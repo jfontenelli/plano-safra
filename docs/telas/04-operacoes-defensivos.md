@@ -59,8 +59,9 @@ Princípio: o peso visual de cada navegação é inverso à frequência de uso. 
 
 ## 6. Operações do grupo (lista lateral)
 
-- Lista à esquerda com nome e DAP de cada operação, ordenada automaticamente pelo DAP padrão; "+ Nova operação" no fim; botão ≪ recolhe a lista.
-- **No item selecionado, lápis (renomear) e lixeira (excluir) aparecem no lugar do DAP.** O DAP da operação selecionada fica visível no painel de detalhe.
+- Lista à esquerda com nome e DAP de cada operação, ordenada automaticamente pelo DAP padrão; cabeçalho "Operações" com o rótulo "DAP" e o botão ≪; "+ Nova operação" no fim. A lista rola sozinha, sem rolar a página.
+- **No item selecionado, lápis (renomear) e lixeira (excluir) aparecem ao lado do DAP.** O DAP continua visível em todos os itens.
+- **Lista minimizada** (≪ / ≫): coluna estreita com ≫, o rótulo "DAP" e só os DAPs das operações, na mesma ordem; a operação selecionada fica marcada e o nome aparece ao passar o mouse. Clicar no DAP abre a operação.
 - O painel de detalhe (direita) não tem lápis nem lixeira.
 - Excluir operação com talhões: confirmação mostrando o impacto (ex.: "Excluir 1ª Fungicida? 11 talhões e 2 produtos serão removidos do plano"). Operação vazia: exclui na hora, com "Desfazer".
 - A lista não mostra contador de pendências.
