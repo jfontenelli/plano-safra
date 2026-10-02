@@ -94,13 +94,24 @@ window.Telas.planoOperacoes = (function () {
   }
 
   // ================= Desenho =================
+  // Tudo acima das guias fica numa área com rolagem própria; as guias ficam fixas embaixo,
+  // fora dela, para a barra de rolagem terminar no topo do rodapé.
   function desenharTudo() {
+    const rolagemAntes = raiz.querySelector('.plano__rolagem')?.scrollTop || 0;
+    const listaAntes = raiz.querySelector('.ops-lista__itens')?.scrollTop || 0;
     raiz.innerHTML = `
-      ${cabecalho()}
-      ${etapa === 'operacoes' ? corpoOperacoes() + rodapeGrupos() : etapaEmConstrucao()}
+      <div class="plano__rolagem">
+        ${cabecalho()}
+        ${etapa === 'operacoes' ? corpoOperacoes() : etapaEmConstrucao()}
+      </div>
+      ${etapa === 'operacoes' ? rodapeGrupos() : ''}
     `;
+    // Redesenhar não pode jogar a página (nem a lista de operações) de volta ao topo
+    raiz.querySelector('.plano__rolagem').scrollTop = rolagemAntes;
+    const lista = raiz.querySelector('.ops-lista__itens');
+    if (lista) lista.scrollTop = listaAntes;
     const foco = raiz.querySelector('[data-foco-inicial]');
-    if (foco) { foco.focus(); foco.select?.(); }
+    if (foco) { foco.focus({ preventScroll: true }); foco.select?.(); }
   }
 
   function cabecalho() {
