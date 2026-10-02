@@ -7,5 +7,8 @@ window.DADOS = {
   usuario: {
     nome: 'Unisystem',
     iniciais: 'U'
-  }
+  },
+
+  // Planos de safra cadastrados. Vazio = menu "Plano de Safra" abre a Tela 01 (Primeiro uso).
+  planos: []
 };

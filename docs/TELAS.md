@@ -13,7 +13,7 @@ Regras de negócio ficam em `docs/DECISOES.md`.
 
 | Nº | Tela | Arquivo | Imagem | Situação |
 |---|---|---|---|---|
-| 01 | Primeiro uso | telas/01-primeiro-uso.md | referencias/01-primeiro-uso.png | Pronta para construir |
+| 01 | Primeiro uso | telas/01-primeiro-uso.md | referencias/01-primeiro-uso.png | Construída |
 | 02 | Modal Criar Plano de Safra | telas/02-modal-criar-plano.md | referencias/02-modal-criar-plano.png | Pronta para construir |
 | 03 | Lista de planos | telas/03-lista-planos.md | referencias/03-lista-planos.png | Pronta para construir |
 | 04 | Etapa 1 · Cadastro do plano | — | — | A definir |

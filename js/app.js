@@ -6,7 +6,10 @@
 (function () {
   // Rotas do menu. Cada tela nova troca o "desenhar" pela sua função em js/telas/.
   const ROTAS = {
-    'plano-safra':    { titulo: 'Plano de Safra',    desenhar: () => Telas.emConstrucao('Plano de Safra') },
+    // Sem planos: Tela 01. Com planos: Tela 03 (ainda não construída).
+    'plano-safra':    { titulo: 'Plano de Safra',    desenhar: () => DADOS.planos.length === 0
+                                                                ? Telas.primeiroUso()
+                                                                : Telas.emConstrucao('Plano de Safra') },
     'ordens-servico': { titulo: 'Ordens de Serviço', desenhar: () => Telas.emConstrucao('Ordens de Serviço') },
     'cadastros':      { titulo: 'Cadastros',         desenhar: () => Telas.emConstrucao('Cadastros') }
   };
@@ -59,6 +62,15 @@
   botaoAlternar.addEventListener('click', () => {
     estado.menuRecolhido = !estado.menuRecolhido;
     aplicarEstadoMenu();
+  });
+
+  // Botões das telas avisam o que fazer pelo atributo data-acao
+  conteudo.addEventListener('click', (e) => {
+    const botao = e.target.closest('[data-acao]');
+    if (!botao) return;
+    if (botao.dataset.acao === 'criar-plano') {
+      Telas.abrirModalEmConstrucao('Criar Plano de Safra'); // Tela 02, ainda não construída
+    }
   });
 
   window.addEventListener('hashchange', mostrarTela);
