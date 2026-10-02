@@ -4,41 +4,60 @@
  * abrindo o arquivo direto no navegador e no Netlify, e o botão Voltar funciona.
  */
 (function () {
-  // Rotas do menu. Cada tela nova troca o "desenhar" pela sua função em js/telas/.
+  // Rotas. "menu" diz qual item do menu fica destacado.
+  // Cada tela nova troca o "desenhar" pela sua função em js/telas/.
   const ROTAS = {
-    // Sem planos: Tela 01. Com planos: Tela 03 (ainda não construída).
-    'plano-safra':    { titulo: 'Plano de Safra',    desenhar: () => DADOS.planos.length === 0
-                                                                ? Telas.primeiroUso()
-                                                                : Telas.emConstrucao('Plano de Safra') },
-    'ordens-servico': { titulo: 'Ordens de Serviço', desenhar: () => Telas.emConstrucao('Ordens de Serviço') },
-    'cadastros':      { titulo: 'Cadastros',         desenhar: () => Telas.emConstrucao('Cadastros') }
+    // Sem planos: Tela 01. Com planos: Tela 03 (ainda não construída; por enquanto
+    // só o botão "Criar Plano Safra", para abrir o modal de novo).
+    'plano-safra':    { titulo: 'Plano de Safra', menu: 'plano-safra',
+                        desenhar: () => DADOS.planos.length === 0
+                          ? Telas.primeiroUso()
+                          : Telas.emConstrucao('Plano de Safra', `
+                              <button class="botao botao--primario" type="button" data-acao="criar-plano">
+                                ${Icones.mais} Criar Plano Safra
+                              </button>`) },
+    // Plano aberto: #/plano/<id>. Tela 04 (ainda não construída).
+    'plano':          { titulo: 'Plano de Safra', menu: 'plano-safra',
+                        desenhar: (id) => Telas.planoEmConstrucao(buscarPlano(id)) },
+    'ordens-servico': { titulo: 'Ordens de Serviço', menu: 'ordens-servico',
+                        desenhar: () => Telas.emConstrucao('Ordens de Serviço') },
+    'cadastros':      { titulo: 'Cadastros', menu: 'cadastros',
+                        desenhar: () => Telas.emConstrucao('Cadastros') }
   };
   const ROTA_INICIAL = 'plano-safra';
 
   // Estado da sessão (só em memória)
   const estado = {
-    menuRecolhido: false // menu começa expandido
+    menuRecolhido: false, // menu começa expandido
+    proximoIdPlano: 1
   };
 
   const menu = document.getElementById('menu');
   const botaoAlternar = document.getElementById('menu-alternar');
   const conteudo = document.getElementById('conteudo');
 
+  function buscarPlano(id) {
+    return DADOS.planos.find((p) => String(p.id) === id);
+  }
+
   function rotaAtual() {
-    const nome = location.hash.replace(/^#\/?/, '');
-    return ROTAS[nome] ? nome : ROTA_INICIAL;
+    const [nome, parametro] = location.hash.replace(/^#\/?/, '').split('/');
+    if (!ROTAS[nome]) return { nome: ROTA_INICIAL };
+    // Plano que não existe mais (ex.: página recarregada) volta para a lista
+    if (nome === 'plano' && !buscarPlano(parametro)) return { nome: ROTA_INICIAL };
+    return { nome, parametro };
   }
 
   function mostrarTela() {
-    const nome = rotaAtual();
+    const { nome, parametro } = rotaAtual();
     const rota = ROTAS[nome];
 
-    conteudo.innerHTML = rota.desenhar();
+    conteudo.innerHTML = rota.desenhar(parametro);
     conteudo.scrollTop = 0;
     document.title = `${rota.titulo} · UniSystem`;
 
     document.querySelectorAll('.menu__item').forEach((item) => {
-      const ativo = item.dataset.rota === nome;
+      const ativo = item.dataset.rota === rota.menu;
       item.classList.toggle('menu__item--ativo', ativo);
       if (ativo) item.setAttribute('aria-current', 'page');
       else item.removeAttribute('aria-current');
@@ -59,6 +78,27 @@
     `;
   }
 
+  function hojeISO() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }
+
+  // Cria o plano com os dados do modal e abre a Etapa 1 · Cadastro
+  function criarPlano(contexto) {
+    const plano = {
+      id: estado.proximoIdPlano++,
+      ...contexto,
+      status: 'Em construção',
+      area: 0,
+      custo: null,
+      receita: null,
+      atualizadoEm: hojeISO(),
+      atualizadoPor: DADOS.usuario.nome
+    };
+    DADOS.planos.push(plano);
+    location.hash = `#/plano/${plano.id}`;
+  }
+
   botaoAlternar.addEventListener('click', () => {
     estado.menuRecolhido = !estado.menuRecolhido;
     aplicarEstadoMenu();
@@ -69,7 +109,7 @@
     const botao = e.target.closest('[data-acao]');
     if (!botao) return;
     if (botao.dataset.acao === 'criar-plano') {
-      Telas.abrirModalEmConstrucao('Criar Plano de Safra'); // Tela 02, ainda não construída
+      Telas.abrirModalCriarPlano({ aoCriar: criarPlano });
     }
   });
 
