@@ -139,14 +139,18 @@ window.Telas.abrirModalCriarPlano = function ({ aoCriar }) {
     e.preventDefault();
     if (botaoContinuar.disabled) return;
     const v = valores();
+    // Importar XLSX ainda não foi implementado: avisa e não cria o plano
+    if (v.inicio === 'importar') {
+      Telas.abrirModalEmConstrucao('Importar XLSX');
+      return;
+    }
     modal.fechar();
     aoCriar({
       safra: v.safra,
       empresa: v.empresa,
       fazenda: v.fazenda,
       cultura: v.cultura,
-      // Importar XLSX ainda não foi implementado: por enquanto segue como plano em branco
-      inicio: v.inicio === 'importar' ? 'branco' : v.inicio
+      inicio: v.inicio
     });
   });
 

@@ -1,5 +1,6 @@
 /*
  * Janela modal reutilizável (fundo escurecido + caixa central).
+ * Pode abrir um modal por cima de outro.
  * Fecha pela tecla Esc, clicando fora, em qualquer elemento com data-fechar
  * ou ao trocar de tela pelo menu.
  */
@@ -19,8 +20,10 @@ window.Modal = {
       if (focoAnterior && document.body.contains(focoAnterior)) focoAnterior.focus();
     }
 
+    // Com um modal aberto por cima de outro, o Esc fecha só o de cima
     function aoTeclar(e) {
-      if (e.key === 'Escape') fechar();
+      const abertos = document.querySelectorAll('.modal-fundo');
+      if (e.key === 'Escape' && abertos[abertos.length - 1] === fundo) fechar();
     }
 
     fundo.addEventListener('click', (e) => {
