@@ -1061,7 +1061,7 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
   top: 20px;
   display: flex;
   flex-direction: column;
-  width: 290px;
+  width: 320px;
   /* a lista rola sozinha, sem rolar a página: cabe entre o cabeçalho do plano e as guias do rodapé */
   max-height: calc(100vh - 260px);
   min-height: 240px;
@@ -1069,14 +1069,36 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
   padding: 16px 12px;
 }
 
-.ops-lista--recolhida { width: auto; padding: 10px 8px; }
+.ops-lista--recolhida {
+  align-items: center;
+  width: 76px;
+  padding: 10px 6px 12px;
+}
+.ops-lista--recolhida .ops-lista__rotulo-dap { margin: 6px 0 8px; }
+.ops-lista--recolhida .ops-lista__itens { width: 100%; padding: 0; }
+.ops-item--dap { padding: 0; }
+.ops-item--dap .ops-item__nome {
+  padding: 10px 8px 10px 0;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--texto-suave);
+}
+.ops-item--dap.ops-item--ativo .ops-item__nome { color: var(--texto); }
+
+.ops-lista__rotulo-dap {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  color: var(--texto-suave);
+}
 
 .ops-lista__topo {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 8px;
   margin: 0 4px 10px 8px;
 }
+.ops-lista__topo .rotulo-secao { margin-right: auto; }
 
 .ops-lista__itens {
   flex: 1;

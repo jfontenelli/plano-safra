@@ -155,18 +155,32 @@ window.Telas.planoOperacoes = (function () {
 
   // ----- Lista lateral -----
   function listaOperacoes(grupo) {
+    const atual = opAtual();
+    // Minimizada: só os DAPs; o nome da operação aparece ao passar o mouse
     if (ui.listaRecolhida) {
       return `
-        <aside class="cartao ops-lista ops-lista--recolhida">
+        <aside class="cartao ops-lista ops-lista--recolhida" aria-label="Operações do grupo (só DAP)">
           <button class="botao-icone" type="button" data-acao="alternar-lista" title="Mostrar operações"
                   aria-label="Mostrar lista de operações">${Icones.expandir}</button>
+          <span class="ops-lista__rotulo-dap">DAP</span>
+          <ul class="ops-lista__itens">
+            ${operacoesOrdenadas(grupo).map((op) => {
+              const ativo = atual && op.id === atual.id;
+              return `
+                <li class="ops-item ops-item--dap ${ativo ? 'ops-item--ativo' : ''}">
+                  <button class="ops-item__nome" type="button" data-acao="abrir-op" data-op="${op.id}"
+                          ${ativo ? 'aria-current="true"' : ''} title="${esc(op.nome)}"
+                          aria-label="${esc(op.nome)}, DAP ${op.dap ?? 'não informado'}">${op.dap ?? '—'}</button>
+                </li>`;
+            }).join('')}
+          </ul>
         </aside>`;
     }
-    const atual = opAtual();
     return `
       <aside class="cartao ops-lista" aria-label="Operações do grupo">
         <div class="ops-lista__topo">
           <h2 class="rotulo-secao">Operações</h2>
+          <span class="ops-lista__rotulo-dap">DAP</span>
           <button class="botao-icone" type="button" data-acao="alternar-lista" title="Recolher lista"
                   aria-label="Recolher lista de operações">${Icones.recolher}</button>
         </div>
@@ -188,14 +202,16 @@ window.Telas.planoOperacoes = (function () {
                  aria-label="Nome da operação" data-foco-inicial>
         </li>`;
     }
-    const lado = ativo && !somenteLeitura
+    // O DAP sempre aparece; no item selecionado, lápis e lixeira ficam ao lado dele
+    const acoes = ativo && !somenteLeitura
       ? `<span class="ops-item__acoes">
            <button class="botao-icone botao-icone--p" type="button" data-acao="renomear-op" title="Renomear operação"
                    aria-label="Renomear ${esc(op.nome)}">${Icones.lapis}</button>
            <button class="botao-icone botao-icone--p" type="button" data-acao="excluir-op" title="Excluir operação"
                    aria-label="Excluir ${esc(op.nome)}">${Icones.lixeira}</button>
          </span>`
-      : `<span class="ops-item__dap">${op.dap ?? '—'}</span>`;
+      : '';
+    const lado = `<span class="ops-item__dap">${op.dap ?? '—'}</span>${acoes}`;
     return `
       <li class="ops-item ${ativo ? 'ops-item--ativo' : ''}">
         <button class="ops-item__nome" type="button" data-acao="abrir-op" data-op="${op.id}"
