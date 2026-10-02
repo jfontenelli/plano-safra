@@ -185,6 +185,9 @@ window.Telas.planoOperacoes = (function () {
                 </li>`;
             }).join('')}
           </ul>
+          ${somenteLeitura ? '' : `
+            <button class="botao-icone ops-lista__nova-min" type="button" data-acao="nova-op" title="Nova operação"
+                    aria-label="Nova operação">${Icones.mais}</button>`}
         </aside>`;
     }
     return `

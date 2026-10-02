@@ -1081,7 +1081,17 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
   width: 76px;
   padding: 10px 6px 12px;
 }
-.ops-lista--recolhida .ops-lista__rotulo-dap { margin: 6px 0 8px; }
+.ops-lista--recolhida .ops-lista__nova-min {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  margin-top: 8px;
+  color: var(--verde-700);
+}
+.ops-lista__nova-min:hover { background: var(--verde-100); }
+.ops-lista__nova-min .icone { width: 20px; height: 20px; stroke-width: 2.2; }
+
+.ops-lista__rotulo-dap { margin: 6px 0 8px; }
 .ops-lista--recolhida .ops-lista__itens { width: 100%; padding: 0; }
 .ops-item--dap { padding: 0; }
 .ops-item--dap .ops-item__nome {
@@ -1091,6 +1101,16 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
   color: var(--texto-suave);
 }
 .ops-item--dap.ops-item--ativo .ops-item__nome { color: var(--texto); }
+
+.ops-lista__nova-min {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  margin-top: 8px;
+  color: var(--verde-700);
+}
+.ops-lista__nova-min:hover { background: var(--verde-100); }
+.ops-lista__nova-min .icone { width: 20px; height: 20px; stroke-width: 2.2; }
 
 .ops-lista__rotulo-dap {
   font-size: 12px;
