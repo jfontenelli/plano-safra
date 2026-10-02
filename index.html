@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Plano de Safra · UniSystem</title>
+  <link rel="icon" type="image/png" href="img/icone-unisystem.png">
+  <link rel="stylesheet" href="css/estilo.css">
+</head>
+<body>
+  <div class="app">
+    <!-- Menu lateral -->
+    <aside class="menu" id="menu">
+      <div class="menu__topo">
+        <img class="menu__logo" src="img/icone-unisystem.png" alt="UniSystem">
+        <span class="menu__marca">UniSystem</span>
+      </div>
+
+      <nav class="menu__nav" aria-label="Menu principal">
+        <a class="menu__item" href="#/plano-safra" data-rota="plano-safra" title="Plano de Safra">
+          <svg class="menu__icone" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 21v-9"/>
+            <path d="M12 12c0-4 2.5-6.5 7-6.5 0 4.5-2.5 6.5-7 6.5Z"/>
+            <path d="M12 14c0-3.5-2.2-5.5-6.5-5.5 0 3.8 2.2 5.5 6.5 5.5Z"/>
+          </svg>
+          <span class="menu__texto">Plano de Safra</span>
+        </a>
+        <a class="menu__item" href="#/ordens-servico" data-rota="ordens-servico" title="Ordens de Serviço">
+          <svg class="menu__icone" viewBox="0 0 24 24" aria-hidden="true">
+            <rect x="5" y="4" width="14" height="17" rx="2"/>
+            <path d="M9 4V3h6v1"/>
+            <path d="M9 10h6M9 14h6M9 18h3"/>
+          </svg>
+          <span class="menu__texto">Ordens de Serviço</span>
+        </a>
+        <a class="menu__item" href="#/cadastros" data-rota="cadastros" title="Cadastros">
+          <svg class="menu__icone" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z"/>
+            <path d="M14 3v5h5"/>
+            <path d="M9 12h6M9 16h6"/>
+          </svg>
+          <span class="menu__texto">Cadastros</span>
+        </a>
+      </nav>
+
+      <button class="menu__alternar" id="menu-alternar" type="button"
+              aria-controls="menu" aria-expanded="true" title="Recolher menu">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
+      </button>
+
+      <div class="menu__usuario" id="menu-usuario">
+        <!-- preenchido por js/app.js a partir de js/dados-exemplo.js -->
+      </div>
+    </aside>
+
+    <!-- Área de conteúdo: cada tela é desenhada aqui -->
+    <main class="conteudo" id="conteudo"></main>
+  </div>
+
+  <script src="js/dados-exemplo.js"></script>
+  <script src="js/telas/em-construcao.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
