@@ -11,9 +11,10 @@
     'plano-safra':    { titulo: 'Plano de Safra', menu: 'plano-safra',
                         desenhar: () => temPlanos() ? Telas.listaPlanos.desenhar() : Telas.primeiroUso(),
                         aoMostrar: (conteudo) => { if (temPlanos()) Telas.listaPlanos.aoMostrar(conteudo); } },
-    // Plano aberto: #/plano/<id>. Tela 04 (ainda não construída).
+    // Plano aberto: #/plano/<id>/<etapa>. Etapa Operações = Tela 04; as demais, em construção.
     'plano':          { titulo: 'Plano de Safra', menu: 'plano-safra',
-                        desenhar: (id) => Telas.planoEmConstrucao(buscarPlano(id)) },
+                        desenhar: () => Telas.planoOperacoes.desenhar(),
+                        aoMostrar: (conteudo, id, etapa) => Telas.planoOperacoes.aoMostrar(conteudo, buscarPlano(id), etapa) },
     'ordens-servico': { titulo: 'Ordens de Serviço', menu: 'ordens-servico',
                         desenhar: () => Telas.emConstrucao('Ordens de Serviço') },
     'cadastros':      { titulo: 'Cadastros', menu: 'cadastros',
@@ -45,19 +46,20 @@
   }
 
   function rotaAtual() {
-    const [nome, parametro] = location.hash.replace(/^#\/?/, '').split('/');
+    const [nome, parametro, extra] = location.hash.replace(/^#\/?/, '').split('/');
     if (!ROTAS[nome]) return { nome: ROTA_INICIAL };
     // Plano que não existe mais (ex.: página recarregada) volta para a lista
     if (nome === 'plano' && !buscarPlano(parametro)) return { nome: ROTA_INICIAL };
-    return { nome, parametro };
+    return { nome, parametro, extra };
   }
 
   function mostrarTela() {
-    const { nome, parametro } = rotaAtual();
+    const { nome, parametro, extra } = rotaAtual();
     const rota = ROTAS[nome];
 
-    conteudo.innerHTML = rota.desenhar(parametro);
-    if (rota.aoMostrar) rota.aoMostrar(conteudo, parametro);
+    document.querySelector('.aviso')?.remove();
+    conteudo.innerHTML = rota.desenhar(parametro, extra);
+    if (rota.aoMostrar) rota.aoMostrar(conteudo, parametro, extra);
     conteudo.scrollTop = 0;
     document.title = `${rota.titulo} · UniSystem`;
 
@@ -89,12 +91,13 @@
     `;
   }
 
-  // Cria o plano com os dados do modal e abre a Etapa 1 · Cadastro
+  // Cria o plano com os dados do modal e abre a etapa Operações.
+  // Usar modelo: grupos e operações do modelo. Plano em branco: nenhum grupo (o cliente cria tudo).
   function criarPlano(contexto) {
     const plano = {
       id: estado.proximoIdPlano++,
       ...contexto,
-      talhoes: [], // área 0 ha até os talhões serem escolhidos
+      grupos: contexto.inicio === 'modelo' ? Planos.gruposModelo() : [], // área 0 ha até aplicar em talhões
       status: 'Em construção',
       custo: null,
       receita: null,
@@ -120,9 +123,9 @@
 
   function verPlanosExemplo() {
     DADOS.safras = [...SAFRAS_INICIAIS];
-    DADOS.planos = DADOS.planosExemplo.map((p) => {
+    DADOS.planos = DADOS.planosExemplo.map(({ operacoes, ...p }) => {
       if (!DADOS.safras.includes(p.safra)) DADOS.safras.push(p.safra);
-      return { ...p, talhoes: [...p.talhoes], id: estado.proximoIdPlano++ };
+      return { ...p, grupos: Planos.montarExemplo(operacoes), id: estado.proximoIdPlano++ };
     });
     irPara('#/plano-safra');
   }

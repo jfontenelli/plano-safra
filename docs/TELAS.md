@@ -16,7 +16,7 @@ Regras de negócio ficam em `docs/DECISOES.md`.
 | 01 | Primeiro uso | telas/01-primeiro-uso.md | referencias/01-primeiro-uso.png | Construída |
 | 02 | Modal Criar Plano de Safra | telas/02-modal-criar-plano.md | referencias/02-modal-criar-plano.png | Construída |
 | 03 | Lista de planos | telas/03-lista-planos.md | referencias/03-lista-planos.png | Construída |
-| 04 | Etapa 1 · Cadastro do plano | — | — | A definir |
+| 04 | Operações (grupo Defensivo) | telas/04-operacoes-defensivos.md | referencias/04.1-operacao-defensivos.png | Construída |
 
 Situação: A definir → Pronta para construir → Construída.
 
@@ -29,9 +29,9 @@ Menu "Plano de Safra"
                      │                                   ▼
                      │                       02 Modal Criar Plano
                      │                        ├─[Cancelar / X]→ volta à tela de origem
-                     │                        └─[Continuar para o cadastro]→ 04 Etapa 1 · Cadastro
-                     └─[seta da linha]→ abre o plano (provisória)
+                     │                        └─[Continuar para as operações]→ 04 Operações
+                     └─[seta da linha]→ abre o plano em 04 Operações
 ```
 
 ## Próximas telas do plano (ainda não desenhadas)
-1 Cadastro → 2 Operações → 3 Calendário Agrícola → 4 Suprimentos → 5 Revisão e aprovação.
+Operações (demais grupos) → Calendário Agrícola → Suprimentos → Aprovação (etapas conforme docs/telas/04-operacoes-defensivos.md).

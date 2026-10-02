@@ -13,28 +13,6 @@ window.Telas.emConstrucao = function (titulo, acoes = '') {
   `;
 };
 
-/*
- * Tela 04 · Etapa 1 · Cadastro do plano (provisória).
- * Safra, Empresa e Fazenda ficam fixas no topo durante o plano.
- */
-window.Telas.planoEmConstrucao = function (plano) {
-  const esc = Util.escapar;
-  return `
-    <header class="cabecalho">
-      <div>
-        <a class="link-voltar" href="#/plano-safra">${Icones.voltar} Voltar para a lista</a>
-        <h1 class="cabecalho__titulo">Plano de Safra</h1>
-        <dl class="contexto-plano">
-          <div><dt>Safra</dt><dd>${esc(plano.safra)}</dd></div>
-          <div><dt>Empresa</dt><dd>${esc(plano.empresa)}</dd></div>
-          <div><dt>Fazenda</dt><dd>${esc(plano.fazenda)}</dd></div>
-        </dl>
-      </div>
-    </header>
-    ${blocoEmConstrucao('Etapa 1 · Cadastro do plano')}
-  `;
-};
-
 /* Versão modal da página provisória, para modais ainda não construídos. */
 window.Telas.abrirModalEmConstrucao = function (titulo) {
   const modal = Modal.abrir(`

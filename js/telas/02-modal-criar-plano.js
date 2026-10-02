@@ -50,7 +50,7 @@ window.Telas.abrirModalCriarPlano = function ({ aoCriar }) {
 
       <div class="modal__rodape">
         <button class="botao botao--secundario" type="button" data-fechar>Cancelar</button>
-        <button class="botao botao--primario" type="submit" disabled>Continuar para o cadastro</button>
+        <button class="botao botao--primario" type="submit" disabled>Continuar para as operações</button>
       </div>
     </form>
   `, { classe: 'modal--formulario' });
@@ -134,7 +134,7 @@ window.Telas.abrirModalCriarPlano = function ({ aoCriar }) {
 
   form.addEventListener('change', atualizar);
 
-  // ----- Continuar para o cadastro -----
+  // ----- Continuar para as operações -----
   form.addEventListener('submit', (e) => {
     e.preventDefault();
     if (botaoContinuar.disabled) return;

@@ -2,13 +2,35 @@
  * Cálculos e formatação usados por várias telas.
  */
 window.Util = {
-  // Área do plano = soma das áreas dos seus talhões (ha)
+  // Área do plano = soma das áreas dos talhões que recebem ao menos uma operação (ha)
   areaPlano(plano) {
-    const talhoesFazenda = DADOS.talhoes[plano.fazenda] || [];
-    return (plano.talhoes || []).reduce((soma, nome) => {
-      const talhao = talhoesFazenda.find((t) => t.nome === nome);
-      return soma + (talhao ? talhao.area : 0);
-    }, 0);
+    const noPlano = new Set();
+    (plano.grupos || []).forEach((g) => g.operacoes.forEach((op) =>
+      Object.keys(op.talhoes).forEach((t) => noPlano.add(t))));
+    return (DADOS.talhoes[plano.fazenda] || [])
+      .filter((t) => noPlano.has(t.nome))
+      .reduce((soma, t) => soma + t.area, 0);
+  },
+
+  // Texto "0,40" ou "0.40" → 0.4; vazio ou inválido → null
+  numero(texto) {
+    let limpo = String(texto ?? '').trim();
+    // Com vírgula, o ponto é separador de milhar ("1.250,5"); sem vírgula, o ponto é decimal ("0.40")
+    if (limpo.includes(',')) limpo = limpo.replace(/\./g, '').replace(',', '.');
+    if (limpo === '' || limpo === '-') return null;
+    const n = Number(limpo);
+    return Number.isFinite(n) ? n : null;
+  },
+
+  // 0.4 → "0,40" (doses); null → ''
+  dose(valor) {
+    if (valor === null || valor === undefined) return '';
+    return valor.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 3 });
+  },
+
+  // Compara textos sem diferenciar maiúsculas e acentos
+  normalizar(texto) {
+    return String(texto).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
   },
 
   // "24/25" < "25/26" < "26/27": a ordem do texto já é a ordem das safras

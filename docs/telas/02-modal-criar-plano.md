@@ -18,17 +18,17 @@ Definir o contexto do novo plano (safra, empresa, fazenda, cultura) e como ele v
 |---|---|---|
 | Usar modelo (pré-selecionado) | Use uma estrutura pronta de operações e ajuste conforme necessário. | Carrega a lista de operações de exemplo. |
 | Plano em branco | Monte a lista de operações conforme a realidade da fazenda. | Lista de operações vazia. |
-| Importar XLSX | Importe um planejamento existente a partir de uma planilha. | Na v1 aceita só o arquivo exportado pelo próprio protótipo. Implementar depois; por enquanto pode ser escolhido, mas "Continuar para o cadastro" mostra o aviso "Em construção" por cima do modal e não cria o plano (o que foi preenchido continua no modal). |
+| Importar XLSX | Importe um planejamento existente a partir de uma planilha. | Na v1 aceita só o arquivo exportado pelo próprio protótipo. Implementar depois; por enquanto pode ser escolhido, mas "Continuar para as operações" mostra o aviso "Em construção" por cima do modal e não cria o plano (o que foi preenchido continua no modal). |
 | Clonar safra anterior | Utilize o plano de uma safra anterior como base para o novo planejamento. | Desabilitado, com selo "Em breve". Sem ação. |
 
-- Botões no rodapé: "Cancelar" e "Continuar para o cadastro".
+- Botões no rodapé: "Cancelar" e "Continuar para as operações".
 
 ## Regras
 - "Criar nova safra": abre um campo para digitar o nome; a safra nova entra na lista já selecionada. A safra tem só o nome.
 - Um único plano por safra e fazenda: se a combinação já existir, não deixar criar outro.
-- "Continuar para o cadastro" fica desabilitado até os quatro campos estarem preenchidos.
+- "Continuar para as operações" fica desabilitado até os quatro campos estarem preenchidos.
 - Ao continuar, o plano é criado com: status "Em construção", área 0 ha, custo e receita vazios, última atualização = hoje, atualizado por = usuário logado.
 
 ## Navegação
 - "Cancelar" ou X → fecha o modal e volta à tela de origem, sem criar nada.
-- "Continuar para o cadastro" → Tela 04 · Etapa 1 · Cadastro do plano (por enquanto, página provisória com Safra, Empresa e Fazenda fixas no topo).
+- "Continuar para as operações" → Tela 04 · Operações do plano, no primeiro grupo de operações.
