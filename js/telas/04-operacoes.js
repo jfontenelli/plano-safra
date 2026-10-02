@@ -230,7 +230,7 @@ window.Telas.planoOperacoes = (function () {
     if (!ehDefensivo(grupo)) {
       return `
         <div class="cartao op-cabecalho"><h2 class="op-cabecalho__nome">${esc(op.nome)}</h2>
-          <span class="op-cabecalho__dap-texto">DAP padrão: <strong>${op.dap ?? '—'}</strong></span></div>
+          <span class="op-cabecalho__dap-texto">DAP: <strong>${op.dap ?? '—'}</strong></span></div>
         <div class="cartao">
           <section class="em-construcao em-construcao--compacto">
             <div class="em-construcao__icone" aria-hidden="true">${Icones.casa}</div>
@@ -265,7 +265,7 @@ window.Telas.planoOperacoes = (function () {
       <div class="cartao op-cabecalho">
         <h2 class="op-cabecalho__nome">${esc(op.nome)}</h2>
         <div class="op-cabecalho__campos">
-          <div class="campo campo--inline"><label class="campo__rotulo" for="op-dap">DAP padrão</label>${dap}</div>
+          <div class="campo campo--inline"><label class="campo__rotulo" for="op-dap">DAP</label>${dap}</div>
           <div class="campo campo--inline"><label class="campo__rotulo" for="op-fenologia">Fenologia</label>${fenologia}</div>
         </div>
         <ul class="op-resumo" aria-label="Resumo da operação">
