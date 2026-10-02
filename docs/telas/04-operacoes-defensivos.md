@@ -27,8 +27,8 @@ Plano de Safra  ›  Safra 26/27 · Empresa A · Fazenda Santa Maria · Cultura 
 Operações   Calendário Agrícola   Suprimentos   Aprovação
 ─────────
 ┌───────────────────────┬──────────────────────────────────────────────────────────┐
-│ Operações          ≪  │ 1ª Fungicida   DAP [30]  Fenologia [V5 ▾]                 │
-│ ▌1ª Fungicida   ✏️ 🗑  │                    1.085 ha · 11 talhões · 1 pendente     │
+│ Operações     DAP  ≪  │ 1ª Fungicida   DAP [30]  Fenologia [V5 ▾]          ✏️ 🗑  │
+│ ▌1ª Fungicida     30  │ 1.085 ha · 11 talhões · 1 pendente                        │
 │  2ª Fungicida     45  │ Recomendação agronômica                                   │
 │  3ª Fungicida     60  │   Princípio ativo · Produto comercial · Unid. · Dose  🗑   │
 │  4ª Fungicida     75  │   + Adicionar produto              [Selecionar talhões]   │
@@ -60,18 +60,18 @@ Princípio: o peso visual de cada navegação é inverso à frequência de uso. 
 ## 6. Operações do grupo (lista lateral)
 
 - Lista à esquerda com nome e DAP de cada operação, ordenada automaticamente pelo DAP; cabeçalho "Operações" com o rótulo "DAP" e o botão ≪; "+ Nova operação" no fim. A lista rola sozinha, sem rolar a página.
-- **No item selecionado, lápis (renomear) e lixeira (excluir) aparecem ao lado do DAP.** O DAP continua visível em todos os itens.
+- A lista mostra só nome e DAP; o item selecionado fica marcado. Lápis e lixeira ficam no card da operação (ver seção 7).
 - **Lista minimizada** (≪ / ≫): coluna estreita com ≫, o rótulo "DAP" e só os DAPs das operações, na mesma ordem; a operação selecionada fica marcada e o nome aparece ao passar o mouse. Clicar no DAP abre a operação.
-- O painel de detalhe (direita) não tem lápis nem lixeira.
 - Excluir operação com talhões: confirmação mostrando o impacto (ex.: "Excluir 1ª Fungicida? 11 talhões e 2 produtos serão removidos do plano"). Operação vazia: exclui na hora, com "Desfazer".
 - A lista não mostra contador de pendências.
 
 ## 7. Detalhe da operação
 
-- Nome da operação, **DAP** (campo) e **Fenologia** (lista de seleção, opcional).
+- Card da operação, em duas linhas:
+  - **Linha 1:** nome da operação, **DAP** (campo) e **Fenologia** (lista de seleção, opcional); à direita, **lápis** (renomear: o próprio título vira campo de edição) e **lixeira** (excluir).
+  - **Linha 2:** resumo área (ha) · talhões · pendentes, alinhado à esquerda, com a lista de operações expandida ou minimizada.
 - As opções de fenologia vêm do menu Cadastros (a trabalhar depois). No protótipo, estádios da soja como exemplo.
 - O DAP da operação vale para todos os talhões, mas pode ser ajustado por talhão.
-- Resumo à direita: área (ha) · talhões · pendentes.
 - Antes de existir data de plantio (informada no grupo Semente), as operações mostram só o DAP (ex.: −30), sem data.
 
 ## 8. Recomendação agronômica
@@ -86,7 +86,8 @@ Princípio: o peso visual de cada navegação é inverso à frequência de uso. 
 | Só princípio ativo | Ingrediente ativo | Azoxistrobina · 60 g i.a./ha |
 
 - A dose é sempre por hectare. Unidades: **L, mL, kg, g, t** (exibidas como L/ha, mL/ha…). Sem produto, a unidade aparece em i.a. (g i.a./ha…).
-- Botão **"Selecionar talhões"** ao lado da recomendação.
+- Botão **"Selecionar talhões"** abaixo da tabela da recomendação, na linha do "+ Adicionar produto".
+- Para selecionar talhões, o preenchimento mínimo é obrigatório: **DAP**, ao menos uma linha na recomendação e, em cada linha, **princípio ativo ou produto comercial** (ao menos um), **unidade** e **dose**. Se faltar algo ao clicar, aparece em vermelho, abaixo de cada campo, "Informação obrigatória" (ou "Informe pelo menos um produto ou princípio ativo").
 
 ## 9. Pré-cadastro (nesta tela)
 
