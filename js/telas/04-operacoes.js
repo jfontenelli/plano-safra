@@ -42,6 +42,7 @@ window.Telas.planoOperacoes = (function () {
       renomeandoOp: null,
       renomeandoGrupo: null,
       preCadastro: null,       // { linhaId, produto, principioAtivo, unidade, erro }
+      validarOp: null,         // operação cujo "Selecionar talhões" foi clicado com campos faltando
       ajuste: null             // ajustes em preparo no modo ajustar
     };
     raiz = conteudo.querySelector('#plano-raiz');
@@ -232,10 +233,12 @@ window.Telas.planoOperacoes = (function () {
 
   function cabecalhoOperacao(op) {
     const r = Planos.resumo(op, talhoesFazenda);
+    const erroDap = errosVisiveis(op).dap;
     const dap = somenteLeitura
       ? `<span class="campo__valor">${op.dap ?? '—'}</span>`
-      : `<input class="campo__controle op-cabecalho__dap" id="op-dap" type="text" inputmode="numeric"
-                data-campo="op-dap" value="${op.dap ?? ''}" placeholder="—">`;
+      : `<input class="campo__controle op-cabecalho__dap ${erroDap ? 'campo__controle--erro' : ''}" id="op-dap" type="text" inputmode="numeric"
+                data-campo="op-dap" value="${op.dap ?? ''}" placeholder="—" ${erroDap ? 'aria-invalid="true"' : ''}>
+         ${erroDap ? '<p class="erro-campo">Informação obrigatória</p>' : ''}`;
     const fenologia = somenteLeitura
       ? `<span class="campo__valor">${op.fenologia || '—'}</span>`
       : `<select class="campo__controle op-cabecalho__fenologia" id="op-fenologia" data-campo="op-fenologia">
@@ -257,16 +260,34 @@ window.Telas.planoOperacoes = (function () {
       </div>`;
   }
 
+  // ----- Preenchimento mínimo para "Selecionar talhões" -----
+  // DAP padrão, ao menos uma linha e, em cada linha: princípio ativo ou produto, unidade e dose.
+  function errosRecomendacao(op) {
+    const vazio = (v) => v === null || v === undefined || v === '';
+    const linhas = op.produtos.filter((l) => l.recomendacao);
+    const porLinha = {};
+    linhas.forEach((l) => {
+      const e = { produto: !l.produto && !l.principioAtivo, unidade: !l.unidade, dose: vazio(l.dose) };
+      if (e.produto || e.unidade || e.dose) porLinha[l.id] = e;
+    });
+    const erros = { dap: vazio(op.dap), semLinhas: linhas.length === 0, linhas: porLinha };
+    erros.algum = erros.dap || erros.semLinhas || Object.keys(porLinha).length > 0;
+    return erros;
+  }
+
+  // Erros só aparecem depois que o usuário clicou em "Selecionar talhões"
+  function errosVisiveis(op) {
+    return ui.validarOp === op.id ? errosRecomendacao(op) : { linhas: {} };
+  }
+
   // ----- Recomendação agronômica -----
   function recomendacao(op) {
     const linhas = op.produtos.filter((l) => l.recomendacao);
+    const erros = errosVisiveis(op);
     return `
       <section class="cartao recomendacao" aria-labelledby="titulo-rec">
         <div class="recomendacao__topo">
           <h3 class="rotulo-secao" id="titulo-rec">Recomendação agronômica</h3>
-          ${somenteLeitura || ui.modo === 'selecionar' ? '' : `
-            <button class="botao botao--primario" type="button" data-acao="selecionar-talhoes">
-              ${Icones.mapa} Selecionar talhões</button>`}
         </div>
         <div class="recomendacao__corpo">
           <div class="recomendacao__tabela">
@@ -276,12 +297,18 @@ window.Telas.planoOperacoes = (function () {
                 ${somenteLeitura ? '' : '<th><span class="so-leitor">Remover</span></th>'}
               </tr></thead>
               <tbody>
-                ${linhas.length ? linhas.map((l) => linhaRecomendacao(l)).join('')
+                ${linhas.length ? linhas.map((l) => linhaRecomendacao(l, erros.linhas[l.id])).join('')
                   : `<tr><td class="tabela__vazia" colspan="5">Nenhum produto na recomendação.</td></tr>`}
               </tbody>
             </table>
+            ${erros.semLinhas ? '<p class="erro-campo">Informe pelo menos um produto ou princípio ativo.</p>' : ''}
             ${somenteLeitura ? '' : `
-              <button class="link-acao" type="button" data-acao="adicionar-linha">${Icones.mais} Adicionar produto</button>`}
+              <div class="recomendacao__acoes">
+                <button class="link-acao" type="button" data-acao="adicionar-linha">${Icones.mais} Adicionar produto</button>
+                ${ui.modo === 'selecionar' ? '' : `
+                  <button class="botao botao--primario" type="button" data-acao="selecionar-talhoes">
+                    ${Icones.mapa} Selecionar talhões</button>`}
+              </div>`}
           </div>
         </div>
       </section>`;
@@ -291,7 +318,7 @@ window.Telas.planoOperacoes = (function () {
     return linha.preCadastro ? '<span class="etiqueta-pre">Pré-cadastro</span>' : '';
   }
 
-  function linhaRecomendacao(l) {
+  function linhaRecomendacao(l, erro = {}) {
     if (somenteLeitura) {
       return `
         <tr>
@@ -310,12 +337,15 @@ window.Telas.planoOperacoes = (function () {
          </select>`;
     return `
       <tr data-linha="${l.id}">
-        <td>${combo(l, 'pa', l.principioAtivo, 'Buscar princípio ativo')}</td>
-        <td>${combo(l, 'produto', l.produto, 'Buscar produto')} ${etiquetaPre(l)}</td>
-        <td>${unidade}</td>
+        <td>${combo(l, 'pa', l.principioAtivo, 'Buscar princípio ativo', erro.produto)}
+          ${erro.produto ? '<p class="erro-campo">Informe o princípio ativo ou o produto</p>' : ''}</td>
+        <td>${combo(l, 'produto', l.produto, 'Buscar produto', erro.produto)} ${etiquetaPre(l)}</td>
+        <td>${unidade}${erro.unidade ? '<p class="erro-campo">Informação obrigatória</p>' : ''}</td>
         <td class="tabela__numero">
-          <input class="campo__controle campo--compacto campo--dose" type="text" inputmode="decimal"
-                 data-campo="linha-dose" value="${Util.dose(l.dose)}" placeholder="—" aria-label="Dose">
+          <input class="campo__controle campo--compacto campo--dose ${erro.dose ? 'campo__controle--erro' : ''}" type="text" inputmode="decimal"
+                 data-campo="linha-dose" value="${Util.dose(l.dose)}" placeholder="—" aria-label="Dose"
+                 ${erro.dose ? 'aria-invalid="true"' : ''}>
+          ${erro.dose ? '<p class="erro-campo">Informação obrigatória</p>' : ''}
         </td>
         <td class="tabela__acao">
           <button class="botao-icone botao-icone--p" type="button" data-acao="remover-linha" title="Remover produto"
@@ -324,10 +354,10 @@ window.Telas.planoOperacoes = (function () {
       </tr>`;
   }
 
-  function combo(linha, tipo, valor, placeholder) {
+  function combo(linha, tipo, valor, placeholder, comErro) {
     return `
       <div class="combo">
-        <input class="campo__controle campo--compacto" type="text" data-combo="${tipo}" value="${esc(valor || '')}"
+        <input class="campo__controle campo--compacto ${comErro ? 'campo__controle--erro' : ''}" type="text" data-combo="${tipo}" value="${esc(valor || '')}"
                placeholder="${placeholder}" autocomplete="off" role="combobox" aria-expanded="false"
                aria-label="${tipo === 'pa' ? 'Princípio ativo' : 'Produto comercial'}">
         <div class="combo__lista" role="listbox" hidden></div>
@@ -691,7 +721,7 @@ window.Telas.planoOperacoes = (function () {
         ui.listaRecolhida = !ui.listaRecolhida; desenharTudo(); break;
 
       case 'abrir-op':
-        ui.opPorGrupo[grupo.id] = alvo.dataset.op; ui.renomeandoOp = null; ui.preCadastro = null;
+        ui.opPorGrupo[grupo.id] = alvo.dataset.op; ui.renomeandoOp = null; ui.preCadastro = null; ui.validarOp = null;
         sairDosModos(); desenharTudo(); break;
 
       case 'nova-op': {
@@ -725,6 +755,9 @@ window.Telas.planoOperacoes = (function () {
       case 'salvar-pre': salvarPreCadastro(op); break;
 
       case 'selecionar-talhoes':
+        // Sem o preenchimento mínimo, mostra o que falta e não entra na seleção
+        if (errosRecomendacao(op).algum) { ui.validarOp = op.id; desenharTudo(); return; }
+        ui.validarOp = null;
         ui.modo = 'selecionar'; ui.marcados = new Set(Object.keys(op.talhoes)); ui.preCadastro = null;
         desenharTudo(); break;
 

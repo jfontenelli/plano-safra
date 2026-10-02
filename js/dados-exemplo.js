@@ -99,7 +99,7 @@ window.DADOS = {
       { nome: '2ª fungicida + inseticida', dap: 55 },
       { nome: '3ª fungicida + inseticida', dap: 70 },
       { nome: '4ª fungicida + inseticida', dap: 85 },
-      { nome: '5ª fungicida + inseticida (particularidades de talhões)', dap: null },
+      { nome: '5ª fungicida + inseticida', dap: null },
       { nome: 'Desfolha', dap: 100 }
     ] },
     { nome: 'Colheita', tipo: 'Colheita', operacoes: [

@@ -1059,7 +1059,12 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
 .ops-lista {
   position: sticky;
   top: 20px;
+  display: flex;
+  flex-direction: column;
   width: 290px;
+  /* a lista rola sozinha, sem rolar a página: cabe entre o cabeçalho do plano e as guias do rodapé */
+  max-height: calc(100vh - 260px);
+  min-height: 240px;
   flex-shrink: 0;
   padding: 16px 12px;
 }
@@ -1073,7 +1078,15 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
   margin: 0 4px 10px 8px;
 }
 
-.ops-lista__itens { list-style: none; margin: 0; padding: 0; }
+.ops-lista__itens {
+  flex: 1;
+  min-height: 0;
+  margin: 0;
+  padding: 0 4px 0 0;
+  list-style: none;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
 
 .ops-item {
   display: flex;
@@ -1115,7 +1128,7 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
 
 .ops-item__acoes { display: flex; gap: 2px; }
 
-.ops-lista__nova { margin: 12px 0 0 10px; }
+.ops-lista__nova { flex-shrink: 0; margin: 12px 0 0 10px; align-self: flex-start; }
 .ops-lista__vazia { margin: 8px 10px 0; font-size: 14px; color: var(--texto-suave); }
 
 /* --- Detalhe --- */
@@ -1175,7 +1188,6 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  min-height: 40px;
   margin-bottom: 12px;
 }
 
@@ -1185,7 +1197,26 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
   gap: 20px;
 }
 .recomendacao__tabela { flex: 1; min-width: 0; }
-.recomendacao__tabela .link-acao { margin-top: 10px; }
+.recomendacao__acoes {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.erro-campo {
+  margin: 4px 0 0;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.3;
+  color: #b03a2e;
+  text-align: left;
+  white-space: normal;
+}
+.tabela-rec td { vertical-align: top; }
+.tabela-rec .tabela-rec__unidade { display: inline-block; padding-top: 7px; }
+.tabela-rec .tabela__acao .botao-icone { margin-top: 3px; }
 
 .tabela--compacta th { padding: 9px 10px; font-size: 13px; }
 .tabela--compacta td { padding: 7px 10px; }
@@ -1389,6 +1420,6 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
 
 @media (max-width: 1200px) {
   .ops { flex-direction: column; align-items: stretch; }
-  .ops-lista { position: static; width: auto; }
+  .ops-lista { position: static; width: auto; max-height: 320px; }
   .op-resumo { margin-left: 0; }
 }
