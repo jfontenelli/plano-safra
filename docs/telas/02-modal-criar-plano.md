@@ -18,7 +18,7 @@ Definir o contexto do novo plano (safra, empresa, fazenda, cultura) e como ele v
 |---|---|---|
 | Usar modelo (pré-selecionado) | Use uma estrutura pronta de operações e ajuste conforme necessário. | Carrega a lista de operações de exemplo. |
 | Plano em branco | Monte a lista de operações conforme a realidade da fazenda. | Lista de operações vazia. |
-| Importar XLSX | Importe um planejamento existente a partir de uma planilha. | Na v1 aceita só o arquivo exportado pelo próprio protótipo. Implementar depois; por enquanto pode ser escolhido e segue como "Plano em branco". |
+| Importar XLSX | Importe um planejamento existente a partir de uma planilha. | Na v1 aceita só o arquivo exportado pelo próprio protótipo. Implementar depois; por enquanto pode ser escolhido, mas "Continuar para o cadastro" mostra o aviso "Em construção" por cima do modal e não cria o plano (o que foi preenchido continua no modal). |
 | Clonar safra anterior | Utilize o plano de uma safra anterior como base para o novo planejamento. | Desabilitado, com selo "Em breve". Sem ação. |
 
 - Botões no rodapé: "Cancelar" e "Continuar para o cadastro".
