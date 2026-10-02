@@ -27,7 +27,7 @@ Plano de Safra  ›  Safra 26/27 · Empresa A · Fazenda Santa Maria · Cultura 
 Operações   Calendário Agrícola   Suprimentos   Aprovação
 ─────────
 ┌───────────────────────┬──────────────────────────────────────────────────────────┐
-│ Operações          ≪  │ 1ª Fungicida   DAP padrão [30]  Fenologia [V5 ▾]          │
+│ Operações          ≪  │ 1ª Fungicida   DAP [30]  Fenologia [V5 ▾]                 │
 │ ▌1ª Fungicida   ✏️ 🗑  │                    1.085 ha · 11 talhões · 1 pendente     │
 │  2ª Fungicida     45  │ Recomendação agronômica                                   │
 │  3ª Fungicida     60  │   Princípio ativo · Produto comercial · Unid. · Dose  🗑   │
@@ -59,7 +59,7 @@ Princípio: o peso visual de cada navegação é inverso à frequência de uso. 
 
 ## 6. Operações do grupo (lista lateral)
 
-- Lista à esquerda com nome e DAP de cada operação, ordenada automaticamente pelo DAP padrão; cabeçalho "Operações" com o rótulo "DAP" e o botão ≪; "+ Nova operação" no fim. A lista rola sozinha, sem rolar a página.
+- Lista à esquerda com nome e DAP de cada operação, ordenada automaticamente pelo DAP; cabeçalho "Operações" com o rótulo "DAP" e o botão ≪; "+ Nova operação" no fim. A lista rola sozinha, sem rolar a página.
 - **No item selecionado, lápis (renomear) e lixeira (excluir) aparecem ao lado do DAP.** O DAP continua visível em todos os itens.
 - **Lista minimizada** (≪ / ≫): coluna estreita com ≫, o rótulo "DAP" e só os DAPs das operações, na mesma ordem; a operação selecionada fica marcada e o nome aparece ao passar o mouse. Clicar no DAP abre a operação.
 - O painel de detalhe (direita) não tem lápis nem lixeira.
@@ -68,9 +68,9 @@ Princípio: o peso visual de cada navegação é inverso à frequência de uso. 
 
 ## 7. Detalhe da operação
 
-- Nome da operação, **DAP padrão** (campo) e **Fenologia** (lista de seleção, opcional).
+- Nome da operação, **DAP** (campo) e **Fenologia** (lista de seleção, opcional).
 - As opções de fenologia vêm do menu Cadastros (a trabalhar depois). No protótipo, estádios da soja como exemplo.
-- O DAP padrão vale para todos os talhões, mas pode ser ajustado por talhão.
+- O DAP da operação vale para todos os talhões, mas pode ser ajustado por talhão.
 - Resumo à direita: área (ha) · talhões · pendentes.
 - Antes de existir data de plantio (informada no grupo Semente), as operações mostram só o DAP (ex.: −30), sem data.
 
@@ -155,7 +155,7 @@ Um verbo por ação, do botão à mensagem:
 
 - Títulos de seção em caixa normal ("Recomendação agronômica") em vez de caixa alta, para a tela ficar mais leve.
 - Área somada dos talhões selecionados nos modos seleção e ajuste.
-- Nova operação: item novo na lista com nome em edição e DAP padrão destacado.
+- Nova operação: item novo na lista com nome em edição e DAP destacado.
 - Ao trocar uma linha de "só princípio ativo" para produto escolhido, limpar a dose em i.a. e pedir a dose do produto (ou converter pela concentração, quando houver no cadastro).
 - Observar nos testes se o duplo clique para renomear grupo é descoberto; se não, voltar com o lápis.
 
