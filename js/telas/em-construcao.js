@@ -18,14 +18,16 @@ window.Telas.emConstrucao = function (titulo, acoes = '') {
  * Safra, Empresa e Fazenda ficam fixas no topo durante o plano.
  */
 window.Telas.planoEmConstrucao = function (plano) {
+  const esc = Util.escapar;
   return `
     <header class="cabecalho">
       <div>
+        <a class="link-voltar" href="#/plano-safra">${Icones.voltar} Voltar para a lista</a>
         <h1 class="cabecalho__titulo">Plano de Safra</h1>
         <dl class="contexto-plano">
-          <div><dt>Safra</dt><dd>${plano.safra}</dd></div>
-          <div><dt>Empresa</dt><dd>${plano.empresa}</dd></div>
-          <div><dt>Fazenda</dt><dd>${plano.fazenda}</dd></div>
+          <div><dt>Safra</dt><dd>${esc(plano.safra)}</dd></div>
+          <div><dt>Empresa</dt><dd>${esc(plano.empresa)}</dd></div>
+          <div><dt>Fazenda</dt><dd>${esc(plano.fazenda)}</dd></div>
         </dl>
       </div>
     </header>

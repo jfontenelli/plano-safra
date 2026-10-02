@@ -1,21 +1,16 @@
 /*
- * Casca do protótipo: navegação entre telas e estado do menu lateral.
+ * Casca do protótipo: navegação entre telas, estado do menu lateral e menu Demonstração.
  * A navegação usa o endereço com # (ex.: index.html#/cadastros), assim funciona
  * abrindo o arquivo direto no navegador e no Netlify, e o botão Voltar funciona.
  */
 (function () {
   // Rotas. "menu" diz qual item do menu fica destacado.
-  // Cada tela nova troca o "desenhar" pela sua função em js/telas/.
+  // "desenhar" devolve o HTML da tela; "aoMostrar" (opcional) roda depois que ele está na página.
   const ROTAS = {
-    // Sem planos: Tela 01. Com planos: Tela 03 (ainda não construída; por enquanto
-    // só o botão "Criar Plano Safra", para abrir o modal de novo).
+    // Sem planos: Tela 01. Com planos: Tela 03.
     'plano-safra':    { titulo: 'Plano de Safra', menu: 'plano-safra',
-                        desenhar: () => DADOS.planos.length === 0
-                          ? Telas.primeiroUso()
-                          : Telas.emConstrucao('Plano de Safra', `
-                              <button class="botao botao--primario" type="button" data-acao="criar-plano">
-                                ${Icones.mais} Criar Plano Safra
-                              </button>`) },
+                        desenhar: () => temPlanos() ? Telas.listaPlanos.desenhar() : Telas.primeiroUso(),
+                        aoMostrar: (conteudo) => { if (temPlanos()) Telas.listaPlanos.aoMostrar(conteudo); } },
     // Plano aberto: #/plano/<id>. Tela 04 (ainda não construída).
     'plano':          { titulo: 'Plano de Safra', menu: 'plano-safra',
                         desenhar: (id) => Telas.planoEmConstrucao(buscarPlano(id)) },
@@ -26,6 +21,9 @@
   };
   const ROTA_INICIAL = 'plano-safra';
 
+  // Safras cadastradas no início, para o "Começar do zero" voltar a elas
+  const SAFRAS_INICIAIS = [...DADOS.safras];
+
   // Estado da sessão (só em memória)
   const estado = {
     menuRecolhido: false, // menu começa expandido
@@ -35,6 +33,12 @@
   const menu = document.getElementById('menu');
   const botaoAlternar = document.getElementById('menu-alternar');
   const conteudo = document.getElementById('conteudo');
+  const botaoDemo = document.getElementById('demo-botao');
+  const opcoesDemo = document.getElementById('demo-opcoes');
+
+  function temPlanos() {
+    return DADOS.planos.length > 0;
+  }
 
   function buscarPlano(id) {
     return DADOS.planos.find((p) => String(p.id) === id);
@@ -53,15 +57,22 @@
     const rota = ROTAS[nome];
 
     conteudo.innerHTML = rota.desenhar(parametro);
+    if (rota.aoMostrar) rota.aoMostrar(conteudo, parametro);
     conteudo.scrollTop = 0;
     document.title = `${rota.titulo} · UniSystem`;
 
-    document.querySelectorAll('.menu__item').forEach((item) => {
+    document.querySelectorAll('.menu__item[data-rota]').forEach((item) => {
       const ativo = item.dataset.rota === rota.menu;
       item.classList.toggle('menu__item--ativo', ativo);
       if (ativo) item.setAttribute('aria-current', 'page');
       else item.removeAttribute('aria-current');
     });
+  }
+
+  // Vai para a tela; se já estiver nela, desenha de novo
+  function irPara(hash) {
+    if (location.hash === hash) mostrarTela();
+    else location.hash = hash;
   }
 
   function aplicarEstadoMenu() {
@@ -78,27 +89,63 @@
     `;
   }
 
-  function hojeISO() {
-    const d = new Date();
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-  }
-
   // Cria o plano com os dados do modal e abre a Etapa 1 · Cadastro
   function criarPlano(contexto) {
     const plano = {
       id: estado.proximoIdPlano++,
       ...contexto,
+      talhoes: [], // área 0 ha até os talhões serem escolhidos
       status: 'Em construção',
-      area: 0,
       custo: null,
       receita: null,
-      atualizadoEm: hojeISO(),
+      atualizadoEm: Util.hojeISO(),
       atualizadoPor: DADOS.usuario.nome
     };
     DADOS.planos.push(plano);
     location.hash = `#/plano/${plano.id}`;
   }
 
+  // ----- Menu Demonstração -----
+  function abrirDemo(abrir) {
+    opcoesDemo.hidden = !abrir;
+    botaoDemo.setAttribute('aria-expanded', String(abrir));
+    if (abrir) opcoesDemo.querySelector('.demo__opcao').focus();
+  }
+
+  function comecarDoZero() {
+    DADOS.planos = [];
+    DADOS.safras = [...SAFRAS_INICIAIS];
+    irPara('#/plano-safra');
+  }
+
+  function verPlanosExemplo() {
+    DADOS.safras = [...SAFRAS_INICIAIS];
+    DADOS.planos = DADOS.planosExemplo.map((p) => {
+      if (!DADOS.safras.includes(p.safra)) DADOS.safras.push(p.safra);
+      return { ...p, talhoes: [...p.talhoes], id: estado.proximoIdPlano++ };
+    });
+    irPara('#/plano-safra');
+  }
+
+  botaoDemo.addEventListener('click', () => abrirDemo(opcoesDemo.hidden));
+
+  opcoesDemo.addEventListener('click', (e) => {
+    const opcao = e.target.closest('[data-demo]');
+    if (!opcao) return;
+    abrirDemo(false);
+    if (opcao.dataset.demo === 'zero') comecarDoZero();
+    else verPlanosExemplo();
+  });
+
+  // Fecha as opções ao clicar fora ou com Esc
+  document.addEventListener('click', (e) => {
+    if (!opcoesDemo.hidden && !e.target.closest('.demo')) abrirDemo(false);
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !opcoesDemo.hidden) { abrirDemo(false); botaoDemo.focus(); }
+  });
+
+  // ----- Eventos gerais -----
   botaoAlternar.addEventListener('click', () => {
     estado.menuRecolhido = !estado.menuRecolhido;
     aplicarEstadoMenu();

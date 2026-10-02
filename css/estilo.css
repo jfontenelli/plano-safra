@@ -191,13 +191,17 @@ svg { flex-shrink: 0; }
   transition: transform .2s ease;
 }
 
+.menu__rodape {
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, .14);
+}
+
 .menu__usuario {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-top: auto;
-  padding: 14px 6px 0;
-  border-top: 1px solid rgba(255, 255, 255, .14);
+  padding: 12px 6px 0;
   white-space: nowrap;
   overflow: hidden;
 }
@@ -224,6 +228,7 @@ svg { flex-shrink: 0; }
 
 .menu--recolhido .menu__topo,
 .menu--recolhido .menu__item,
+.menu--recolhido .demo__botao,
 .menu--recolhido .menu__usuario { justify-content: center; }
 
 .menu--recolhido .menu__item { padding: 0; }
@@ -656,4 +661,239 @@ select.campo__controle option { color: var(--texto); }
   border-color: transparent;
   color: #fff;
   cursor: not-allowed;
+}
+
+/* ===== Menu Demonstração (rodapé do menu lateral) ===== */
+.demo { position: relative; }
+
+.demo__botao {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.demo__botao[aria-expanded="true"] { background: rgba(255, 255, 255, .12); color: #fff; }
+
+.demo__opcoes {
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + 8px);
+  z-index: 5;
+  width: 290px;
+  padding: 8px;
+  border-radius: 12px;
+  background: var(--superficie);
+  color: var(--texto);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, .25);
+}
+
+/* menu recolhido: as opções abrem ao lado */
+.menu--recolhido .demo__opcoes {
+  left: calc(100% + 12px);
+  bottom: 0;
+}
+
+.demo__opcoes[hidden] { display: none; }
+
+.demo__titulo {
+  margin: 4px 10px 6px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--texto-suave);
+}
+
+.demo__opcao {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  padding: 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  color: inherit;
+  cursor: pointer;
+}
+
+.demo__opcao:hover,
+.demo__opcao:focus-visible { background: var(--verde-100); outline: none; }
+
+.demo__opcao-titulo { font-weight: 600; }
+.demo__opcao-texto { font-size: 13px; line-height: 1.4; color: var(--texto-suave); }
+
+/* ===== Página com seções (Tela 03 em diante) ===== */
+.pagina {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  padding: 28px 40px 48px;
+}
+
+/* deixa as seções encolherem; a tabela larga rola dentro do próprio cartão */
+.pagina > * { min-width: 0; }
+
+.cartao {
+  border: 1px solid var(--borda);
+  border-radius: 12px;
+  background: var(--superficie);
+  box-shadow: var(--sombra);
+}
+
+.secao__titulo {
+  margin-bottom: 14px;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.so-leitor {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* ===== Tela 03 · Filtros ===== */
+.filtros { padding: 20px 24px 8px; }
+
+.filtros__grade {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0 20px;
+}
+
+/* ===== Tela 03 · Indicadores ===== */
+.indicadores {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.indicador {
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+  padding: 22px 24px;
+}
+
+.indicador__icone {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+  border-radius: 12px;
+}
+.indicador__icone .icone { width: 28px; height: 28px; }
+
+.indicador--area .indicador__icone    { background: var(--verde-100); color: var(--verde-700); }
+.indicador--custo .indicador__icone   { background: #e8f0fb; color: #2b5ea7; }
+.indicador--receita .indicador__icone { background: #fdf1e3; color: #b0611a; }
+
+.indicador__titulo { margin: 0 0 2px; font-weight: 600; }
+
+.indicador__valor {
+  margin: 0;
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1.25;
+  font-variant-numeric: tabular-nums;
+}
+
+.indicador__dica { margin: 4px 0 0; font-size: 14px; color: var(--texto-suave); }
+
+/* ===== Tabelas ===== */
+.tabela-rolagem { position: relative; overflow-x: auto; }
+.tabela th:first-child, .tabela td:first-child { padding-left: 20px; }
+
+.tabela {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.tabela th {
+  padding: 14px 12px;
+  background: #f1f4f2;
+  font-weight: 600;
+  text-align: left;
+  color: var(--texto);
+}
+
+.tabela td {
+  padding: 12px 12px;
+  border-top: 1px solid var(--borda);
+}
+
+.tabela tbody tr:hover { background: #f8faf9; }
+
+.tabela__numero { text-align: right !important; font-variant-numeric: tabular-nums; }
+
+.tabela__acao { width: 1%; text-align: right; padding-right: 12px !important; }
+
+.tabela__vazia {
+  padding: 32px 16px !important;
+  text-align: center;
+  color: var(--texto-suave);
+}
+
+.botao-icone {
+  display: inline-grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  color: var(--texto);
+}
+.botao-icone:hover { background: var(--verde-100); color: var(--verde-700); }
+.botao-icone:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 1px; }
+
+/* ===== Selos de status ===== */
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.status::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.status--construcao { background: #eceff1; color: #59636b; }
+.status--aprovado   { background: #e1f3e8; color: #17703f; }
+
+/* ===== Link de voltar ===== */
+.link-voltar {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--verde-700);
+  text-decoration: none;
+}
+.link-voltar:hover { text-decoration: underline; }
+.link-voltar .icone { width: 16px; height: 16px; stroke-width: 2.2; }
+
+@media (max-width: 1100px) {
+  .filtros__grade { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .indicadores { grid-template-columns: 1fr; }
 }

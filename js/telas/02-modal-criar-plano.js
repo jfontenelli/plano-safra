@@ -125,7 +125,7 @@ window.Telas.abrirModalCriarPlano = function ({ aoCriar }) {
 
     erroDuplicado.hidden = !duplicado;
     erroDuplicado.textContent = duplicado
-      ? `Já existe um plano da safra ${v.safra} para a fazenda ${v.fazenda}.`
+      ? `Já existe um plano da safra ${v.safra} para a fazenda ${v.fazenda}.` // textContent: não precisa escapar
       : '';
     form.elements.fazenda.classList.toggle('campo__controle--erro', !!duplicado);
 
@@ -169,7 +169,7 @@ window.Telas.abrirModalCriarPlano = function ({ aoCriar }) {
   function opcoes(textoVazio, itens, selecionado = '') {
     return `<option value="" disabled ${selecionado ? '' : 'selected'}>${textoVazio}</option>` +
       itens.map((item) =>
-        `<option value="${item}" ${item === selecionado ? 'selected' : ''}>${item}</option>`).join('');
+        `<option value="${Util.escapar(item)}" ${item === selecionado ? 'selected' : ''}>${Util.escapar(item)}</option>`).join('');
   }
 
   function cardInicio(c) {
