@@ -194,30 +194,34 @@ window.Telas.planoOperacoes = (function () {
     `;
   }
 
+  // Lápis e lixeira ficam no card da operação (detalhe), não na lista
   function itemOperacao(op, ativo) {
-    if (ui.renomeandoOp === op.id) {
-      return `
-        <li class="ops-item ops-item--ativo">
-          <input class="campo__controle campo--compacto" data-campo="nome-op" value="${esc(op.nome)}"
-                 aria-label="Nome da operação" data-foco-inicial>
-        </li>`;
-    }
-    // O DAP sempre aparece; no item selecionado, lápis e lixeira ficam ao lado dele
-    const acoes = ativo && !somenteLeitura
-      ? `<span class="ops-item__acoes">
-           <button class="botao-icone botao-icone--p" type="button" data-acao="renomear-op" title="Renomear operação"
-                   aria-label="Renomear ${esc(op.nome)}">${Icones.lapis}</button>
-           <button class="botao-icone botao-icone--p" type="button" data-acao="excluir-op" title="Excluir operação"
-                   aria-label="Excluir ${esc(op.nome)}">${Icones.lixeira}</button>
-         </span>`
-      : '';
-    const lado = `<span class="ops-item__dap">${op.dap ?? '—'}</span>${acoes}`;
     return `
       <li class="ops-item ${ativo ? 'ops-item--ativo' : ''}">
         <button class="ops-item__nome" type="button" data-acao="abrir-op" data-op="${op.id}"
                 ${ativo ? 'aria-current="true"' : ''} title="${esc(op.nome)}">${esc(op.nome)}</button>
-        ${lado}
+        <span class="ops-item__dap">${op.dap ?? '—'}</span>
       </li>`;
+  }
+
+  // Nome da operação no card; vira campo de edição ao clicar no lápis
+  function nomeOperacao(op) {
+    if (ui.renomeandoOp === op.id) {
+      return `<input class="campo__controle op-cabecalho__nome-campo" data-campo="nome-op" value="${esc(op.nome)}"
+                     aria-label="Nome da operação" data-foco-inicial>`;
+    }
+    return `<h2 class="op-cabecalho__nome">${esc(op.nome)}</h2>`;
+  }
+
+  function acoesOperacao(op) {
+    if (somenteLeitura) return '';
+    return `
+      <span class="op-cabecalho__acoes">
+        <button class="botao-icone botao-icone--borda" type="button" data-acao="renomear-op" title="Renomear operação"
+                aria-label="Renomear ${esc(op.nome)}">${Icones.lapis}</button>
+        <button class="botao-icone botao-icone--borda" type="button" data-acao="excluir-op" title="Excluir operação"
+                aria-label="Excluir ${esc(op.nome)}">${Icones.lixeira}</button>
+      </span>`;
   }
 
   // ----- Detalhe -----
@@ -229,8 +233,13 @@ window.Telas.planoOperacoes = (function () {
     }
     if (!ehDefensivo(grupo)) {
       return `
-        <div class="cartao op-cabecalho"><h2 class="op-cabecalho__nome">${esc(op.nome)}</h2>
-          <span class="op-cabecalho__dap-texto">DAP: <strong>${op.dap ?? '—'}</strong></span></div>
+        <div class="cartao op-cabecalho">
+          <div class="op-cabecalho__linha">
+            ${nomeOperacao(op)}
+            <span class="op-cabecalho__dap-texto">DAP: <strong>${op.dap ?? '—'}</strong></span>
+            ${acoesOperacao(op)}
+          </div>
+        </div>
         <div class="cartao">
           <section class="em-construcao em-construcao--compacto">
             <div class="em-construcao__icone" aria-hidden="true">${Icones.casa}</div>
@@ -261,18 +270,24 @@ window.Telas.planoOperacoes = (function () {
            <option value="">—</option>
            ${DADOS.fenologia.map((f) => `<option ${f === op.fenologia ? 'selected' : ''}>${f}</option>`).join('')}
          </select>`;
-    return `
-      <div class="cartao op-cabecalho">
-        <h2 class="op-cabecalho__nome">${esc(op.nome)}</h2>
-        <div class="op-cabecalho__campos">
-          <div class="campo campo--inline"><label class="campo__rotulo" for="op-dap">DAP</label>${dap}</div>
-          <div class="campo campo--inline"><label class="campo__rotulo" for="op-fenologia">Fenologia</label>${fenologia}</div>
-        </div>
+    const resumo = `
         <ul class="op-resumo" aria-label="Resumo da operação">
           <li>${Icones.mapa}<strong>${Util.area(r.area).replace(' ha', '')}</strong> ha</li>
           <li>${Icones.talhoes}<strong>${r.talhoes}</strong> ${r.talhoes === 1 ? 'talhão' : 'talhões'}</li>
           <li class="${r.pendentes ? 'op-resumo--alerta' : ''}">${Icones.alerta}<strong>${r.pendentes}</strong> ${r.pendentes === 1 ? 'pendente' : 'pendentes'}</li>
-        </ul>
+        </ul>`;
+    // Linha 1: nome, DAP, fenologia e, à direita, lápis e lixeira. Linha 2: resumo, à esquerda.
+    return `
+      <div class="cartao op-cabecalho">
+        <div class="op-cabecalho__linha">
+          ${nomeOperacao(op)}
+          <div class="op-cabecalho__campos">
+            <div class="campo campo--inline"><label class="campo__rotulo" for="op-dap">DAP</label>${dap}</div>
+            <div class="campo campo--inline"><label class="campo__rotulo" for="op-fenologia">Fenologia</label>${fenologia}</div>
+          </div>
+          ${acoesOperacao(op)}
+        </div>
+        ${resumo}
       </div>`;
   }
 
