@@ -61,7 +61,7 @@ Princípio: o peso visual de cada navegação é inverso à frequência de uso. 
 
 - Lista à esquerda com nome e DAP de cada operação, ordenada automaticamente pelo DAP; cabeçalho "Operações" com o rótulo "DAP" e o botão ≪; "+ Nova operação" no fim. A lista rola sozinha, sem rolar a página.
 - A lista mostra só nome e DAP; o item selecionado fica marcado. Lápis e lixeira ficam no card da operação (ver seção 7).
-- **Lista minimizada** (≪ / ≫): coluna estreita com ≫, o rótulo "DAP" e só os DAPs das operações, na mesma ordem; a operação selecionada fica marcada e o nome aparece ao passar o mouse. Clicar no DAP abre a operação.
+- **Lista minimizada** (≪ / ≫): coluna estreita com ≫, o rótulo "DAP" e só os DAPs das operações, na mesma ordem; a operação selecionada fica marcada e o nome aparece ao passar o mouse. Clicar no DAP abre a operação. No fim da coluna, um "+" cria uma nova operação (o nome abre em edição no card da operação).
 - Excluir operação com talhões: confirmação mostrando o impacto (ex.: "Excluir 1ª Fungicida? 11 talhões e 2 produtos serão removidos do plano"). Operação vazia: exclui na hora, com "Desfazer".
 - A lista não mostra contador de pendências.
 
