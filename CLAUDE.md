@@ -55,3 +55,6 @@ Protótipo navegável e preenchível do Plano de Safra (UniSystem), usado para v
 
 ## Linguagem
 - Interface em português do Brasil, com termos do dia a dia da fazenda (safra, talhão, DAP, OS).
+
+## Referencias
+Imagens em referencias/ são só referência visual. Quando divergirem dos documentos em docs/, os documentos valem.
