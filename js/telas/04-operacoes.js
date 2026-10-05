@@ -622,7 +622,7 @@ window.Telas.planoOperacoes = (function () {
       return `
         <tr>
           <td>${esc(l.principioAtivo || '—')}</td>
-          <td>${esc(l.produto || '—')} ${etiquetaPre(l)}</td>
+          <td>${esc(l.produto || '—')} ${etiquetaPre(l)}${seloTipo(l)}</td>
           <td>${Planos.unidadeDose(l)}</td>
           <td class="tabela__numero">${Util.dose(l.dose) || '—'}</td>
         </tr>`;
@@ -634,7 +634,7 @@ window.Telas.planoOperacoes = (function () {
     return `
       <tr data-linha="${l.id}">
         <td>${combo(l, 'pa', l.principioAtivo, 'Buscar princípio ativo', false)}</td>
-        <td>${combo(l, 'produto', l.produto, 'Buscar produto', erro.produto)} ${etiquetaPre(l)}
+        <td>${combo(l, 'produto', l.produto, 'Buscar produto', erro.produto)} ${etiquetaPre(l)}${seloTipo(l)}
           ${erro.produto ? '<p class="erro-campo">Escolha o produto comercial</p>' : ''}</td>
         <td><span class="tabela-rec__unidade">${Planos.unidadeDose(l) || '—'}</span></td>
         <td class="tabela__numero" ${semProduto ? 'title="Escolha o produto comercial para informar a dose"' : ''}>
