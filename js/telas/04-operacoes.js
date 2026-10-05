@@ -787,7 +787,8 @@ window.Telas.planoOperacoes = (function () {
         return `
           <div class="talhoes__rodape">
             <span class="talhoes__selecao">Marque os talhões que quer ajustar.</span>
-            <button class="botao botao--secundario" type="button" data-acao="cancelar-modo">${ui.ajusteFeito ? 'Concluir edição' : 'Cancelar'}</button>
+            <button class="botao ${ui.ajusteFeito ? 'botao--primario' : 'botao--secundario'}" type="button"
+                    data-acao="cancelar-modo">${ui.ajusteFeito ? 'Concluir edição' : 'Cancelar'}</button>
           </div>`;
       }
       const area = talhoesFazenda.filter((t) => ui.marcados.has(t.nome)).reduce((s, t) => s + t.area, 0);
