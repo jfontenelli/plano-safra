@@ -99,6 +99,31 @@ window.Telas.planoOperacoes = (function () {
     ui.marcados = new Set();
     ui.ajuste = null;
     ui.ajusteFeito = false;  // modo edição dos talhões: já aplicou algo (Cancelar vira "Concluir edição")
+    ui.copiaEdicao = null;   // como a operação estava ao entrar no modo edição (para "Cancelar edição")
+  }
+
+  // Guarda receitas e talhões da operação ao entrar no modo edição
+  function guardarCopiaEdicao(op) {
+    ui.copiaEdicao = {
+      opId: op.id,
+      receitas: structuredClone(op.receitas),
+      talhoes: structuredClone(op.talhoes),
+      atualizadoEm: plano.atualizadoEm,
+      atualizadoPor: plano.atualizadoPor
+    };
+  }
+
+  // "Cancelar edição": desfaz tudo o que foi aplicado desde que entrou no modo edição
+  function cancelarEdicao(op) {
+    const c = ui.copiaEdicao;
+    if (c && op && c.opId === op.id) {
+      op.receitas = c.receitas;
+      op.talhoes = c.talhoes;
+      plano.atualizadoEm = c.atualizadoEm;
+      plano.atualizadoPor = c.atualizadoPor;
+    }
+    sairDosModos(); desenharTudo();
+    Aviso.mostrar('Edição cancelada. As alterações foram descartadas.');
   }
 
   // ================= Desenho =================
@@ -787,6 +812,7 @@ window.Telas.planoOperacoes = (function () {
         return `
           <div class="talhoes__rodape">
             <span class="talhoes__selecao">Marque os talhões que quer ajustar.</span>
+            ${botaoCancelarEdicao()}
             <button class="botao ${ui.ajusteFeito ? 'botao--primario' : 'botao--secundario'}" type="button"
                     data-acao="cancelar-modo">${ui.ajusteFeito ? 'Concluir edição' : 'Cancelar'}</button>
           </div>`;
@@ -799,10 +825,18 @@ window.Telas.planoOperacoes = (function () {
           <button class="botao botao--perigo-leve botao--p" type="button" data-acao="remover-da-operacao"
                   ${recebem ? '' : 'disabled title="Nenhum dos talhões selecionados recebe a operação"'}>Excluir recomendação</button>
           <button class="botao botao--primario botao--p" type="button" data-acao="ajustar-produtos">Ajustar recomendação</button>
+          ${botaoCancelarEdicao('botao--p')}
           <button class="botao botao--secundario botao--p" type="button" data-acao="cancelar-modo">${ui.ajusteFeito ? 'Concluir edição' : 'Cancelar'}</button>
         </div>`;
     }
     return '';
+  }
+
+  // Só aparece depois de aplicar algo, à esquerda do "Concluir edição"
+  function botaoCancelarEdicao(classe = '') {
+    return ui.ajusteFeito
+      ? `<button class="botao botao--secundario ${classe}" type="button" data-acao="cancelar-edicao">Cancelar edição</button>`
+      : '';
   }
 
   // Aplicar: talhões marcados recebem a receita; os que estavam nela e foram desmarcados saem da operação
@@ -1304,11 +1338,13 @@ window.Telas.planoOperacoes = (function () {
       case 'ajustar-talhoes':
         sairDaReceita(() => {
           ui.modo = 'ajustar'; ui.marcados = new Set(); ui.ajuste = novoAjustePreparado();
+          guardarCopiaEdicao(op);
           desenharTudo();
         }, { removerVazia: false });
         break;
 
       case 'cancelar-modo': sairDosModos(); desenharTudo(); break;
+      case 'cancelar-edicao': cancelarEdicao(op); break;
 
       case 'marcar':
         if (alvo.checked) ui.marcados.add(alvo.dataset.talhao); else ui.marcados.delete(alvo.dataset.talhao);
