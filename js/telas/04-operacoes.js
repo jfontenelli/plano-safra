@@ -679,7 +679,15 @@ window.Telas.planoOperacoes = (function () {
   }
 
   // ----- Talhões da recomendação agronômica -----
+  // A tabela de talhões só aparece depois de ao menos uma recomendação salva com produto comercial e dose
+  // (durante a seleção e a edição dos talhões ela sempre aparece)
+  function temRecomendacaoFeita(op) {
+    const comDose = (l) => l.produto && l.dose !== null && l.dose !== undefined && l.dose !== '';
+    return op.receitas.some((r) => r.produtos.some(comDose)) || Object.keys(op.talhoes).length > 0;
+  }
+
   function tabelaTalhoes(op) {
+    if (ui.modo === 'ver' && !temRecomendacaoFeita(op)) return '';
     const colunas = Planos.colunasDose(op);
     const modo = ui.modo;
     let titulo = 'Talhões da recomendação agronômica';
