@@ -663,7 +663,8 @@ window.Telas.planoOperacoes = (function () {
             <p class="pre-cadastro__titulo">Pré-cadastro de defensivo
               <span class="pre-cadastro__ajuda">Informe o produto comercial e a unidade. O princípio ativo é opcional.</span></p>
             <div class="pre-cadastro__campos">
-              <input class="campo__controle campo--compacto" data-pre="produto" value="${esc(pc.produto)}" placeholder="Produto comercial" aria-label="Produto comercial">
+              <input class="campo__controle campo--compacto" data-pre="produto" value="${esc(pc.produto)}" placeholder="Produto comercial" aria-label="Produto comercial"
+                     ${pc.produto ? '' : 'data-foco-inicial'}>
               <input class="campo__controle campo--compacto" data-pre="principioAtivo" value="${esc(pc.principioAtivo)}" placeholder="Princípio ativo" aria-label="Princípio ativo">
               <select class="campo__controle campo--compacto" data-pre="unidade" aria-label="Unidade" required>
                 <option value="" ${pc.unidade ? '' : 'selected'} disabled>Unidade</option>
@@ -1160,8 +1161,8 @@ window.Telas.planoOperacoes = (function () {
         .map((d) => ({ valor: d.produto, rotulo: `${esc(d.produto)}<span class="combo__sub">${esc(d.principioAtivo || '—')} · ${d.unidade}</span>`, pre: d.preCadastro }));
     }
     opcoes = opcoes.slice(0, 8);
-    // "+ Pré-cadastrar" sempre como última opção quando há texto digitado, só na busca de produto comercial
-    if (tipo === 'produto' && texto.trim()) opcoes.push({ preCadastrar: true, valor: texto.trim(), rotulo: `${Icones.mais} Pré-cadastrar "${esc(texto.trim())}"` });
+    // "+ Pré-cadastrar" sempre como última opção quando há texto digitado (princípio ativo e produto comercial)
+    if (texto.trim()) opcoes.push({ preCadastrar: true, valor: texto.trim(), rotulo: `${Icones.mais} Pré-cadastrar "${esc(texto.trim())}"` });
     return opcoes;
   }
 
@@ -1190,7 +1191,10 @@ window.Telas.planoOperacoes = (function () {
     const tipo = input.dataset.combo;
     const valor = opcaoEl.dataset.valor;
     if (opcaoEl.hasAttribute('data-pre-cadastrar')) {
-      ui.preCadastro = { linhaId: linha.id, produto: valor, principioAtivo: linha.principioAtivo || '', unidade: '', erro: '' };
+      // Pelo princípio ativo, o texto vai para o Princípio ativo; o produto comercial continua obrigatório
+      ui.preCadastro = tipo === 'pa'
+        ? { linhaId: linha.id, produto: '', principioAtivo: valor, unidade: '', erro: '' }
+        : { linhaId: linha.id, produto: valor, principioAtivo: linha.principioAtivo || '', unidade: '', erro: '' };
     } else if (tipo === 'pa') {
       linha.principioAtivo = valor;
       // Produto de outro princípio ativo deixa de valer (e, sem produto, não há unidade nem dose)
