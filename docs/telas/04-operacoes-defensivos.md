@@ -32,7 +32,7 @@ Operações   Calendário Agrícola   Suprimentos   Aprovação
 │  2ª Fungicida     45  │ Recomendação agronômica                                   │
 │  3ª Fungicida     60  │   Receita 1 │ Receita 2 │ + Nova receita              🗑   │
 │  4ª Fungicida     75  │   Princípio ativo · Produto comercial · Unid. · Dose padrão│
-│                       │   [Salvar receita] [Aplicar nos talhões] [+ Adicionar produto]│
+│                       │   [Aplicar nos talhões]   [Salvar receita] [+ Adicionar produto]│
 │ + Nova operação       │ Talhões da recomendação agronômica      ✏️ Editar  🔍     │
 │                       │   Talhão · Área · dose por produto (cor da linha = status)│
 └───────────────────────┴──────────────────────────────────────────────────────────┘
@@ -117,7 +117,7 @@ Princípio: o peso visual de cada navegação é inverso à frequência de uso. 
 
 **Salvar receita** (fluxo: montar receita → salvar receita → aplicar nos talhões)
 - As mudanças na receita ficam em rascunho até **"Salvar receita"**. Trocar de receita, operação ou grupo com alteração não salva pergunta: "Descartar as alterações de Receita 1?" (Continuar editando · Descartar).
-- **Botões abaixo da tabela, alinhados à direita**, da esquerda para a direita: **[Salvar receita] [Aplicar nos talhões] [+ Adicionar produto]**.
+- **Botões na linha abaixo da tabela**: à esquerda **[Aplicar nos talhões]**; à direita **[Salvar receita] [+ Adicionar produto]**.
   - Com alteração não salva: "Salvar receita" fica em destaque e **"Aplicar nos talhões" não aparece**.
   - Receita salva: "Salvar receita" fica visível e desabilitado (os botões não mudam de lugar) e "Aplicar nos talhões" aparece, em destaque.
 - Receita já aplicada: salvar vale para os talhões dela.

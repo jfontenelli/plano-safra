@@ -1356,6 +1356,7 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
   margin-top: 12px;
 }
 .recomendacao__acoes .botao .icone { width: 16px; height: 16px; stroke-width: 2.2; }
+.recomendacao__aplicar { margin-right: auto; }
 
 /* Receitas da operação: Receita 1 | Receita 2 | + Nova receita · lixeira na ponta */
 .receitas {

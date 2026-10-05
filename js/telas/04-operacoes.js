@@ -527,13 +527,14 @@ window.Telas.planoOperacoes = (function () {
           </table>
           ${erros.semLinhas ? '<p class="erro-campo">Informe pelo menos um produto.</p>' : ''}
           ${somenteLeitura ? '' : `
+            <!-- À esquerda: Aplicar nos talhões (só com a receita salva). À direita: Salvar receita e + Adicionar produto -->
             <div class="recomendacao__acoes">
+              ${ui.modo === 'selecionar' || alterada ? '' : `
+                <button class="botao botao--primario recomendacao__aplicar" type="button" data-acao="aplicar-receita">
+                  ${Icones.mapa} Aplicar nos talhões</button>`}
               ${ui.modo === 'selecionar' ? '' : `
                 <button class="botao ${alterada ? 'botao--primario' : 'botao--secundario'}" type="button"
                         data-acao="salvar-receita" ${alterada ? '' : 'disabled'}>Salvar receita</button>`}
-              ${ui.modo === 'selecionar' || alterada ? '' : `
-                <button class="botao botao--primario" type="button" data-acao="aplicar-receita">
-                  ${Icones.mapa} Aplicar nos talhões</button>`}
               <button class="botao botao--secundario" type="button" data-acao="adicionar-linha">${Icones.mais} Adicionar produto</button>
             </div>`}
         </div>
