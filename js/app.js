@@ -121,12 +121,16 @@
     irPara('#/plano-safra');
   }
 
-  function verPlanosExemplo() {
+  function carregarPlanosExemplo() {
     DADOS.safras = [...SAFRAS_INICIAIS];
     DADOS.planos = DADOS.planosExemplo.map(({ operacoes, ...p }) => {
       if (!DADOS.safras.includes(p.safra)) DADOS.safras.push(p.safra);
       return { ...p, grupos: Planos.montarExemplo(operacoes), id: estado.proximoIdPlano++ };
     });
+  }
+
+  function verPlanosExemplo() {
+    carregarPlanosExemplo();
     irPara('#/plano-safra');
   }
 
@@ -167,5 +171,7 @@
 
   desenharUsuario();
   aplicarEstadoMenu();
+  // O protótipo abre com os planos de exemplo; o primeiro uso fica em Demonstração → Começar do zero
+  carregarPlanosExemplo();
   mostrarTela();
 })();
