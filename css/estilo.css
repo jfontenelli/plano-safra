@@ -1527,7 +1527,8 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
   border: 1px solid var(--borda);
   border-radius: 3px;
 }
-.talhoes__cor--sem { margin-left: 14px; background: #f3f5f6; border-color: #d5dadd; }
+.talhoes__cor--sem { background: #f3f5f6; border-color: #d5dadd; }
+.talhoes__cor--sem:not(:first-child) { margin-left: 14px; }
 .talhoes__cor--pendente { background: #fdf0e1; border-color: #f1d2ad; }
 .tabela__marcar { width: 36px; text-align: center !important; }
 .tabela__marcar input { width: 16px; height: 16px; accent-color: var(--verde-700); cursor: pointer; }

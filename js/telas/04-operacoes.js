@@ -677,11 +677,7 @@ window.Telas.planoOperacoes = (function () {
           <h3 class="rotulo-secao ${modo !== 'ver' ? 'rotulo-secao--destaque' : ''}" id="titulo-talhoes">${titulo}</h3>
           ${ferramentas}
         </div>
-        ${modo === 'ajustar' ? '' : `
-          <p class="talhoes__legenda">
-            <span class="talhoes__cor talhoes__cor--pendente" aria-hidden="true"></span>Sem operação ou sem dose
-            <span class="talhoes__cor talhoes__cor--sem" aria-hidden="true"></span>Operação ainda não aplicada em nenhum talhão
-          </p>`}
+        ${modo === 'ajustar' ? '' : legendaTalhoes(op)}
         <!-- Modo edição: tabela com a barra de seleção embaixo e, com seleção, o painel de ajuste ao lado -->
         <div class="talhoes__area">
         <div class="talhoes__principal">
@@ -701,6 +697,19 @@ window.Telas.planoOperacoes = (function () {
         ${modo === 'ajustar' && ui.marcados.size ? painelAjuste(op) : ''}
         </div>
       </section>`;
+  }
+
+  // Legenda das cores: cada item só aparece quando existe ao menos 1 talhão nessa situação
+  function legendaTalhoes(op) {
+    const algumTalhao = Object.keys(op.talhoes).length > 0;
+    const laranja = algumTalhao && talhoesFazenda.some((t) => Planos.statusTalhao(op, t.nome) !== 'Completo');
+    const cinza = !algumTalhao && talhoesFazenda.length > 0;
+    if (!laranja && !cinza) return '';
+    return `
+      <p class="talhoes__legenda">
+        ${laranja ? '<span class="talhoes__cor talhoes__cor--pendente" aria-hidden="true"></span>Sem operação ou sem dose' : ''}
+        ${cinza ? '<span class="talhoes__cor talhoes__cor--sem" aria-hidden="true"></span>Operação ainda não aplicada em nenhum talhão' : ''}
+      </p>`;
   }
 
   function talhoesMarcaveis(op) {
