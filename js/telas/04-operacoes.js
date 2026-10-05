@@ -121,6 +121,12 @@ window.Telas.planoOperacoes = (function () {
     if (foco) { foco.focus({ preventScroll: true }); foco.select?.(); }
   }
 
+  function htmlParaElemento(html) {
+    const t = document.createElement('template');
+    t.innerHTML = html.trim();
+    return t.content.firstElementChild;
+  }
+
   // Redesenha e devolve o foco ao controle equivalente (o anterior foi recriado)
   function desenharMantendoFoco(seletor) {
     desenharTudo();
@@ -515,7 +521,6 @@ window.Telas.planoOperacoes = (function () {
     const leitura = somenteLeitura || ui.modo === 'ajustar';
     const linhas = leitura ? r.produtos.filter(Planos.linhaPreenchida) : rascunho(op).produtos;
     const erros = errosVisiveis(op);
-    const alterada = rascunhoAlterado(op);
     return `
       <div class="recomendacao__corpo">
         <div class="recomendacao__tabela">
@@ -530,18 +535,23 @@ window.Telas.planoOperacoes = (function () {
             </tbody>
           </table>
           ${erros.semLinhas ? '<p class="erro-campo">Informe pelo menos um produto.</p>' : ''}
-          ${leitura ? '' : `
-            <!-- À esquerda: Aplicar nos talhões (só com a receita salva). À direita: Salvar receita e + Adicionar produto -->
-            <div class="recomendacao__acoes">
-              ${ui.modo === 'selecionar' || alterada ? '' : `
-                <button class="botao botao--primario recomendacao__aplicar" type="button" data-acao="aplicar-receita">
-                  ${Icones.mapa} Aplicar nos talhões</button>`}
-              ${ui.modo === 'selecionar' ? '' : `
-                <button class="botao ${alterada ? 'botao--primario' : 'botao--secundario'}" type="button"
-                        data-acao="salvar-receita" ${alterada ? '' : 'disabled'}>Salvar receita</button>`}
-              <button class="botao botao--secundario" type="button" data-acao="adicionar-linha">${Icones.mais} Adicionar produto</button>
-            </div>`}
+          ${leitura ? '' : acoesReceita(op)}
         </div>
+      </div>`;
+  }
+
+  // À esquerda: Aplicar nos talhões (só com a receita salva). À direita: Salvar receita e + Adicionar produto
+  function acoesReceita(op) {
+    const alterada = rascunhoAlterado(op);
+    return `
+      <div class="recomendacao__acoes">
+        ${ui.modo === 'selecionar' || alterada ? '' : `
+          <button class="botao botao--primario recomendacao__aplicar" type="button" data-acao="aplicar-receita">
+            ${Icones.mapa} Aplicar nos talhões</button>`}
+        ${ui.modo === 'selecionar' ? '' : `
+          <button class="botao ${alterada ? 'botao--primario' : 'botao--secundario'}" type="button"
+                  data-acao="salvar-receita" ${alterada ? '' : 'disabled'}>Salvar receita</button>`}
+        <button class="botao botao--secundario" type="button" data-acao="adicionar-linha">${Icones.mais} Adicionar produto</button>
       </div>`;
   }
 
@@ -1163,15 +1173,15 @@ window.Telas.planoOperacoes = (function () {
     } else if (campo === 'op-fenologia') {
       op.fenologia = e.target.value; alterou(); desenharTudo();
     } else if (campo === 'linha-dose') {
-      linhaDoElemento(e.target).dose = Util.numero(e.target.value); desenharTudo();
+      // Já registrada ao digitar; sem redesenhar, para o clique em "Salvar receita" valer de primeira
+      e.target.value = Util.dose(Util.numero(e.target.value));
     } else if (e.target.dataset.pre) {
       ui.preCadastro[e.target.dataset.pre] = e.target.value;
-    } else if (e.target.dataset.ajuste === 'dose') {
-      ui.ajuste.doses[e.target.dataset.chave] = e.target.value.trim(); desenharTudo();
+    } else if (e.target.dataset.ajuste === 'dose' || e.target.dataset.ajuste === 'novo-dose') {
+      // Já registrada ao digitar; sem redesenhar, para o clique em "Aplicar em N talhões" valer de primeira
     } else if (e.target.dataset.ajuste === 'novo-produto') {
       ui.ajuste.adicionar[Number(e.target.dataset.indice)].produto = e.target.value; desenharTudo();
-    } else if (e.target.dataset.ajuste === 'novo-dose') {
-      ui.ajuste.adicionar[Number(e.target.dataset.indice)].dose = e.target.value.trim(); desenharTudo();
+
     }
   }
 
@@ -1184,6 +1194,20 @@ window.Telas.planoOperacoes = (function () {
   function aoDigitar(e) {
     if (e.target.dataset.campo === 'ed-nome') {
       registrarNome(grupoAtual().operacoes.find((o) => o.id === e.target.dataset.op), e.target.value);
+      return;
+    }
+    // Doses: registradas enquanto se digita; só os botões que dependem delas são atualizados
+    if (e.target.dataset.campo === 'linha-dose') {
+      linhaDoElemento(e.target).dose = Util.numero(e.target.value);
+      const op = opAtual();
+      raiz.querySelector('.recomendacao__acoes')?.replaceWith(htmlParaElemento(acoesReceita(op)));
+      return;
+    }
+    if (e.target.dataset.ajuste === 'dose' || e.target.dataset.ajuste === 'novo-dose') {
+      if (e.target.dataset.ajuste === 'dose') ui.ajuste.doses[e.target.dataset.chave] = e.target.value.trim();
+      else ui.ajuste.adicionar[Number(e.target.dataset.indice)].dose = e.target.value.trim();
+      const aplicar = raiz.querySelector('[data-acao="salvar-ajustes"]');
+      if (aplicar) aplicar.disabled = !ajusteTemMudanca();
       return;
     }
     if (e.target.dataset.combo) { abrirCombo(e.target); return; }
