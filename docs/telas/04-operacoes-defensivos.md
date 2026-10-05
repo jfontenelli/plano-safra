@@ -120,7 +120,8 @@ Princípio: o peso visual de cada navegação é inverso à frequência de uso. 
 - **Botões na linha abaixo da tabela**: à esquerda **[Aplicar nos talhões]**; à direita **[Salvar receita] [+ Adicionar produto]**.
   - Com alteração não salva: "Salvar receita" fica em destaque e **"Aplicar nos talhões" não aparece**.
   - Receita salva: "Salvar receita" fica visível e desabilitado (os botões não mudam de lugar) e "Aplicar nos talhões" aparece, em destaque.
-- Receita já aplicada: salvar vale para os talhões dela.
+- Receita **ainda não aplicada**: salvar não muda nada na tabela de talhões (a receita não está ligada a nenhum talhão).
+- Receita **já aplicada**: ao salvar, a tela pergunta antes: "Alterar os talhões que já recebem Receita 1? Receita 1 já está aplicada em 10 talhões. Ao salvar, as alterações valem para eles. Talhões com dose própria mantêm a dose deles." Botões: Cancelar (nada é salvo; a alteração continua em edição) · **Salvar e alterar talhões**. Mensagem: "Receita 1 salva e alterada em 10 talhões". Ao confirmar:
   - **Dose padrão alterada**: muda nos talhões que seguem o padrão; talhão com dose própria mantém a dele.
   - **Produto adicionado, removido ou trocado**: muda em todos os talhões da receita (é a composição alterada para todos, que atualiza a própria receita).
 - Salvar aceita linha só com princípio ativo (rascunho de trabalho, enquanto o produto é escolhido).

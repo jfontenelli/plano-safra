@@ -1318,24 +1318,37 @@ window.Telas.planoOperacoes = (function () {
   }
 
   // ----- Salvar e excluir receita -----
-  // Salvar vale para os talhões da receita: dose padrão nova chega a quem segue o padrão
-  // (dose própria do talhão fica); produto removido ou trocado sai de todos os talhões dela.
+  // Receita ainda não aplicada: salva e não muda nada na tabela de talhões.
+  // Receita já aplicada: pergunta antes, porque a mudança vale para os talhões dela
+  // (dose padrão nova chega a quem segue o padrão; dose própria do talhão fica;
+  // produto removido ou trocado sai de todos os talhões da receita).
   function salvarReceita(op) {
     const r = receitaAtual(op);
     if (!rascunhoAlterado(op)) return;
-    const novas = ui.rascunho.produtos.filter(Planos.linhaPreenchida).map((l) => ({ ...l }));
-    Planos.talhoesDaReceita(op, r).forEach((t) => {
-      const doses = op.talhoes[t].doses;
-      Object.keys(doses).forEach((id) => {
-        const antes = r.produtos.find((l) => l.id === id);
-        const depois = novas.find((l) => l.id === id);
-        if (!depois || !antes || Planos.chaveLinha(antes) !== Planos.chaveLinha(depois)) delete doses[id];
+    const talhoes = Planos.talhoesDaReceita(op, r);
+    const salvar = () => {
+      const novas = ui.rascunho.produtos.filter(Planos.linhaPreenchida).map((l) => ({ ...l }));
+      talhoes.forEach((t) => {
+        const doses = op.talhoes[t].doses;
+        Object.keys(doses).forEach((id) => {
+          const antes = r.produtos.find((l) => l.id === id);
+          const depois = novas.find((l) => l.id === id);
+          if (!depois || !antes || Planos.chaveLinha(antes) !== Planos.chaveLinha(depois)) delete doses[id];
+        });
       });
+      r.produtos = novas;
+      ui.rascunho = null; ui.validarOp = null; ui.preCadastro = null;
+      alterou(); desenharTudo();
+      const n = talhoes.length;
+      Aviso.mostrar(n ? `${esc(r.nome)} salva e alterada em ${n} ${n === 1 ? 'talhão' : 'talhões'}` : `${esc(r.nome)} salva`);
+    };
+    if (!talhoes.length) { salvar(); return; }
+    const n = talhoes.length;
+    Modal.confirmar({
+      titulo: `Alterar os talhões que já recebem ${esc(r.nome)}?`,
+      texto: `${esc(r.nome)} já está aplicada em ${n} ${n === 1 ? 'talhão' : 'talhões'}. Ao salvar, as alterações valem para ${n === 1 ? 'ele' : 'eles'}. Talhões com dose própria mantêm a dose deles.`,
+      botoes: [{ rotulo: 'Cancelar' }, { rotulo: 'Salvar e alterar talhões', classe: 'primario', acao: salvar }]
     });
-    r.produtos = novas;
-    ui.rascunho = null; ui.validarOp = null; ui.preCadastro = null;
-    alterou(); desenharTudo();
-    Aviso.mostrar(`${esc(r.nome)} salva`);
   }
 
   // Com talhões: confirmação com o impacto (os talhões ficam sem operação). Sem talhões: na hora, com Desfazer.
