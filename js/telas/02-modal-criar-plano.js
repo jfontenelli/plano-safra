@@ -50,7 +50,7 @@ window.Telas.abrirModalCriarPlano = function ({ aoCriar }) {
 
       <div class="modal__rodape">
         <p class="modal__rodape-erro" id="cp-erro-continuar" role="alert" hidden>
-          Preencha safra, empresa, fazenda e cultura para continuar.</p>
+          Preencha os campos obrigatórios.</p>
         <button class="botao botao--secundario" type="button" data-fechar>Cancelar</button>
         <button class="botao botao--primario" type="submit" aria-disabled="true">Continuar para as operações</button>
       </div>
