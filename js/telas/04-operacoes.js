@@ -800,7 +800,7 @@ window.Telas.planoOperacoes = (function () {
         </div>`;
     }
     // Modo edição: barra fixa embaixo da tabela. Sem seleção, o Cancelar sai do modo edição;
-    // com seleção, o Cancelar fica no fim da barra. Depois de aplicar algo, vira "Concluir edição".
+    // com seleção: Excluir recomendação · Cancelar · Ajustar recomendação. Depois de aplicar algo, vira "Concluir edição".
     if (ui.modo === 'ajustar') {
       const n = ui.marcados.size;
       if (!n) {
@@ -819,9 +819,9 @@ window.Telas.planoOperacoes = (function () {
           <span class="talhoes__selecao"><strong>${n} ${n === 1 ? 'talhão' : 'talhões'}</strong> · ${Util.area(area)}</span>
           <button class="botao botao--perigo-leve botao--p" type="button" data-acao="remover-da-operacao"
                   ${recebem ? '' : 'disabled title="Nenhum dos talhões selecionados recebe a operação"'}>Excluir recomendação</button>
-          <button class="botao botao--primario botao--p" type="button" data-acao="ajustar-produtos">Ajustar recomendação</button>
           ${botaoCancelarEdicao('botao--p')}
           <button class="botao botao--secundario botao--p" type="button" data-acao="cancelar-modo">${ui.ajusteFeito ? 'Concluir edição' : 'Cancelar'}</button>
+          <button class="botao botao--primario botao--p" type="button" data-acao="ajustar-produtos">Ajustar recomendação</button>
         </div>`;
     }
     return '';
