@@ -515,6 +515,17 @@ select.campo__controle option { color: var(--texto); }
 .campo__controle--erro,
 .campo__controle--erro:hover { border-color: #c0392b; }
 
+/* Asterisco de campo obrigatório, depois do nome do campo */
+.obrigatorio { color: #b03a2e; font-weight: 700; }
+
+/* Mensagem ao lado dos botões do rodapé do modal (ex.: o que falta para continuar) */
+.modal__rodape-erro {
+  align-self: center;
+  margin: 0 auto 0 0;
+  font-size: 14px;
+  color: #b03a2e;
+}
+
 .campo__erro {
   margin: -8px 0 16px;
   font-size: 14px;

@@ -24,8 +24,9 @@ window.Telas.abrirModalCriarPlano = function ({ aoCriar }) {
         <p class="modal__subtitulo">Defina o contexto do novo planejamento.</p>
 
         <div class="campo">
-          <label class="campo__rotulo" for="cp-safra">Safra</label>
+          <label class="campo__rotulo" for="cp-safra">Safra ${asterisco()}</label>
           <select class="campo__controle" id="cp-safra" name="safra" required></select>
+          ${erroObrigatorio('safra')}
           <div class="nova-safra" hidden>
             <input class="campo__controle" id="cp-nova-safra" type="text" placeholder="Nome da safra (ex.: 26/27)"
                    aria-label="Nome da nova safra" autocomplete="off">
@@ -48,8 +49,10 @@ window.Telas.abrirModalCriarPlano = function ({ aoCriar }) {
       </div>
 
       <div class="modal__rodape">
+        <p class="modal__rodape-erro" id="cp-erro-continuar" role="alert" hidden>
+          Preencha safra, empresa, fazenda e cultura para continuar.</p>
         <button class="botao botao--secundario" type="button" data-fechar>Cancelar</button>
-        <button class="botao botao--primario" type="submit" disabled>Continuar para as operações</button>
+        <button class="botao botao--primario" type="submit" aria-disabled="true">Continuar para as operações</button>
       </div>
     </form>
   `, { classe: 'modal--formulario' });
@@ -62,6 +65,9 @@ window.Telas.abrirModalCriarPlano = function ({ aoCriar }) {
   let safraAnterior = '';
   const erroDuplicado = form.querySelector('#cp-erro-duplicado');
   const botaoContinuar = form.querySelector('[type="submit"]');
+  const erroContinuar = form.querySelector('#cp-erro-continuar');
+  const OBRIGATORIOS = ['safra', 'empresa', 'fazenda', 'cultura'];
+  let tentouContinuar = false;  // os avisos de obrigatório só aparecem depois de tentar continuar
 
   preencherSafras();
   selectSafra.focus();
@@ -139,7 +145,21 @@ window.Telas.abrirModalCriarPlano = function ({ aoCriar }) {
       : '';
     form.elements.fazenda.classList.toggle('campo__controle--erro', !!duplicado);
 
-    botaoContinuar.disabled = !(v.safra && v.empresa && v.fazenda && v.cultura) || duplicado;
+    const faltando = OBRIGATORIOS.filter((nome) => !v[nome]);
+    // O botão parece desabilitado, mas continua clicável para explicar o que falta
+    botaoContinuar.setAttribute('aria-disabled', faltando.length || duplicado ? 'true' : 'false');
+    mostrarObrigatorios(tentouContinuar ? faltando : []);
+    return { faltando, duplicado };
+  }
+
+  // "Preenchimento obrigatório" abaixo de cada campo vazio e a mensagem ao lado dos botões
+  function mostrarObrigatorios(faltando) {
+    OBRIGATORIOS.forEach((nome) => {
+      const vazio = faltando.includes(nome);
+      form.querySelector(`#cp-erro-${nome}`).hidden = !vazio;
+      form.elements[nome].toggleAttribute('aria-invalid', vazio);
+    });
+    erroContinuar.hidden = !faltando.length;
   }
 
   form.addEventListener('change', atualizar);
@@ -147,7 +167,10 @@ window.Telas.abrirModalCriarPlano = function ({ aoCriar }) {
   // ----- Continuar para as operações -----
   form.addEventListener('submit', (e) => {
     e.preventDefault();
-    if (botaoContinuar.disabled) return;
+    tentouContinuar = true;
+    const { faltando, duplicado } = atualizar();
+    if (faltando.length) { form.elements[faltando[0]].focus(); return; }
+    if (duplicado) { form.elements.fazenda.focus(); return; }
     const v = valores();
     modal.fechar();
     aoCriar({
@@ -163,12 +186,21 @@ window.Telas.abrirModalCriarPlano = function ({ aoCriar }) {
   function campoLista(nome, rotulo, textoVazio, itens) {
     return `
       <div class="campo">
-        <label class="campo__rotulo" for="cp-${nome}">${rotulo}</label>
+        <label class="campo__rotulo" for="cp-${nome}">${rotulo} ${asterisco()}</label>
         <select class="campo__controle" id="cp-${nome}" name="${nome}" required>
           ${opcoes(textoVazio, itens)}
         </select>
+        ${erroObrigatorio(nome)}
       </div>
     `;
+  }
+
+  function asterisco() {
+    return '<span class="obrigatorio" aria-hidden="true">*</span>';
+  }
+
+  function erroObrigatorio(nome) {
+    return `<p class="erro-campo" id="cp-erro-${nome}" hidden>Preenchimento obrigatório</p>`;
   }
 
   function opcoes(textoVazio, itens, selecionado = '') {
