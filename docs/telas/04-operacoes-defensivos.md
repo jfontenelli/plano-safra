@@ -119,6 +119,7 @@ Princípio: o peso visual de cada navegação é inverso à frequência de uso. 
 
 **Salvar receita** (fluxo: montar receita → salvar receita → aplicar nos talhões)
 - As mudanças na receita ficam em rascunho até **"Salvar receita"**. Trocar de receita, operação ou grupo com alteração não salva pergunta: "Descartar as alterações de Receita 1?" (Continuar editando · Descartar).
+- Trocar de **etapa** (ex.: Calendário Agrícola) e voltar não descarta nada: a receita com produto digitado e ainda não salvo continua em rascunho (inclusive receita nova).
 - **Botões na linha abaixo da tabela**: à esquerda **[Aplicar nos talhões]**; à direita **[Salvar receita] [+ Adicionar produto]**.
   - Com alteração não salva: "Salvar receita" fica em destaque e **"Aplicar nos talhões" não aparece**.
   - Receita salva: "Salvar receita" fica visível e desabilitado (os botões não mudam de lugar) e "Aplicar nos talhões" aparece, em destaque.
