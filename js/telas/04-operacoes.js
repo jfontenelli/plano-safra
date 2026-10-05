@@ -660,9 +660,9 @@ window.Telas.planoOperacoes = (function () {
     if (modo === 'selecionar') titulo = `Selecione os talhões que recebem: ${esc(receitaAtual(op).nome)}`;
     if (modo === 'ajustar') titulo = 'Editar talhões';
 
-    const ferramentas = modo === 'ver' ? `
+    const ferramentas = modo !== 'selecionar' ? `
       <div class="talhoes__ferramentas">
-        ${somenteLeitura ? '' : `
+        ${somenteLeitura || modo === 'ajustar' ? '' : `
           <button class="botao-icone botao-icone--borda dica dica--direita" type="button" data-acao="ajustar-talhoes"
                   data-dica="Editar talhões" aria-label="Editar talhões">${Icones.lapis}</button>`}
         <label class="busca">${Icones.busca}
@@ -678,9 +678,6 @@ window.Telas.planoOperacoes = (function () {
           ${ferramentas}
         </div>
         ${modo === 'ajustar' ? '' : legendaTalhoes(op)}
-        <!-- Modo edição: tabela com a barra de seleção embaixo e, com seleção, o painel de ajuste ao lado -->
-        <div class="talhoes__area">
-        <div class="talhoes__principal">
         <div class="tabela-rolagem">
           <table class="tabela tabela--compacta tabela-talhoes">
             <thead><tr>
@@ -693,9 +690,6 @@ window.Telas.planoOperacoes = (function () {
           </table>
         </div>
         ${rodapeTalhoes(op)}
-        </div>
-        ${modo === 'ajustar' && ui.marcados.size ? painelAjuste(op) : ''}
-        </div>
       </section>`;
   }
 
@@ -785,7 +779,7 @@ window.Telas.planoOperacoes = (function () {
         </div>`;
     }
     // Modo edição: barra fixa embaixo da tabela. Sem seleção, o Cancelar sai do modo edição;
-    // com seleção, o Cancelar fica no painel de ajuste.
+    // com seleção, o X faz o papel do Cancelar (sai do modo edição).
     if (ui.modo === 'ajustar') {
       const n = ui.marcados.size;
       if (!n) {
@@ -802,8 +796,9 @@ window.Telas.planoOperacoes = (function () {
           <span class="talhoes__selecao"><strong>${n} ${n === 1 ? 'talhão' : 'talhões'}</strong> · ${Util.area(area)}</span>
           <button class="botao botao--perigo-leve botao--p" type="button" data-acao="remover-da-operacao"
                   ${recebem ? '' : 'disabled title="Nenhum dos talhões selecionados recebe a operação"'}>Remover da operação</button>
-          <button class="botao-icone dica dica--direita" type="button" data-acao="limpar-selecao"
-                  data-dica="Limpar seleção" aria-label="Limpar seleção">${Icones.fechar}</button>
+          <button class="botao botao--primario botao--p" type="button" data-acao="ajustar-produtos">Ajustar produtos</button>
+          <button class="botao-icone dica dica--direita" type="button" data-acao="cancelar-modo"
+                  data-dica="Cancelar edição" aria-label="Cancelar edição">${Icones.fechar}</button>
         </div>`;
     }
     return '';
@@ -818,82 +813,255 @@ window.Telas.planoOperacoes = (function () {
     };
   }
 
-  // ----- Painel lateral "Ajustar N talhões" (vale para todos os talhões selecionados) -----
-  // Uma linha por produto dos selecionados: nome · dose · unidade · lixeira. Dose igual em todos
-  // aparece no campo; doses diferentes deixam o campo vazio com "Vários".
-  function painelAjuste(op) {
-    const aj = ui.ajuste;
-    const n = ui.marcados.size;
-    const selecionados = [...ui.marcados].map((t) => op.talhoes[t]).filter(Boolean);
+  // ----- Modal "Ajustar produtos de N talhões" (vale para todos os talhões selecionados) -----
+  // Mesma estrutura da receita: Princípio ativo · Produto comercial · Unid. · Dose · lixeira.
+  // Dose igual em todos aparece no campo; doses diferentes deixam o campo vazio com "Vários".
+  // Cancelar, X ou Esc: descarta o que foi feito no modal e mantém a seleção.
+  function abrirAjusteProdutos(op) {
+    const nomes = talhoesFazenda.filter((t) => ui.marcados.has(t.nome)).map((t) => t.nome);
+    const n = nomes.length;
+    const selecionados = nomes.map((t) => op.talhoes[t]).filter(Boolean);
     const comum = (valores) => valores.every((v) => v === valores[0]) ? valores[0] : undefined;
-    const linhas = Planos.colunasDose(op).filter((col) => selecionados.some((a) => Planos.linhaNoTalhao(op, a, col)));
 
-    const existentes = linhas.map((l) => {
-      const chave = Planos.chaveLinha(l);
-      const nome = esc(Planos.nomeLinha(l));
-      const removido = aj.remover.includes(chave);
-      const doses = selecionados.filter((a) => Planos.linhaNoTalhao(op, a, l))
-        .map((a) => Planos.doseTalhao(op, a, Planos.linhaNoTalhao(op, a, l)));
-      const doseComum = comum(doses);
-      const preparado = aj.doses[chave];
-      const valor = preparado !== undefined ? preparado : (doseComum === undefined ? '' : Util.dose(doseComum));
-      const ph = doseComum === undefined && preparado === undefined ? 'Vários' : '—';
+    // Produtos que os talhões selecionados já recebem
+    const existentes = Planos.colunasDose(op).filter((col) => selecionados.some((a) => Planos.linhaNoTalhao(op, a, col)))
+      .map((l) => {
+        const doses = selecionados.filter((a) => Planos.linhaNoTalhao(op, a, l))
+          .map((a) => Planos.doseTalhao(op, a, Planos.linhaNoTalhao(op, a, l)));
+        const doseComum = comum(doses);
+        const original = doseComum === undefined ? '' : Util.dose(doseComum);
+        return { chave: Planos.chaveLinha(l), linha: l, original, texto: original, varios: doseComum === undefined, removido: false };
+      });
+    const m = { existentes, novas: [] };
+    let seq = 0;
+
+    // T01, T02… até 6; depois "e mais N" (lista completa na dica)
+    const listaTalhoes = n <= 6 ? nomes.join(', ')
+      : `${nomes.slice(0, 6).join(', ')} <span class="ajuste-modal__mais" tabindex="0" title="${nomes.join(', ')}"
+           aria-label="e mais ${n - 6}: ${nomes.slice(6).join(', ')}">e mais ${n - 6}</span>`;
+
+    const modal = Modal.abrir(`
+      <div class="modal__corpo">
+        <button class="modal__fechar" type="button" aria-label="Fechar" data-fechar>${Icones.fechar}</button>
+        <h2 class="modal__titulo" id="modal-titulo">Ajustar produtos de ${n} ${n === 1 ? 'talhão' : 'talhões'}</h2>
+        <p class="ajuste-modal__talhoes">${listaTalhoes}</p>
+        <p class="ajuste-modal__ajuda">Campo não alterado mantém o valor de cada talhão</p>
+        <div class="ajuste-modal__conteudo"></div>
+      </div>
+      <div class="modal__rodape">
+        <button class="botao botao--secundario" type="button" data-fechar>Cancelar</button>
+        <button class="botao botao--primario" type="button" data-m="aplicar">Aplicar em ${n} ${n === 1 ? 'talhão' : 'talhões'}</button>
+      </div>`, { classe: 'modal--formulario ajuste-modal', devolverFoco: raiz.querySelector('[data-acao="ajustar-produtos"]') });
+    const caixa = modal.elemento;
+    const conteudo = caixa.querySelector('.ajuste-modal__conteudo');
+
+    const temMudanca = () => m.existentes.some((e) => e.removido || e.texto !== e.original) || m.novas.some((x) => x.produto);
+    const atualizarAplicar = () => { caixa.querySelector('[data-m="aplicar"]').disabled = !temMudanca(); };
+
+    function linhaExistente(e, i) {
+      const nome = esc(Planos.nomeLinha(e.linha));
       return `
-        <li class="painel-produto ${removido ? 'painel-produto--removido' : ''}">
-          <span class="painel-produto__nome">${nome} ${etiquetaPre(l)}</span>
-          <input class="campo__controle campo--compacto campo--dose" type="text" inputmode="decimal"
-                 data-ajuste="dose" data-chave="${esc(chave)}" value="${esc(valor)}" placeholder="${ph}"
-                 aria-label="Dose de ${nome}" ${removido ? 'disabled' : ''}>
-          <span class="painel-produto__unidade">${Planos.unidadeDose(l)}</span>
-          ${removido ? `
-            <button class="link-acao painel-produto__desfazer" type="button" data-acao="aj-desfazer-remover" data-chave="${esc(chave)}"
+        <tr class="${e.removido ? 'ajuste-modal__removida' : ''}">
+          <td>${esc(e.linha.principioAtivo || '—')}</td>
+          <td>${esc(e.linha.produto || '—')} ${etiquetaPre(e.linha)}</td>
+          <td><span class="tabela-rec__unidade">${Planos.unidadeDose(e.linha) || '—'}</span></td>
+          <td class="tabela__numero">
+            <input class="campo__controle campo--compacto campo--dose" type="text" inputmode="decimal" data-m="dose" data-i="${i}"
+                   data-foco="dose-${i}" value="${esc(e.texto)}" placeholder="${e.varios ? 'Vários' : '—'}"
+                   aria-label="Dose de ${nome}" ${e.removido || !e.linha.produto ? 'disabled' : ''}>
+          </td>
+          <td class="tabela__acao">${e.removido ? `
+            <button class="link-acao" type="button" data-m="desfazer" data-i="${i}" data-foco="desfazer-${i}"
                     aria-label="Desfazer a remoção de ${nome}">Desfazer</button>` : `
-            <button class="botao-icone botao-icone--p" type="button" data-acao="aj-remover" data-chave="${esc(chave)}"
+            <button class="botao-icone botao-icone--p" type="button" data-m="remover" data-i="${i}" data-foco="remover-${i}"
                     title="Remover dos talhões selecionados" aria-label="Remover ${nome} dos talhões selecionados">${Icones.lixeira}</button>`}
-        </li>`;
-    }).join('');
+          </td>
+        </tr>`;
+    }
 
-    const novos = aj.adicionar.map((a, i) => {
-      const d = a.produto ? Planos.produtoDoCadastro(a.produto) : null;
-      return `
-        <li class="painel-produto painel-produto--novo">
-          <select class="campo__controle campo--compacto" data-ajuste="novo-produto" data-indice="${i}" aria-label="Produto adicionado">
-            <option value="">Escolha o produto</option>
-            ${DADOS.defensivos.filter((x) => x.produto).map((x) =>
-              `<option value="${esc(x.produto)}" ${x.produto === a.produto ? 'selected' : ''}>${esc(x.produto)}</option>`).join('')}
-          </select>
-          <input class="campo__controle campo--compacto campo--dose" type="text" inputmode="decimal"
-                 data-ajuste="novo-dose" data-indice="${i}" value="${esc(a.dose)}" placeholder="—"
-                 aria-label="Dose do produto adicionado" ${d ? '' : 'disabled title="Escolha o produto para informar a dose"'}>
-          <span class="painel-produto__unidade">${d ? `${d.unidade}/ha` : ''}</span>
-          <button class="botao-icone botao-icone--p" type="button" data-acao="aj-desfazer-adicionar" data-indice="${i}"
+    function linhaNova(x) {
+      const lixeira = `
+        <td class="tabela__acao">
+          <button class="botao-icone botao-icone--p" type="button" data-m="tirar" data-id="${x.id}"
                   title="Tirar esta linha" aria-label="Tirar a linha do produto adicionado">${Icones.lixeira}</button>
-        </li>`;
-    }).join('');
+        </td>`;
+      if (x.pre) {
+        // Pré-cadastro na própria linha: produto comercial e unidade obrigatórios; princípio ativo opcional
+        return `
+          <tr class="tabela-rec__pre">
+            <td colspan="5">
+              <div class="pre-cadastro">
+                <p class="pre-cadastro__titulo">Pré-cadastro de defensivo
+                  <span class="pre-cadastro__ajuda">Informe o produto comercial e a unidade. O princípio ativo é opcional.</span></p>
+                <div class="pre-cadastro__campos">
+                  <input class="campo__controle campo--compacto" data-m="pre-produto" data-id="${x.id}" data-foco="pre-${x.id}"
+                         value="${esc(x.pre.produto)}" placeholder="Produto comercial" aria-label="Produto comercial">
+                  <input class="campo__controle campo--compacto" data-m="pre-pa" data-id="${x.id}"
+                         value="${esc(x.pre.principioAtivo)}" placeholder="Princípio ativo" aria-label="Princípio ativo">
+                  <select class="campo__controle campo--compacto" data-m="pre-unidade" data-id="${x.id}" aria-label="Unidade">
+                    <option value="" ${x.pre.unidade ? '' : 'selected'} disabled>Unidade</option>
+                    ${UNIDADES.map((u) => `<option ${u === x.pre.unidade ? 'selected' : ''}>${u}</option>`).join('')}
+                  </select>
+                  <button class="botao botao--secundario botao--p" type="button" data-m="pre-cancelar" data-id="${x.id}">Cancelar</button>
+                  <button class="botao botao--primario botao--p" type="button" data-m="pre-salvar" data-id="${x.id}">Salvar pré-cadastro</button>
+                </div>
+                ${x.pre.erro ? `<p class="campo__erro">${x.pre.erro}</p>` : ''}
+              </div>
+            </td>
+          </tr>`;
+      }
+      if (!x.produto) {
+        // Um campo de busca ocupando Princípio ativo e Produto comercial, que procura pelos dois
+        return `
+          <tr>
+            <td colspan="2">
+              <div class="combo">
+                <input class="campo__controle campo--compacto" type="text" data-m="busca" data-id="${x.id}" data-foco="busca-${x.id}"
+                       value="${esc(x.busca)}" placeholder="Buscar por princípio ativo ou produto comercial" autocomplete="off"
+                       role="combobox" aria-expanded="false" aria-label="Buscar produto por princípio ativo ou produto comercial">
+                <div class="combo__lista" role="listbox" hidden></div>
+              </div>
+            </td>
+            <td><span class="tabela-rec__unidade">—</span></td>
+            <td class="tabela__numero" title="Escolha o produto para informar a dose">
+              <input class="campo__controle campo--compacto campo--dose" type="text" placeholder="—" aria-label="Dose" disabled>
+            </td>
+            ${lixeira}
+          </tr>`;
+      }
+      return `
+        <tr>
+          <td>${esc(x.produto.principioAtivo || '—')}</td>
+          <td>${esc(x.produto.produto)} ${x.produto.preCadastro ? '<span class="etiqueta-pre">Pré-cadastro</span>' : ''}</td>
+          <td><span class="tabela-rec__unidade">${x.produto.unidade}/ha</span></td>
+          <td class="tabela__numero">
+            <input class="campo__controle campo--compacto campo--dose" type="text" inputmode="decimal" data-m="nova-dose" data-id="${x.id}"
+                   data-foco="nova-dose-${x.id}" value="${esc(x.dose)}" placeholder="—" aria-label="Dose de ${esc(x.produto.produto)}">
+          </td>
+          ${lixeira}
+        </tr>`;
+    }
 
-    return `
-      <aside class="painel-ajuste" aria-labelledby="titulo-ajuste">
-        <h4 class="painel-ajuste__titulo" id="titulo-ajuste">Ajustar ${n} ${n === 1 ? 'talhão' : 'talhões'}</h4>
-        <p class="painel-ajuste__ajuda">Campo não alterado mantém o valor de cada talhão.</p>
-        <p class="painel-ajuste__secao">Produtos e doses</p>
-        ${existentes || novos ? `<ul class="painel-ajuste__produtos">${existentes}${novos}</ul>`
-          : '<p class="painel-ajuste__vazio">Os talhões selecionados ainda não recebem produtos.</p>'}
-        <button class="link-acao painel-ajuste__adicionar" type="button" data-acao="aj-novo">${Icones.mais} Adicionar produto</button>
-        <div class="painel-ajuste__rodape">
-          <button class="botao botao--secundario" type="button" data-acao="cancelar-modo">Cancelar</button>
-          <button class="botao botao--primario" type="button" data-acao="salvar-ajustes"
-                  ${ajusteTemMudanca() ? '' : 'disabled'}>Aplicar em ${n} ${n === 1 ? 'talhão' : 'talhões'}</button>
-        </div>
-      </aside>`;
+    function desenhar(foco) {
+      const linhas = m.existentes.map(linhaExistente).join('') + m.novas.map(linhaNova).join('');
+      conteudo.innerHTML = `
+        <table class="tabela tabela--compacta tabela-rec ajuste-modal__tabela">
+          <thead><tr>
+            <th>Princípio ativo</th><th>Produto comercial</th><th>Unid.</th><th class="tabela__numero">Dose</th>
+            <th><span class="so-leitor">Remover</span></th>
+          </tr></thead>
+          <tbody>${linhas || '<tr><td class="tabela__vazia" colspan="5">Os talhões selecionados ainda não recebem produtos.</td></tr>'}</tbody>
+        </table>
+        <div class="ajuste-modal__acoes">
+          <button class="botao botao--secundario" type="button" data-m="adicionar" data-foco="adicionar">${Icones.mais} Adicionar produto</button>
+        </div>`;
+      atualizarAplicar();
+      if (foco) caixa.querySelector(`[data-foco="${foco}"]`)?.focus();
+    }
+
+    // Resultados da busca: "Select 240 EC · Cletodim · L/ha"; por último, "+ Pré-cadastrar produto"
+    function mostrarResultados(input) {
+      const lista = input.parentElement.querySelector('.combo__lista');
+      const busca = Util.normalizar(input.value.trim());
+      const achados = DADOS.defensivos.filter((d) => d.produto && (!busca ||
+        Util.normalizar(d.produto).includes(busca) || Util.normalizar(d.principioAtivo || '').includes(busca))).slice(0, 8);
+      lista.innerHTML = achados.map((d) => `
+        <button class="combo__opcao" type="button" role="option" data-m="escolher" data-id="${input.dataset.id}" data-produto="${esc(d.produto)}">
+          <strong>${esc(d.produto)}</strong><span class="combo__sub"> · ${esc(d.principioAtivo || '—')} · ${d.unidade}/ha</span>
+          ${d.preCadastro ? '<span class="etiqueta-pre">Pré-cadastro</span>' : ''}
+        </button>`).join('') + `
+        <button class="combo__opcao combo__opcao--pre" type="button" role="option" data-m="pre-abrir" data-id="${input.dataset.id}">
+          ${Icones.mais} Pré-cadastrar produto</button>`;
+      lista.hidden = false;
+      input.setAttribute('aria-expanded', 'true');
+    }
+
+    const novaPorId = (id) => m.novas.find((x) => x.id === id);
+
+    caixa.addEventListener('click', (e) => {
+      const alvo = e.target.closest('[data-m]');
+      if (!alvo) return;
+      const i = Number(alvo.dataset.i);
+      const x = alvo.dataset.id ? novaPorId(alvo.dataset.id) : null;
+      switch (alvo.dataset.m) {
+        case 'adicionar': {
+          const nova = { id: `n${++seq}`, produto: null, busca: '', dose: '', pre: null };
+          m.novas.push(nova); desenhar(`busca-${nova.id}`); break;
+        }
+        case 'remover': m.existentes[i].removido = true; desenhar(`desfazer-${i}`); break;
+        case 'desfazer': m.existentes[i].removido = false; desenhar(`remover-${i}`); break;
+        case 'tirar': m.novas = m.novas.filter((n2) => n2 !== x); desenhar('adicionar'); break;
+        case 'escolher':
+          x.produto = Planos.produtoDoCadastro(alvo.dataset.produto); desenhar(`nova-dose-${x.id}`); break;
+        case 'pre-abrir':
+          x.pre = { produto: x.busca.trim(), principioAtivo: '', unidade: '', erro: '' }; desenhar(`pre-${x.id}`); break;
+        case 'pre-cancelar': x.pre = null; desenhar(`busca-${x.id}`); break;
+        case 'pre-salvar': {
+          const produto = x.pre.produto.trim();
+          if (!produto) { x.pre.erro = 'Informe o produto comercial.'; desenhar(`pre-${x.id}`); break; }
+          if (!x.pre.unidade) { x.pre.erro = 'Escolha a unidade.'; desenhar(`pre-${x.id}`); break; }
+          const d = { classe: '', produto, principioAtivo: x.pre.principioAtivo.trim(), unidade: x.pre.unidade, preCadastro: true };
+          DADOS.defensivos.push(d);
+          x.produto = d; x.pre = null; desenhar(`nova-dose-${x.id}`);
+          break;
+        }
+        case 'aplicar': {
+          if (!temMudanca()) break;
+          ui.ajuste = {
+            doses: Object.fromEntries(m.existentes.filter((e2) => !e2.removido && e2.texto !== e2.original).map((e2) => [e2.chave, e2.texto])),
+            remover: m.existentes.filter((e2) => e2.removido).map((e2) => e2.chave),
+            adicionar: m.novas.filter((n2) => n2.produto).map((n2) => ({ produto: n2.produto.produto, dose: n2.dose }))
+          };
+          modal.fechar();
+          salvarAjustes(op);
+          break;
+        }
+      }
+    });
+
+    caixa.addEventListener('input', (e) => {
+      const el = e.target;
+      const x = el.dataset.id ? novaPorId(el.dataset.id) : null;
+      if (el.dataset.m === 'dose') { m.existentes[Number(el.dataset.i)].texto = el.value.trim(); atualizarAplicar(); }
+      else if (el.dataset.m === 'nova-dose') { x.dose = el.value.trim(); }
+      else if (el.dataset.m === 'busca') { x.busca = el.value; mostrarResultados(el); }
+      else if (el.dataset.m === 'pre-produto') { x.pre.produto = el.value; }
+      else if (el.dataset.m === 'pre-pa') { x.pre.principioAtivo = el.value; }
+    });
+    caixa.addEventListener('change', (e) => {
+      const el = e.target;
+      if (el.dataset.m === 'pre-unidade') novaPorId(el.dataset.id).pre.unidade = el.value;
+      if (el.dataset.m === 'dose' || el.dataset.m === 'nova-dose') {
+        const v = Util.numero(el.value);
+        if (v !== null) el.value = Util.dose(v);
+      }
+    });
+    caixa.addEventListener('focusin', (e) => { if (e.target.dataset.m === 'busca') mostrarResultados(e.target); });
+    caixa.addEventListener('keydown', (e) => {
+      const el = e.target;
+      if (el.dataset.m === 'busca') {
+        const lista = el.parentElement.querySelector('.combo__lista');
+        if (e.key === 'Enter') { e.preventDefault(); lista.querySelector('.combo__opcao')?.click(); }
+        // Esc com a lista aberta fecha só a lista (não o modal)
+        if (e.key === 'Escape' && !lista.hidden) { e.stopPropagation(); lista.hidden = true; el.setAttribute('aria-expanded', 'false'); }
+        if (e.key === 'ArrowDown') { e.preventDefault(); lista.querySelector('.combo__opcao')?.focus(); }
+      } else if (el.classList.contains('combo__opcao') && (e.key === 'ArrowDown' || e.key === 'ArrowUp')) {
+        e.preventDefault();
+        (e.key === 'ArrowDown' ? el.nextElementSibling : el.previousElementSibling)?.focus();
+      } else if (el.tagName === 'INPUT' && e.key === 'Enter' && el.dataset.m === 'pre-produto') {
+        e.preventDefault(); caixa.querySelector(`[data-m="pre-salvar"][data-id="${el.dataset.id}"]`).click();
+      }
+    });
+    // Clique fora da busca fecha a lista de resultados
+    caixa.addEventListener('mousedown', (e) => {
+      if (!e.target.closest('.combo')) caixa.querySelectorAll('.combo__lista').forEach((l) => { l.hidden = true; });
+    });
+
+    desenhar(m.existentes.length ? 'dose-0' : 'adicionar');
   }
 
   function novoAjustePreparado() {
     return { doses: {}, adicionar: [], remover: [] };
-  }
-
-  function ajusteTemMudanca() {
-    const aj = ui.ajuste;
-    return !!aj && (Object.keys(aj.doses).length > 0 || aj.adicionar.some((a) => a.produto) || aj.remover.length > 0);
   }
 
   // "Remover da operação" (barra de seleção): pede confirmação e apaga produtos e doses desses talhões
@@ -1150,23 +1318,9 @@ window.Telas.planoOperacoes = (function () {
 
       case 'aplicar': aplicarRecomendacao(op); break;
 
-      case 'aj-novo':
-        ui.ajuste.adicionar.push({ produto: '', dose: '' }); desenharTudo();
-        raiz.querySelector('.painel-produto--novo:last-of-type select')?.focus();
-        break;
-      case 'aj-remover':
-        ui.ajuste.remover.push(alvo.dataset.chave); delete ui.ajuste.doses[alvo.dataset.chave];
-        desenharTudo(); break;
-      case 'aj-desfazer-adicionar':
-        ui.ajuste.adicionar.splice(Number(alvo.dataset.indice), 1); desenharTudo(); break;
-      case 'aj-desfazer-remover':
-        ui.ajuste.remover = ui.ajuste.remover.filter((chave) => chave !== alvo.dataset.chave); desenharTudo(); break;
-
-      case 'limpar-selecao':
-        ui.marcados = new Set(); ui.ajuste = novoAjustePreparado(); desenharTudo(); break;
+      case 'ajustar-produtos': abrirAjusteProdutos(op); break;
       case 'remover-da-operacao': removerDaOperacao(op); break;
 
-      case 'salvar-ajustes': salvarAjustes(op); break;
 
       case 'abrir-grupo': {
         if (ui.renomeandoGrupo) return;
@@ -1204,11 +1358,6 @@ window.Telas.planoOperacoes = (function () {
       e.target.value = Util.dose(Util.numero(e.target.value));
     } else if (e.target.dataset.pre) {
       ui.preCadastro[e.target.dataset.pre] = e.target.value;
-    } else if (e.target.dataset.ajuste === 'dose' || e.target.dataset.ajuste === 'novo-dose') {
-      // Já registrada ao digitar; sem redesenhar, para o clique em "Aplicar em N talhões" valer de primeira
-    } else if (e.target.dataset.ajuste === 'novo-produto') {
-      ui.ajuste.adicionar[Number(e.target.dataset.indice)].produto = e.target.value; desenharTudo();
-
     }
   }
 
@@ -1228,13 +1377,6 @@ window.Telas.planoOperacoes = (function () {
       linhaDoElemento(e.target).dose = Util.numero(e.target.value);
       const op = opAtual();
       raiz.querySelector('.recomendacao__acoes')?.replaceWith(htmlParaElemento(acoesReceita(op)));
-      return;
-    }
-    if (e.target.dataset.ajuste === 'dose' || e.target.dataset.ajuste === 'novo-dose') {
-      if (e.target.dataset.ajuste === 'dose') ui.ajuste.doses[e.target.dataset.chave] = e.target.value.trim();
-      else ui.ajuste.adicionar[Number(e.target.dataset.indice)].dose = e.target.value.trim();
-      const aplicar = raiz.querySelector('[data-acao="salvar-ajustes"]');
-      if (aplicar) aplicar.disabled = !ajusteTemMudanca();
       return;
     }
     if (e.target.dataset.combo) { abrirCombo(e.target); return; }
@@ -1317,7 +1459,7 @@ window.Telas.planoOperacoes = (function () {
       e.preventDefault(); ui.renomeandoReceita = el.dataset.receita; desenharTudo(); return;
     }
     if (el.dataset.pre && e.key === 'Enter') { e.preventDefault(); salvarPreCadastro(opAtual()); }
-    if ((el.dataset.campo === 'op-dap' || el.dataset.campo === 'linha-dose' || el.dataset.ajuste) && e.key === 'Enter') {
+    if ((el.dataset.campo === 'op-dap' || el.dataset.campo === 'linha-dose') && e.key === 'Enter') {
       e.preventDefault(); el.blur();
     }
   }
@@ -1522,7 +1664,7 @@ window.Telas.planoOperacoes = (function () {
     }
   }
 
-  // ----- Ajustar talhões (Aplicar em N talhões) -----
+  // ----- Ajustar talhões (Aplicar em N talhões, no modal "Ajustar produtos") -----
   // Mudar só a dose: fica como dose própria do talhão (a receita não muda).
   // Mudar a composição (adicionar, remover ou trocar produto):
   //  - se já existe receita com a nova composição, os talhões passam para ela;

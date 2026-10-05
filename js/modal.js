@@ -2,7 +2,8 @@
  * Janela modal reutilizável (fundo escurecido + caixa central).
  * Pode abrir um modal por cima de outro.
  * Fecha pela tecla Esc, clicando fora, em qualquer elemento com data-fechar
- * ou ao trocar de tela pelo menu.
+ * ou ao trocar de tela pelo menu. Enquanto aberto, o Tab fica preso dentro dele.
+ * opcoes.devolverFoco: elemento que recebe o foco ao fechar (padrão: o que tinha o foco ao abrir).
  */
 window.Modal = {
   abrir(html, opcoes = {}) {
@@ -11,7 +12,7 @@ window.Modal = {
     fundo.innerHTML = `<div class="modal ${opcoes.classe || ''}" role="dialog" aria-modal="true"
                             aria-labelledby="modal-titulo">${html}</div>`;
 
-    const focoAnterior = document.activeElement;
+    const focoAnterior = opcoes.devolverFoco || document.activeElement;
 
     function fechar() {
       document.removeEventListener('keydown', aoTeclar);
@@ -23,7 +24,21 @@ window.Modal = {
     // Com um modal aberto por cima de outro, o Esc fecha só o de cima
     function aoTeclar(e) {
       const abertos = document.querySelectorAll('.modal-fundo');
-      if (e.key === 'Escape' && abertos[abertos.length - 1] === fundo) fechar();
+      if (abertos[abertos.length - 1] !== fundo) return;
+      if (e.key === 'Escape') fechar();
+      if (e.key === 'Tab') prenderFoco(e);
+    }
+
+    // Tab no último elemento volta ao primeiro (e Shift+Tab no primeiro vai ao último)
+    function prenderFoco(e) {
+      const focaveis = [...fundo.querySelectorAll('button, input, select, textarea, a[href], [tabindex]:not([tabindex="-1"])')]
+        .filter((el) => !el.disabled && el.offsetParent !== null);
+      if (!focaveis.length) return;
+      const primeiro = focaveis[0];
+      const ultimo = focaveis[focaveis.length - 1];
+      if (!fundo.contains(document.activeElement)) { e.preventDefault(); primeiro.focus(); }
+      else if (e.shiftKey && document.activeElement === primeiro) { e.preventDefault(); ultimo.focus(); }
+      else if (!e.shiftKey && document.activeElement === ultimo) { e.preventDefault(); primeiro.focus(); }
     }
 
     fundo.addEventListener('click', (e) => {

@@ -1550,58 +1550,28 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
 .talhoes__selecao { margin-right: auto; font-size: 14px; color: var(--texto-suave); }
 .talhoes__selecao strong { color: var(--texto); }
 
-/* Modo edição: tabela (com a barra fixa embaixo) e, com seleção, o painel de ajuste ao lado */
-.talhoes__area { display: flex; align-items: flex-start; gap: 16px; }
-.talhoes__principal { flex: 1; min-width: 0; }
 .tabela-talhoes .linha--marcada td, .tabela-talhoes .linha--marcada th { background: #e6f2ec; }
-
-.painel-ajuste {
-  position: sticky;
-  top: 12px;
-  flex: 0 0 300px;
-  display: flex;
-  flex-direction: column;
-  padding: 16px;
-  border: 1px solid var(--borda);
-  border-radius: 10px;
-  background: var(--superficie);
-}
-.painel-ajuste__titulo { margin: 0; font-size: 16px; font-weight: 700; }
-.painel-ajuste__ajuda { margin: 4px 0 14px; font-size: 13px; color: var(--texto-suave); }
-.painel-ajuste__secao { margin: 0 0 8px; font-size: 13px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
-.painel-ajuste__produtos { display: flex; flex-direction: column; gap: 8px; margin: 0; padding: 0; list-style: none; }
-.painel-ajuste__vazio { margin: 0; font-size: 14px; color: var(--texto-suave); }
-.painel-ajuste__adicionar { align-self: flex-start; margin-top: 10px; }
-.painel-ajuste__rodape {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  margin-top: 16px;
-  padding-top: 14px;
-  border-top: 1px solid var(--borda);
-}
-.painel-produto {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 70px 36px 30px;
-  align-items: center;
-  gap: 8px;
-}
-.painel-produto__nome { font-size: 14px; overflow-wrap: anywhere; }
-.painel-produto__unidade { font-size: 13px; color: var(--texto-suave); white-space: nowrap; }
-.painel-produto .campo--dose { width: 100%; text-align: right; }
-.painel-produto .campo--dose:disabled { background: #f3f5f6; cursor: not-allowed; }
-.painel-produto select { width: 100%; min-width: 0; }
-.painel-produto--removido .painel-produto__nome { color: #a83226; text-decoration: line-through; }
-.painel-produto__desfazer { margin: 0; font-size: 13px; }
-.painel-produto .botao-icone:focus-visible,
-.painel-ajuste__adicionar:focus-visible,
-.painel-produto__desfazer:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 2px; }
 .tabela__marcar input:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 2px; }
 
-@media (max-width: 1200px) {
-  .talhoes__area { flex-direction: column; }
-  .painel-ajuste { position: static; flex: none; width: 100%; }
-}
+/* Modal "Ajustar produtos de N talhões" */
+.ajuste-modal { max-width: 860px; }
+.ajuste-modal__talhoes { margin: 6px 0 2px; font-weight: 600; }
+.ajuste-modal__mais { font-weight: 500; color: var(--verde-700); text-decoration: underline dotted; cursor: help; }
+.ajuste-modal__mais:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 2px; border-radius: 3px; }
+.ajuste-modal__ajuda { margin: 0 0 16px; font-size: 14px; color: var(--texto-suave); }
+.ajuste-modal__tabela { width: 100%; }
+.ajuste-modal__removida td:nth-child(-n+3) { color: #a83226; text-decoration: line-through; }
+.ajuste-modal__acoes { display: flex; justify-content: flex-end; margin: 12px 0 8px; }
+.ajuste-modal__acoes .botao .icone { width: 16px; height: 16px; stroke-width: 2.2; }
+/* No modal, a lista de resultados entra no fluxo (o corpo do modal rola e cortaria uma lista flutuante) */
+.ajuste-modal .combo__lista { position: static; width: 100%; margin-top: 4px; }
+.ajuste-modal button.combo__opcao { display: block; width: 100%; border: 0; background: none; font: inherit; font-size: 14px; text-align: left; color: var(--texto); }
+.ajuste-modal button.combo__opcao--pre { display: flex; color: var(--verde-700); font-weight: 600; }
+.ajuste-modal .combo__sub { display: inline; }
+.ajuste-modal button.combo__opcao:focus-visible { outline: 2px solid var(--verde-600); outline-offset: -2px; background: var(--verde-100); }
+.ajuste-modal .tabela__acao .botao-icone:focus-visible,
+.ajuste-modal .link-acao:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 2px; }
+
 
 .chip {
   display: inline-flex;
