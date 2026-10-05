@@ -149,7 +149,7 @@ Regras gerais da base (Plano_Safra_Cultura_Variedade_revisado_Julyane.docx): só
 
 **Modo visualizar (padrão)**
 - Mostra **todos os talhões da fazenda**, os que recebem e os que não recebem a operação.
-- Colunas: Talhão · Área · uma coluna de dose por produto, com a unidade no cabeçalho (ex.: "Fox Xpro (L/ha)"), juntando os produtos de todas as receitas. Produto que não está na receita do talhão aparece como "—" apagado. Sem colunas DAP, Status e Receita.
+- Colunas: Talhão · Área · uma coluna de dose por produto, com a unidade no cabeçalho (ex.: "Fox Xpro (L/ha)"), juntando os produtos das receitas **já aplicadas**. Os produtos de uma receita só entram na tabela depois de "Aplicar nos talhões"; montar ou salvar a receita não muda a tabela. Produto que não está na receita do talhão aparece como "—" apagado. Sem colunas DAP, Status e Receita.
 - O status aparece na **cor da linha** (ver seção 12), com uma legenda acima da tabela: "Sem operação ou sem dose" (laranja) · "Operação ainda não aplicada em nenhum talhão" (cinza).
 - Valores ajustados aparecem iguais aos demais (sem marca de ajuste).
 - Botão **"✏️ Editar"** (mesmo padrão do Editar da lista de operações) e busca no cabeçalho da tabela.

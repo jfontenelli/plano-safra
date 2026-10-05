@@ -144,10 +144,12 @@ window.Planos = (function () {
     };
   }
 
-  // Colunas de dose da tabela de talhões: um produto por coluna, juntando todas as receitas
+  // Colunas de dose da tabela de talhões: um produto por coluna, juntando as receitas já aplicadas
+  // (receita sem talhões não aparece na tabela até ser aplicada)
   function colunasDose(op) {
     const vistas = new Set();
-    return op.receitas.flatMap((r) => r.produtos.filter(linhaPreenchida)).filter((l) => {
+    const aplicadas = op.receitas.filter((r) => talhoesDaReceita(op, r).length);
+    return aplicadas.flatMap((r) => r.produtos.filter(linhaPreenchida)).filter((l) => {
       const chave = chaveLinha(l);
       if (vistas.has(chave)) return false;
       vistas.add(chave);
