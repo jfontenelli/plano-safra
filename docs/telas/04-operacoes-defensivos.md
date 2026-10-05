@@ -165,7 +165,7 @@ Regras gerais da base (Plano_Safra_Cultura_Variedade_revisado_Julyane.docx): só
 - A recomendação acima fica só para consulta: sem "Salvar recomendação", "Aplicar nos talhões", "+ Adicionar produto", "+ Nova recomendação", lixeira e renomear.
 
 **Barra de seleção** (fixa embaixo da tabela, sempre visível ao rolar)
-- Sem seleção: "Marque os talhões que quer ajustar." e **Cancelar** (sai do modo edição).
+- Sem seleção: "Marque os talhões que quer ajustar." e **Cancelar** (sai do modo edição). Depois do primeiro ajuste aplicado (ou recomendação excluída), o botão passa a **"Concluir edição"** (e a dica do X também), para não parecer que desfaz o que já foi gravado. O sistema não pergunta se quer continuar: a tabela segue no modo edição. Mensagem: "Ajustes aplicados em 3 talhões. Marque outros talhões ou conclua a edição."
 - Com seleção: "3 talhões · 305 ha" (quantidade e soma da área) · **"Excluir recomendação"** (texto vermelho, estilo secundário; vale só para os talhões marcados) · **"Ajustar recomendação"** (botão principal verde) · **X** (dica "Cancelar edição": faz o papel do Cancelar e sai do modo edição).
 - "Excluir recomendação" pede confirmação: "Excluir a recomendação de 3 talhões? Os produtos e doses desses talhões serão apagados e eles ficarão sem operação." Botões: Cancelar · Excluir recomendação. Mensagem: "Recomendação excluída de 3 talhões". A recomendação continua para os outros talhões. Desabilitado quando nenhum dos selecionados recebe a operação.
 
@@ -231,6 +231,7 @@ Um verbo por ação, do botão à mensagem:
 - Área somada dos talhões selecionados nos modos seleção e ajuste.
 - Nova operação: item novo na lista com nome em edição e DAP destacado.
 - Observar nos testes se o duplo clique para renomear grupo é descoberto; se não, voltar com o lápis.
+- Observar nos testes se "Concluir edição" é encontrado sem ajuda; se não, testar uma pergunta após aplicar ("Continuar editando" · "Concluir").
 - Legenda de cores da tabela de talhões só no modo normal (sai no modo edição). Se nos testes as cores forem entendidas sem legenda, tirar também no modo normal.
 - **Exclusão de operações no modo Editar (hipótese para validar com clientes):**
   - Com talhões nas marcadas: confirmação com o impacto. Ex.: "Excluir 2 operações? Elas estão aplicadas em 12 talhões, com 5 produtos. Essa ação não pode ser desfeita." Botões: Cancelar · Excluir operações.

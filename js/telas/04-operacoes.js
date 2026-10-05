@@ -98,6 +98,7 @@ window.Telas.planoOperacoes = (function () {
     ui.modo = 'ver';
     ui.marcados = new Set();
     ui.ajuste = null;
+    ui.ajusteFeito = false;  // modo edição dos talhões: já aplicou algo (Cancelar vira "Concluir edição")
   }
 
   // ================= Desenho =================
@@ -786,7 +787,7 @@ window.Telas.planoOperacoes = (function () {
         return `
           <div class="talhoes__rodape">
             <span class="talhoes__selecao">Marque os talhões que quer ajustar.</span>
-            <button class="botao botao--secundario" type="button" data-acao="cancelar-modo">Cancelar</button>
+            <button class="botao botao--secundario" type="button" data-acao="cancelar-modo">${ui.ajusteFeito ? 'Concluir edição' : 'Cancelar'}</button>
           </div>`;
       }
       const area = talhoesFazenda.filter((t) => ui.marcados.has(t.nome)).reduce((s, t) => s + t.area, 0);
@@ -798,7 +799,8 @@ window.Telas.planoOperacoes = (function () {
                   ${recebem ? '' : 'disabled title="Nenhum dos talhões selecionados recebe a operação"'}>Excluir recomendação</button>
           <button class="botao botao--primario botao--p" type="button" data-acao="ajustar-produtos">Ajustar recomendação</button>
           <button class="botao-icone dica dica--direita" type="button" data-acao="cancelar-modo"
-                  data-dica="Cancelar edição" aria-label="Cancelar edição">${Icones.fechar}</button>
+                  data-dica="${ui.ajusteFeito ? 'Concluir edição' : 'Cancelar edição'}"
+                  aria-label="${ui.ajusteFeito ? 'Concluir edição' : 'Cancelar edição'}">${Icones.fechar}</button>
         </div>`;
     }
     return '';
@@ -1075,7 +1077,7 @@ window.Telas.planoOperacoes = (function () {
         : 'Os produtos e doses desses talhões serão apagados e eles ficarão sem operação.',
       botoes: [{ rotulo: 'Cancelar' }, { rotulo: 'Excluir recomendação', classe: 'perigo', acao: () => {
         alvo.forEach((t) => { delete op.talhoes[t]; });
-        ui.marcados = new Set(); ui.ajuste = novoAjustePreparado();
+        ui.marcados = new Set(); ui.ajuste = novoAjustePreparado(); ui.ajusteFeito = true;
         alterou(); desenharTudo();
         Aviso.mostrar(`Recomendação excluída de ${n} ${n === 1 ? 'talhão' : 'talhões'}`);
       } }]
@@ -1738,10 +1740,11 @@ window.Telas.planoOperacoes = (function () {
 
     // Fecha o painel e limpa a seleção; a tabela continua no modo edição
     ui.rascunho = null;
-    ui.marcados = new Set(); ui.ajuste = novoAjustePreparado();
+    ui.marcados = new Set(); ui.ajuste = novoAjustePreparado(); ui.ajusteFeito = true;
     alterou(); desenharTudo();
     Aviso.mostrar(`Ajustes aplicados em ${alterados} ${alterados === 1 ? 'talhão' : 'talhões'}` +
-      (criadas.length ? ` · criada a ${criadas.map((r) => esc(r.nome)).join(', ')}` : ''));
+      (criadas.length ? ` · criada a ${criadas.map((r) => esc(r.nome)).join(', ')}` : '') +
+      '. Marque outros talhões ou conclua a edição.');
   }
 
   // ----- Grupos -----
