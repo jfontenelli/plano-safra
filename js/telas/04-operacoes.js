@@ -234,12 +234,12 @@ window.Telas.planoOperacoes = (function () {
     if (grupo.operacoes.length === 0) return '';
     if (somenteLeitura) {
       return `
-        <button class="link-acao ops-lista__editar dica" type="button" data-acao="editar-ops" aria-disabled="true"
+        <button class="link-acao link-editar ops-lista__editar dica" type="button" data-acao="editar-ops" aria-disabled="true"
                 data-dica="Plano aprovado: operações não podem ser editadas"
                 aria-describedby="dica-editar">${Icones.lapis} Editar</button>
         <span class="so-leitor" id="dica-editar">Plano aprovado: operações não podem ser editadas</span>`;
     }
-    return `<button class="link-acao ops-lista__editar" type="button" data-acao="editar-ops">${Icones.lapis} Editar</button>`;
+    return `<button class="link-acao link-editar ops-lista__editar" type="button" data-acao="editar-ops">${Icones.lapis} Editar</button>`;
   }
 
   function itemOperacao(op, ativo) {
@@ -531,8 +531,8 @@ window.Telas.planoOperacoes = (function () {
     const ferramentas = modo === 'ver' ? `
       <div class="talhoes__ferramentas">
         ${somenteLeitura ? '' : `
-          <button class="botao-icone botao-icone--borda" type="button" data-acao="ajustar-talhoes" title="Ajustar talhões"
-                  aria-label="Ajustar talhões">${Icones.lapis}</button>`}
+          <button class="link-acao link-editar" type="button" data-acao="ajustar-talhoes"
+                  aria-label="Editar talhões">${Icones.lapis} Editar</button>`}
         <label class="busca">${Icones.busca}
           <input class="busca__campo" type="search" data-campo="busca" value="${esc(ui.busca)}" placeholder="Buscar talhão" aria-label="Buscar talhão">
         </label>
@@ -546,14 +546,17 @@ window.Telas.planoOperacoes = (function () {
           ${ferramentas}
         </div>
         ${modo === 'ajustar' && ui.marcados.size ? caixaAjuste(op) : ''}
+        <p class="talhoes__legenda">
+          <span class="talhoes__cor talhoes__cor--pendente" aria-hidden="true"></span>Falta produto ou dose
+          <span class="talhoes__cor talhoes__cor--sem" aria-hidden="true"></span>Talhão sem esta operação
+        </p>
         <div class="tabela-rolagem">
           <table class="tabela tabela--compacta tabela-talhoes">
             <thead><tr>
               ${comCaixa ? `<th class="tabela__marcar"><input type="checkbox" data-acao="marcar-todos" aria-label="Marcar todos"
                    ${todosMarcados(op) ? 'checked' : ''}></th>` : ''}
-              <th>Talhão</th><th class="tabela__numero">Área</th><th class="tabela__numero">DAP</th>
+              <th>Talhão</th><th class="tabela__numero">Área</th>
               ${colunas.map((l) => `<th class="tabela__numero">${esc(Planos.nomeLinha(l))} (${Planos.unidadeDose(l)}) ${etiquetaPre(l)}</th>`).join('')}
-              <th>Status</th>
             </tr></thead>
             <tbody id="talhoes-linhas">${linhasTalhoes(op, colunas)}</tbody>
           </table>
@@ -574,25 +577,26 @@ window.Telas.planoOperacoes = (function () {
 
   function linhasTalhoes(op, colunas) {
     if (!talhoesFazenda.length) {
-      return `<tr><td class="tabela__vazia" colspan="${colunas.length + 5}">Nenhum talhão cadastrado na fazenda ${esc(plano.fazenda)}.</td></tr>`;
+      return `<tr><td class="tabela__vazia" colspan="${colunas.length + 3}">Nenhum talhão cadastrado na fazenda ${esc(plano.fazenda)}.</td></tr>`;
     }
     const busca = Util.normalizar(ui.busca.trim());
     const visiveis = talhoesFazenda.filter((t) => !busca || Util.normalizar(t.nome).includes(busca));
     if (!visiveis.length) {
-      return `<tr><td class="tabela__vazia" colspan="${colunas.length + 5}">Nenhum talhão encontrado.</td></tr>`;
+      return `<tr><td class="tabela__vazia" colspan="${colunas.length + 3}">Nenhum talhão encontrado.</td></tr>`;
     }
     return visiveis.map((t) => {
       const ajuste = op.talhoes[t.nome];
+      // Sem coluna Status: a cor da linha mostra a situação (com texto oculto para leitor de tela)
       const status = Planos.statusTalhao(op, t.nome);
-      const classeStatus = { 'Completo': 'aprovado', 'Pendente': 'pendente', 'Sem operação': 'sem' }[status];
+      const classeLinha = { 'Pendente': 'linha--pendente', 'Sem operação': 'linha--sem' }[status] || '';
+      const situacao = { 'Pendente': 'falta produto ou dose', 'Sem operação': 'sem esta operação' }[status];
       const marcavel = ui.modo === 'selecionar' || (ui.modo === 'ajustar' && ajuste);
       const caixa = ui.modo === 'ver' ? '' : `
         <td class="tabela__marcar">${marcavel ? `<input type="checkbox" data-acao="marcar" data-talhao="${t.nome}"
             aria-label="Marcar ${t.nome}" ${ui.marcados.has(t.nome) ? 'checked' : ''}>` : ''}</td>`;
-      let dap = '', doses = colunas.map(() => '<td></td>').join('');
+      let doses = colunas.map(() => '<td></td>').join('');
       if (ajuste) {
         const recebidas = Planos.linhasTalhao(op, ajuste);
-        dap = Planos.dapTalhao(op, ajuste) ?? '—';
         doses = colunas.map((l) => {
           if (!recebidas.includes(l)) return '<td class="tabela__numero tabela__nao-recebe" title="Não recebe este produto">—</td>';
           const d = Planos.doseTalhao(op, ajuste, l);
@@ -600,13 +604,11 @@ window.Telas.planoOperacoes = (function () {
         }).join('');
       }
       return `
-        <tr class="${ajuste ? '' : 'linha--sem'} ${ui.marcados.has(t.nome) ? 'linha--marcada' : ''}">
+        <tr class="${classeLinha} ${ui.marcados.has(t.nome) ? 'linha--marcada' : ''}">
           ${caixa}
-          <th scope="row" class="tabela__talhao">${t.nome}</th>
+          <th scope="row" class="tabela__talhao">${t.nome}${situacao ? `<span class="so-leitor"> (${situacao})</span>` : ''}</th>
           <td class="tabela__numero">${Util.area(t.area)}</td>
-          <td class="tabela__numero">${dap}</td>
           ${doses}
-          <td><span class="status status--${classeStatus}">${status}</span></td>
         </tr>`;
     }).join('');
   }
@@ -654,10 +656,6 @@ window.Telas.planoOperacoes = (function () {
 
     // Valor comum entre os selecionados ou "vários"
     const comum = (valores) => valores.every((v) => v === valores[0]) ? valores[0] : undefined;
-    const daps = selecionados.map((a) => Planos.dapTalhao(op, a));
-    const dapComum = comum(daps);
-    const valorDap = aj.dap !== undefined ? aj.dap : (dapComum === undefined ? '' : (dapComum ?? ''));
-    const placeholderDap = dapComum === undefined && aj.dap === undefined ? 'vários' : '—';
 
     const linhas = Planos.colunasDose(op).filter((l) =>
       selecionados.some((a) => Planos.linhasTalhao(op, a).includes(l)));
@@ -680,14 +678,7 @@ window.Telas.planoOperacoes = (function () {
       <div class="ajuste" role="group" aria-label="Ajuste dos talhões selecionados">
         <p class="ajuste__titulo">Ajuste para ${ui.marcados.size} ${ui.marcados.size === 1 ? 'talhão selecionado' : 'talhões selecionados'}
           <span class="ajuste__ajuda">Campo não alterado mantém o valor de cada talhão.</span></p>
-        <div class="ajuste__campos">
-          <div class="campo campo--ajuste">
-            <label class="campo__rotulo" for="aj-dap">DAP</label>
-            <input class="campo__controle campo--compacto" id="aj-dap" type="text" inputmode="numeric"
-                   data-ajuste="dap" value="${esc(valorDap)}" placeholder="${placeholderDap}">
-          </div>
-          ${camposDose}
-        </div>
+        ${camposDose ? `<div class="ajuste__campos">${camposDose}</div>` : ''}
 
         <div class="ajuste__acoes">
           <div class="ajuste__grupo">
@@ -731,12 +722,12 @@ window.Telas.planoOperacoes = (function () {
   }
 
   function novoAjustePreparado() {
-    return { dap: undefined, doses: {}, adicionar: [], remover: [], removerOperacao: false };
+    return { doses: {}, adicionar: [], remover: [], removerOperacao: false };
   }
 
   function ajusteTemMudanca() {
     const aj = ui.ajuste;
-    return aj && (aj.dap !== undefined || Object.keys(aj.doses).length || aj.adicionar.length ||
+    return aj && (Object.keys(aj.doses).length || aj.adicionar.length ||
                   aj.remover.length || aj.removerOperacao);
   }
 
@@ -994,8 +985,6 @@ window.Telas.planoOperacoes = (function () {
       linhaDoElemento(e.target).unidade = e.target.value; alterou(); desenharTudo();
     } else if (e.target.dataset.pre) {
       ui.preCadastro[e.target.dataset.pre] = e.target.value;
-    } else if (e.target.dataset.ajuste === 'dap') {
-      ui.ajuste.dap = e.target.value.trim(); desenharTudo();
     } else if (e.target.dataset.ajuste === 'dose') {
       ui.ajuste.doses[e.target.dataset.linhaId] = e.target.value.trim(); desenharTudo();
     }
@@ -1207,12 +1196,6 @@ window.Telas.planoOperacoes = (function () {
     selecionados.forEach((t) => {
       if (aj.removerOperacao) { delete op.talhoes[t]; return; }
       const a = op.talhoes[t];
-
-      if (aj.dap !== undefined) {
-        const n = Util.numero(aj.dap);
-        const v = n === null ? null : Math.round(n);
-        if (v === op.dap) delete a.dap; else a.dap = v;
-      }
 
       Object.entries(aj.doses).forEach(([id, texto]) => {
         const linha = op.produtos.find((l) => l.id === id);

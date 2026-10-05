@@ -32,8 +32,8 @@ Operações   Calendário Agrícola   Suprimentos   Aprovação
 │  2ª Fungicida     45  │ Recomendação agronômica                                   │
 │  3ª Fungicida     60  │   Princípio ativo · Produto comercial · Unid. · Dose  🗑   │
 │  4ª Fungicida     75  │   + Adicionar produto              [Selecionar talhões]   │
-│ + Nova operação       │ Talhões da recomendação agronômica            ✏️  🔍      │
-│                       │   Talhão · Área · DAP · dose por produto · Status         │
+│ + Nova operação       │ Talhões da recomendação agronômica      ✏️ Editar  🔍     │
+│                       │   Talhão · Área · dose por produto (cor da linha = status)│
 └───────────────────────┴──────────────────────────────────────────────────────────┘
 Grupo de operações │ Corretivos │ Semente │ Fertilizante │ Defensivo │ Colheita │ + │      🗑
 ```
@@ -84,7 +84,7 @@ Princípio: o peso visual de cada navegação é inverso à frequência de uso. 
   - **Linha 1:** nome da operação, **DAP** (campo) e **Fenologia** (lista de seleção, opcional). Sem lápis e lixeira: renomear e excluir ficam no modo Editar da lista (seção 6).
   - **Linha 2:** resumo área (ha) · talhões · pendentes, alinhado à esquerda, com a lista de operações expandida ou minimizada.
 - As opções de fenologia vêm do menu Cadastros (a trabalhar depois). No protótipo, estádios da soja como exemplo.
-- O DAP da operação vale para todos os talhões, mas pode ser ajustado por talhão.
+- **Uma operação tem um DAP só**, que vale para todos os talhões dela. Outro DAP = outra operação.
 - Antes de existir data de plantio (informada no grupo Semente), as operações mostram só o DAP (ex.: −30), sem data.
 
 ## 8. Recomendação agronômica
@@ -124,23 +124,24 @@ Regras gerais da base (Plano_Safra_Cultura_Variedade_revisado_Julyane.docx): só
 
 **Modo visualizar (padrão)**
 - Mostra **todos os talhões da fazenda**, os que recebem e os que não recebem a operação.
-- Colunas: Talhão · Área · DAP · uma coluna de dose por produto, com a unidade no cabeçalho (ex.: "Fox Xpro (L/ha)") · Status (última coluna).
+- Colunas: Talhão · Área · uma coluna de dose por produto, com a unidade no cabeçalho (ex.: "Fox Xpro (L/ha)"). Sem colunas DAP e Status.
+- O status aparece na **cor da linha** (ver seção 12), com uma legenda acima da tabela: "Falta produto ou dose" · "Talhão sem esta operação".
 - Valores ajustados aparecem iguais aos demais (sem marca de ajuste).
-- Lápis ("Ajustar talhões") e busca no cabeçalho da tabela.
+- Botão **"✏️ Editar"** (mesmo padrão do Editar da lista de operações) e busca no cabeçalho da tabela.
 
-**Modo ajustar (opcional, pelo lápis)**
+**Modo ajustar (opcional, pelo "✏️ Editar")**
 - Caixas de seleção ("Marcar todos" ou um a um).
-- Com talhões selecionados, aparece a caixa de ajuste, que vale para **todos os selecionados de uma vez**: DAP, dose de cada produto, adicionar produto, remover produto, remover da operação.
+- Com talhões selecionados, aparece a caixa de ajuste, que vale para **todos os selecionados de uma vez**: dose de cada produto, adicionar produto, remover produto, remover da operação. DAP e fenologia não são ajustados por talhão.
 - Campo com valores diferentes entre os selecionados mostra **"vários"**; campo não alterado mantém o valor de cada talhão.
 - **"Salvar ajustes"** salva e volta ao modo visualizar. Mensagem: "Ajustes salvos em 2 talhões".
 
 ## 12. Status
 
-| Status | Quando |
-|---|---|
-| Completo | O talhão recebe a operação e tem DAP, produto e dose |
-| Pendente | O talhão recebe a operação, mas falta DAP, produto ou dose |
-| Sem operação | O talhão não recebe esta operação (decisão do agrônomo). Em cinza; não conta como pendência |
+| Status | Quando | Linha da tabela |
+|---|---|---|
+| Completo | O talhão recebe a operação e tem produto e dose | Branca |
+| Pendente | O talhão recebe a operação, mas falta produto ou dose | Laranja claro; a dose que falta aparece como "—" em destaque |
+| Sem operação | O talhão não recebe esta operação (decisão do agrônomo). Não conta como pendência | Cinza |
 
 No grupo: o talhão fica pendente quando está "Sem operação" em todas as operações do grupo.
 

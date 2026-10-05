@@ -1179,10 +1179,12 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
 .ops-lista__vazia { margin: 8px 10px 0; font-size: 14px; color: var(--texto-suave); }
 
 /* Modo Editar da lista: caixas de seleção, renomear com duplo clique e barra no rodapé */
+/* "✏️ Editar": o mesmo botão na lista de operações e na tabela de talhões */
+.link-editar { margin: 0; padding: 2px 4px; border-radius: 4px; white-space: nowrap; }
+.link-editar[aria-disabled="true"] { color: #9aa5a0; cursor: not-allowed; text-decoration: none; }
 /* margem automática dos dois lados do vão: Editar fica centralizado entre OPERAÇÕES e DAP */
-.ops-lista__editar { margin: 0 auto 0 0; padding: 2px 4px; border-radius: 4px; white-space: nowrap; }
-.ops-lista__editar[aria-disabled="true"] { color: #9aa5a0; cursor: not-allowed; text-decoration: none; }
-.ops-lista__editar:focus-visible,
+.ops-lista__editar { margin-right: auto; }
+.link-editar:focus-visible,
 .ops-lista__nova:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 2px; }
 
 .ops-lista__todos {
@@ -1458,7 +1460,27 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
 .tabela-talhoes th:first-child { border-top-left-radius: 8px; }
 .tabela-talhoes th:last-child { border-top-right-radius: 8px; }
 .tabela-talhoes tbody th { font-weight: 600; text-align: left; padding: 7px 10px; border-top: 1px solid var(--borda); background: none; }
-.tabela-talhoes .linha--sem td, .tabela-talhoes .linha--sem th { color: #9aa3a9; background: #fafbfb; }
+.tabela-talhoes .linha--sem td, .tabela-talhoes .linha--sem th { color: #9aa3a9; background: #f3f5f6; }
+.tabela-talhoes .linha--pendente td, .tabela-talhoes .linha--pendente th { background: #fdf0e1; }
+
+/* Legenda das cores da tabela de talhões (no lugar da coluna Status) */
+.talhoes__legenda {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 10px;
+  font-size: 13px;
+  color: var(--texto-suave);
+}
+.talhoes__cor {
+  width: 14px;
+  height: 14px;
+  border: 1px solid var(--borda);
+  border-radius: 3px;
+}
+.talhoes__cor--sem { margin-left: 14px; background: #f3f5f6; border-color: #d5dadd; }
+.talhoes__cor--pendente { background: #fdf0e1; border-color: #f1d2ad; }
 .tabela-talhoes .linha--marcada td, .tabela-talhoes .linha--marcada th { background: #f0f8f3; }
 .tabela__marcar { width: 36px; text-align: center !important; }
 .tabela__marcar input { width: 16px; height: 16px; accent-color: var(--verde-700); cursor: pointer; }

@@ -127,7 +127,7 @@ window.DADOS = {
           produtos: [['Fox Xpro', 0.40], ['Engeo Pleno', 0.20]],
           talhoes: ['T01', 'T02', 'T04', 'T05', 'T06', 'T07', 'T08', 'T09', 'T10', 'T11', 'T12'], // T03 sem operação
           ajustes: {
-            T02: { dap: 45, doses: { 'Fox Xpro': 0.50 } },
+            T02: { doses: { 'Fox Xpro': 0.50 } },
             T04: { doses: { 'Engeo Pleno': null } } // dose pendente
           }
         }

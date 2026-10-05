@@ -6,9 +6,9 @@
  * linha        = { id, principioAtivo, produto, unidade, dose, preCadastro, recomendacao }
  *                recomendacao: true = linha da recomendação agronômica (vale para os talhões);
  *                false = produto adicionado só em alguns talhões (modo ajustar).
- * ajuste       = { dap?, doses: { linhaId: dose }, removidas: [linhaId], extras: [linhaId] }
- *                Talhão presente em "talhoes" = recebe a operação. Sem "dap" ou sem dose
- *                própria, o talhão segue o DAP padrão e as doses da recomendação.
+ * ajuste       = { doses: { linhaId: dose }, removidas: [linhaId], extras: [linhaId] }
+ *                Talhão presente em "talhoes" = recebe a operação. Sem dose própria, o talhão
+ *                segue as doses da recomendação. O DAP é um só por operação (outro DAP = outra operação).
  */
 window.Planos = (function () {
   let sequencia = 0;
@@ -61,7 +61,6 @@ window.Planos = (function () {
       (d.talhoes || []).forEach((t) => { op.talhoes[t] = novoAjuste(); });
       Object.entries(d.ajustes || {}).forEach(([talhao, aj]) => {
         const ajuste = op.talhoes[talhao];
-        if ('dap' in aj) ajuste.dap = aj.dap;
         Object.entries(aj.doses || {}).forEach(([produto, dose]) => {
           ajuste.doses[op.produtos.find((l) => l.produto === produto).id] = dose;
         });
@@ -71,10 +70,6 @@ window.Planos = (function () {
   }
 
   // ----- Valores de cada talhão (o que é dele ou o que vem da recomendação) -----
-  function dapTalhao(op, ajuste) {
-    return 'dap' in ajuste ? ajuste.dap : op.dap;
-  }
-
   // Linha ainda sem princípio ativo e sem produto (recém-adicionada) não conta
   function linhaPreenchida(linha) {
     return !!(linha.produto || linha.principioAtivo);
@@ -92,16 +87,16 @@ window.Planos = (function () {
   }
 
   function temAjuste(ajuste) {
-    return 'dap' in ajuste || Object.keys(ajuste.doses).length > 0 ||
+    return Object.keys(ajuste.doses).length > 0 ||
            ajuste.removidas.length > 0 || ajuste.extras.length > 0;
   }
 
-  // Completo: recebe a operação e tem DAP, produto e dose. Pendente: falta algum. Sem operação: não recebe.
+  // Completo: recebe a operação e tem produto e dose. Pendente: falta produto ou dose. Sem operação: não recebe.
   function statusTalhao(op, nomeTalhao) {
     const ajuste = op.talhoes[nomeTalhao];
     if (!ajuste) return 'Sem operação';
     const linhas = linhasTalhao(op, ajuste);
-    const completo = !vazio(dapTalhao(op, ajuste)) && linhas.length > 0 &&
+    const completo = linhas.length > 0 &&
       linhas.every((l) => !vazio(doseTalhao(op, ajuste, l)));
     return completo ? 'Completo' : 'Pendente';
   }
@@ -141,7 +136,7 @@ window.Planos = (function () {
   return {
     novoId, novaLinha, linhaDoProduto, novaOperacao, novoAjuste, novoGrupo,
     gruposModelo, montarExemplo, produtoDoCadastro,
-    dapTalhao, linhasTalhao, doseTalhao, temAjuste, statusTalhao, resumo,
+    linhasTalhao, doseTalhao, temAjuste, statusTalhao, resumo,
     colunasDose, limparExtras, unidadeDose, nomeLinha
   };
 })();
