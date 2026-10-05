@@ -375,7 +375,8 @@ window.Telas.planoOperacoes = (function () {
         <ul class="op-resumo" aria-label="Resumo da operação">
           <li>${Icones.mapa}<strong>${Util.area(r.area).replace(' ha', '')}</strong> ha</li>
           <li>${Icones.talhoes}<strong>${r.talhoes}</strong> ${r.talhoes === 1 ? 'talhão' : 'talhões'}</li>
-          <li class="${r.pendentes ? 'op-resumo--alerta' : ''}">${Icones.alerta}<strong>${r.pendentes}</strong> ${r.pendentes === 1 ? 'pendente' : 'pendentes'}</li>
+          ${r.semOperacao ? `<li class="op-resumo--alerta">${Icones.alerta}<strong>${r.semOperacao}</strong> sem operação</li>` : ''}
+          ${r.semDose ? `<li class="op-resumo--alerta">${Icones.alerta}<strong>${r.semDose}</strong> sem dose</li>` : ''}
         </ul>`;
     // Linha 1: nome, DAP e fenologia. Linha 2: resumo, à esquerda. Renomear e excluir ficam no modo Editar da lista.
     return `
@@ -547,8 +548,8 @@ window.Telas.planoOperacoes = (function () {
         </div>
         ${modo === 'ajustar' && ui.marcados.size ? caixaAjuste(op) : ''}
         <p class="talhoes__legenda">
-          <span class="talhoes__cor talhoes__cor--pendente" aria-hidden="true"></span>Falta produto ou dose
-          <span class="talhoes__cor talhoes__cor--sem" aria-hidden="true"></span>Talhão sem esta operação
+          <span class="talhoes__cor talhoes__cor--pendente" aria-hidden="true"></span>Sem operação ou sem dose
+          <span class="talhoes__cor talhoes__cor--sem" aria-hidden="true"></span>Operação ainda não aplicada em nenhum talhão
         </p>
         <div class="tabela-rolagem">
           <table class="tabela tabela--compacta tabela-talhoes">
@@ -584,12 +585,14 @@ window.Telas.planoOperacoes = (function () {
     if (!visiveis.length) {
       return `<tr><td class="tabela__vazia" colspan="${colunas.length + 3}">Nenhum talhão encontrado.</td></tr>`;
     }
+    const algumTalhao = Object.keys(op.talhoes).length > 0;
     return visiveis.map((t) => {
       const ajuste = op.talhoes[t.nome];
-      // Sem coluna Status: a cor da linha mostra a situação (com texto oculto para leitor de tela)
+      // Sem coluna Status: a cor da linha mostra a situação (com texto oculto para leitor de tela).
+      // Operação ainda sem nenhum talhão: tudo cinza. Com algum talhão: sem operação ou sem dose em laranja.
       const status = Planos.statusTalhao(op, t.nome);
-      const classeLinha = { 'Pendente': 'linha--pendente', 'Sem operação': 'linha--sem' }[status] || '';
-      const situacao = { 'Pendente': 'falta produto ou dose', 'Sem operação': 'sem esta operação' }[status];
+      const classeLinha = status === 'Completo' ? '' : (algumTalhao ? 'linha--pendente' : 'linha--sem');
+      const situacao = { 'Sem dose': 'sem dose', 'Sem operação': 'sem operação' }[status];
       const marcavel = ui.modo === 'selecionar' || (ui.modo === 'ajustar' && ajuste);
       const caixa = ui.modo === 'ver' ? '' : `
         <td class="tabela__marcar">${marcavel ? `<input type="checkbox" data-acao="marcar" data-talhao="${t.nome}"

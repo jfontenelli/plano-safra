@@ -28,7 +28,7 @@ Operações   Calendário Agrícola   Suprimentos   Aprovação
 ─────────
 ┌───────────────────────┬──────────────────────────────────────────────────────────┐
 │ Operações Editar DAP ≪│ 1ª Fungicida   DAP [30]  Fenologia [V5 ▾]                │
-│ ▌1ª Fungicida     30  │ 1.085 ha · 11 talhões · 1 pendente                        │
+│ ▌1ª Fungicida     30  │ 1.085 ha · 11 talhões · 1 sem operação · 1 sem dose       │
 │  2ª Fungicida     45  │ Recomendação agronômica                                   │
 │  3ª Fungicida     60  │   Princípio ativo · Produto comercial · Unid. · Dose  🗑   │
 │  4ª Fungicida     75  │   + Adicionar produto              [Selecionar talhões]   │
@@ -82,7 +82,7 @@ Princípio: o peso visual de cada navegação é inverso à frequência de uso. 
 
 - Card da operação, em duas linhas:
   - **Linha 1:** nome da operação, **DAP** (campo) e **Fenologia** (lista de seleção, opcional). Sem lápis e lixeira: renomear e excluir ficam no modo Editar da lista (seção 6).
-  - **Linha 2:** resumo área (ha) · talhões · pendentes, alinhado à esquerda, com a lista de operações expandida ou minimizada.
+  - **Linha 2:** resumo área (ha) · talhões · sem operação · sem dose, alinhado à esquerda, com a lista de operações expandida ou minimizada. "Sem operação" e "sem dose" só aparecem quando maiores que zero.
 - As opções de fenologia vêm do menu Cadastros (a trabalhar depois). No protótipo, estádios da soja como exemplo.
 - **Uma operação tem um DAP só**, que vale para todos os talhões dela. Outro DAP = outra operação.
 - Antes de existir data de plantio (informada no grupo Semente), as operações mostram só o DAP (ex.: −30), sem data.
@@ -125,7 +125,7 @@ Regras gerais da base (Plano_Safra_Cultura_Variedade_revisado_Julyane.docx): só
 **Modo visualizar (padrão)**
 - Mostra **todos os talhões da fazenda**, os que recebem e os que não recebem a operação.
 - Colunas: Talhão · Área · uma coluna de dose por produto, com a unidade no cabeçalho (ex.: "Fox Xpro (L/ha)"). Sem colunas DAP e Status.
-- O status aparece na **cor da linha** (ver seção 12), com uma legenda acima da tabela: "Falta produto ou dose" · "Talhão sem esta operação".
+- O status aparece na **cor da linha** (ver seção 12), com uma legenda acima da tabela: "Sem operação ou sem dose" (laranja) · "Operação ainda não aplicada em nenhum talhão" (cinza).
 - Valores ajustados aparecem iguais aos demais (sem marca de ajuste).
 - Botão **"✏️ Editar"** (mesmo padrão do Editar da lista de operações) e busca no cabeçalho da tabela.
 
@@ -140,8 +140,11 @@ Regras gerais da base (Plano_Safra_Cultura_Variedade_revisado_Julyane.docx): só
 | Status | Quando | Linha da tabela |
 |---|---|---|
 | Completo | O talhão recebe a operação e tem produto e dose | Branca |
-| Pendente | O talhão recebe a operação, mas falta produto ou dose | Laranja claro; a dose que falta aparece como "—" em destaque |
-| Sem operação | O talhão não recebe esta operação (decisão do agrônomo). Não conta como pendência | Cinza |
+| Sem dose | O talhão recebe a operação, mas falta produto ou dose | Laranja claro; a dose que falta aparece como "—" em destaque |
+| Sem operação | O talhão da fazenda não recebe esta operação | Laranja claro; **cinza enquanto a operação não foi aplicada em nenhum talhão** |
+
+- Todos os talhões cadastrados da fazenda contam. Operação ainda sem talhões: todos "sem operação" (ex.: 12 talhões → "12 sem operação"), com as linhas em cinza.
+- Card da operação: "N sem operação" e "N sem dose", separados, porque pedem ações diferentes (Selecionar talhões × Editar). Contador zerado não aparece.
 
 No grupo: o talhão fica pendente quando está "Sem operação" em todas as operações do grupo.
 

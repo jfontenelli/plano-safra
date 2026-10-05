@@ -91,23 +91,25 @@ window.Planos = (function () {
            ajuste.removidas.length > 0 || ajuste.extras.length > 0;
   }
 
-  // Completo: recebe a operação e tem produto e dose. Pendente: falta produto ou dose. Sem operação: não recebe.
+  // Completo: recebe a operação e tem produto e dose. Sem dose: recebe, mas falta produto ou dose.
+  // Sem operação: não recebe. Todo talhão da fazenda que não recebe a operação fica "Sem operação".
   function statusTalhao(op, nomeTalhao) {
     const ajuste = op.talhoes[nomeTalhao];
     if (!ajuste) return 'Sem operação';
     const linhas = linhasTalhao(op, ajuste);
     const completo = linhas.length > 0 &&
       linhas.every((l) => !vazio(doseTalhao(op, ajuste, l)));
-    return completo ? 'Completo' : 'Pendente';
+    return completo ? 'Completo' : 'Sem dose';
   }
 
-  // Resumo da operação: área (ha) e número de talhões que recebem, e quantos estão pendentes
+  // Resumo da operação: área (ha) e número de talhões que recebem; quantos estão sem operação e sem dose
   function resumo(op, talhoesFazenda) {
     const recebem = talhoesFazenda.filter((t) => op.talhoes[t.nome]);
     return {
       area: recebem.reduce((s, t) => s + t.area, 0),
       talhoes: recebem.length,
-      pendentes: recebem.filter((t) => statusTalhao(op, t.nome) === 'Pendente').length
+      semOperacao: talhoesFazenda.length - recebem.length,
+      semDose: recebem.filter((t) => statusTalhao(op, t.nome) === 'Sem dose').length
     };
   }
 
