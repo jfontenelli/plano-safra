@@ -45,7 +45,7 @@ window.Planos = (function () {
 
   function novaReceita(op, produtos = []) {
     const numero = proximoNumero(op);
-    return { id: novoId('r'), numero, nome: `Receita ${numero}`, produtos };
+    return { id: novoId('r'), numero, nome: `Recomendação ${numero}`, produtos };
   }
 
   function novoAjuste(receitaId) {

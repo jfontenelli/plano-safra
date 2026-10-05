@@ -9,7 +9,7 @@ Referência no protótipo: `tela/04-operacoes-defensivos`. Referência visual: m
 
 ## 1. Objetivo
 
-O agrônomo corporativo monta as operações do plano, grupo por grupo: cria as operações com DAP, monta as receitas da recomendação agronômica (produtos e doses padrão), aplica cada receita nos talhões e, se precisar, ajusta talhão a talhão.
+O agrônomo corporativo monta as operações do plano, grupo por grupo: cria as operações com DAP, monta as recomendações da recomendação agronômica (produtos e doses padrão), aplica cada recomendação nos talhões e, se precisar, ajusta talhão a talhão.
 
 ## 2. Lugar na jornada
 
@@ -30,9 +30,9 @@ Operações   Calendário Agrícola   Suprimentos   Aprovação
 │ Operações   ✏️   DAP ≪│ 1ª Fungicida   DAP [30]  Fenologia [V5 ▾]                │
 │ ▌1ª Fungicida     30  │ 1.085 ha · 11 talhões · 1 sem operação · 1 sem dose       │
 │  2ª Fungicida     45  │ Recomendação agronômica                                   │
-│  3ª Fungicida     60  │   Receita 1 │ Receita 2 │ + Nova receita              🗑   │
+│  3ª Fungicida     60  │   Recomendação 1 │ Recomendação 2 │ + Nova recomendação              🗑   │
 │  4ª Fungicida     75  │   Princípio ativo · Produto comercial · Unid. · Dose padrão│
-│                       │   [Aplicar nos talhões]   [Salvar receita] [+ Adicionar produto]│
+│                       │   [Aplicar nos talhões]   [Salvar recomendação] [+ Adicionar produto]│
 │ + Nova operação       │ Talhões da recomendação agronômica            ✏️  🔍      │
 │                       │   Talhão · Área · dose por produto (cor da linha = status)│
 └───────────────────────┴──────────────────────────────────────────────────────────┘
@@ -88,72 +88,72 @@ Princípio: o peso visual de cada navegação é inverso à frequência de uso. 
 - **Uma operação tem um DAP só**, que vale para todos os talhões dela. Outro DAP = outra operação.
 - Antes de existir data de plantio (informada no grupo Semente), as operações mostram só o DAP (ex.: −30), sem data.
 
-## 8. Recomendação agronômica (receitas)
+## 8. Recomendação agronômica
 
 **Regra**
-- **Receita agronômica = conjunto de produtos + doses padrão.**
-- **A composição de produtos determina a identidade da receita.**
-- **A dose pode variar por talhão sem alterar a identidade da receita.**
-- Uma operação pode ter mais de uma receita. Na mesma operação, **cada talhão fica em uma receita só**.
+- **Recomendação agronômica = conjunto de produtos + doses padrão.**
+- **A composição de produtos determina a identidade da recomendação.**
+- **A dose pode variar por talhão sem alterar a identidade da recomendação.**
+- Uma operação pode ter mais de uma recomendação. Na mesma operação, **cada talhão fica em uma recomendação só**.
 
-**Lista de receitas** (topo da seção)
-- `Receita 1 | Receita 2 | + Nova receita`, numeradas automaticamente. Só uma fica aberta, com destaque discreto; as demais mostram só o nome. Sem status ("Em edição", "Salva", "Aplicada").
-- **"+ Nova receita"** cria a próxima, já aberta, com uma linha vazia para o primeiro produto.
-- **Numeração**: maior número já usado + 1 (ex.: com Receita 1 e Receita 3, a próxima é Receita 4). Renomear ou excluir não renumera as outras.
-- **Receita vazia não fica no sistema** (sem produto comercial, sem princípio ativo e sem dose):
-  - Receita nova que ficou vazia é excluída ao trocar de receita, operação, grupo ou etapa, mesmo sendo a única (a operação volta a "Nenhuma receita nesta operação"). Sem aviso.
-  - "Salvar receita" com todas as linhas apagadas exclui a receita: sem talhões, na hora, com "Desfazer"; aplicada em talhões, com a mesma confirmação da lixeira ("Excluir Receita 1? Ela está aplicada em 11 talhões, que ficarão sem operação. Essa ação não pode ser desfeita.").
-- **Renomear**: duplo clique na receita aberta (ou F2), como nas guias de grupo. Enter confirma, Esc desfaz. Dica no mouse: "Clique duas vezes para renomear". Nome vazio volta ao anterior; nome repetido na operação não é aceito ("Já existe uma receita com esse nome").
-- **Excluir**: lixeira na ponta direita da lista, agindo sobre a receita aberta.
-  - Com talhões: confirmação com o impacto. Ex.: "Excluir Receita 2? Ela está aplicada em 3 talhões, que ficarão sem operação. Essa ação não pode ser desfeita." Botões: Cancelar · Excluir receita.
+**Lista de recomendações** (topo da seção)
+- `Recomendação 1 | Recomendação 2 | + Nova recomendação`, numeradas automaticamente. Só uma fica aberta, com destaque discreto; as demais mostram só o nome. Sem status ("Em edição", "Salva", "Aplicada").
+- **"+ Nova recomendação"** cria a próxima, já aberta, com uma linha vazia para o primeiro produto.
+- **Numeração**: maior número já usado + 1 (ex.: com Recomendação 1 e Recomendação 3, a próxima é Recomendação 4). Renomear ou excluir não renumera as outras.
+- **Recomendação vazia não fica no sistema** (sem produto comercial, sem princípio ativo e sem dose):
+  - Recomendação nova que ficou vazia é excluída ao trocar de recomendação, operação, grupo ou etapa, mesmo sendo a única (a operação volta a "Nenhuma recomendação nesta operação"). Sem aviso.
+  - "Salvar recomendação" com todas as linhas apagadas exclui a recomendação: sem talhões, na hora, com "Desfazer"; aplicada em talhões, com a mesma confirmação da lixeira ("Excluir Recomendação 1? Ela está aplicada em 11 talhões, que ficarão sem operação. Essa ação não pode ser desfeita.").
+- **Renomear**: duplo clique na recomendação aberta (ou F2), como nas guias de grupo. Enter confirma, Esc desfaz. Dica no mouse: "Clique duas vezes para renomear". Nome vazio volta ao anterior; nome repetido na operação não é aceito ("Já existe uma recomendação com esse nome").
+- **Excluir**: lixeira na ponta direita da lista, agindo sobre a recomendação aberta.
+  - Com talhões: confirmação com o impacto. Ex.: "Excluir Recomendação 2? Ela está aplicada em 3 talhões, que ficarão sem operação. Essa ação não pode ser desfeita." Botões: Cancelar · Excluir recomendação.
   - Sem talhões: exclui na hora, com "Desfazer".
-  - Depois de excluir, abre a primeira receita restante; sem nenhuma, aparece só "+ Nova receita".
-- Operação sem receita: "Nenhuma receita nesta operação. Use "+ Nova receita" para criar."
+  - Depois de excluir, abre a primeira recomendação restante; sem nenhuma, aparece só "+ Nova recomendação".
+- Operação sem recomendação: "Nenhuma recomendação nesta operação. Use "+ Nova recomendação" para criar."
 
-**Tabela da receita**
+**Tabela da recomendação**
 - Colunas: **Princípio ativo · Produto comercial · Unidade · Dose padrão**, com lixeira por linha.
 - **A dose é do produto comercial.** O princípio ativo não tem dose: serve como filtro para encontrar o produto. Escolhido o princípio ativo, o produto mostra só os produtos com ele; escolhido o produto, o princípio ativo dele é preenchido.
 - Linha só com princípio ativo: unidade vazia e dose bloqueada ("Escolha o produto comercial para informar a dose").
 - A unidade vem do cadastro do produto. A dose é sempre por hectare (L/ha, mL/ha, kg/ha, g/ha, t/ha).
 - Exemplo: Bixafen + Protioconazol + Trifloxistrobina · Fox Xpro · L/ha · 0,40.
 
-**Salvar receita** (fluxo: montar receita → salvar receita → aplicar nos talhões)
-- As mudanças na receita ficam em rascunho até **"Salvar receita"**. Trocar de receita, operação ou grupo com alteração não salva pergunta: "Descartar as alterações de Receita 1?" (Continuar editando · Descartar).
-- Trocar de **etapa** (ex.: Calendário Agrícola) e voltar não descarta nada: a receita com produto digitado e ainda não salvo continua em rascunho (inclusive receita nova).
-- **Botões na linha abaixo da tabela**: à esquerda **[Aplicar nos talhões]**; à direita **[Salvar receita] [+ Adicionar produto]**.
-  - Com alteração não salva: "Salvar receita" fica em destaque e **"Aplicar nos talhões" não aparece**.
-  - Receita salva: "Salvar receita" fica visível e desabilitado (os botões não mudam de lugar) e "Aplicar nos talhões" aparece, em destaque.
-- Receita **ainda não aplicada**: salvar não muda nada na tabela de talhões (a receita não está ligada a nenhum talhão).
-- Receita **já aplicada**: ao salvar, a tela pergunta antes: "Alterar os talhões que já recebem Receita 1? Receita 1 já está aplicada em 10 talhões. Ao salvar, as alterações valem para eles. Talhões com dose própria mantêm a dose deles." Botões: Cancelar (nada é salvo; a alteração continua em edição) · **Salvar e alterar talhões**. Mensagem: "Receita 1 salva e alterada em 10 talhões". Ao confirmar:
+**Salvar recomendação** (fluxo: montar recomendação → salvar recomendação → aplicar nos talhões)
+- As mudanças na recomendação ficam em rascunho até **"Salvar recomendação"**. Trocar de recomendação, operação ou grupo com alteração não salva pergunta: "Descartar as alterações de Recomendação 1?" (Continuar editando · Descartar).
+- Trocar de **etapa** (ex.: Calendário Agrícola) e voltar não descarta nada: a recomendação com produto digitado e ainda não salvo continua em rascunho (inclusive recomendação nova).
+- **Botões na linha abaixo da tabela**: à esquerda **[Aplicar nos talhões]**; à direita **[Salvar recomendação] [+ Adicionar produto]**.
+  - Com alteração não salva: "Salvar recomendação" fica em destaque e **"Aplicar nos talhões" não aparece**.
+  - Recomendação salva: "Salvar recomendação" fica visível e desabilitado (os botões não mudam de lugar) e "Aplicar nos talhões" aparece, em destaque.
+- Recomendação **ainda não aplicada**: salvar não muda nada na tabela de talhões (a recomendação não está ligada a nenhum talhão).
+- Recomendação **já aplicada**: ao salvar, a tela pergunta antes: "Alterar os talhões que já recebem Recomendação 1? Recomendação 1 já está aplicada em 10 talhões. Ao salvar, as alterações valem para eles. Talhões com dose própria mantêm a dose deles." Botões: Cancelar (nada é salvo; a alteração continua em edição) · **Salvar e alterar talhões**. Mensagem: "Recomendação 1 salva e alterada em 10 talhões". Ao confirmar:
   - **Dose padrão alterada**: muda nos talhões que seguem o padrão; talhão com dose própria mantém a dele.
-  - **Produto adicionado, removido ou trocado**: muda em todos os talhões da receita (é a composição alterada para todos, que atualiza a própria receita).
+  - **Produto adicionado, removido ou trocado**: muda em todos os talhões da recomendação (é a composição alterada para todos, que atualiza a própria recomendação).
 - Salvar aceita linha só com princípio ativo (rascunho de trabalho, enquanto o produto é escolhido).
 
-**Preenchimento mínimo para aplicar**: **DAP**, ao menos uma linha na receita e, em cada linha, **produto comercial** e **dose padrão**. Se faltar algo ao clicar, aparece em vermelho abaixo do campo: "Escolha o produto comercial" ou "Informação obrigatória".
+**Preenchimento mínimo para aplicar**: **DAP**, ao menos uma linha na recomendação e, em cada linha, **produto comercial** e **dose padrão**. Se faltar algo ao clicar, aparece em vermelho abaixo do campo: "Escolha o produto comercial" ou "Informação obrigatória".
 
 ## 9. Pré-cadastro (nesta tela)
 
 Regras gerais da base (Plano_Safra_Cultura_Variedade_revisado_Julyane.docx): só quando o item não é encontrado; fica disponível para uso e reuso com status "Pré-cadastro"; o responsável pelo cadastro é avisado; ao completar, vira "Cadastro completo" mantendo o vínculo com os planos; o sistema aponta possíveis duplicidades e a consolidação depende do responsável.
 
-- **Onde**: só na busca de **produto comercial** da receita e na busca do modal "Ajustar receita" (seção 11). **"+ Pré-cadastrar "texto digitado""** aparece sempre como última opção da lista de resultados, mesmo quando há resultados parecidos.
-- **Como**: a própria linha da receita vira um mini-formulário, com o texto digitado já preenchido. Botões: Cancelar e "Salvar pré-cadastro".
+- **Onde**: só na busca de **produto comercial** da recomendação e na busca do modal "Ajustar recomendação" (seção 11). **"+ Pré-cadastrar "texto digitado""** aparece sempre como última opção da lista de resultados, mesmo quando há resultados parecidos.
+- **Como**: a própria linha da recomendação vira um mini-formulário, com o texto digitado já preenchido. Botões: Cancelar e "Salvar pré-cadastro".
 - **Mínimo para defensivo**: **nome comercial e unidade**. O princípio ativo é opcional.
 - Os resultados parecidos aparecem acima da opção de pré-cadastro, para evitar duplicidade na origem.
-- Depois de salvo, o produto aparece com a etiqueta **"Pré-cadastro"** na receita e na coluna da tabela de talhões.
+- Depois de salvo, o produto aparece com a etiqueta **"Pré-cadastro"** na recomendação e na coluna da tabela de talhões.
 
 ## 10. Aplicar nos talhões
 
-1. **"Aplicar nos talhões"** (abaixo da receita salva) coloca a tabela de talhões em modo seleção, sem janela. Título: "Selecione os talhões que recebem: Receita 1".
-2. Aparecem todos os talhões da fazenda com caixa de seleção e "Marcar todos". Os que já estão nesta receita vêm marcados. Talhão que está em outra receita mostra a indicação (ex.: "· em Receita 1"); marcá-lo muda o talhão para esta receita.
-3. **"Aplicar em N talhões"** confirma. Os talhões recebem os produtos e as **doses padrão** da receita, sem perguntar a dose. Desmarcar um talhão que estava nesta receita remove a operação dele, e o botão avisa (ex.: "Aplicar em 10 talhões · remover de 1").
-4. Se algum talhão marcado (já nesta receita) tem dose própria, a tela pergunta: "3 talhões têm ajustes." **Manter ajustes** · **Substituir pela dose padrão**.
-5. Mensagem: "Receita 1 aplicada em 11 talhões". "Cancelar" sai sem mudar nada.
+1. **"Aplicar nos talhões"** (abaixo da recomendação salva) coloca a tabela de talhões em modo seleção, sem janela. Título: "Selecione os talhões que recebem: Recomendação 1".
+2. Aparecem todos os talhões da fazenda com caixa de seleção e "Marcar todos". Os que já estão nesta recomendação vêm marcados. Talhão que está em outra recomendação mostra a indicação (ex.: "· em Recomendação 1"); marcá-lo muda o talhão para esta recomendação.
+3. **"Aplicar em N talhões"** confirma. Os talhões recebem os produtos e as **doses padrão** da recomendação, sem perguntar a dose. Desmarcar um talhão que estava nesta recomendação remove a operação dele, e o botão avisa (ex.: "Aplicar em 10 talhões · remover de 1").
+4. Se algum talhão marcado (já nesta recomendação) tem dose própria, a tela pergunta: "3 talhões têm ajustes." **Manter ajustes** · **Substituir pela dose padrão**.
+5. Mensagem: "Recomendação 1 aplicada em 11 talhões". "Cancelar" sai sem mudar nada.
 
 ## 11. Tabela "Talhões da recomendação agronômica"
 
 **Modo visualizar (padrão)**
 - Mostra **todos os talhões da fazenda**, os que recebem e os que não recebem a operação.
-- Colunas: Talhão · Área · uma coluna de dose por produto, com a unidade no cabeçalho (ex.: "Fox Xpro (L/ha)"), juntando os produtos das receitas **já aplicadas**. Os produtos de uma receita só entram na tabela depois de "Aplicar nos talhões"; montar ou salvar a receita não muda a tabela. Produto que não está na receita do talhão aparece como "—" apagado. Sem colunas DAP, Status e Receita.
+- Colunas: Talhão · Área · uma coluna de dose por produto, com a unidade no cabeçalho (ex.: "Fox Xpro (L/ha)"), juntando os produtos das recomendações **já aplicadas**. Os produtos de uma recomendação só entram na tabela depois de "Aplicar nos talhões"; montar ou salvar a recomendação não muda a tabela. Produto que não está na recomendação do talhão aparece como "—" apagado. Sem colunas DAP, Status e Recomendação.
 - O status aparece na **cor da linha** (ver seção 12), com uma legenda acima da tabela: "Sem operação ou sem dose" (laranja) · "Operação ainda não aplicada em nenhum talhão" (cinza). **Cada item da legenda só aparece quando ao menos 1 talhão está nessa situação**; sem nenhum, a legenda não aparece.
 - Valores ajustados aparecem iguais aos demais (sem marca de ajuste).
 - **Lápis ✏️** (só o ícone, com a dica "Editar talhões"; mesmo padrão do lápis da lista de operações) e busca no cabeçalho da tabela.
@@ -162,38 +162,38 @@ Regras gerais da base (Plano_Safra_Cultura_Variedade_revisado_Julyane.docx): só
 - Título da tabela: "Editar talhões". **Todos os talhões** têm caixa de seleção, inclusive os que ainda não recebem a operação; "Todos" no cabeçalho. Linhas selecionadas com fundo verde claro.
 - Talhão que não recebe a operação mostra "—" claro nas colunas de produto. A unidade fica só no cabeçalho da coluna.
 - Sem a legenda de cores (no modo normal ela continua).
-- A receita acima fica só para consulta: sem "Salvar receita", "Aplicar nos talhões", "+ Adicionar produto", "+ Nova receita", lixeira e renomear.
+- A recomendação acima fica só para consulta: sem "Salvar recomendação", "Aplicar nos talhões", "+ Adicionar produto", "+ Nova recomendação", lixeira e renomear.
 
 **Barra de seleção** (fixa embaixo da tabela, sempre visível ao rolar)
 - Sem seleção: "Marque os talhões que quer ajustar." e **Cancelar** (sai do modo edição).
-- Com seleção: "3 talhões · 305 ha" (quantidade e soma da área) · **"Remover da operação"** (texto vermelho, estilo secundário) · **"Ajustar receita"** (botão principal verde) · **X** (dica "Cancelar edição": faz o papel do Cancelar e sai do modo edição).
+- Com seleção: "3 talhões · 305 ha" (quantidade e soma da área) · **"Remover da operação"** (texto vermelho, estilo secundário) · **"Ajustar recomendação"** (botão principal verde) · **X** (dica "Cancelar edição": faz o papel do Cancelar e sai do modo edição).
 - "Remover da operação" pede confirmação: "Remover 3 talhões desta operação? Os produtos e doses desses talhões serão apagados." Botões: Cancelar · Remover talhões. Desabilitado quando nenhum dos selecionados recebe a operação.
 
-**Modal "Ajustar receita"** (abre pelo botão "Ajustar receita"; a tabela ocupa a largura toda, sem painel lateral)
-- Cabeçalho: "Ajustar receita de 3 talhões" · lista dos talhões ("T01, T02, T03"; com mais de 6, os 6 primeiros e "e mais N", com a lista completa ao passar o mouse) · "Campo não alterado mantém o valor de cada talhão" (cinza) · X para fechar.
-- Corpo no padrão da receita: **Princípio ativo · Produto comercial · Unid. · Dose · lixeira**, uma linha por produto presente nos talhões selecionados (princípio ativo e produto só como texto).
+**Modal "Ajustar recomendação"** (abre pelo botão "Ajustar recomendação"; a tabela ocupa a largura toda, sem painel lateral)
+- Cabeçalho: "Ajustar recomendação de 3 talhões" · lista dos talhões ("T01, T02, T03"; com mais de 6, os 6 primeiros e "e mais N", com a lista completa ao passar o mouse) · "Campo não alterado mantém o valor de cada talhão" (cinza) · X para fechar.
+- Corpo no padrão da recomendação: **Princípio ativo · Produto comercial · Unid. · Dose · lixeira**, uma linha por produto presente nos talhões selecionados (princípio ativo e produto só como texto).
   - Mesma dose em todos os selecionados: o campo mostra o valor (ex.: 0,40). Doses diferentes: campo vazio com "Vários".
   - Lixeira: marca o produto para sair só dos talhões selecionados (vale ao aplicar; "Desfazer" volta atrás).
 - **"+ Adicionar produto"**: nova linha com **um campo de busca** ocupando Princípio ativo e Produto comercial, que procura pelos dois. Resultados no formato "**Select 240 EC** · Cletodim · L/ha"; o último item é **"+ Pré-cadastrar produto"**. Ao escolher, preenche princípio ativo, produto e unidade, e o foco vai para Dose.
 - **Pré-cadastro** na própria linha (sem outro modal): Produto comercial, Princípio ativo e Unidade, com o texto da busca já no Produto comercial. Mesma regra da seção 9: produto comercial e unidade obrigatórios, princípio ativo opcional. Botões: Cancelar · Salvar pré-cadastro. Ao salvar, o produto entra na linha com o selo "Pré-cadastro" e o foco vai para Dose.
-- Rodapé: **Cancelar** · **Aplicar em 3 talhões** (botão principal). Sem excluir receita no modal.
+- Rodapé: **Cancelar** · **Aplicar em 3 talhões** (botão principal). Sem excluir recomendação no modal.
   - **Aplicar**: grava só nos talhões selecionados, fecha o modal, atualiza a tabela (produto novo ganha coluna; talhões sem ele mostram "—"), limpa a seleção (a tabela continua no modo edição) e mostra "Ajustes aplicados em 3 talhões".
   - **Cancelar, X ou Esc**: descarta o que foi feito no modal e mantém a seleção.
-- Foco preso no modal enquanto aberto; ao fechar, volta ao botão "Ajustar receita".
+- Foco preso no modal enquanto aberto; ao fechar, volta ao botão "Ajustar recomendação".
 - Talhão que não recebia a operação e recebe produto passa a receber a operação. DAP e fenologia não são ajustados por talhão.
-- **Receitas no ajuste** (a composição de produtos é a identidade da receita):
-  - **Só dose** alterada: fica como dose própria do talhão; **não** cria receita. Ex.: Fox Xpro de 0,40 para 0,45 L/ha em 3 talhões da Receita 1 → continuam na Receita 1, com a diferença de dose registrada.
-  - **Composição alterada** (adicionar, remover ou trocar produto) **em parte** dos talhões da receita: esses talhões saem da receita e nasce a próxima receita para eles. Ex.: Receita 1 (Fox Xpro + Engeo Pleno) em 10 talhões; em 3 deles adiciona Assist → Receita 1 fica com 7; a Receita 2 (Fox Xpro + Engeo Pleno + Assist) nasce com os 3.
-  - **Composição alterada em todos** os talhões da receita: atualiza a própria receita.
-  - **Composição que já existe** em outra receita: os talhões entram nela, sem criar receita nova (ex.: em mais 2 talhões da Receita 1 adiciona Assist → entram na Receita 2; tirar o Assist dos talhões da Receita 2 → voltam para a Receita 1). Dose diferente da padrão dessa receita fica como dose própria do talhão.
-  - Talhão sem a operação que recebe produtos entra na receita com a mesma composição ou numa receita nova.
-  - Mensagem: "Ajustes aplicados em 3 talhões · criada a Receita 2".
+- **Recomendações no ajuste** (a composição de produtos é a identidade da recomendação):
+  - **Só dose** alterada: fica como dose própria do talhão; **não** cria recomendação. Ex.: Fox Xpro de 0,40 para 0,45 L/ha em 3 talhões da Recomendação 1 → continuam na Recomendação 1, com a diferença de dose registrada.
+  - **Composição alterada** (adicionar, remover ou trocar produto) **em parte** dos talhões da recomendação: esses talhões saem da recomendação e nasce a próxima recomendação para eles. Ex.: Recomendação 1 (Fox Xpro + Engeo Pleno) em 10 talhões; em 3 deles adiciona Assist → Recomendação 1 fica com 7; a Recomendação 2 (Fox Xpro + Engeo Pleno + Assist) nasce com os 3.
+  - **Composição alterada em todos** os talhões da recomendação: atualiza a própria recomendação.
+  - **Composição que já existe** em outra recomendação: os talhões entram nela, sem criar recomendação nova (ex.: em mais 2 talhões da Recomendação 1 adiciona Assist → entram na Recomendação 2; tirar o Assist dos talhões da Recomendação 2 → voltam para a Recomendação 1). Dose diferente da padrão dessa recomendação fica como dose própria do talhão.
+  - Talhão sem a operação que recebe produtos entra na recomendação com a mesma composição ou numa recomendação nova.
+  - Mensagem: "Ajustes aplicados em 3 talhões · criada a Recomendação 2".
 
 ## 12. Status
 
 | Status | Quando | Linha da tabela |
 |---|---|---|
-| Completo | O talhão recebe a operação e cada produto da receita tem dose | Branca |
+| Completo | O talhão recebe a operação e cada produto da recomendação tem dose | Branca |
 | Sem dose | O talhão recebe a operação, mas falta produto comercial ou dose | Laranja claro; a dose que falta aparece como "—" em destaque |
 | Sem operação | O talhão da fazenda não recebe esta operação | Laranja claro; **cinza enquanto a operação não foi aplicada em nenhum talhão** |
 
@@ -209,9 +209,9 @@ Um verbo por ação, do botão à mensagem:
 | Verbo | Ação |
 |---|---|
 | Selecionar | escolher os talhões |
-| Salvar receita | guardar os produtos e as doses padrão da receita |
-| Aplicar | colocar a receita nos talhões |
-| Editar talhões / Ajustar receita / Aplicar em N talhões | mudanças pontuais por talhão (modal "Ajustar receita") |
+| Salvar recomendação | guardar os produtos e as doses padrão da recomendação |
+| Aplicar | colocar a recomendação nos talhões |
+| Editar talhões / Ajustar recomendação / Aplicar em N talhões | mudanças pontuais por talhão (modal "Ajustar recomendação") |
 | Remover | tirar produto ou talhão da operação |
 
 ## 14. Demonstração (só no protótipo)

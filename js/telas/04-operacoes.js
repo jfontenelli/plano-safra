@@ -490,7 +490,7 @@ window.Telas.planoOperacoes = (function () {
     if (!rascunhoAlterado(op)) { seguir(); return; }
     Modal.confirmar({
       titulo: `Descartar as alterações de ${esc(r.nome)}?`,
-      texto: 'As alterações não salvas na receita serão perdidas.',
+      texto: 'As alterações não salvas na recomendação serão perdidas.',
       botoes: [{ rotulo: 'Continuar editando' }, { rotulo: 'Descartar', classe: 'perigo', acao: seguir }]
     });
   }
@@ -505,7 +505,7 @@ window.Telas.planoOperacoes = (function () {
         </div>
         ${listaReceitas(op, r)}
         ${r ? corpoReceita(op, r) : `
-          <p class="recomendacao__vazia">Nenhuma receita nesta operação.${somenteLeitura ? '' : ' Use "+ Nova receita" para criar.'}</p>`}
+          <p class="recomendacao__vazia">Nenhuma recomendação nesta operação.${somenteLeitura ? '' : ' Use "+ Nova recomendação" para criar.'}</p>`}
       </section>`;
   }
 
@@ -515,7 +515,7 @@ window.Telas.planoOperacoes = (function () {
       const ativa = atual && r.id === atual.id;
       if (ui.renomeandoReceita === r.id) {
         return `<input class="campo__controle campo--compacto receitas__nome-campo" data-campo="nome-receita"
-                       value="${esc(r.nome)}" aria-label="Nome da receita" data-foco-inicial>`;
+                       value="${esc(r.nome)}" aria-label="Nome da recomendação" data-foco-inicial>`;
       }
       return `
         <button class="receitas__guia ${ativa ? 'receitas__guia--ativa' : ''}" type="button" role="tab"
@@ -524,9 +524,9 @@ window.Telas.planoOperacoes = (function () {
     }).join('');
     return `
       <div class="receitas">
-        <div class="receitas__guias" role="tablist" aria-label="Receitas da operação">${guias}</div>
+        <div class="receitas__guias" role="tablist" aria-label="Recomendações da operação">${guias}</div>
         ${somenteLeitura || ui.modo === 'ajustar' ? '' : `
-          <button class="link-acao receitas__nova" type="button" data-acao="nova-receita">${Icones.mais} Nova receita</button>
+          <button class="link-acao receitas__nova" type="button" data-acao="nova-receita">${Icones.mais} Nova recomendação</button>
           ${atual ? `
             <button class="botao-icone receitas__excluir" type="button" data-acao="excluir-receita"
                     title="Excluir a ${esc(atual.nome)}" aria-label="Excluir a ${esc(atual.nome)}">${Icones.lixeira}</button>` : ''}`}
@@ -549,7 +549,7 @@ window.Telas.planoOperacoes = (function () {
             </tr></thead>
             <tbody>
               ${linhas.length ? linhas.map((l) => linhaRecomendacao(l, erros.linhas[l.id], leitura)).join('')
-                : '<tr><td class="tabela__vazia" colspan="5">Nenhum produto na receita.</td></tr>'}
+                : '<tr><td class="tabela__vazia" colspan="5">Nenhum produto na recomendação.</td></tr>'}
             </tbody>
           </table>
           ${erros.semLinhas ? '<p class="erro-campo">Informe pelo menos um produto.</p>' : ''}
@@ -568,7 +568,7 @@ window.Telas.planoOperacoes = (function () {
             ${Icones.mapa} Aplicar nos talhões</button>`}
         ${ui.modo === 'selecionar' ? '' : `
           <button class="botao ${alterada ? 'botao--primario' : 'botao--secundario'}" type="button"
-                  data-acao="salvar-receita" ${alterada ? '' : 'disabled'}>Salvar receita</button>`}
+                  data-acao="salvar-receita" ${alterada ? '' : 'disabled'}>Salvar recomendação</button>`}
         <button class="botao botao--secundario" type="button" data-acao="adicionar-linha">${Icones.mais} Adicionar produto</button>
       </div>`;
   }
@@ -796,7 +796,7 @@ window.Telas.planoOperacoes = (function () {
           <span class="talhoes__selecao"><strong>${n} ${n === 1 ? 'talhão' : 'talhões'}</strong> · ${Util.area(area)}</span>
           <button class="botao botao--perigo-leve botao--p" type="button" data-acao="remover-da-operacao"
                   ${recebem ? '' : 'disabled title="Nenhum dos talhões selecionados recebe a operação"'}>Remover da operação</button>
-          <button class="botao botao--primario botao--p" type="button" data-acao="ajustar-produtos">Ajustar receita</button>
+          <button class="botao botao--primario botao--p" type="button" data-acao="ajustar-produtos">Ajustar recomendação</button>
           <button class="botao-icone dica dica--direita" type="button" data-acao="cancelar-modo"
                   data-dica="Cancelar edição" aria-label="Cancelar edição">${Icones.fechar}</button>
         </div>`;
@@ -843,7 +843,7 @@ window.Telas.planoOperacoes = (function () {
     const modal = Modal.abrir(`
       <div class="modal__corpo">
         <button class="modal__fechar" type="button" aria-label="Fechar" data-fechar>${Icones.fechar}</button>
-        <h2 class="modal__titulo" id="modal-titulo">Ajustar receita de ${n} ${n === 1 ? 'talhão' : 'talhões'}</h2>
+        <h2 class="modal__titulo" id="modal-titulo">Ajustar recomendação de ${n} ${n === 1 ? 'talhão' : 'talhões'}</h2>
         <p class="ajuste-modal__talhoes">${listaTalhoes}</p>
         <p class="ajuste-modal__ajuda">Campo não alterado mantém o valor de cada talhão</p>
         <div class="ajuste-modal__conteudo"></div>
@@ -1598,7 +1598,7 @@ window.Telas.planoOperacoes = (function () {
       Modal.confirmar({
         titulo: `Excluir ${esc(r.nome)}?`,
         texto: `Ela está aplicada em ${n} ${n === 1 ? 'talhão, que ficará' : 'talhões, que ficarão'} sem operação. Essa ação não pode ser desfeita.`,
-        botoes: [{ rotulo: 'Cancelar' }, { rotulo: 'Excluir receita', classe: 'perigo', acao: () => {
+        botoes: [{ rotulo: 'Cancelar' }, { rotulo: 'Excluir recomendação', classe: 'perigo', acao: () => {
           remover(); Aviso.mostrar(`${esc(r.nome)} excluída`);
         } }]
       });
@@ -1623,7 +1623,7 @@ window.Telas.planoOperacoes = (function () {
     const v = valor.trim();
     if (r && v && v !== r.nome) {
       if (op.receitas.some((x) => x !== r && Util.normalizar(x.nome) === Util.normalizar(v))) {
-        Aviso.mostrar('Já existe uma receita com esse nome');
+        Aviso.mostrar('Já existe uma recomendação com esse nome');
       } else {
         r.nome = v; alterou();
       }
@@ -1653,7 +1653,7 @@ window.Telas.planoOperacoes = (function () {
     if (comAjuste.length) {
       Modal.confirmar({
         titulo: `${comAjuste.length} ${comAjuste.length === 1 ? 'talhão tem ajustes' : 'talhões têm ajustes'}.`,
-        texto: `${comAjuste.join(', ')}: manter as doses próprias desses talhões ou substituir pelas doses padrão da receita?`,
+        texto: `${comAjuste.join(', ')}: manter as doses próprias desses talhões ou substituir pelas doses padrão da recomendação?`,
         botoes: [
           { rotulo: 'Manter ajustes', classe: 'secundario', acao: () => aplicar(false) },
           { rotulo: 'Substituir pela dose padrão', classe: 'primario', acao: () => aplicar(true) }
