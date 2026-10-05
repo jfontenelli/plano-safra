@@ -79,27 +79,27 @@ window.DADOS = {
       { nome: 'Preparo de solo', dap: -50 }
     ] },
     { nome: 'Corretivos', tipo: 'Corretivos', operacoes: [
-      { nome: 'Calcário – pré-plantio', dap: -30 }
+      { nome: 'Calcário: pré-plantio', dap: -30 }
     ] },
     { nome: 'Semente', tipo: 'Sementes', operacoes: [
       { nome: 'Plantio', dap: 0 }
     ] },
     { nome: 'Fertilizante', tipo: 'Fertilizantes', operacoes: [
-      { nome: 'Fósforo – pré-plantio', dap: -20 },
-      { nome: '1ª metade do K – pré-plantio', dap: -10 },
+      { nome: 'Fósforo: pré-plantio', dap: -20 },
+      { nome: '1ª Metade do K: pré-plantio', dap: -10 },
       { nome: '2ª Potássio', dap: 25 }
     ] },
     { nome: 'Defensivo', tipo: 'Defensivos', operacoes: [
-      { nome: '1ª dessecação – pré-plantio', dap: -15 },
-      { nome: '2ª dessecação – opcional pré-plantio', dap: -5 },
+      { nome: '1ª Dessecação: pré-plantio', dap: -15 },
+      { nome: '2ª Dessecação: pré-plantio', dap: -5 },
       { nome: 'Pré-emergente', dap: 1 },
-      { nome: '1ª Pós-emergente (herbicida)', dap: 15 },
-      { nome: '2ª Pós-emergente (herbicida + inseticida + fungicida e adjuvante)', dap: 25 },
-      { nome: '1ª fungicida + inseticida', dap: 40 },
-      { nome: '2ª fungicida + inseticida', dap: 55 },
-      { nome: '3ª fungicida + inseticida', dap: 70 },
-      { nome: '4ª fungicida + inseticida', dap: 85 },
-      { nome: '5ª fungicida + inseticida', dap: null },
+      { nome: '1ª Pós-emergente', dap: 15 },
+      { nome: '2ª Pós-emergente', dap: 25 },
+      { nome: '1ª Fungicida', dap: 40 },
+      { nome: '2ª Fungicida', dap: 55 },
+      { nome: '3ª Fungicida', dap: 70 },
+      { nome: '4ª Fungicida', dap: 85 },
+      { nome: '5ª Fungicida', dap: null },
       { nome: 'Desfolha', dap: 100 }
     ] },
     { nome: 'Colheita', tipo: 'Colheita', operacoes: [
@@ -122,7 +122,7 @@ window.DADOS = {
       receita: null, // aguardando premissas de produção
       atualizadoEm: '2026-09-30', atualizadoPor: 'João da Silva',
       operacoes: {
-        '1ª fungicida + inseticida': {
+        '1ª Fungicida': {
           fenologia: 'V5',
           produtos: [['Fox Xpro', 0.40], ['Engeo Pleno', 0.20]],
           talhoes: ['T01', 'T02', 'T04', 'T05', 'T06', 'T07', 'T08', 'T09', 'T10', 'T11', 'T12'], // T03 sem operação
@@ -145,17 +145,17 @@ window.DADOS = {
         const todos = ['T01', 'T02', 'T03', 'T04', 'T05', 'T06', 'T07', 'T08'];
         const op = (produtos, fenologia = '') => ({ fenologia, produtos, talhoes: todos });
         return {
-          '1ª dessecação – pré-plantio': op([['Roundup Original DI', 2.5], ['DMA 806 BR', 1.0]]),
-          '2ª dessecação – opcional pré-plantio': op([['Finale', 2.0]]),
+          '1ª Dessecação: pré-plantio': op([['Roundup Original DI', 2.5], ['DMA 806 BR', 1.0]]),
+          '2ª Dessecação: pré-plantio': op([['Finale', 2.0]]),
           'Pré-emergente': op([['Dual Gold', 1.5]]),
-          '1ª Pós-emergente (herbicida)': op([['Roundup Original DI', 2.0]]),
-          '2ª Pós-emergente (herbicida + inseticida + fungicida e adjuvante)':
+          '1ª Pós-emergente': op([['Roundup Original DI', 2.0]]),
+          '2ª Pós-emergente':
             op([['Select 240 EC', 0.45], ['Engeo Pleno', 0.20], ['Unizeb Gold', 1.5]]),
-          '1ª fungicida + inseticida': op([['Fox Xpro', 0.40], ['Engeo Pleno', 0.20]], 'V5'),
-          '2ª fungicida + inseticida': op([['Priori Xtra', 0.30], ['Ampligo', 0.15]]),
-          '3ª fungicida + inseticida': op([['Elatus', 0.20], ['Connect', 1.0]]),
-          '4ª fungicida + inseticida': op([['Cypress', 0.30], ['Premio', 0.05]]),
-          // 5ª fungicida + inseticida: sem talhões (Sem operação)
+          '1ª Fungicida': op([['Fox Xpro', 0.40], ['Engeo Pleno', 0.20]], 'V5'),
+          '2ª Fungicida': op([['Priori Xtra', 0.30], ['Ampligo', 0.15]]),
+          '3ª Fungicida': op([['Elatus', 0.20], ['Connect', 1.0]]),
+          '4ª Fungicida': op([['Cypress', 0.30], ['Premio', 0.05]]),
+          // 5ª Fungicida: sem talhões (Sem operação)
           'Desfolha': op([['Finale', 2.0]])
         };
       })()
