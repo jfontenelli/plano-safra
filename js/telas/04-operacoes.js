@@ -711,7 +711,6 @@ window.Telas.planoOperacoes = (function () {
           <h3 class="rotulo-secao ${modo !== 'ver' ? 'rotulo-secao--destaque' : ''}" id="titulo-talhoes">${titulo}</h3>
           ${ferramentas}
         </div>
-        ${modo === 'ajustar' ? '' : legendaTalhoes(op)}
         <div class="tabela-rolagem">
           <table class="tabela tabela--compacta tabela-talhoes">
             <thead><tr>
@@ -725,19 +724,6 @@ window.Telas.planoOperacoes = (function () {
         </div>
         ${rodapeTalhoes(op)}
       </section>`;
-  }
-
-  // Legenda das cores: cada item só aparece quando existe ao menos 1 talhão nessa situação
-  function legendaTalhoes(op) {
-    const algumTalhao = Object.keys(op.talhoes).length > 0;
-    const laranja = algumTalhao && talhoesFazenda.some((t) => Planos.statusTalhao(op, t.nome) !== 'Completo');
-    const cinza = !algumTalhao && talhoesFazenda.length > 0;
-    if (!laranja && !cinza) return '';
-    return `
-      <p class="talhoes__legenda">
-        ${laranja ? '<span class="talhoes__cor talhoes__cor--pendente" aria-hidden="true"></span>Sem operação ou sem dose' : ''}
-        ${cinza ? '<span class="talhoes__cor talhoes__cor--sem" aria-hidden="true"></span>Operação ainda não aplicada em nenhum talhão' : ''}
-      </p>`;
   }
 
   function talhoesMarcaveis(op) {
