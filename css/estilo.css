@@ -1175,10 +1175,94 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
   font-variant-numeric: tabular-nums;
 }
 
-.ops-item__acoes { display: flex; gap: 2px; }
-
 .ops-lista__nova { flex-shrink: 0; margin: 12px 0 0 10px; align-self: flex-start; }
 .ops-lista__vazia { margin: 8px 10px 0; font-size: 14px; color: var(--texto-suave); }
+
+/* Modo Editar da lista: caixas de seleção, renomear com duplo clique e barra no rodapé */
+.ops-lista__editar { margin: 0; padding: 2px 4px; border-radius: 4px; }
+.ops-lista__editar[aria-disabled="true"] { color: #9aa5a0; cursor: not-allowed; text-decoration: none; }
+.ops-lista__editar:focus-visible,
+.ops-lista__nova:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 2px; }
+
+.ops-lista__todos {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 36px;
+  margin: 0 4px 4px 3px;
+  font-size: 14px;
+  color: var(--texto-suave);
+  cursor: pointer;
+}
+.ops-lista__todos input,
+.ops-item--editar input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  margin: 4px 4px 4px 8px;
+  flex-shrink: 0;
+  accent-color: var(--verde-700);
+  cursor: pointer;
+}
+.ops-lista__todos input:focus-visible,
+.ops-item--editar input[type="checkbox"]:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 2px; }
+
+.ops-item--editar .ops-item__nome { padding-left: 4px; cursor: text; }
+.ops-item--editar .ops-item__nome:focus-visible { outline: 2px solid var(--verde-600); outline-offset: -2px; border-radius: 6px; }
+.ops-item__nome--alterado { font-style: italic; }
+
+.ops-item__nome-campo {
+  flex: 1;
+  min-width: 0;
+  height: auto;
+  min-height: 34px;
+  margin: 4px 0;
+  padding: 6px 8px;
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.35;
+  resize: none;
+  field-sizing: content;
+}
+.ops-item__nome-campo:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 1px; }
+
+.ops-lista__barra {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-shrink: 0;
+  margin: 12px -12px -16px;
+  padding: 12px;
+  border-top: 1px solid var(--borda);
+}
+.ops-lista__barra .botao:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 2px; }
+.ops-lista__barra .botao--perigo-leve:disabled { background: var(--superficie); border-color: var(--borda); color: #9aa5a0; }
+
+/* Dica no mouse e no foco do teclado (botão com aria-disabled continua focável) */
+.dica { position: relative; }
+.dica:hover::after,
+.dica:focus-visible::after {
+  content: attr(data-dica);
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 20;
+  width: max-content;
+  max-width: 240px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  background: #26312c;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.35;
+  white-space: normal;
+  pointer-events: none;
+}
+
+/* Status no subtítulo do plano: clique alterna (só no protótipo) */
+.status--botao { border: 0; font: inherit; font-size: 13px; font-weight: 500; cursor: pointer; }
+.status--botao:hover { filter: brightness(.96); }
+.status--botao:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 2px; }
 
 /* --- Detalhe --- */
 .ops-detalhe {
@@ -1202,14 +1286,6 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
   align-items: flex-end;
   gap: 12px 28px;
 }
-
-.op-cabecalho__acoes {
-  display: flex;
-  gap: 8px;
-  align-self: center;
-  margin-left: auto;
-}
-.op-cabecalho__acoes .botao-icone { width: 36px; height: 36px; }
 
 .op-cabecalho__nome-campo {
   align-self: center;
