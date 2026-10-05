@@ -10,7 +10,7 @@ window.Telas.abrirModalCriarPlano = function ({ aoCriar }) {
       texto: 'Use uma estrutura pronta de operações e ajuste conforme necessário.' },
     { valor: 'branco',   titulo: 'Plano em branco', icone: Icones.lapis,
       texto: 'Monte a lista de operações conforme a realidade da fazenda.' },
-    { valor: 'importar', titulo: 'Importar XLSX',   icone: Icones.planilha,
+    { valor: 'importar', titulo: 'Importar XLSX',   icone: Icones.planilha, emBreve: true,
       texto: 'Importe um planejamento existente a partir de uma planilha.' },
     { valor: 'clonar',   titulo: 'Clonar safra anterior', icone: Icones.copiar, emBreve: true,
       texto: 'Utilize o plano de uma safra anterior como base para o novo planejamento.' }
@@ -26,7 +26,6 @@ window.Telas.abrirModalCriarPlano = function ({ aoCriar }) {
         <div class="campo">
           <label class="campo__rotulo" for="cp-safra">Safra</label>
           <select class="campo__controle" id="cp-safra" name="safra" required></select>
-          <button class="link-acao" type="button" data-acao="nova-safra">${Icones.mais} Criar nova safra</button>
           <div class="nova-safra" hidden>
             <input class="campo__controle" id="cp-nova-safra" type="text" placeholder="Nome da safra (ex.: 26/27)"
                    aria-label="Nome da nova safra" autocomplete="off">
@@ -59,28 +58,40 @@ window.Telas.abrirModalCriarPlano = function ({ aoCriar }) {
   const selectSafra = form.elements.safra;
   const caixaNovaSafra = form.querySelector('.nova-safra');
   const inputNovaSafra = form.querySelector('#cp-nova-safra');
-  const linkNovaSafra = form.querySelector('[data-acao="nova-safra"]');
+  const NOVA_SAFRA = '__nova-safra__';
+  let safraAnterior = '';
   const erroDuplicado = form.querySelector('#cp-erro-duplicado');
   const botaoContinuar = form.querySelector('[type="submit"]');
 
   preencherSafras();
   selectSafra.focus();
 
-  // ----- Criar nova safra -----
+  // ----- Criar nova safra (última opção da lista de safras) -----
   function preencherSafras(selecionada = '') {
-    selectSafra.innerHTML = opcoes('Selecione uma safra', DADOS.safras, selecionada);
+    selectSafra.innerHTML = opcoes('Selecione uma safra', DADOS.safras, selecionada) +
+      `<option value="${NOVA_SAFRA}">+ Criar nova safra</option>`;
+    safraAnterior = selecionada;
   }
+
+  // Escolher "+ Criar nova safra" volta a lista ao valor anterior e abre o campo do nome.
+  // Registrado no próprio select, antes da validação do formulário.
+  selectSafra.addEventListener('change', () => {
+    if (selectSafra.value === NOVA_SAFRA) {
+      selectSafra.value = safraAnterior;
+      abrirNovaSafra();
+    } else {
+      safraAnterior = selectSafra.value;
+    }
+  });
 
   function abrirNovaSafra() {
     caixaNovaSafra.hidden = false;
-    linkNovaSafra.hidden = true;
     inputNovaSafra.value = '';
     inputNovaSafra.focus();
   }
 
   function fecharNovaSafra() {
     caixaNovaSafra.hidden = true;
-    linkNovaSafra.hidden = false;
   }
 
   function adicionarSafra() {
@@ -96,14 +107,13 @@ window.Telas.abrirModalCriarPlano = function ({ aoCriar }) {
 
   form.addEventListener('click', (e) => {
     const acao = e.target.closest('[data-acao]')?.dataset.acao;
-    if (acao === 'nova-safra') abrirNovaSafra();
     if (acao === 'adicionar-safra') adicionarSafra();
-    if (acao === 'cancelar-safra') { fecharNovaSafra(); linkNovaSafra.focus(); }
+    if (acao === 'cancelar-safra') { fecharNovaSafra(); selectSafra.focus(); }
   });
 
   inputNovaSafra.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') { e.preventDefault(); adicionarSafra(); }
-    if (e.key === 'Escape') { e.stopPropagation(); fecharNovaSafra(); linkNovaSafra.focus(); }
+    if (e.key === 'Escape') { e.stopPropagation(); fecharNovaSafra(); selectSafra.focus(); }
   });
 
   // ----- Validação: quatro campos preenchidos e um plano por safra e fazenda -----
@@ -139,11 +149,6 @@ window.Telas.abrirModalCriarPlano = function ({ aoCriar }) {
     e.preventDefault();
     if (botaoContinuar.disabled) return;
     const v = valores();
-    // Importar XLSX ainda não foi implementado: avisa e não cria o plano
-    if (v.inicio === 'importar') {
-      Telas.abrirModalEmConstrucao('Importar XLSX');
-      return;
-    }
     modal.fechar();
     aoCriar({
       safra: v.safra,
