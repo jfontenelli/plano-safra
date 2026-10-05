@@ -1,6 +1,6 @@
 # Tela Operações (grupo Defensivo)
 
-Atualizado em 02/10/2026. Este doc mostra só o estado atual da tela. Decisão alterada é reescrita, não acumulada.
+Atualizado em 05/10/2026. Este doc mostra só o estado atual da tela. Decisão alterada é reescrita, não acumulada.
 Tudo é **Definido**, exceto as seções "Sugestões em teste" e "Em aberto".
 Referência no protótipo: `tela/04-operacoes-defensivos`. Referência visual: mockup de 02/10/2026 (grupos no rodapé).
 **A imagem é só referência visual. Quando imagem e documento divergirem (nomes, ordem de colunas, botões, comportamento), vale este documento.**
@@ -22,12 +22,12 @@ O agrônomo corporativo monta as operações do plano, grupo por grupo: cria as 
 ## 3. Layout geral
 
 ```
-Plano de Safra  ›  Safra 26/27 · Empresa A · Fazenda Santa Maria · Cultura Soja
+Plano de Safra  ›  Safra 26/27 · Empresa A · Fazenda Santa Maria · Cultura Soja · Em construção
 ──────────────
 Operações   Calendário Agrícola   Suprimentos   Aprovação
 ─────────
 ┌───────────────────────┬──────────────────────────────────────────────────────────┐
-│ Operações     DAP  ≪  │ 1ª Fungicida   DAP [30]  Fenologia [V5 ▾]          ✏️ 🗑  │
+│ Operações Editar DAP ≪│ 1ª Fungicida   DAP [30]  Fenologia [V5 ▾]                │
 │ ▌1ª Fungicida     30  │ 1.085 ha · 11 talhões · 1 pendente                        │
 │  2ª Fungicida     45  │ Recomendação agronômica                                   │
 │  3ª Fungicida     60  │   Princípio ativo · Produto comercial · Unid. · Dose  🗑   │
@@ -43,7 +43,7 @@ Princípio: o peso visual de cada navegação é inverso à frequência de uso. 
 ## 4. Cabeçalho
 
 - **"Plano de Safra" é um link** que volta para a Visão Geral. O menu lateral também volta.
-- Contexto fixo ao lado: Safra · Empresa · Fazenda · Cultura.
+- Contexto fixo ao lado: Safra · Empresa · Fazenda · Cultura · Status do plano (Em construção ou Aprovado).
 - Etapas em abas sublinhadas, sem número: Operações · Calendário Agrícola · Suprimentos · Aprovação.
 
 ## 5. Grupos de operação (guias no rodapé)
@@ -60,15 +60,28 @@ Princípio: o peso visual de cada navegação é inverso à frequência de uso. 
 ## 6. Operações do grupo (lista lateral)
 
 - Lista à esquerda com nome e DAP de cada operação, ordenada automaticamente pelo DAP; cabeçalho "Operações" com o rótulo "DAP" e o botão ≪; "+ Nova operação" no fim. A lista rola sozinha, sem rolar a página.
-- A lista mostra só nome e DAP; o item selecionado fica marcado. Lápis e lixeira ficam no card da operação (ver seção 7).
-- **Lista minimizada** (≪ / ≫): coluna estreita com ≫, o rótulo "DAP" e só os DAPs das operações, na mesma ordem; a operação selecionada fica marcada e o nome aparece ao passar o mouse. Clicar no DAP abre a operação. No fim da coluna, um "+" cria uma nova operação (o nome abre em edição no card da operação).
-- Excluir operação com talhões: confirmação mostrando o impacto (ex.: "Excluir 1ª Fungicida? 11 talhões e 2 produtos serão removidos do plano"). Operação vazia: exclui na hora, com "Desfazer".
+- A lista mostra só nome e DAP; o item selecionado fica marcado. Clique simples na linha abre a operação; duplo clique na lista normal não faz nada.
+- Botão de texto **"Editar"** no cabeçalho da lista, entre "Operações" e "DAP". Renomear e excluir operações ficam no modo Editar (não no card da operação).
+- **Lista minimizada** (≪ / ≫): coluna estreita com ≫, o rótulo "DAP" e só os DAPs das operações, na mesma ordem; a operação selecionada fica marcada e o nome aparece ao passar o mouse. Clicar no DAP abre a operação. No fim da coluna, um "+" cria uma nova operação (o nome abre em edição no card da operação). Minimizada, o "Editar" não aparece.
+
+**Modo Editar** (só com o plano "Em construção")
+- Cada linha ganha uma caixa de seleção à esquerda; no topo da lista, a caixa **"Todos"** (marca/desmarca todas). "+ Nova operação" fica oculto.
+- No rodapé da lista, a barra **Cancelar · Excluir (n) · Salvar**.
+- A caixa de seleção só é marcada clicando nela mesma; o nome fica reservado para o duplo clique.
+- **Renomear: duplo clique no nome** (ou Enter no teclado) transforma o nome em campo de texto, com o nome completo (sem truncar). Enter confirma o campo; Esc desfaz a edição daquele campo. Ao passar o mouse no nome: "Clique duas vezes para renomear".
+- O DAP não é editável neste modo (só no cabeçalho da operação). A lista continua ordenada pelo DAP.
+- **Salvar**: só fica ativo com algum nome alterado; salva os nomes e sai do modo Editar.
+- **Cancelar**: descarta os nomes não salvos e sai do modo Editar.
+- **Excluir (n)**: mostra quantas operações estão marcadas; desabilitado com n = 0. Ver "Sugestões em teste" (exclusão).
+
+**Plano aprovado**
+- Nenhuma operação pode ser editada. "Editar" fica com aparência desabilitada, mas recebe mouse e foco do teclado para mostrar a dica: "Plano aprovado: operações não podem ser editadas".
 - A lista não mostra contador de pendências.
 
 ## 7. Detalhe da operação
 
 - Card da operação, em duas linhas:
-  - **Linha 1:** nome da operação, **DAP** (campo) e **Fenologia** (lista de seleção, opcional); à direita, **lápis** (renomear: o próprio título vira campo de edição) e **lixeira** (excluir).
+  - **Linha 1:** nome da operação, **DAP** (campo) e **Fenologia** (lista de seleção, opcional). Sem lápis e lixeira: renomear e excluir ficam no modo Editar da lista (seção 6).
   - **Linha 2:** resumo área (ha) · talhões · pendentes, alinhado à esquerda, com a lista de operações expandida ou minimizada.
 - As opções de fenologia vêm do menu Cadastros (a trabalhar depois). No protótipo, estádios da soja como exemplo.
 - O DAP da operação vale para todos os talhões, mas pode ser ajustado por talhão.
@@ -145,6 +158,7 @@ Um verbo por ação, do botão à mensagem:
 ## 14. Demonstração (só no protótipo)
 
 - Ícone de demonstração no menu lateral, acima do usuário, com duas opções: **"Começar do zero"** (limpa os dados e mostra o primeiro uso) e **"Ver com planos de exemplo"** (carrega planos fictícios e abre a Visão Geral).
+- Clicar no status do plano, no fim do subtítulo do cabeçalho, alterna entre "Em construção" e "Aprovado", para testar os dois estados.
 
 ## 15. Princípios da tela
 
@@ -159,6 +173,11 @@ Um verbo por ação, do botão à mensagem:
 - Nova operação: item novo na lista com nome em edição e DAP destacado.
 - Ao trocar uma linha de "só princípio ativo" para produto escolhido, limpar a dose em i.a. e pedir a dose do produto (ou converter pela concentração, quando houver no cadastro).
 - Observar nos testes se o duplo clique para renomear grupo é descoberto; se não, voltar com o lápis.
+- **Exclusão de operações no modo Editar (hipótese para validar com clientes):**
+  - Com talhões nas marcadas: confirmação com o impacto. Ex.: "Excluir 2 operações? Elas estão aplicadas em 12 talhões, com 5 produtos. Essa ação não pode ser desfeita." Botões: Cancelar · Excluir operações.
+  - Sem talhões nas marcadas: exclui na hora, com "Desfazer".
+  - Todas as operações do grupo marcadas: avisa que o grupo ficará sem operações.
+  - Ao confirmar, exclui as operações com seus talhões e produtos. Se a operação aberta foi excluída, abre a primeira restante da lista (ou o estado vazio do grupo).
 
 ## 17. Em aberto
 
