@@ -9,7 +9,7 @@ Referência no protótipo: `tela/04-operacoes-defensivos`. Referência visual: m
 
 ## 1. Objetivo
 
-O agrônomo corporativo monta as operações do plano, grupo por grupo: cria as operações com DAP, define a recomendação agronômica (princípio ativo, produto e dose), seleciona em quais talhões aplicar e, se precisar, ajusta talhão a talhão.
+O agrônomo corporativo monta as operações do plano, grupo por grupo: cria as operações com DAP, monta as receitas da recomendação agronômica (produtos e doses padrão), aplica cada receita nos talhões e, se precisar, ajusta talhão a talhão.
 
 ## 2. Lugar na jornada
 
@@ -30,8 +30,9 @@ Operações   Calendário Agrícola   Suprimentos   Aprovação
 │ Operações Editar DAP ≪│ 1ª Fungicida   DAP [30]  Fenologia [V5 ▾]                │
 │ ▌1ª Fungicida     30  │ 1.085 ha · 11 talhões · 1 sem operação · 1 sem dose       │
 │  2ª Fungicida     45  │ Recomendação agronômica                                   │
-│  3ª Fungicida     60  │   Princípio ativo · Produto comercial · Unid. · Dose  🗑   │
-│  4ª Fungicida     75  │   + Adicionar produto              [Selecionar talhões]   │
+│  3ª Fungicida     60  │   Receita 1 │ Receita 2 │ + Nova receita              🗑   │
+│  4ª Fungicida     75  │   Princípio ativo · Produto comercial · Unid. · Dose padrão│
+│                       │   + Adicionar produto [Salvar receita] [Aplicar nos talhões]│
 │ + Nova operação       │ Talhões da recomendação agronômica      ✏️ Editar  🔍     │
 │                       │   Talhão · Área · dose por produto (cor da linha = status)│
 └───────────────────────┴──────────────────────────────────────────────────────────┘
@@ -87,44 +88,66 @@ Princípio: o peso visual de cada navegação é inverso à frequência de uso. 
 - **Uma operação tem um DAP só**, que vale para todos os talhões dela. Outro DAP = outra operação.
 - Antes de existir data de plantio (informada no grupo Semente), as operações mostram só o DAP (ex.: −30), sem data.
 
-## 8. Recomendação agronômica
+## 8. Recomendação agronômica (receitas)
 
-- Colunas: **Princípio ativo · Produto comercial · Unidade · Dose**, com lixeira por linha e "+ Adicionar produto".
-- **Os dois campos se filtram nos dois sentidos**: escolhido o princípio ativo, o produto mostra só os produtos com ele; escolhido o produto, o princípio ativo dele é preenchido. O agrônomo começa pelo campo que preferir.
-- **Dose**:
+**Regra**
+- **Receita agronômica = conjunto de produtos + doses padrão.**
+- **A composição de produtos determina a identidade da receita.**
+- **A dose pode variar por talhão sem alterar a identidade da receita.**
+- Uma operação pode ter mais de uma receita. Na mesma operação, **cada talhão fica em uma receita só**.
 
-| A linha tem | A dose é do | Exemplo |
-|---|---|---|
-| Produto comercial (com ou sem princípio ativo) | Produto comercial | Fox Xpro · 0,40 L/ha |
-| Só princípio ativo | Ingrediente ativo | Azoxistrobina · 60 g i.a./ha |
+**Lista de receitas** (topo da seção)
+- `Receita 1 | Receita 2 | + Nova receita`, numeradas automaticamente. Só uma fica aberta, com destaque discreto; as demais mostram só o nome. Sem status ("Em edição", "Salva", "Aplicada").
+- **"+ Nova receita"** cria a próxima, já aberta, com uma linha vazia para o primeiro produto.
+- **Numeração**: maior número já usado + 1 (ex.: com Receita 1 e Receita 3, a próxima é Receita 4). Renomear ou excluir não renumera as outras.
+- Receita nova sem nenhum produto preenchido some ao trocar de receita (se houver outra receita na operação).
+- **Renomear**: duplo clique na receita aberta (ou F2), como nas guias de grupo. Enter confirma, Esc desfaz. Dica no mouse: "Clique duas vezes para renomear". Nome vazio volta ao anterior; nome repetido na operação não é aceito ("Já existe uma receita com esse nome").
+- **Excluir**: lixeira na ponta direita da lista, agindo sobre a receita aberta.
+  - Com talhões: confirmação com o impacto. Ex.: "Excluir Receita 2? Ela está aplicada em 3 talhões, que ficarão sem operação. Essa ação não pode ser desfeita." Botões: Cancelar · Excluir receita.
+  - Sem talhões: exclui na hora, com "Desfazer".
+  - Depois de excluir, abre a primeira receita restante; sem nenhuma, aparece só "+ Nova receita".
+- Operação sem receita: "Nenhuma receita nesta operação. Use "+ Nova receita" para criar."
 
-- A dose é sempre por hectare. Unidades: **L, mL, kg, g, t** (exibidas como L/ha, mL/ha…). Sem produto, a unidade aparece em i.a. (g i.a./ha…).
-- Botão **"Selecionar talhões"** abaixo da tabela da recomendação, na linha do "+ Adicionar produto".
-- Para selecionar talhões, o preenchimento mínimo é obrigatório: **DAP**, ao menos uma linha na recomendação e, em cada linha, **princípio ativo ou produto comercial** (ao menos um), **unidade** e **dose**. Se faltar algo ao clicar, aparece em vermelho, abaixo de cada campo, "Informação obrigatória" (ou "Informe pelo menos um produto ou princípio ativo").
+**Tabela da receita**
+- Colunas: **Princípio ativo · Produto comercial · Unidade · Dose padrão**, com lixeira por linha e "+ Adicionar produto".
+- **A dose é do produto comercial.** O princípio ativo não tem dose: serve como filtro para encontrar o produto. Escolhido o princípio ativo, o produto mostra só os produtos com ele; escolhido o produto, o princípio ativo dele é preenchido.
+- Linha só com princípio ativo: unidade vazia e dose bloqueada ("Escolha o produto comercial para informar a dose").
+- A unidade vem do cadastro do produto. A dose é sempre por hectare (L/ha, mL/ha, kg/ha, g/ha, t/ha).
+- Exemplo: Bixafen + Protioconazol + Trifloxistrobina · Fox Xpro · L/ha · 0,40.
+
+**Salvar receita** (fluxo: montar receita → salvar receita → aplicar nos talhões)
+- As mudanças na receita ficam em rascunho até **"Salvar receita"**. Trocar de receita, operação ou grupo com alteração não salva pergunta: "Descartar as alterações de Receita 1?" (Continuar editando · Descartar).
+- **"Aplicar nos talhões"** fica desabilitado com alteração não salva (dica: "Salve a receita antes de aplicar").
+- Receita já aplicada: salvar vale para os talhões dela.
+  - **Dose padrão alterada**: muda nos talhões que seguem o padrão; talhão com dose própria mantém a dele.
+  - **Produto adicionado, removido ou trocado**: muda em todos os talhões da receita (é a composição alterada para todos, que atualiza a própria receita).
+- Salvar aceita linha só com princípio ativo (rascunho de trabalho, enquanto o produto é escolhido).
+
+**Preenchimento mínimo para aplicar**: **DAP**, ao menos uma linha na receita e, em cada linha, **produto comercial** e **dose padrão**. Se faltar algo ao clicar, aparece em vermelho abaixo do campo: "Escolha o produto comercial" ou "Informação obrigatória".
 
 ## 9. Pré-cadastro (nesta tela)
 
 Regras gerais da base (Plano_Safra_Cultura_Variedade_revisado_Julyane.docx): só quando o item não é encontrado; fica disponível para uso e reuso com status "Pré-cadastro"; o responsável pelo cadastro é avisado; ao completar, vira "Cadastro completo" mantendo o vínculo com os planos; o sistema aponta possíveis duplicidades e a consolidação depende do responsável.
 
-- **Onde**: na busca de princípio ativo ou de produto comercial. **"+ Pré-cadastrar "texto digitado""** aparece sempre como última opção da lista de resultados, mesmo quando há resultados parecidos.
-- **Como**: a própria linha da recomendação vira um mini-formulário, com o texto digitado já preenchido. Botões: Cancelar e "Salvar pré-cadastro".
-- **Mínimo para defensivo**: nome comercial **ou** princípio ativo (ao menos um) **e unidade**.
+- **Onde**: só na busca de **produto comercial**. **"+ Pré-cadastrar "texto digitado""** aparece sempre como última opção da lista de resultados, mesmo quando há resultados parecidos.
+- **Como**: a própria linha da receita vira um mini-formulário, com o texto digitado já preenchido. Botões: Cancelar e "Salvar pré-cadastro".
+- **Mínimo para defensivo**: **nome comercial e unidade**. O princípio ativo é opcional.
 - Os resultados parecidos aparecem acima da opção de pré-cadastro, para evitar duplicidade na origem.
-- Depois de salvo, o produto aparece com a etiqueta **"Pré-cadastro"** na recomendação e na coluna da tabela de talhões.
+- Depois de salvo, o produto aparece com a etiqueta **"Pré-cadastro"** na receita e na coluna da tabela de talhões.
 
-## 10. Selecionar talhões e aplicar
+## 10. Aplicar nos talhões
 
-1. **"Selecionar talhões"** coloca a tabela em modo seleção, sem janela. Título: "Selecione os talhões que recebem a 1ª Fungicida".
-2. Aparecem todos os talhões da fazenda com caixa de seleção e "Marcar todos". Os que já recebem a operação vêm marcados. A recomendação continua visível acima.
-3. **"Aplicar em N talhões"** confirma. Desmarcar um talhão que já recebia remove a operação dele, e o botão avisa (ex.: "Aplicar em 10 talhões · remover de 1").
-4. Se algum talhão marcado tem ajuste, a tela pergunta: "3 talhões têm ajustes." **Manter ajustes** · **Substituir pela recomendação**.
-5. Mensagem: "Recomendação aplicada em 11 talhões". "Cancelar" sai sem mudar nada.
+1. **"Aplicar nos talhões"** (rodapé da receita aberta) coloca a tabela de talhões em modo seleção, sem janela. Título: "Selecione os talhões que recebem: Receita 1".
+2. Aparecem todos os talhões da fazenda com caixa de seleção e "Marcar todos". Os que já estão nesta receita vêm marcados. Talhão que está em outra receita mostra a indicação (ex.: "· em Receita 1"); marcá-lo muda o talhão para esta receita.
+3. **"Aplicar em N talhões"** confirma. Os talhões recebem os produtos e as **doses padrão** da receita, sem perguntar a dose. Desmarcar um talhão que estava nesta receita remove a operação dele, e o botão avisa (ex.: "Aplicar em 10 talhões · remover de 1").
+4. Se algum talhão marcado (já nesta receita) tem dose própria, a tela pergunta: "3 talhões têm ajustes." **Manter ajustes** · **Substituir pela dose padrão**.
+5. Mensagem: "Receita 1 aplicada em 11 talhões". "Cancelar" sai sem mudar nada.
 
 ## 11. Tabela "Talhões da recomendação agronômica"
 
 **Modo visualizar (padrão)**
 - Mostra **todos os talhões da fazenda**, os que recebem e os que não recebem a operação.
-- Colunas: Talhão · Área · uma coluna de dose por produto, com a unidade no cabeçalho (ex.: "Fox Xpro (L/ha)"). Sem colunas DAP e Status.
+- Colunas: Talhão · Área · uma coluna de dose por produto, com a unidade no cabeçalho (ex.: "Fox Xpro (L/ha)"), juntando os produtos de todas as receitas. Produto que não está na receita do talhão aparece como "—" apagado. Sem colunas DAP, Status e Receita.
 - O status aparece na **cor da linha** (ver seção 12), com uma legenda acima da tabela: "Sem operação ou sem dose" (laranja) · "Operação ainda não aplicada em nenhum talhão" (cinza).
 - Valores ajustados aparecem iguais aos demais (sem marca de ajuste).
 - Botão **"✏️ Editar"** (mesmo padrão do Editar da lista de operações) e busca no cabeçalho da tabela.
@@ -132,6 +155,12 @@ Regras gerais da base (Plano_Safra_Cultura_Variedade_revisado_Julyane.docx): só
 **Modo ajustar (opcional, pelo "✏️ Editar")**
 - Caixas de seleção ("Marcar todos" ou um a um).
 - Com talhões selecionados, aparece a caixa de ajuste, que vale para **todos os selecionados de uma vez**: dose de cada produto, adicionar produto, remover produto, remover da operação. DAP e fenologia não são ajustados por talhão.
+- **Receitas no ajuste** (a composição de produtos é a identidade da receita):
+  - **Só dose** alterada: fica como dose própria do talhão; **não** cria receita. Ex.: Fox Xpro de 0,40 para 0,45 L/ha em 3 talhões da Receita 1 → continuam na Receita 1, com a diferença de dose registrada.
+  - **Composição alterada** (adicionar, remover ou trocar produto) **em parte** dos talhões da receita: esses talhões saem da receita e nasce a próxima receita para eles. Ex.: Receita 1 (Fox Xpro + Engeo Pleno) em 10 talhões; em 3 deles adiciona Assist → Receita 1 fica com 7; a Receita 2 (Fox Xpro + Engeo Pleno + Assist) nasce com os 3.
+  - **Composição alterada em todos** os talhões da receita: atualiza a própria receita.
+  - **Composição que já existe** em outra receita: os talhões entram nela, sem criar receita nova (ex.: em mais 2 talhões da Receita 1 adiciona Assist → entram na Receita 2; tirar o Assist dos talhões da Receita 2 → voltam para a Receita 1). Dose diferente da padrão dessa receita fica como dose própria do talhão.
+  - Mensagem: "Ajustes salvos em 3 talhões · criada a Receita 2".
 - Campo com valores diferentes entre os selecionados mostra **"vários"**; campo não alterado mantém o valor de cada talhão.
 - **"Salvar ajustes"** salva e volta ao modo visualizar. Mensagem: "Ajustes salvos em 2 talhões".
 
@@ -139,12 +168,12 @@ Regras gerais da base (Plano_Safra_Cultura_Variedade_revisado_Julyane.docx): só
 
 | Status | Quando | Linha da tabela |
 |---|---|---|
-| Completo | O talhão recebe a operação e tem produto e dose | Branca |
-| Sem dose | O talhão recebe a operação, mas falta produto ou dose | Laranja claro; a dose que falta aparece como "—" em destaque |
+| Completo | O talhão recebe a operação e cada produto da receita tem dose | Branca |
+| Sem dose | O talhão recebe a operação, mas falta produto comercial ou dose | Laranja claro; a dose que falta aparece como "—" em destaque |
 | Sem operação | O talhão da fazenda não recebe esta operação | Laranja claro; **cinza enquanto a operação não foi aplicada em nenhum talhão** |
 
 - Todos os talhões cadastrados da fazenda contam. Operação ainda sem talhões: todos "sem operação" (ex.: 12 talhões → "12 sem operação"), com as linhas em cinza.
-- Card da operação: "N sem operação" e "N sem dose", separados, porque pedem ações diferentes (Selecionar talhões × Editar). Contador zerado não aparece.
+- Card da operação: "N sem operação" e "N sem dose", separados, porque pedem ações diferentes (Aplicar nos talhões × Editar). Contador zerado não aparece.
 
 - No grupo: o talhão fica "sem operação" no grupo quando está "Sem operação" em todas as operações do grupo.
 
@@ -155,7 +184,8 @@ Um verbo por ação, do botão à mensagem:
 | Verbo | Ação |
 |---|---|
 | Selecionar | escolher os talhões |
-| Aplicar | colocar a recomendação nos talhões |
+| Salvar receita | guardar os produtos e as doses padrão da receita |
+| Aplicar | colocar a receita nos talhões |
 | Ajustar / Salvar ajustes | mudanças pontuais por talhão |
 | Remover | tirar produto ou talhão da operação |
 
@@ -175,7 +205,6 @@ Um verbo por ação, do botão à mensagem:
 - Títulos de seção em caixa normal ("Recomendação agronômica") em vez de caixa alta, para a tela ficar mais leve.
 - Área somada dos talhões selecionados nos modos seleção e ajuste.
 - Nova operação: item novo na lista com nome em edição e DAP destacado.
-- Ao trocar uma linha de "só princípio ativo" para produto escolhido, limpar a dose em i.a. e pedir a dose do produto (ou converter pela concentração, quando houver no cadastro).
 - Observar nos testes se o duplo clique para renomear grupo é descoberto; se não, voltar com o lápis.
 - **Exclusão de operações no modo Editar (hipótese para validar com clientes):**
   - Com talhões nas marcadas: confirmação com o impacto. Ex.: "Excluir 2 operações? Elas estão aplicadas em 12 talhões, com 5 produtos. Essa ação não pode ser desfeita." Botões: Cancelar · Excluir operações.
@@ -186,11 +215,10 @@ Um verbo por ação, do botão à mensagem:
 ## 17. Em aberto
 
 1. Dose recomendada (do fornecedor) em produto de pré-cadastro: mostrar vazio ou "—".
-2. Conversão da dose em i.a. para quantidade de produto: quem escolhe o produto comercial e quando (Suprimentos ou programação da OS).
-3. Visões alternativas da tabela (Por talhão em matriz de cobertura, Por produto).
-4. Operação nova começa com todos os talhões ou vazia.
-5. Grupos Semente, Corretivos, Fertilizante e Colheita seguem o mesmo esqueleto? (Semente recebe a data de plantio, por talhão.)
-6. Onde fica a escolha entre DAP e DAE.
-7. Preparo do solo e operações só de máquina (sem tipo).
-8. Talhão de outra cultura com a Cultura fixa no topo.
-9. Momento em que o plano entra na lista de planos.
+2. Visões alternativas da tabela (Por talhão em matriz de cobertura, Por produto).
+3. Operação nova começa com todos os talhões ou vazia.
+4. Grupos Semente, Corretivos, Fertilizante e Colheita seguem o mesmo esqueleto? (Semente recebe a data de plantio, por talhão.)
+5. Onde fica a escolha entre DAP e DAE.
+6. Preparo do solo e operações só de máquina (sem tipo).
+7. Talhão de outra cultura com a Cultura fixa no topo.
+8. Momento em que o plano entra na lista de planos.

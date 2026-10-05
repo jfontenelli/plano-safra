@@ -44,7 +44,10 @@ window.Telas.planoOperacoes = (function () {
       preCadastro: null,       // { linhaId, produto, principioAtivo, unidade, erro }
       validarOp: null,         // operação cujo "Selecionar talhões" foi clicado com campos faltando
       ajuste: null,            // ajustes em preparo no modo ajustar
-      edicao: null             // modo Editar da lista: { marcadas, nomes, renomeando, nomeAntes }
+      edicao: null,            // modo Editar da lista: { marcadas, nomes, renomeando, nomeAntes }
+      receitaPorOp: {},        // receita aberta em cada operação
+      rascunho: null,          // cópia da receita aberta, editada até "Salvar receita": { receitaId, produtos }
+      renomeandoReceita: null
     };
     ui.edicao = null;          // voltar ao plano sempre abre a lista no modo normal
     raiz = conteudo.querySelector('#plano-raiz');
@@ -392,58 +395,157 @@ window.Telas.planoOperacoes = (function () {
       </div>`;
   }
 
-  // ----- Preenchimento mínimo para "Selecionar talhões" -----
-  // DAP padrão, ao menos uma linha e, em cada linha: princípio ativo ou produto, unidade e dose.
+  // ----- Preenchimento mínimo para "Aplicar nos talhões" -----
+  // DAP, ao menos uma linha na receita e, em cada linha, produto comercial e dose padrão
+  // (a dose é do produto; o princípio ativo só ajuda a encontrar o produto).
   function errosRecomendacao(op) {
     const vazio = (v) => v === null || v === undefined || v === '';
-    const linhas = op.produtos.filter((l) => l.recomendacao);
+    const r = receitaAtual(op);
+    const linhas = r ? r.produtos.filter(Planos.linhaPreenchida) : [];
     const porLinha = {};
     linhas.forEach((l) => {
-      const e = { produto: !l.produto && !l.principioAtivo, unidade: !l.unidade, dose: vazio(l.dose) };
-      if (e.produto || e.unidade || e.dose) porLinha[l.id] = e;
+      const e = { produto: !l.produto, dose: vazio(l.dose) };
+      if (e.produto || e.dose) porLinha[l.id] = e;
     });
     const erros = { dap: vazio(op.dap), semLinhas: linhas.length === 0, linhas: porLinha };
     erros.algum = erros.dap || erros.semLinhas || Object.keys(porLinha).length > 0;
     return erros;
   }
 
-  // Erros só aparecem depois que o usuário clicou em "Selecionar talhões"
+  // Erros só aparecem depois que o usuário clicou em "Aplicar nos talhões"
   function errosVisiveis(op) {
     return ui.validarOp === op.id ? errosRecomendacao(op) : { linhas: {} };
   }
 
+  // ----- Receitas da operação -----
+  // Receita agronômica = conjunto de produtos + doses padrão. A composição de produtos determina
+  // a identidade da receita; a dose pode variar por talhão sem alterar a identidade da receita.
+  function receitaAtual(op) {
+    if (!op || !op.receitas.length) return null;
+    return op.receitas.find((r) => r.id === ui.receitaPorOp[op.id]) || op.receitas[0];
+  }
+
+  // A receita aberta é editada numa cópia (rascunho) até "Salvar receita"
+  function rascunho(op) {
+    const r = receitaAtual(op);
+    if (!r) return null;
+    if (!ui.rascunho || ui.rascunho.receitaId !== r.id) {
+      ui.rascunho = { receitaId: r.id, produtos: r.produtos.map((l) => ({ ...l })) };
+      if (!ui.rascunho.produtos.length) ui.rascunho.produtos.push(Planos.novaLinha());
+    }
+    return ui.rascunho;
+  }
+
+  function assinatura(linhas) {
+    return JSON.stringify(linhas.filter(Planos.linhaPreenchida)
+      .map((l) => [l.id, l.principioAtivo, l.produto, l.unidade, l.dose, l.preCadastro]));
+  }
+
+  function rascunhoAlterado(op) {
+    const r = receitaAtual(op);
+    return !!(r && ui.rascunho && ui.rascunho.receitaId === r.id &&
+              assinatura(ui.rascunho.produtos) !== assinatura(r.produtos));
+  }
+
+  // Antes de trocar de receita, operação ou grupo: confirma o descarte das alterações não salvas
+  // e tira a receita nova que ficou sem nenhum produto (se houver outra receita na operação).
+  function sairDaReceita(depois, { removerVazia = true } = {}) {
+    const op = opAtual();
+    const r = receitaAtual(op);
+    const seguir = () => {
+      ui.rascunho = null; ui.preCadastro = null; ui.validarOp = null; ui.renomeandoReceita = null;
+      if (removerVazia && r && op.receitas.length > 1 && !r.produtos.some(Planos.linhaPreenchida) &&
+          !Planos.talhoesDaReceita(op, r).length) {
+        op.receitas.splice(op.receitas.indexOf(r), 1);
+        delete ui.receitaPorOp[op.id];
+      }
+      depois();
+    };
+    if (!rascunhoAlterado(op)) { seguir(); return; }
+    Modal.confirmar({
+      titulo: `Descartar as alterações de ${esc(r.nome)}?`,
+      texto: 'As alterações não salvas na receita serão perdidas.',
+      botoes: [{ rotulo: 'Continuar editando' }, { rotulo: 'Descartar', classe: 'perigo', acao: seguir }]
+    });
+  }
+
   // ----- Recomendação agronômica -----
   function recomendacao(op) {
-    const linhas = op.produtos.filter((l) => l.recomendacao);
-    const erros = errosVisiveis(op);
+    const r = receitaAtual(op);
     return `
       <section class="cartao recomendacao" aria-labelledby="titulo-rec">
         <div class="recomendacao__topo">
           <h3 class="rotulo-secao" id="titulo-rec">Recomendação agronômica</h3>
         </div>
-        <div class="recomendacao__corpo">
-          <div class="recomendacao__tabela">
-            <table class="tabela tabela--compacta tabela-rec">
-              <thead><tr>
-                <th>Princípio ativo</th><th>Produto comercial</th><th>Unid.</th><th class="tabela__numero">Dose</th>
-                ${somenteLeitura ? '' : '<th><span class="so-leitor">Remover</span></th>'}
-              </tr></thead>
-              <tbody>
-                ${linhas.length ? linhas.map((l) => linhaRecomendacao(l, erros.linhas[l.id])).join('')
-                  : `<tr><td class="tabela__vazia" colspan="5">Nenhum produto na recomendação.</td></tr>`}
-              </tbody>
-            </table>
-            ${erros.semLinhas ? '<p class="erro-campo">Informe pelo menos um produto ou princípio ativo.</p>' : ''}
-            ${somenteLeitura ? '' : `
-              <div class="recomendacao__acoes">
-                <button class="link-acao" type="button" data-acao="adicionar-linha">${Icones.mais} Adicionar produto</button>
-                ${ui.modo === 'selecionar' ? '' : `
-                  <button class="botao botao--primario" type="button" data-acao="selecionar-talhoes">
-                    ${Icones.mapa} Selecionar talhões</button>`}
-              </div>`}
-          </div>
-        </div>
+        ${listaReceitas(op, r)}
+        ${r ? corpoReceita(op, r) : `
+          <p class="recomendacao__vazia">Nenhuma receita nesta operação.${somenteLeitura ? '' : ' Use "+ Nova receita" para criar.'}</p>`}
       </section>`;
+  }
+
+  // Receita 1 | Receita 2 | + Nova receita · lixeira na ponta (age sobre a receita aberta)
+  function listaReceitas(op, atual) {
+    const guias = op.receitas.map((r) => {
+      const ativa = atual && r.id === atual.id;
+      if (ui.renomeandoReceita === r.id) {
+        return `<input class="campo__controle campo--compacto receitas__nome-campo" data-campo="nome-receita"
+                       value="${esc(r.nome)}" aria-label="Nome da receita" data-foco-inicial>`;
+      }
+      return `
+        <button class="receitas__guia ${ativa ? 'receitas__guia--ativa' : ''}" type="button" role="tab"
+                aria-selected="${ativa ? 'true' : 'false'}" data-acao="abrir-receita" data-receita="${r.id}"
+                title="${somenteLeitura ? esc(r.nome) : 'Clique duas vezes para renomear'}">${esc(r.nome)}</button>`;
+    }).join('');
+    return `
+      <div class="receitas">
+        <div class="receitas__guias" role="tablist" aria-label="Receitas da operação">${guias}</div>
+        ${somenteLeitura ? '' : `
+          <button class="link-acao receitas__nova" type="button" data-acao="nova-receita">${Icones.mais} Nova receita</button>
+          ${atual ? `
+            <button class="botao-icone receitas__excluir" type="button" data-acao="excluir-receita"
+                    title="Excluir a ${esc(atual.nome)}" aria-label="Excluir a ${esc(atual.nome)}">${Icones.lixeira}</button>` : ''}`}
+      </div>`;
+  }
+
+  // Tabela da receita aberta: Princípio ativo · Produto comercial · Unid. · Dose padrão
+  function corpoReceita(op, r) {
+    const linhas = somenteLeitura ? r.produtos.filter(Planos.linhaPreenchida) : rascunho(op).produtos;
+    const erros = errosVisiveis(op);
+    const alterada = rascunhoAlterado(op);
+    return `
+      <div class="recomendacao__corpo">
+        <div class="recomendacao__tabela">
+          <table class="tabela tabela--compacta tabela-rec">
+            <thead><tr>
+              <th>Princípio ativo</th><th>Produto comercial</th><th>Unid.</th><th class="tabela__numero">Dose padrão</th>
+              ${somenteLeitura ? '' : '<th><span class="so-leitor">Remover</span></th>'}
+            </tr></thead>
+            <tbody>
+              ${linhas.length ? linhas.map((l) => linhaRecomendacao(l, erros.linhas[l.id])).join('')
+                : '<tr><td class="tabela__vazia" colspan="5">Nenhum produto na receita.</td></tr>'}
+            </tbody>
+          </table>
+          ${erros.semLinhas ? '<p class="erro-campo">Informe pelo menos um produto.</p>' : ''}
+          ${somenteLeitura ? '' : `
+            <div class="recomendacao__acoes">
+              <button class="link-acao" type="button" data-acao="adicionar-linha">${Icones.mais} Adicionar produto</button>
+              ${ui.modo === 'selecionar' ? '' : `
+                <div class="recomendacao__botoes">
+                  <button class="botao ${alterada ? 'botao--primario' : 'botao--secundario'}" type="button"
+                          data-acao="salvar-receita" ${alterada ? '' : 'disabled'}>Salvar receita</button>
+                  <button class="botao botao--primario ${alterada ? 'dica' : ''}" type="button" data-acao="aplicar-receita"
+                          ${alterada ? 'aria-disabled="true" data-dica="Salve a receita antes de aplicar"' : ''}>
+                    ${Icones.mapa} Aplicar nos talhões</button>
+                </div>`}
+            </div>`}
+        </div>
+      </div>`;
+  }
+
+  // "Fox Xpro (L/ha)"; sem produto comercial, só o princípio ativo (não há unidade)
+  function rotuloProduto(l) {
+    const u = Planos.unidadeDose(l);
+    return `${esc(Planos.nomeLinha(l))}${u ? ` (${u})` : ''}`;
   }
 
   function etiquetaPre(linha) {
@@ -462,26 +564,24 @@ window.Telas.planoOperacoes = (function () {
     }
     if (ui.preCadastro && ui.preCadastro.linhaId === l.id) return linhaPreCadastro(l);
 
-    const unidade = l.produto
-      ? `<span class="tabela-rec__unidade">${Planos.unidadeDose(l)}</span>`
-      : `<select class="campo__controle campo--compacto" data-campo="linha-unidade" aria-label="Unidade">
-           ${UNIDADES.map((u) => `<option value="${u}" ${u === l.unidade ? 'selected' : ''}>${u} i.a./ha</option>`).join('')}
-         </select>`;
+    // Sem produto comercial não há unidade nem dose: o princípio ativo só filtra os produtos
+    const semProduto = !l.produto;
     return `
       <tr data-linha="${l.id}">
-        <td>${combo(l, 'pa', l.principioAtivo, 'Buscar princípio ativo', erro.produto)}
-          ${erro.produto ? '<p class="erro-campo">Informe o princípio ativo ou o produto</p>' : ''}</td>
-        <td>${combo(l, 'produto', l.produto, 'Buscar produto', erro.produto)} ${etiquetaPre(l)}</td>
-        <td>${unidade}${erro.unidade ? '<p class="erro-campo">Informação obrigatória</p>' : ''}</td>
-        <td class="tabela__numero">
-          <input class="campo__controle campo--compacto campo--dose ${erro.dose ? 'campo__controle--erro' : ''}" type="text" inputmode="decimal"
-                 data-campo="linha-dose" value="${Util.dose(l.dose)}" placeholder="—" aria-label="Dose"
-                 ${erro.dose ? 'aria-invalid="true"' : ''}>
-          ${erro.dose ? '<p class="erro-campo">Informação obrigatória</p>' : ''}
+        <td>${combo(l, 'pa', l.principioAtivo, 'Buscar princípio ativo', false)}</td>
+        <td>${combo(l, 'produto', l.produto, 'Buscar produto', erro.produto)} ${etiquetaPre(l)}
+          ${erro.produto ? '<p class="erro-campo">Escolha o produto comercial</p>' : ''}</td>
+        <td><span class="tabela-rec__unidade">${Planos.unidadeDose(l) || '—'}</span></td>
+        <td class="tabela__numero" ${semProduto ? 'title="Escolha o produto comercial para informar a dose"' : ''}>
+          <input class="campo__controle campo--compacto campo--dose ${erro.dose && !semProduto ? 'campo__controle--erro' : ''}" type="text" inputmode="decimal"
+                 data-campo="linha-dose" value="${Util.dose(l.dose)}" placeholder="—" aria-label="Dose padrão"
+                 ${semProduto ? 'disabled aria-describedby="dica-dose-produto"' : ''} ${erro.dose && !semProduto ? 'aria-invalid="true"' : ''}>
+          ${erro.dose && !semProduto ? '<p class="erro-campo">Informação obrigatória</p>' : ''}
         </td>
         <td class="tabela__acao">
           <button class="botao-icone botao-icone--p" type="button" data-acao="remover-linha" title="Remover produto"
                   aria-label="Remover ${esc(Planos.nomeLinha(l))}">${Icones.lixeira}</button>
+          ${semProduto ? '<span class="so-leitor" id="dica-dose-produto">Escolha o produto comercial para informar a dose</span>' : ''}
         </td>
       </tr>`;
   }
@@ -504,7 +604,7 @@ window.Telas.planoOperacoes = (function () {
         <td colspan="5">
           <div class="pre-cadastro">
             <p class="pre-cadastro__titulo">Pré-cadastro de defensivo
-              <span class="pre-cadastro__ajuda">Informe o produto comercial ou o princípio ativo (ao menos um) e a unidade.</span></p>
+              <span class="pre-cadastro__ajuda">Informe o produto comercial e a unidade. O princípio ativo é opcional.</span></p>
             <div class="pre-cadastro__campos">
               <input class="campo__controle campo--compacto" data-pre="produto" value="${esc(pc.produto)}" placeholder="Produto comercial" aria-label="Produto comercial">
               <input class="campo__controle campo--compacto" data-pre="principioAtivo" value="${esc(pc.principioAtivo)}" placeholder="Princípio ativo" aria-label="Princípio ativo">
@@ -526,7 +626,7 @@ window.Telas.planoOperacoes = (function () {
     const colunas = Planos.colunasDose(op);
     const modo = ui.modo;
     let titulo = 'Talhões da recomendação agronômica';
-    if (modo === 'selecionar') titulo = `Selecione os talhões que recebem a ${esc(op.nome)}`;
+    if (modo === 'selecionar') titulo = `Selecione os talhões que recebem: ${esc(receitaAtual(op).nome)}`;
     if (modo === 'ajustar') titulo = 'Ajustar talhões';
 
     const ferramentas = modo === 'ver' ? `
@@ -557,7 +657,7 @@ window.Telas.planoOperacoes = (function () {
               ${comCaixa ? `<th class="tabela__marcar"><input type="checkbox" data-acao="marcar-todos" aria-label="Marcar todos"
                    ${todosMarcados(op) ? 'checked' : ''}></th>` : ''}
               <th>Talhão</th><th class="tabela__numero">Área</th>
-              ${colunas.map((l) => `<th class="tabela__numero">${esc(Planos.nomeLinha(l))} (${Planos.unidadeDose(l)}) ${etiquetaPre(l)}</th>`).join('')}
+              ${colunas.map((l) => `<th class="tabela__numero">${rotuloProduto(l)} ${etiquetaPre(l)}</th>`).join('')}
             </tr></thead>
             <tbody id="talhoes-linhas">${linhasTalhoes(op, colunas)}</tbody>
           </table>
@@ -599,9 +699,9 @@ window.Telas.planoOperacoes = (function () {
             aria-label="Marcar ${t.nome}" ${ui.marcados.has(t.nome) ? 'checked' : ''}>` : ''}</td>`;
       let doses = colunas.map(() => '<td></td>').join('');
       if (ajuste) {
-        const recebidas = Planos.linhasTalhao(op, ajuste);
-        doses = colunas.map((l) => {
-          if (!recebidas.includes(l)) return '<td class="tabela__numero tabela__nao-recebe" title="Não recebe este produto">—</td>';
+        doses = colunas.map((col) => {
+          const l = Planos.linhaNoTalhao(op, ajuste, col);
+          if (!l) return '<td class="tabela__numero tabela__nao-recebe" title="Não recebe este produto">—</td>';
           const d = Planos.doseTalhao(op, ajuste, l);
           return `<td class="tabela__numero">${d === null || d === undefined ? '<span class="falta">—</span>' : Util.dose(d)}</td>`;
         }).join('');
@@ -609,11 +709,18 @@ window.Telas.planoOperacoes = (function () {
       return `
         <tr class="${classeLinha} ${ui.marcados.has(t.nome) ? 'linha--marcada' : ''}">
           ${caixa}
-          <th scope="row" class="tabela__talhao">${t.nome}${situacao ? `<span class="so-leitor"> (${situacao})</span>` : ''}</th>
+          <th scope="row" class="tabela__talhao">${t.nome}${situacao ? `<span class="so-leitor"> (${situacao})</span>` : ''}${outraReceita(op, ajuste)}</th>
           <td class="tabela__numero">${Util.area(t.area)}</td>
           ${doses}
         </tr>`;
     }).join('');
+  }
+
+  // Ao aplicar uma receita: indica o talhão que está em outra receita (marcá-lo muda a receita dele)
+  function outraReceita(op, ajuste) {
+    if (ui.modo !== 'selecionar' || !ajuste) return '';
+    const r = Planos.receitaDoTalhao(op, ajuste);
+    return r && r.id !== receitaAtual(op).id ? `<span class="talhoes__outra">· em ${esc(r.nome)}</span>` : '';
   }
 
   function rodapeTalhoes(op) {
@@ -644,11 +751,12 @@ window.Telas.planoOperacoes = (function () {
     return '';
   }
 
+  // Aplicar: talhões marcados recebem a receita; os que estavam nela e foram desmarcados saem da operação
   function contagemSelecao(op) {
-    const recebem = Object.keys(op.talhoes);
+    const daReceita = Planos.talhoesDaReceita(op, receitaAtual(op));
     return {
       aplicar: ui.marcados.size,
-      remover: recebem.filter((t) => !ui.marcados.has(t)).length
+      remover: daReceita.filter((t) => !ui.marcados.has(t)).length
     };
   }
 
@@ -660,19 +768,22 @@ window.Telas.planoOperacoes = (function () {
     // Valor comum entre os selecionados ou "vários"
     const comum = (valores) => valores.every((v) => v === valores[0]) ? valores[0] : undefined;
 
-    const linhas = Planos.colunasDose(op).filter((l) =>
-      selecionados.some((a) => Planos.linhasTalhao(op, a).includes(l)));
+    // Um campo por produto presente em algum dos selecionados (mesmo produto em receitas diferentes = um campo)
+    const linhas = Planos.colunasDose(op).filter((col) =>
+      selecionados.some((a) => Planos.linhaNoTalhao(op, a, col)));
     const camposDose = linhas.map((l) => {
-      const doses = selecionados.filter((a) => Planos.linhasTalhao(op, a).includes(l)).map((a) => Planos.doseTalhao(op, a, l));
+      const chave = Planos.chaveLinha(l);
+      const doses = selecionados.filter((a) => Planos.linhaNoTalhao(op, a, l))
+        .map((a) => Planos.doseTalhao(op, a, Planos.linhaNoTalhao(op, a, l)));
       const doseComum = comum(doses);
-      const preparado = aj.doses[l.id];
+      const preparado = aj.doses[chave];
       const valor = preparado !== undefined ? preparado : (doseComum === undefined ? '' : Util.dose(doseComum));
       const ph = doseComum === undefined && preparado === undefined ? 'vários' : '—';
       return `
         <div class="campo campo--ajuste">
-          <label class="campo__rotulo" for="aj-${l.id}">${esc(Planos.nomeLinha(l))} (${Planos.unidadeDose(l)})</label>
+          <label class="campo__rotulo" for="aj-${l.id}">${rotuloProduto(l)}</label>
           <input class="campo__controle campo--compacto" id="aj-${l.id}" type="text" inputmode="decimal"
-                 data-ajuste="dose" data-linha-id="${l.id}" value="${esc(valor)}" placeholder="${ph}">
+                 data-ajuste="dose" data-chave="${esc(chave)}" value="${esc(valor)}" placeholder="${ph}">
         </div>`;
     }).join('');
 
@@ -701,8 +812,8 @@ window.Telas.planoOperacoes = (function () {
             <div class="ajuste__linha">
               <select class="campo__controle campo--compacto" id="aj-remover-produto">
                 <option value="">Escolha o produto</option>
-                ${linhas.filter((l) => !aj.remover.includes(l.id)).map((l) =>
-                  `<option value="${l.id}">${esc(Planos.nomeLinha(l))}</option>`).join('')}
+                ${linhas.filter((l) => !aj.remover.includes(Planos.chaveLinha(l))).map((l) =>
+                  `<option value="${esc(Planos.chaveLinha(l))}">${esc(Planos.nomeLinha(l))}</option>`).join('')}
               </select>
               <button class="botao botao--secundario botao--p" type="button" data-acao="aj-remover">Remover</button>
             </div>
@@ -717,8 +828,8 @@ window.Telas.planoOperacoes = (function () {
           <ul class="ajuste__preparados" aria-label="Mudanças preparadas">
             ${aj.adicionar.map((a, i) => `<li class="chip chip--mais">+ ${nomeProduto(a.produto)} ${Util.dose(a.dose) || '(sem dose)'}
               <button type="button" data-acao="aj-desfazer-adicionar" data-indice="${i}" aria-label="Desfazer">${Icones.fechar}</button></li>`).join('')}
-            ${aj.remover.map((id) => `<li class="chip chip--menos">− ${esc(Planos.nomeLinha(op.produtos.find((l) => l.id === id)))}
-              <button type="button" data-acao="aj-desfazer-remover" data-linha-id="${id}" aria-label="Desfazer">${Icones.fechar}</button></li>`).join('')}
+            ${aj.remover.map((chave) => `<li class="chip chip--menos">− ${esc(Planos.nomeLinha(linhas.find((l) => Planos.chaveLinha(l) === chave)))}
+              <button type="button" data-acao="aj-desfazer-remover" data-chave="${esc(chave)}" aria-label="Desfazer">${Icones.fechar}</button></li>`).join('')}
             ${aj.removerOperacao ? '<li class="chip chip--menos">Remover da operação</li>' : ''}
           </ul>` : ''}
       </div>`;
@@ -764,7 +875,7 @@ window.Telas.planoOperacoes = (function () {
   function linhaDoElemento(el) {
     const tr = el.closest('[data-linha]');
     const op = opAtual();
-    return tr && op ? op.produtos.find((l) => l.id === tr.dataset.linha) : null;
+    return tr && op && ui.rascunho ? ui.rascunho.produtos.find((l) => l.id === tr.dataset.linha) : null;
   }
 
   function opcoesCombo(linha, tipo, texto) {
@@ -783,8 +894,8 @@ window.Telas.planoOperacoes = (function () {
         .map((d) => ({ valor: d.produto, rotulo: `${esc(d.produto)}<span class="combo__sub">${esc(d.principioAtivo || '—')} · ${d.unidade}</span>`, pre: d.preCadastro }));
     }
     opcoes = opcoes.slice(0, 8);
-    // "+ Pré-cadastrar" sempre como última opção quando há texto digitado
-    if (texto.trim()) opcoes.push({ preCadastrar: true, valor: texto.trim(), rotulo: `${Icones.mais} Pré-cadastrar "${esc(texto.trim())}"` });
+    // "+ Pré-cadastrar" sempre como última opção quando há texto digitado, só na busca de produto comercial
+    if (tipo === 'produto' && texto.trim()) opcoes.push({ preCadastrar: true, valor: texto.trim(), rotulo: `${Icones.mais} Pré-cadastrar "${esc(texto.trim())}"` });
     return opcoes;
   }
 
@@ -813,22 +924,20 @@ window.Telas.planoOperacoes = (function () {
     const tipo = input.dataset.combo;
     const valor = opcaoEl.dataset.valor;
     if (opcaoEl.hasAttribute('data-pre-cadastrar')) {
-      ui.preCadastro = { linhaId: linha.id, produto: tipo === 'produto' ? valor : '',
-                         principioAtivo: tipo === 'pa' ? valor : (linha.principioAtivo || ''), unidade: '', erro: '' };
+      ui.preCadastro = { linhaId: linha.id, produto: valor, principioAtivo: linha.principioAtivo || '', unidade: '', erro: '' };
     } else if (tipo === 'pa') {
       linha.principioAtivo = valor;
-      // Produto de outro princípio ativo deixa de valer
+      // Produto de outro princípio ativo deixa de valer (e, sem produto, não há unidade nem dose)
       const prod = Planos.produtoDoCadastro(linha.produto);
-      if (prod && prod.principioAtivo !== valor) { linha.produto = ''; linha.preCadastro = false; }
-      if (!linha.produto) linha.preCadastro = !!DADOS.defensivos.find((d) => d.principioAtivo === valor && !d.produto && d.preCadastro);
-      alterou();
+      if (prod && prod.principioAtivo !== valor) {
+        Object.assign(linha, { produto: '', unidade: '', dose: null, preCadastro: false });
+      }
     } else {
       const d = Planos.produtoDoCadastro(valor);
       linha.produto = d.produto;
       linha.principioAtivo = d.principioAtivo || '';
       linha.unidade = d.unidade;
       linha.preCadastro = !!d.preCadastro;
-      alterou();
     }
     desenharTudo();
   }
@@ -845,23 +954,64 @@ window.Telas.planoOperacoes = (function () {
       case 'alternar-lista':
         ui.listaRecolhida = !ui.listaRecolhida; desenharTudo(); break;
 
-      case 'abrir-op':
-        ui.opPorGrupo[grupo.id] = alvo.dataset.op; ui.renomeandoOp = null; ui.preCadastro = null; ui.validarOp = null;
-        sairDosModos(); desenharTudo(); break;
-
-      case 'nova-op': {
-        const nova = Planos.novaOperacao('Nova operação', null);
-        grupo.operacoes.push(nova);
-        ui.opPorGrupo[grupo.id] = nova.id; ui.renomeandoOp = nova.id;
-        sairDosModos(); alterou(); desenharTudo(); break;
+      case 'abrir-op': {
+        const id = alvo.dataset.op;
+        if (op && op.id === id) break;
+        sairDaReceita(() => {
+          ui.opPorGrupo[grupo.id] = id; ui.renomeandoOp = null;
+          sairDosModos(); desenharTudo();
+        });
+        break;
       }
 
+      case 'nova-op':
+        sairDaReceita(() => {
+          const nova = Planos.novaOperacao('Nova operação', null);
+          grupo.operacoes.push(nova);
+          ui.opPorGrupo[grupo.id] = nova.id; ui.renomeandoOp = nova.id;
+          sairDosModos(); alterou(); desenharTudo();
+        });
+        break;
+
       case 'alternar-status':
-        plano.status = somenteLeitura ? 'Em construção' : 'Aprovado';
-        somenteLeitura = plano.status === 'Aprovado';
-        ui.renomeandoOp = null; ui.renomeandoGrupo = null; ui.preCadastro = null; ui.validarOp = null;
-        sairDosModos(); sairDaEdicao();
-        desenharMantendoFoco('[data-acao="alternar-status"]'); break;
+        sairDaReceita(() => {
+          plano.status = somenteLeitura ? 'Em construção' : 'Aprovado';
+          somenteLeitura = plano.status === 'Aprovado';
+          ui.renomeandoOp = null; ui.renomeandoGrupo = null;
+          sairDosModos(); sairDaEdicao();
+          desenharMantendoFoco('[data-acao="alternar-status"]');
+        }, { removerVazia: false });
+        break;
+
+      case 'abrir-receita': {
+        if (ui.renomeandoReceita) return;
+        // Dois cliques seguidos na receita aberta = renomear (como nas guias de grupo)
+        const id = alvo.dataset.receita;
+        const agora = Date.now();
+        const duplo = ultimoCliqueReceita.id === id && agora - ultimoCliqueReceita.quando < 450;
+        ultimoCliqueReceita = { id, quando: agora };
+        const aberta = receitaAtual(op);
+        if (aberta && aberta.id === id) {
+          if (duplo && !somenteLeitura) { ui.renomeandoReceita = id; desenharTudo(); }
+          break;
+        }
+        sairDaReceita(() => { ui.receitaPorOp[op.id] = id; sairDosModos(); desenharTudo(); });
+        break;
+      }
+
+      case 'nova-receita':
+        sairDaReceita(() => {
+          const nova = Planos.novaReceita(op);
+          op.receitas.push(nova);
+          ui.receitaPorOp[op.id] = nova.id;
+          sairDosModos(); alterou(); desenharTudo();
+          raiz.querySelector('.tabela-rec tbody tr:last-child [data-combo="pa"]')?.focus();
+        });
+        break;
+
+      case 'excluir-receita': excluirReceita(op, receitaAtual(op)); break;
+
+      case 'salvar-receita': salvarReceita(op); break;
 
       case 'editar-ops':
         if (alvo.getAttribute('aria-disabled') === 'true') break;
@@ -893,33 +1043,34 @@ window.Telas.planoOperacoes = (function () {
       case 'ed-excluir': excluirMarcadas(grupo); break;
 
       case 'adicionar-linha':
-        op.produtos.push(Planos.novaLinha()); alterou(); desenharTudo();
+        rascunho(op).produtos.push(Planos.novaLinha()); desenharTudo();
         raiz.querySelector('.tabela-rec tbody tr:last-child [data-combo="pa"]')?.focus();
         break;
 
       case 'remover-linha': {
         const linha = linhaDoElemento(alvo);
-        op.produtos = op.produtos.filter((l) => l !== linha);
-        Object.values(op.talhoes).forEach((a) => {
-          delete a.doses[linha.id];
-          a.removidas = a.removidas.filter((id) => id !== linha.id);
-        });
-        alterou(); desenharTudo(); break;
+        ui.rascunho.produtos = ui.rascunho.produtos.filter((l) => l !== linha);
+        desenharTudo(); break;
       }
 
       case 'cancelar-pre': ui.preCadastro = null; desenharTudo(); break;
       case 'salvar-pre': salvarPreCadastro(op); break;
 
-      case 'selecionar-talhoes':
+      case 'aplicar-receita':
+        // Receita com alteração não salva não é aplicada (a dica explica)
+        if (alvo.getAttribute('aria-disabled') === 'true') break;
         // Sem o preenchimento mínimo, mostra o que falta e não entra na seleção
         if (errosRecomendacao(op).algum) { ui.validarOp = op.id; desenharTudo(); return; }
         ui.validarOp = null;
-        ui.modo = 'selecionar'; ui.marcados = new Set(Object.keys(op.talhoes)); ui.preCadastro = null;
+        ui.modo = 'selecionar'; ui.marcados = new Set(Planos.talhoesDaReceita(op, receitaAtual(op))); ui.preCadastro = null;
         desenharTudo(); break;
 
       case 'ajustar-talhoes':
-        ui.modo = 'ajustar'; ui.marcados = new Set(); ui.ajuste = novoAjustePreparado();
-        desenharTudo(); break;
+        sairDaReceita(() => {
+          ui.modo = 'ajustar'; ui.marcados = new Set(); ui.ajuste = novoAjustePreparado();
+          desenharTudo();
+        }, { removerVazia: false });
+        break;
 
       case 'cancelar-modo': sairDosModos(); desenharTudo(); break;
 
@@ -942,13 +1093,13 @@ window.Telas.planoOperacoes = (function () {
       case 'aj-remover': {
         const id = raiz.querySelector('#aj-remover-produto').value;
         if (!id) { raiz.querySelector('#aj-remover-produto').focus(); return; }
-        ui.ajuste.remover.push(id); delete ui.ajuste.doses[id];
+        ui.ajuste.remover.push(id); delete ui.ajuste.doses[id];  // id = produto (chave), não a linha
         desenharTudo(); break;
       }
       case 'aj-desfazer-adicionar':
         ui.ajuste.adicionar.splice(Number(alvo.dataset.indice), 1); desenharTudo(); break;
       case 'aj-desfazer-remover':
-        ui.ajuste.remover = ui.ajuste.remover.filter((id) => id !== alvo.dataset.linhaId); desenharTudo(); break;
+        ui.ajuste.remover = ui.ajuste.remover.filter((chave) => chave !== alvo.dataset.chave); desenharTudo(); break;
       case 'aj-remover-operacao':
         ui.ajuste.removerOperacao = !ui.ajuste.removerOperacao; desenharTudo(); break;
 
@@ -964,12 +1115,15 @@ window.Telas.planoOperacoes = (function () {
         ultimoCliqueGuia = { id, quando: agora };
         if (duplo && !somenteLeitura) { ui.renomeandoGrupo = id; desenharTudo(); break; }
         if (ui.grupoId === id) break;
-        ui.grupoId = id; ui.renomeandoOp = null; ui.preCadastro = null;
-        sairDosModos(); sairDaEdicao(); desenharTudo(); break;
+        sairDaReceita(() => {
+          ui.grupoId = id; ui.renomeandoOp = null;
+          sairDosModos(); sairDaEdicao(); desenharTudo();
+        });
+        break;
       }
 
-      case 'novo-grupo': novoGrupo(); break;
-      case 'excluir-grupo': excluirGrupo(grupo); break;
+      case 'novo-grupo': sairDaReceita(novoGrupo); break;
+      case 'excluir-grupo': sairDaReceita(() => excluirGrupo(grupo)); break;
     }
   }
 
@@ -983,13 +1137,11 @@ window.Telas.planoOperacoes = (function () {
     } else if (campo === 'op-fenologia') {
       op.fenologia = e.target.value; alterou(); desenharTudo();
     } else if (campo === 'linha-dose') {
-      linhaDoElemento(e.target).dose = Util.numero(e.target.value); alterou(); desenharTudo();
-    } else if (campo === 'linha-unidade') {
-      linhaDoElemento(e.target).unidade = e.target.value; alterou(); desenharTudo();
+      linhaDoElemento(e.target).dose = Util.numero(e.target.value); desenharTudo();
     } else if (e.target.dataset.pre) {
       ui.preCadastro[e.target.dataset.pre] = e.target.value;
     } else if (e.target.dataset.ajuste === 'dose') {
-      ui.ajuste.doses[e.target.dataset.linhaId] = e.target.value.trim(); desenharTudo();
+      ui.ajuste.doses[e.target.dataset.chave] = e.target.value.trim(); desenharTudo();
     }
   }
 
@@ -1030,6 +1182,7 @@ window.Telas.planoOperacoes = (function () {
       }, 150);
     }
     if (el.dataset.campo === 'nome-op') salvarNomeOperacao(el.value);
+    if (el.dataset.campo === 'nome-receita') salvarNomeReceita(el.value);
     if (el.dataset.campo === 'nome-grupo') salvarNomeGrupo(el.value);
     if (el.dataset.campo === 'ed-nome' && ui.edicao && ui.edicao.renomeando === el.dataset.op) {
       // Sair do campo confirma o nome (sem salvar ainda: isso é no "Salvar" da barra).
@@ -1070,13 +1223,17 @@ window.Telas.planoOperacoes = (function () {
       }
       return;
     }
-    if (el.dataset.campo === 'nome-op' || el.dataset.campo === 'nome-grupo') {
+    if (el.dataset.campo === 'nome-op' || el.dataset.campo === 'nome-grupo' || el.dataset.campo === 'nome-receita') {
       if (e.key === 'Enter') { e.preventDefault(); el.blur(); }
       if (e.key === 'Escape') {
         e.preventDefault(); e.stopPropagation();
-        ui.renomeandoOp = null; ui.renomeandoGrupo = null; desenharTudo();
+        ui.renomeandoOp = null; ui.renomeandoGrupo = null; ui.renomeandoReceita = null; desenharTudo();
       }
       return;
+    }
+    // F2 na receita aberta = renomear (teclado)
+    if (el.dataset.receita && e.key === 'F2' && !somenteLeitura && receitaAtual(opAtual())?.id === el.dataset.receita) {
+      e.preventDefault(); ui.renomeandoReceita = el.dataset.receita; desenharTudo(); return;
     }
     if (el.dataset.pre && e.key === 'Enter') { e.preventDefault(); salvarPreCadastro(opAtual()); }
     if ((el.dataset.campo === 'op-dap' || el.dataset.campo === 'linha-dose' || el.dataset.ajuste) && e.key === 'Enter') {
@@ -1108,8 +1265,8 @@ window.Telas.planoOperacoes = (function () {
     const n = ops.length;
     if (!n) return;
     const talhoes = new Set(ops.flatMap((o) => Object.keys(o.talhoes))).size;
-    const produtos = new Set(ops.flatMap((o) => o.produtos.filter((l) => l.recomendacao)
-      .map((l) => l.produto || l.principioAtivo).filter(Boolean))).size;
+    const produtos = new Set(ops.flatMap((o) => o.receitas.flatMap((r) => r.produtos)
+      .filter(Planos.linhaPreenchida).map(Planos.chaveLinha))).size;
     const todas = n === grupo.operacoes.length;
     const nome = (o) => esc(nomeEmEdicao(o));
     const remover = () => {
@@ -1152,39 +1309,115 @@ window.Telas.planoOperacoes = (function () {
     raiz.querySelectorAll('[data-pre]').forEach((el) => { pc[el.dataset.pre] = el.value; });
     const produto = pc.produto.trim();
     const pa = pc.principioAtivo.trim();
-    if (!produto && !pa) { pc.erro = 'Informe o produto comercial ou o princípio ativo.'; desenharTudo(); return; }
+    if (!produto) { pc.erro = 'Informe o produto comercial.'; desenharTudo(); return; }
     if (!pc.unidade) { pc.erro = 'Escolha a unidade.'; desenharTudo(); return; }
 
     DADOS.defensivos.push({ classe: '', produto, principioAtivo: pa, unidade: pc.unidade, preCadastro: true });
-    const linha = op.produtos.find((l) => l.id === pc.linhaId);
+    const linha = ui.rascunho.produtos.find((l) => l.id === pc.linhaId);
     Object.assign(linha, { produto, principioAtivo: pa, unidade: pc.unidade, preCadastro: true });
     ui.preCadastro = null;
-    alterou(); desenharTudo();
-    Aviso.mostrar(`Pré-cadastro de "${esc(produto || pa)}" salvo`);
+    desenharTudo();
+    Aviso.mostrar(`Pré-cadastro de "${esc(produto)}" salvo`);
   }
 
-  // ----- Selecionar talhões e aplicar -----
+  // ----- Salvar e excluir receita -----
+  // Salvar vale para os talhões da receita: dose padrão nova chega a quem segue o padrão
+  // (dose própria do talhão fica); produto removido ou trocado sai de todos os talhões dela.
+  function salvarReceita(op) {
+    const r = receitaAtual(op);
+    if (!rascunhoAlterado(op)) return;
+    const novas = ui.rascunho.produtos.filter(Planos.linhaPreenchida).map((l) => ({ ...l }));
+    Planos.talhoesDaReceita(op, r).forEach((t) => {
+      const doses = op.talhoes[t].doses;
+      Object.keys(doses).forEach((id) => {
+        const antes = r.produtos.find((l) => l.id === id);
+        const depois = novas.find((l) => l.id === id);
+        if (!depois || !antes || Planos.chaveLinha(antes) !== Planos.chaveLinha(depois)) delete doses[id];
+      });
+    });
+    r.produtos = novas;
+    ui.rascunho = null; ui.validarOp = null; ui.preCadastro = null;
+    alterou(); desenharTudo();
+    Aviso.mostrar(`${esc(r.nome)} salva`);
+  }
+
+  // Com talhões: confirmação com o impacto (os talhões ficam sem operação). Sem talhões: na hora, com Desfazer.
+  function excluirReceita(op, r) {
+    if (!r) return;
+    const talhoes = Planos.talhoesDaReceita(op, r);
+    const remover = () => {
+      const indice = op.receitas.indexOf(r);
+      op.receitas.splice(indice, 1);
+      talhoes.forEach((t) => { delete op.talhoes[t]; });
+      delete ui.receitaPorOp[op.id];
+      ui.rascunho = null; ui.validarOp = null; ui.preCadastro = null; ui.renomeandoReceita = null;
+      sairDosModos(); alterou(); desenharTudo();
+      return indice;
+    };
+    const n = talhoes.length;
+    if (n) {
+      Modal.confirmar({
+        titulo: `Excluir ${esc(r.nome)}?`,
+        texto: `Ela está aplicada em ${n} ${n === 1 ? 'talhão, que ficará' : 'talhões, que ficarão'} sem operação. Essa ação não pode ser desfeita.`,
+        botoes: [{ rotulo: 'Cancelar' }, { rotulo: 'Excluir receita', classe: 'perigo', acao: () => {
+          remover(); Aviso.mostrar(`${esc(r.nome)} excluída`);
+        } }]
+      });
+    } else {
+      const indice = remover();
+      Aviso.mostrar(`${esc(r.nome)} excluída`, { acao: 'Desfazer', aoAgir: () => {
+        op.receitas.splice(Math.min(indice, op.receitas.length), 0, r);
+        ui.receitaPorOp[op.id] = r.id; ui.rascunho = null;
+        if (raiz.isConnected) desenharTudo();
+      } });
+    }
+  }
+
+  let ultimoCliqueReceita = { id: null, quando: 0 };
+
+  // Nome vazio volta ao anterior; nome repetido na mesma operação não é aceito
+  function salvarNomeReceita(valor) {
+    if (!ui.renomeandoReceita) return;
+    const op = opAtual();
+    const r = op.receitas.find((x) => x.id === ui.renomeandoReceita);
+    ui.renomeandoReceita = null;
+    const v = valor.trim();
+    if (r && v && v !== r.nome) {
+      if (op.receitas.some((x) => x !== r && Util.normalizar(x.nome) === Util.normalizar(v))) {
+        Aviso.mostrar('Já existe uma receita com esse nome');
+      } else {
+        r.nome = v; alterou();
+      }
+    }
+    desenharTudo();
+  }
+
+  // ----- Aplicar a receita nos talhões -----
+  // Os marcados recebem os produtos e as doses padrão da receita (sem perguntar a dose).
+  // Talhão de outra receita muda para esta (um talhão fica em uma receita só na operação).
   function aplicarRecomendacao(op) {
-    const comAjuste = [...ui.marcados].filter((t) => op.talhoes[t] && Planos.temAjuste(op.talhoes[t]));
+    const r = receitaAtual(op);
+    const comAjuste = [...ui.marcados].filter((t) => op.talhoes[t] && op.talhoes[t].receitaId === r.id &&
+      Planos.temAjuste(op.talhoes[t]));
     const aplicar = (substituir) => {
       const { aplicar: n, remover: m } = contagemSelecao(op);
-      Object.keys(op.talhoes).forEach((t) => { if (!ui.marcados.has(t)) delete op.talhoes[t]; });
+      Planos.talhoesDaReceita(op, r).forEach((t) => { if (!ui.marcados.has(t)) delete op.talhoes[t]; });
       ui.marcados.forEach((t) => {
-        if (!op.talhoes[t] || substituir) op.talhoes[t] = Planos.novoAjuste();
+        const a = op.talhoes[t];
+        if (!a || a.receitaId !== r.id || substituir) op.talhoes[t] = Planos.novoAjuste(r.id);
       });
-      Planos.limparExtras(op);
       sairDosModos(); alterou(); desenharTudo();
       Aviso.mostrar(n
-        ? `Recomendação aplicada em ${n} ${n === 1 ? 'talhão' : 'talhões'}${m ? ` · removida de ${m}` : ''}`
-        : `Operação removida de ${m} ${m === 1 ? 'talhão' : 'talhões'}`);
+        ? `${esc(r.nome)} aplicada em ${n} ${n === 1 ? 'talhão' : 'talhões'}${m ? ` · removida de ${m}` : ''}`
+        : `${esc(r.nome)} removida de ${m} ${m === 1 ? 'talhão' : 'talhões'}`);
     };
     if (comAjuste.length) {
       Modal.confirmar({
         titulo: `${comAjuste.length} ${comAjuste.length === 1 ? 'talhão tem ajustes' : 'talhões têm ajustes'}.`,
-        texto: `${comAjuste.join(', ')}: manter os valores próprios desses talhões ou substituir pela recomendação?`,
+        texto: `${comAjuste.join(', ')}: manter as doses próprias desses talhões ou substituir pelas doses padrão da receita?`,
         botoes: [
           { rotulo: 'Manter ajustes', classe: 'secundario', acao: () => aplicar(false) },
-          { rotulo: 'Substituir pela recomendação', classe: 'primario', acao: () => aplicar(true) }
+          { rotulo: 'Substituir pela dose padrão', classe: 'primario', acao: () => aplicar(true) }
         ]
       });
     } else {
@@ -1193,48 +1426,79 @@ window.Telas.planoOperacoes = (function () {
   }
 
   // ----- Ajustar talhões -----
+  // Mudar só a dose: fica como dose própria do talhão (a receita não muda).
+  // Mudar a composição (adicionar, remover ou trocar produto):
+  //  - se já existe receita com a nova composição, os talhões passam para ela;
+  //  - se a mudança vale para todos os talhões da receita, a própria receita é atualizada;
+  //  - se vale só para parte deles, nasce a próxima receita para esses talhões.
   function salvarAjustes(op) {
     const aj = ui.ajuste;
     const selecionados = [...ui.marcados].filter((t) => op.talhoes[t]);
+    const n = selecionados.length;
+    if (aj.removerOperacao) {
+      selecionados.forEach((t) => { delete op.talhoes[t]; });
+      sairDosModos(); alterou(); desenharTudo();
+      Aviso.mostrar(`${n} ${n === 1 ? 'talhão removido' : 'talhões removidos'} da operação`);
+      return;
+    }
+
+    // Doses de cada talhão depois do ajuste, por produto (chave): { linha, dose }
+    const porDestino = new Map();
     selecionados.forEach((t) => {
-      if (aj.removerOperacao) { delete op.talhoes[t]; return; }
       const a = op.talhoes[t];
-
-      Object.entries(aj.doses).forEach(([id, texto]) => {
-        const linha = op.produtos.find((l) => l.id === id);
-        if (!linha || !Planos.linhasTalhao(op, a).includes(linha)) return;
-        const v = Util.numero(texto);
-        if (linha.recomendacao && v === linha.dose) delete a.doses[id]; else a.doses[id] = v;
+      const r = Planos.receitaDoTalhao(op, a);
+      const efetivas = new Map();
+      Planos.linhasTalhao(op, a).forEach((l) => efetivas.set(Planos.chaveLinha(l), { linha: l, dose: Planos.doseTalhao(op, a, l) }));
+      Object.entries(aj.doses).forEach(([chave, texto]) => {
+        if (efetivas.has(chave)) efetivas.get(chave).dose = Util.numero(texto);
       });
-
+      aj.remover.forEach((chave) => efetivas.delete(chave));
       aj.adicionar.forEach(({ produto, dose }) => {
-        const daRec = op.produtos.find((l) => l.recomendacao && l.produto === produto);
-        if (daRec) {
-          // Produto já está na recomendação: volta a valer neste talhão, com a dose informada
-          a.removidas = a.removidas.filter((id) => id !== daRec.id);
-          if (dose !== null && dose !== daRec.dose) a.doses[daRec.id] = dose;
-          return;
-        }
-        let extra = op.produtos.find((l) => !l.recomendacao && l.produto === produto);
-        if (!extra) { extra = Planos.linhaDoProduto(produto, null, false); op.produtos.push(extra); }
-        if (!a.extras.includes(extra.id)) a.extras.push(extra.id);
-        a.doses[extra.id] = dose;
+        const linha = Planos.linhaDoProduto(produto, dose);
+        const chave = Planos.chaveLinha(linha);
+        if (efetivas.has(chave)) { if (dose !== null) efetivas.get(chave).dose = dose; }
+        else efetivas.set(chave, { linha, dose });
       });
+      const comp = [...efetivas.keys()].sort().join('|');
+      const k = `${r.id}#${comp}`;
+      if (!porDestino.has(k)) porDestino.set(k, { r, comp, talhoes: [] });
+      porDestino.get(k).talhoes.push({ t, efetivas });
+    });
 
-      aj.remover.forEach((id) => {
-        const linha = op.produtos.find((l) => l.id === id);
-        if (!linha) return;
-        delete a.doses[id];
-        if (linha.recomendacao) { if (!a.removidas.includes(id)) a.removidas.push(id); }
-        else a.extras = a.extras.filter((x) => x !== id);
+    const criadas = [];
+    porDestino.forEach(({ r, comp, talhoes }) => {
+      let destino = Planos.composicao(r.produtos) === comp ? r
+        : op.receitas.find((x) => Planos.composicao(x.produtos) === comp);
+      const modelo = talhoes[0].efetivas;
+      if (!destino && talhoes.length === Planos.talhoesDaReceita(op, r).length) {
+        // Composição mudou em todos os talhões da receita: atualiza a própria receita
+        r.produtos = r.produtos.filter((l) => modelo.has(Planos.chaveLinha(l)));
+        modelo.forEach(({ linha, dose }, chave) => {
+          if (!r.produtos.some((l) => Planos.chaveLinha(l) === chave)) r.produtos.push({ ...linha, id: Planos.novoId('l'), dose });
+        });
+        destino = r;
+      } else if (!destino) {
+        // Só parte dos talhões: nova receita (mantém as doses padrão da receita de origem)
+        destino = Planos.novaReceita(op, [...modelo.values()].map(({ linha, dose }) =>
+          ({ ...linha, id: Planos.novoId('l'), dose: r.produtos.includes(linha) ? linha.dose : dose })));
+        op.receitas.push(destino);
+        criadas.push(destino);
+      }
+      // Dose diferente da padrão da receita de destino fica como dose própria do talhão
+      talhoes.forEach(({ t, efetivas }) => {
+        const doses = {};
+        destino.produtos.filter(Planos.linhaPreenchida).forEach((l) => {
+          const e = efetivas.get(Planos.chaveLinha(l));
+          if (e && e.dose !== l.dose) doses[l.id] = e.dose;
+        });
+        op.talhoes[t] = { receitaId: destino.id, doses };
       });
     });
-    Planos.limparExtras(op);
-    const n = selecionados.length;
+
+    ui.rascunho = null;
     sairDosModos(); alterou(); desenharTudo();
-    Aviso.mostrar(aj.removerOperacao
-      ? `${n} ${n === 1 ? 'talhão removido' : 'talhões removidos'} da operação`
-      : `Ajustes salvos em ${n} ${n === 1 ? 'talhão' : 'talhões'}`);
+    Aviso.mostrar(`Ajustes salvos em ${n} ${n === 1 ? 'talhão' : 'talhões'}` +
+      (criadas.length ? ` · criada a ${criadas.map((r) => esc(r.nome)).join(', ')}` : ''));
   }
 
   // ----- Grupos -----

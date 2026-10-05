@@ -1355,6 +1355,50 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
   margin-top: 12px;
 }
 
+/* Receitas da operação: Receita 1 | Receita 2 | + Nova receita · lixeira na ponta */
+.receitas {
+  display: flex;
+  align-items: center;
+  gap: 4px 12px;
+  flex-wrap: wrap;
+  margin: -4px 0 12px;
+}
+.receitas__guias { display: flex; flex-wrap: wrap; gap: 4px; }
+.receitas__guia {
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: none;
+  font: inherit;
+  font-size: 14px;
+  color: var(--texto-suave);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.receitas__guia:hover { background: #f4f7f5; color: var(--texto); }
+.receitas__guia--ativa,
+.receitas__guia--ativa:hover { background: var(--verde-100); color: var(--verde-700); font-weight: 600; }
+.receitas__guia:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 1px; }
+.receitas__nome-campo { width: 180px; height: 32px; }
+.receitas__nova { margin: 0; }
+.receitas__nova:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 2px; border-radius: 4px; }
+.receitas__excluir { margin-left: auto; width: 32px; height: 32px; }
+.recomendacao__vazia { margin: 4px 0 0; font-size: 14px; color: var(--texto-suave); }
+
+.recomendacao__botoes { display: flex; gap: 10px; }
+.botao[aria-disabled="true"],
+.botao[aria-disabled="true"]:hover {
+  background: #c9d1cd;
+  border-color: transparent;
+  color: #fff;
+  cursor: not-allowed;
+}
+.tabela-rec .campo--dose:disabled { background: #f3f5f6; cursor: not-allowed; }
+
+/* Ao aplicar uma receita: talhão que está em outra receita */
+.talhoes__outra { margin-left: 8px; font-size: 12px; font-weight: 400; color: var(--texto-suave); }
+
 .erro-campo {
   margin: 4px 0 0;
   font-size: 12px;
