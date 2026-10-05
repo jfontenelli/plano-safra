@@ -796,7 +796,7 @@ window.Telas.planoOperacoes = (function () {
           <span class="talhoes__selecao"><strong>${n} ${n === 1 ? 'talhão' : 'talhões'}</strong> · ${Util.area(area)}</span>
           <button class="botao botao--perigo-leve botao--p" type="button" data-acao="remover-da-operacao"
                   ${recebem ? '' : 'disabled title="Nenhum dos talhões selecionados recebe a operação"'}>Remover da operação</button>
-          <button class="botao botao--primario botao--p" type="button" data-acao="ajustar-produtos">Ajustar produtos</button>
+          <button class="botao botao--primario botao--p" type="button" data-acao="ajustar-produtos">Ajustar receita</button>
           <button class="botao-icone dica dica--direita" type="button" data-acao="cancelar-modo"
                   data-dica="Cancelar edição" aria-label="Cancelar edição">${Icones.fechar}</button>
         </div>`;

@@ -166,10 +166,10 @@ Regras gerais da base (Plano_Safra_Cultura_Variedade_revisado_Julyane.docx): só
 
 **Barra de seleção** (fixa embaixo da tabela, sempre visível ao rolar)
 - Sem seleção: "Marque os talhões que quer ajustar." e **Cancelar** (sai do modo edição).
-- Com seleção: "3 talhões · 305 ha" (quantidade e soma da área) · **"Remover da operação"** (texto vermelho, estilo secundário) · **"Ajustar produtos"** (botão principal verde) · **X** (dica "Cancelar edição": faz o papel do Cancelar e sai do modo edição).
+- Com seleção: "3 talhões · 305 ha" (quantidade e soma da área) · **"Remover da operação"** (texto vermelho, estilo secundário) · **"Ajustar receita"** (botão principal verde) · **X** (dica "Cancelar edição": faz o papel do Cancelar e sai do modo edição).
 - "Remover da operação" pede confirmação: "Remover 3 talhões desta operação? Os produtos e doses desses talhões serão apagados." Botões: Cancelar · Remover talhões. Desabilitado quando nenhum dos selecionados recebe a operação.
 
-**Modal "Ajustar produtos"** (abre pelo botão "Ajustar produtos"; a tabela ocupa a largura toda, sem painel lateral)
+**Modal "Ajustar produtos"** (abre pelo botão "Ajustar receita"; a tabela ocupa a largura toda, sem painel lateral)
 - Cabeçalho: "Ajustar produtos de 3 talhões" · lista dos talhões ("T01, T02, T03"; com mais de 6, os 6 primeiros e "e mais N", com a lista completa ao passar o mouse) · "Campo não alterado mantém o valor de cada talhão" (cinza) · X para fechar.
 - Corpo no padrão da receita: **Princípio ativo · Produto comercial · Unid. · Dose · lixeira**, uma linha por produto presente nos talhões selecionados (princípio ativo e produto só como texto).
   - Mesma dose em todos os selecionados: o campo mostra o valor (ex.: 0,40). Doses diferentes: campo vazio com "Vários".
@@ -179,7 +179,7 @@ Regras gerais da base (Plano_Safra_Cultura_Variedade_revisado_Julyane.docx): só
 - Rodapé: **Cancelar** · **Aplicar em 3 talhões** (botão principal). Sem excluir receita no modal.
   - **Aplicar**: grava só nos talhões selecionados, fecha o modal, atualiza a tabela (produto novo ganha coluna; talhões sem ele mostram "—"), limpa a seleção (a tabela continua no modo edição) e mostra "Ajustes aplicados em 3 talhões".
   - **Cancelar, X ou Esc**: descarta o que foi feito no modal e mantém a seleção.
-- Foco preso no modal enquanto aberto; ao fechar, volta ao botão "Ajustar produtos".
+- Foco preso no modal enquanto aberto; ao fechar, volta ao botão "Ajustar receita".
 - Talhão que não recebia a operação e recebe produto passa a receber a operação. DAP e fenologia não são ajustados por talhão.
 - **Receitas no ajuste** (a composição de produtos é a identidade da receita):
   - **Só dose** alterada: fica como dose própria do talhão; **não** cria receita. Ex.: Fox Xpro de 0,40 para 0,45 L/ha em 3 talhões da Receita 1 → continuam na Receita 1, com a diferença de dose registrada.
@@ -211,7 +211,7 @@ Um verbo por ação, do botão à mensagem:
 | Selecionar | escolher os talhões |
 | Salvar receita | guardar os produtos e as doses padrão da receita |
 | Aplicar | colocar a receita nos talhões |
-| Editar talhões / Ajustar produtos / Aplicar em N talhões | mudanças pontuais por talhão (modal "Ajustar produtos") |
+| Editar talhões / Ajustar receita / Aplicar em N talhões | mudanças pontuais por talhão (modal "Ajustar produtos") |
 | Remover | tirar produto ou talhão da operação |
 
 ## 14. Demonstração (só no protótipo)
