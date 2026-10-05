@@ -901,7 +901,7 @@ window.Telas.planoOperacoes = (function () {
       return `
         <tr class="${e.removido ? 'ajuste-modal__removida' : ''}">
           <td>${esc(e.linha.principioAtivo || '—')}</td>
-          <td>${esc(e.linha.produto || '—')} ${etiquetaPre(e.linha)}</td>
+          <td>${esc(e.linha.produto || '—')} ${etiquetaPre(e.linha)}${seloTipo(e.linha)}</td>
           <td><span class="tabela-rec__unidade">${Planos.unidadeDose(e.linha) || '—'}</span></td>
           <td class="tabela__numero">
             <input class="campo__controle campo--compacto campo--dose" type="text" inputmode="decimal" data-m="dose" data-i="${i}"
@@ -961,7 +961,7 @@ window.Telas.planoOperacoes = (function () {
         <tr>
           <td>${buscaNova('pa', x.pa, 'Buscar princípio ativo', 'Princípio ativo')}</td>
           <td>${buscaNova('prod', x.produto ? x.produto.produto : '', 'Buscar produto', 'Produto comercial')}
-            ${x.produto && x.produto.preCadastro ? '<span class="etiqueta-pre">Pré-cadastro</span>' : ''}</td>
+            ${x.produto && x.produto.preCadastro ? '<span class="etiqueta-pre">Pré-cadastro</span>' : ''}${x.produto ? seloTipo(x.produto) : ''}</td>
           <td><span class="tabela-rec__unidade">${x.produto ? `${x.produto.unidade}/ha` : '—'}</span></td>
           <td class="tabela__numero" ${semProduto ? 'title="Escolha o produto comercial para informar a dose"' : ''}>
             <input class="campo__controle campo--compacto campo--dose" type="text" inputmode="decimal" data-m="nova-dose" data-id="${x.id}"

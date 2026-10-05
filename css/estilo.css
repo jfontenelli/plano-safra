@@ -1510,6 +1510,8 @@ body:has(.talhoes__rodape) .aviso { bottom: 140px; }
 .etiqueta-tipo--fungicida  { background: #e7effa; color: #2a5a9b; }
 .etiqueta-tipo--inseticida { background: #fbe9e7; color: #a3412f; }
 .etiqueta-tipo--herbicida  { background: #f1ecf8; color: #6a4a9a; }
+/* Em células alinhadas à esquerda (modal Ajustar recomendação) */
+.ajuste-modal .etiqueta-tipo { margin-left: 0; }
 
 .busca {
   display: flex;
