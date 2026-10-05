@@ -146,7 +146,7 @@ Regras gerais da base (Plano_Safra_Cultura_Variedade_revisado_Julyane.docx): só
 - Todos os talhões cadastrados da fazenda contam. Operação ainda sem talhões: todos "sem operação" (ex.: 12 talhões → "12 sem operação"), com as linhas em cinza.
 - Card da operação: "N sem operação" e "N sem dose", separados, porque pedem ações diferentes (Selecionar talhões × Editar). Contador zerado não aparece.
 
-No grupo: o talhão fica pendente quando está "Sem operação" em todas as operações do grupo.
+- No grupo: o talhão fica "sem operação" no grupo quando está "Sem operação" em todas as operações do grupo.
 
 ## 13. Vocabulário da tela
 
