@@ -609,6 +609,14 @@ window.Telas.planoOperacoes = (function () {
     return linha.preCadastro ? '<span class="etiqueta-pre">Pré-cadastro</span>' : '';
   }
 
+  // Tipo do insumo (classe do cadastro: Fungicida, Inseticida, Herbicida…) em selo pequeno abaixo do nome.
+  // Produto de pré-cadastro fica sem selo.
+  function seloTipo(linha) {
+    const d = !linha.preCadastro && linha.produto ? Planos.produtoDoCadastro(linha.produto) : null;
+    if (!d || !d.classe) return '';
+    return `<span class="etiqueta-tipo etiqueta-tipo--${Util.normalizar(d.classe).replace(/\s+/g, '-')}">${esc(d.classe)}</span>`;
+  }
+
   function linhaRecomendacao(l, erro = {}, leitura = somenteLeitura) {
     if (leitura) {
       return `
@@ -718,7 +726,7 @@ window.Telas.planoOperacoes = (function () {
               ${comCaixa ? `<th class="tabela__marcar"><input type="checkbox" data-acao="marcar-todos" aria-label="Marcar todos"
                    ${todosMarcados(op) ? 'checked' : ''}></th>` : ''}
               <th>Talhão</th><th class="tabela__numero">Área</th>
-              ${colunas.map((l) => `<th class="tabela__numero">${rotuloProduto(l)} ${etiquetaPre(l)}</th>`).join('')}
+              ${colunas.map((l) => `<th class="tabela__numero">${rotuloProduto(l)} ${etiquetaPre(l)}${seloTipo(l)}</th>`).join('')}
             </tr></thead>
             <tbody id="talhoes-linhas">${linhasTalhoes(op, colunas)}</tbody>
           </table>

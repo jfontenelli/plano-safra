@@ -1492,6 +1492,25 @@ body:has(.talhoes__rodape) .aviso { bottom: 140px; }
 
 .talhoes__ferramentas { display: flex; align-items: center; gap: 10px; }
 
+/* Tipo do insumo, abaixo do nome do produto (cabeçalho da tabela de talhões) */
+.etiqueta-tipo {
+  display: block;
+  width: fit-content;
+  margin: 3px 0 0 auto;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: #eef1ef;
+  color: var(--texto-suave);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  white-space: nowrap;
+}
+.etiqueta-tipo--fungicida  { background: #e7effa; color: #2a5a9b; }
+.etiqueta-tipo--inseticida { background: #fbe9e7; color: #a3412f; }
+.etiqueta-tipo--herbicida  { background: #f1ecf8; color: #6a4a9a; }
+
 .busca {
   display: flex;
   align-items: center;
