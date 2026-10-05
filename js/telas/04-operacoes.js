@@ -795,7 +795,7 @@ window.Telas.planoOperacoes = (function () {
         <div class="talhoes__rodape">
           <span class="talhoes__selecao"><strong>${n} ${n === 1 ? 'talhão' : 'talhões'}</strong> · ${Util.area(area)}</span>
           <button class="botao botao--perigo-leve botao--p" type="button" data-acao="remover-da-operacao"
-                  ${recebem ? '' : 'disabled title="Nenhum dos talhões selecionados recebe a operação"'}>Remover da operação</button>
+                  ${recebem ? '' : 'disabled title="Nenhum dos talhões selecionados recebe a operação"'}>Excluir recomendação</button>
           <button class="botao botao--primario botao--p" type="button" data-acao="ajustar-produtos">Ajustar recomendação</button>
           <button class="botao-icone dica dica--direita" type="button" data-acao="cancelar-modo"
                   data-dica="Cancelar edição" aria-label="Cancelar edição">${Icones.fechar}</button>
@@ -1064,19 +1064,20 @@ window.Telas.planoOperacoes = (function () {
     return { doses: {}, adicionar: [], remover: [] };
   }
 
-  // "Remover da operação" (barra de seleção): pede confirmação e apaga produtos e doses desses talhões
+  // "Excluir recomendação" (barra de seleção): só dos talhões marcados, que ficam sem operação; pede confirmação
   function removerDaOperacao(op) {
     const alvo = [...ui.marcados].filter((t) => op.talhoes[t]);
     const n = alvo.length;
     if (!n) return;
     Modal.confirmar({
-      titulo: `Remover ${n} ${n === 1 ? 'talhão' : 'talhões'} desta operação?`,
-      texto: `Os produtos e doses ${n === 1 ? 'desse talhão serão apagados' : 'desses talhões serão apagados'}.`,
-      botoes: [{ rotulo: 'Cancelar' }, { rotulo: n === 1 ? 'Remover talhão' : 'Remover talhões', classe: 'perigo', acao: () => {
+      titulo: `Excluir a recomendação de ${n} ${n === 1 ? 'talhão' : 'talhões'}?`,
+      texto: n === 1 ? 'Os produtos e doses desse talhão serão apagados e ele ficará sem operação.'
+        : 'Os produtos e doses desses talhões serão apagados e eles ficarão sem operação.',
+      botoes: [{ rotulo: 'Cancelar' }, { rotulo: 'Excluir recomendação', classe: 'perigo', acao: () => {
         alvo.forEach((t) => { delete op.talhoes[t]; });
         ui.marcados = new Set(); ui.ajuste = novoAjustePreparado();
         alterou(); desenharTudo();
-        Aviso.mostrar(`${n} ${n === 1 ? 'talhão removido' : 'talhões removidos'} da operação`);
+        Aviso.mostrar(`Recomendação excluída de ${n} ${n === 1 ? 'talhão' : 'talhões'}`);
       } }]
     });
   }

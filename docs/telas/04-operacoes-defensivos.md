@@ -166,8 +166,8 @@ Regras gerais da base (Plano_Safra_Cultura_Variedade_revisado_Julyane.docx): só
 
 **Barra de seleção** (fixa embaixo da tabela, sempre visível ao rolar)
 - Sem seleção: "Marque os talhões que quer ajustar." e **Cancelar** (sai do modo edição).
-- Com seleção: "3 talhões · 305 ha" (quantidade e soma da área) · **"Remover da operação"** (texto vermelho, estilo secundário) · **"Ajustar recomendação"** (botão principal verde) · **X** (dica "Cancelar edição": faz o papel do Cancelar e sai do modo edição).
-- "Remover da operação" pede confirmação: "Remover 3 talhões desta operação? Os produtos e doses desses talhões serão apagados." Botões: Cancelar · Remover talhões. Desabilitado quando nenhum dos selecionados recebe a operação.
+- Com seleção: "3 talhões · 305 ha" (quantidade e soma da área) · **"Excluir recomendação"** (texto vermelho, estilo secundário; vale só para os talhões marcados) · **"Ajustar recomendação"** (botão principal verde) · **X** (dica "Cancelar edição": faz o papel do Cancelar e sai do modo edição).
+- "Excluir recomendação" pede confirmação: "Excluir a recomendação de 3 talhões? Os produtos e doses desses talhões serão apagados e eles ficarão sem operação." Botões: Cancelar · Excluir recomendação. Mensagem: "Recomendação excluída de 3 talhões". A recomendação continua para os outros talhões. Desabilitado quando nenhum dos selecionados recebe a operação.
 
 **Modal "Ajustar recomendação"** (abre pelo botão "Ajustar recomendação"; a tabela ocupa a largura toda, sem painel lateral)
 - Cabeçalho: "Ajustar recomendação de 3 talhões" · lista dos talhões ("T01, T02, T03"; com mais de 6, os 6 primeiros e "e mais N", com a lista completa ao passar o mouse) · "Campo não alterado mantém o valor de cada talhão" (cinza) · X para fechar.
