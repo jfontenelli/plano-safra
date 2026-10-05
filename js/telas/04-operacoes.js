@@ -50,6 +50,7 @@ window.Telas.planoOperacoes = (function () {
       renomeandoReceita: null
     };
     ui.edicao = null;          // voltar ao plano sempre abre a lista no modo normal
+    if (!somenteLeitura) limparReceitasVazias();
     raiz = conteudo.querySelector('#plano-raiz');
     raiz.addEventListener('click', aoClicar);
     raiz.addEventListener('dblclick', aoDuploClique);
@@ -455,15 +456,32 @@ window.Telas.planoOperacoes = (function () {
               assinatura(ui.rascunho.produtos) !== assinatura(r.produtos));
   }
 
+  // Receita sem nenhuma linha preenchida (nem produto, nem princípio ativo) e sem talhões
+  function receitaVazia(op, r) {
+    return !r.produtos.some(Planos.linhaPreenchida) && !Planos.talhoesDaReceita(op, r).length;
+  }
+
+  // Ao voltar para a tela (ex.: depois de outra etapa), exclui as receitas vazias que ficaram para trás,
+  // menos a que está em edição com algum produto ainda não salvo
+  function limparReceitasVazias() {
+    const emEdicao = ui.rascunho && ui.rascunho.produtos.some(Planos.linhaPreenchida) ? ui.rascunho.receitaId : null;
+    plano.grupos.forEach((g) => g.operacoes.forEach((op) => {
+      op.receitas.filter((r) => r.id !== emEdicao && receitaVazia(op, r)).forEach((r) => {
+        op.receitas.splice(op.receitas.indexOf(r), 1);
+        if (ui.receitaPorOp[op.id] === r.id) delete ui.receitaPorOp[op.id];
+        if (ui.rascunho && ui.rascunho.receitaId === r.id) ui.rascunho = null;
+      });
+    }));
+  }
+
   // Antes de trocar de receita, operação ou grupo: confirma o descarte das alterações não salvas
-  // e tira a receita nova que ficou sem nenhum produto (se houver outra receita na operação).
+  // e exclui a receita que ficou sem nenhum produto (receita vazia não fica no sistema).
   function sairDaReceita(depois, { removerVazia = true } = {}) {
     const op = opAtual();
     const r = receitaAtual(op);
     const seguir = () => {
       ui.rascunho = null; ui.preCadastro = null; ui.validarOp = null; ui.renomeandoReceita = null;
-      if (removerVazia && r && op.receitas.length > 1 && !r.produtos.some(Planos.linhaPreenchida) &&
-          !Planos.talhoesDaReceita(op, r).length) {
+      if (removerVazia && r && receitaVazia(op, r)) {
         op.receitas.splice(op.receitas.indexOf(r), 1);
         delete ui.receitaPorOp[op.id];
       }
@@ -1382,6 +1400,9 @@ window.Telas.planoOperacoes = (function () {
   function salvarReceita(op) {
     const r = receitaAtual(op);
     if (!rascunhoAlterado(op)) return;
+    // Todas as linhas apagadas: a receita vazia não fica no sistema, é excluída
+    // (aplicada em talhões, com a mesma confirmação da lixeira; senão, na hora, com Desfazer)
+    if (!ui.rascunho.produtos.some(Planos.linhaPreenchida)) { excluirReceita(op, r); return; }
     const talhoes = Planos.talhoesDaReceita(op, r);
     const salvar = () => {
       const novas = ui.rascunho.produtos.filter(Planos.linhaPreenchida).map((l) => ({ ...l }));

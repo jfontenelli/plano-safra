@@ -100,7 +100,9 @@ Princípio: o peso visual de cada navegação é inverso à frequência de uso. 
 - `Receita 1 | Receita 2 | + Nova receita`, numeradas automaticamente. Só uma fica aberta, com destaque discreto; as demais mostram só o nome. Sem status ("Em edição", "Salva", "Aplicada").
 - **"+ Nova receita"** cria a próxima, já aberta, com uma linha vazia para o primeiro produto.
 - **Numeração**: maior número já usado + 1 (ex.: com Receita 1 e Receita 3, a próxima é Receita 4). Renomear ou excluir não renumera as outras.
-- Receita nova sem nenhum produto preenchido some ao trocar de receita (se houver outra receita na operação).
+- **Receita vazia não fica no sistema** (sem produto comercial, sem princípio ativo e sem dose):
+  - Receita nova que ficou vazia é excluída ao trocar de receita, operação, grupo ou etapa, mesmo sendo a única (a operação volta a "Nenhuma receita nesta operação"). Sem aviso.
+  - "Salvar receita" com todas as linhas apagadas exclui a receita: sem talhões, na hora, com "Desfazer"; aplicada em talhões, com a mesma confirmação da lixeira ("Excluir Receita 1? Ela está aplicada em 11 talhões, que ficarão sem operação. Essa ação não pode ser desfeita.").
 - **Renomear**: duplo clique na receita aberta (ou F2), como nas guias de grupo. Enter confirma, Esc desfaz. Dica no mouse: "Clique duas vezes para renomear". Nome vazio volta ao anterior; nome repetido na operação não é aceito ("Já existe uma receita com esse nome").
 - **Excluir**: lixeira na ponta direita da lista, agindo sobre a receita aberta.
   - Com talhões: confirmação com o impacto. Ex.: "Excluir Receita 2? Ela está aplicada em 3 talhões, que ficarão sem operação. Essa ação não pode ser desfeita." Botões: Cancelar · Excluir receita.
