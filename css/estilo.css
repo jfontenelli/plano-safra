@@ -973,6 +973,9 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
   box-shadow: 0 10px 30px rgba(0, 0, 0, .25);
   transform: translateX(-50%);
 }
+/* Com a barra fixa da tabela de talhões na tela, a mensagem sobe para não cobrir os botões dela */
+body:has(.talhoes__rodape) .aviso { bottom: 140px; }
+
 .aviso__acao {
   border: 0;
   background: none;
