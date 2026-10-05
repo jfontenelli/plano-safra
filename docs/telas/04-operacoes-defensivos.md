@@ -135,7 +135,7 @@ Princípio: o peso visual de cada navegação é inverso à frequência de uso. 
 
 Regras gerais da base (Plano_Safra_Cultura_Variedade_revisado_Julyane.docx): só quando o item não é encontrado; fica disponível para uso e reuso com status "Pré-cadastro"; o responsável pelo cadastro é avisado; ao completar, vira "Cadastro completo" mantendo o vínculo com os planos; o sistema aponta possíveis duplicidades e a consolidação depende do responsável.
 
-- **Onde**: só na busca de **produto comercial** da receita e na busca do modal "Ajustar produtos" (seção 11). **"+ Pré-cadastrar "texto digitado""** aparece sempre como última opção da lista de resultados, mesmo quando há resultados parecidos.
+- **Onde**: só na busca de **produto comercial** da receita e na busca do modal "Ajustar receita" (seção 11). **"+ Pré-cadastrar "texto digitado""** aparece sempre como última opção da lista de resultados, mesmo quando há resultados parecidos.
 - **Como**: a própria linha da receita vira um mini-formulário, com o texto digitado já preenchido. Botões: Cancelar e "Salvar pré-cadastro".
 - **Mínimo para defensivo**: **nome comercial e unidade**. O princípio ativo é opcional.
 - Os resultados parecidos aparecem acima da opção de pré-cadastro, para evitar duplicidade na origem.
@@ -169,8 +169,8 @@ Regras gerais da base (Plano_Safra_Cultura_Variedade_revisado_Julyane.docx): só
 - Com seleção: "3 talhões · 305 ha" (quantidade e soma da área) · **"Remover da operação"** (texto vermelho, estilo secundário) · **"Ajustar receita"** (botão principal verde) · **X** (dica "Cancelar edição": faz o papel do Cancelar e sai do modo edição).
 - "Remover da operação" pede confirmação: "Remover 3 talhões desta operação? Os produtos e doses desses talhões serão apagados." Botões: Cancelar · Remover talhões. Desabilitado quando nenhum dos selecionados recebe a operação.
 
-**Modal "Ajustar produtos"** (abre pelo botão "Ajustar receita"; a tabela ocupa a largura toda, sem painel lateral)
-- Cabeçalho: "Ajustar produtos de 3 talhões" · lista dos talhões ("T01, T02, T03"; com mais de 6, os 6 primeiros e "e mais N", com a lista completa ao passar o mouse) · "Campo não alterado mantém o valor de cada talhão" (cinza) · X para fechar.
+**Modal "Ajustar receita"** (abre pelo botão "Ajustar receita"; a tabela ocupa a largura toda, sem painel lateral)
+- Cabeçalho: "Ajustar receita de 3 talhões" · lista dos talhões ("T01, T02, T03"; com mais de 6, os 6 primeiros e "e mais N", com a lista completa ao passar o mouse) · "Campo não alterado mantém o valor de cada talhão" (cinza) · X para fechar.
 - Corpo no padrão da receita: **Princípio ativo · Produto comercial · Unid. · Dose · lixeira**, uma linha por produto presente nos talhões selecionados (princípio ativo e produto só como texto).
   - Mesma dose em todos os selecionados: o campo mostra o valor (ex.: 0,40). Doses diferentes: campo vazio com "Vários".
   - Lixeira: marca o produto para sair só dos talhões selecionados (vale ao aplicar; "Desfazer" volta atrás).
@@ -211,7 +211,7 @@ Um verbo por ação, do botão à mensagem:
 | Selecionar | escolher os talhões |
 | Salvar receita | guardar os produtos e as doses padrão da receita |
 | Aplicar | colocar a receita nos talhões |
-| Editar talhões / Ajustar receita / Aplicar em N talhões | mudanças pontuais por talhão (modal "Ajustar produtos") |
+| Editar talhões / Ajustar receita / Aplicar em N talhões | mudanças pontuais por talhão (modal "Ajustar receita") |
 | Remover | tirar produto ou talhão da operação |
 
 ## 14. Demonstração (só no protótipo)

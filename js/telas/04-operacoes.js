@@ -813,7 +813,7 @@ window.Telas.planoOperacoes = (function () {
     };
   }
 
-  // ----- Modal "Ajustar produtos de N talhões" (vale para todos os talhões selecionados) -----
+  // ----- Modal "Ajustar receita de N talhões" (vale para todos os talhões selecionados) -----
   // Mesma estrutura da receita: Princípio ativo · Produto comercial · Unid. · Dose · lixeira.
   // Dose igual em todos aparece no campo; doses diferentes deixam o campo vazio com "Vários".
   // Cancelar, X ou Esc: descarta o que foi feito no modal e mantém a seleção.
@@ -843,7 +843,7 @@ window.Telas.planoOperacoes = (function () {
     const modal = Modal.abrir(`
       <div class="modal__corpo">
         <button class="modal__fechar" type="button" aria-label="Fechar" data-fechar>${Icones.fechar}</button>
-        <h2 class="modal__titulo" id="modal-titulo">Ajustar produtos de ${n} ${n === 1 ? 'talhão' : 'talhões'}</h2>
+        <h2 class="modal__titulo" id="modal-titulo">Ajustar receita de ${n} ${n === 1 ? 'talhão' : 'talhões'}</h2>
         <p class="ajuste-modal__talhoes">${listaTalhoes}</p>
         <p class="ajuste-modal__ajuda">Campo não alterado mantém o valor de cada talhão</p>
         <div class="ajuste-modal__conteudo"></div>
@@ -1664,7 +1664,7 @@ window.Telas.planoOperacoes = (function () {
     }
   }
 
-  // ----- Ajustar talhões (Aplicar em N talhões, no modal "Ajustar produtos") -----
+  // ----- Ajustar talhões (Aplicar em N talhões, no modal "Ajustar receita") -----
   // Mudar só a dose: fica como dose própria do talhão (a receita não muda).
   // Mudar a composição (adicionar, remover ou trocar produto):
   //  - se já existe receita com a nova composição, os talhões passam para ela;
