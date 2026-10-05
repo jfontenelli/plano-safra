@@ -940,33 +940,25 @@ window.Telas.planoOperacoes = (function () {
             </td>
           </tr>`;
       }
-      if (!x.produto) {
-        // Um campo de busca ocupando Princípio ativo e Produto comercial, que procura pelos dois
-        return `
-          <tr>
-            <td colspan="2">
-              <div class="combo">
-                <input class="campo__controle campo--compacto" type="text" data-m="busca" data-id="${x.id}" data-foco="busca-${x.id}"
-                       value="${esc(x.busca)}" placeholder="Buscar por princípio ativo ou produto comercial" autocomplete="off"
-                       role="combobox" aria-expanded="false" aria-label="Buscar produto por princípio ativo ou produto comercial">
-                <div class="combo__lista" role="listbox" hidden></div>
-              </div>
-            </td>
-            <td><span class="tabela-rec__unidade">—</span></td>
-            <td class="tabela__numero" title="Escolha o produto para informar a dose">
-              <input class="campo__controle campo--compacto campo--dose" type="text" placeholder="—" aria-label="Dose" disabled>
-            </td>
-            ${lixeira}
-          </tr>`;
-      }
+      // Mesma estrutura da recomendação: Princípio ativo · Produto comercial · Unid. · Dose
+      const buscaNova = (tipo, valor, placeholder, rotulo) => `
+        <div class="combo">
+          <input class="campo__controle campo--compacto" type="text" data-m="busca" data-tipo="${tipo}" data-id="${x.id}"
+                 data-foco="${tipo}-${x.id}" value="${esc(valor)}" placeholder="${placeholder}" autocomplete="off"
+                 role="combobox" aria-expanded="false" aria-label="${rotulo}">
+          <div class="combo__lista" role="listbox" hidden></div>
+        </div>`;
+      const semProduto = !x.produto;
       return `
         <tr>
-          <td>${esc(x.produto.principioAtivo || '—')}</td>
-          <td>${esc(x.produto.produto)} ${x.produto.preCadastro ? '<span class="etiqueta-pre">Pré-cadastro</span>' : ''}</td>
-          <td><span class="tabela-rec__unidade">${x.produto.unidade}/ha</span></td>
-          <td class="tabela__numero">
+          <td>${buscaNova('pa', x.pa, 'Buscar princípio ativo', 'Princípio ativo')}</td>
+          <td>${buscaNova('prod', x.produto ? x.produto.produto : '', 'Buscar produto', 'Produto comercial')}
+            ${x.produto && x.produto.preCadastro ? '<span class="etiqueta-pre">Pré-cadastro</span>' : ''}</td>
+          <td><span class="tabela-rec__unidade">${x.produto ? `${x.produto.unidade}/ha` : '—'}</span></td>
+          <td class="tabela__numero" ${semProduto ? 'title="Escolha o produto comercial para informar a dose"' : ''}>
             <input class="campo__controle campo--compacto campo--dose" type="text" inputmode="decimal" data-m="nova-dose" data-id="${x.id}"
-                   data-foco="nova-dose-${x.id}" value="${esc(x.dose)}" placeholder="—" aria-label="Dose de ${esc(x.produto.produto)}">
+                   data-foco="nova-dose-${x.id}" value="${esc(x.dose)}" placeholder="—"
+                   aria-label="Dose${x.produto ? ` de ${esc(x.produto.produto)}` : ''}" ${semProduto ? 'disabled' : ''}>
           </td>
           ${lixeira}
         </tr>`;
@@ -989,19 +981,34 @@ window.Telas.planoOperacoes = (function () {
       if (foco) caixa.querySelector(`[data-foco="${foco}"]`)?.focus();
     }
 
-    // Resultados da busca: "Select 240 EC · Cletodim · L/ha"; por último, "+ Pré-cadastrar produto"
+    // Princípio ativo: princípios do cadastro. Produto: produtos do cadastro ("Select 240 EC · Cletodim · L/ha"),
+    // só os do princípio ativo escolhido. Com texto digitado, a última opção é "+ Pré-cadastrar "texto"".
     function mostrarResultados(input) {
+      const x = novaPorId(input.dataset.id);
       const lista = input.parentElement.querySelector('.combo__lista');
-      const busca = Util.normalizar(input.value.trim());
-      const achados = DADOS.defensivos.filter((d) => d.produto && (!busca ||
-        Util.normalizar(d.produto).includes(busca) || Util.normalizar(d.principioAtivo || '').includes(busca))).slice(0, 8);
-      lista.innerHTML = achados.map((d) => `
-        <button class="combo__opcao" type="button" role="option" data-m="escolher" data-id="${input.dataset.id}" data-produto="${esc(d.produto)}">
-          <strong>${esc(d.produto)}</strong><span class="combo__sub"> · ${esc(d.principioAtivo || '—')} · ${d.unidade}/ha</span>
-          ${d.preCadastro ? '<span class="etiqueta-pre">Pré-cadastro</span>' : ''}
-        </button>`).join('') + `
-        <button class="combo__opcao combo__opcao--pre" type="button" role="option" data-m="pre-abrir" data-id="${input.dataset.id}">
-          ${Icones.mais} Pré-cadastrar produto</button>`;
+      const texto = input.value.trim();
+      const atual = input.dataset.tipo === 'pa' ? x.pa : (x.produto ? x.produto.produto : '');
+      const busca = texto === atual ? '' : Util.normalizar(texto);
+      const bate = (v) => !busca || Util.normalizar(v).includes(busca);
+      let opcoes;
+      if (input.dataset.tipo === 'pa') {
+        const pas = [...new Set(DADOS.defensivos.map((d) => d.principioAtivo).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
+        opcoes = pas.filter(bate).slice(0, 8).map((pa) => `
+          <button class="combo__opcao" type="button" role="option" data-m="escolher-pa" data-id="${x.id}" data-valor="${esc(pa)}">${esc(pa)}</button>`);
+      } else {
+        opcoes = DADOS.defensivos.filter((d) => d.produto && (!x.pa || d.principioAtivo === x.pa) && bate(d.produto)).slice(0, 8)
+          .map((d) => `
+          <button class="combo__opcao" type="button" role="option" data-m="escolher" data-id="${x.id}" data-produto="${esc(d.produto)}">
+            <strong>${esc(d.produto)}</strong><span class="combo__sub"> · ${esc(d.principioAtivo || '—')} · ${d.unidade}/ha</span>
+            ${d.preCadastro ? '<span class="etiqueta-pre">Pré-cadastro</span>' : ''}
+          </button>`);
+      }
+      if (busca) {
+        opcoes.push(`
+          <button class="combo__opcao combo__opcao--pre" type="button" role="option" data-m="pre-abrir" data-id="${x.id}"
+                  data-tipo="${input.dataset.tipo}" data-valor="${esc(texto)}">${Icones.mais} Pré-cadastrar "${esc(texto)}"</button>`);
+      }
+      lista.innerHTML = opcoes.length ? opcoes.join('') : '<div class="combo__nada">Digite para buscar</div>';
       lista.hidden = false;
       input.setAttribute('aria-expanded', 'true');
     }
@@ -1015,24 +1022,36 @@ window.Telas.planoOperacoes = (function () {
       const x = alvo.dataset.id ? novaPorId(alvo.dataset.id) : null;
       switch (alvo.dataset.m) {
         case 'adicionar': {
-          const nova = { id: `n${++seq}`, produto: null, busca: '', dose: '', pre: null };
-          m.novas.push(nova); desenhar(`busca-${nova.id}`); break;
+          const nova = { id: `n${++seq}`, pa: '', produto: null, dose: '', pre: null };
+          m.novas.push(nova); desenhar(`pa-${nova.id}`); break;
         }
         case 'remover': m.existentes[i].removido = true; desenhar(`desfazer-${i}`); break;
         case 'desfazer': m.existentes[i].removido = false; desenhar(`remover-${i}`); break;
         case 'tirar': m.novas = m.novas.filter((n2) => n2 !== x); desenhar('adicionar'); break;
         case 'escolher':
-          x.produto = Planos.produtoDoCadastro(alvo.dataset.produto); desenhar(`nova-dose-${x.id}`); break;
+          // Escolhido o produto, o princípio ativo dele é preenchido
+          x.produto = Planos.produtoDoCadastro(alvo.dataset.produto);
+          x.pa = x.produto.principioAtivo || '';
+          desenhar(`nova-dose-${x.id}`); break;
+        case 'escolher-pa':
+          // Produto de outro princípio ativo deixa de valer (e, sem produto, não há unidade nem dose)
+          x.pa = alvo.dataset.valor;
+          if (x.produto && x.produto.principioAtivo !== x.pa) { x.produto = null; x.dose = ''; }
+          desenhar(`prod-${x.id}`); break;
         case 'pre-abrir':
-          x.pre = { produto: x.busca.trim(), principioAtivo: '', unidade: '', erro: '' }; desenhar(`pre-${x.id}`); break;
-        case 'pre-cancelar': x.pre = null; desenhar(`busca-${x.id}`); break;
+          // Pelo princípio ativo, o texto vai para o Princípio ativo; pelo produto, para o Produto comercial
+          x.pre = alvo.dataset.tipo === 'pa'
+            ? { origem: 'pa', produto: '', principioAtivo: alvo.dataset.valor, unidade: '', erro: '' }
+            : { origem: 'prod', produto: alvo.dataset.valor, principioAtivo: x.pa, unidade: '', erro: '' };
+          desenhar(`pre-${x.id}`); break;
+        case 'pre-cancelar': { const origem = x.pre.origem; x.pre = null; desenhar(`${origem}-${x.id}`); break; }
         case 'pre-salvar': {
           const produto = x.pre.produto.trim();
           if (!produto) { x.pre.erro = 'Informe o produto comercial.'; desenhar(`pre-${x.id}`); break; }
           if (!x.pre.unidade) { x.pre.erro = 'Escolha a unidade.'; desenhar(`pre-${x.id}`); break; }
           const d = { classe: '', produto, principioAtivo: x.pre.principioAtivo.trim(), unidade: x.pre.unidade, preCadastro: true };
           DADOS.defensivos.push(d);
-          x.produto = d; x.pre = null; desenhar(`nova-dose-${x.id}`);
+          x.produto = d; x.pa = d.principioAtivo; x.pre = null; desenhar(`nova-dose-${x.id}`);
           break;
         }
         case 'aplicar': {
@@ -1054,7 +1073,7 @@ window.Telas.planoOperacoes = (function () {
       const x = el.dataset.id ? novaPorId(el.dataset.id) : null;
       if (el.dataset.m === 'dose') { m.existentes[Number(el.dataset.i)].texto = el.value.trim(); atualizarAplicar(); }
       else if (el.dataset.m === 'nova-dose') { x.dose = el.value.trim(); }
-      else if (el.dataset.m === 'busca') { x.busca = el.value; mostrarResultados(el); }
+      else if (el.dataset.m === 'busca') { mostrarResultados(el); }
       else if (el.dataset.m === 'pre-produto') { x.pre.produto = el.value; }
       else if (el.dataset.m === 'pre-pa') { x.pre.principioAtivo = el.value; }
     });
@@ -1066,7 +1085,7 @@ window.Telas.planoOperacoes = (function () {
         if (v !== null) el.value = Util.dose(v);
       }
     });
-    caixa.addEventListener('focusin', (e) => { if (e.target.dataset.m === 'busca') mostrarResultados(e.target); });
+    caixa.addEventListener('focusin', (e) => { if (e.target.dataset.m === 'busca') { e.target.select(); mostrarResultados(e.target); } });
     caixa.addEventListener('keydown', (e) => {
       const el = e.target;
       if (el.dataset.m === 'busca') {
