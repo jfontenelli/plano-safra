@@ -1350,10 +1350,12 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
 .recomendacao__acoes {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
   margin-top: 12px;
 }
+.recomendacao__acoes .botao .icone { width: 16px; height: 16px; stroke-width: 2.2; }
 
 /* Receitas da operação: Receita 1 | Receita 2 | + Nova receita · lixeira na ponta */
 .receitas {
@@ -1386,7 +1388,6 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
 .receitas__excluir { margin-left: auto; width: 32px; height: 32px; }
 .recomendacao__vazia { margin: 4px 0 0; font-size: 14px; color: var(--texto-suave); }
 
-.recomendacao__botoes { display: flex; gap: 10px; }
 .botao[aria-disabled="true"],
 .botao[aria-disabled="true"]:hover {
   background: #c9d1cd;

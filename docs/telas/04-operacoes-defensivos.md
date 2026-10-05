@@ -32,7 +32,7 @@ Operações   Calendário Agrícola   Suprimentos   Aprovação
 │  2ª Fungicida     45  │ Recomendação agronômica                                   │
 │  3ª Fungicida     60  │   Receita 1 │ Receita 2 │ + Nova receita              🗑   │
 │  4ª Fungicida     75  │   Princípio ativo · Produto comercial · Unid. · Dose padrão│
-│                       │   + Adicionar produto [Salvar receita] [Aplicar nos talhões]│
+│                       │   [Salvar receita] [Aplicar nos talhões] [+ Adicionar produto]│
 │ + Nova operação       │ Talhões da recomendação agronômica      ✏️ Editar  🔍     │
 │                       │   Talhão · Área · dose por produto (cor da linha = status)│
 └───────────────────────┴──────────────────────────────────────────────────────────┘
@@ -109,7 +109,7 @@ Princípio: o peso visual de cada navegação é inverso à frequência de uso. 
 - Operação sem receita: "Nenhuma receita nesta operação. Use "+ Nova receita" para criar."
 
 **Tabela da receita**
-- Colunas: **Princípio ativo · Produto comercial · Unidade · Dose padrão**, com lixeira por linha e "+ Adicionar produto".
+- Colunas: **Princípio ativo · Produto comercial · Unidade · Dose padrão**, com lixeira por linha.
 - **A dose é do produto comercial.** O princípio ativo não tem dose: serve como filtro para encontrar o produto. Escolhido o princípio ativo, o produto mostra só os produtos com ele; escolhido o produto, o princípio ativo dele é preenchido.
 - Linha só com princípio ativo: unidade vazia e dose bloqueada ("Escolha o produto comercial para informar a dose").
 - A unidade vem do cadastro do produto. A dose é sempre por hectare (L/ha, mL/ha, kg/ha, g/ha, t/ha).
@@ -117,7 +117,9 @@ Princípio: o peso visual de cada navegação é inverso à frequência de uso. 
 
 **Salvar receita** (fluxo: montar receita → salvar receita → aplicar nos talhões)
 - As mudanças na receita ficam em rascunho até **"Salvar receita"**. Trocar de receita, operação ou grupo com alteração não salva pergunta: "Descartar as alterações de Receita 1?" (Continuar editando · Descartar).
-- **"Aplicar nos talhões"** fica desabilitado com alteração não salva (dica: "Salve a receita antes de aplicar").
+- **Botões abaixo da tabela, alinhados à direita**, da esquerda para a direita: **[Salvar receita] [Aplicar nos talhões] [+ Adicionar produto]**.
+  - Com alteração não salva: "Salvar receita" fica em destaque e **"Aplicar nos talhões" não aparece**.
+  - Receita salva: "Salvar receita" fica visível e desabilitado (os botões não mudam de lugar) e "Aplicar nos talhões" aparece, em destaque.
 - Receita já aplicada: salvar vale para os talhões dela.
   - **Dose padrão alterada**: muda nos talhões que seguem o padrão; talhão com dose própria mantém a dele.
   - **Produto adicionado, removido ou trocado**: muda em todos os talhões da receita (é a composição alterada para todos, que atualiza a própria receita).
@@ -137,7 +139,7 @@ Regras gerais da base (Plano_Safra_Cultura_Variedade_revisado_Julyane.docx): só
 
 ## 10. Aplicar nos talhões
 
-1. **"Aplicar nos talhões"** (rodapé da receita aberta) coloca a tabela de talhões em modo seleção, sem janela. Título: "Selecione os talhões que recebem: Receita 1".
+1. **"Aplicar nos talhões"** (abaixo da receita salva) coloca a tabela de talhões em modo seleção, sem janela. Título: "Selecione os talhões que recebem: Receita 1".
 2. Aparecem todos os talhões da fazenda com caixa de seleção e "Marcar todos". Os que já estão nesta receita vêm marcados. Talhão que está em outra receita mostra a indicação (ex.: "· em Receita 1"); marcá-lo muda o talhão para esta receita.
 3. **"Aplicar em N talhões"** confirma. Os talhões recebem os produtos e as **doses padrão** da receita, sem perguntar a dose. Desmarcar um talhão que estava nesta receita remove a operação dele, e o botão avisa (ex.: "Aplicar em 10 talhões · remover de 1").
 4. Se algum talhão marcado (já nesta receita) tem dose própria, a tela pergunta: "3 talhões têm ajustes." **Manter ajustes** · **Substituir pela dose padrão**.

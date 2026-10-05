@@ -528,15 +528,13 @@ window.Telas.planoOperacoes = (function () {
           ${erros.semLinhas ? '<p class="erro-campo">Informe pelo menos um produto.</p>' : ''}
           ${somenteLeitura ? '' : `
             <div class="recomendacao__acoes">
-              <button class="link-acao" type="button" data-acao="adicionar-linha">${Icones.mais} Adicionar produto</button>
               ${ui.modo === 'selecionar' ? '' : `
-                <div class="recomendacao__botoes">
-                  <button class="botao ${alterada ? 'botao--primario' : 'botao--secundario'}" type="button"
-                          data-acao="salvar-receita" ${alterada ? '' : 'disabled'}>Salvar receita</button>
-                  <button class="botao botao--primario ${alterada ? 'dica' : ''}" type="button" data-acao="aplicar-receita"
-                          ${alterada ? 'aria-disabled="true" data-dica="Salve a receita antes de aplicar"' : ''}>
-                    ${Icones.mapa} Aplicar nos talhões</button>
-                </div>`}
+                <button class="botao ${alterada ? 'botao--primario' : 'botao--secundario'}" type="button"
+                        data-acao="salvar-receita" ${alterada ? '' : 'disabled'}>Salvar receita</button>`}
+              ${ui.modo === 'selecionar' || alterada ? '' : `
+                <button class="botao botao--primario" type="button" data-acao="aplicar-receita">
+                  ${Icones.mapa} Aplicar nos talhões</button>`}
+              <button class="botao botao--secundario" type="button" data-acao="adicionar-linha">${Icones.mais} Adicionar produto</button>
             </div>`}
         </div>
       </div>`;
@@ -1057,8 +1055,6 @@ window.Telas.planoOperacoes = (function () {
       case 'salvar-pre': salvarPreCadastro(op); break;
 
       case 'aplicar-receita':
-        // Receita com alteração não salva não é aplicada (a dica explica)
-        if (alvo.getAttribute('aria-disabled') === 'true') break;
         // Sem o preenchimento mínimo, mostra o que falta e não entra na seleção
         if (errosRecomendacao(op).algum) { ui.validarOp = op.id; desenharTudo(); return; }
         ui.validarOp = null;
