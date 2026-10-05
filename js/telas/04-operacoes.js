@@ -231,18 +231,20 @@ window.Telas.planoOperacoes = (function () {
     `;
   }
 
-  // "Editar" entre OPERAÇÕES e DAP. Plano aprovado: aparência desabilitada, mas com foco e dica
+  // Lápis entre OPERAÇÕES e DAP. Plano aprovado: aparência desabilitada, mas com foco e dica
   // (aria-disabled em vez de disabled, para a dica aparecer no mouse e no teclado).
   function botaoEditar(grupo) {
     if (grupo.operacoes.length === 0) return '';
     if (somenteLeitura) {
       return `
-        <button class="link-acao link-editar ops-lista__editar dica" type="button" data-acao="editar-ops" aria-disabled="true"
-                data-dica="Plano aprovado: operações não podem ser editadas"
-                aria-describedby="dica-editar">${Icones.lapis} Editar</button>
+        <button class="botao-icone ops-lista__editar dica" type="button" data-acao="editar-ops" aria-disabled="true"
+                data-dica="Plano aprovado: operações não podem ser editadas" aria-label="Editar operações"
+                aria-describedby="dica-editar">${Icones.lapis}</button>
         <span class="so-leitor" id="dica-editar">Plano aprovado: operações não podem ser editadas</span>`;
     }
-    return `<button class="link-acao link-editar ops-lista__editar" type="button" data-acao="editar-ops">${Icones.lapis} Editar</button>`;
+    return `
+      <button class="botao-icone ops-lista__editar dica" type="button" data-acao="editar-ops"
+              data-dica="Editar operações" aria-label="Editar operações">${Icones.lapis}</button>`;
   }
 
   function itemOperacao(op, ativo) {
@@ -494,12 +496,12 @@ window.Telas.planoOperacoes = (function () {
       return `
         <button class="receitas__guia ${ativa ? 'receitas__guia--ativa' : ''}" type="button" role="tab"
                 aria-selected="${ativa ? 'true' : 'false'}" data-acao="abrir-receita" data-receita="${r.id}"
-                title="${somenteLeitura ? esc(r.nome) : 'Clique duas vezes para renomear'}">${esc(r.nome)}</button>`;
+                title="${somenteLeitura || ui.modo === 'ajustar' ? esc(r.nome) : 'Clique duas vezes para renomear'}">${esc(r.nome)}</button>`;
     }).join('');
     return `
       <div class="receitas">
         <div class="receitas__guias" role="tablist" aria-label="Receitas da operação">${guias}</div>
-        ${somenteLeitura ? '' : `
+        ${somenteLeitura || ui.modo === 'ajustar' ? '' : `
           <button class="link-acao receitas__nova" type="button" data-acao="nova-receita">${Icones.mais} Nova receita</button>
           ${atual ? `
             <button class="botao-icone receitas__excluir" type="button" data-acao="excluir-receita"
@@ -509,7 +511,9 @@ window.Telas.planoOperacoes = (function () {
 
   // Tabela da receita aberta: Princípio ativo · Produto comercial · Unid. · Dose padrão
   function corpoReceita(op, r) {
-    const linhas = somenteLeitura ? r.produtos.filter(Planos.linhaPreenchida) : rascunho(op).produtos;
+    // No modo edição da tabela de talhões, a receita fica só para consulta (sem botões)
+    const leitura = somenteLeitura || ui.modo === 'ajustar';
+    const linhas = leitura ? r.produtos.filter(Planos.linhaPreenchida) : rascunho(op).produtos;
     const erros = errosVisiveis(op);
     const alterada = rascunhoAlterado(op);
     return `
@@ -518,15 +522,15 @@ window.Telas.planoOperacoes = (function () {
           <table class="tabela tabela--compacta tabela-rec">
             <thead><tr>
               <th>Princípio ativo</th><th>Produto comercial</th><th>Unid.</th><th class="tabela__numero">Dose padrão</th>
-              ${somenteLeitura ? '' : '<th><span class="so-leitor">Remover</span></th>'}
+              ${leitura ? '' : '<th><span class="so-leitor">Remover</span></th>'}
             </tr></thead>
             <tbody>
-              ${linhas.length ? linhas.map((l) => linhaRecomendacao(l, erros.linhas[l.id])).join('')
+              ${linhas.length ? linhas.map((l) => linhaRecomendacao(l, erros.linhas[l.id], leitura)).join('')
                 : '<tr><td class="tabela__vazia" colspan="5">Nenhum produto na receita.</td></tr>'}
             </tbody>
           </table>
           ${erros.semLinhas ? '<p class="erro-campo">Informe pelo menos um produto.</p>' : ''}
-          ${somenteLeitura ? '' : `
+          ${leitura ? '' : `
             <!-- À esquerda: Aplicar nos talhões (só com a receita salva). À direita: Salvar receita e + Adicionar produto -->
             <div class="recomendacao__acoes">
               ${ui.modo === 'selecionar' || alterada ? '' : `
@@ -551,8 +555,8 @@ window.Telas.planoOperacoes = (function () {
     return linha.preCadastro ? '<span class="etiqueta-pre">Pré-cadastro</span>' : '';
   }
 
-  function linhaRecomendacao(l, erro = {}) {
-    if (somenteLeitura) {
+  function linhaRecomendacao(l, erro = {}, leitura = somenteLeitura) {
+    if (leitura) {
       return `
         <tr>
           <td>${esc(l.principioAtivo || '—')}</td>
@@ -626,13 +630,13 @@ window.Telas.planoOperacoes = (function () {
     const modo = ui.modo;
     let titulo = 'Talhões da recomendação agronômica';
     if (modo === 'selecionar') titulo = `Selecione os talhões que recebem: ${esc(receitaAtual(op).nome)}`;
-    if (modo === 'ajustar') titulo = 'Ajustar talhões';
+    if (modo === 'ajustar') titulo = 'Editar talhões';
 
     const ferramentas = modo === 'ver' ? `
       <div class="talhoes__ferramentas">
         ${somenteLeitura ? '' : `
-          <button class="link-acao link-editar" type="button" data-acao="ajustar-talhoes"
-                  aria-label="Editar talhões">${Icones.lapis} Editar</button>`}
+          <button class="botao-icone botao-icone--borda dica dica--direita" type="button" data-acao="ajustar-talhoes"
+                  data-dica="Editar talhões" aria-label="Editar talhões">${Icones.lapis}</button>`}
         <label class="busca">${Icones.busca}
           <input class="busca__campo" type="search" data-campo="busca" value="${esc(ui.busca)}" placeholder="Buscar talhão" aria-label="Buscar talhão">
         </label>
@@ -645,11 +649,14 @@ window.Telas.planoOperacoes = (function () {
           <h3 class="rotulo-secao ${modo !== 'ver' ? 'rotulo-secao--destaque' : ''}" id="titulo-talhoes">${titulo}</h3>
           ${ferramentas}
         </div>
-        ${modo === 'ajustar' && ui.marcados.size ? caixaAjuste(op) : ''}
-        <p class="talhoes__legenda">
-          <span class="talhoes__cor talhoes__cor--pendente" aria-hidden="true"></span>Sem operação ou sem dose
-          <span class="talhoes__cor talhoes__cor--sem" aria-hidden="true"></span>Operação ainda não aplicada em nenhum talhão
-        </p>
+        ${modo === 'ajustar' ? '' : `
+          <p class="talhoes__legenda">
+            <span class="talhoes__cor talhoes__cor--pendente" aria-hidden="true"></span>Sem operação ou sem dose
+            <span class="talhoes__cor talhoes__cor--sem" aria-hidden="true"></span>Operação ainda não aplicada em nenhum talhão
+          </p>`}
+        <!-- Modo edição: tabela com a barra de seleção embaixo e, com seleção, o painel de ajuste ao lado -->
+        <div class="talhoes__area">
+        <div class="talhoes__principal">
         <div class="tabela-rolagem">
           <table class="tabela tabela--compacta tabela-talhoes">
             <thead><tr>
@@ -662,12 +669,15 @@ window.Telas.planoOperacoes = (function () {
           </table>
         </div>
         ${rodapeTalhoes(op)}
+        </div>
+        ${modo === 'ajustar' && ui.marcados.size ? painelAjuste(op) : ''}
+        </div>
       </section>`;
   }
 
   function talhoesMarcaveis(op) {
-    // Selecionar: todos os talhões da fazenda. Ajustar: só os que recebem a operação.
-    return ui.modo === 'ajustar' ? talhoesFazenda.filter((t) => op.talhoes[t.nome]) : talhoesFazenda;
+    // Selecionar e editar: todos os talhões da fazenda (inclusive os que ainda não recebem a operação)
+    return talhoesFazenda;
   }
 
   function todosMarcados(op) {
@@ -692,11 +702,12 @@ window.Telas.planoOperacoes = (function () {
       const status = Planos.statusTalhao(op, t.nome);
       const classeLinha = status === 'Completo' ? '' : (algumTalhao ? 'linha--pendente' : 'linha--sem');
       const situacao = { 'Sem dose': 'sem dose', 'Sem operação': 'sem operação' }[status];
-      const marcavel = ui.modo === 'selecionar' || (ui.modo === 'ajustar' && ajuste);
       const caixa = ui.modo === 'ver' ? '' : `
-        <td class="tabela__marcar">${marcavel ? `<input type="checkbox" data-acao="marcar" data-talhao="${t.nome}"
-            aria-label="Marcar ${t.nome}" ${ui.marcados.has(t.nome) ? 'checked' : ''}>` : ''}</td>`;
-      let doses = colunas.map(() => '<td></td>').join('');
+        <td class="tabela__marcar"><input type="checkbox" data-acao="marcar" data-talhao="${t.nome}"
+            aria-label="Marcar ${t.nome}" ${ui.marcados.has(t.nome) ? 'checked' : ''}></td>`;
+      // No modo edição, talhão sem a operação mostra "—" claro em cada produto
+      const vazio = ui.modo === 'ajustar' ? '<td class="tabela__numero tabela__nao-recebe">—</td>' : '<td></td>';
+      let doses = colunas.map(() => vazio).join('');
       if (ajuste) {
         doses = colunas.map((col) => {
           const l = Planos.linhaNoTalhao(op, ajuste, col);
@@ -736,15 +747,26 @@ window.Telas.planoOperacoes = (function () {
           <button class="botao botao--primario" type="button" data-acao="aplicar" ${aplicar || remover ? '' : 'disabled'}>${texto}</button>
         </div>`;
     }
+    // Modo edição: barra fixa embaixo da tabela. Sem seleção, o Cancelar sai do modo edição;
+    // com seleção, o Cancelar fica no painel de ajuste.
     if (ui.modo === 'ajustar') {
+      const n = ui.marcados.size;
+      if (!n) {
+        return `
+          <div class="talhoes__rodape">
+            <span class="talhoes__selecao">Marque os talhões que quer ajustar.</span>
+            <button class="botao botao--secundario" type="button" data-acao="cancelar-modo">Cancelar</button>
+          </div>`;
+      }
+      const area = talhoesFazenda.filter((t) => ui.marcados.has(t.nome)).reduce((s, t) => s + t.area, 0);
+      const recebem = [...ui.marcados].filter((t) => op.talhoes[t]).length;
       return `
         <div class="talhoes__rodape">
-          <span class="talhoes__selecao">${ui.marcados.size
-            ? `${ui.marcados.size} ${ui.marcados.size === 1 ? 'talhão selecionado' : 'talhões selecionados'}`
-            : 'Marque os talhões que quer ajustar.'}</span>
-          <button class="botao botao--secundario" type="button" data-acao="cancelar-modo">Cancelar</button>
-          <button class="botao botao--primario" type="button" data-acao="salvar-ajustes"
-                  ${ui.marcados.size && ajusteTemMudanca() ? '' : 'disabled'}>Salvar ajustes</button>
+          <span class="talhoes__selecao"><strong>${n} ${n === 1 ? 'talhão' : 'talhões'}</strong> · ${Util.area(area)}</span>
+          <button class="botao botao--perigo-leve botao--p" type="button" data-acao="remover-da-operacao"
+                  ${recebem ? '' : 'disabled title="Nenhum dos talhões selecionados recebe a operação"'}>Remover da operação</button>
+          <button class="botao-icone dica dica--direita" type="button" data-acao="limpar-selecao"
+                  data-dica="Limpar seleção" aria-label="Limpar seleção">${Icones.fechar}</button>
         </div>`;
     }
     return '';
@@ -759,89 +781,99 @@ window.Telas.planoOperacoes = (function () {
     };
   }
 
-  // ----- Caixa de ajuste (vale para todos os talhões selecionados) -----
-  function caixaAjuste(op) {
+  // ----- Painel lateral "Ajustar N talhões" (vale para todos os talhões selecionados) -----
+  // Uma linha por produto dos selecionados: nome · dose · unidade · lixeira. Dose igual em todos
+  // aparece no campo; doses diferentes deixam o campo vazio com "Vários".
+  function painelAjuste(op) {
     const aj = ui.ajuste;
+    const n = ui.marcados.size;
     const selecionados = [...ui.marcados].map((t) => op.talhoes[t]).filter(Boolean);
-
-    // Valor comum entre os selecionados ou "vários"
     const comum = (valores) => valores.every((v) => v === valores[0]) ? valores[0] : undefined;
+    const linhas = Planos.colunasDose(op).filter((col) => selecionados.some((a) => Planos.linhaNoTalhao(op, a, col)));
 
-    // Um campo por produto presente em algum dos selecionados (mesmo produto em receitas diferentes = um campo)
-    const linhas = Planos.colunasDose(op).filter((col) =>
-      selecionados.some((a) => Planos.linhaNoTalhao(op, a, col)));
-    const camposDose = linhas.map((l) => {
+    const existentes = linhas.map((l) => {
       const chave = Planos.chaveLinha(l);
+      const nome = esc(Planos.nomeLinha(l));
+      const removido = aj.remover.includes(chave);
       const doses = selecionados.filter((a) => Planos.linhaNoTalhao(op, a, l))
         .map((a) => Planos.doseTalhao(op, a, Planos.linhaNoTalhao(op, a, l)));
       const doseComum = comum(doses);
       const preparado = aj.doses[chave];
       const valor = preparado !== undefined ? preparado : (doseComum === undefined ? '' : Util.dose(doseComum));
-      const ph = doseComum === undefined && preparado === undefined ? 'vários' : '—';
+      const ph = doseComum === undefined && preparado === undefined ? 'Vários' : '—';
       return `
-        <div class="campo campo--ajuste">
-          <label class="campo__rotulo" for="aj-${l.id}">${rotuloProduto(l)}</label>
-          <input class="campo__controle campo--compacto" id="aj-${l.id}" type="text" inputmode="decimal"
-                 data-ajuste="dose" data-chave="${esc(chave)}" value="${esc(valor)}" placeholder="${ph}">
-        </div>`;
+        <li class="painel-produto ${removido ? 'painel-produto--removido' : ''}">
+          <span class="painel-produto__nome">${nome} ${etiquetaPre(l)}</span>
+          <input class="campo__controle campo--compacto campo--dose" type="text" inputmode="decimal"
+                 data-ajuste="dose" data-chave="${esc(chave)}" value="${esc(valor)}" placeholder="${ph}"
+                 aria-label="Dose de ${nome}" ${removido ? 'disabled' : ''}>
+          <span class="painel-produto__unidade">${Planos.unidadeDose(l)}</span>
+          ${removido ? `
+            <button class="link-acao painel-produto__desfazer" type="button" data-acao="aj-desfazer-remover" data-chave="${esc(chave)}"
+                    aria-label="Desfazer a remoção de ${nome}">Desfazer</button>` : `
+            <button class="botao-icone botao-icone--p" type="button" data-acao="aj-remover" data-chave="${esc(chave)}"
+                    title="Remover dos talhões selecionados" aria-label="Remover ${nome} dos talhões selecionados">${Icones.lixeira}</button>`}
+        </li>`;
     }).join('');
 
-    const nomeProduto = (p) => esc(p);
+    const novos = aj.adicionar.map((a, i) => {
+      const d = a.produto ? Planos.produtoDoCadastro(a.produto) : null;
+      return `
+        <li class="painel-produto painel-produto--novo">
+          <select class="campo__controle campo--compacto" data-ajuste="novo-produto" data-indice="${i}" aria-label="Produto adicionado">
+            <option value="">Escolha o produto</option>
+            ${DADOS.defensivos.filter((x) => x.produto).map((x) =>
+              `<option value="${esc(x.produto)}" ${x.produto === a.produto ? 'selected' : ''}>${esc(x.produto)}</option>`).join('')}
+          </select>
+          <input class="campo__controle campo--compacto campo--dose" type="text" inputmode="decimal"
+                 data-ajuste="novo-dose" data-indice="${i}" value="${esc(a.dose)}" placeholder="—"
+                 aria-label="Dose do produto adicionado" ${d ? '' : 'disabled title="Escolha o produto para informar a dose"'}>
+          <span class="painel-produto__unidade">${d ? `${d.unidade}/ha` : ''}</span>
+          <button class="botao-icone botao-icone--p" type="button" data-acao="aj-desfazer-adicionar" data-indice="${i}"
+                  title="Tirar esta linha" aria-label="Tirar a linha do produto adicionado">${Icones.lixeira}</button>
+        </li>`;
+    }).join('');
+
     return `
-      <div class="ajuste" role="group" aria-label="Ajuste dos talhões selecionados">
-        <p class="ajuste__titulo">Ajuste para ${ui.marcados.size} ${ui.marcados.size === 1 ? 'talhão selecionado' : 'talhões selecionados'}
-          <span class="ajuste__ajuda">Campo não alterado mantém o valor de cada talhão.</span></p>
-        ${camposDose ? `<div class="ajuste__campos">${camposDose}</div>` : ''}
-
-        <div class="ajuste__acoes">
-          <div class="ajuste__grupo">
-            <label class="campo__rotulo" for="aj-novo-produto">Adicionar produto</label>
-            <div class="ajuste__linha">
-              <select class="campo__controle campo--compacto" id="aj-novo-produto">
-                <option value="">Escolha o produto</option>
-                ${DADOS.defensivos.filter((d) => d.produto).map((d) =>
-                  `<option value="${esc(d.produto)}">${esc(d.produto)} (${d.unidade}/ha)</option>`).join('')}
-              </select>
-              <input class="campo__controle campo--compacto campo--dose" id="aj-novo-dose" type="text" inputmode="decimal" placeholder="Dose" aria-label="Dose do produto adicionado">
-              <button class="botao botao--secundario botao--p" type="button" data-acao="aj-adicionar">Adicionar</button>
-            </div>
-          </div>
-          <div class="ajuste__grupo">
-            <label class="campo__rotulo" for="aj-remover-produto">Remover produto</label>
-            <div class="ajuste__linha">
-              <select class="campo__controle campo--compacto" id="aj-remover-produto">
-                <option value="">Escolha o produto</option>
-                ${linhas.filter((l) => !aj.remover.includes(Planos.chaveLinha(l))).map((l) =>
-                  `<option value="${esc(Planos.chaveLinha(l))}">${esc(Planos.nomeLinha(l))}</option>`).join('')}
-              </select>
-              <button class="botao botao--secundario botao--p" type="button" data-acao="aj-remover">Remover</button>
-            </div>
-          </div>
-          <div class="ajuste__grupo ajuste__grupo--fim">
-            <button class="botao botao--perigo-leve botao--p" type="button" data-acao="aj-remover-operacao"
-                    aria-pressed="${aj.removerOperacao}">${aj.removerOperacao ? 'Manter na operação' : 'Remover da operação'}</button>
-          </div>
+      <aside class="painel-ajuste" aria-labelledby="titulo-ajuste">
+        <h4 class="painel-ajuste__titulo" id="titulo-ajuste">Ajustar ${n} ${n === 1 ? 'talhão' : 'talhões'}</h4>
+        <p class="painel-ajuste__ajuda">Campo não alterado mantém o valor de cada talhão.</p>
+        <p class="painel-ajuste__secao">Produtos e doses</p>
+        ${existentes || novos ? `<ul class="painel-ajuste__produtos">${existentes}${novos}</ul>`
+          : '<p class="painel-ajuste__vazio">Os talhões selecionados ainda não recebem produtos.</p>'}
+        <button class="link-acao painel-ajuste__adicionar" type="button" data-acao="aj-novo">${Icones.mais} Adicionar produto</button>
+        <div class="painel-ajuste__rodape">
+          <button class="botao botao--secundario" type="button" data-acao="cancelar-modo">Cancelar</button>
+          <button class="botao botao--primario" type="button" data-acao="salvar-ajustes"
+                  ${ajusteTemMudanca() ? '' : 'disabled'}>Aplicar em ${n} ${n === 1 ? 'talhão' : 'talhões'}</button>
         </div>
-
-        ${aj.adicionar.length || aj.remover.length || aj.removerOperacao ? `
-          <ul class="ajuste__preparados" aria-label="Mudanças preparadas">
-            ${aj.adicionar.map((a, i) => `<li class="chip chip--mais">+ ${nomeProduto(a.produto)} ${Util.dose(a.dose) || '(sem dose)'}
-              <button type="button" data-acao="aj-desfazer-adicionar" data-indice="${i}" aria-label="Desfazer">${Icones.fechar}</button></li>`).join('')}
-            ${aj.remover.map((chave) => `<li class="chip chip--menos">− ${esc(Planos.nomeLinha(linhas.find((l) => Planos.chaveLinha(l) === chave)))}
-              <button type="button" data-acao="aj-desfazer-remover" data-chave="${esc(chave)}" aria-label="Desfazer">${Icones.fechar}</button></li>`).join('')}
-            ${aj.removerOperacao ? '<li class="chip chip--menos">Remover da operação</li>' : ''}
-          </ul>` : ''}
-      </div>`;
+      </aside>`;
   }
 
   function novoAjustePreparado() {
-    return { doses: {}, adicionar: [], remover: [], removerOperacao: false };
+    return { doses: {}, adicionar: [], remover: [] };
   }
 
   function ajusteTemMudanca() {
     const aj = ui.ajuste;
-    return aj && (Object.keys(aj.doses).length || aj.adicionar.length ||
-                  aj.remover.length || aj.removerOperacao);
+    return !!aj && (Object.keys(aj.doses).length > 0 || aj.adicionar.some((a) => a.produto) || aj.remover.length > 0);
+  }
+
+  // "Remover da operação" (barra de seleção): pede confirmação e apaga produtos e doses desses talhões
+  function removerDaOperacao(op) {
+    const alvo = [...ui.marcados].filter((t) => op.talhoes[t]);
+    const n = alvo.length;
+    if (!n) return;
+    Modal.confirmar({
+      titulo: `Remover ${n} ${n === 1 ? 'talhão' : 'talhões'} desta operação?`,
+      texto: `Os produtos e doses ${n === 1 ? 'desse talhão serão apagados' : 'desses talhões serão apagados'}.`,
+      botoes: [{ rotulo: 'Cancelar' }, { rotulo: n === 1 ? 'Remover talhão' : 'Remover talhões', classe: 'perigo', acao: () => {
+        alvo.forEach((t) => { delete op.talhoes[t]; });
+        ui.marcados = new Set(); ui.ajuste = novoAjustePreparado();
+        alterou(); desenharTudo();
+        Aviso.mostrar(`${n} ${n === 1 ? 'talhão removido' : 'talhões removidos'} da operação`);
+      } }]
+    });
   }
 
   // ----- Guias de grupo (rodapé) -----
@@ -991,7 +1023,7 @@ window.Telas.planoOperacoes = (function () {
         ultimoCliqueReceita = { id, quando: agora };
         const aberta = receitaAtual(op);
         if (aberta && aberta.id === id) {
-          if (duplo && !somenteLeitura) { ui.renomeandoReceita = id; desenharTudo(); }
+          if (duplo && !somenteLeitura && ui.modo !== 'ajustar') { ui.renomeandoReceita = id; desenharTudo(); }
           break;
         }
         sairDaReceita(() => { ui.receitaPorOp[op.id] = id; sairDosModos(); desenharTudo(); });
@@ -1081,24 +1113,21 @@ window.Telas.planoOperacoes = (function () {
 
       case 'aplicar': aplicarRecomendacao(op); break;
 
-      case 'aj-adicionar': {
-        const produto = raiz.querySelector('#aj-novo-produto').value;
-        if (!produto) { raiz.querySelector('#aj-novo-produto').focus(); return; }
-        ui.ajuste.adicionar.push({ produto, dose: Util.numero(raiz.querySelector('#aj-novo-dose').value) });
+      case 'aj-novo':
+        ui.ajuste.adicionar.push({ produto: '', dose: '' }); desenharTudo();
+        raiz.querySelector('.painel-produto--novo:last-of-type select')?.focus();
+        break;
+      case 'aj-remover':
+        ui.ajuste.remover.push(alvo.dataset.chave); delete ui.ajuste.doses[alvo.dataset.chave];
         desenharTudo(); break;
-      }
-      case 'aj-remover': {
-        const id = raiz.querySelector('#aj-remover-produto').value;
-        if (!id) { raiz.querySelector('#aj-remover-produto').focus(); return; }
-        ui.ajuste.remover.push(id); delete ui.ajuste.doses[id];  // id = produto (chave), não a linha
-        desenharTudo(); break;
-      }
       case 'aj-desfazer-adicionar':
         ui.ajuste.adicionar.splice(Number(alvo.dataset.indice), 1); desenharTudo(); break;
       case 'aj-desfazer-remover':
         ui.ajuste.remover = ui.ajuste.remover.filter((chave) => chave !== alvo.dataset.chave); desenharTudo(); break;
-      case 'aj-remover-operacao':
-        ui.ajuste.removerOperacao = !ui.ajuste.removerOperacao; desenharTudo(); break;
+
+      case 'limpar-selecao':
+        ui.marcados = new Set(); ui.ajuste = novoAjustePreparado(); desenharTudo(); break;
+      case 'remover-da-operacao': removerDaOperacao(op); break;
 
       case 'salvar-ajustes': salvarAjustes(op); break;
 
@@ -1139,6 +1168,10 @@ window.Telas.planoOperacoes = (function () {
       ui.preCadastro[e.target.dataset.pre] = e.target.value;
     } else if (e.target.dataset.ajuste === 'dose') {
       ui.ajuste.doses[e.target.dataset.chave] = e.target.value.trim(); desenharTudo();
+    } else if (e.target.dataset.ajuste === 'novo-produto') {
+      ui.ajuste.adicionar[Number(e.target.dataset.indice)].produto = e.target.value; desenharTudo();
+    } else if (e.target.dataset.ajuste === 'novo-dose') {
+      ui.ajuste.adicionar[Number(e.target.dataset.indice)].dose = e.target.value.trim(); desenharTudo();
     }
   }
 
@@ -1435,52 +1468,52 @@ window.Telas.planoOperacoes = (function () {
     }
   }
 
-  // ----- Ajustar talhões -----
+  // ----- Ajustar talhões (Aplicar em N talhões) -----
   // Mudar só a dose: fica como dose própria do talhão (a receita não muda).
   // Mudar a composição (adicionar, remover ou trocar produto):
   //  - se já existe receita com a nova composição, os talhões passam para ela;
   //  - se a mudança vale para todos os talhões da receita, a própria receita é atualizada;
   //  - se vale só para parte deles, nasce a próxima receita para esses talhões.
+  // Talhão sem a operação que recebe produto passa a receber a operação.
   function salvarAjustes(op) {
     const aj = ui.ajuste;
-    const selecionados = [...ui.marcados].filter((t) => op.talhoes[t]);
-    const n = selecionados.length;
-    if (aj.removerOperacao) {
-      selecionados.forEach((t) => { delete op.talhoes[t]; });
-      sairDosModos(); alterou(); desenharTudo();
-      Aviso.mostrar(`${n} ${n === 1 ? 'talhão removido' : 'talhões removidos'} da operação`);
-      return;
-    }
-
-    // Doses de cada talhão depois do ajuste, por produto (chave): { linha, dose }
+    const adicionados = aj.adicionar.filter((a) => a.produto);
     const porDestino = new Map();
-    selecionados.forEach((t) => {
+    const semProdutos = [];
+    let alterados = 0;
+    [...ui.marcados].forEach((t) => {
       const a = op.talhoes[t];
-      const r = Planos.receitaDoTalhao(op, a);
+      const r = a ? Planos.receitaDoTalhao(op, a) : null;
+      // Doses do talhão depois do ajuste, por produto (chave): { linha, dose }
       const efetivas = new Map();
-      Planos.linhasTalhao(op, a).forEach((l) => efetivas.set(Planos.chaveLinha(l), { linha: l, dose: Planos.doseTalhao(op, a, l) }));
+      if (a) Planos.linhasTalhao(op, a).forEach((l) => efetivas.set(Planos.chaveLinha(l), { linha: l, dose: Planos.doseTalhao(op, a, l) }));
       Object.entries(aj.doses).forEach(([chave, texto]) => {
         if (efetivas.has(chave)) efetivas.get(chave).dose = Util.numero(texto);
       });
       aj.remover.forEach((chave) => efetivas.delete(chave));
-      aj.adicionar.forEach(({ produto, dose }) => {
-        const linha = Planos.linhaDoProduto(produto, dose);
+      adicionados.forEach(({ produto, dose }) => {
+        const v = Util.numero(dose);
+        const linha = Planos.linhaDoProduto(produto, v);
         const chave = Planos.chaveLinha(linha);
-        if (efetivas.has(chave)) { if (dose !== null) efetivas.get(chave).dose = dose; }
-        else efetivas.set(chave, { linha, dose });
+        if (efetivas.has(chave)) { if (v !== null) efetivas.get(chave).dose = v; }
+        else efetivas.set(chave, { linha, dose: v });
       });
+      if (!a && !efetivas.size) return;                       // sem operação e sem produto: continua igual
+      alterados++;
+      if (!efetivas.size) { semProdutos.push(t); return; }    // ficou sem nenhum produto: sai da operação
       const comp = [...efetivas.keys()].sort().join('|');
-      const k = `${r.id}#${comp}`;
+      const k = `${r ? r.id : '-'}#${comp}`;
       if (!porDestino.has(k)) porDestino.set(k, { r, comp, talhoes: [] });
       porDestino.get(k).talhoes.push({ t, efetivas });
     });
+    semProdutos.forEach((t) => { delete op.talhoes[t]; });
 
     const criadas = [];
     porDestino.forEach(({ r, comp, talhoes }) => {
-      let destino = Planos.composicao(r.produtos) === comp ? r
+      let destino = r && Planos.composicao(r.produtos) === comp ? r
         : op.receitas.find((x) => Planos.composicao(x.produtos) === comp);
       const modelo = talhoes[0].efetivas;
-      if (!destino && talhoes.length === Planos.talhoesDaReceita(op, r).length) {
+      if (!destino && r && talhoes.length === Planos.talhoesDaReceita(op, r).length) {
         // Composição mudou em todos os talhões da receita: atualiza a própria receita
         r.produtos = r.produtos.filter((l) => modelo.has(Planos.chaveLinha(l)));
         modelo.forEach(({ linha, dose }, chave) => {
@@ -1488,9 +1521,10 @@ window.Telas.planoOperacoes = (function () {
         });
         destino = r;
       } else if (!destino) {
-        // Só parte dos talhões: nova receita (mantém as doses padrão da receita de origem)
+        // Só parte dos talhões (ou talhões que não recebiam a operação): nova receita,
+        // mantendo as doses padrão da receita de origem
         destino = Planos.novaReceita(op, [...modelo.values()].map(({ linha, dose }) =>
-          ({ ...linha, id: Planos.novoId('l'), dose: r.produtos.includes(linha) ? linha.dose : dose })));
+          ({ ...linha, id: Planos.novoId('l'), dose: r && r.produtos.includes(linha) ? linha.dose : dose })));
         op.receitas.push(destino);
         criadas.push(destino);
       }
@@ -1505,9 +1539,11 @@ window.Telas.planoOperacoes = (function () {
       });
     });
 
+    // Fecha o painel e limpa a seleção; a tabela continua no modo edição
     ui.rascunho = null;
-    sairDosModos(); alterou(); desenharTudo();
-    Aviso.mostrar(`Ajustes salvos em ${n} ${n === 1 ? 'talhão' : 'talhões'}` +
+    ui.marcados = new Set(); ui.ajuste = novoAjustePreparado();
+    alterou(); desenharTudo();
+    Aviso.mostrar(`Ajustes aplicados em ${alterados} ${alterados === 1 ? 'talhão' : 'talhões'}` +
       (criadas.length ? ` · criada a ${criadas.map((r) => esc(r.nome)).join(', ')}` : ''));
   }
 

@@ -1179,12 +1179,12 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
 .ops-lista__vazia { margin: 8px 10px 0; font-size: 14px; color: var(--texto-suave); }
 
 /* Modo Editar da lista: caixas de seleção, renomear com duplo clique e barra no rodapé */
-/* "✏️ Editar": o mesmo botão na lista de operações e na tabela de talhões */
-.link-editar { margin: 0; padding: 2px 4px; border-radius: 4px; white-space: nowrap; }
-.link-editar[aria-disabled="true"] { color: #9aa5a0; cursor: not-allowed; text-decoration: none; }
-/* margem automática dos dois lados do vão: Editar fica centralizado entre OPERAÇÕES e DAP */
-.ops-lista__editar { margin-right: auto; }
-.link-editar:focus-visible,
+/* Lápis (só ícone, com dica): o mesmo botão na lista de operações e na tabela de talhões */
+/* margem automática dos dois lados do vão: o lápis fica centralizado entre OPERAÇÕES e DAP */
+.ops-lista__editar { margin-right: auto; width: 30px; height: 30px; color: var(--verde-700); }
+.ops-lista__editar .icone { width: 17px; height: 17px; }
+.botao-icone[aria-disabled="true"],
+.botao-icone[aria-disabled="true"]:hover { background: none; color: #9aa5a0; cursor: not-allowed; }
 .ops-lista__nova:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 2px; }
 
 .ops-lista__todos {
@@ -1242,6 +1242,8 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
 
 /* Dica no mouse e no foco do teclado (botão com aria-disabled continua focável) */
 .dica { position: relative; }
+.dica--direita:hover::after,
+.dica--direita:focus-visible::after { left: auto; right: 0; }
 .dica:hover::after,
 .dica:focus-visible::after {
   content: attr(data-dica);
@@ -1527,7 +1529,6 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
 }
 .talhoes__cor--sem { margin-left: 14px; background: #f3f5f6; border-color: #d5dadd; }
 .talhoes__cor--pendente { background: #fdf0e1; border-color: #f1d2ad; }
-.tabela-talhoes .linha--marcada td, .tabela-talhoes .linha--marcada th { background: #f0f8f3; }
 .tabela__marcar { width: 36px; text-align: center !important; }
 .tabela__marcar input { width: 16px; height: 16px; accent-color: var(--verde-700); cursor: pointer; }
 .tabela__nao-recebe { color: #b9c0c5; }
@@ -1546,27 +1547,61 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
   background: var(--superficie);
 }
 .talhoes__selecao { margin-right: auto; font-size: 14px; color: var(--texto-suave); }
+.talhoes__selecao strong { color: var(--texto); }
 
-/* caixa de ajuste */
-.ajuste {
-  margin-bottom: 14px;
-  padding: 14px 16px;
-  border: 1px solid #cfe5d7;
+/* Modo edição: tabela (com a barra fixa embaixo) e, com seleção, o painel de ajuste ao lado */
+.talhoes__area { display: flex; align-items: flex-start; gap: 16px; }
+.talhoes__principal { flex: 1; min-width: 0; }
+.tabela-talhoes .linha--marcada td, .tabela-talhoes .linha--marcada th { background: #e6f2ec; }
+
+.painel-ajuste {
+  position: sticky;
+  top: 12px;
+  flex: 0 0 300px;
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  border: 1px solid var(--borda);
   border-radius: 10px;
-  background: #f5faf7;
+  background: var(--superficie);
 }
-.ajuste__titulo { margin: 0 0 10px; font-weight: 600; font-size: 14px; }
-.ajuste__ajuda { margin-left: 8px; font-weight: 400; color: var(--texto-suave); }
-.ajuste__campos, .ajuste__acoes { display: flex; flex-wrap: wrap; gap: 12px 16px; align-items: flex-end; }
-.ajuste__acoes { margin-top: 12px; padding-top: 12px; border-top: 1px dashed #cfe5d7; }
-.campo--ajuste { margin: 0; }
-.campo--ajuste .campo__rotulo { font-size: 13px; font-weight: 500; margin-bottom: 4px; }
-.campo--ajuste input { width: 140px; }
-.ajuste__grupo .campo__rotulo { font-size: 13px; font-weight: 500; margin-bottom: 4px; }
-.ajuste__linha { display: flex; gap: 8px; }
-.ajuste__linha select { width: 220px; }
-.ajuste__grupo--fim { margin-left: auto; }
-.ajuste__preparados { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 0; padding: 0; list-style: none; }
+.painel-ajuste__titulo { margin: 0; font-size: 16px; font-weight: 700; }
+.painel-ajuste__ajuda { margin: 4px 0 14px; font-size: 13px; color: var(--texto-suave); }
+.painel-ajuste__secao { margin: 0 0 8px; font-size: 13px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+.painel-ajuste__produtos { display: flex; flex-direction: column; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.painel-ajuste__vazio { margin: 0; font-size: 14px; color: var(--texto-suave); }
+.painel-ajuste__adicionar { align-self: flex-start; margin-top: 10px; }
+.painel-ajuste__rodape {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--borda);
+}
+.painel-produto {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 70px 36px 30px;
+  align-items: center;
+  gap: 8px;
+}
+.painel-produto__nome { font-size: 14px; overflow-wrap: anywhere; }
+.painel-produto__unidade { font-size: 13px; color: var(--texto-suave); white-space: nowrap; }
+.painel-produto .campo--dose { width: 100%; text-align: right; }
+.painel-produto .campo--dose:disabled { background: #f3f5f6; cursor: not-allowed; }
+.painel-produto select { width: 100%; min-width: 0; }
+.painel-produto--removido .painel-produto__nome { color: #a83226; text-decoration: line-through; }
+.painel-produto__desfazer { margin: 0; font-size: 13px; }
+.painel-produto .botao-icone:focus-visible,
+.painel-ajuste__adicionar:focus-visible,
+.painel-produto__desfazer:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 2px; }
+.tabela__marcar input:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 2px; }
+
+@media (max-width: 1200px) {
+  .talhoes__area { flex-direction: column; }
+  .painel-ajuste { position: static; flex: none; width: 100%; }
+}
+
 .chip {
   display: inline-flex;
   align-items: center;

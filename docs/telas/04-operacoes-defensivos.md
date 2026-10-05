@@ -27,13 +27,13 @@ Plano de Safra  ›  Safra 26/27 · Empresa A · Fazenda Santa Maria · Cultura 
 Operações   Calendário Agrícola   Suprimentos   Aprovação
 ─────────
 ┌───────────────────────┬──────────────────────────────────────────────────────────┐
-│ Operações Editar DAP ≪│ 1ª Fungicida   DAP [30]  Fenologia [V5 ▾]                │
+│ Operações   ✏️   DAP ≪│ 1ª Fungicida   DAP [30]  Fenologia [V5 ▾]                │
 │ ▌1ª Fungicida     30  │ 1.085 ha · 11 talhões · 1 sem operação · 1 sem dose       │
 │  2ª Fungicida     45  │ Recomendação agronômica                                   │
 │  3ª Fungicida     60  │   Receita 1 │ Receita 2 │ + Nova receita              🗑   │
 │  4ª Fungicida     75  │   Princípio ativo · Produto comercial · Unid. · Dose padrão│
 │                       │   [Aplicar nos talhões]   [Salvar receita] [+ Adicionar produto]│
-│ + Nova operação       │ Talhões da recomendação agronômica      ✏️ Editar  🔍     │
+│ + Nova operação       │ Talhões da recomendação agronômica            ✏️  🔍      │
 │                       │   Talhão · Área · dose por produto (cor da linha = status)│
 └───────────────────────┴──────────────────────────────────────────────────────────┘
 Grupo de operações │ Corretivos │ Semente │ Fertilizante │ Defensivo │ Colheita │ + │      🗑
@@ -62,8 +62,8 @@ Princípio: o peso visual de cada navegação é inverso à frequência de uso. 
 
 - Lista à esquerda com nome e DAP de cada operação, ordenada automaticamente pelo DAP; cabeçalho "Operações" com o rótulo "DAP" e o botão ≪; "+ Nova operação" no fim. A lista rola sozinha, sem rolar a página.
 - A lista mostra só nome e DAP; o item selecionado fica marcado. Clique simples na linha abre a operação; duplo clique na lista normal não faz nada.
-- Botão **"✏️ Editar"** (ícone de lápis antes do texto) no cabeçalho da lista, centralizado entre "Operações" e "DAP". Renomear e excluir operações ficam no modo Editar (não no card da operação).
-- **Lista minimizada** (≪ / ≫): coluna estreita com ≫, o rótulo "DAP" e só os DAPs das operações, na mesma ordem; a operação selecionada fica marcada e o nome aparece ao passar o mouse. Clicar no DAP abre a operação. No fim da coluna, um "+" cria uma nova operação (o nome abre em edição no card da operação). Minimizada, o "Editar" não aparece.
+- Botão **lápis ✏️** (só o ícone, com a dica "Editar operações") no cabeçalho da lista, centralizado entre "Operações" e "DAP". Renomear e excluir operações ficam no modo Editar (não no card da operação).
+- **Lista minimizada** (≪ / ≫): coluna estreita com ≫, o rótulo "DAP" e só os DAPs das operações, na mesma ordem; a operação selecionada fica marcada e o nome aparece ao passar o mouse. Clicar no DAP abre a operação. No fim da coluna, um "+" cria uma nova operação (o nome abre em edição no card da operação). Minimizada, o lápis não aparece.
 
 **Modo Editar** (só com o plano "Em construção")
 - Cada linha ganha uma caixa de seleção à esquerda; no topo da lista, a caixa **"Todos"** (marca/desmarca todas). "+ Nova operação" fica oculto.
@@ -76,7 +76,7 @@ Princípio: o peso visual de cada navegação é inverso à frequência de uso. 
 - **Excluir (n)**: mostra quantas operações estão marcadas; desabilitado com n = 0. Ver "Sugestões em teste" (exclusão).
 
 **Plano aprovado**
-- Nenhuma operação pode ser editada. "Editar" fica com aparência desabilitada, mas recebe mouse e foco do teclado para mostrar a dica: "Plano aprovado: operações não podem ser editadas".
+- Nenhuma operação pode ser editada. O lápis fica com aparência desabilitada, mas recebe mouse e foco do teclado para mostrar a dica: "Plano aprovado: operações não podem ser editadas".
 - A lista não mostra contador de pendências.
 
 ## 7. Detalhe da operação
@@ -153,19 +153,36 @@ Regras gerais da base (Plano_Safra_Cultura_Variedade_revisado_Julyane.docx): só
 - Colunas: Talhão · Área · uma coluna de dose por produto, com a unidade no cabeçalho (ex.: "Fox Xpro (L/ha)"), juntando os produtos das receitas **já aplicadas**. Os produtos de uma receita só entram na tabela depois de "Aplicar nos talhões"; montar ou salvar a receita não muda a tabela. Produto que não está na receita do talhão aparece como "—" apagado. Sem colunas DAP, Status e Receita.
 - O status aparece na **cor da linha** (ver seção 12), com uma legenda acima da tabela: "Sem operação ou sem dose" (laranja) · "Operação ainda não aplicada em nenhum talhão" (cinza).
 - Valores ajustados aparecem iguais aos demais (sem marca de ajuste).
-- Botão **"✏️ Editar"** (mesmo padrão do Editar da lista de operações) e busca no cabeçalho da tabela.
+- **Lápis ✏️** (só o ícone, com a dica "Editar talhões"; mesmo padrão do lápis da lista de operações) e busca no cabeçalho da tabela.
 
-**Modo ajustar (opcional, pelo "✏️ Editar")**
-- Caixas de seleção ("Marcar todos" ou um a um).
-- Com talhões selecionados, aparece a caixa de ajuste, que vale para **todos os selecionados de uma vez**: dose de cada produto, adicionar produto, remover produto, remover da operação. DAP e fenologia não são ajustados por talhão.
+**Modo edição (pelo lápis)**
+- Título da tabela: "Editar talhões". **Todos os talhões** têm caixa de seleção, inclusive os que ainda não recebem a operação; "Todos" no cabeçalho. Linhas selecionadas com fundo verde claro.
+- Talhão que não recebe a operação mostra "—" claro nas colunas de produto. A unidade fica só no cabeçalho da coluna.
+- Sem a legenda de cores (no modo normal ela continua).
+- A receita acima fica só para consulta: sem "Salvar receita", "Aplicar nos talhões", "+ Adicionar produto", "+ Nova receita", lixeira e renomear.
+
+**Barra de seleção** (fixa embaixo da tabela, sempre visível ao rolar)
+- Sem seleção: "Marque os talhões que quer ajustar." e **Cancelar** (sai do modo edição).
+- Com seleção: "4 talhões · 375 ha" (quantidade e soma da área), **"Remover da operação"** (texto vermelho, estilo secundário) e **X** (dica "Limpar seleção"; só limpa a seleção).
+- "Remover da operação" pede confirmação: "Remover 4 talhões desta operação? Os produtos e doses desses talhões serão apagados." Botões: Cancelar · Remover talhões. Desabilitado quando nenhum dos selecionados recebe a operação.
+
+**Painel lateral "Ajustar N talhões"** (à direita da tabela, com pelo menos 1 talhão selecionado)
+- Título "Ajustar 4 talhões" e o apoio "Campo não alterado mantém o valor de cada talhão."
+- Seção **"Produtos e doses"**: uma linha por produto presente nos talhões selecionados, no padrão da receita: nome · campo de dose · unidade (ex.: L/ha) · lixeira.
+  - Mesma dose em todos os selecionados: o campo mostra o valor (ex.: 0,40). Doses diferentes: campo vazio com "Vários".
+  - Lixeira: marca o produto para sair só dos talhões selecionados (vale ao aplicar; "Desfazer" volta atrás).
+- **"+ Adicionar produto"**: nova linha com a escolha do produto, a dose e a unidade do produto. Ao aplicar, o produto entra nos talhões selecionados e ganha coluna própria na tabela; os demais talhões mostram "—" nessa coluna.
+- Rodapé do painel: **Cancelar** · **Aplicar em 4 talhões** (único botão principal da tela; número dinâmico).
+  - **Aplicar**: grava as alterações só nos talhões selecionados, fecha o painel, limpa a seleção (a tabela continua no modo edição) e mostra "Ajustes aplicados em 4 talhões".
+  - **Cancelar**: descarta as alterações do painel e sai do modo edição.
+- Talhão que não recebia a operação e recebe produto passa a receber a operação. DAP e fenologia não são ajustados por talhão.
 - **Receitas no ajuste** (a composição de produtos é a identidade da receita):
   - **Só dose** alterada: fica como dose própria do talhão; **não** cria receita. Ex.: Fox Xpro de 0,40 para 0,45 L/ha em 3 talhões da Receita 1 → continuam na Receita 1, com a diferença de dose registrada.
   - **Composição alterada** (adicionar, remover ou trocar produto) **em parte** dos talhões da receita: esses talhões saem da receita e nasce a próxima receita para eles. Ex.: Receita 1 (Fox Xpro + Engeo Pleno) em 10 talhões; em 3 deles adiciona Assist → Receita 1 fica com 7; a Receita 2 (Fox Xpro + Engeo Pleno + Assist) nasce com os 3.
   - **Composição alterada em todos** os talhões da receita: atualiza a própria receita.
   - **Composição que já existe** em outra receita: os talhões entram nela, sem criar receita nova (ex.: em mais 2 talhões da Receita 1 adiciona Assist → entram na Receita 2; tirar o Assist dos talhões da Receita 2 → voltam para a Receita 1). Dose diferente da padrão dessa receita fica como dose própria do talhão.
-  - Mensagem: "Ajustes salvos em 3 talhões · criada a Receita 2".
-- Campo com valores diferentes entre os selecionados mostra **"vários"**; campo não alterado mantém o valor de cada talhão.
-- **"Salvar ajustes"** salva e volta ao modo visualizar. Mensagem: "Ajustes salvos em 2 talhões".
+  - Talhão sem a operação que recebe produtos entra na receita com a mesma composição ou numa receita nova.
+  - Mensagem: "Ajustes aplicados em 3 talhões · criada a Receita 2".
 
 ## 12. Status
 
@@ -176,7 +193,7 @@ Regras gerais da base (Plano_Safra_Cultura_Variedade_revisado_Julyane.docx): só
 | Sem operação | O talhão da fazenda não recebe esta operação | Laranja claro; **cinza enquanto a operação não foi aplicada em nenhum talhão** |
 
 - Todos os talhões cadastrados da fazenda contam. Operação ainda sem talhões: todos "sem operação" (ex.: 12 talhões → "12 sem operação"), com as linhas em cinza.
-- Card da operação: "N sem operação" e "N sem dose", separados, porque pedem ações diferentes (Aplicar nos talhões × Editar). Contador zerado não aparece.
+- Card da operação: "N sem operação" e "N sem dose", separados, porque pedem ações diferentes (Aplicar nos talhões × lápis da tabela de talhões). Contador zerado não aparece.
 
 - No grupo: o talhão fica "sem operação" no grupo quando está "Sem operação" em todas as operações do grupo.
 
@@ -189,7 +206,7 @@ Um verbo por ação, do botão à mensagem:
 | Selecionar | escolher os talhões |
 | Salvar receita | guardar os produtos e as doses padrão da receita |
 | Aplicar | colocar a receita nos talhões |
-| Ajustar / Salvar ajustes | mudanças pontuais por talhão |
+| Editar talhões / Aplicar em N talhões | mudanças pontuais por talhão (painel "Ajustar N talhões") |
 | Remover | tirar produto ou talhão da operação |
 
 ## 14. Demonstração (só no protótipo)
@@ -209,6 +226,7 @@ Um verbo por ação, do botão à mensagem:
 - Área somada dos talhões selecionados nos modos seleção e ajuste.
 - Nova operação: item novo na lista com nome em edição e DAP destacado.
 - Observar nos testes se o duplo clique para renomear grupo é descoberto; se não, voltar com o lápis.
+- Legenda de cores da tabela de talhões só no modo normal (sai no modo edição). Se nos testes as cores forem entendidas sem legenda, tirar também no modo normal.
 - **Exclusão de operações no modo Editar (hipótese para validar com clientes):**
   - Com talhões nas marcadas: confirmação com o impacto. Ex.: "Excluir 2 operações? Elas estão aplicadas em 12 talhões, com 5 produtos. Essa ação não pode ser desfeita." Botões: Cancelar · Excluir operações.
   - Sem talhões nas marcadas: exclui na hora, com "Desfazer".
