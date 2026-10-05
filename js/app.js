@@ -93,7 +93,9 @@
 
   // Cria o plano com os dados do modal e abre a etapa Operações.
   // Usar modelo: grupos e operações do modelo. Plano em branco: nenhum grupo (o cliente cria tudo).
+  // O primeiro plano criado (a partir do primeiro uso) entra na lista junto com os planos de exemplo.
   function criarPlano(contexto) {
+    if (!temPlanos()) carregarPlanosExemplo();
     const plano = {
       id: estado.proximoIdPlano++,
       ...contexto,
@@ -121,8 +123,8 @@
     irPara('#/plano-safra');
   }
 
+  // Mantém as safras já cadastradas (inclusive a criada no modal) e inclui a dos exemplos
   function carregarPlanosExemplo() {
-    DADOS.safras = [...SAFRAS_INICIAIS];
     DADOS.planos = DADOS.planosExemplo.map(({ operacoes, ...p }) => {
       if (!DADOS.safras.includes(p.safra)) DADOS.safras.push(p.safra);
       return { ...p, grupos: Planos.montarExemplo(operacoes), id: estado.proximoIdPlano++ };
@@ -130,6 +132,7 @@
   }
 
   function verPlanosExemplo() {
+    DADOS.safras = [...SAFRAS_INICIAIS];
     carregarPlanosExemplo();
     irPara('#/plano-safra');
   }
@@ -171,7 +174,5 @@
 
   desenharUsuario();
   aplicarEstadoMenu();
-  // O protótipo abre com os planos de exemplo; o primeiro uso fica em Demonstração → Começar do zero
-  carregarPlanosExemplo();
   mostrarTela();
 })();
