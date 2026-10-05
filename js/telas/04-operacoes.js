@@ -236,10 +236,10 @@ window.Telas.planoOperacoes = (function () {
       return `
         <button class="link-acao ops-lista__editar dica" type="button" data-acao="editar-ops" aria-disabled="true"
                 data-dica="Plano aprovado: operações não podem ser editadas"
-                aria-describedby="dica-editar">Editar</button>
+                aria-describedby="dica-editar">${Icones.lapis} Editar</button>
         <span class="so-leitor" id="dica-editar">Plano aprovado: operações não podem ser editadas</span>`;
     }
-    return '<button class="link-acao ops-lista__editar" type="button" data-acao="editar-ops">Editar</button>';
+    return `<button class="link-acao ops-lista__editar" type="button" data-acao="editar-ops">${Icones.lapis} Editar</button>`;
   }
 
   function itemOperacao(op, ativo) {

@@ -1179,7 +1179,8 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
 .ops-lista__vazia { margin: 8px 10px 0; font-size: 14px; color: var(--texto-suave); }
 
 /* Modo Editar da lista: caixas de seleção, renomear com duplo clique e barra no rodapé */
-.ops-lista__editar { margin: 0; padding: 2px 4px; border-radius: 4px; }
+/* margem automática dos dois lados do vão: Editar fica centralizado entre OPERAÇÕES e DAP */
+.ops-lista__editar { margin: 0 auto 0 0; padding: 2px 4px; border-radius: 4px; white-space: nowrap; }
 .ops-lista__editar[aria-disabled="true"] { color: #9aa5a0; cursor: not-allowed; text-decoration: none; }
 .ops-lista__editar:focus-visible,
 .ops-lista__nova:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 2px; }

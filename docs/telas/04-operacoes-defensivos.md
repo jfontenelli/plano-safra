@@ -61,7 +61,7 @@ Princípio: o peso visual de cada navegação é inverso à frequência de uso. 
 
 - Lista à esquerda com nome e DAP de cada operação, ordenada automaticamente pelo DAP; cabeçalho "Operações" com o rótulo "DAP" e o botão ≪; "+ Nova operação" no fim. A lista rola sozinha, sem rolar a página.
 - A lista mostra só nome e DAP; o item selecionado fica marcado. Clique simples na linha abre a operação; duplo clique na lista normal não faz nada.
-- Botão de texto **"Editar"** no cabeçalho da lista, entre "Operações" e "DAP". Renomear e excluir operações ficam no modo Editar (não no card da operação).
+- Botão **"✏️ Editar"** (ícone de lápis antes do texto) no cabeçalho da lista, centralizado entre "Operações" e "DAP". Renomear e excluir operações ficam no modo Editar (não no card da operação).
 - **Lista minimizada** (≪ / ≫): coluna estreita com ≫, o rótulo "DAP" e só os DAPs das operações, na mesma ordem; a operação selecionada fica marcada e o nome aparece ao passar o mouse. Clicar no DAP abre a operação. No fim da coluna, um "+" cria uma nova operação (o nome abre em edição no card da operação). Minimizada, o "Editar" não aparece.
 
 **Modo Editar** (só com o plano "Em construção")
