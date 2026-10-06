@@ -948,7 +948,6 @@ select.campo__controle option { color: var(--texto); }
   text-transform: uppercase;
   color: var(--texto);
 }
-.rotulo-secao--destaque { color: var(--verde-700); text-transform: none; letter-spacing: 0; font-size: 15px; }
 
 .campo--compacto { height: 34px; padding: 0 10px; font-size: 14px; }
 select.campo--compacto { padding-right: 32px; background-position: right 8px center; background-size: 16px; }
@@ -990,7 +989,6 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
   transform: translateX(-50%);
 }
 /* Com a barra fixa da tabela de talhões na tela, a mensagem sobe para não cobrir os botões dela */
-body:has(.talhoes__rodape) .aviso { bottom: 140px; }
 
 .aviso__acao {
   border: 0;
@@ -1296,30 +1294,7 @@ body:has(.talhoes__rodape) .aviso { bottom: 140px; }
 .op-cabecalho__dap { width: 96px; height: 38px; }
 .op-cabecalho__fenologia { width: 130px; height: 38px; }
 
-.op-resumo {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 20px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  color: var(--texto-suave);
-  white-space: nowrap;
-}
-.op-resumo li { display: flex; align-items: center; gap: 6px; }
-.op-resumo li + li { padding-left: 20px; border-left: 1px solid var(--borda); }
-.op-resumo strong { color: var(--texto); font-size: 17px; }
-.op-resumo--alerta, .op-resumo--alerta strong { color: #b45f06 !important; }
-
 /* --- Recomendação --- */
-.recomendacao { padding: 16px 22px 18px; }
-.recomendacao__topo {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 12px;
-}
 
 .recomendacao__corpo {
   display: flex;
@@ -1336,7 +1311,6 @@ body:has(.talhoes__rodape) .aviso { bottom: 140px; }
   margin-top: 12px;
 }
 .recomendacao__acoes .botao .icone { width: 16px; height: 16px; stroke-width: 2.2; }
-.recomendacao__aplicar { margin-right: auto; }
 
 /* Receitas da operação: Receita 1 | Receita 2 | + Nova receita · lixeira na ponta */
 .receitas {
@@ -1377,9 +1351,6 @@ body:has(.talhoes__rodape) .aviso { bottom: 140px; }
   cursor: not-allowed;
 }
 .tabela-rec .campo--dose:disabled { background: #f3f5f6; cursor: not-allowed; }
-
-/* Ao aplicar uma receita: talhão que está em outra receita */
-.talhoes__outra { margin-left: 8px; font-size: 12px; font-weight: 400; color: var(--texto-suave); }
 
 .erro-campo {
   margin: 4px 0 0;
@@ -1453,20 +1424,6 @@ body:has(.talhoes__rodape) .aviso { bottom: 140px; }
 .pre-cadastro__campos select { width: 120px; }
 .pre-cadastro .campo__erro { margin: 8px 0 0; }
 
-/* --- Talhões --- */
-.talhoes { padding: 16px 22px 18px; }
-
-.talhoes__topo {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  min-height: 38px;
-  margin-bottom: 12px;
-}
-
-.talhoes__ferramentas { display: flex; align-items: center; gap: 10px; }
-
 /* Tipo do insumo, abaixo do nome do produto (cabeçalho da tabela de talhões) */
 .etiqueta-tipo {
   display: block;
@@ -1485,87 +1442,8 @@ body:has(.talhoes__rodape) .aviso { bottom: 140px; }
 .etiqueta-tipo--fungicida  { background: #e7effa; color: #2a5a9b; }
 .etiqueta-tipo--inseticida { background: #fbe9e7; color: #a3412f; }
 .etiqueta-tipo--herbicida  { background: #f1ecf8; color: #6a4a9a; }
-/* Em células alinhadas à esquerda (recomendação e modal Ajustar recomendação) */
+/* Em células alinhadas à esquerda (tabela da recomendação) */
 .tabela-rec .etiqueta-tipo { margin-left: 0; }
-
-.busca {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  width: 220px;
-  height: 36px;
-  padding: 0 10px;
-  border: 1px solid var(--borda);
-  border-radius: 8px;
-  color: var(--texto-suave);
-}
-.busca:focus-within { border-color: var(--verde-600); box-shadow: 0 0 0 3px rgba(24, 122, 79, .15); }
-.busca .icone { width: 17px; height: 17px; }
-.busca__campo { flex: 1; min-width: 0; border: 0; outline: none; font: inherit; font-size: 14px; background: none; }
-
-.tabela-talhoes { border: 1px solid var(--borda); border-radius: 8px; border-collapse: separate; border-spacing: 0; }
-.tabela-talhoes th:first-child { border-top-left-radius: 8px; }
-.tabela-talhoes th:last-child { border-top-right-radius: 8px; }
-.tabela-talhoes tbody th { font-weight: 600; text-align: left; padding: 7px 10px; border-top: 1px solid var(--borda); background: none; }
-.tabela-talhoes .linha--sem td, .tabela-talhoes .linha--sem th { color: #9aa3a9; background: #f3f5f6; }
-.tabela-talhoes .linha--pendente td, .tabela-talhoes .linha--pendente th { background: #fdf0e1; }
-
-.tabela__marcar { width: 36px; text-align: center !important; }
-.tabela__marcar input { width: 16px; height: 16px; accent-color: var(--verde-700); cursor: pointer; }
-.tabela__nao-recebe { color: #b9c0c5; }
-.falta { color: #b45f06; font-weight: 700; }
-
-.talhoes__rodape {
-  position: sticky;
-  bottom: 0;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 10px;
-  margin-top: 14px;
-  padding-top: 14px;
-  border-top: 1px solid var(--borda);
-  background: var(--superficie);
-}
-.talhoes__selecao { margin-right: auto; font-size: 14px; color: var(--texto-suave); }
-.talhoes__selecao strong { color: var(--texto); }
-
-.tabela-talhoes .linha--marcada td, .tabela-talhoes .linha--marcada th { background: #e6f2ec; }
-.tabela__marcar input:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 2px; }
-
-/* Modal "Ajustar produtos de N talhões" */
-.ajuste-modal { max-width: 860px; }
-.ajuste-modal__talhoes { margin: 6px 0 2px; font-weight: 600; }
-.ajuste-modal__mais { font-weight: 500; color: var(--verde-700); text-decoration: underline dotted; cursor: help; }
-.ajuste-modal__mais:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 2px; border-radius: 3px; }
-.ajuste-modal__ajuda { margin: 0 0 16px; font-size: 14px; color: var(--texto-suave); }
-.ajuste-modal__tabela { width: 100%; }
-.ajuste-modal__removida td:nth-child(-n+3) { color: #a83226; text-decoration: line-through; }
-.ajuste-modal__acoes { display: flex; justify-content: flex-end; margin: 12px 0 8px; }
-.ajuste-modal__acoes .botao .icone { width: 16px; height: 16px; stroke-width: 2.2; }
-/* No modal, a lista de resultados entra no fluxo (o corpo do modal rola e cortaria uma lista flutuante) */
-.ajuste-modal .combo__lista { position: static; width: 100%; margin-top: 4px; }
-.ajuste-modal button.combo__opcao { display: block; width: 100%; border: 0; background: none; font: inherit; font-size: 14px; text-align: left; color: var(--texto); }
-.ajuste-modal button.combo__opcao--pre { display: flex; color: var(--verde-700); font-weight: 600; }
-.ajuste-modal .combo__sub { display: inline; }
-.ajuste-modal button.combo__opcao:focus-visible { outline: 2px solid var(--verde-600); outline-offset: -2px; background: var(--verde-100); }
-.ajuste-modal .tabela__acao .botao-icone:focus-visible,
-.ajuste-modal .link-acao:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 2px; }
-
-
-.chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 3px 4px 3px 10px;
-  border-radius: 999px;
-  font-size: 13px;
-  font-weight: 500;
-}
-.chip button { display: grid; place-items: center; width: 20px; height: 20px; padding: 0; border: 0; border-radius: 50%; background: none; color: inherit; cursor: pointer; }
-.chip .icone { width: 13px; height: 13px; }
-.chip--mais { background: #e1f3e8; color: #17703f; }
-.chip--menos { background: #fbeceb; color: #a83226; }
 
 /* --- Guias de grupo no rodapé --- */
 .grupos {
@@ -1648,5 +1526,83 @@ body:has(.talhoes__rodape) .aviso { bottom: 140px; }
 @media (max-width: 1200px) {
   .ops { flex-direction: column; align-items: stretch; }
   .ops-lista { position: static; width: auto; max-height: 320px; }
-  
 }
+
+/* ===== Tela 04 · Talhões da operação (primeiro os talhões, depois a recomendação) ===== */
+.op-painel { display: flex; flex-direction: column; gap: 16px; padding: 18px 22px; }
+
+.filtros-talhoes { display: flex; flex-wrap: wrap; gap: 8px; }
+.filtro-talhoes {
+  height: 34px;
+  padding: 0 14px;
+  border: 1px solid #cfd6d2;
+  border-radius: 999px;
+  background: var(--superficie);
+  font: inherit;
+  font-size: 14px;
+  color: var(--texto);
+  cursor: pointer;
+}
+.filtro-talhoes:hover { border-color: #9aa59f; }
+/* filtro ativo em verde claro: o único verde sólido da área é o "Definir recomendação" */
+.filtro-talhoes--ativo,
+.filtro-talhoes--ativo:hover { border-color: #c9dcd2; background: var(--verde-100); color: var(--verde-700); font-weight: 600; }
+.filtro-talhoes:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 2px; }
+
+.tabela-talhoes { border: 1px solid var(--borda); border-radius: 8px; border-collapse: separate; border-spacing: 0; }
+.tabela-talhoes th:first-child { border-top-left-radius: 8px; }
+.tabela-talhoes th:last-child { border-top-right-radius: 8px; }
+.tabela-talhoes tbody th { font-weight: 600; text-align: left; padding: 7px 10px; border-top: 1px solid var(--borda); background: none; }
+.tabela-talhoes .tabela__numero { padding-right: 32px; }
+.tabela__marcar { width: 36px; text-align: center !important; }
+.tabela__marcar input { width: 16px; height: 16px; accent-color: var(--verde-700); cursor: pointer; }
+.tabela__marcar input:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 2px; }
+.talhao-rec { font-weight: 600; }
+.talhao-rec--nao { color: var(--texto-suave); }
+
+.barra-definir {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 10px 0 0;
+  background: var(--superficie);
+}
+.barra-definir--vazia { padding: 10px 14px; border-radius: 8px; background: #f1f4f2; }
+.barra-definir__texto { display: flex; align-items: center; gap: 8px; margin-right: auto; font-size: 14px; color: var(--texto-suave); }
+.barra-definir__texto .icone { width: 18px; height: 18px; flex-shrink: 0; }
+
+/* Modal "Definir recomendação": a página do modal rola (e não o corpo), para a lista de produtos não ser cortada */
+.definir-fundo {
+  position: fixed;
+  inset: 0;
+  z-index: 9;
+  display: flex;
+  padding: 48px 24px;
+  overflow: auto;
+  background: rgba(16, 28, 22, .45);
+}
+.definir {
+  width: 100%;
+  max-width: 880px;
+  margin: auto;
+  border-radius: 14px;
+  background: var(--superficie);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, .2);
+}
+.definir:focus { outline: none; }
+.definir__topo { display: flex; align-items: flex-start; gap: 16px; padding: 22px 28px 16px; border-bottom: 1px solid var(--borda); }
+.definir__titulos { flex: 1; min-width: 0; }
+.definir__titulo { margin: 0; font-size: 20px; font-weight: 700; }
+.definir__op { margin: 4px 0 0; font-size: 14px; color: var(--texto-suave); }
+.definir__alvo { margin: 8px 0 0; font-size: 14px; font-weight: 600; }
+.definir__corpo { display: flex; flex-direction: column; gap: 14px; padding: 18px 28px 8px; }
+.definir__aviso { display: flex; align-items: flex-start; gap: 10px; margin: 0; padding: 10px 14px; border-radius: 8px; background: #f1f4f2; font-size: 14px; }
+.definir__aviso .icone { width: 18px; height: 18px; flex-shrink: 0; margin-top: 1px; color: var(--texto-suave); }
+.definir__rodape { display: flex; justify-content: flex-end; gap: 12px; margin-top: 12px; padding: 16px 28px; border-top: 1px solid var(--borda); }
+.definir .recomendacao__acoes { justify-content: flex-start; }
+.definir .botao-icone:focus-visible,
+.definir .link-acao:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 2px; }
+.receitas__qtd { font-weight: 400; }
