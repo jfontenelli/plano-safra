@@ -697,12 +697,22 @@ window.Telas.planoOperacoes = (function () {
     const comum = receitas.size === 1 ? [...receitas][0] : null;
     if (comum) {
       ui.receitaPorOp[op.id] = comum;
+      // Talhões marcados com a mesma dose própria: o modal mostra a dose deles, não a padrão
+      const r = op.receitas.find((x) => x.id === comum);
+      rascunho(op).produtos.forEach((l) => {
+        const base = r.produtos.find((x) => x.id === l.id);
+        if (!base) return;
+        const doses = talhoes.map((t) => Planos.doseTalhao(op, op.talhoes[t], base));
+        if (doses.every((d) => d === doses[0])) l.dose = doses[0];
+      });
     } else {
       const nova = Planos.novaReceita(op);
       op.receitas.push(nova);
       ui.receitaPorOp[op.id] = nova.id;
     }
-    ui.definindo = { talhoes };
+    // Doses mostradas ao abrir: ao aplicar em parte dos talhões, só a dose que a pessoa mudar é gravada
+    const dosesIniciais = Object.fromEntries(rascunho(op).produtos.map((l) => [l.id, l.dose]));
+    ui.definindo = { talhoes, dosesIniciais };
     // Foco no próprio modal (focar a busca abriria a lista de produtos por cima de tudo)
     desenharMantendoFoco('.definir');
   }
@@ -1237,6 +1247,7 @@ window.Telas.planoOperacoes = (function () {
   // Grava o rascunho na recomendação e liga os talhões marcados a ela (um talhão fica em uma recomendação só
   // na operação: o que estava em outra muda para esta). Os talhões que já usavam a recomendação recebem
   // as alterações: dose padrão nova chega a quem segue o padrão; produto removido ou trocado sai de todos.
+  // Exceção: marcando só parte dos talhões de uma recomendação, a mudança vale só para eles (ver aplicarEmParte).
   function aplicarDefinicao(op) {
     const r = receitaAtual(op);
     if (!r) return;
@@ -1246,8 +1257,11 @@ window.Telas.planoOperacoes = (function () {
     if (op.receitas.some((x) => x !== r && Util.normalizar(x.nome) === Util.normalizar(nome))) {
       ui.erroNome = 'Já existe uma recomendação com esse nome'; desenharMantendoFoco('#rec-nome'); return;
     }
-    r.nome = nome;
     const novas = rascunho(op).produtos.filter(Planos.linhaPreenchida).map((l) => ({ ...l }));
+    const { talhoes, editando } = ui.definindo;
+    const daRec = Planos.talhoesDaReceita(op, r);
+    if (!editando && daRec.some((t) => !talhoes.includes(t))) { aplicarEmParte(op, r, talhoes, novas, nome); return; }
+    r.nome = nome;
     Planos.talhoesDaReceita(op, r).forEach((t) => {
       const doses = op.talhoes[t].doses;
       Object.keys(doses).forEach((id) => {
@@ -1257,19 +1271,67 @@ window.Telas.planoOperacoes = (function () {
       });
     });
     r.produtos = novas;
-    const { talhoes, editando } = ui.definindo;
     talhoes.forEach((t) => {
       const a = op.talhoes[t];
       if (!a || a.receitaId !== r.id) op.talhoes[t] = Planos.novoAjuste(r.id);
     });
+    const n = talhoes.length;
+    concluirAplicacao(op, r, editando ? `${esc(r.nome)} salva` : `${esc(r.nome)} aplicada em ${n} ${n === 1 ? 'talhão' : 'talhões'}`);
+  }
+
+  // Depois de aplicar, a tela mostra a recomendação aplicada (etiqueta selecionada, quadro e talhões dela)
+  function concluirAplicacao(op, destino, mensagem) {
     ui.rascunho = null; ui.validarOp = null; ui.preCadastro = null; ui.erroNome = null;
-    // Depois de aplicar, a tela mostra a recomendação aplicada (etiqueta selecionada, quadro e talhões dela)
-    ui.filtroTalhoes = `rec:${r.id}`; ui.quadroAberto = false;
+    ui.filtroTalhoes = `rec:${destino.id}`; ui.quadroAberto = false;
     limparSelecao(); alterou(); desenharTudo();
     const rolagem = raiz.querySelector('.talhoes-rolagem');
     if (rolagem) rolagem.scrollTop = 0;
+    Aviso.mostrar(mensagem);
+  }
+
+  // Só parte dos talhões de uma recomendação foi marcada: a mudança vale só para eles
+  // (regra do docs/DECISOES: a composição de produtos é a identidade da recomendação).
+  //  - Mesmos produtos, dose diferente: fica como dose própria dos talhões marcados; a recomendação não muda.
+  //  - Produtos diferentes: os talhões marcados saem da recomendação e vão para a que já tem essa
+  //    composição; se nenhuma tem, nasce a próxima (Recomendação 2…). A original continua nos outros.
+  function aplicarEmParte(op, r, talhoes, novas, nome) {
     const n = talhoes.length;
-    Aviso.mostrar(editando ? `${esc(r.nome)} salva` : `${esc(r.nome)} aplicada em ${n} ${n === 1 ? 'talhão' : 'talhões'}`);
+    const plural = `${n} ${n === 1 ? 'talhão' : 'talhões'}`;
+    const restam = Planos.talhoesDaReceita(op, r).filter((t) => !talhoes.includes(t)).length;
+    // Dose diferente da padrão de "receita" vira dose própria do talhão.
+    // soAlteradas: na mesma recomendação, dose não mexida no modal fica como estava em cada talhão.
+    const dosesProprias = (receita, ajuste, soAlteradas) => {
+      novas.forEach((l) => {
+        const base = receita.produtos.find((x) => Planos.chaveLinha(x) === Planos.chaveLinha(l));
+        if (!base || (soAlteradas && ui.definindo.dosesIniciais[l.id] === l.dose)) return;
+        if (l.dose === base.dose) delete ajuste.doses[base.id]; else ajuste.doses[base.id] = l.dose;
+      });
+    };
+    const composicao = Planos.composicao(novas);
+
+    if (composicao === Planos.composicao(r.produtos)) {
+      if (nome !== r.nome) r.nome = nome; // o nome é da recomendação: vale para todos os talhões dela
+      talhoes.forEach((t) => dosesProprias(r, op.talhoes[t], true));
+      concluirAplicacao(op, r, `${esc(nomeCurto(r))} aplicada em ${plural} · doses só desses talhões`);
+      return;
+    }
+
+    let destino = op.receitas.find((x) => x !== r && Planos.composicao(x.produtos) === composicao);
+    const criada = !destino;
+    if (criada) {
+      destino = Planos.novaReceita(op, novas.map((l) => Planos.novaLinha({
+        principioAtivo: l.principioAtivo, produto: l.produto, unidade: l.unidade, dose: l.dose, preCadastro: l.preCadastro })));
+      // Nome digitado diferente do original vai para a nova; senão, ela fica com o nome padrão
+      if (nome !== r.nome) destino.nome = nome;
+      op.receitas.push(destino);
+    }
+    talhoes.forEach((t) => {
+      op.talhoes[t] = Planos.novoAjuste(destino.id);
+      if (!criada) dosesProprias(destino, op.talhoes[t], false);
+    });
+    concluirAplicacao(op, destino, criada
+      ? `${esc(nomeCurto(destino))} criada para ${plural} · ${esc(nomeCurto(r))} continua em ${restam} ${restam === 1 ? 'talhão' : 'talhões'}`
+      : `${plural} ${n === 1 ? 'passou' : 'passaram'} para ${esc(nomeCurto(destino))}`);
   }
 
   // ----- Grupos -----
