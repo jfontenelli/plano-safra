@@ -701,11 +701,14 @@ window.Telas.planoOperacoes = (function () {
     if (!talhoes.length) return;
     if (semDap(op)) return;
     ui.rascunho = null; ui.preCadastro = null; ui.validarOp = null; ui.erroNome = null;
-    // Talhões marcados que já estão todos na mesma recomendação: abre nela. Sem recomendação na operação: cria uma.
+    // Talhões marcados que já estão todos na mesma recomendação: abre nela.
+    // Senão, abre uma recomendação nova (Recomendação 2, Rec 2…), com produto e dose em branco;
+    // as já existentes continuam nas guias. Se o modal for cancelado, a nova vazia é descartada.
     const receitas = new Set(talhoes.map((t) => op.talhoes[t] && op.talhoes[t].receitaId));
     const comum = receitas.size === 1 ? [...receitas][0] : null;
-    if (comum) ui.receitaPorOp[op.id] = comum;
-    if (!op.receitas.length) {
+    if (comum) {
+      ui.receitaPorOp[op.id] = comum;
+    } else {
       const nova = Planos.novaReceita(op);
       op.receitas.push(nova);
       ui.receitaPorOp[op.id] = nova.id;
