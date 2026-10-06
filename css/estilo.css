@@ -1656,7 +1656,33 @@ body:has(.talhoes__rodape) .aviso { bottom: 140px; }
 .guia--editando { padding: 0 8px; }
 .guia__campo { width: 140px; height: 32px; padding: 0 8px; border: 1px solid var(--verde-600); border-radius: 6px; font: inherit; font-size: 14px; }
 
-.grupos__excluir { align-self: center; margin-left: auto; }
+/* Menu do botão direito nas guias de grupo (como no Excel) */
+.menu-contexto {
+  position: fixed;
+  z-index: 50;
+  min-width: 160px;
+  padding: 6px;
+  border: 1px solid var(--borda);
+  border-radius: 8px;
+  background: var(--superficie);
+  box-shadow: 0 8px 24px rgba(16, 24, 20, .18);
+}
+
+.menu-contexto__item {
+  display: block;
+  width: 100%;
+  padding: 8px 12px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  font: inherit;
+  font-size: 14px;
+  text-align: left;
+  color: var(--texto);
+  cursor: pointer;
+}
+.menu-contexto__item:hover,
+.menu-contexto__item:focus-visible { background: var(--verde-100); outline: none; }
 
 .em-construcao--compacto { padding: 40px 24px; }
 

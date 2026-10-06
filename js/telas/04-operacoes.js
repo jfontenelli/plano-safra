@@ -54,6 +54,7 @@ window.Telas.planoOperacoes = (function () {
     raiz = conteudo.querySelector('#plano-raiz');
     raiz.addEventListener('click', aoClicar);
     raiz.addEventListener('dblclick', aoDuploClique);
+    raiz.addEventListener('contextmenu', aoMenuContexto);
     raiz.addEventListener('change', aoMudar);
     raiz.addEventListener('input', aoDigitar);
     raiz.addEventListener('keydown', aoTeclar);
@@ -1154,14 +1155,11 @@ window.Telas.planoOperacoes = (function () {
             }
             return `<button class="guia ${ativo ? 'guia--ativa' : ''}" type="button" role="tab" aria-selected="${!!ativo}"
                       data-acao="abrir-grupo" data-grupo="${g.id}" ${somenteLeitura ? '' : 'draggable="true"'}
-                      title="${somenteLeitura ? esc(g.nome) : `${esc(g.nome)} · duplo clique para renomear, arraste para reordenar`}">${esc(g.nome)}</button>`;
+                      title="${somenteLeitura ? esc(g.nome) : `${esc(g.nome)} · duplo clique para renomear, botão direito para mais opções, arraste para reordenar`}">${esc(g.nome)}</button>`;
           }).join('')}
           ${somenteLeitura ? '' : `<button class="guia guia--mais" type="button" data-acao="novo-grupo" title="Novo grupo"
                                      aria-label="Novo grupo de operações">${Icones.mais}</button>`}
         </div>
-        ${somenteLeitura || !atual ? '' : `
-          <button class="botao-icone botao-icone--borda grupos__excluir" type="button" data-acao="excluir-grupo"
-                  title="Excluir o grupo ${esc(atual.nome)}" aria-label="Excluir o grupo ${esc(atual.nome)}">${Icones.lixeira}</button>`}
       </footer>`;
   }
 
@@ -1403,7 +1401,6 @@ window.Telas.planoOperacoes = (function () {
       }
 
       case 'novo-grupo': sairDaReceita(novoGrupo); break;
-      case 'excluir-grupo': sairDaReceita(() => excluirGrupo(grupo)); break;
     }
   }
 
@@ -1852,8 +1849,10 @@ window.Telas.planoOperacoes = (function () {
   function excluirGrupo(grupo) {
     const remover = () => {
       const indice = plano.grupos.indexOf(grupo);
+      const eraAtual = grupo === grupoAtual();
       plano.grupos.splice(indice, 1);
-      ui.grupoId = (plano.grupos[indice] || plano.grupos[indice - 1] || {}).id || null;
+      // pelo botão direito dá para excluir outra guia: a aberta só muda se for a excluída
+      if (eraAtual) ui.grupoId = (plano.grupos[indice] || plano.grupos[indice - 1] || {}).id || null;
       sairDaEdicao();
       sairDosModos(); alterou(); desenharTudo();
       return indice;
@@ -1877,6 +1876,82 @@ window.Telas.planoOperacoes = (function () {
   }
 
   let ultimoCliqueGuia = { id: null, quando: 0 };
+
+  // Botão direito na guia (ou tecla de menu / Shift+F10): Inserir · Excluir · Renomear, como no Excel
+  let menuGuia = null;
+
+  function aoMenuContexto(e) {
+    const guia = e.target.closest('.guia[data-grupo]');
+    if (!guia || somenteLeitura) return;
+    e.preventDefault();
+    const grupo = plano.grupos.find((g) => g.id === guia.dataset.grupo);
+    if (!grupo) return;
+    // Pelo teclado o evento vem sem coordenadas: abre junto da guia
+    const caixa = guia.getBoundingClientRect();
+    const x = e.clientX || caixa.left;
+    const y = e.clientY || caixa.top;
+    abrirMenuGuia(grupo, guia, x, y);
+  }
+
+  function abrirMenuGuia(grupo, guia, x, y) {
+    fecharMenuGuia();
+    const menu = document.createElement('div');
+    menu.className = 'menu-contexto';
+    menu.setAttribute('role', 'menu');
+    menu.setAttribute('aria-label', `Grupo ${grupo.nome}`);
+    menu.innerHTML = `
+      <button class="menu-contexto__item" type="button" role="menuitem" data-item="inserir">Inserir</button>
+      <button class="menu-contexto__item" type="button" role="menuitem" data-item="excluir">Excluir</button>
+      <button class="menu-contexto__item" type="button" role="menuitem" data-item="renomear">Renomear</button>`;
+    document.body.appendChild(menu);
+
+    // Abre no ponto do clique; como as guias ficam no rodapé, sobe quando não cabe embaixo
+    const { width, height } = menu.getBoundingClientRect();
+    menu.style.left = `${Math.max(8, Math.min(x, window.innerWidth - width - 8))}px`;
+    menu.style.top = `${y + height + 8 > window.innerHeight ? Math.max(8, y - height) : y}px`;
+
+    const itens = [...menu.querySelectorAll('.menu-contexto__item')];
+    const fecharFora = (ev) => { if (!menu.contains(ev.target)) fecharMenuGuia(); };
+    const fecharSemFoco = () => fecharMenuGuia();
+
+    menu.addEventListener('click', (ev) => {
+      const item = ev.target.closest('[data-item]');
+      if (!item) return;
+      fecharMenuGuia();
+      if (item.dataset.item === 'inserir') sairDaReceita(novoGrupo);
+      else if (item.dataset.item === 'excluir') sairDaReceita(() => excluirGrupo(grupo));
+      else sairDaReceita(() => {
+        ui.grupoId = grupo.id; ui.renomeandoOp = null;
+        sairDosModos(); sairDaEdicao();
+        ui.renomeandoGrupo = grupo.id;
+        desenharTudo();
+      });
+    });
+    menu.addEventListener('keydown', (ev) => {
+      const i = itens.indexOf(document.activeElement);
+      if (ev.key === 'ArrowDown') { ev.preventDefault(); itens[(i + 1) % itens.length].focus(); }
+      else if (ev.key === 'ArrowUp') { ev.preventDefault(); itens[(i - 1 + itens.length) % itens.length].focus(); }
+      else if (ev.key === 'Escape' || ev.key === 'Tab') {
+        ev.preventDefault(); fecharMenuGuia();
+        if (guia.isConnected) guia.focus();
+      }
+    });
+    document.addEventListener('mousedown', fecharFora, true);
+    window.addEventListener('resize', fecharSemFoco);
+    window.addEventListener('scroll', fecharSemFoco, true);
+
+    menuGuia = { menu, fecharFora, fecharSemFoco };
+    itens[0].focus();
+  }
+
+  function fecharMenuGuia() {
+    if (!menuGuia) return;
+    document.removeEventListener('mousedown', menuGuia.fecharFora, true);
+    window.removeEventListener('resize', menuGuia.fecharSemFoco);
+    window.removeEventListener('scroll', menuGuia.fecharSemFoco, true);
+    menuGuia.menu.remove();
+    menuGuia = null;
+  }
 
   function salvarNomeGrupo(valor) {
     if (!ui.renomeandoGrupo) return;
