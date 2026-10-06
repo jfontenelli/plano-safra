@@ -604,9 +604,9 @@ window.Telas.planoOperacoes = (function () {
     const nColunas = colunas.length + (marcar ? 3 : 2);
     return `
       <div class="filtros-talhoes" role="group" aria-label="Filtrar talhões">
-        ${filtro('todos', `Todos · ${talhoesFazenda.length}`)}
+        ${filtro('todos', `Todos os talhões: ${talhoesFazenda.length}`)}
         ${recsAplicadas(op).map((r) => filtro(`rec:${r.id}`, `${pontoRec(op, r)}${esc(nomeCurto(r))}`)).join('')}
-        ${filtro('nao-planejados', `Não planejados · ${naoPlanejados}`,
+        ${filtro('nao-planejados', `Não planejados: ${naoPlanejados}`,
           naoPlanejados || ui.filtroTalhoes === 'nao-planejados' ? '' : 'Todos os talhões já têm recomendação')}
       </div>
       ${rec ? quadroRec(op, rec) : ''}
