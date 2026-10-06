@@ -1613,9 +1613,9 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
 .quadro-rec__produtos { margin: 10px 0 2px; padding: 10px 0 0 17px; border-top: 1px solid var(--borda); list-style: none; font-size: 14px; display: flex; flex-direction: column; gap: 4px; }
 
 .definir__nome { max-width: 360px; margin: 0; }
-/* Produto que já está em outra recomendação: aviso discreto, em âmbar (não bloqueia) */
-.nota-repetido { display: flex; align-items: center; gap: 4px; margin: 4px 0 0; font-size: 12px; font-weight: 600; color: #7a5600; }
-.nota-repetido .icone { width: 14px; height: 14px; flex-shrink: 0; }
+/* Produto ou princípio ativo repetido (nesta ou em outra recomendação): aviso em vermelho */
+.aviso-repetido { display: flex; align-items: flex-start; gap: 4px; margin: 4px 0 0; font-size: 12px; font-weight: 600; line-height: 1.3; color: #b03a2e; }
+.aviso-repetido .icone { width: 14px; height: 14px; flex-shrink: 0; margin-top: 1px; }
 /* Excluir fica à esquerda, longe do Salvar */
 .definir__excluir { margin-right: auto; }
 .definir__excluir .icone { width: 16px; height: 16px; }

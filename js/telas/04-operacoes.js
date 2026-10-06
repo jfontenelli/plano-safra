@@ -334,8 +334,8 @@ window.Telas.planoOperacoes = (function () {
     const linhas = fonte.filter(Planos.linhaPreenchida);
     const porLinha = {};
     linhas.forEach((l) => {
-      const e = { produto: !l.produto, dose: vazio(l.dose) };
-      if (e.produto || e.dose) porLinha[l.id] = e;
+      const e = { produto: !l.produto, dose: vazio(l.dose), repetido: !!repetidoNaMesma(fonte, l) };
+      if (e.produto || e.dose || e.repetido) porLinha[l.id] = e;
     });
     const erros = { dap: vazio(op.dap), semLinhas: linhas.length === 0, linhas: porLinha };
     erros.algum = erros.dap || erros.semLinhas || Object.keys(porLinha).length > 0;
@@ -476,9 +476,9 @@ window.Telas.planoOperacoes = (function () {
     const semProduto = !l.produto;
     return `
       <tr data-linha="${l.id}">
-        <td>${combo(l, 'pa', l.principioAtivo, 'Buscar princípio ativo', false)}</td>
+        <td>${combo(l, 'pa', l.principioAtivo, 'Buscar princípio ativo', false)}${avisoRepetido(l, 'pa')}</td>
         <td>${combo(l, 'produto', l.produto, 'Buscar produto', erro.produto)} ${etiquetaPre(l)}${seloTipo(l)}
-          ${erro.produto ? '<p class="erro-campo">Escolha o produto comercial</p>' : ''}${notaRepetido(l)}</td>
+          ${erro.produto ? '<p class="erro-campo">Escolha o produto comercial</p>' : ''}${avisoRepetido(l, 'produto')}</td>
         <td class="tabela__numero" ${semProduto ? 'title="Escolha o produto comercial para informar a dose"' : ''}>
           <input class="campo__controle campo--compacto campo--dose ${erro.dose && !semProduto ? 'campo__controle--erro' : ''}" type="text" inputmode="decimal"
                  data-campo="linha-dose" value="${Util.dose(l.dose)}" placeholder="—" aria-label="Dose padrão"
@@ -494,17 +494,42 @@ window.Telas.planoOperacoes = (function () {
       </tr>`;
   }
 
-  // Produto comercial que já está em outra recomendação da operação: só avisa, com a dose de lá
-  // (pode repetir; o que muda pode ser a dose ou a mistura)
-  function notaRepetido(l) {
-    if (!l.produto) return '';
+  // Produto comercial ou princípio ativo repetido, em vermelho:
+  //  - na mesma recomendação: "já está nesta recomendação" (bloqueia o aplicar);
+  //  - em outra recomendação da operação: "também na Rec 1", com a dose de lá (só avisa).
+  const mesmo = (campo) => (a, b) => a[campo] && b[campo] && Util.normalizar(a[campo]) === Util.normalizar(b[campo]);
+  const mesmoProduto = mesmo('produto');
+  const mesmoPA = mesmo('principioAtivo');
+
+  // Linha anterior da mesma recomendação com o mesmo produto (ou o mesmo princípio ativo): 'produto' | 'pa' | null
+  function repetidoNaMesma(linhas, l) {
+    const antes = linhas.slice(0, linhas.indexOf(l)).filter(Planos.linhaPreenchida);
+    if (antes.some((x) => mesmoProduto(x, l))) return 'produto';
+    if (antes.some((x) => mesmoPA(x, l))) return 'pa';
+    return null;
+  }
+
+  function avisoRepetido(l, coluna) {
     const op = opAtual();
     const atual = receitaAtual(op);
+    const linhas = ui.rascunho && atual && ui.rascunho.receitaId === atual.id ? ui.rascunho.produtos : [];
+    const naMesma = repetidoNaMesma(linhas, l);
+    if (naMesma) {
+      return naMesma === coluna
+        ? `<p class="aviso-repetido">${Icones.alerta} ${coluna === 'produto' ? 'Produto' : 'Princípio ativo'} já está nesta recomendação</p>`
+        : '';
+    }
+    const dose = (x) => `${Util.dose(x.dose) || '—'} ${Planos.unidadeDose(x)}`;
     const outras = op.receitas.filter((r) => r !== atual).map((r) => {
-      const igual = r.produtos.find((x) => x.produto && Planos.chaveLinha(x) === Planos.chaveLinha(l));
-      return igual ? `${esc(nomeCurto(r))} · ${Util.dose(igual.dose) || '—'} ${Planos.unidadeDose(igual)}` : null;
+      if (coluna === 'produto') {
+        const igual = r.produtos.find((x) => mesmoProduto(x, l));
+        return igual ? `${esc(nomeCurto(r))} · ${dose(igual)}` : null;
+      }
+      // Princípio ativo: só quando o produto não é o mesmo (senão o aviso já está no produto)
+      const igual = r.produtos.find((x) => mesmoPA(x, l) && !mesmoProduto(x, l));
+      return igual ? `${esc(nomeCurto(r))} (${esc(igual.produto || igual.principioAtivo)} · ${dose(igual)})` : null;
     }).filter(Boolean);
-    return outras.length ? `<p class="nota-repetido">${Icones.info} Também na ${outras.join(' e na ')}</p>` : '';
+    return outras.length ? `<p class="aviso-repetido">${Icones.alerta} Também na ${outras.join(' e na ')}</p>` : '';
   }
 
   function combo(linha, tipo, valor, placeholder, comErro) {
