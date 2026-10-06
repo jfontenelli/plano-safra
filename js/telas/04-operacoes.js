@@ -292,7 +292,7 @@ window.Telas.planoOperacoes = (function () {
           </section>
         </div>`;
     }
-    // Primeiro os talhões, depois a recomendação: marca os talhões e "Criar recomendação" abre o modal
+    // Primeiro os talhões, depois a recomendação: marca os talhões e "Definir recomendação" abre o modal
     return `
       <section class="cartao op-painel" aria-label="${esc(op.nome)}">
         ${cabecalhoOperacao(op)}
@@ -342,7 +342,7 @@ window.Telas.planoOperacoes = (function () {
     return erros;
   }
 
-  // Erros só aparecem depois que o usuário clicou em "Criar recomendação" ou "Aplicar em N talhões"
+  // Erros só aparecem depois que o usuário clicou em "Definir recomendação" ou "Aplicar em N talhões"
   function errosVisiveis(op) {
     return ui.validarOp === op.id ? errosRecomendacao(op) : { linhas: {} };
   }
@@ -557,7 +557,7 @@ window.Telas.planoOperacoes = (function () {
   }
 
   // ----- Talhões da operação -----
-  // Filtros Todos · Não planejados; tabela Talhão · Área; marcar talhões e "Criar recomendação"
+  // Filtros Todos · recomendações · Não planejados; tabela Talhão · Área · produtos; marcar e "Definir recomendação"
   function talhoesVisiveis(op) {
     const rec = recFiltrada(op);
     if (rec) return talhoesFazenda.filter((t) => op.talhoes[t.nome] && op.talhoes[t.nome].receitaId === rec.id);
@@ -678,7 +678,7 @@ window.Telas.planoOperacoes = (function () {
   }
 
   // Sem talhão marcado: orientação em destaque e botão desabilitado.
-  // Com talhão marcado: quantidade e área · Limpar à esquerda; "Criar recomendação" à direita.
+  // Com talhão marcado: quantidade e área à esquerda; Limpar e "Definir recomendação" à direita.
   function barraDefinir() {
     const n = ui.marcados.size;
     const area = talhoesFazenda.filter((t) => ui.marcados.has(t.nome)).reduce((s, t) => s + t.area, 0);
@@ -689,7 +689,7 @@ window.Telas.planoOperacoes = (function () {
           <button class="botao botao--secundario barra-definir__limpar" type="button" data-acao="limpar-selecao"
                   title="Desmarcar todos os talhões" aria-label="Limpar seleção: desmarcar todos os talhões">Limpar</button>`
         : `<span class="barra-definir__texto">${Icones.info} Selecione um ou mais talhões para definir a recomendação.</span>`}
-        <button class="botao botao--primario" type="button" data-acao="definir-recomendacao" ${n ? '' : 'disabled'}>Criar recomendação</button>
+        <button class="botao botao--primario" type="button" data-acao="definir-recomendacao" ${n ? '' : 'disabled'}>Definir recomendação</button>
       </div>`;
   }
 
@@ -773,6 +773,8 @@ window.Telas.planoOperacoes = (function () {
               <p class="recomendacao__vazia">Nenhuma recomendação nesta operação. Use "+ Nova recomendação" para criar.</p>`}
           </div>
           <div class="definir__rodape">
+            ${editando && r && !somenteLeitura ? `
+              <button class="botao botao--perigo-leve definir__excluir" type="button" data-acao="excluir-rec-editando">${Icones.lixeira} Excluir recomendação</button>` : ''}
             <button class="botao botao--secundario" type="button" data-acao="fechar-definir">Cancelar</button>
             <button class="botao botao--primario" type="button" data-acao="aplicar-definicao" ${r ? '' : 'disabled'}>${editando
               ? 'Salvar alterações' : `Aplicar em ${n} ${n === 1 ? 'talhão' : 'talhões'}`}</button>
@@ -981,6 +983,7 @@ window.Telas.planoOperacoes = (function () {
 
       case 'definir-recomendacao': abrirDefinir(op); break;
       case 'editar-rec': abrirEditar(op, alvo.dataset.rec); break;
+      case 'excluir-rec-editando': excluirReceita(op, receitaAtual(op)); break;
       case 'alternar-quadro':
         ui.quadroAberto = !ui.quadroAberto; desenharMantendoFoco('[data-acao="alternar-quadro"]'); break;
       case 'fechar-definir': fecharDefinir(); break;
@@ -1027,6 +1030,11 @@ window.Telas.planoOperacoes = (function () {
   function aoDigitar(e) {
     // Doses: registradas enquanto se digita, sem redesenhar
     if (e.target.dataset.campo === 'linha-dose') {
+      // Só números e uma vírgula decimal; o ponto digitado vira vírgula
+      let v = e.target.value.replace(/\./g, ',').replace(/[^\d,]/g, '');
+      const virgula = v.indexOf(',');
+      if (virgula >= 0) v = v.slice(0, virgula + 1) + v.slice(virgula + 1).replace(/,/g, '');
+      if (v !== e.target.value) e.target.value = v;
       linhaDoElemento(e.target).dose = Util.numero(e.target.value);
       return;
     }
@@ -1202,17 +1210,20 @@ window.Telas.planoOperacoes = (function () {
       op.receitas.splice(indice, 1);
       talhoes.forEach((t) => { delete op.talhoes[t]; });
       delete ui.receitaPorOp[op.id];
-      ui.rascunho = null; ui.validarOp = null; ui.preCadastro = null;
+      ui.rascunho = null; ui.validarOp = null; ui.preCadastro = null; ui.erroNome = null;
+      // Pelo "Editar recomendação", o modal fecha (a recomendação editada deixou de existir)
+      if (ui.definindo && ui.definindo.editando) ui.definindo = null;
       alterou(); desenharTudo();
       return indice;
     };
     const n = talhoes.length;
     if (n) {
+      const area = talhoesFazenda.filter((t) => talhoes.includes(t.nome)).reduce((s, t) => s + t.area, 0);
       Modal.confirmar({
-        titulo: `Excluir ${esc(r.nome)}?`,
-        texto: `Ela está aplicada em ${n} ${n === 1 ? 'talhão, que ficará' : 'talhões, que ficarão'} sem operação. Essa ação não pode ser desfeita.`,
+        titulo: `Excluir ${esc(nomeCurto(r))}?`,
+        texto: `${n === 1 ? 'O talhão' : `Os ${n} talhões`} (${Util.area(area)}) ${n === 1 ? 'ficará' : 'ficarão'} sem recomendação. Essa ação não pode ser desfeita.`,
         botoes: [{ rotulo: 'Cancelar' }, { rotulo: 'Excluir recomendação', classe: 'perigo', acao: () => {
-          remover(); Aviso.mostrar(`${esc(r.nome)} excluída`);
+          remover(); Aviso.mostrar(`${esc(nomeCurto(r))} excluída`);
         } }]
       });
     } else {

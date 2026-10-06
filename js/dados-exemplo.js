@@ -73,22 +73,9 @@ window.DADOS = {
   tiposGrupo: ['Corretivos', 'Sementes', 'Fertilizantes', 'Defensivos', 'Colheita'],
 
   // Modelo de operações (levantado com clientes). Usado pelo "Usar modelo" e pelos planos de exemplo.
-  // tipo null = grupo sem tipo (Preparo do solo, só máquina).
+  // Por enquanto, para os testes com usuários, só o grupo Defensivo (os outros grupos do modelo
+  // — Preparo do solo, Corretivos, Semente, Fertilizante e Colheita — estão no histórico do git).
   modeloOperacoes: [
-    { nome: 'Preparo do solo', tipo: null, operacoes: [
-      { nome: 'Preparo de solo', dap: -50 }
-    ] },
-    { nome: 'Corretivos', tipo: 'Corretivos', operacoes: [
-      { nome: 'Calcário: pré-plantio', dap: -30 }
-    ] },
-    { nome: 'Semente', tipo: 'Sementes', operacoes: [
-      { nome: 'Plantio', dap: 0 }
-    ] },
-    { nome: 'Fertilizante', tipo: 'Fertilizantes', operacoes: [
-      { nome: 'Fósforo: pré-plantio', dap: -20 },
-      { nome: '1ª Metade do K: pré-plantio', dap: -10 },
-      { nome: '2ª Potássio', dap: 25 }
-    ] },
     { nome: 'Defensivo', tipo: 'Defensivos', operacoes: [
       { nome: '1ª Dessecação: pré-plantio', dap: -15 },
       { nome: '2ª Dessecação: pré-plantio', dap: -5 },
@@ -101,9 +88,6 @@ window.DADOS = {
       { nome: '4ª Fungicida', dap: 85 },
       { nome: '5ª Fungicida', dap: null },
       { nome: 'Desfolha', dap: 100 }
-    ] },
-    { nome: 'Colheita', tipo: 'Colheita', operacoes: [
-      { nome: 'Colheita', dap: 107 }
     ] }
   ],
 

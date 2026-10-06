@@ -1589,7 +1589,7 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
 .barra-definir__texto .icone { width: 18px; height: 18px; flex-shrink: 0; }
 .barra-definir__selecao { margin-right: auto; font-size: 14px; color: var(--texto-suave); }
 .barra-definir__selecao strong { color: var(--texto); }
-/* Limpar: botão com borda, ao lado do Criar recomendação e do mesmo tamanho */
+/* Limpar: botão com borda, ao lado do Definir recomendação e do mesmo tamanho */
 .barra-definir__limpar { border-color: #cfd6d2; }
 .barra-definir__limpar:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 2px; }
 
@@ -1643,4 +1643,7 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
 .quadro-rec__produtos { margin: 10px 0 2px; padding: 10px 0 0 17px; border-top: 1px solid var(--borda); list-style: none; font-size: 14px; display: flex; flex-direction: column; gap: 4px; }
 
 .definir__nome { max-width: 360px; margin: 0; }
+/* Excluir fica à esquerda, longe do Salvar */
+.definir__excluir { margin-right: auto; }
+.definir__excluir .icone { width: 16px; height: 16px; }
 
