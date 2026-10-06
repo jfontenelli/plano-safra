@@ -1587,10 +1587,10 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
 .barra-definir--vazia { padding: 10px 14px; border: 1px solid #f2de9b; border-radius: 8px; background: #fff6d6; }
 .barra-definir__texto { display: flex; align-items: center; gap: 8px; margin-right: auto; font-size: 14px; font-weight: 600; color: #7a5600; }
 .barra-definir__texto .icone { width: 18px; height: 18px; flex-shrink: 0; }
-.barra-definir__selecao { font-size: 14px; color: var(--texto-suave); }
+.barra-definir__selecao { margin-right: auto; font-size: 14px; color: var(--texto-suave); }
 .barra-definir__selecao strong { color: var(--texto); }
-/* Limpar: botão com borda e área de clique do mesmo tamanho do principal */
-.barra-definir__limpar { margin: 0 auto 0 4px; border-color: #cfd6d2; }
+/* Limpar: botão com borda, ao lado do Criar recomendação e do mesmo tamanho */
+.barra-definir__limpar { border-color: #cfd6d2; }
 .barra-definir__limpar:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 2px; }
 
 /* Modal "Definir recomendação": a página do modal rola (e não o corpo), para a lista de produtos não ser cortada */
