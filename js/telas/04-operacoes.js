@@ -864,9 +864,14 @@ window.Telas.planoOperacoes = (function () {
       opcoes = pas.filter(bate).map((pa) => ({ valor: pa, rotulo: esc(pa),
         pre: DADOS.defensivos.some((d) => d.principioAtivo === pa && d.preCadastro && !d.produto) }));
     } else {
-      // Produtos do cadastro; com princípio ativo escolhido, só os que têm ele
+      // Produtos do cadastro. Com princípio ativo escolhido e ainda sem produto, só os que têm ele.
+      // Trocando um produto já escolhido (o princípio ativo veio dele), mostra todos, com os do mesmo
+      // princípio ativo primeiro; escolher outro produto atualiza o princípio ativo.
+      const trocando = !!linha.produto;
+      const mesmoPA = (d) => !!linha.principioAtivo && d.principioAtivo === linha.principioAtivo;
       opcoes = DADOS.defensivos
-        .filter((d) => d.produto && (!linha.principioAtivo || d.principioAtivo === linha.principioAtivo) && bate(d.produto))
+        .filter((d) => d.produto && (trocando || !linha.principioAtivo || mesmoPA(d)) && bate(d.produto))
+        .sort((a, b) => (trocando ? Number(mesmoPA(b)) - Number(mesmoPA(a)) : 0))
         .map((d) => ({ valor: d.produto, rotulo: `${esc(d.produto)}<span class="combo__sub">${esc(d.principioAtivo || '—')} · ${d.unidade}</span>`, pre: d.preCadastro }));
     }
     opcoes = opcoes.slice(0, 8);
