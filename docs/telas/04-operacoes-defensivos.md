@@ -54,7 +54,11 @@ Princípio: o peso visual de cada navegação é inverso à frequência de uso. 
 - **"+"** no fim das guias cria um grupo: pede nome e tipo (obrigatórios).
 - Tipos: Corretivos, Sementes, Fertilizantes, Defensivos, Colheita. O tipo define as informações mínimas pedidas no grupo.
 - **Renomear: duplo clique na guia**, como no Excel.
-- **Excluir: lixeira na ponta direita do rodapé**, agindo sobre a guia selecionada.
+- **Botão direito na guia** abre um menu como o do Excel: **Inserir · Excluir · Renomear** (também pela tecla de menu ou Shift+F10). Sem lixeira no rodapé.
+  - Inserir: mesmo comportamento do "+" (pede nome e tipo; o grupo entra no fim das guias).
+  - Excluir: age sobre a guia clicada. Com operações, pede confirmação; sem operações, exclui na hora com "Desfazer".
+  - Renomear: abre a guia com o nome em edição, igual ao duplo clique.
+  - Plano aprovado: o menu não abre.
 - Arrastar a guia reordena os grupos.
 - As guias não mostram contador de pendências.
 
