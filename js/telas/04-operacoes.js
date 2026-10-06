@@ -285,7 +285,7 @@ window.Telas.planoOperacoes = (function () {
           </section>
         </div>`;
     }
-    // Primeiro os talhões, depois a recomendação: marca os talhões e "Definir recomendação" abre o modal
+    // Primeiro os talhões, depois a recomendação: marca os talhões e "Criar recomendação" abre o modal
     return `
       <section class="cartao op-painel" aria-label="${esc(op.nome)}">
         ${cabecalhoOperacao(op)}
@@ -335,7 +335,7 @@ window.Telas.planoOperacoes = (function () {
     return erros;
   }
 
-  // Erros só aparecem depois que o usuário clicou em "Definir recomendação" ou "Aplicar em N talhões"
+  // Erros só aparecem depois que o usuário clicou em "Criar recomendação" ou "Aplicar em N talhões"
   function errosVisiveis(op) {
     return ui.validarOp === op.id ? errosRecomendacao(op) : { linhas: {} };
   }
@@ -554,7 +554,7 @@ window.Telas.planoOperacoes = (function () {
   }
 
   // ----- Talhões da operação -----
-  // Filtros Todos · Não planejados; tabela Talhão · Área · Recomendação; marcar talhões e "Definir recomendação"
+  // Filtros Todos · Não planejados; tabela Talhão · Área; marcar talhões e "Criar recomendação"
   function talhoesVisiveis(op) {
     return ui.filtroTalhoes === 'nao-planejados' ? talhoesFazenda.filter((t) => !op.talhoes[t.nome]) : talhoesFazenda;
   }
@@ -579,33 +579,34 @@ window.Telas.planoOperacoes = (function () {
           <thead><tr>
             ${marcar ? `<th class="tabela__marcar"><input type="checkbox" data-acao="marcar-todos" aria-label="Marcar todos"
                  ${todos ? 'checked' : ''} ${visiveis.length ? '' : 'disabled'}></th>` : ''}
-            <th>Talhão</th><th class="tabela__numero">Área (ha)</th><th>Recomendação</th>
+            <th>Talhão</th><th class="tabela__numero">Área (ha)</th>
           </tr></thead>
           <tbody>
-            ${vazio ? `<tr><td class="tabela__vazia" colspan="4">${vazio}</td></tr>` : visiveis.map((t) => {
-              const r = op.talhoes[t.nome] ? Planos.receitaDoTalhao(op, op.talhoes[t.nome]) : null;
-              return `
+            ${vazio ? `<tr><td class="tabela__vazia" colspan="3">${vazio}</td></tr>` : visiveis.map((t) => `
                 <tr>
                   ${marcar ? `<td class="tabela__marcar"><input type="checkbox" data-acao="marcar" data-talhao="${esc(t.nome)}"
                       aria-label="Marcar ${esc(t.nome)}" ${ui.marcados.has(t.nome) ? 'checked' : ''}></td>` : ''}
                   <th scope="row" class="tabela__talhao">${esc(t.nome)}</th>
                   <td class="tabela__numero">${Util.area(t.area).replace(' ha', '')}</td>
-                  <td>${r ? `<span class="talhao-rec">${esc(r.nome)}</span>` : '<span class="talhao-rec--nao">Não planejado</span>'}</td>
-                </tr>`;
-            }).join('')}
+                </tr>`).join('')}
           </tbody>
         </table>
       </div>
       ${marcar ? barraDefinir() : ''}`;
   }
 
-  // Sem talhão marcado: orientação e botão desabilitado. Com talhão marcado: só o botão.
+  // Sem talhão marcado: orientação em destaque e botão desabilitado.
+  // Com talhão marcado: quantidade e área · Limpar à esquerda; "Criar recomendação" à direita.
   function barraDefinir() {
     const n = ui.marcados.size;
+    const area = talhoesFazenda.filter((t) => ui.marcados.has(t.nome)).reduce((s, t) => s + t.area, 0);
     return `
       <div class="barra-definir ${n ? '' : 'barra-definir--vazia'}">
-        ${n ? '' : `<span class="barra-definir__texto">${Icones.info} Selecione um ou mais talhões para definir a recomendação.</span>`}
-        <button class="botao botao--primario" type="button" data-acao="definir-recomendacao" ${n ? '' : 'disabled'}>Definir recomendação</button>
+        ${n ? `
+          <span class="barra-definir__selecao"><strong>${n} ${n === 1 ? 'talhão' : 'talhões'}</strong> · ${Util.area(area)}</span>
+          <button class="link-acao barra-definir__limpar" type="button" data-acao="limpar-selecao">Limpar</button>`
+        : `<span class="barra-definir__texto">${Icones.info} Selecione um ou mais talhões para definir a recomendação.</span>`}
+        <button class="botao botao--primario" type="button" data-acao="definir-recomendacao" ${n ? '' : 'disabled'}>Criar recomendação</button>
       </div>`;
   }
 
@@ -869,6 +870,9 @@ window.Telas.planoOperacoes = (function () {
       case 'marcar-todos':
         talhoesVisiveis(op).forEach((t) => { if (alvo.checked) ui.marcados.add(t.nome); else ui.marcados.delete(t.nome); });
         desenharMantendoFoco('[data-acao="marcar-todos"]'); break;
+
+      case 'limpar-selecao':
+        ui.marcados = new Set(); desenharMantendoFoco('[data-acao="marcar-todos"]'); break;
 
       case 'definir-recomendacao': abrirDefinir(op); break;
       case 'fechar-definir': fecharDefinir(); break;

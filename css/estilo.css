@@ -1557,8 +1557,6 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
 .tabela__marcar { width: 36px; text-align: center !important; }
 .tabela__marcar input { width: 16px; height: 16px; accent-color: var(--verde-700); cursor: pointer; }
 .tabela__marcar input:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 2px; }
-.talhao-rec { font-weight: 600; }
-.talhao-rec--nao { color: var(--texto-suave); }
 
 .barra-definir {
   position: sticky;
@@ -1570,9 +1568,13 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
   padding: 10px 0 0;
   background: var(--superficie);
 }
-.barra-definir--vazia { padding: 10px 14px; border-radius: 8px; background: #f1f4f2; }
-.barra-definir__texto { display: flex; align-items: center; gap: 8px; margin-right: auto; font-size: 14px; color: var(--texto-suave); }
+.barra-definir--vazia { padding: 10px 14px; border-radius: 8px; background: var(--verde-100); }
+.barra-definir__texto { display: flex; align-items: center; gap: 8px; margin-right: auto; font-size: 14px; font-weight: 600; color: var(--verde-700); }
 .barra-definir__texto .icone { width: 18px; height: 18px; flex-shrink: 0; }
+.barra-definir__selecao { font-size: 14px; color: var(--texto-suave); }
+.barra-definir__selecao strong { color: var(--texto); }
+.barra-definir__limpar { margin: 0 auto 0 4px; }
+.barra-definir__limpar:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 2px; border-radius: 4px; }
 
 /* Modal "Definir recomendação": a página do modal rola (e não o corpo), para a lista de produtos não ser cortada */
 .definir-fundo {
