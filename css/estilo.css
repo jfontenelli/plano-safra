@@ -1006,21 +1006,27 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
   height: 100%;
 }
 
-/* área que rola: do topo da página até o rodapé das guias */
+/* área que rola: entre o cabeçalho do plano (fixo) e o rodapé das guias */
 .plano__rolagem {
   flex: 1;
   min-height: 0;
+  display: flex;
+  flex-direction: column;
   overflow-y: auto;
 }
 
+/* Cabeçalho compacto: título, contexto e status numa linha; etapas logo abaixo */
 .plano__cabecalho {
-  padding: 22px 40px 0;
+  flex-shrink: 0;
+  padding: 14px 40px 0;
   background: var(--superficie);
   border-bottom: 1px solid var(--borda);
 }
 
+.plano__linha { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 20px; }
+
 .plano__titulo {
-  font-size: 28px;
+  font-size: 22px;
   font-weight: 700;
   color: var(--texto);
   text-decoration: none;
@@ -1032,16 +1038,17 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
   flex-wrap: wrap;
   align-items: center;
   gap: 4px;
-  margin: 4px 0 14px;
+  margin: 0;
+  font-size: 14px;
   color: var(--texto-suave);
 }
 .plano__ponto { margin: 0 6px; }
 .plano__contexto .status { margin-left: 10px; }
 
-.etapas { display: flex; gap: 32px; }
+.etapas { display: flex; gap: 32px; margin-top: 4px; }
 
 .etapa {
-  padding: 10px 2px 12px;
+  padding: 10px 2px 9px;
   border-bottom: 3px solid transparent;
   color: var(--texto-suave);
   font-weight: 500;
@@ -1055,8 +1062,9 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
   display: flex;
   align-items: center;
   gap: 8px;
-  margin: 16px 40px 0;
-  padding: 10px 14px;
+  flex-shrink: 0;
+  margin: 12px 40px 0;
+  padding: 8px 14px;
   border-radius: 10px;
   background: #e1f3e8;
   color: #17703f;
@@ -1067,10 +1075,11 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
 
 .ops {
   flex: 1;
+  min-height: 0;
   display: flex;
-  align-items: flex-start;
+  align-items: stretch;
   gap: 20px;
-  padding: 20px 40px 24px;
+  padding: 16px 40px 16px;
 }
 
 .ops--vazio { justify-content: center; }
@@ -1081,13 +1090,10 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
 
 /* --- Lista lateral --- */
 .ops-lista {
-  position: sticky;
-  top: 20px;
   display: flex;
   flex-direction: column;
   width: 320px;
-  /* a lista rola sozinha, sem rolar a página: cabe entre o cabeçalho do plano e as guias do rodapé */
-  max-height: calc(100vh - 260px);
+  /* a lista rola sozinha: ocupa a altura entre o cabeçalho do plano e as guias do rodapé */
   min-height: 240px;
   flex-shrink: 0;
   padding: 16px 12px;
@@ -1249,6 +1255,7 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
 .ops-detalhe {
   flex: 1;
   min-width: 0;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -1524,12 +1531,13 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
 .em-construcao--compacto { padding: 40px 24px; }
 
 @media (max-width: 1200px) {
-  .ops { flex-direction: column; align-items: stretch; }
-  .ops-lista { position: static; width: auto; max-height: 320px; }
+  .ops { flex: none; flex-direction: column; align-items: stretch; }
+  .ops-lista { width: auto; max-height: 320px; }
+  .talhoes-rolagem { flex: none; max-height: 60vh; }
 }
 
 /* ===== Tela 04 · Talhões da operação (primeiro os talhões, depois a recomendação) ===== */
-.op-painel { display: flex; flex-direction: column; gap: 16px; padding: 18px 22px; }
+.op-painel { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 14px; padding: 16px 22px; }
 
 .filtros-talhoes { display: flex; flex-wrap: wrap; gap: 8px; }
 .filtro-talhoes {
@@ -1549,9 +1557,17 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
 .filtro-talhoes--ativo:hover { border-color: #c9dcd2; background: var(--verde-100); color: var(--verde-700); font-weight: 600; }
 .filtro-talhoes:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 2px; }
 
-.tabela-talhoes { border: 1px solid var(--borda); border-radius: 8px; border-collapse: separate; border-spacing: 0; }
-.tabela-talhoes th:first-child { border-top-left-radius: 8px; }
-.tabela-talhoes th:last-child { border-top-right-radius: 8px; }
+/* Só a tabela rola; a linha de títulos fica fixa no topo dela */
+.talhoes-rolagem {
+  flex: 1;
+  min-height: 160px;
+  overflow: auto;
+  border: 1px solid var(--borda);
+  border-radius: 8px;
+  overscroll-behavior: contain;
+}
+.tabela-talhoes { border-collapse: separate; border-spacing: 0; }
+.tabela-talhoes thead th { position: sticky; top: 0; z-index: 1; }
 .tabela-talhoes tbody th { font-weight: 600; text-align: left; padding: 7px 10px; border-top: 1px solid var(--borda); background: none; }
 .tabela-talhoes .tabela__numero { padding-right: 32px; }
 .tabela__marcar { width: 36px; text-align: center !important; }
@@ -1559,8 +1575,7 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
 .tabela__marcar input:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 2px; }
 
 .barra-definir {
-  position: sticky;
-  bottom: 0;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: flex-end;
@@ -1568,8 +1583,9 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
   padding: 10px 0 0;
   background: var(--superficie);
 }
-.barra-definir--vazia { padding: 10px 14px; border-radius: 8px; background: var(--verde-100); }
-.barra-definir__texto { display: flex; align-items: center; gap: 8px; margin-right: auto; font-size: 14px; font-weight: 600; color: var(--verde-700); }
+/* Orientação em amarelo (âmbar escuro sobre amarelo claro): não se confunde com o verde da guia ativa */
+.barra-definir--vazia { padding: 10px 14px; border: 1px solid #f2de9b; border-radius: 8px; background: #fff6d6; }
+.barra-definir__texto { display: flex; align-items: center; gap: 8px; margin-right: auto; font-size: 14px; font-weight: 600; color: #7a5600; }
 .barra-definir__texto .icone { width: 18px; height: 18px; flex-shrink: 0; }
 .barra-definir__selecao { font-size: 14px; color: var(--texto-suave); }
 .barra-definir__selecao strong { color: var(--texto); }

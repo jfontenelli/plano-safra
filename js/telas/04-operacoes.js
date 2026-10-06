@@ -99,15 +99,17 @@ window.Telas.planoOperacoes = (function () {
   }
 
   // ================= Desenho =================
-  // Tudo acima das guias fica numa área com rolagem própria; as guias ficam fixas embaixo,
-  // fora dela, para a barra de rolagem terminar no topo do rodapé.
+  // Cabeçalho do plano fixo no topo e guias fixas embaixo; o que fica entre eles tem rolagem própria.
+  // No grupo Defensivo, a lista de operações e o cartão da operação ocupam essa altura e só a
+  // tabela de talhões rola.
   function desenharTudo() {
     const rolagemAntes = raiz.querySelector('.plano__rolagem')?.scrollTop || 0;
     const listaAntes = raiz.querySelector('.ops-lista__itens')?.scrollTop || 0;
     const modalAntes = raiz.querySelector('.definir-fundo')?.scrollTop || 0;
+    const talhoesAntes = raiz.querySelector('.talhoes-rolagem')?.scrollTop || 0;
     raiz.innerHTML = `
+      ${cabecalho()}
       <div class="plano__rolagem">
-        ${cabecalho()}
         ${etapa === 'operacoes' ? corpoOperacoes() : etapaEmConstrucao()}
       </div>
       ${etapa === 'operacoes' ? rodapeGrupos() : ''}
@@ -119,6 +121,8 @@ window.Telas.planoOperacoes = (function () {
     if (lista) lista.scrollTop = listaAntes;
     const modal = raiz.querySelector('.definir-fundo');
     if (modal) modal.scrollTop = modalAntes;
+    const talhoes = raiz.querySelector('.talhoes-rolagem');
+    if (talhoes) talhoes.scrollTop = talhoesAntes;
     const foco = raiz.querySelector('[data-foco-inicial]');
     if (foco) { foco.focus({ preventScroll: true }); foco.select?.(); }
   }
@@ -134,11 +138,13 @@ window.Telas.planoOperacoes = (function () {
     const contexto = [`Safra ${plano.safra}`, plano.empresa, `Fazenda ${plano.fazenda}`, `Cultura ${plano.cultura}`];
     return `
       <header class="plano__cabecalho">
+        <div class="plano__linha">
         <a class="plano__titulo" href="#/plano-safra" title="Voltar para a Visão Geral">Plano de Safra</a>
         <p class="plano__contexto">${contexto.map(esc).join('<span class="plano__ponto">·</span>')}
           <button class="status status--botao ${somenteLeitura ? 'status--aprovado' : 'status--construcao'}" type="button"
                   data-acao="alternar-status" title="Protótipo: clique para alternar o status"
                   aria-label="Status: ${esc(plano.status)}. Protótipo: clique para alternar o status">${esc(plano.status)}</button></p>
+        </div>
         <nav class="etapas" aria-label="Etapas do plano">
           ${ETAPAS.map((e) => `
             <a class="etapa ${e.id === etapa ? 'etapa--ativa' : ''}" href="#/plano/${plano.id}/${e.id}"
@@ -574,7 +580,7 @@ window.Telas.planoOperacoes = (function () {
         ${filtro('todos', 'Todos', talhoesFazenda.length)}
         ${filtro('nao-planejados', 'Não planejados', naoPlanejados)}
       </div>
-      <div class="tabela-rolagem">
+      <div class="talhoes-rolagem">
         <table class="tabela tabela--compacta tabela-talhoes">
           <thead><tr>
             ${marcar ? `<th class="tabela__marcar"><input type="checkbox" data-acao="marcar-todos" aria-label="Marcar todos"
