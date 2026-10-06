@@ -1527,6 +1527,9 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
 .filtro-talhoes--ativo,
 .filtro-talhoes--ativo:hover { border-color: #c9dcd2; background: var(--verde-100); color: var(--verde-700); font-weight: 600; }
 .filtro-talhoes:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 2px; }
+/* Zerado (ex.: Não planejados · 0): desabilitado, sem clique */
+.filtro-talhoes:disabled,
+.filtro-talhoes:disabled:hover { border-color: var(--borda); background: var(--fundo); color: #9aa5a0; cursor: not-allowed; }
 
 /* Só a tabela rola; a linha de títulos fica fixa no topo dela */
 .talhoes-rolagem {
@@ -1589,8 +1592,6 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
 .definir__op { margin: 4px 0 0; font-size: 14px; color: var(--texto-suave); }
 .definir__alvo { margin: 8px 0 0; font-size: 14px; font-weight: 600; }
 .definir__corpo { display: flex; flex-direction: column; gap: 14px; padding: 18px 28px 8px; }
-.definir__aviso { display: flex; align-items: flex-start; gap: 10px; margin: 0; padding: 10px 14px; border-radius: 8px; background: #f1f4f2; font-size: 14px; }
-.definir__aviso .icone { width: 18px; height: 18px; flex-shrink: 0; margin-top: 1px; color: var(--texto-suave); }
 .definir__rodape { display: flex; justify-content: flex-end; gap: 12px; margin-top: 12px; padding: 16px 28px; border-top: 1px solid var(--borda); }
 .definir .recomendacao__acoes { justify-content: flex-start; }
 .definir .botao-icone:focus-visible,
@@ -1613,6 +1614,9 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
 .quadro-rec__produtos { margin: 10px 0 2px; padding: 10px 0 0 17px; border-top: 1px solid var(--borda); list-style: none; font-size: 14px; display: flex; flex-direction: column; gap: 4px; }
 
 .definir__nome { max-width: 360px; margin: 0; }
+/* Produto que já está em outra recomendação: aviso discreto, em âmbar (não bloqueia) */
+.nota-repetido { display: flex; align-items: center; gap: 4px; margin: 4px 0 0; font-size: 12px; font-weight: 600; color: #7a5600; }
+.nota-repetido .icone { width: 14px; height: 14px; flex-shrink: 0; }
 /* Excluir fica à esquerda, longe do Salvar */
 .definir__excluir { margin-right: auto; }
 .definir__excluir .icone { width: 16px; height: 16px; }
