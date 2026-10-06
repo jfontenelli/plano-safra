@@ -340,19 +340,18 @@ window.Telas.planoOperacoes = (function () {
       </div>`;
   }
 
-  // Anterior e próxima operação do grupo, na ordem do DAP (a mesma da lista). O botão mostra o DAP
-  // de destino; o nome da operação aparece ao passar o mouse. Sem DAP, mostra o nome.
+  // Anterior e próxima operação do grupo, na ordem do DAP (a mesma da lista): só as setas ← →.
+  // Primeira operação: só →; última: só ←. O nome e o DAP do destino aparecem ao passar o mouse.
   function navegacaoOperacoes(op) {
     const ops = operacoesOrdenadas(grupoAtual());
     const i = ops.indexOf(op);
     const botao = (destino, sentido) => {
       if (!destino) return '';
-      const rotulo = destino.dap !== null && destino.dap !== undefined ? `DAP ${destino.dap}` : esc(destino.nome);
-      const dica = `${sentido === 'anterior' ? 'Anterior' : 'Próxima'}: ${esc(destino.nome)}`;
+      const dap = destino.dap !== null && destino.dap !== undefined ? ` (DAP ${destino.dap})` : '';
+      const dica = `${sentido === 'anterior' ? 'Operação anterior' : 'Próxima operação'}: ${esc(destino.nome)}${dap}`;
       return `
         <button class="botao botao--secundario botao--p op-navegar" type="button" data-acao="navegar-op" data-op="${destino.id}"
-                title="${dica}" aria-label="${dica}">
-          ${sentido === 'anterior' ? `${Icones.anterior} ${rotulo}` : `${rotulo} ${Icones.proxima}`}</button>`;
+                title="${dica}" aria-label="${dica}">${sentido === 'anterior' ? Icones.voltar : Icones.seta}</button>`;
     };
     if (ops.length < 2) return '';
     return `<div class="op-navegacao">${botao(ops[i - 1], 'anterior')}${botao(ops[i + 1], 'proxima')}</div>`;
