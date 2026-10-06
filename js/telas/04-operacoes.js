@@ -40,6 +40,7 @@ window.Telas.planoOperacoes = (function () {
       filtroTalhoes: 'todos',  // todos | nao-planejados | rec:<id da recomendação>
       quadroAberto: false,     // quadro da recomendação filtrada: lista de produtos aberta
       erroNome: null,          // modal: nome da recomendação repetido
+      naoEncontrado: {},       // texto digitado sem escolher na lista e que não está no cadastro: { 'linhaId:pa|produto': texto }
       definindo: null,         // modal "Definir recomendação" aberto: { talhoes, editando }
       renomeandoOp: null,
       renomeandoGrupo: null,
@@ -425,11 +426,13 @@ window.Telas.planoOperacoes = (function () {
     const leitura = somenteLeitura;
     const linhas = leitura ? r.produtos.filter(Planos.linhaPreenchida) : rascunho(op).produtos;
     const erros = errosVisiveis(op);
+    // Só a linha em pré-cadastro na tabela: sem o cabeçalho (o pré-cadastro já tem os rótulos dele)
+    const soPreCadastro = !leitura && ui.preCadastro && linhas.length === 1 && linhas[0].id === ui.preCadastro.linhaId;
     return `
       <div class="recomendacao__corpo">
         <div class="recomendacao__tabela">
-          <table class="tabela tabela--compacta tabela-rec">
-            <thead><tr>
+          <table class="tabela tabela--compacta tabela-rec ${soPreCadastro ? 'tabela-rec--so-pre' : ''}">
+            <thead ${soPreCadastro ? 'hidden' : ''}><tr>
               <th>Princípio ativo</th><th>Produto comercial</th><th class="tabela__numero">Dose padrão</th><th>Unid.</th>
               ${leitura ? '' : '<th><span class="so-leitor">Remover</span></th>'}
             </tr></thead>
@@ -479,9 +482,9 @@ window.Telas.planoOperacoes = (function () {
     const semProduto = !l.produto;
     return `
       <tr data-linha="${l.id}">
-        <td>${combo(l, 'pa', l.principioAtivo, 'Buscar princípio ativo', false)}${avisoRepetido(l, 'pa')}</td>
-        <td>${combo(l, 'produto', l.produto, 'Buscar produto', erro.produto)} ${etiquetaPre(l)}${seloTipo(l)}
-          ${erro.produto ? '<p class="erro-campo">Escolha o produto comercial</p>' : ''}${avisoRepetido(l, 'produto')}</td>
+        <td>${celulaCombo(l, 'pa', l.principioAtivo, 'Buscar princípio ativo', false)}${avisoRepetido(l, 'pa')}</td>
+        <td>${celulaCombo(l, 'produto', l.produto, 'Buscar produto', erro.produto)} ${etiquetaPre(l)}${seloTipo(l)}
+          ${erro.produto && !ui.naoEncontrado[`${l.id}:produto`] ? '<p class="erro-campo">Escolha o produto comercial</p>' : ''}${avisoRepetido(l, 'produto')}</td>
         <td class="tabela__numero" ${semProduto ? 'title="Escolha o produto comercial para informar a dose"' : ''}>
           <input class="campo__controle campo--compacto campo--dose ${erro.dose && !semProduto ? 'campo__controle--erro' : ''}" type="text" inputmode="decimal"
                  data-campo="linha-dose" value="${Util.dose(l.dose)}" placeholder="—" aria-label="Dose padrão"
@@ -535,6 +538,40 @@ window.Telas.planoOperacoes = (function () {
     return outras.length ? `<p class="aviso-repetido">${Icones.alerta} Também na ${outras.join(' e na ')}</p>` : '';
   }
 
+  // Campo de busca com o texto digitado que não foi encontrado no cadastro (mantém o texto e mostra o erro)
+  const MSG_NAO_ENCONTRADO = 'Não encontrado no cadastro. Escolha na lista ou use "+ Pré-cadastrar".';
+  function celulaCombo(l, tipo, valor, placeholder, comErro) {
+    const digitado = ui.naoEncontrado[`${l.id}:${tipo}`];
+    if (digitado === undefined) return combo(l, tipo, valor, placeholder, comErro);
+    return combo(l, tipo, digitado, placeholder, true) + `<p class="erro-campo erro-campo--digitado">${MSG_NAO_ENCONTRADO}</p>`;
+  }
+
+  // Texto digitado sem clicar numa opção: se for exatamente um item do cadastro, vale como escolhido.
+  // Devolve 'ok' (aceito ou nada a fazer) ou 'nao-encontrado'.
+  function aceitarDigitado(input) {
+    const linha = linhaDoElemento(input);
+    if (!linha) return 'ok';
+    const tipo = input.dataset.combo;
+    const texto = input.value.trim();
+    const atual = tipo === 'pa' ? linha.principioAtivo : linha.produto;
+    const chave = `${linha.id}:${tipo}`;
+    if (!texto || texto === atual) { delete ui.naoEncontrado[chave]; return 'ok'; }
+    const igual = (v) => v && Util.normalizar(v) === Util.normalizar(texto);
+    if (tipo === 'pa') {
+      const d = DADOS.defensivos.find((x) => igual(x.principioAtivo));
+      if (!d) { ui.naoEncontrado[chave] = texto; return 'nao-encontrado'; }
+      linha.principioAtivo = d.principioAtivo;
+      const prod = Planos.produtoDoCadastro(linha.produto);
+      if (prod && prod.principioAtivo !== d.principioAtivo) Object.assign(linha, { produto: '', unidade: '', dose: null, preCadastro: false });
+    } else {
+      const d = DADOS.defensivos.find((x) => igual(x.produto));
+      if (!d) { ui.naoEncontrado[chave] = texto; return 'nao-encontrado'; }
+      Object.assign(linha, { produto: d.produto, principioAtivo: d.principioAtivo || '', unidade: d.unidade, preCadastro: !!d.preCadastro });
+    }
+    delete ui.naoEncontrado[chave];
+    return 'ok';
+  }
+
   function combo(linha, tipo, valor, placeholder, comErro) {
     return `
       <div class="combo">
@@ -545,27 +582,64 @@ window.Telas.planoOperacoes = (function () {
       </div>`;
   }
 
-  // A própria linha vira um mini-formulário de pré-cadastro
+  // Guarda o que foi digitado no pré-cadastro; preenchido o campo, o erro dele some (sem redesenhar)
+  function registrarPre(el) {
+    const pc = ui.preCadastro;
+    if (!pc) return;
+    pc[el.dataset.pre] = el.value;
+    if (pc.erros && pc.erros[el.dataset.pre] && el.value.trim()) {
+      delete pc.erros[el.dataset.pre];
+      el.classList.remove('campo__controle--erro');
+      el.removeAttribute('aria-invalid');
+      const msg = el.parentElement.querySelector('.pre-cadastro__msg');
+      if (msg) msg.textContent = '';
+    }
+  }
+
+  // A própria linha vira o pré-cadastro, com cada campo embaixo da sua coluna
+  // (Princípio ativo · Produto comercial · Dose · Unid.). A dose é informada depois de salvar.
   function linhaPreCadastro(l) {
     const pc = ui.preCadastro;
+    const erros = pc.erros || {};
+    const id = (campo) => `pre-${campo}-${l.id}`;
     return `
-      <tr data-linha="${l.id}" class="tabela-rec__pre">
+      <tr data-linha="${l.id}" class="tabela-rec__pre tabela-rec__pre--titulo">
         <td colspan="5">
-          <div class="pre-cadastro">
-            <p class="pre-cadastro__titulo">Pré-cadastro de defensivo
-              <span class="pre-cadastro__ajuda">Informe o produto comercial e a unidade. O princípio ativo é opcional.</span></p>
-            <div class="pre-cadastro__campos">
-              <input class="campo__controle campo--compacto" data-pre="produto" value="${esc(pc.produto)}" placeholder="Produto comercial" aria-label="Produto comercial"
-                     ${pc.produto ? '' : 'data-foco-inicial'}>
-              <input class="campo__controle campo--compacto" data-pre="principioAtivo" value="${esc(pc.principioAtivo)}" placeholder="Princípio ativo" aria-label="Princípio ativo">
-              <select class="campo__controle campo--compacto" data-pre="unidade" aria-label="Unidade" required>
-                <option value="" ${pc.unidade ? '' : 'selected'} disabled>Unidade</option>
-                ${UNIDADES.map((u) => `<option ${u === pc.unidade ? 'selected' : ''}>${u}</option>`).join('')}
-              </select>
-              <button class="botao botao--secundario botao--p" type="button" data-acao="cancelar-pre">Cancelar</button>
-              <button class="botao botao--primario botao--p" type="button" data-acao="salvar-pre">Salvar pré-cadastro</button>
-            </div>
-            ${pc.erro ? `<p class="campo__erro">${pc.erro}</p>` : ''}
+          <p class="pre-cadastro__titulo">Pré-cadastro de defensivo
+            <span class="pre-cadastro__ajuda">· Informe o produto comercial e a unidade. O princípio ativo é opcional.</span></p>
+        </td>
+      </tr>
+      <tr data-linha="${l.id}" class="tabela-rec__pre">
+        <td>
+          <label class="pre-cadastro__rotulo" for="${id('pa')}">Princípio ativo (opcional)</label>
+          <input class="campo__controle campo--compacto" id="${id('pa')}" data-pre="principioAtivo" value="${esc(pc.principioAtivo)}"
+                 placeholder="Princípio ativo" autocomplete="off">
+          <p class="pre-cadastro__msg"></p>
+        </td>
+        <td>
+          <label class="pre-cadastro__rotulo" for="${id('produto')}">Produto comercial *</label>
+          <input class="campo__controle campo--compacto ${erros.produto ? 'campo__controle--erro' : ''}" id="${id('produto')}" data-pre="produto"
+                 value="${esc(pc.produto)}" placeholder="Produto comercial" autocomplete="off" ${erros.produto ? 'aria-invalid="true"' : ''}>
+          <p class="pre-cadastro__msg erro-campo">${erros.produto || ''}</p>
+        </td>
+        <td></td>
+        <td>
+          <label class="pre-cadastro__rotulo" for="${id('unidade')}">Unidade *</label>
+          <select class="campo__controle campo--compacto ${erros.unidade ? 'campo__controle--erro' : ''}" id="${id('unidade')}" data-pre="unidade" required
+                  ${erros.unidade ? 'aria-invalid="true"' : ''}>
+            <option value="" ${pc.unidade ? '' : 'selected'} disabled>Unidade</option>
+            ${UNIDADES.map((u) => `<option ${u === pc.unidade ? 'selected' : ''}>${u}</option>`).join('')}
+          </select>
+          <p class="pre-cadastro__msg erro-campo">${erros.unidade || ''}</p>
+        </td>
+        <td></td>
+      </tr>
+      <tr data-linha="${l.id}" class="tabela-rec__pre tabela-rec__pre--acoes">
+        <td colspan="5">
+          <div class="pre-cadastro__acoes">
+            ${pc.aviso ? `<p class="erro-campo pre-cadastro__erro">${pc.aviso}</p>` : ''}
+            <button class="botao botao--secundario botao--p" type="button" data-acao="cancelar-pre">Cancelar</button>
+            <button class="botao botao--secundario botao--p pre-cadastro__salvar" type="button" data-acao="salvar-pre">Salvar pré-cadastro</button>
           </div>
         </td>
       </tr>`;
@@ -721,7 +795,7 @@ window.Telas.planoOperacoes = (function () {
     const talhoes = talhoesFazenda.filter((t) => ui.marcados.has(t.nome)).map((t) => t.nome);
     if (!talhoes.length) return;
     if (semDap(op)) return;
-    ui.rascunho = null; ui.preCadastro = null; ui.validarOp = null; ui.erroNome = null;
+    ui.rascunho = null; ui.preCadastro = null; ui.validarOp = null; ui.erroNome = null; ui.naoEncontrado = {};
     // Talhões marcados que já estão todos na mesma recomendação: abre nela.
     // Senão, cria a próxima (Recomendação 2, Rec 2…), com produto e dose em branco e sem mostrar
     // as outras: o modal é só dessa recomendação. Se for cancelado, a nova vazia é descartada.
@@ -760,7 +834,7 @@ window.Telas.planoOperacoes = (function () {
   function abrirEditar(op, id) {
     const r = op.receitas.find((x) => x.id === id);
     if (!r || semDap(op)) return;
-    ui.rascunho = null; ui.preCadastro = null; ui.validarOp = null; ui.erroNome = null;
+    ui.rascunho = null; ui.preCadastro = null; ui.validarOp = null; ui.erroNome = null; ui.naoEncontrado = {};
     ui.receitaPorOp[op.id] = r.id;
     const talhoes = talhoesFazenda.map((t) => t.nome).filter((t) => op.talhoes[t] && op.talhoes[t].receitaId === r.id);
     ui.definindo = { talhoes, editando: true };
@@ -771,7 +845,7 @@ window.Telas.planoOperacoes = (function () {
   function fecharDefinir() {
     const op = opAtual();
     const editando = ui.definindo && ui.definindo.editando;
-    ui.rascunho = null; ui.preCadastro = null; ui.validarOp = null; ui.erroNome = null;
+    ui.rascunho = null; ui.preCadastro = null; ui.validarOp = null; ui.erroNome = null; ui.naoEncontrado = {};
     ui.definindo = null;
     if (op) {
       op.receitas.filter((r) => receitaVazia(op, r)).forEach((r) => op.receitas.splice(op.receitas.indexOf(r), 1));
@@ -903,12 +977,13 @@ window.Telas.planoOperacoes = (function () {
   function escolherNoCombo(input, opcaoEl) {
     const linha = linhaDoElemento(input);
     const tipo = input.dataset.combo;
+    delete ui.naoEncontrado[`${linha.id}:pa`]; delete ui.naoEncontrado[`${linha.id}:produto`];
     const valor = opcaoEl.dataset.valor;
     if (opcaoEl.hasAttribute('data-pre-cadastrar')) {
       // Pelo princípio ativo, o texto vai para o Princípio ativo; o produto comercial continua obrigatório
       ui.preCadastro = tipo === 'pa'
-        ? { linhaId: linha.id, produto: '', principioAtivo: valor, unidade: '', erro: '' }
-        : { linhaId: linha.id, produto: valor, principioAtivo: linha.principioAtivo || '', unidade: '', erro: '' };
+        ? { linhaId: linha.id, produto: '', principioAtivo: valor, unidade: '', erros: {}, aviso: '' }
+        : { linhaId: linha.id, produto: valor, principioAtivo: linha.principioAtivo || '', unidade: '', erros: {}, aviso: '' };
     } else if (tipo === 'pa') {
       linha.principioAtivo = valor;
       // Produto de outro princípio ativo deixa de valer (e, sem produto, não há unidade nem dose)
@@ -1047,7 +1122,7 @@ window.Telas.planoOperacoes = (function () {
       // Já registrada ao digitar; sem redesenhar, para o clique em "Aplicar" valer de primeira
       e.target.value = Util.dose(Util.numero(e.target.value));
     } else if (e.target.dataset.pre) {
-      ui.preCadastro[e.target.dataset.pre] = e.target.value;
+      registrarPre(e.target);
     }
   }
 
@@ -1063,8 +1138,12 @@ window.Telas.planoOperacoes = (function () {
       return;
     }
     if (e.target.dataset.campo === 'nome-rec') { rascunho(opAtual()).nome = e.target.value; return; }
-    if (e.target.dataset.combo) { abrirCombo(e.target); return; }
-    if (e.target.dataset.pre) { ui.preCadastro[e.target.dataset.pre] = e.target.value; return; }
+    if (e.target.dataset.combo) {
+      const linha = linhaDoElemento(e.target);
+      if (linha) delete ui.naoEncontrado[`${linha.id}:${e.target.dataset.combo}`];
+      abrirCombo(e.target); return;
+    }
+    if (e.target.dataset.pre) { registrarPre(e.target); return; }
   }
 
   function aoFocar(e) {
@@ -1074,13 +1153,37 @@ window.Telas.planoOperacoes = (function () {
   function aoDesfocar(e) {
     const el = e.target;
     if (el.dataset.combo) {
-      // Sem escolher uma opção, o campo volta ao valor da linha
+      // Sem escolher uma opção: texto igual a um item do cadastro vale como escolhido;
+      // texto que não existe fica no campo, com o erro embaixo
       setTimeout(() => {
         if (!raiz.contains(el) || el === document.activeElement) return;
-        const linha = linhaDoElemento(el);
-        if (linha) el.value = el.dataset.combo === 'pa' ? linha.principioAtivo : linha.produto;
         el.parentElement.querySelector('.combo__lista').hidden = true;
         el.setAttribute('aria-expanded', 'false');
+        const linha = linhaDoElemento(el);
+        if (!linha) return;
+        const td = el.closest('td');
+        td.querySelectorAll('.erro-campo--digitado').forEach((p) => p.remove());
+        if (aceitarDigitado(el) === 'nao-encontrado') {
+          el.classList.add('campo__controle--erro');
+          el.closest('.combo').insertAdjacentHTML('afterend', `<p class="erro-campo erro-campo--digitado">${MSG_NAO_ENCONTRADO}</p>`);
+          return;
+        }
+        el.classList.remove('campo__controle--erro');
+        // Com erros na tela (já tentou aplicar), redesenha para limpá-los, mantendo o foco onde a pessoa foi
+        if (ui.validarOp) {
+          const ativo = document.activeElement;
+          const linhaAtiva = ativo && ativo.closest && ativo.closest('[data-linha]');
+          const campo = ativo && (ativo.dataset.campo ? `[data-campo="${ativo.dataset.campo}"]` : ativo.dataset.combo ? `[data-combo="${ativo.dataset.combo}"]` : null);
+          if (linhaAtiva && campo) desenharMantendoFoco(`[data-linha="${linhaAtiva.dataset.linha}"] ${campo}`); else desenharTudo();
+          return;
+        }
+        // Atualiza a linha sem redesenhar: princípio ativo, produto, unidade e dose
+        const tr = el.closest('tr');
+        tr.querySelector('[data-combo="pa"]').value = linha.principioAtivo;
+        tr.querySelector('[data-combo="produto"]').value = linha.produto;
+        tr.querySelector('.tabela-rec__unidade').textContent = Planos.unidadeDose(linha) || '—';
+        const dose = tr.querySelector('[data-campo="linha-dose"]');
+        if (dose) dose.disabled = !linha.produto;
       }, 150);
     }
     if (el.dataset.campo === 'nome-op') salvarNomeOperacao(el.value);
@@ -1213,8 +1316,11 @@ window.Telas.planoOperacoes = (function () {
     raiz.querySelectorAll('[data-pre]').forEach((el) => { pc[el.dataset.pre] = el.value; });
     const produto = pc.produto.trim();
     const pa = pc.principioAtivo.trim();
-    if (!produto) { pc.erro = 'Informe o produto comercial.'; desenharTudo(); return; }
-    if (!pc.unidade) { pc.erro = 'Escolha a unidade.'; desenharTudo(); return; }
+    pc.erros = {};
+    if (!produto) pc.erros.produto = 'Informe o produto comercial.';
+    if (!pc.unidade) pc.erros.unidade = 'Escolha a unidade.';
+    pc.aviso = '';
+    if (pc.erros.produto || pc.erros.unidade) { desenharTudo(); return; }
 
     DADOS.defensivos.push({ classe: '', produto, principioAtivo: pa, unidade: pc.unidade, preCadastro: true });
     const linha = ui.rascunho.produtos.find((l) => l.id === pc.linhaId);
@@ -1339,7 +1445,20 @@ window.Telas.planoOperacoes = (function () {
   function aplicarDefinicao(op) {
     const r = receitaAtual(op);
     if (!r) return;
-    if (errosRecomendacao(op).algum) { ui.validarOp = op.id; desenharTudo(); return; }
+    // Pré-cadastro aberto: não aplica; avisa no próprio bloco
+    if (ui.preCadastro) {
+      const pc = ui.preCadastro;
+      raiz.querySelectorAll('[data-pre]').forEach((el) => { pc[el.dataset.pre] = el.value; });
+      pc.aviso = `${Icones.alerta} <span><strong>Pré-cadastro não finalizado.</strong> Salve ou cancele o pré-cadastro antes de aplicar.</span>`;
+      desenharTudo();
+      return;
+    }
+    // Campos digitados sem escolher na lista: aceita o que é do cadastro; o que não é fica com erro
+    let naoEncontrado = false;
+    raiz.querySelectorAll('.definir [data-combo]').forEach((el) => {
+      if (aceitarDigitado(el) === 'nao-encontrado') naoEncontrado = true;
+    });
+    if (naoEncontrado || errosRecomendacao(op).algum) { ui.validarOp = op.id; desenharTudo(); return; }
     // Nome vazio volta ao anterior; nome repetido na operação não é aceito
     const nome = rascunho(op).nome.trim() || r.nome;
     if (op.receitas.some((x) => x !== r && Util.normalizar(x.nome) === Util.normalizar(nome))) {

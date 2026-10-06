@@ -1395,13 +1395,24 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
 .combo__sub { display: block; font-size: 12px; color: var(--texto-suave); }
 .combo__nada { padding: 8px 10px; font-size: 14px; color: var(--texto-suave); }
 
-.tabela-rec__pre td { background: #fffbef; }
-.pre-cadastro__titulo { margin: 2px 0 8px; font-weight: 600; font-size: 14px; }
-.pre-cadastro__ajuda { display: block; font-weight: 400; font-size: 13px; color: var(--texto-suave); }
-.pre-cadastro__campos { display: flex; flex-wrap: wrap; gap: 8px; }
-.pre-cadastro__campos input { flex: 1 1 180px; }
-.pre-cadastro__campos select { width: 120px; }
-.pre-cadastro .campo__erro { margin: 8px 0 0; }
+/* Pré-cadastro na própria linha: bloco amarelo claro com borda à esquerda, campos alinhados às colunas */
+.tabela-rec__pre td { background: #fffaeb; }
+.tabela-rec__pre td:first-child { box-shadow: inset 4px 0 0 #f2de9b; }
+.tabela-rec .tabela-rec__pre--titulo td { padding-bottom: 0; }
+.tabela-rec .tabela-rec__pre--acoes td { border-top: 0; padding-top: 0; }
+.tabela-rec .tabela-rec__pre + .tabela-rec__pre td { border-top: 0; }
+.pre-cadastro__titulo { margin: 4px 0 0; font-weight: 700; font-size: 14px; }
+/* Sem cabeçalho na tabela, o bloco arredonda os cantos de cima */
+.tabela-rec--so-pre .tabela-rec__pre--titulo td { border-top: 0; border-radius: 8px 8px 0 0; }
+.pre-cadastro__ajuda { font-weight: 400; color: var(--texto-suave); }
+.pre-cadastro__rotulo { display: block; margin-bottom: 4px; font-size: 12px; font-weight: 600; color: var(--texto-suave); }
+.pre-cadastro__acoes { display: flex; align-items: center; justify-content: flex-end; gap: 10px; padding-bottom: 4px; }
+/* Espaço já reservado embaixo de cada campo para a mensagem de erro (a caixa não pula ao aparecer) */
+.pre-cadastro__msg { min-height: 18px; margin: 4px 0 0; font-size: 12px; line-height: 1.3; }
+.pre-cadastro__erro { display: flex; align-items: flex-start; gap: 4px; margin: 0 auto 0 0; }
+.pre-cadastro__erro .icone { width: 14px; height: 14px; flex-shrink: 0; margin-top: 1px; }
+/* Salvar com borda verde: o verde sólido do modal continua sendo só o "Aplicar" */
+.pre-cadastro__salvar { border-color: var(--verde-700); color: var(--verde-700); }
 
 /* Tipo do insumo, abaixo do nome do produto (cabeçalho da tabela de talhões) */
 .etiqueta-tipo {
