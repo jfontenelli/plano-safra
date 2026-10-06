@@ -610,7 +610,8 @@ window.Telas.planoOperacoes = (function () {
       <div class="barra-definir ${n ? '' : 'barra-definir--vazia'}">
         ${n ? `
           <span class="barra-definir__selecao"><strong>${n} ${n === 1 ? 'talhão' : 'talhões'}</strong> · ${Util.area(area)}</span>
-          <button class="link-acao barra-definir__limpar" type="button" data-acao="limpar-selecao">Limpar</button>`
+          <button class="botao botao--secundario barra-definir__limpar" type="button" data-acao="limpar-selecao"
+                  title="Desmarcar todos os talhões" aria-label="Limpar seleção: desmarcar todos os talhões">Limpar</button>`
         : `<span class="barra-definir__texto">${Icones.info} Selecione um ou mais talhões para definir a recomendação.</span>`}
         <button class="botao botao--primario" type="button" data-acao="definir-recomendacao" ${n ? '' : 'disabled'}>Criar recomendação</button>
       </div>`;

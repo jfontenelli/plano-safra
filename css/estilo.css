@@ -1589,8 +1589,9 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
 .barra-definir__texto .icone { width: 18px; height: 18px; flex-shrink: 0; }
 .barra-definir__selecao { font-size: 14px; color: var(--texto-suave); }
 .barra-definir__selecao strong { color: var(--texto); }
-.barra-definir__limpar { margin: 0 auto 0 4px; }
-.barra-definir__limpar:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 2px; border-radius: 4px; }
+/* Limpar: botão com borda e área de clique do mesmo tamanho do principal */
+.barra-definir__limpar { margin: 0 auto 0 4px; border-color: #cfd6d2; }
+.barra-definir__limpar:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 2px; }
 
 /* Modal "Definir recomendação": a página do modal rola (e não o corpo), para a lista de produtos não ser cortada */
 .definir-fundo {
