@@ -1529,9 +1529,6 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
 /* bolinha da recomendação com contorno branco, para aparecer sobre o verde */
 .filtro-talhoes--ativo .rec-ponto { box-shadow: 0 0 0 2px #fff; }
 .filtro-talhoes:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 2px; }
-/* Zerado (ex.: Não planejados · 0): desabilitado, sem clique */
-.filtro-talhoes:disabled,
-.filtro-talhoes:disabled:hover { border-color: var(--borda); background: var(--fundo); color: #9aa5a0; cursor: not-allowed; }
 
 /* Só a tabela rola; a linha de títulos fica fixa no topo dela */
 .talhoes-rolagem {

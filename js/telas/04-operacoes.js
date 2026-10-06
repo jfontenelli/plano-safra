@@ -590,23 +590,23 @@ window.Telas.planoOperacoes = (function () {
   function painelTalhoes(op) {
     const rec = recFiltrada(op);
     const naoPlanejados = talhoesFazenda.filter((t) => !op.talhoes[t.nome]).length;
+    // Sem talhão não planejado, a etiqueta some (e quem estava nela volta para Todos os talhões)
+    if (!naoPlanejados && ui.filtroTalhoes === 'nao-planejados') ui.filtroTalhoes = 'todos';
     const visiveis = talhoesVisiveis(op);
     const marcar = !somenteLeitura;
     const todos = visiveis.length > 0 && visiveis.every((t) => ui.marcados.has(t.nome));
     // Uma coluna por produto: os da recomendação filtrada, ou os de todas as recomendações aplicadas
     const colunas = rec ? rec.produtos.filter(Planos.linhaPreenchida) : Planos.colunasDose(op);
-    const filtro = (valor, rotulo, dica = '') => `
+    const filtro = (valor, rotulo) => `
       <button class="filtro-talhoes ${ui.filtroTalhoes === valor ? 'filtro-talhoes--ativo' : ''}" type="button"
-              data-acao="filtro-talhoes" data-filtro="${valor}" aria-pressed="${ui.filtroTalhoes === valor}"
-              ${dica ? `disabled title="${dica}"` : ''}>${rotulo}</button>`;
+              data-acao="filtro-talhoes" data-filtro="${valor}" aria-pressed="${ui.filtroTalhoes === valor}">${rotulo}</button>`;
     const vazio = !talhoesFazenda.length ? `Nenhum talhão cadastrado na fazenda ${esc(plano.fazenda)}.`
       : !visiveis.length ? 'Todos os talhões já têm recomendação.' : '';
     const nColunas = colunas.length + (marcar ? 3 : 2);
     return `
       <div class="filtros-talhoes" role="group" aria-label="Filtrar talhões">
         ${filtro('todos', `Todos os talhões: ${talhoesFazenda.length}`)}
-        ${filtro('nao-planejados', `Não planejados: ${naoPlanejados}`,
-          naoPlanejados || ui.filtroTalhoes === 'nao-planejados' ? '' : 'Todos os talhões já têm recomendação')}
+        ${naoPlanejados ? filtro('nao-planejados', `Não planejados: ${naoPlanejados}`) : ''}
         ${recsAplicadas(op).map((r) => filtro(`rec:${r.id}`, `${pontoRec(op, r)}${esc(nomeCurto(r))}`)).join('')}
       </div>
       ${rec ? quadroRec(op, rec) : ''}
