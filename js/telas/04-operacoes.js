@@ -37,16 +37,17 @@ window.Telas.planoOperacoes = (function () {
       opPorGrupo: {},          // operação aberta em cada grupo
       listaRecolhida: false,
       marcados: new Set(),     // talhões marcados na tabela
-      filtroTalhoes: 'todos',  // todos | nao-planejados
-      definindo: null,         // modal "Definir recomendação" aberto: { talhoes }
+      filtroTalhoes: 'todos',  // todos | nao-planejados | rec:<id da recomendação>
+      quadroAberto: false,     // quadro da recomendação filtrada: lista de produtos aberta
+      erroNome: null,          // modal: nome da recomendação repetido
+      definindo: null,         // modal "Definir recomendação" aberto: { talhoes, editando }
       renomeandoOp: null,
       renomeandoGrupo: null,
       preCadastro: null,       // { linhaId, produto, principioAtivo, unidade, erro }
       validarOp: null,         // operação com o preenchimento mínimo em vermelho (DAP ou recomendação)
       renomeandoNaLista: null, // operação com o nome em edição na lista (duplo clique, F2 ou botão direito)
       receitaPorOp: {},        // receita aberta em cada operação
-      rascunho: null,          // cópia da receita aberta, editada até "Aplicar em N talhões": { receitaId, produtos }
-      renomeandoReceita: null
+      rascunho: null,          // cópia da receita aberta, editada até "Aplicar em N talhões": { receitaId, nome, produtos }
     };
     if (!somenteLeitura) limparReceitasVazias();
     raiz = conteudo.querySelector('#plano-raiz');
@@ -359,7 +360,7 @@ window.Telas.planoOperacoes = (function () {
     const r = receitaAtual(op);
     if (!r) return null;
     if (!ui.rascunho || ui.rascunho.receitaId !== r.id) {
-      ui.rascunho = { receitaId: r.id, produtos: r.produtos.map((l) => ({ ...l })) };
+      ui.rascunho = { receitaId: r.id, nome: r.nome, produtos: r.produtos.map((l) => ({ ...l })) };
       if (!ui.rascunho.produtos.length) ui.rascunho.produtos.push(Planos.novaLinha());
     }
     return ui.rascunho;
@@ -373,7 +374,7 @@ window.Telas.planoOperacoes = (function () {
   function rascunhoAlterado(op) {
     const r = receitaAtual(op);
     return !!(r && ui.rascunho && ui.rascunho.receitaId === r.id &&
-              assinatura(ui.rascunho.produtos) !== assinatura(r.produtos));
+              (assinatura(ui.rascunho.produtos) !== assinatura(r.produtos) || ui.rascunho.nome.trim() !== r.nome));
   }
 
   // Receita sem nenhuma linha preenchida (nem produto, nem princípio ativo) e sem talhões
@@ -400,7 +401,7 @@ window.Telas.planoOperacoes = (function () {
     const op = opAtual();
     const r = receitaAtual(op);
     const seguir = () => {
-      ui.rascunho = null; ui.preCadastro = null; ui.validarOp = null; ui.renomeandoReceita = null;
+      ui.rascunho = null; ui.preCadastro = null; ui.validarOp = null;
       if (removerVazia && r && receitaVazia(op, r)) {
         op.receitas.splice(op.receitas.indexOf(r), 1);
         delete ui.receitaPorOp[op.id];
@@ -420,14 +421,10 @@ window.Telas.planoOperacoes = (function () {
   function listaReceitas(op, atual) {
     const guias = op.receitas.map((r) => {
       const ativa = atual && r.id === atual.id;
-      if (ui.renomeandoReceita === r.id) {
-        return `<input class="campo__controle campo--compacto receitas__nome-campo" data-campo="nome-receita"
-                       value="${esc(r.nome)}" aria-label="Nome da recomendação" data-foco-inicial>`;
-      }
       return `
         <button class="receitas__guia ${ativa ? 'receitas__guia--ativa' : ''}" type="button" role="tab"
                 aria-selected="${ativa ? 'true' : 'false'}" data-acao="abrir-receita" data-receita="${r.id}"
-                title="${somenteLeitura ? esc(r.nome) : 'Clique duas vezes para renomear'}">${esc(r.nome)}${qtdTalhoes(op, r)}</button>`;
+                title="${esc(r.nome)}">${esc(r.nome)}${qtdTalhoes(op, r)}</button>`;
     }).join('');
     return `
       <div class="receitas">
@@ -562,43 +559,122 @@ window.Telas.planoOperacoes = (function () {
   // ----- Talhões da operação -----
   // Filtros Todos · Não planejados; tabela Talhão · Área; marcar talhões e "Criar recomendação"
   function talhoesVisiveis(op) {
+    const rec = recFiltrada(op);
+    if (rec) return talhoesFazenda.filter((t) => op.talhoes[t.nome] && op.talhoes[t.nome].receitaId === rec.id);
     return ui.filtroTalhoes === 'nao-planejados' ? talhoesFazenda.filter((t) => !op.talhoes[t.nome]) : talhoesFazenda;
   }
 
+  // Recomendações já aplicadas em algum talhão (as que ganham etiqueta nos filtros)
+  function recsAplicadas(op) {
+    return op.receitas.filter((r) => Planos.talhoesDaReceita(op, r).length);
+  }
+
+  // Filtro de uma recomendação que deixou de existir (ou ficou sem talhões) volta para Todos
+  function recFiltrada(op) {
+    if (!ui.filtroTalhoes.startsWith('rec:')) return null;
+    const r = recsAplicadas(op).find((x) => `rec:${x.id}` === ui.filtroTalhoes);
+    if (!r) ui.filtroTalhoes = 'todos';
+    return r || null;
+  }
+
+  // "Rec 1" enquanto tiver o nome padrão; renomeada, o nome dado
+  function nomeCurto(r) {
+    const m = /^Recomendação (\d+)$/.exec(r.nome);
+    return m ? `Rec ${m[1]}` : r.nome;
+  }
+
+  // Cor de cada recomendação (bolinha na etiqueta e no talhão). Fora das cores dos tipos de insumo
+  // (Herbicida roxo, Inseticida vermelho, Fungicida azul) para não confundir.
+  const CORES_REC = ['#0f766e', '#be185d', '#8a6a2f', '#4d7c0f', '#475569'];
+  function corRec(op, r) {
+    return CORES_REC[op.receitas.indexOf(r) % CORES_REC.length];
+  }
+
+  function pontoRec(op, r) {
+    return `<span class="rec-ponto" style="background: ${corRec(op, r)}" aria-hidden="true"></span>`;
+  }
+
+  // "DMA 806 BR (L/ha)"; sem produto comercial, só o princípio ativo (não há unidade)
+  function rotuloProduto(l) {
+    const u = Planos.unidadeDose(l);
+    return `${esc(Planos.nomeLinha(l))}${u ? ` (${u})` : ''}`;
+  }
+
   function painelTalhoes(op) {
+    const rec = recFiltrada(op);
     const naoPlanejados = talhoesFazenda.filter((t) => !op.talhoes[t.nome]).length;
     const visiveis = talhoesVisiveis(op);
     const marcar = !somenteLeitura;
     const todos = visiveis.length > 0 && visiveis.every((t) => ui.marcados.has(t.nome));
-    const filtro = (valor, rotulo, n) => `
+    // Uma coluna por produto: os da recomendação filtrada, ou os de todas as recomendações aplicadas
+    const colunas = rec ? rec.produtos.filter(Planos.linhaPreenchida) : Planos.colunasDose(op);
+    const filtro = (valor, rotulo) => `
       <button class="filtro-talhoes ${ui.filtroTalhoes === valor ? 'filtro-talhoes--ativo' : ''}" type="button"
-              data-acao="filtro-talhoes" data-filtro="${valor}" aria-pressed="${ui.filtroTalhoes === valor}">${rotulo} · ${n}</button>`;
+              data-acao="filtro-talhoes" data-filtro="${valor}" aria-pressed="${ui.filtroTalhoes === valor}">${rotulo}</button>`;
     const vazio = !talhoesFazenda.length ? `Nenhum talhão cadastrado na fazenda ${esc(plano.fazenda)}.`
       : !visiveis.length ? 'Todos os talhões já têm recomendação.' : '';
+    const nColunas = colunas.length + (marcar ? 3 : 2);
     return `
       <div class="filtros-talhoes" role="group" aria-label="Filtrar talhões">
-        ${filtro('todos', 'Todos', talhoesFazenda.length)}
-        ${filtro('nao-planejados', 'Não planejados', naoPlanejados)}
+        ${filtro('todos', `Todos · ${talhoesFazenda.length}`)}
+        ${recsAplicadas(op).map((r) => filtro(`rec:${r.id}`, `${pontoRec(op, r)}${esc(nomeCurto(r))}`)).join('')}
+        ${filtro('nao-planejados', `Não planejados · ${naoPlanejados}`)}
       </div>
+      ${rec ? quadroRec(op, rec) : ''}
       <div class="talhoes-rolagem">
         <table class="tabela tabela--compacta tabela-talhoes">
           <thead><tr>
             ${marcar ? `<th class="tabela__marcar"><input type="checkbox" data-acao="marcar-todos" aria-label="Marcar todos"
                  ${todos ? 'checked' : ''} ${visiveis.length ? '' : 'disabled'}></th>` : ''}
             <th>Talhão</th><th class="tabela__numero">Área (ha)</th>
+            ${colunas.map((l) => `<th class="tabela__numero">${rotuloProduto(l)} ${etiquetaPre(l)}${seloTipo(l)}</th>`).join('')}
           </tr></thead>
           <tbody>
-            ${vazio ? `<tr><td class="tabela__vazia" colspan="3">${vazio}</td></tr>` : visiveis.map((t) => `
+            ${vazio ? `<tr><td class="tabela__vazia" colspan="${nColunas}">${vazio}</td></tr>` : visiveis.map((t) => {
+              const ajuste = op.talhoes[t.nome];
+              const r = ajuste ? Planos.receitaDoTalhao(op, ajuste) : null;
+              const doses = colunas.map((col) => {
+                const l = ajuste ? Planos.linhaNoTalhao(op, ajuste, col) : null;
+                if (!l) return '<td class="tabela__numero tabela__nao-recebe">—</td>';
+                const d = Planos.doseTalhao(op, ajuste, l);
+                return `<td class="tabela__numero">${d === null || d === undefined ? '—' : Util.dose(d)}</td>`;
+              }).join('');
+              return `
                 <tr>
                   ${marcar ? `<td class="tabela__marcar"><input type="checkbox" data-acao="marcar" data-talhao="${esc(t.nome)}"
                       aria-label="Marcar ${esc(t.nome)}" ${ui.marcados.has(t.nome) ? 'checked' : ''}></td>` : ''}
-                  <th scope="row" class="tabela__talhao">${esc(t.nome)}</th>
+                  <th scope="row" class="tabela__talhao">${r ? `${pontoRec(op, r)}<span class="so-leitor">${esc(r.nome)}: </span>` : ''}${esc(t.nome)}</th>
                   <td class="tabela__numero">${Util.area(t.area).replace(' ha', '')}</td>
-                </tr>`).join('')}
+                  ${doses}
+                </tr>`;
+            }).join('')}
           </tbody>
         </table>
       </div>
       ${marcar ? barraDefinir() : ''}`;
+  }
+
+  // Quadro da recomendação filtrada: nome · talhões · área, "Editar" e "Ver produtos" (começa recolhido)
+  function quadroRec(op, r) {
+    const talhoes = Planos.talhoesDaReceita(op, r);
+    const area = talhoesFazenda.filter((t) => talhoes.includes(t.nome)).reduce((s, t) => s + t.area, 0);
+    const aberto = ui.quadroAberto;
+    const produtos = r.produtos.filter(Planos.linhaPreenchida);
+    return `
+      <section class="quadro-rec" aria-label="${esc(r.nome)}">
+        <div class="quadro-rec__topo">
+          ${pontoRec(op, r)}
+          <p class="quadro-rec__titulo"><strong>${esc(nomeCurto(r))}</strong> · ${talhoes.length} ${talhoes.length === 1 ? 'talhão' : 'talhões'} · ${Util.area(area)}</p>
+          ${somenteLeitura ? '' : `
+            <button class="botao botao--secundario botao--p" type="button" data-acao="editar-rec" data-rec="${r.id}">${Icones.lapis} Editar</button>`}
+          <button class="botao botao--secundario botao--p quadro-rec__alternar" type="button" data-acao="alternar-quadro"
+                  aria-expanded="${aberto}" aria-controls="quadro-produtos">${aberto ? 'Ocultar produtos' : 'Ver produtos'} ${Icones.abaixo}</button>
+        </div>
+        ${aberto ? `
+          <ul class="quadro-rec__produtos" id="quadro-produtos">
+            ${produtos.map((l) => `<li>${[l.principioAtivo, l.produto].filter(Boolean).map(esc).join(' · ')} · <strong>${Util.dose(l.dose) || '—'} ${Planos.unidadeDose(l)}</strong></li>`).join('')}
+          </ul>` : ''}
+      </section>`;
   }
 
   // Sem talhão marcado: orientação em destaque e botão desabilitado.
@@ -623,11 +699,8 @@ window.Telas.planoOperacoes = (function () {
   function abrirDefinir(op) {
     const talhoes = talhoesFazenda.filter((t) => ui.marcados.has(t.nome)).map((t) => t.nome);
     if (!talhoes.length) return;
-    // Sem DAP não dá para aplicar: mostra o erro no cabeçalho e não abre
-    if (op.dap === null || op.dap === undefined || op.dap === '') {
-      ui.validarOp = op.id; desenharTudo(); raiz.querySelector('#op-dap')?.focus(); return;
-    }
-    ui.rascunho = null; ui.preCadastro = null; ui.validarOp = null; ui.renomeandoReceita = null;
+    if (semDap(op)) return;
+    ui.rascunho = null; ui.preCadastro = null; ui.validarOp = null; ui.erroNome = null;
     // Talhões marcados que já estão todos na mesma recomendação: abre nela. Sem recomendação na operação: cria uma.
     const receitas = new Set(talhoes.map((t) => op.talhoes[t] && op.talhoes[t].receitaId));
     const comum = receitas.size === 1 ? [...receitas][0] : null;
@@ -642,20 +715,39 @@ window.Telas.planoOperacoes = (function () {
     desenharMantendoFoco('.definir');
   }
 
+  // Sem DAP não dá para aplicar: mostra o erro no cabeçalho e não abre o modal
+  function semDap(op) {
+    if (op.dap !== null && op.dap !== undefined && op.dap !== '') return false;
+    ui.validarOp = op.id; desenharTudo(); raiz.querySelector('#op-dap')?.focus();
+    return true;
+  }
+
+  // "Editar" no quadro: abre o modal na recomendação, valendo para os talhões dela (sem as outras guias)
+  function abrirEditar(op, id) {
+    const r = op.receitas.find((x) => x.id === id);
+    if (!r || semDap(op)) return;
+    ui.rascunho = null; ui.preCadastro = null; ui.validarOp = null; ui.erroNome = null;
+    ui.receitaPorOp[op.id] = r.id;
+    const talhoes = talhoesFazenda.map((t) => t.nome).filter((t) => op.talhoes[t] && op.talhoes[t].receitaId === r.id);
+    ui.definindo = { talhoes, editando: true };
+    desenharMantendoFoco('.definir');
+  }
+
   // Cancelar, X ou Esc: descarta o que foi feito no modal (sem perguntar) e mantém os talhões marcados
   function fecharDefinir() {
     const op = opAtual();
-    ui.rascunho = null; ui.preCadastro = null; ui.validarOp = null; ui.renomeandoReceita = null;
+    const editando = ui.definindo && ui.definindo.editando;
+    ui.rascunho = null; ui.preCadastro = null; ui.validarOp = null; ui.erroNome = null;
     ui.definindo = null;
     if (op) {
       op.receitas.filter((r) => receitaVazia(op, r)).forEach((r) => op.receitas.splice(op.receitas.indexOf(r), 1));
       if (!op.receitas.some((r) => r.id === ui.receitaPorOp[op.id])) delete ui.receitaPorOp[op.id];
     }
-    desenharMantendoFoco('[data-acao="definir-recomendacao"]');
+    desenharMantendoFoco(editando ? '[data-acao="editar-rec"]' : '[data-acao="definir-recomendacao"]');
   }
 
   function modalDefinir(op) {
-    const talhoes = ui.definindo.talhoes;
+    const { talhoes, editando } = ui.definindo;
     const n = talhoes.length;
     const area = talhoesFazenda.filter((t) => talhoes.includes(t.nome)).reduce((s, t) => s + t.area, 0);
     const r = receitaAtual(op);
@@ -666,14 +758,15 @@ window.Telas.planoOperacoes = (function () {
         <div class="definir" role="dialog" aria-modal="true" aria-labelledby="definir-titulo" tabindex="-1">
           <div class="definir__topo">
             <div class="definir__titulos">
-              <h2 class="definir__titulo" id="definir-titulo">Definir recomendação</h2>
+              <h2 class="definir__titulo" id="definir-titulo">${editando ? 'Editar recomendação' : 'Definir recomendação'}</h2>
               <p class="definir__op">${esc(op.nome)} · DAP ${op.dap}</p>
               <p class="definir__alvo">${n} ${n === 1 ? 'talhão' : 'talhões'} · ${Util.area(area)}</p>
             </div>
             <button class="botao-icone" type="button" data-acao="fechar-definir" aria-label="Fechar">${Icones.fechar}</button>
           </div>
           <div class="definir__corpo">
-            ${listaReceitas(op, r)}
+            ${editando ? '' : listaReceitas(op, r)}
+            ${r && !somenteLeitura ? campoNome(op) : ''}
             ${outros ? `<p class="definir__aviso">${Icones.info} ${esc(r.nome)} já está em ${outros} ${outros === 1 ? 'outro talhão' : 'outros talhões'}.
               Se alterar produtos ou doses, ${outros === 1 ? 'ele também muda' : 'eles também mudam'}.</p>` : ''}
             ${r ? corpoReceita(op, r) : `
@@ -681,9 +774,22 @@ window.Telas.planoOperacoes = (function () {
           </div>
           <div class="definir__rodape">
             <button class="botao botao--secundario" type="button" data-acao="fechar-definir">Cancelar</button>
-            <button class="botao botao--primario" type="button" data-acao="aplicar-definicao" ${r ? '' : 'disabled'}>Aplicar em ${n} ${n === 1 ? 'talhão' : 'talhões'}</button>
+            <button class="botao botao--primario" type="button" data-acao="aplicar-definicao" ${r ? '' : 'disabled'}>${editando
+              ? 'Salvar alterações' : `Aplicar em ${n} ${n === 1 ? 'talhão' : 'talhões'}`}</button>
           </div>
         </div>
+      </div>`;
+  }
+
+  // Nome da recomendação num campo visível (no teste, ninguém achou o renomear por duplo clique)
+  function campoNome(op) {
+    const nome = rascunho(op).nome;
+    return `
+      <div class="campo definir__nome">
+        <label class="campo__rotulo" for="rec-nome">Nome da recomendação</label>
+        <input class="campo__controle ${ui.erroNome ? 'campo__controle--erro' : ''}" id="rec-nome" data-campo="nome-rec"
+               value="${esc(nome)}" autocomplete="off" ${ui.erroNome ? 'aria-invalid="true" aria-describedby="rec-nome-erro"' : ''}>
+        ${ui.erroNome ? `<p class="erro-campo" id="rec-nome-erro">${ui.erroNome}</p>` : ''}
       </div>`;
   }
 
@@ -825,17 +931,9 @@ window.Telas.planoOperacoes = (function () {
         break;
 
       case 'abrir-receita': {
-        if (ui.renomeandoReceita) return;
-        // Dois cliques seguidos na receita aberta = renomear (como nas guias de grupo)
         const id = alvo.dataset.receita;
-        const agora = Date.now();
-        const duplo = ultimoCliqueReceita.id === id && agora - ultimoCliqueReceita.quando < 450;
-        ultimoCliqueReceita = { id, quando: agora };
-        const aberta = receitaAtual(op);
-        if (aberta && aberta.id === id) {
-          if (duplo && !somenteLeitura) { ui.renomeandoReceita = id; desenharTudo(); }
-          break;
-        }
+        if (receitaAtual(op)?.id === id) break;
+        ui.erroNome = null;
         sairDaReceita(() => { ui.receitaPorOp[op.id] = id; desenharTudo(); });
         break;
       }
@@ -867,7 +965,7 @@ window.Telas.planoOperacoes = (function () {
       case 'salvar-pre': salvarPreCadastro(op); break;
 
       case 'filtro-talhoes':
-        ui.filtroTalhoes = alvo.dataset.filtro; ui.marcados = new Set();
+        ui.filtroTalhoes = alvo.dataset.filtro; ui.marcados = new Set(); ui.quadroAberto = false;
         desenharMantendoFoco(`[data-filtro="${alvo.dataset.filtro}"]`); break;
 
       case 'marcar':
@@ -882,6 +980,9 @@ window.Telas.planoOperacoes = (function () {
         ui.marcados = new Set(); desenharMantendoFoco('[data-acao="marcar-todos"]'); break;
 
       case 'definir-recomendacao': abrirDefinir(op); break;
+      case 'editar-rec': abrirEditar(op, alvo.dataset.rec); break;
+      case 'alternar-quadro':
+        ui.quadroAberto = !ui.quadroAberto; desenharMantendoFoco('[data-acao="alternar-quadro"]'); break;
       case 'fechar-definir': fecharDefinir(); break;
       case 'aplicar-definicao': aplicarDefinicao(op); break;
 
@@ -929,6 +1030,7 @@ window.Telas.planoOperacoes = (function () {
       linhaDoElemento(e.target).dose = Util.numero(e.target.value);
       return;
     }
+    if (e.target.dataset.campo === 'nome-rec') { rascunho(opAtual()).nome = e.target.value; return; }
     if (e.target.dataset.combo) { abrirCombo(e.target); return; }
     if (e.target.dataset.pre) { ui.preCadastro[e.target.dataset.pre] = e.target.value; return; }
   }
@@ -950,7 +1052,6 @@ window.Telas.planoOperacoes = (function () {
       }, 150);
     }
     if (el.dataset.campo === 'nome-op') salvarNomeOperacao(el.value);
-    if (el.dataset.campo === 'nome-receita') salvarNomeReceita(el.value);
     if (el.dataset.campo === 'nome-grupo') salvarNomeGrupo(el.value);
     if (el.dataset.campo === 'lista-nome') {
       // Sair do campo salva o nome. Se o foco foi para um botão da tela, o clique dele redesenha;
@@ -988,17 +1089,13 @@ window.Telas.planoOperacoes = (function () {
       }
       return;
     }
-    if (el.dataset.campo === 'nome-op' || el.dataset.campo === 'nome-grupo' || el.dataset.campo === 'nome-receita') {
+    if (el.dataset.campo === 'nome-op' || el.dataset.campo === 'nome-grupo') {
       if (e.key === 'Enter') { e.preventDefault(); el.blur(); }
       if (e.key === 'Escape') {
         e.preventDefault(); e.stopPropagation();
-        ui.renomeandoOp = null; ui.renomeandoGrupo = null; ui.renomeandoReceita = null; desenharTudo();
+        ui.renomeandoOp = null; ui.renomeandoGrupo = null; desenharTudo();
       }
       return;
-    }
-    // F2 na receita aberta = renomear (teclado)
-    if (el.dataset.receita && e.key === 'F2' && !somenteLeitura && receitaAtual(opAtual())?.id === el.dataset.receita) {
-      e.preventDefault(); ui.renomeandoReceita = el.dataset.receita; desenharTudo(); return;
     }
     if (el.dataset.pre && e.key === 'Enter') { e.preventDefault(); salvarPreCadastro(opAtual()); }
     if ((el.dataset.campo === 'op-dap' || el.dataset.campo === 'linha-dose') && e.key === 'Enter') {
@@ -1105,7 +1202,7 @@ window.Telas.planoOperacoes = (function () {
       op.receitas.splice(indice, 1);
       talhoes.forEach((t) => { delete op.talhoes[t]; });
       delete ui.receitaPorOp[op.id];
-      ui.rascunho = null; ui.validarOp = null; ui.preCadastro = null; ui.renomeandoReceita = null;
+      ui.rascunho = null; ui.validarOp = null; ui.preCadastro = null;
       alterou(); desenharTudo();
       return indice;
     };
@@ -1128,25 +1225,6 @@ window.Telas.planoOperacoes = (function () {
     }
   }
 
-  let ultimoCliqueReceita = { id: null, quando: 0 };
-
-  // Nome vazio volta ao anterior; nome repetido na mesma operação não é aceito
-  function salvarNomeReceita(valor) {
-    if (!ui.renomeandoReceita) return;
-    const op = opAtual();
-    const r = op.receitas.find((x) => x.id === ui.renomeandoReceita);
-    ui.renomeandoReceita = null;
-    const v = valor.trim();
-    if (r && v && v !== r.nome) {
-      if (op.receitas.some((x) => x !== r && Util.normalizar(x.nome) === Util.normalizar(v))) {
-        Aviso.mostrar('Já existe uma recomendação com esse nome');
-      } else {
-        r.nome = v; alterou();
-      }
-    }
-    desenharTudo();
-  }
-
   // ----- Aplicar a recomendação nos talhões marcados -----
   // Grava o rascunho na recomendação e liga os talhões marcados a ela (um talhão fica em uma recomendação só
   // na operação: o que estava em outra muda para esta). Os talhões que já usavam a recomendação recebem
@@ -1155,6 +1233,12 @@ window.Telas.planoOperacoes = (function () {
     const r = receitaAtual(op);
     if (!r) return;
     if (errosRecomendacao(op).algum) { ui.validarOp = op.id; desenharTudo(); return; }
+    // Nome vazio volta ao anterior; nome repetido na operação não é aceito
+    const nome = rascunho(op).nome.trim() || r.nome;
+    if (op.receitas.some((x) => x !== r && Util.normalizar(x.nome) === Util.normalizar(nome))) {
+      ui.erroNome = 'Já existe uma recomendação com esse nome'; desenharMantendoFoco('#rec-nome'); return;
+    }
+    r.nome = nome;
     const novas = rascunho(op).produtos.filter(Planos.linhaPreenchida).map((l) => ({ ...l }));
     Planos.talhoesDaReceita(op, r).forEach((t) => {
       const doses = op.talhoes[t].doses;
@@ -1165,15 +1249,15 @@ window.Telas.planoOperacoes = (function () {
       });
     });
     r.produtos = novas;
-    const talhoes = ui.definindo.talhoes;
+    const { talhoes, editando } = ui.definindo;
     talhoes.forEach((t) => {
       const a = op.talhoes[t];
       if (!a || a.receitaId !== r.id) op.talhoes[t] = Planos.novoAjuste(r.id);
     });
-    ui.rascunho = null; ui.validarOp = null; ui.preCadastro = null; ui.renomeandoReceita = null;
+    ui.rascunho = null; ui.validarOp = null; ui.preCadastro = null; ui.erroNome = null;
     limparSelecao(); alterou(); desenharTudo();
     const n = talhoes.length;
-    Aviso.mostrar(`${esc(r.nome)} aplicada em ${n} ${n === 1 ? 'talhão' : 'talhões'}`);
+    Aviso.mostrar(editando ? `${esc(r.nome)} salva` : `${esc(r.nome)} aplicada em ${n} ${n === 1 ? 'talhão' : 'talhões'}`);
   }
 
   // ----- Grupos -----

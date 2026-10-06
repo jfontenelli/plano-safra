@@ -20,6 +20,7 @@ window.Icones = (function () {
     lixeira: svg('<path d="M4 7h16M10 11v6M14 11v6"/><path d="M6 7l1 13h10l1-13"/><path d="M9 7V4h6v3"/>'),
     mapa:   svg('<path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2Z"/><path d="M9 4v14M15 6v14"/>'),
     talhoes: svg('<rect x="3" y="3" width="8" height="8" rx="1"/><rect x="13" y="3" width="8" height="8" rx="1"/><rect x="3" y="13" width="8" height="8" rx="1"/><rect x="13" y="13" width="8" height="8" rx="1"/>'),
+    abaixo: svg('<path d="M6 9l6 6 6-6"/>'),
     info:   svg('<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>'),
     alerta: svg('<path d="M12 3l10 18H2Z"/><path d="M12 10v5M12 18h.01"/>'),
     busca:  svg('<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/>'),
