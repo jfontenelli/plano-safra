@@ -668,7 +668,7 @@ window.Telas.planoOperacoes = (function () {
           </tbody>
         </table>
       </div>
-      ${marcar ? barraDefinir() : ''}`;
+      ${marcar ? barraDefinir(op) : ''}`;
   }
 
   // Quadro da recomendação filtrada: nome · talhões · área, "Editar" e "Ver produtos" (começa recolhido)
@@ -696,13 +696,17 @@ window.Telas.planoOperacoes = (function () {
 
   // Sem talhão marcado: orientação em destaque e botão desabilitado.
   // Com talhão marcado: quantidade e área à esquerda; Limpar e "Definir recomendação" à direita.
-  function barraDefinir() {
+  // "Excluir recomendação" aparece antes de Limpar e Definir recomendação quando algum talhão marcado tem recomendação.
+  function barraDefinir(op) {
     const n = ui.marcados.size;
     const area = talhoesFazenda.filter((t) => ui.marcados.has(t.nome)).reduce((s, t) => s + t.area, 0);
+    const comRec = [...ui.marcados].some((t) => op.talhoes[t]);
     return `
       <div class="barra-definir ${n ? '' : 'barra-definir--vazia'}">
         ${n ? `
           <span class="barra-definir__selecao"><strong>${n} ${n === 1 ? 'talhão' : 'talhões'}</strong> · ${Util.area(area)}</span>
+          ${comRec ? `
+            <button class="botao botao--perigo-leve barra-definir__excluir" type="button" data-acao="excluir-marcados">${Icones.lixeira} Excluir recomendação</button>` : ''}
           <button class="botao botao--secundario barra-definir__limpar" type="button" data-acao="limpar-selecao"
                   title="Desmarcar todos os talhões" aria-label="Limpar seleção: desmarcar todos os talhões">Limpar</button>`
         : `<span class="barra-definir__texto">${Icones.info} Selecione um ou mais talhões para definir a recomendação.</span>`}
@@ -983,6 +987,8 @@ window.Telas.planoOperacoes = (function () {
         talhoesVisiveis(op).forEach((t) => { if (alvo.checked) ui.marcados.add(t.nome); else ui.marcados.delete(t.nome); });
         desenharMantendoFoco('[data-acao="marcar-todos"]'); break;
 
+      case 'excluir-marcados': excluirDosMarcados(op); break;
+
       case 'limpar-selecao':
         ui.marcados = new Set(); desenharMantendoFoco('[data-acao="marcar-todos"]'); break;
 
@@ -1234,10 +1240,9 @@ window.Telas.planoOperacoes = (function () {
     };
     const n = talhoes.length;
     if (n) {
-      const area = talhoesFazenda.filter((t) => talhoes.includes(t.nome)).reduce((s, t) => s + t.area, 0);
       Modal.confirmar({
-        titulo: `Excluir ${esc(nomeCurto(r))}?`,
-        texto: `${n === 1 ? 'O talhão' : `Os ${n} talhões`} (${Util.area(area)}) ${n === 1 ? 'ficará' : 'ficarão'} sem recomendação. Essa ação não pode ser desfeita.`,
+        titulo: `Excluir ${esc(r.nome)}?`,
+        texto: `${n === 1 ? 'O talhão ficará' : `Os ${n} talhões ficarão`} sem recomendação. Essa ação não pode ser desfeita.`,
         botoes: [{ rotulo: 'Cancelar' }, { rotulo: 'Excluir recomendação', classe: 'perigo', acao: () => {
           remover(); Aviso.mostrar(`${esc(nomeCurto(r))} excluída`);
         } }]
@@ -1260,13 +1265,10 @@ window.Telas.planoOperacoes = (function () {
     const n = alvo.length;
     if (!n) return;
     const restam = Planos.talhoesDaReceita(op, r).length - n;
-    const area = talhoesFazenda.filter((t) => alvo.includes(t.nome)).reduce((s, t) => s + t.area, 0);
     const nome = esc(nomeCurto(r));
     Modal.confirmar({
-      titulo: `Excluir ${nome} de ${n} ${n === 1 ? 'talhão' : 'talhões'}?`,
-      texto: `${n === 1 ? 'O talhão' : `Os ${n} talhões`} (${Util.area(area)}) ${n === 1 ? 'ficará' : 'ficarão'} sem recomendação.`
-        + (restam ? ` ${nome} continua ${restam === 1 ? 'no outro talhão' : `nos outros ${restam} talhões`}.` : ` ${nome} deixa de existir.`)
-        + ' Essa ação não pode ser desfeita.',
+      titulo: `Excluir ${esc(r.nome)} de ${n} ${n === 1 ? 'talhão' : 'talhões'}?`,
+      texto: textoRestam(nome, restam) + ' Essa ação não pode ser desfeita.',
       botoes: [{ rotulo: 'Cancelar' }, { rotulo: 'Excluir recomendação', classe: 'perigo', acao: () => {
         alvo.forEach((t) => { delete op.talhoes[t]; });
         if (!restam) { op.receitas.splice(op.receitas.indexOf(r), 1); delete ui.receitaPorOp[op.id]; }
@@ -1277,6 +1279,49 @@ window.Telas.planoOperacoes = (function () {
         const rolagem = raiz.querySelector('.talhoes-rolagem');
         if (rolagem) rolagem.scrollTop = 0;
         Aviso.mostrar(restam ? `${nome} excluída de ${n} ${n === 1 ? 'talhão' : 'talhões'}` : `${nome} excluída`);
+      } }]
+    });
+  }
+
+  // "Rec 1 continua nos outros 11 talhões." / "Rec 1 deixa de existir."
+  function textoRestam(nome, restam) {
+    if (!restam) return `${nome} deixa de existir.`;
+    return `${nome} continua ${restam === 1 ? 'no outro talhão' : `nos outros ${restam} talhões`}.`;
+  }
+
+  // "Excluir recomendação" no rodapé da tabela: tira a recomendação dos talhões marcados (podem ser de
+  // recomendações diferentes); talhão marcado sem recomendação é ignorado. Recomendação sem talhão deixa de existir.
+  function excluirDosMarcados(op) {
+    const alvo = talhoesFazenda.map((t) => t.nome).filter((t) => ui.marcados.has(t) && op.talhoes[t]);
+    const n = alvo.length;
+    if (!n) return;
+    const ignorados = ui.marcados.size - n;
+    const recs = op.receitas.map((r) => ({ r, n: alvo.filter((t) => op.talhoes[t].receitaId === r.id).length }))
+      .filter((x) => x.n);
+    const plural = (q) => `${q} ${q === 1 ? 'talhão' : 'talhões'}`;
+    let titulo; let detalhe;
+    if (recs.length === 1) {
+      const { r } = recs[0];
+      const restam = Planos.talhoesDaReceita(op, r).length - n;
+      titulo = `Excluir ${esc(r.nome)} de ${plural(n)}?`;
+      detalhe = textoRestam(esc(nomeCurto(r)), restam);
+    } else {
+      titulo = `Excluir a recomendação de ${plural(n)}?`;
+      detalhe = recs.map((x) => `${esc(nomeCurto(x.r))} sai de ${plural(x.n)}`).join(', ').replace(/, ([^,]*)$/, ' e $1') + '.';
+    }
+    const aviso = ignorados ? ` ${ignorados === 1 ? '1 talhão marcado já não tem' : `${ignorados} talhões marcados já não têm`} recomendação.` : '';
+    Modal.confirmar({
+      titulo,
+      texto: `${detalhe}${aviso} Essa ação não pode ser desfeita.`,
+      botoes: [{ rotulo: 'Cancelar' }, { rotulo: 'Excluir recomendação', classe: 'perigo', acao: () => {
+        alvo.forEach((t) => { delete op.talhoes[t]; });
+        recs.filter((x) => !Planos.talhoesDaReceita(op, x.r).length)
+          .forEach((x) => op.receitas.splice(op.receitas.indexOf(x.r), 1));
+        ui.filtroTalhoes = 'todos'; ui.quadroAberto = false;
+        limparSelecao(); alterou(); desenharTudo();
+        const rolagem = raiz.querySelector('.talhoes-rolagem');
+        if (rolagem) rolagem.scrollTop = 0;
+        Aviso.mostrar(`Recomendação excluída de ${plural(n)}`);
       } }]
     });
   }

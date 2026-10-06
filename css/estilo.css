@@ -1565,6 +1565,12 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
 .barra-definir__selecao strong { color: var(--texto); }
 /* Limpar: botão com borda, ao lado do Definir recomendação e do mesmo tamanho */
 .barra-definir__limpar { border-color: #cfd6d2; }
+/* Excluir recomendação: à direita, antes de Limpar e Definir recomendação, já com fundo vermelho sutil */
+.barra-definir__excluir,
+.barra-definir__excluir:hover { background: #fbeceb; }
+.barra-definir__excluir:hover { border-color: #d9a39b; }
+.barra-definir__excluir .icone { width: 16px; height: 16px; }
+.barra-definir__excluir:focus-visible { outline: 2px solid #b03a2e; outline-offset: 2px; }
 .barra-definir__limpar:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 2px; }
 
 /* Modal "Definir recomendação": a página do modal rola (e não o corpo), para a lista de produtos não ser cortada */
