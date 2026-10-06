@@ -583,20 +583,15 @@ select.campo__controle option { color: var(--texto); }
   align-items: flex-start;
   gap: 12px;
   padding: 16px;
-  border: 1px solid var(--borda);
+  border: 1px solid #cfd6d2; /* mesma borda dos campos */
   border-radius: var(--raio);
   background: var(--superficie);
   cursor: pointer;
-  transition: border-color .15s ease, background-color .15s ease;
+  transition: border-color .15s ease;
 }
 
-.card-inicio:hover { border-color: #b4beb8; }
-
-.card-inicio:has(:checked) {
-  border-color: var(--verde-600);
-  background: var(--verde-100);
-  box-shadow: 0 0 0 1px var(--verde-600);
-}
+/* a seleção aparece só no rádio; o cartão não muda de cor */
+.card-inicio:hover { border-color: #9aa59f; }
 
 .card-inicio:has(:focus-visible) {
   outline: 2px solid var(--verde-600);
@@ -608,9 +603,19 @@ select.campo__controle option { color: var(--texto); }
   height: 18px;
   margin: 2px 0 0;
   flex-shrink: 0;
-  accent-color: var(--verde-700);
+  appearance: none;
+  border: 2px solid #b4beb8;
+  border-radius: 50%;
+  background: var(--superficie);
   cursor: inherit;
 }
+
+.card-inicio__radio:checked {
+  border-color: var(--verde-600);
+  background: radial-gradient(circle, var(--verde-600) 0 4px, var(--superficie) 4.5px);
+}
+
+.card-inicio__radio:focus { outline: none; }
 
 .card-inicio__icone { color: var(--texto); margin-top: 1px; }
 .card-inicio__icone .icone { width: 22px; height: 22px; }
@@ -635,7 +640,7 @@ select.campo__controle option { color: var(--texto); }
   background: var(--fundo);
   cursor: not-allowed;
 }
-.card-inicio--desabilitado:hover { border-color: var(--borda); }
+.card-inicio--desabilitado:hover { border-color: #cfd6d2; }
 .card-inicio--desabilitado .card-inicio__titulo,
 .card-inicio--desabilitado .card-inicio__icone { color: var(--texto-suave); }
 
