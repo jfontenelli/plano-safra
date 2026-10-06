@@ -44,16 +44,14 @@ window.Telas.planoOperacoes = (function () {
       preCadastro: null,       // { linhaId, produto, principioAtivo, unidade, erro }
       validarOp: null,         // operação cujo "Selecionar talhões" foi clicado com campos faltando
       ajuste: null,            // ajustes em preparo no modo ajustar
-      edicao: null,            // modo Editar da lista: { marcadas, nomes, renomeando, nomeAntes }
+      renomeandoNaLista: null, // operação com o nome em edição na lista (duplo clique, F2 ou botão direito)
       receitaPorOp: {},        // receita aberta em cada operação
       rascunho: null,          // cópia da receita aberta, editada até "Salvar receita": { receitaId, produtos }
       renomeandoReceita: null
     };
-    ui.edicao = null;          // voltar ao plano sempre abre a lista no modo normal
     if (!somenteLeitura) limparReceitasVazias();
     raiz = conteudo.querySelector('#plano-raiz');
     raiz.addEventListener('click', aoClicar);
-    raiz.addEventListener('dblclick', aoDuploClique);
     raiz.addEventListener('contextmenu', aoMenuContexto);
     raiz.addEventListener('change', aoMudar);
     raiz.addEventListener('input', aoDigitar);
@@ -144,7 +142,6 @@ window.Telas.planoOperacoes = (function () {
     raiz.querySelector('.plano__rolagem').scrollTop = rolagemAntes;
     const lista = raiz.querySelector('.ops-lista__itens');
     if (lista) lista.scrollTop = listaAntes;
-    raiz.querySelectorAll('[data-indeterminado]').forEach((el) => { el.indeterminate = true; });
     const foco = raiz.querySelector('[data-foco-inicial]');
     if (foco) { foco.focus({ preventScroll: true }); foco.select?.(); }
   }
@@ -240,120 +237,48 @@ window.Telas.planoOperacoes = (function () {
                     aria-label="Nova operação">${Icones.mais}</button>`}
         </aside>`;
     }
-    const ed = ui.edicao;
     const ops = operacoesOrdenadas(grupo);
     return `
-      <aside class="cartao ops-lista ${ed ? 'ops-lista--editando' : ''}" aria-label="Operações do grupo">
+      <aside class="cartao ops-lista" aria-label="Operações do grupo">
         <div class="ops-lista__topo">
           <h2 class="rotulo-secao">Operações</h2>
-          ${ed ? '' : botaoEditar(grupo)}
           <span class="ops-lista__rotulo-dap">DAP</span>
-          ${ed ? '' : `
-            <button class="botao-icone" type="button" data-acao="alternar-lista" title="Recolher lista"
-                    aria-label="Recolher lista de operações">${Icones.recolher}</button>`}
+          <button class="botao-icone" type="button" data-acao="alternar-lista" title="Recolher lista"
+                  aria-label="Recolher lista de operações">${Icones.recolher}</button>
         </div>
-        ${ed ? caixaTodos(ops) : ''}
         <ul class="ops-lista__itens">
-          ${ops.map((op) => ed ? itemEdicao(op, atual && op.id === atual.id)
-                               : itemOperacao(op, atual && op.id === atual.id)).join('')}
+          ${ops.map((op) => itemOperacao(op, atual && op.id === atual.id)).join('')}
         </ul>
-        ${somenteLeitura || ed ? '' : `
+        ${somenteLeitura ? '' : `
           <button class="link-acao ops-lista__nova" type="button" data-acao="nova-op">${Icones.mais} Nova operação</button>`}
         ${grupo.operacoes.length === 0 ? '<p class="ops-lista__vazia">Nenhuma operação neste grupo.</p>' : ''}
-        ${ed ? barraEdicao() : ''}
       </aside>
     `;
   }
 
-  // Lápis entre OPERAÇÕES e DAP. Plano aprovado: aparência desabilitada, mas com foco e dica
-  // (aria-disabled em vez de disabled, para a dica aparecer no mouse e no teclado).
-  function botaoEditar(grupo) {
-    if (grupo.operacoes.length === 0) return '';
-    if (somenteLeitura) {
-      return `
-        <button class="botao-icone ops-lista__editar dica" type="button" data-acao="editar-ops" aria-disabled="true"
-                data-dica="Plano aprovado: operações não podem ser editadas" aria-label="Editar operações"
-                aria-describedby="dica-editar">${Icones.lapis}</button>
-        <span class="so-leitor" id="dica-editar">Plano aprovado: operações não podem ser editadas</span>`;
-    }
-    return `
-      <button class="botao-icone ops-lista__editar dica" type="button" data-acao="editar-ops"
-              data-dica="Editar operações" aria-label="Editar operações">${Icones.lapis}</button>`;
-  }
-
+  // Clique abre a operação; duplo clique (ou F2) renomeia; botão direito abre Inserir · Excluir · Renomear
   function itemOperacao(op, ativo) {
+    const nome = ui.renomeandoNaLista === op.id
+      // Área de texto que cresce com o nome, para mostrá-lo inteiro (sem truncar); Enter não quebra linha
+      ? `<textarea class="campo__controle ops-item__nome-campo" data-campo="lista-nome" data-op="${op.id}" rows="2"
+                   aria-label="Nome da operação" data-foco-inicial>${esc(op.nome)}</textarea>`
+      : `<button class="ops-item__nome" type="button" data-acao="abrir-op" data-op="${op.id}"
+                 ${ativo ? 'aria-current="true"' : ''}
+                 title="${somenteLeitura ? esc(op.nome) : `${esc(op.nome)} · clique duas vezes para renomear, botão direito para mais opções`}">${esc(op.nome)}</button>`;
     return `
       <li class="ops-item ${ativo ? 'ops-item--ativo' : ''}">
-        <button class="ops-item__nome" type="button" data-acao="abrir-op" data-op="${op.id}"
-                ${ativo ? 'aria-current="true"' : ''} title="${esc(op.nome)}">${esc(op.nome)}</button>
+        ${nome}
         <span class="ops-item__dap">${op.dap ?? '—'}</span>
       </li>`;
   }
 
-  // ----- Modo Editar da lista -----
-  // Caixa de seleção só pelo clique nela; o nome fica para o duplo clique (renomear).
-  function nomeEmEdicao(op) {
-    return ui.edicao.nomes[op.id] ?? op.nome;
-  }
-
-  function caixaTodos(ops) {
-    const n = ops.filter((o) => ui.edicao.marcadas.has(o.id)).length;
-    return `
-      <label class="ops-lista__todos">
-        <input type="checkbox" data-acao="ed-marcar-todos" ${n && n === ops.length ? 'checked' : ''}
-               ${n && n < ops.length ? 'data-indeterminado' : ''}> Todos
-      </label>`;
-  }
-
-  function itemEdicao(op, ativo) {
-    const ed = ui.edicao;
-    const nome = nomeEmEdicao(op);
-    const nomeHtml = ed.renomeando === op.id
-      // Área de texto que cresce com o nome, para mostrá-lo inteiro (sem truncar); Enter não quebra linha
-      ? `<textarea class="campo__controle ops-item__nome-campo" data-campo="ed-nome" data-op="${op.id}" rows="2"
-                   aria-label="Nome da operação" data-foco-inicial>${esc(nome)}</textarea>`
-      : `<button class="ops-item__nome ${op.id in ed.nomes ? 'ops-item__nome--alterado' : ''}" type="button"
-                 data-ed-nome="${op.id}" title="Clique duas vezes para renomear"
-                 aria-label="${esc(nome)}. Pressione Enter para renomear">${esc(nome)}</button>`;
-    return `
-      <li class="ops-item ops-item--editar ${ativo ? 'ops-item--ativo' : ''}">
-        <input type="checkbox" data-acao="ed-marcar" data-op="${op.id}" ${ed.marcadas.has(op.id) ? 'checked' : ''}
-               aria-label="Selecionar ${esc(nome)}">
-        ${nomeHtml}
-        <span class="ops-item__dap">${op.dap ?? '—'}</span>
-      </li>`;
-  }
-
-  function barraEdicao() {
-    const n = ui.edicao.marcadas.size;
-    return `
-      <div class="ops-lista__barra">
-        <button class="botao botao--secundario botao--p" type="button" data-acao="ed-cancelar">Cancelar</button>
-        <button class="botao botao--perigo-leve botao--p" type="button" data-acao="ed-excluir" ${n ? '' : 'disabled'}>Excluir (${n})</button>
-        <button class="botao botao--primario botao--p" type="button" data-acao="ed-salvar"
-                ${Object.keys(ui.edicao.nomes).length ? '' : 'disabled'}>Salvar</button>
-      </div>`;
-  }
-
-  // Salvar só fica ativo com algum nome alterado; atualizado enquanto se digita, sem redesenhar
-  function registrarNome(op, valor) {
-    const v = valor.trim();
-    if (!v || v === op.nome) delete ui.edicao.nomes[op.id];
-    else ui.edicao.nomes[op.id] = v;
-    const salvar = raiz.querySelector('[data-acao="ed-salvar"]');
-    if (salvar) salvar.disabled = !Object.keys(ui.edicao.nomes).length;
-  }
-
-  function comecarRenomear(id) {
-    const op = grupoAtual().operacoes.find((o) => o.id === id);
-    if (!op) return;
-    ui.edicao.renomeando = id;
-    ui.edicao.nomeAntes = ui.edicao.nomes[id];
+  function renomearNaLista(id) {
+    ui.renomeandoNaLista = id; ui.renomeandoOp = null;
     desenharTudo();
   }
 
-  function sairDaEdicao() {
-    ui.edicao = null;
+  function pararRenomearNaLista() {
+    ui.renomeandoNaLista = null;
   }
 
   // Nome da operação no card; abre em edição quando a operação acaba de ser criada
@@ -1251,6 +1176,12 @@ window.Telas.planoOperacoes = (function () {
 
       case 'abrir-op': {
         const id = alvo.dataset.op;
+        // Dois cliques seguidos no nome = renomear (como nas guias). Feito à mão porque
+        // o primeiro clique redesenha a lista e o dblclick do navegador se perderia.
+        const agora = Date.now();
+        const duplo = ultimoCliqueOp.id === id && agora - ultimoCliqueOp.quando < 450;
+        ultimoCliqueOp = { id, quando: agora };
+        if (duplo && !somenteLeitura && !ui.listaRecolhida) { renomearNaLista(id); break; }
         if (op && op.id === id) break;
         sairDaReceita(() => {
           ui.opPorGrupo[grupo.id] = id; ui.renomeandoOp = null;
@@ -1259,21 +1190,14 @@ window.Telas.planoOperacoes = (function () {
         break;
       }
 
-      case 'nova-op':
-        sairDaReceita(() => {
-          const nova = Planos.novaOperacao('Nova operação', null);
-          grupo.operacoes.push(nova);
-          ui.opPorGrupo[grupo.id] = nova.id; ui.renomeandoOp = nova.id;
-          sairDosModos(); alterou(); desenharTudo();
-        });
-        break;
+      case 'nova-op': sairDaReceita(() => criarOperacao(grupo)); break;
 
       case 'alternar-status':
         sairDaReceita(() => {
           plano.status = somenteLeitura ? 'Em construção' : 'Aprovado';
           somenteLeitura = plano.status === 'Aprovado';
           ui.renomeandoOp = null; ui.renomeandoGrupo = null;
-          sairDosModos(); sairDaEdicao();
+          sairDosModos(); pararRenomearNaLista();
           desenharMantendoFoco('[data-acao="alternar-status"]');
         }, { removerVazia: false });
         break;
@@ -1307,35 +1231,6 @@ window.Telas.planoOperacoes = (function () {
       case 'excluir-receita': excluirReceita(op, receitaAtual(op)); break;
 
       case 'salvar-receita': salvarReceita(op); break;
-
-      case 'editar-ops':
-        if (alvo.getAttribute('aria-disabled') === 'true') break;
-        ui.edicao = { marcadas: new Set(), nomes: {}, renomeando: null, nomeAntes: undefined };
-        ui.renomeandoOp = null; ui.preCadastro = null;
-        sairDosModos(); desenharMantendoFoco('[data-acao="ed-marcar-todos"]'); break;
-
-      case 'ed-marcar':
-        if (alvo.checked) ui.edicao.marcadas.add(alvo.dataset.op); else ui.edicao.marcadas.delete(alvo.dataset.op);
-        desenharMantendoFoco(`[data-acao="ed-marcar"][data-op="${alvo.dataset.op}"]`); break;
-
-      case 'ed-marcar-todos':
-        ui.edicao.marcadas = alvo.checked ? new Set(grupo.operacoes.map((o) => o.id)) : new Set();
-        desenharMantendoFoco('[data-acao="ed-marcar-todos"]'); break;
-
-      case 'ed-cancelar':
-        sairDaEdicao(); desenharMantendoFoco('[data-acao="editar-ops"]'); break;
-
-      case 'ed-salvar': {
-        const nomes = ui.edicao.nomes;
-        const n = Object.keys(nomes).length;
-        if (!n) break;
-        grupo.operacoes.forEach((o) => { if (nomes[o.id]) o.nome = nomes[o.id]; });
-        sairDaEdicao(); alterou(); desenharMantendoFoco('[data-acao="editar-ops"]');
-        Aviso.mostrar(n === 1 ? '1 nome salvo' : `${n} nomes salvos`);
-        break;
-      }
-
-      case 'ed-excluir': excluirMarcadas(grupo); break;
 
       case 'adicionar-linha':
         rascunho(op).produtos.push(Planos.novaLinha()); desenharTudo();
@@ -1395,7 +1290,7 @@ window.Telas.planoOperacoes = (function () {
         if (ui.grupoId === id) break;
         sairDaReceita(() => {
           ui.grupoId = id; ui.renomeandoOp = null;
-          sairDosModos(); sairDaEdicao(); desenharTudo();
+          sairDosModos(); pararRenomearNaLista(); desenharTudo();
         });
         break;
       }
@@ -1421,17 +1316,7 @@ window.Telas.planoOperacoes = (function () {
     }
   }
 
-  // Duplo clique no nome, no modo Editar, abre o campo para renomear. Na lista normal não faz nada.
-  function aoDuploClique(e) {
-    const nome = e.target.closest('[data-ed-nome]');
-    if (nome && ui.edicao) comecarRenomear(nome.dataset.edNome);
-  }
-
   function aoDigitar(e) {
-    if (e.target.dataset.campo === 'ed-nome') {
-      registrarNome(grupoAtual().operacoes.find((o) => o.id === e.target.dataset.op), e.target.value);
-      return;
-    }
     // Doses: registradas enquanto se digita; só os botões que dependem delas são atualizados
     if (e.target.dataset.campo === 'linha-dose') {
       linhaDoElemento(e.target).dose = Util.numero(e.target.value);
@@ -1467,32 +1352,29 @@ window.Telas.planoOperacoes = (function () {
     if (el.dataset.campo === 'nome-op') salvarNomeOperacao(el.value);
     if (el.dataset.campo === 'nome-receita') salvarNomeReceita(el.value);
     if (el.dataset.campo === 'nome-grupo') salvarNomeGrupo(el.value);
-    if (el.dataset.campo === 'ed-nome' && ui.edicao && ui.edicao.renomeando === el.dataset.op) {
-      // Sair do campo confirma o nome (sem salvar ainda: isso é no "Salvar" da barra).
-      // Se o foco foi para um botão da tela, o clique dele redesenha; redesenhar aqui o faria se perder.
-      ui.edicao.renomeando = null;
-      if (!e.relatedTarget?.closest?.('[data-acao]')) desenharTudo();
+    if (el.dataset.campo === 'lista-nome') {
+      // Sair do campo salva o nome. Se o foco foi para um botão da tela, o clique dele redesenha;
+      // redesenhar aqui o faria se perder.
+      salvarNomeNaLista(el.value, { redesenhar: !e.relatedTarget?.closest?.('[data-acao]') });
     }
   }
 
   function aoTeclar(e) {
     const el = e.target;
-    // Modo Editar: Enter (ou F2) no nome abre o campo; no campo, Enter confirma e Esc desfaz só aquele campo
-    if (el.dataset.edNome && (e.key === 'Enter' || e.key === 'F2')) {
-      e.preventDefault(); comecarRenomear(el.dataset.edNome); return;
+    // Lista de operações: F2 no nome abre o campo; no campo, Enter confirma e Esc desfaz
+    if (el.dataset.acao === 'abrir-op' && e.key === 'F2' && !somenteLeitura && !ui.listaRecolhida) {
+      e.preventDefault(); renomearNaLista(el.dataset.op); return;
     }
-    if (el.dataset.campo === 'ed-nome') {
+    if (el.dataset.campo === 'lista-nome') {
       const id = el.dataset.op;
       if (e.key === 'Enter') {
         e.preventDefault();
-        ui.edicao.renomeando = null;
-        desenharMantendoFoco(`[data-ed-nome="${id}"]`);
+        salvarNomeNaLista(el.value, { redesenhar: false });
+        desenharMantendoFoco(`[data-acao="abrir-op"][data-op="${id}"]`);
       } else if (e.key === 'Escape') {
         e.preventDefault(); e.stopPropagation();
-        if (ui.edicao.nomeAntes === undefined) delete ui.edicao.nomes[id];
-        else ui.edicao.nomes[id] = ui.edicao.nomeAntes;
-        ui.edicao.renomeando = null;
-        desenharMantendoFoco(`[data-ed-nome="${id}"]`);
+        pararRenomearNaLista();
+        desenharMantendoFoco(`[data-acao="abrir-op"][data-op="${id}"]`);
       }
       return;
     }
@@ -1541,46 +1423,54 @@ window.Telas.planoOperacoes = (function () {
     desenharTudo();
   }
 
-  // Exclui as operações marcadas no modo Editar (hipótese a validar com clientes).
+  // Nome vazio volta ao anterior
+  function salvarNomeNaLista(valor, { redesenhar = true } = {}) {
+    if (!ui.renomeandoNaLista) return;
+    const op = grupoAtual().operacoes.find((o) => o.id === ui.renomeandoNaLista);
+    pararRenomearNaLista();
+    const v = valor.trim();
+    if (op && v && v !== op.nome) { op.nome = v; alterou(); }
+    if (redesenhar) desenharTudo();
+  }
+
+  function criarOperacao(grupo) {
+    const nova = Planos.novaOperacao('Nova operação', null);
+    grupo.operacoes.push(nova);
+    ui.opPorGrupo[grupo.id] = nova.id; ui.renomeandoOp = nova.id;
+    sairDosModos(); alterou(); desenharTudo();
+  }
+
+  // Exclui a operação pelo botão direito (hipótese a validar com clientes).
   // Com talhões: confirmação com o impacto. Sem talhões: exclui na hora, com Desfazer.
-  function excluirMarcadas(grupo) {
-    const ops = grupo.operacoes.filter((o) => ui.edicao.marcadas.has(o.id));
-    const n = ops.length;
-    if (!n) return;
-    const talhoes = new Set(ops.flatMap((o) => Object.keys(o.talhoes))).size;
-    const produtos = new Set(ops.flatMap((o) => o.receitas.flatMap((r) => r.produtos)
-      .filter(Planos.linhaPreenchida).map(Planos.chaveLinha))).size;
-    const todas = n === grupo.operacoes.length;
-    const nome = (o) => esc(nomeEmEdicao(o));
+  function excluirOperacao(grupo, op) {
+    const talhoes = Object.keys(op.talhoes).length;
+    const produtos = new Set(op.receitas.flatMap((r) => r.produtos)
+      .filter(Planos.linhaPreenchida).map(Planos.chaveLinha)).size;
+    const ultima = grupo.operacoes.length === 1;
+    const nome = esc(op.nome);
     const remover = () => {
-      // Guarda a posição de cada uma para o Desfazer
-      const removidas = ops.map((o) => ({ op: o, indice: grupo.operacoes.indexOf(o) })).sort((a, b) => a.indice - b.indice);
-      removidas.slice().reverse().forEach((r) => grupo.operacoes.splice(r.indice, 1));
+      const indice = grupo.operacoes.indexOf(op);
+      grupo.operacoes.splice(indice, 1);
       // Se a operação aberta saiu, abre a primeira restante (opAtual cai nela)
-      if (ops.some((o) => o.id === ui.opPorGrupo[grupo.id])) delete ui.opPorGrupo[grupo.id];
-      ops.forEach((o) => { delete ui.edicao.nomes[o.id]; });
-      ui.edicao.marcadas = new Set();
-      if (grupo.operacoes.length === 0) sairDaEdicao();
+      if (ui.opPorGrupo[grupo.id] === op.id) delete ui.opPorGrupo[grupo.id];
       sairDosModos(); alterou(); desenharTudo();
-      return removidas;
+      return indice;
     };
-    const aviso = n === 1 ? `${nome(ops[0])} excluída` : `${n} operações excluídas`;
     if (talhoes) {
-      const sujeito = n === 1 ? 'Ela está aplicada' : 'Elas estão aplicadas';
       Modal.confirmar({
-        titulo: n === 1 ? `Excluir ${nome(ops[0])}?` : `Excluir ${n} operações?`,
-        texto: `${sujeito} em ${talhoes} ${talhoes === 1 ? 'talhão' : 'talhões'}`
+        titulo: `Excluir ${nome}?`,
+        texto: `Ela está aplicada em ${talhoes} ${talhoes === 1 ? 'talhão' : 'talhões'}`
           + `${produtos ? `, com ${produtos} ${produtos === 1 ? 'produto' : 'produtos'}` : ''}.`
-          + `${todas ? ` O grupo ${esc(grupo.nome)} ficará sem operações.` : ''}`
+          + `${ultima ? ` O grupo ${esc(grupo.nome)} ficará sem operações.` : ''}`
           + ' Essa ação não pode ser desfeita.',
-        botoes: [{ rotulo: 'Cancelar' }, { rotulo: n === 1 ? 'Excluir operação' : 'Excluir operações', classe: 'perigo', acao: () => {
-          remover(); Aviso.mostrar(aviso);
+        botoes: [{ rotulo: 'Cancelar' }, { rotulo: 'Excluir operação', classe: 'perigo', acao: () => {
+          remover(); Aviso.mostrar(`${nome} excluída`);
         } }]
       });
     } else {
-      const removidas = remover();
-      Aviso.mostrar(`${aviso}${todas ? `. O grupo ${esc(grupo.nome)} ficou sem operações` : ''}`, { acao: 'Desfazer', aoAgir: () => {
-        removidas.forEach((r) => grupo.operacoes.splice(Math.min(r.indice, grupo.operacoes.length), 0, r.op));
+      const indice = remover();
+      Aviso.mostrar(`${nome} excluída${ultima ? `. O grupo ${esc(grupo.nome)} ficou sem operações` : ''}`, { acao: 'Desfazer', aoAgir: () => {
+        grupo.operacoes.splice(Math.min(indice, grupo.operacoes.length), 0, op);
         if (ui.grupoId === grupo.id && raiz.isConnected) desenharTudo();
       } });
     }
@@ -1841,7 +1731,7 @@ window.Telas.planoOperacoes = (function () {
       const grupo = Planos.novoGrupo(form.elements.nome.value.trim(), form.elements.tipo.value);
       plano.grupos.push(grupo);
       ui.grupoId = grupo.id;
-      modal.fechar(); sairDosModos(); sairDaEdicao(); alterou(); desenharTudo();
+      modal.fechar(); sairDosModos(); pararRenomearNaLista(); alterou(); desenharTudo();
     });
     form.elements.nome.focus();
   }
@@ -1853,7 +1743,7 @@ window.Telas.planoOperacoes = (function () {
       plano.grupos.splice(indice, 1);
       // pelo botão direito dá para excluir outra guia: a aberta só muda se for a excluída
       if (eraAtual) ui.grupoId = (plano.grupos[indice] || plano.grupos[indice - 1] || {}).id || null;
-      sairDaEdicao();
+      pararRenomearNaLista();
       sairDosModos(); alterou(); desenharTudo();
       return indice;
     };
@@ -1877,80 +1767,103 @@ window.Telas.planoOperacoes = (function () {
 
   let ultimoCliqueGuia = { id: null, quando: 0 };
 
-  // Botão direito na guia (ou tecla de menu / Shift+F10): Inserir · Excluir · Renomear, como no Excel
-  let menuGuia = null;
+  let ultimoCliqueOp = { id: null, quando: 0 };
+
+  // Botão direito (ou tecla de menu / Shift+F10) na guia de grupo ou no nome da operação:
+  // Inserir · Excluir · Renomear, como no Excel
+  let menuContexto = null;
 
   function aoMenuContexto(e) {
+    if (somenteLeitura) return;
     const guia = e.target.closest('.guia[data-grupo]');
-    if (!guia || somenteLeitura) return;
+    const nomeOp = !ui.listaRecolhida && e.target.closest('.ops-item__nome[data-op]');
+    const ancora = guia || nomeOp;
+    if (!ancora) return;
     e.preventDefault();
-    const grupo = plano.grupos.find((g) => g.id === guia.dataset.grupo);
-    if (!grupo) return;
-    // Pelo teclado o evento vem sem coordenadas: abre junto da guia
-    const caixa = guia.getBoundingClientRect();
+    // Pelo teclado o evento vem sem coordenadas: abre junto do elemento
+    const caixa = ancora.getBoundingClientRect();
     const x = e.clientX || caixa.left;
-    const y = e.clientY || caixa.top;
-    abrirMenuGuia(grupo, guia, x, y);
+    const y = e.clientY || (guia ? caixa.top : caixa.bottom);
+
+    if (guia) {
+      const grupo = plano.grupos.find((g) => g.id === guia.dataset.grupo);
+      if (!grupo) return;
+      abrirMenuContexto(ancora, x, y, `Grupo ${grupo.nome}`, {
+        inserir: () => sairDaReceita(novoGrupo),
+        excluir: () => sairDaReceita(() => excluirGrupo(grupo)),
+        renomear: () => sairDaReceita(() => {
+          ui.grupoId = grupo.id; ui.renomeandoOp = null;
+          sairDosModos(); pararRenomearNaLista();
+          ui.renomeandoGrupo = grupo.id;
+          desenharTudo();
+        })
+      });
+    } else {
+      const grupo = grupoAtual();
+      const op = grupo.operacoes.find((o) => o.id === nomeOp.dataset.op);
+      if (!op) return;
+      abrirMenuContexto(ancora, x, y, op.nome, {
+        inserir: () => sairDaReceita(() => criarOperacao(grupo)),
+        excluir: () => sairDaReceita(() => excluirOperacao(grupo, op)),
+        renomear: () => sairDaReceita(() => {
+          ui.opPorGrupo[grupo.id] = op.id;
+          sairDosModos(); renomearNaLista(op.id);
+        })
+      });
+    }
   }
 
-  function abrirMenuGuia(grupo, guia, x, y) {
-    fecharMenuGuia();
+  function abrirMenuContexto(ancora, x, y, rotulo, acoes) {
+    fecharMenuContexto();
     const menu = document.createElement('div');
     menu.className = 'menu-contexto';
     menu.setAttribute('role', 'menu');
-    menu.setAttribute('aria-label', `Grupo ${grupo.nome}`);
+    menu.setAttribute('aria-label', rotulo);
     menu.innerHTML = `
       <button class="menu-contexto__item" type="button" role="menuitem" data-item="inserir">Inserir</button>
       <button class="menu-contexto__item" type="button" role="menuitem" data-item="excluir">Excluir</button>
       <button class="menu-contexto__item" type="button" role="menuitem" data-item="renomear">Renomear</button>`;
     document.body.appendChild(menu);
 
-    // Abre no ponto do clique; como as guias ficam no rodapé, sobe quando não cabe embaixo
+    // Abre no ponto do clique; sobe quando não cabe embaixo (caso das guias, no rodapé)
     const { width, height } = menu.getBoundingClientRect();
     menu.style.left = `${Math.max(8, Math.min(x, window.innerWidth - width - 8))}px`;
     menu.style.top = `${y + height + 8 > window.innerHeight ? Math.max(8, y - height) : y}px`;
 
     const itens = [...menu.querySelectorAll('.menu-contexto__item')];
-    const fecharFora = (ev) => { if (!menu.contains(ev.target)) fecharMenuGuia(); };
-    const fecharSemFoco = () => fecharMenuGuia();
+    const fecharFora = (ev) => { if (!menu.contains(ev.target)) fecharMenuContexto(); };
+    const fecharSemFoco = () => fecharMenuContexto();
 
     menu.addEventListener('click', (ev) => {
       const item = ev.target.closest('[data-item]');
       if (!item) return;
-      fecharMenuGuia();
-      if (item.dataset.item === 'inserir') sairDaReceita(novoGrupo);
-      else if (item.dataset.item === 'excluir') sairDaReceita(() => excluirGrupo(grupo));
-      else sairDaReceita(() => {
-        ui.grupoId = grupo.id; ui.renomeandoOp = null;
-        sairDosModos(); sairDaEdicao();
-        ui.renomeandoGrupo = grupo.id;
-        desenharTudo();
-      });
+      fecharMenuContexto();
+      acoes[item.dataset.item]();
     });
     menu.addEventListener('keydown', (ev) => {
       const i = itens.indexOf(document.activeElement);
       if (ev.key === 'ArrowDown') { ev.preventDefault(); itens[(i + 1) % itens.length].focus(); }
       else if (ev.key === 'ArrowUp') { ev.preventDefault(); itens[(i - 1 + itens.length) % itens.length].focus(); }
       else if (ev.key === 'Escape' || ev.key === 'Tab') {
-        ev.preventDefault(); fecharMenuGuia();
-        if (guia.isConnected) guia.focus();
+        ev.preventDefault(); fecharMenuContexto();
+        if (ancora.isConnected) ancora.focus();
       }
     });
     document.addEventListener('mousedown', fecharFora, true);
     window.addEventListener('resize', fecharSemFoco);
     window.addEventListener('scroll', fecharSemFoco, true);
 
-    menuGuia = { menu, fecharFora, fecharSemFoco };
+    menuContexto = { menu, fecharFora, fecharSemFoco };
     itens[0].focus();
   }
 
-  function fecharMenuGuia() {
-    if (!menuGuia) return;
-    document.removeEventListener('mousedown', menuGuia.fecharFora, true);
-    window.removeEventListener('resize', menuGuia.fecharSemFoco);
-    window.removeEventListener('scroll', menuGuia.fecharSemFoco, true);
-    menuGuia.menu.remove();
-    menuGuia = null;
+  function fecharMenuContexto() {
+    if (!menuContexto) return;
+    document.removeEventListener('mousedown', menuContexto.fecharFora, true);
+    window.removeEventListener('resize', menuContexto.fecharSemFoco);
+    window.removeEventListener('scroll', menuContexto.fecharSemFoco, true);
+    menuContexto.menu.remove();
+    menuContexto = null;
   }
 
   function salvarNomeGrupo(valor) {

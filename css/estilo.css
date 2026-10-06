@@ -1197,47 +1197,18 @@ body:has(.talhoes__rodape) .aviso { bottom: 140px; }
 .ops-lista__nova { flex-shrink: 0; margin: 12px 0 0 10px; align-self: flex-start; }
 .ops-lista__vazia { margin: 8px 10px 0; font-size: 14px; color: var(--texto-suave); }
 
-/* Modo Editar da lista: caixas de seleção, renomear com duplo clique e barra no rodapé */
-/* Lápis (só ícone, com dica): o mesmo botão na lista de operações e na tabela de talhões */
-/* margem automática dos dois lados do vão: o lápis fica centralizado entre OPERAÇÕES e DAP */
-.ops-lista__editar { margin-right: auto; width: 30px; height: 30px; color: var(--verde-700); }
-.ops-lista__editar .icone { width: 17px; height: 17px; }
+/* Renomear na lista: duplo clique, F2 ou botão direito → Renomear */
 .botao-icone[aria-disabled="true"],
 .botao-icone[aria-disabled="true"]:hover { background: none; color: #9aa5a0; cursor: not-allowed; }
 .ops-lista__nova:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 2px; }
-
-.ops-lista__todos {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  min-height: 36px;
-  margin: 0 4px 4px 3px;
-  font-size: 14px;
-  color: var(--texto-suave);
-  cursor: pointer;
-}
-.ops-lista__todos input,
-.ops-item--editar input[type="checkbox"] {
-  width: 16px;
-  height: 16px;
-  margin: 4px 4px 4px 8px;
-  flex-shrink: 0;
-  accent-color: var(--verde-700);
-  cursor: pointer;
-}
-.ops-lista__todos input:focus-visible,
-.ops-item--editar input[type="checkbox"]:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 2px; }
-
-.ops-item--editar .ops-item__nome { padding-left: 4px; cursor: text; }
-.ops-item--editar .ops-item__nome:focus-visible { outline: 2px solid var(--verde-600); outline-offset: -2px; border-radius: 6px; }
-.ops-item__nome--alterado { font-style: italic; }
+.ops-item__nome:focus-visible { outline: 2px solid var(--verde-600); outline-offset: -2px; border-radius: 6px; }
 
 .ops-item__nome-campo {
   flex: 1;
   min-width: 0;
   height: auto;
   min-height: 34px;
-  margin: 4px 0;
+  margin: 4px 0 4px 6px;
   padding: 6px 8px;
   font: inherit;
   font-size: 14px;
@@ -1246,18 +1217,6 @@ body:has(.talhoes__rodape) .aviso { bottom: 140px; }
   field-sizing: content;
 }
 .ops-item__nome-campo:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 1px; }
-
-.ops-lista__barra {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  flex-shrink: 0;
-  margin: 12px -12px -16px;
-  padding: 12px;
-  border-top: 1px solid var(--borda);
-}
-.ops-lista__barra .botao:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 2px; }
-.ops-lista__barra .botao--perigo-leve:disabled { background: var(--superficie); border-color: var(--borda); color: #9aa5a0; }
 
 /* Dica no mouse e no foco do teclado (botão com aria-disabled continua focável) */
 .dica { position: relative; }
