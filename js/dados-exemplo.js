@@ -86,7 +86,7 @@ window.DADOS = {
       { nome: '2ª Fungicida', dap: 55 },
       { nome: '3ª Fungicida', dap: 70 },
       { nome: '4ª Fungicida', dap: 85 },
-      { nome: '5ª Fungicida', dap: null },
+      { nome: '5ª Fungicida', dap: 90 },
       { nome: 'Desfolha', dap: 100 }
     ] }
   ],
@@ -105,17 +105,8 @@ window.DADOS = {
       custo: null,   // aguardando orçamento
       receita: null, // aguardando premissas de produção
       atualizadoEm: '2026-09-30', atualizadoPor: 'João da Silva',
-      operacoes: {
-        '1ª Fungicida': {
-          fenologia: 'V5',
-          produtos: [['Fox Xpro', 0.40], ['Engeo Pleno', 0.20]],
-          talhoes: ['T01', 'T02', 'T04', 'T05', 'T06', 'T07', 'T08', 'T09', 'T10', 'T11', 'T12'], // T03 sem operação
-          ajustes: {
-            T02: { doses: { 'Fox Xpro': 0.50 } },
-            T04: { doses: { 'Engeo Pleno': null } } // dose pendente
-          }
-        }
-      }
+      // Em construção: todas as operações começam sem recomendação, para o teste montar do zero
+      operacoes: {}
     },
     {
       safra: '26/27', empresa: 'Empresa A', fazenda: 'Santa Clara', cultura: 'Soja', inicio: 'modelo',

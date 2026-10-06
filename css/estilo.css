@@ -1289,6 +1289,9 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
   font-size: 22px;
   font-weight: 700;
 }
+.op-cabecalho__nome--editavel { cursor: text; border-radius: 6px; }
+.op-cabecalho__nome--editavel:hover { background: #f4f7f5; }
+.op-cabecalho__nome--editavel:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 2px; }
 
 .op-cabecalho__dap-texto { align-self: center; color: var(--texto-suave); }
 
@@ -1300,6 +1303,15 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
 }
 .op-cabecalho__dap { width: 96px; height: 38px; }
 .op-cabecalho__fenologia { width: 130px; height: 38px; }
+.campo__ajuda { margin: 4px 0 0; font-size: 13px; color: var(--texto-suave); }
+.no-dap { max-width: 160px; }
+/* Anterior / próxima operação: sempre na ponta direita, na altura dos campos DAP e Fenologia */
+.op-navegacao { display: flex; gap: 8px; align-self: flex-end; margin-left: auto; }
+.op-navegar { height: 38px; }
+.op-navegar { border-color: var(--verde-700); color: var(--verde-700); gap: 4px; }
+.op-navegar:hover { background: var(--verde-100); }
+.op-navegar .icone { width: 16px; height: 16px; }
+.op-navegar:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 2px; }
 .op-cabecalho__fenologia:disabled { background-color: var(--fundo); color: #9aa5a0; cursor: not-allowed; }
 
 /* --- Recomendação --- */

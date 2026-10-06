@@ -54,6 +54,7 @@ window.Telas.planoOperacoes = (function () {
     raiz = conteudo.querySelector('#plano-raiz');
     raiz.addEventListener('click', aoClicar);
     raiz.addEventListener('contextmenu', aoMenuContexto);
+    raiz.addEventListener('dblclick', aoDuploClique);
     raiz.addEventListener('change', aoMudar);
     raiz.addEventListener('input', aoDigitar);
     raiz.addEventListener('keydown', aoTeclar);
@@ -261,12 +262,22 @@ window.Telas.planoOperacoes = (function () {
   }
 
   // Nome da operação no card; abre em edição quando a operação acaba de ser criada
+  // Nome da operação no cabeçalho: duplo clique (ou F2) renomeia, no mesmo padrão da lista.
+  // Enter ou sair do campo salva; Esc desfaz; nome vazio volta ao anterior.
   function nomeOperacao(op) {
     if (ui.renomeandoOp === op.id) {
       return `<input class="campo__controle op-cabecalho__nome-campo" data-campo="nome-op" value="${esc(op.nome)}"
                      aria-label="Nome da operação" data-foco-inicial>`;
     }
-    return `<h2 class="op-cabecalho__nome">${esc(op.nome)}</h2>`;
+    if (somenteLeitura) return `<h2 class="op-cabecalho__nome">${esc(op.nome)}</h2>`;
+    return `<h2 class="op-cabecalho__nome op-cabecalho__nome--editavel" tabindex="0" data-renomear-op="${op.id}"
+                title="Clique duas vezes para renomear">${esc(op.nome)}</h2>`;
+  }
+
+  function aoDuploClique(e) {
+    const nome = e.target.closest('[data-renomear-op]');
+    if (!nome || somenteLeitura) return;
+    ui.renomeandoOp = nome.dataset.renomearOp; desenharTudo();
   }
 
   // ----- Detalhe -----
@@ -325,7 +336,26 @@ window.Telas.planoOperacoes = (function () {
           <div class="campo campo--inline"><label class="campo__rotulo" for="op-dap">DAP</label>${dap}</div>
           <div class="campo campo--inline"><label class="campo__rotulo" for="op-fenologia">Fenologia</label>${fenologia}</div>
         </div>
+        ${navegacaoOperacoes(op)}
       </div>`;
+  }
+
+  // Anterior e próxima operação do grupo, na ordem do DAP (a mesma da lista). O botão mostra o DAP
+  // de destino; o nome da operação aparece ao passar o mouse. Sem DAP, mostra o nome.
+  function navegacaoOperacoes(op) {
+    const ops = operacoesOrdenadas(grupoAtual());
+    const i = ops.indexOf(op);
+    const botao = (destino, sentido) => {
+      if (!destino) return '';
+      const rotulo = destino.dap !== null && destino.dap !== undefined ? `DAP ${destino.dap}` : esc(destino.nome);
+      const dica = `${sentido === 'anterior' ? 'Anterior' : 'Próxima'}: ${esc(destino.nome)}`;
+      return `
+        <button class="botao botao--secundario botao--p op-navegar" type="button" data-acao="navegar-op" data-op="${destino.id}"
+                title="${dica}" aria-label="${dica}">
+          ${sentido === 'anterior' ? `${Icones.anterior} ${rotulo}` : `${rotulo} ${Icones.proxima}`}</button>`;
+    };
+    if (ops.length < 2) return '';
+    return `<div class="op-navegacao">${botao(ops[i - 1], 'anterior')}${botao(ops[i + 1], 'proxima')}</div>`;
   }
 
   // ----- Preenchimento mínimo para aplicar -----
@@ -1029,6 +1059,14 @@ window.Telas.planoOperacoes = (function () {
         break;
       }
 
+      // Botões anterior/próxima do cabeçalho: abre a operação (sem o duplo clique de renomear da lista)
+      case 'navegar-op':
+        sairDaReceita(() => {
+          ui.opPorGrupo[grupo.id] = alvo.dataset.op; ui.renomeandoOp = null;
+          limparSelecao(); desenharMantendoFoco('.op-navegar');
+        });
+        break;
+
       case 'nova-op': sairDaReceita(() => criarOperacao(grupo)); break;
 
       case 'alternar-status':
@@ -1111,6 +1149,10 @@ window.Telas.planoOperacoes = (function () {
     const op = opAtual();
     if (campo === 'op-dap') {
       const n = Util.numero(e.target.value);
+      // DAP é obrigatório: apagar não vale, o campo volta ao valor anterior
+      if (n === null && op.dap !== null && op.dap !== undefined) {
+        e.target.value = op.dap; Aviso.mostrar('Toda operação precisa de DAP'); return;
+      }
       op.dap = n === null ? null : Math.round(n);
       if (op.dap !== null && op.dap < 0) op.fenologia = ''; // antes do plantio não há fenologia
       // A lista se reordena pelo DAP: a operação continua aberta (sem isso, abriria a nova primeira da lista)
@@ -1197,6 +1239,10 @@ window.Telas.planoOperacoes = (function () {
 
   function aoTeclar(e) {
     const el = e.target;
+    // Cabeçalho da operação: F2 no nome abre o campo
+    if (el.dataset.renomearOp && e.key === 'F2' && !somenteLeitura) {
+      e.preventDefault(); ui.renomeandoOp = el.dataset.renomearOp; desenharTudo(); return;
+    }
     // Lista de operações: F2 no nome abre o campo; no campo, Enter confirma e Esc desfaz
     if (el.dataset.acao === 'abrir-op' && e.key === 'F2' && !somenteLeitura && !ui.listaRecolhida) {
       e.preventDefault(); renomearNaLista(el.dataset.op); return;
@@ -1267,11 +1313,51 @@ window.Telas.planoOperacoes = (function () {
     if (redesenhar) desenharTudo();
   }
 
+  // Nova operação: nome e DAP obrigatórios (modal; "Criar operação" só habilita com os dois preenchidos)
   function criarOperacao(grupo) {
-    const nova = Planos.novaOperacao('Nova operação', null);
-    grupo.operacoes.push(nova);
-    ui.opPorGrupo[grupo.id] = nova.id; ui.renomeandoOp = nova.id;
-    limparSelecao(); alterou(); desenharTudo();
+    const modal = Modal.abrir(`
+      <form class="formulario" novalidate>
+        <div class="modal__corpo">
+          <button class="modal__fechar" type="button" aria-label="Fechar" data-fechar>${Icones.fechar}</button>
+          <h2 class="modal__titulo" id="modal-titulo">Nova operação</h2>
+          <p class="modal__subtitulo">Grupo ${esc(grupo.nome)}. Toda operação precisa de nome e DAP.</p>
+          <div class="campo">
+            <label class="campo__rotulo" for="no-nome">Nome *</label>
+            <input class="campo__controle" id="no-nome" name="nome" autocomplete="off" required>
+          </div>
+          <div class="campo">
+            <label class="campo__rotulo" for="no-dap">DAP *</label>
+            <input class="campo__controle no-dap" id="no-dap" name="dap" type="text" inputmode="numeric" autocomplete="off"
+                   placeholder="Ex.: -15, 0, 40" required>
+            <p class="campo__ajuda">Dias após o plantio. Negativo = antes do plantio.</p>
+          </div>
+        </div>
+        <div class="modal__rodape">
+          <button class="botao botao--secundario" type="button" data-fechar>Cancelar</button>
+          <button class="botao botao--primario" type="submit" disabled>Criar operação</button>
+        </div>
+      </form>`, { classe: 'modal--pequeno' });
+    const form = modal.elemento.querySelector('form');
+    // DAP: só números inteiros, com sinal de menos opcional no início
+    const dap = () => (/^-?\d+$/.test(form.elements.dap.value.trim()) ? Number(form.elements.dap.value.trim()) : null);
+    form.elements.dap.addEventListener('input', (e) => {
+      const v = e.target.value.replace(/[^\d-]/g, '').replace(/(?!^)-/g, '');
+      if (v !== e.target.value) e.target.value = v;
+    });
+    const atualizar = () => {
+      form.querySelector('[type=submit]').disabled = !(form.elements.nome.value.trim() && dap() !== null);
+    };
+    form.addEventListener('input', atualizar);
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (form.querySelector('[type=submit]').disabled) return;
+      const nova = Planos.novaOperacao(form.elements.nome.value.trim(), dap());
+      grupo.operacoes.push(nova);
+      ui.opPorGrupo[grupo.id] = nova.id;
+      modal.fechar(); limparSelecao(); alterou(); desenharTudo();
+      Aviso.mostrar(`Operação ${esc(nova.nome)} criada`);
+    });
+    form.elements.nome.focus();
   }
 
   // Exclui a operação pelo botão direito (hipótese a validar com clientes).
