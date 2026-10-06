@@ -307,9 +307,12 @@ window.Telas.planoOperacoes = (function () {
       : `<input class="campo__controle op-cabecalho__dap ${erroDap ? 'campo__controle--erro' : ''}" id="op-dap" type="text" inputmode="numeric"
                 data-campo="op-dap" value="${op.dap ?? ''}" placeholder="—" ${erroDap ? 'aria-invalid="true"' : ''}>
          ${erroDap ? '<p class="erro-campo">Informação obrigatória</p>' : ''}`;
+    // DAP negativo = antes do plantio: não há fenologia (campo desabilitado)
+    const prePlantio = op.dap !== null && op.dap !== undefined && op.dap < 0;
     const fenologia = somenteLeitura
       ? `<span class="campo__valor">${op.fenologia || '—'}</span>`
-      : `<select class="campo__controle op-cabecalho__fenologia" id="op-fenologia" data-campo="op-fenologia">
+      : `<select class="campo__controle op-cabecalho__fenologia" id="op-fenologia" data-campo="op-fenologia"
+                 ${prePlantio ? 'disabled title="Antes do plantio (DAP negativo) não há fenologia"' : ''}>
            <option value="">—</option>
            ${DADOS.fenologia.map((f) => `<option ${f === op.fenologia ? 'selected' : ''}>${f}</option>`).join('')}
          </select>`;
@@ -1023,6 +1026,9 @@ window.Telas.planoOperacoes = (function () {
     if (campo === 'op-dap') {
       const n = Util.numero(e.target.value);
       op.dap = n === null ? null : Math.round(n);
+      if (op.dap !== null && op.dap < 0) op.fenologia = ''; // antes do plantio não há fenologia
+      // A lista se reordena pelo DAP: a operação continua aberta (sem isso, abriria a nova primeira da lista)
+      ui.opPorGrupo[grupoAtual().id] = op.id;
       alterou(); desenharTudo();
     } else if (campo === 'op-fenologia') {
       op.fenologia = e.target.value; alterou(); desenharTudo();

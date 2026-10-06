@@ -1300,6 +1300,7 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
 }
 .op-cabecalho__dap { width: 96px; height: 38px; }
 .op-cabecalho__fenologia { width: 130px; height: 38px; }
+.op-cabecalho__fenologia:disabled { background-color: var(--fundo); color: #9aa5a0; cursor: not-allowed; }
 
 /* --- Recomendação --- */
 
