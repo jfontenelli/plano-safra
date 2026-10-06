@@ -1523,9 +1523,11 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
   cursor: pointer;
 }
 .filtro-talhoes:hover { border-color: #9aa59f; }
-/* filtro ativo em verde claro: o único verde sólido da área é o "Definir recomendação" */
+/* Filtro selecionado: preenchido em verde */
 .filtro-talhoes--ativo,
-.filtro-talhoes--ativo:hover { border-color: #c9dcd2; background: var(--verde-100); color: var(--verde-700); font-weight: 600; }
+.filtro-talhoes--ativo:hover { border-color: var(--verde-700); background: var(--verde-700); color: #fff; font-weight: 600; }
+/* bolinha da recomendação com contorno branco, para aparecer sobre o verde */
+.filtro-talhoes--ativo .rec-ponto { box-shadow: 0 0 0 2px #fff; }
 .filtro-talhoes:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 2px; }
 /* Zerado (ex.: Não planejados · 0): desabilitado, sem clique */
 .filtro-talhoes:disabled,

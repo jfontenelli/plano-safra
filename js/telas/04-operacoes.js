@@ -544,7 +544,7 @@ window.Telas.planoOperacoes = (function () {
   }
 
   // ----- Talhões da operação -----
-  // Filtros Todos · recomendações · Não planejados; tabela Talhão · Área · produtos; marcar e "Definir recomendação"
+  // Filtros Todos · Não planejados · recomendações; tabela Talhão · Área · produtos; marcar e "Definir recomendação"
   function talhoesVisiveis(op) {
     const rec = recFiltrada(op);
     if (rec) return talhoesFazenda.filter((t) => op.talhoes[t.nome] && op.talhoes[t.nome].receitaId === rec.id);
@@ -605,9 +605,9 @@ window.Telas.planoOperacoes = (function () {
     return `
       <div class="filtros-talhoes" role="group" aria-label="Filtrar talhões">
         ${filtro('todos', `Todos os talhões: ${talhoesFazenda.length}`)}
-        ${recsAplicadas(op).map((r) => filtro(`rec:${r.id}`, `${pontoRec(op, r)}${esc(nomeCurto(r))}`)).join('')}
         ${filtro('nao-planejados', `Não planejados: ${naoPlanejados}`,
           naoPlanejados || ui.filtroTalhoes === 'nao-planejados' ? '' : 'Todos os talhões já têm recomendação')}
+        ${recsAplicadas(op).map((r) => filtro(`rec:${r.id}`, `${pontoRec(op, r)}${esc(nomeCurto(r))}`)).join('')}
       </div>
       ${rec ? quadroRec(op, rec) : ''}
       <div class="talhoes-rolagem">
@@ -1193,9 +1193,12 @@ window.Telas.planoOperacoes = (function () {
       talhoes.forEach((t) => { delete op.talhoes[t]; });
       delete ui.receitaPorOp[op.id];
       ui.rascunho = null; ui.validarOp = null; ui.preCadastro = null; ui.erroNome = null;
-      // O modal fecha: a recomendação aberta nele deixou de existir
+      // O modal fecha (a recomendação aberta nele deixou de existir) e a tabela volta para Todos os talhões
       ui.definindo = null;
+      ui.filtroTalhoes = 'todos'; ui.quadroAberto = false;
       alterou(); desenharTudo();
+      const rolagem = raiz.querySelector('.talhoes-rolagem');
+      if (rolagem) rolagem.scrollTop = 0;
       return indice;
     };
     const n = talhoes.length;
@@ -1237,7 +1240,11 @@ window.Telas.planoOperacoes = (function () {
         alvo.forEach((t) => { delete op.talhoes[t]; });
         if (!restam) { op.receitas.splice(op.receitas.indexOf(r), 1); delete ui.receitaPorOp[op.id]; }
         ui.rascunho = null; ui.validarOp = null; ui.preCadastro = null; ui.erroNome = null;
+        // Depois de excluir, a tabela volta para Todos os talhões
+        ui.filtroTalhoes = 'todos'; ui.quadroAberto = false;
         limparSelecao(); alterou(); desenharTudo();
+        const rolagem = raiz.querySelector('.talhoes-rolagem');
+        if (rolagem) rolagem.scrollTop = 0;
         Aviso.mostrar(restam ? `${nome} excluída de ${n} ${n === 1 ? 'talhão' : 'talhões'}` : `${nome} excluída`);
       } }]
     });
