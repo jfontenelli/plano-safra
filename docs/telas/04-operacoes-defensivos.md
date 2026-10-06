@@ -65,28 +65,27 @@ Princípio: o peso visual de cada navegação é inverso à frequência de uso. 
 ## 6. Operações do grupo (lista lateral)
 
 - Lista à esquerda com nome e DAP de cada operação, ordenada automaticamente pelo DAP; cabeçalho "Operações" com o rótulo "DAP" e o botão ≪; "+ Nova operação" no fim. A lista rola sozinha, sem rolar a página.
-- A lista mostra só nome e DAP; o item selecionado fica marcado. Clique simples na linha abre a operação; duplo clique na lista normal não faz nada.
-- Botão **lápis ✏️** (só o ícone, com a dica "Editar operações") no cabeçalho da lista, centralizado entre "Operações" e "DAP". Renomear e excluir operações ficam no modo Editar (não no card da operação).
-- **Lista minimizada** (≪ / ≫): coluna estreita com ≫, o rótulo "DAP" e só os DAPs das operações, na mesma ordem; a operação selecionada fica marcada e o nome aparece ao passar o mouse. Clicar no DAP abre a operação. No fim da coluna, um "+" cria uma nova operação (o nome abre em edição no card da operação). Minimizada, o lápis não aparece.
+- A lista mostra só nome e DAP; o item selecionado fica marcado. Clique simples na linha abre a operação.
+- Sem lápis e sem modo Editar: renomear e excluir seguem o padrão das guias de grupo (como no Excel). Não ficam no card da operação.
+- **Lista minimizada** (≪ / ≫): coluna estreita com ≫, o rótulo "DAP" e só os DAPs das operações, na mesma ordem; a operação selecionada fica marcada e o nome aparece ao passar o mouse. Clicar no DAP abre a operação. No fim da coluna, um "+" cria uma nova operação (o nome abre em edição no card da operação). Minimizada, não há duplo clique nem menu do botão direito.
 
-**Modo Editar** (só com o plano "Em construção")
-- Cada linha ganha uma caixa de seleção à esquerda; no topo da lista, a caixa **"Todos"** (marca/desmarca todas). "+ Nova operação" fica oculto.
-- No rodapé da lista, a barra **Cancelar · Excluir (n) · Salvar**.
-- A caixa de seleção só é marcada clicando nela mesma; o nome fica reservado para o duplo clique.
-- **Renomear: duplo clique no nome** (ou Enter no teclado) transforma o nome em campo de texto, com o nome completo (sem truncar). Enter confirma o campo; Esc desfaz a edição daquele campo. Ao passar o mouse no nome: "Clique duas vezes para renomear".
-- O DAP não é editável neste modo (só no cabeçalho da operação). A lista continua ordenada pelo DAP.
-- **Salvar**: só fica ativo com algum nome alterado; salva os nomes e sai do modo Editar.
-- **Cancelar**: descarta os nomes não salvos e sai do modo Editar.
-- **Excluir (n)**: mostra quantas operações estão marcadas; desabilitado com n = 0. Ver "Sugestões em teste" (exclusão).
+**Renomear e excluir** (só com o plano "Em construção")
+- **Renomear: duplo clique no nome** (ou F2 no teclado) transforma o nome em campo de texto na própria lista, com o nome completo (sem truncar). Enter ou sair do campo salva; Esc desfaz. Nome vazio volta ao anterior.
+- **Botão direito no nome** (ou tecla de menu / Shift+F10) abre o menu **Inserir · Excluir · Renomear**:
+  - Inserir: mesmo comportamento de "+ Nova operação".
+  - Excluir: uma operação por vez. Ver "Sugestões em teste" (exclusão).
+  - Renomear: igual ao duplo clique.
+- Ao passar o mouse no nome: "clique duas vezes para renomear, botão direito para mais opções".
+- O DAP não é editável na lista (só no cabeçalho da operação). A lista continua ordenada pelo DAP.
 
 **Plano aprovado**
-- Nenhuma operação pode ser editada. O lápis fica com aparência desabilitada, mas recebe mouse e foco do teclado para mostrar a dica: "Plano aprovado: operações não podem ser editadas".
+- Nenhuma operação pode ser editada: sem renomear e sem menu do botão direito.
 - A lista não mostra contador de pendências.
 
 ## 7. Detalhe da operação
 
 - Card da operação, em duas linhas:
-  - **Linha 1:** nome da operação, **DAP** (campo) e **Fenologia** (lista de seleção, opcional). Sem lápis e lixeira: renomear e excluir ficam no modo Editar da lista (seção 6).
+  - **Linha 1:** nome da operação, **DAP** (campo) e **Fenologia** (lista de seleção, opcional). Sem lápis e lixeira: renomear e excluir ficam na lista, por duplo clique e botão direito (seção 6).
   - **Linha 2:** resumo área (ha) · talhões · sem operação · sem dose, alinhado à esquerda, com a lista de operações expandida ou minimizada. "Sem operação" e "sem dose" só aparecem quando maiores que zero.
 - As opções de fenologia vêm do menu Cadastros (a trabalhar depois). No protótipo, estádios da soja como exemplo.
 - **Uma operação tem um DAP só**, que vale para todos os talhões dela. Outro DAP = outra operação.
@@ -237,11 +236,13 @@ Um verbo por ação, do botão à mensagem:
 - Observar nos testes se o duplo clique para renomear grupo é descoberto; se não, voltar com o lápis.
 - Observar nos testes se "Concluir edição" é encontrado sem ajuda; se não, testar uma pergunta após aplicar ("Continuar editando" · "Concluir").
 - Legenda de cores da tabela de talhões só no modo normal (sai no modo edição). Se nos testes as cores forem entendidas sem legenda, tirar também no modo normal.
-- **Exclusão de operações no modo Editar (hipótese para validar com clientes):**
-  - Com talhões nas marcadas: confirmação com o impacto. Ex.: "Excluir 2 operações? Elas estão aplicadas em 12 talhões, com 5 produtos. Essa ação não pode ser desfeita." Botões: Cancelar · Excluir operações.
-  - Sem talhões nas marcadas: exclui na hora, com "Desfazer".
-  - Todas as operações do grupo marcadas: avisa que o grupo ficará sem operações.
-  - Ao confirmar, exclui as operações com seus talhões e produtos. Se a operação aberta foi excluída, abre a primeira restante da lista (ou o estado vazio do grupo).
+- **Exclusão de operação pelo botão direito (hipótese para validar com clientes):**
+  - Uma operação por vez (sem seleção múltipla). Se fizer falta, testar Ctrl/Shift + clique para marcar várias.
+  - Com talhões: confirmação com o impacto. Ex.: "Excluir Dessecação 1? Ela está aplicada em 12 talhões, com 5 produtos. Essa ação não pode ser desfeita." Botões: Cancelar · Excluir operação.
+  - Sem talhões: exclui na hora, com "Desfazer".
+  - Última operação do grupo: avisa que o grupo ficará sem operações.
+  - Ao confirmar, exclui a operação com seus talhões e produtos. Se a operação aberta foi excluída, abre a primeira restante da lista (ou o estado vazio do grupo).
+- Observar nos testes se o duplo clique e o botão direito na lista de operações são descobertos; se não, mostrar uma dica fixa no cabeçalho da lista.
 
 ## 17. Em aberto
 
