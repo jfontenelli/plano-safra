@@ -440,7 +440,7 @@ window.Telas.planoOperacoes = (function () {
       </div>`;
   }
 
-  // Tabela da receita aberta: Princípio ativo · Produto comercial · Unid. · Dose padrão
+  // Tabela da receita aberta: Princípio ativo · Produto comercial · Dose padrão · Unid.
   function corpoReceita(op, r) {
     const leitura = somenteLeitura;
     const linhas = leitura ? r.produtos.filter(Planos.linhaPreenchida) : rascunho(op).produtos;
@@ -450,7 +450,7 @@ window.Telas.planoOperacoes = (function () {
         <div class="recomendacao__tabela">
           <table class="tabela tabela--compacta tabela-rec">
             <thead><tr>
-              <th>Princípio ativo</th><th>Produto comercial</th><th>Unid.</th><th class="tabela__numero">Dose padrão</th>
+              <th>Princípio ativo</th><th>Produto comercial</th><th class="tabela__numero">Dose padrão</th><th>Unid.</th>
               ${leitura ? '' : '<th><span class="so-leitor">Remover</span></th>'}
             </tr></thead>
             <tbody>
@@ -495,8 +495,8 @@ window.Telas.planoOperacoes = (function () {
         <tr>
           <td>${esc(l.principioAtivo || '—')}</td>
           <td>${esc(l.produto || '—')} ${etiquetaPre(l)}${seloTipo(l)}</td>
-          <td>${Planos.unidadeDose(l)}</td>
           <td class="tabela__numero">${Util.dose(l.dose) || '—'}</td>
+          <td>${Planos.unidadeDose(l)}</td>
         </tr>`;
     }
     if (ui.preCadastro && ui.preCadastro.linhaId === l.id) return linhaPreCadastro(l);
@@ -508,13 +508,13 @@ window.Telas.planoOperacoes = (function () {
         <td>${combo(l, 'pa', l.principioAtivo, 'Buscar princípio ativo', false)}</td>
         <td>${combo(l, 'produto', l.produto, 'Buscar produto', erro.produto)} ${etiquetaPre(l)}${seloTipo(l)}
           ${erro.produto ? '<p class="erro-campo">Escolha o produto comercial</p>' : ''}</td>
-        <td><span class="tabela-rec__unidade">${Planos.unidadeDose(l) || '—'}</span></td>
         <td class="tabela__numero" ${semProduto ? 'title="Escolha o produto comercial para informar a dose"' : ''}>
           <input class="campo__controle campo--compacto campo--dose ${erro.dose && !semProduto ? 'campo__controle--erro' : ''}" type="text" inputmode="decimal"
                  data-campo="linha-dose" value="${Util.dose(l.dose)}" placeholder="—" aria-label="Dose padrão"
                  ${semProduto ? 'disabled aria-describedby="dica-dose-produto"' : ''} ${erro.dose && !semProduto ? 'aria-invalid="true"' : ''}>
           ${erro.dose && !semProduto ? '<p class="erro-campo">Informação obrigatória</p>' : ''}
         </td>
+        <td><span class="tabela-rec__unidade">${Planos.unidadeDose(l) || '—'}</span></td>
         <td class="tabela__acao">
           <button class="botao-icone botao-icone--p" type="button" data-acao="remover-linha" title="Remover produto"
                   aria-label="Remover ${esc(Planos.nomeLinha(l))}">${Icones.lixeira}</button>
