@@ -1319,35 +1319,6 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
 }
 .recomendacao__acoes .botao .icone { width: 16px; height: 16px; stroke-width: 2.2; }
 
-/* Receitas da operação: Receita 1 | Receita 2 | + Nova receita · lixeira na ponta */
-.receitas {
-  display: flex;
-  align-items: center;
-  gap: 4px 12px;
-  flex-wrap: wrap;
-  margin: -4px 0 12px;
-}
-.receitas__guias { display: flex; flex-wrap: wrap; gap: 4px; }
-.receitas__guia {
-  height: 32px;
-  padding: 0 12px;
-  border: 1px solid transparent;
-  border-radius: 6px;
-  background: none;
-  font: inherit;
-  font-size: 14px;
-  color: var(--texto-suave);
-  cursor: pointer;
-  white-space: nowrap;
-}
-.receitas__guia:hover { background: #f4f7f5; color: var(--texto); }
-.receitas__guia--ativa,
-.receitas__guia--ativa:hover { background: var(--verde-100); color: var(--verde-700); font-weight: 600; }
-.receitas__guia:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 1px; }
-.receitas__nome-campo { width: 180px; height: 32px; }
-.receitas__nova { margin: 0; }
-.receitas__nova:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 2px; border-radius: 4px; }
-.receitas__excluir { margin-left: auto; width: 32px; height: 32px; }
 .recomendacao__vazia { margin: 4px 0 0; font-size: 14px; color: var(--texto-suave); }
 
 .botao[aria-disabled="true"],
@@ -1624,7 +1595,6 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
 .definir .recomendacao__acoes { justify-content: flex-start; }
 .definir .botao-icone:focus-visible,
 .definir .link-acao:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 2px; }
-.receitas__qtd { font-weight: 400; }
 
 /* Recomendações aplicadas: etiqueta nos filtros, bolinha no talhão e quadro com os produtos */
 .rec-ponto { display: inline-block; width: 9px; height: 9px; margin-right: 7px; border-radius: 50%; vertical-align: 1px; flex-shrink: 0; }

@@ -417,26 +417,6 @@ window.Telas.planoOperacoes = (function () {
   }
 
   // ----- Recomendação agronômica (dentro do modal "Definir recomendação") -----
-  // Receita 1 | Receita 2 | + Nova receita · lixeira na ponta (age sobre a receita aberta)
-  function listaReceitas(op, atual) {
-    const guias = op.receitas.map((r) => {
-      const ativa = atual && r.id === atual.id;
-      return `
-        <button class="receitas__guia ${ativa ? 'receitas__guia--ativa' : ''}" type="button" role="tab"
-                aria-selected="${ativa ? 'true' : 'false'}" data-acao="abrir-receita" data-receita="${r.id}"
-                title="${esc(r.nome)}">${esc(r.nome)}${qtdTalhoes(op, r)}</button>`;
-    }).join('');
-    return `
-      <div class="receitas">
-        <div class="receitas__guias" role="tablist" aria-label="Recomendações da operação">${guias}</div>
-        ${somenteLeitura ? '' : `
-          <button class="link-acao receitas__nova" type="button" data-acao="nova-receita">${Icones.mais} Nova recomendação</button>
-          ${atual ? `
-            <button class="botao-icone receitas__excluir" type="button" data-acao="excluir-receita"
-                    title="Excluir a ${esc(atual.nome)}" aria-label="Excluir a ${esc(atual.nome)}">${Icones.lixeira}</button>` : ''}`}
-      </div>`;
-  }
-
   // Tabela da receita aberta: Princípio ativo · Produto comercial · Dose padrão · Unid.
   function corpoReceita(op, r) {
     const leitura = somenteLeitura;
@@ -459,12 +439,6 @@ window.Telas.planoOperacoes = (function () {
           ${leitura ? '' : acoesReceita(op)}
         </div>
       </div>`;
-  }
-
-  // Quantos talhões já usam a recomendação (na guia)
-  function qtdTalhoes(op, r) {
-    const n = Planos.talhoesDaReceita(op, r).length;
-    return n ? `<span class="receitas__qtd"> · ${n} ${n === 1 ? 'talhão' : 'talhões'}</span>` : '';
   }
 
   function acoesReceita() {
@@ -702,8 +676,8 @@ window.Telas.planoOperacoes = (function () {
     if (semDap(op)) return;
     ui.rascunho = null; ui.preCadastro = null; ui.validarOp = null; ui.erroNome = null;
     // Talhões marcados que já estão todos na mesma recomendação: abre nela.
-    // Senão, abre uma recomendação nova (Recomendação 2, Rec 2…), com produto e dose em branco;
-    // as já existentes continuam nas guias. Se o modal for cancelado, a nova vazia é descartada.
+    // Senão, cria a próxima (Recomendação 2, Rec 2…), com produto e dose em branco e sem mostrar
+    // as outras: o modal é só dessa recomendação. Se for cancelado, a nova vazia é descartada.
     const receitas = new Set(talhoes.map((t) => op.talhoes[t] && op.talhoes[t].receitaId));
     const comum = receitas.size === 1 ? [...receitas][0] : null;
     if (comum) {
@@ -768,16 +742,15 @@ window.Telas.planoOperacoes = (function () {
             <button class="botao-icone" type="button" data-acao="fechar-definir" aria-label="Fechar">${Icones.fechar}</button>
           </div>
           <div class="definir__corpo">
-            ${editando ? '' : listaReceitas(op, r)}
             ${r && !somenteLeitura ? campoNome(op) : ''}
             ${outros ? `<p class="definir__aviso">${Icones.info} ${esc(r.nome)} já está em ${outros} ${outros === 1 ? 'outro talhão' : 'outros talhões'}.
               Se alterar produtos ou doses, ${outros === 1 ? 'ele também muda' : 'eles também mudam'}.</p>` : ''}
             ${r ? corpoReceita(op, r) : `
-              <p class="recomendacao__vazia">Nenhuma recomendação nesta operação. Use "+ Nova recomendação" para criar.</p>`}
+              <p class="recomendacao__vazia">Nenhuma recomendação nesta operação.</p>`}
           </div>
           <div class="definir__rodape">
-            ${editando && r && !somenteLeitura ? `
-              <button class="botao botao--perigo-leve definir__excluir" type="button" data-acao="excluir-rec-editando">${Icones.lixeira} Excluir recomendação</button>` : ''}
+            ${r && !somenteLeitura && Planos.talhoesDaReceita(op, r).length ? `
+              <button class="botao botao--perigo-leve definir__excluir" type="button" data-acao="excluir-rec">${Icones.lixeira} Excluir recomendação</button>` : ''}
             <button class="botao botao--secundario" type="button" data-acao="fechar-definir">Cancelar</button>
             <button class="botao botao--primario" type="button" data-acao="aplicar-definicao" ${r ? '' : 'disabled'}>${editando
               ? 'Salvar alterações' : `Aplicar em ${n} ${n === 1 ? 'talhão' : 'talhões'}`}</button>
@@ -935,26 +908,6 @@ window.Telas.planoOperacoes = (function () {
         }, { removerVazia: false });
         break;
 
-      case 'abrir-receita': {
-        const id = alvo.dataset.receita;
-        if (receitaAtual(op)?.id === id) break;
-        ui.erroNome = null;
-        sairDaReceita(() => { ui.receitaPorOp[op.id] = id; desenharTudo(); });
-        break;
-      }
-
-      case 'nova-receita':
-        sairDaReceita(() => {
-          const nova = Planos.novaReceita(op);
-          op.receitas.push(nova);
-          ui.receitaPorOp[op.id] = nova.id;
-          desenharTudo();
-          raiz.querySelector('.tabela-rec tbody tr:last-child [data-combo="pa"]')?.focus();
-        });
-        break;
-
-      case 'excluir-receita': excluirReceita(op, receitaAtual(op)); break;
-
       case 'adicionar-linha':
         rascunho(op).produtos.push(Planos.novaLinha()); desenharTudo();
         raiz.querySelector('.tabela-rec tbody tr:last-child [data-combo="pa"]')?.focus();
@@ -986,7 +939,7 @@ window.Telas.planoOperacoes = (function () {
 
       case 'definir-recomendacao': abrirDefinir(op); break;
       case 'editar-rec': abrirEditar(op, alvo.dataset.rec); break;
-      case 'excluir-rec-editando': excluirReceita(op, receitaAtual(op)); break;
+      case 'excluir-rec': excluirReceita(op, receitaAtual(op)); break;
       case 'alternar-quadro':
         ui.quadroAberto = !ui.quadroAberto; desenharMantendoFoco('[data-acao="alternar-quadro"]'); break;
       case 'fechar-definir': fecharDefinir(); break;
@@ -1214,8 +1167,8 @@ window.Telas.planoOperacoes = (function () {
       talhoes.forEach((t) => { delete op.talhoes[t]; });
       delete ui.receitaPorOp[op.id];
       ui.rascunho = null; ui.validarOp = null; ui.preCadastro = null; ui.erroNome = null;
-      // Pelo "Editar recomendação", o modal fecha (a recomendação editada deixou de existir)
-      if (ui.definindo && ui.definindo.editando) ui.definindo = null;
+      // O modal fecha: a recomendação aberta nele deixou de existir
+      ui.definindo = null;
       alterou(); desenharTudo();
       return indice;
     };
@@ -1269,7 +1222,11 @@ window.Telas.planoOperacoes = (function () {
       if (!a || a.receitaId !== r.id) op.talhoes[t] = Planos.novoAjuste(r.id);
     });
     ui.rascunho = null; ui.validarOp = null; ui.preCadastro = null; ui.erroNome = null;
+    // Depois de aplicar, a tela mostra a recomendação aplicada (etiqueta selecionada, quadro e talhões dela)
+    ui.filtroTalhoes = `rec:${r.id}`; ui.quadroAberto = false;
     limparSelecao(); alterou(); desenharTudo();
+    const rolagem = raiz.querySelector('.talhoes-rolagem');
+    if (rolagem) rolagem.scrollTop = 0;
     const n = talhoes.length;
     Aviso.mostrar(editando ? `${esc(r.nome)} salva` : `${esc(r.nome)} aplicada em ${n} ${n === 1 ? 'talhão' : 'talhões'}`);
   }
