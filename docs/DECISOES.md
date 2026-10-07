@@ -82,6 +82,7 @@ Agrônomo da fazenda e líder de operações podem ser a mesma pessoa, conforme 
 - Etapa Cadastro também tem produtividade esperada (na unidade da cultura) e preço esperado, opcionais, por cultura, valendo para aquela fazenda e safra. Alimentam a receita projetada. Local a refinar com usuários.
 - Previsão de cumprimento no modelo: preparo, calcário, fósforo, 1ª dessecação e 1ª metade do K = 5 dias (levantado com clientes); demais: plantio 3, defensivos 2, corretivo/fertilizante 2; colheita 10 (valor de exemplo).
 - Modelo de operações (levantado com clientes) tem 5 grupos: Preparo do solo, Corretivo/Fertilizante, Plantio, Defensivos e Colheita. As duas dessecações pré-plantio são do grupo Defensivos.
+- **Tipos de grupo: Sementes, Defensivos, Fertilidade e Colheita.** O grupo **Fertilidade** junta corretivos e fertilizantes (inclusive adubação foliar). No protótipo, as guias são Semente · Defensivo · Fertilidade.
 - O menu Cadastros não é prioridade agora.
 - Etapa Operações refina talhão a talhão: cada talhão tem o seu planejamento, e o agrônomo pode aplicar ou copiar para vários talhões de uma vez.
 - Programação, execução e gestão da OS ficam em outro item do menu lateral (Ordens de Serviço).
@@ -89,6 +90,7 @@ Agrônomo da fazenda e líder de operações podem ser a mesma pessoa, conforme 
 - Data de plantio (ao menos prevista) e escolha entre DAP ou DAE.
 - Planejamento por grupo (fertilizantes, sementes, defensivos).
 - Momento da operação = fenologia + DAP/DAE (negativo no pré-plantio). Sem DAP padrão, o agrônomo informa.
+- Fenologia fixa: **DAP negativo = "Pré-plantio"; DAP 0 = "Plantio"** (já escrita, sem escolha). Com DAP positivo, o agrônomo escolhe o estádio.
 - Operação "opcional" é só anotação.
 - Previsão de colheita = data de plantio + ciclo da variedade para a região da fazenda e a safra do plano. Sem ciclo cadastrado para a safra corrente, abre o pré-cadastro para informar o ciclo. Recalculada com a data real de plantio da OS.
 - Restrição de aplicação do produto (ex.: "somente terrestre") aparece só como informação ao lado do produto, vinda do cadastro. Forma de aplicação e vazão não são preenchidas no plano.
@@ -108,6 +110,14 @@ Detalhe da tela: docs/telas/04.2-operacoes-sementes.md.
 - **Sementes = população planejada × área ÷ germinação. Bags = sementes ÷ 5.000.000** (1 bag de soja = 5 milhões de sementes).
 - **Tratamento de sementes industrial (TSI)**: receita com nome (TSI 1, TSI 2…), só para talhão com variedade, no padrão da recomendação agronômica (composição de produtos = identidade; dose pode variar por talhão), aplicada **por talhão** (pode mudar após os testes). Composta por grupos de produto: fertilizante, fungicida, inseticida, nematicida, inoculante, polímero, pó secante e grafite.
 - Unidade da dose de TSI vem do cadastro do produto; a unidade usada pelos clientes (por 100 kg de sementes, por bag ou por hectare) e a entrada do PMS no plano serão definidas nos testes. Sem cálculo de quantidade de TSI no plano por enquanto.
+### 4.5 Fertilidade (corretivos e fertilizantes)
+
+Detalhe da tela: docs/telas/04.3-operacoes-fertilidade.md.
+
+- Grupo do tipo **Fertilidade**, com o mesmo funcionamento da recomendação agronômica do Defensivo (receitas, talhões, doses por talhão).
+- No lugar do princípio ativo, a **matéria-prima** (fonte do nutriente: MAP, cloreto de potássio, calcário…), com a mesma lógica: ajuda a achar o produto comercial. A **garantia** (teores) é informação do produto.
+- Unidade da dose vem do cadastro do produto: **t/ha** para corretivos, **kg/ha** para fertilizantes de solo, **L/ha** para foliares.
+- Adubação foliar fica neste grupo.
 
 ## 5. Orçamento e aprovação
 

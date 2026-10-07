@@ -106,8 +106,19 @@ window.Telas.planoOperacoes = (function () {
     return ops.find((o) => o.id === ui.opPorGrupo[grupo.id]) || ops[0] || null;
   }
 
-  function ehDefensivo(grupo) {
-    return grupo && grupo.tipo === 'Defensivos';
+  // Grupos com o detalhe da recomendação agronômica (talhões, receitas e doses): Defensivos e Fertilidade
+  function usaRecomendacao(grupo) {
+    return grupo && ['Defensivos', 'Fertilidade'].includes(grupo.tipo);
+  }
+
+  function ehFertilidade(grupo) {
+    return grupo && grupo.tipo === 'Fertilidade';
+  }
+
+  // Dose: "0,40" (duas casas, como nos defensivos); na Fertilidade, sem casas fixas ("130", "1,5")
+  function formatarDose(valor) {
+    if (!ehFertilidade(grupoAtual()) || valor === null || valor === undefined) return Util.dose(valor);
+    return valor.toLocaleString('pt-BR', { maximumFractionDigits: 3 });
   }
 
   // Toda alteração atualiza "Última atualização" e "Atualizado por" do plano
@@ -316,7 +327,7 @@ window.Telas.planoOperacoes = (function () {
         ? 'Nenhuma operação neste grupo.' : 'Nenhuma operação neste grupo. Use "+ Nova operação" para criar.'}</p></div>`;
     }
     if (ehSemente(grupo)) return detalheSemente(op);
-    if (!ehDefensivo(grupo)) {
+    if (!usaRecomendacao(grupo)) {
       return `
         <div class="cartao op-cabecalho">
           <div class="op-cabecalho__linha">
@@ -329,7 +340,7 @@ window.Telas.planoOperacoes = (function () {
             <div class="em-construcao__icone" aria-hidden="true">${Icones.casa}</div>
             <p class="em-construcao__subtitulo">Grupo ${esc(grupo.nome)}${grupo.tipo ? ` · tipo ${esc(grupo.tipo)}` : ' · sem tipo'}</p>
             <h2 class="em-construcao__titulo">Em construção</h2>
-            <p class="em-construcao__texto">Neste protótipo, só o grupo do tipo Defensivos tem o detalhe da operação.</p>
+            <p class="em-construcao__texto">Neste protótipo, só os grupos dos tipos Defensivos e Fertilidade têm o detalhe da operação.</p>
           </section>
         </div>`;
     }
@@ -349,15 +360,19 @@ window.Telas.planoOperacoes = (function () {
       : `<input class="campo__controle op-cabecalho__dap ${erroDap ? 'campo__controle--erro' : ''}" id="op-dap" type="text" inputmode="numeric"
                 data-campo="op-dap" value="${op.dap ?? ''}" placeholder="—" ${erroDap ? 'aria-invalid="true"' : ''}>
          ${erroDap ? '<p class="erro-campo">Informação obrigatória</p>' : ''}`;
-    // DAP negativo = antes do plantio: não há fenologia (campo desabilitado)
-    const prePlantio = op.dap !== null && op.dap !== undefined && op.dap < 0;
+    // Fenologia já escrita e sem escolha (todos os grupos): DAP negativo = "Pré-plantio"; DAP 0 = "Plantio"
+    const temDap = op.dap !== null && op.dap !== undefined && op.dap !== '';
+    const fixa = temDap && op.dap < 0 ? ['Pré-plantio', 'DAP negativo: antes do plantio']
+      : temDap && op.dap === 0 ? ['Plantio', 'DAP 0: dia do plantio'] : null;
     const fenologia = somenteLeitura
-      ? `<span class="campo__valor">${op.fenologia || '—'}</span>`
-      : `<select class="campo__controle op-cabecalho__fenologia" id="op-fenologia" data-campo="op-fenologia"
-                 ${prePlantio ? 'disabled title="Antes do plantio (DAP negativo) não há fenologia"' : ''}>
-           <option value="">—</option>
-           ${DADOS.fenologia.map((f) => `<option ${f === op.fenologia ? 'selected' : ''}>${f}</option>`).join('')}
-         </select>`;
+      ? `<span class="campo__valor">${fixa ? fixa[0] : op.fenologia || '—'}</span>`
+      : fixa
+        ? `<select class="campo__controle op-cabecalho__fenologia" id="op-fenologia" disabled
+                   title="${fixa[1]}"><option selected>${fixa[0]}</option></select>`
+        : `<select class="campo__controle op-cabecalho__fenologia" id="op-fenologia" data-campo="op-fenologia">
+             <option value="">—</option>
+             ${DADOS.fenologia.map((f) => `<option ${f === op.fenologia ? 'selected' : ''}>${f}</option>`).join('')}
+           </select>`;
     // Nome, DAP e fenologia. Renomear e excluir ficam na lista de operações.
     return `
       <div class="op-cabecalho__linha">
@@ -492,7 +507,7 @@ window.Telas.planoOperacoes = (function () {
         <div class="recomendacao__tabela">
           <table class="tabela tabela--compacta tabela-rec ${soPreCadastro ? 'tabela-rec--so-pre' : ''}">
             <thead ${soPreCadastro ? 'hidden' : ''}><tr>
-              <th>Princípio ativo</th><th>Produto comercial</th><th class="tabela__numero">Dose padrão</th><th>Unid.</th>
+              <th>${T().pa}</th><th>Produto comercial</th><th class="tabela__numero">Dose padrão</th><th>Unid.</th>
               ${leitura ? '' : '<th><span class="so-leitor">Remover</span></th>'}
             </tr></thead>
             <tbody>
@@ -531,7 +546,7 @@ window.Telas.planoOperacoes = (function () {
         <tr>
           <td>${esc(l.principioAtivo || '—')}</td>
           <td>${esc(l.produto || '—')} ${etiquetaPre(l)}${seloTipo(l)}</td>
-          <td class="tabela__numero">${Util.dose(l.dose) || '—'}</td>
+          <td class="tabela__numero">${formatarDose(l.dose) || '—'}</td>
           <td>${Planos.unidadeDose(l)}</td>
         </tr>`;
     }
@@ -541,12 +556,12 @@ window.Telas.planoOperacoes = (function () {
     const semProduto = !l.produto;
     return `
       <tr data-linha="${l.id}">
-        <td>${celulaCombo(l, 'pa', l.principioAtivo, 'Buscar princípio ativo', false)}${avisoRepetido(l, 'pa')}</td>
+        <td>${celulaCombo(l, 'pa', l.principioAtivo, `Buscar ${T().pa.toLowerCase()}`, false)}${avisoRepetido(l, 'pa')}</td>
         <td>${celulaCombo(l, 'produto', l.produto, 'Buscar produto', erro.produto)} ${etiquetaPre(l)}${seloTipo(l)}
           ${erro.produto && !ui.naoEncontrado[`${l.id}:produto`] ? '<p class="erro-campo">Escolha o produto comercial</p>' : ''}${avisoRepetido(l, 'produto')}</td>
         <td class="tabela__numero" ${semProduto ? 'title="Escolha o produto comercial para informar a dose"' : ''}>
           <input class="campo__controle campo--compacto campo--dose ${erro.dose && !semProduto ? 'campo__controle--erro' : ''}" type="text" inputmode="decimal"
-                 data-campo="linha-dose" value="${Util.dose(l.dose)}" placeholder="—" aria-label="Dose padrão"
+                 data-campo="linha-dose" value="${formatarDose(l.dose)}" placeholder="—" aria-label="Dose padrão"
                  ${semProduto ? 'disabled aria-describedby="dica-dose-produto"' : ''} ${erro.dose && !semProduto ? 'aria-invalid="true"' : ''}>
           ${erro.dose && !semProduto ? '<p class="erro-campo">Informação obrigatória</p>' : ''}
         </td>
@@ -581,10 +596,10 @@ window.Telas.planoOperacoes = (function () {
     const naMesma = repetidoNaMesma(linhas, l);
     if (naMesma) {
       return naMesma === coluna
-        ? `<p class="aviso-repetido">${Icones.alerta} ${coluna === 'produto' ? 'Produto' : 'Princípio ativo'} já está nesta ${T().nome}</p>`
+        ? `<p class="aviso-repetido">${Icones.alerta} ${coluna === 'produto' ? 'Produto' : T().pa} já está nesta ${T().nome}</p>`
         : '';
     }
-    const dose = (x) => `${Util.dose(x.dose) || '—'} ${Planos.unidadeDose(x)}`;
+    const dose = (x) => `${formatarDose(x.dose) || '—'} ${Planos.unidadeDose(x)}`;
     const outras = op.receitas.filter((r) => r !== atual).map((r) => {
       if (coluna === 'produto') {
         const igual = r.produtos.find((x) => mesmoProduto(x, l));
@@ -636,7 +651,7 @@ window.Telas.planoOperacoes = (function () {
       <div class="combo">
         <input class="campo__controle campo--compacto ${comErro ? 'campo__controle--erro' : ''}" type="text" data-combo="${tipo}" value="${esc(valor || '')}"
                placeholder="${placeholder}" autocomplete="off" role="combobox" aria-expanded="false"
-               aria-label="${tipo === 'pa' ? 'Princípio ativo' : 'Produto comercial'}">
+               aria-label="${tipo === 'pa' ? T().pa : 'Produto comercial'}">
         <div class="combo__lista" role="listbox" hidden></div>
       </div>`;
   }
@@ -665,14 +680,14 @@ window.Telas.planoOperacoes = (function () {
       <tr data-linha="${l.id}" class="tabela-rec__pre tabela-rec__pre--titulo">
         <td colspan="5">
           <p class="pre-cadastro__titulo">Pré-cadastro de defensivo
-            <span class="pre-cadastro__ajuda">· Informe o produto comercial e a unidade. O princípio ativo é opcional.</span></p>
+            <span class="pre-cadastro__ajuda">· Informe o produto comercial e a unidade. ${T().paOpcional}.</span></p>
         </td>
       </tr>
       <tr data-linha="${l.id}" class="tabela-rec__pre">
         <td>
-          <label class="pre-cadastro__rotulo" for="${id('pa')}">Princípio ativo (opcional)</label>
+          <label class="pre-cadastro__rotulo" for="${id('pa')}">${T().pa} (opcional)</label>
           <input class="campo__controle campo--compacto" id="${id('pa')}" data-pre="principioAtivo" value="${esc(pc.principioAtivo)}"
-                 placeholder="Princípio ativo" autocomplete="off">
+                 placeholder="${T().pa}" autocomplete="off">
           <p class="pre-cadastro__msg"></p>
         </td>
         <td>
@@ -814,7 +829,7 @@ window.Telas.planoOperacoes = (function () {
                 const l = ajuste ? Planos.linhaNoTalhao(op, ajuste, col) : null;
                 if (!l) return '<td class="tabela__numero tabela__nao-recebe">—</td>';
                 const d = Planos.doseTalhao(op, ajuste, l);
-                return `<td class="tabela__numero">${d === null || d === undefined ? '—' : Util.dose(d)}</td>`;
+                return `<td class="tabela__numero">${d === null || d === undefined ? '—' : formatarDose(d)}</td>`;
               }).join('');
               return `
                 <tr>
@@ -852,7 +867,7 @@ window.Telas.planoOperacoes = (function () {
         </div>
         ${aberto ? `
           <ul class="quadro-rec__produtos" id="quadro-produtos">
-            ${produtos.map((l) => `<li>${[l.principioAtivo, l.produto].filter(Boolean).map(esc).join(' · ')} · <strong>${Util.dose(l.dose) || '—'} ${Planos.unidadeDose(l)}</strong></li>`).join('')}
+            ${produtos.map((l) => `<li>${[l.principioAtivo, l.produto].filter(Boolean).map(esc).join(' · ')} · <strong>${formatarDose(l.dose) || '—'} ${Planos.unidadeDose(l)}</strong></li>`).join('')}
           </ul>` : ''}
       </section>`;
   }
@@ -997,16 +1012,27 @@ window.Telas.planoOperacoes = (function () {
     return ehSemente(grupoAtual()) && ui.passoSemente === 'tsi';
   }
 
-  // Produtos do cadastro: no TSI só os de tratamento de sementes; nos defensivos, sem eles
+  // Produtos do cadastro: no TSI só os de tratamento de sementes; nos defensivos, sem eles.
+  // Fertilidade: só corretivos e fertilizantes
   function cadastroAtual() {
-    const tsi = ehTsi();
-    return DADOS.defensivos.filter((d) => !!d.tsi === tsi);
+    const uso = usoAtual();
+    return DADOS.defensivos.filter((d) => usoProduto(d) === uso);
+  }
+  function usoProduto(d) {
+    return d.tsi ? 'tsi' : d.fertilidade ? 'fertilidade' : 'defensivo';
+  }
+  function usoAtual() {
+    return ehTsi() ? 'tsi' : ehFertilidade(grupoAtual()) ? 'fertilidade' : 'defensivo';
   }
 
   // Palavras da recomendação agronômica; no TSI, "TSI" ("Definir TSI", "TSI 1 aplicada")
   function T() {
-    return ehTsi() ? { nome: 'TSI', Nome: 'TSI', base: 'TSI' }
-      : { nome: 'recomendação', Nome: 'Recomendação', base: 'Recomendação' };
+    // pa: nome da coluna do princípio ativo (na Fertilidade, a matéria-prima: a fonte do nutriente)
+    const fert = ehFertilidade(grupoAtual());
+    const pa = fert ? 'Matéria-prima' : 'Princípio ativo';
+    const paOpcional = fert ? 'A matéria-prima é opcional' : 'O princípio ativo é opcional';
+    return ehTsi() ? { nome: 'TSI', Nome: 'TSI', base: 'TSI', pa, paOpcional }
+      : { nome: 'recomendação', Nome: 'Recomendação', base: 'Recomendação', pa, paOpcional };
   }
 
   // ================= Grupo Semente: plantio por talhão =================
@@ -2111,7 +2137,7 @@ window.Telas.planoOperacoes = (function () {
       opcoes = cadastro
         .filter((d) => d.produto && (trocando || !linha.principioAtivo || mesmoPA(d)) && bate(d.produto))
         .sort((a, b) => (trocando ? Number(mesmoPA(b)) - Number(mesmoPA(a)) : 0))
-        .map((d) => ({ valor: d.produto, rotulo: `${esc(d.produto)}<span class="combo__sub">${esc(d.principioAtivo || '—')} · ${d.unidade}</span>`, pre: d.preCadastro }));
+        .map((d) => ({ valor: d.produto, rotulo: `${esc(d.produto)}<span class="combo__sub">${esc(d.garantia || d.principioAtivo || '—')} · ${d.unidade}</span>`, pre: d.preCadastro }));
     }
     opcoes = opcoes.slice(0, 8);
     // "+ Pré-cadastrar" sempre como última opção quando há texto digitado (princípio ativo e produto comercial)
@@ -2365,7 +2391,7 @@ window.Telas.planoOperacoes = (function () {
         e.target.value = op.dap; Aviso.mostrar('Toda operação precisa de DAP'); return;
       }
       op.dap = n === null ? null : Math.round(n);
-      if (op.dap !== null && op.dap < 0) op.fenologia = ''; // antes do plantio não há fenologia
+      if (op.dap !== null && op.dap <= 0) op.fenologia = ''; // pré-plantio e plantio: fenologia fixa (não se escolhe)
       // A lista se reordena pelo DAP: a operação continua aberta (sem isso, abriria a nova primeira da lista)
       ui.opPorGrupo[grupoAtual().id] = op.id;
       alterou(); desenharTudo();
@@ -2375,7 +2401,7 @@ window.Telas.planoOperacoes = (function () {
       op.fenologia = e.target.value; alterou(); desenharTudo();
     } else if (campo === 'linha-dose') {
       // Já registrada ao digitar; sem redesenhar, para o clique em "Aplicar" valer de primeira
-      e.target.value = Util.dose(Util.numero(e.target.value));
+      e.target.value = formatarDose(Util.numero(e.target.value));
     } else if (e.target.dataset.pre) {
       registrarPre(e.target);
     }
@@ -2746,7 +2772,9 @@ window.Telas.planoOperacoes = (function () {
     pc.aviso = '';
     if (pc.erros.produto || pc.erros.unidade) { desenharTudo(); return; }
 
-    DADOS.defensivos.push({ classe: '', produto, principioAtivo: pa, unidade: pc.unidade, preCadastro: true, ...(ehTsi() ? { tsi: true } : {}) });
+    const uso = usoAtual();
+    DADOS.defensivos.push({ classe: '', produto, principioAtivo: pa, unidade: pc.unidade, preCadastro: true,
+                            ...(uso === 'tsi' ? { tsi: true } : uso === 'fertilidade' ? { fertilidade: true } : {}) });
     const linha = ui.rascunho.produtos.find((l) => l.id === pc.linhaId);
     Object.assign(linha, { produto, principioAtivo: pa, unidade: pc.unidade, preCadastro: true });
     ui.preCadastro = null;

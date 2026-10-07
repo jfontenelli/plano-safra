@@ -18,6 +18,7 @@ Regras de negócio ficam em `docs/DECISOES.md`.
 | 03 | Lista de planos | telas/03-lista-planos.md | referencias/03-lista-planos.png | Construída |
 | 04.1 | Operações (grupo Defensivo) | telas/04.1-operacoes-defensivos.md | referencias/04.1-operacao-defensivos.png | Construída |
 | 04.2 | Operações (grupo Semente) | telas/04.2-operacoes-sementes.md | quadro de design (telas A e B) | Construída: passos Plantio (variedade, data e população; Tabela, Mapa e Previsão de colheita) e TSI |
+| 04.3 | Operações (grupo Fertilidade) | telas/04.3-operacoes-fertilidade.md | — (layout da Tela 04.1) | Construída: operações do modelo, matéria-prima e cadastro (produtos de cliente a conferir) |
 
 Situação: A definir → Pronta para construir → Construída.
 

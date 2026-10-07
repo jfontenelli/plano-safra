@@ -1919,3 +1919,11 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 /* Tabela de talhões do Defensivo e do TSI: números centralizados na coluna (título e valor) */
 .tabela-talhoes.tabela-doses .tabela__numero { text-align: center !important; padding-right: 10px; }
 .tabela-talhoes.tabela-doses thead .tabela__numero .etiqueta-tipo { margin-left: auto; margin-right: auto; }
+
+/* Fertilidade: tipos de corretivo e fertilizante (selo abaixo do nome) */
+.etiqueta-tipo--corretivo      { background: #f1ece4; color: #6b5435; }
+.etiqueta-tipo--condicionador  { background: #eef0f6; color: #46507a; }
+.etiqueta-tipo--fosfatado      { background: #e6f3f1; color: #1d6b60; }
+.etiqueta-tipo--potassico      { background: #fbeee6; color: #9a4a1c; }
+.etiqueta-tipo--formulado-npk  { background: #f0eef8; color: #57418f; }
+.etiqueta-tipo--micronutriente { background: #f6f3dc; color: #6b5e10; }

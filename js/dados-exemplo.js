@@ -103,6 +103,37 @@ window.DADOS = {
   // Cadastro de defensivos (exemplo). Pré-cadastros feitos na tela de Operações entram aqui.
   // unidade: L, mL, kg, g ou t (a dose é sempre por hectare)
   defensivos: [
+    // Fertilidade (corretivos e fertilizantes), soja. fertilidade: true = só aparece no grupo Fertilidade.
+    // classe = tipo do produto; principioAtivo = matéria-prima (a fonte do nutriente: faz o papel do princípio
+    // ativo dos defensivos e ajuda a achar o produto); garantia = teores, mostrados na busca. Teores típicos
+    // de mercado e da legislação de fertilizantes (MAPA); conferir com o fornecedor.
+    { fertilidade: true, classe: 'Corretivo',      produto: 'Calcário dolomítico PRNT 85%', principioAtivo: 'Calcário dolomítico', garantia: 'CaO 30% + MgO 14%', unidade: 't' },
+    { fertilidade: true, classe: 'Corretivo',      produto: 'Calcário calcítico PRNT 85%',  principioAtivo: 'Calcário calcítico',  garantia: 'CaO 45%',           unidade: 't' },
+    { fertilidade: true, classe: 'Condicionador',  produto: 'Gesso agrícola',               principioAtivo: 'Gesso (sulfato de cálcio)', garantia: 'Ca 17% + S 14%', unidade: 't' },
+    { fertilidade: true, classe: 'Fosfatado',      produto: 'MAP 11-52-00',                 principioAtivo: 'MAP',                 garantia: 'N 11% + P₂O₅ 52%', unidade: 'kg' },
+    { fertilidade: true, classe: 'Fosfatado',      produto: 'Superfosfato simples 18%',     principioAtivo: 'Superfosfato simples', garantia: 'P₂O₅ 18% + Ca 16% + S 10%', unidade: 'kg' },
+    { fertilidade: true, classe: 'Fosfatado',      produto: 'Superfosfato triplo 41%',      principioAtivo: 'Superfosfato triplo', garantia: 'P₂O₅ 41% + Ca 10%', unidade: 'kg' },
+    { fertilidade: true, classe: 'Potássico',      produto: 'KCl 00-00-60',                 principioAtivo: 'Cloreto de potássio', garantia: 'K₂O 60%',           unidade: 'kg' },
+    { fertilidade: true, classe: 'Formulado NPK',  produto: 'Formulado 02-20-18',           principioAtivo: 'MAP + Cloreto de potássio', garantia: 'N 2% + P₂O₅ 20% + K₂O 18%', unidade: 'kg' },
+    { fertilidade: true, classe: 'Formulado NPK',  produto: 'Formulado 00-20-20',           principioAtivo: 'Superfosfato simples + Cloreto de potássio', garantia: 'P₂O₅ 20% + K₂O 20%', unidade: 'kg' },
+    { fertilidade: true, classe: 'Micronutriente', produto: 'FTE BR-12',                    principioAtivo: 'Fritas (FTE)',        garantia: 'Zn 9% + B 1,8% + Mn 2% + Cu 0,8%', unidade: 'kg' },
+    // Do plano de fertilidade de um cliente (os que já existem acima — calcário calcítico e dolomítico, MAP e
+    // KCl — não foram repetidos). A composição destas marcas não foi encontrada em fonte pública: a matéria-prima
+    // vem só do nome quando ele é claro; garantia, tipo e unidade (L para os foliares) A CONFERIR com o cliente.
+    { fertilidade: true, classe: 'Corretivo',      produto: 'Calcário dolomítico filler',   principioAtivo: 'Calcário dolomítico', unidade: 't' },
+    { fertilidade: true, classe: 'Fosfatado',      produto: 'Adubo 00-23-00',               principioAtivo: '',                    garantia: 'P₂O₅ 23%', unidade: 'kg' },
+    { fertilidade: true, classe: 'Micronutriente', produto: 'Complex Dualbor',              principioAtivo: 'Boro',                unidade: 'L' },
+    { fertilidade: true, classe: '',               produto: 'Midas +63S + 3B',              principioAtivo: '',                    unidade: 'kg' },
+    { fertilidade: true, classe: '',               produto: 'Support',                      principioAtivo: '',                    unidade: 'L' },
+    { fertilidade: true, classe: 'Micronutriente', produto: 'Borosol K',                    principioAtivo: 'Boro',                unidade: 'L' },
+    { fertilidade: true, classe: '',               produto: 'Vigora',                       principioAtivo: '',                    unidade: 'L' },
+    { fertilidade: true, classe: 'Micronutriente', produto: 'Compat Copper',                principioAtivo: 'Cobre',               unidade: 'L' },
+    { fertilidade: true, classe: '',               produto: 'Compat Pro',                   principioAtivo: '',                    unidade: 'L' },
+    { fertilidade: true, classe: 'Micronutriente', produto: 'Nutre Boro',                   principioAtivo: 'Boro',                unidade: 'L' },
+    { fertilidade: true, classe: '',               produto: 'Tonus',                        principioAtivo: '',                    unidade: 'L' },
+    { fertilidade: true, classe: 'Micronutriente', produto: 'Nutre Fer',                    principioAtivo: 'Ferro',               unidade: 'L' },
+    { fertilidade: true, classe: 'Micronutriente', produto: 'Nutre Cobre',                  principioAtivo: 'Cobre',               unidade: 'L' },
+    { fertilidade: true, classe: 'Micronutriente', produto: 'Nutre Zinco',                  principioAtivo: 'Zinco',               unidade: 'L' },
     // Tratamento de sementes industrial (TSI), soja. tsi: true = só aparece no passo TSI do Plantio.
     // classe = grupo do produto no TSI. Dose por 100 kg de sementes, dentro da faixa de bula dos
     // produtos (Agrofit/MAPA e bulas dos fabricantes); "Co + Mo", pó secante e grafite são genéricos.
@@ -145,11 +176,16 @@ window.DADOS = {
   fenologia: ['VE', 'VC', 'V1', 'V2', 'V3', 'V4', 'V5', 'V6', 'R1', 'R2', 'R3', 'R4', 'R5', 'R6', 'R7', 'R8'],
 
   // Tipos de grupo de operação (definem as informações mínimas pedidas no grupo)
-  tiposGrupo: ['Corretivos', 'Sementes', 'Fertilizantes', 'Defensivos', 'Colheita'],
+  // Fertilidade junta corretivos e fertilizantes
+  tiposGrupo: ['Sementes', 'Defensivos', 'Fertilidade', 'Colheita'],
 
   // Modelo de operações (levantado com clientes). Usado pelo "Usar modelo" e pelos planos de exemplo.
-  // Por enquanto, para os testes com usuários, só os grupos Semente e Defensivo (os outros grupos do
-  // modelo — Preparo do solo, Corretivos, Fertilizante e Colheita — estão no histórico do git).
+  // Por enquanto, para os testes com usuários, os grupos Semente, Defensivo e Fertilidade (os outros grupos
+  // do modelo — Preparo do solo e Colheita — estão no histórico do git).
+  // Fertilidade (soja no Cerrado/MT): calagem 60 a 90 dias antes do plantio (pH alvo 5,5–6,0); gessagem;
+  // potássio a lanço antecipado (7 a 30 dias antes) e em cobertura; fósforo (MAP) no sulco de plantio.
+  // K₂O ≈ 20 kg por tonelada de soja produzida (MT/MS). Fontes: Embrapa (Circular Técnica 33, Documentos
+  // 458/2023, Sistema soja-milho) e ensaios no MT (Rev. Cerrado Agrociências/UNIPAM; Agrarian/UFGD).
   modeloOperacoes: [
     { nome: 'Semente', tipo: 'Sementes', operacoes: [
       { nome: 'Plantio', dap: 0 }
@@ -165,6 +201,17 @@ window.DADOS = {
       { nome: '3ª Fungicida', dap: 70 },
       { nome: '4ª Fungicida', dap: 85 },
       { nome: 'Desfolha', dap: 100 }
+    ] },
+    { nome: 'Fertilidade', tipo: 'Fertilidade', operacoes: [
+      { nome: 'Calagem', dap: -90 },
+      { nome: 'Gessagem', dap: -60 },
+      { nome: '1ª Adubação potássica', dap: -15 },
+      { nome: 'Fosfatagem', dap: -10 },
+      { nome: 'Adubação de plantio', dap: 0 },
+      { nome: '2ª Adubação potássica', dap: 25 },
+      // Adubação foliar (micronutrientes: boro, cobre, zinco, ferro), como no plano de fertilidade do cliente
+      { nome: '1ª Adubação foliar', dap: 25 },
+      { nome: '2ª Adubação foliar', dap: 50 }
     ] }
   ],
 
@@ -199,6 +246,14 @@ window.DADOS = {
         return {
           // Plantio: variedade, data de plantio e população planejada (mil plantas/ha) por talhão,
           // dentro da população recomendada de cada variedade; germinação média do plano em %
+          // Fertilidade: calcário e base em todos; gesso só onde a análise de subsuperfície pediu (T01 a T04);
+          // cobertura potássica só nos talhões mais arenosos (T05 a T08); T07 com dose maior de KCl
+          'Calagem': op([['Calcário dolomítico PRNT 85%', 2]]),
+          'Gessagem': { produtos: [['Gesso agrícola', 1.5]], talhoes: ['T01', 'T02', 'T03', 'T04'] },
+          '1ª Adubação potássica': { produtos: [['KCl 00-00-60', 130]], talhoes: todos,
+            ajustes: { T07: { doses: { 'KCl 00-00-60': 160 } } } },
+          'Adubação de plantio': op([['MAP 11-52-00', 180]]),
+          '2ª Adubação potássica': { fenologia: 'V4', produtos: [['KCl 00-00-60', 80]], talhoes: ['T05', 'T06', 'T07', 'T08'] },
           // TSI 1 nos talhões sem histórico de nematoide; TSI 2 com nematicida (T06 a T08)
           'Plantio': { germinacao: 95, tsi: [
             { produtos: [['Standak Top', 200], ['Masterfix L Soja', 200], ['Co + Mo', 100], ['Disco AG Red L-280', 100]],
