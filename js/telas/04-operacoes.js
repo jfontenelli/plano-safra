@@ -1628,10 +1628,10 @@ window.Telas.planoOperacoes = (function () {
     concluirAplicacao(op, r, editando ? `${esc(r.nome)} salva` : `${esc(r.nome)} aplicada em ${n} ${n === 1 ? 'talhão' : 'talhões'}`);
   }
 
-  // Depois de aplicar, a tela mostra a recomendação aplicada (etiqueta selecionada, quadro e talhões dela)
+  // Depois de aplicar, a tela volta para "Todos os talhões" (a pessoa escolhe a etiqueta, se quiser)
   function concluirAplicacao(op, destino, mensagem) {
     ui.rascunho = null; ui.validarOp = null; ui.preCadastro = null; ui.erroNome = null;
-    ui.filtroTalhoes = `rec:${destino.id}`; ui.quadroAberto = false;
+    ui.filtroTalhoes = 'todos'; ui.quadroAberto = false;
     limparSelecao(); alterou(); desenharTudo();
     const rolagem = raiz.querySelector('.talhoes-rolagem');
     if (rolagem) rolagem.scrollTop = 0;
