@@ -180,6 +180,8 @@ window.DADOS = {
   tiposGrupo: ['Sementes', 'Defensivos', 'Fertilidade', 'Colheita'],
 
   // Modelo de operações (levantado com clientes). Usado pelo "Usar modelo" e pelos planos de exemplo.
+  // prazo: prazo para encerramento da OS, em dias (DECISOES 4.3: preparo, calcário, fósforo, 1ª dessecação e
+  // 1ª metade do K = 5; plantio 3); sem prazo, vale o padrão do grupo (2 dias; Semente 3). Colheita: 10.
   // Por enquanto, para os testes com usuários, os grupos Semente, Defensivo e Fertilidade (os outros grupos
   // do modelo — Preparo do solo e Colheita — estão no histórico do git).
   // Fertilidade (soja no Cerrado/MT): calagem 60 a 90 dias antes do plantio (pH alvo 5,5–6,0); gessagem;
@@ -188,10 +190,10 @@ window.DADOS = {
   // 458/2023, Sistema soja-milho) e ensaios no MT (Rev. Cerrado Agrociências/UNIPAM; Agrarian/UFGD).
   modeloOperacoes: [
     { nome: 'Semente', tipo: 'Sementes', operacoes: [
-      { nome: 'Plantio', dap: 0 }
+      { nome: 'Plantio', dap: 0, prazo: 3 }
     ] },
     { nome: 'Defensivo', tipo: 'Defensivos', operacoes: [
-      { nome: '1ª Dessecação: pré-plantio', dap: -15 },
+      { nome: '1ª Dessecação: pré-plantio', dap: -15, prazo: 5 },
       { nome: '2ª Dessecação: pré-plantio', dap: -5 },
       { nome: 'Pré-emergente', dap: 1 },
       { nome: '1ª Pós-emergente', dap: 15 },
@@ -203,10 +205,10 @@ window.DADOS = {
       { nome: 'Desfolha', dap: 100 }
     ] },
     { nome: 'Fertilidade', tipo: 'Fertilidade', operacoes: [
-      { nome: 'Calagem', dap: -90 },
-      { nome: 'Gessagem', dap: -60 },
-      { nome: '1ª Adubação potássica', dap: -15 },
-      { nome: 'Fosfatagem', dap: -10 },
+      { nome: 'Calagem', dap: -90, prazo: 5 },
+      { nome: 'Gessagem', dap: -60, prazo: 5 },
+      { nome: '1ª Adubação potássica', dap: -15, prazo: 5 },
+      { nome: 'Fosfatagem', dap: -10, prazo: 5 },
       { nome: 'Adubação de plantio', dap: 0 },
       { nome: '2ª Adubação potássica', dap: 25 },
       // Adubação foliar (micronutrientes: boro, cobre, zinco, ferro), como no plano de fertilidade do cliente
@@ -272,15 +274,15 @@ window.DADOS = {
           ] },
           '1ª Dessecação: pré-plantio': op([['Roundup Original DI', 2.5], ['DMA 806 BR', 1.0]]),
           '2ª Dessecação: pré-plantio': op([['Finale', 2.0]]),
-          'Pré-emergente': op([['Dual Gold', 1.5]]),
-          '1ª Pós-emergente': op([['Roundup Original DI', 2.0]]),
+          'Pré-emergente': op([['Dual Gold', 1.5]], 'VE'),
+          '1ª Pós-emergente': op([['Roundup Original DI', 2.0]], 'V2'),
           '2ª Pós-emergente':
-            op([['Select 240 EC', 0.45], ['Engeo Pleno', 0.20], ['Unizeb Gold', 1.5]]),
-          '1ª Fungicida': op([['Fox Xpro', 0.40], ['Engeo Pleno', 0.20]], 'V5'),
-          '2ª Fungicida': op([['Priori Xtra', 0.30], ['Ampligo', 0.15]]),
-          '3ª Fungicida': op([['Elatus', 0.20], ['Connect', 1.0]]),
-          '4ª Fungicida': op([['Cypress', 0.30], ['Premio', 0.05]]),
-          'Desfolha': op([['Finale', 2.0]])
+            op([['Select 240 EC', 0.45], ['Engeo Pleno', 0.20], ['Unizeb Gold', 1.5]], 'V4'),
+          '1ª Fungicida': op([['Fox Xpro', 0.40], ['Engeo Pleno', 0.20]], 'R1'),
+          '2ª Fungicida': op([['Priori Xtra', 0.30], ['Ampligo', 0.15]], 'R3'),
+          '3ª Fungicida': op([['Elatus', 0.20], ['Connect', 1.0]], 'R5'),
+          '4ª Fungicida': op([['Cypress', 0.30], ['Premio', 0.05]], 'R5'),
+          'Desfolha': op([['Finale', 2.0]], 'R7')
         };
       })()
     }

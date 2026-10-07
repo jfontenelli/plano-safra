@@ -40,11 +40,13 @@ window.ArquivoPlano = (function () {
       ['exportado_em', Util.hojeISO()], ['exportado_por', DADOS.usuario.nome]
     ];
 
-    const abaOperacoes = [['grupo_operacao', 'tipo_grupo', 'operacao', 'dap', 'fenologia']];
+    // previsao_cumprimento: prazo para encerramento da OS, em dias (vazio = padrão do grupo)
+    const abaOperacoes = [['grupo_operacao', 'tipo_grupo', 'operacao', 'dap', 'fenologia', 'previsao_cumprimento']];
     plano.grupos.forEach((g) => {
-      if (!g.operacoes.length) abaOperacoes.push([g.nome, g.tipo || '', '', '', '']);
-      g.operacoes.forEach((op) => abaOperacoes.push([g.nome, g.tipo || '', op.nome, op.dap ?? '', op.fenologia || '']));
+      if (!g.operacoes.length) abaOperacoes.push([g.nome, g.tipo || '', '', '', '', '']);
+      g.operacoes.forEach((op) => abaOperacoes.push([g.nome, g.tipo || '', op.nome, op.dap ?? '', op.fenologia || '', op.prazo ?? '']));
     });
+    if (plantio && plantio.prazoColheita) abaPlano.push(['prazo_colheita', plantio.prazoColheita]);
 
     const abaVariedade = [['fazenda', 'talhao', 'area_talhao', 'cultura', 'grupo_operacao', 'operacao', 'variedade',
       'data_plantio', 'pop_plantas_planejada', 'pop_plantas_recomendada', 'perc_germinacao', 'quantidade_total_sementes', 'bags']];
@@ -116,6 +118,7 @@ window.ArquivoPlano = (function () {
         resolver({
           contexto: { safra: String(campos.safra), empresa: String(campos.empresa), fazenda: String(campos.fazenda), cultura: String(campos.cultura) },
           germinacao: campos.germinacao_media === '' ? null : Number(campos.germinacao_media),
+          prazoColheita: campos.prazo_colheita ? Number(campos.prazo_colheita) : null,
           abas: Object.fromEntries(['operacoes', 'cultura_variedade', ...ABAS_REC].map((n) => [n, linhas(n)]))
         });
       };
@@ -143,9 +146,11 @@ window.ArquivoPlano = (function () {
       let g = grupos.find((y) => y.nome === x.grupo_operacao);
       if (!g) { g = Planos.novoGrupo(String(x.grupo_operacao), String(x.tipo_grupo || '')); grupos.push(g); }
       if (x.operacao === '') return;
-      const op = Planos.novaOperacao(String(x.operacao), x.dap === '' ? null : Number(x.dap));
+      const op = Planos.novaOperacao(String(x.operacao), x.dap === '' ? null : Number(x.dap),
+        x.previsao_cumprimento === '' || x.previsao_cumprimento === undefined ? null : Number(x.previsao_cumprimento));
       op.fenologia = String(x.fenologia || '');
       if (g.tipo === 'Sementes' && dados.germinacao) op.germinacao = dados.germinacao;
+      if (g.tipo === 'Sementes' && dados.prazoColheita) op.prazoColheita = dados.prazoColheita;
       g.operacoes.push(op);
     });
 

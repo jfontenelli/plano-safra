@@ -33,10 +33,11 @@ window.Planos = (function () {
                        dose, preCadastro: !!d.preCadastro });
   }
 
-  function novaOperacao(nome, dap = null) {
+  // prazo: prazo para encerramento da OS, em dias (informado no Calendário Agrícola; null = padrão do grupo)
+  function novaOperacao(nome, dap = null, prazo = null) {
     // Só no grupo Semente: plantio { 'T01': { variedade, data ('AAAA-MM-DD'), populacao (mil plantas/ha) } }
     // e germinação média do plano (%, um valor só para todos os talhões)
-    return { id: novoId('o'), nome, dap, fenologia: '', receitas: [], talhoes: {}, plantio: {}, germinacao: null };
+    return { id: novoId('o'), nome, dap, fenologia: '', prazo, receitas: [], talhoes: {}, plantio: {}, germinacao: null };
   }
 
   // ----- Receitas -----
@@ -63,7 +64,7 @@ window.Planos = (function () {
   function gruposModelo() {
     return DADOS.modeloOperacoes.map((g) => ({
       ...novoGrupo(g.nome, g.tipo),
-      operacoes: g.operacoes.map((o) => novaOperacao(o.nome, o.dap))
+      operacoes: g.operacoes.map((o) => novaOperacao(o.nome, o.dap, o.prazo ?? null))
     }));
   }
 

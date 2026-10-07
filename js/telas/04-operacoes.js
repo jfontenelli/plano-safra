@@ -147,7 +147,7 @@ window.Telas.planoOperacoes = (function () {
     raiz.innerHTML = `
       ${cabecalho()}
       <div class="plano__rolagem">
-        ${etapa === 'operacoes' ? corpoOperacoes() : etapaEmConstrucao()}
+        ${etapa === 'operacoes' ? corpoOperacoes() : etapa === 'calendario' ? Telas.calendario.desenhar(ctxCalendario()) : etapaEmConstrucao()}
       </div>
       ${etapa === 'operacoes' ? rodapeGrupos() : ''}
       ${etapa === 'operacoes' && ui.definindo && opAtual() ? modalDefinir(opAtual()) : ''}
@@ -200,6 +200,13 @@ window.Telas.planoOperacoes = (function () {
         <p class="faixa-leitura">${Icones.cadeado} Plano aprovado: somente leitura. O plano aprovado não muda durante a safra.</p>` : ''}
     `;
   }
+
+  // Calendário Agrícola (Tela 05): desenhado aqui dentro, com o mesmo cabeçalho do plano
+  function ctxCalendario() {
+    ui.calendario = ui.calendario || { visao: 'infografico', talhao: 'todos' };
+    return { plano, somenteLeitura, talhoes: talhoesFazenda, estado: ui.calendario };
+  }
+  const acoesCalendario = { redesenhar: (foco) => (foco ? desenharMantendoFoco(foco) : desenharTudo()), alterou: () => alterou() };
 
   function etapaEmConstrucao() {
     const nome = ETAPAS.find((e) => e.id === etapa).nome;
@@ -2198,6 +2205,7 @@ window.Telas.planoOperacoes = (function () {
 
   // ================= Ações =================
   function aoClicar(e) {
+    if (etapa === 'calendario' && Telas.calendario.aoClicar(e, ctxCalendario(), acoesCalendario)) return;
     const alvo = e.target.closest('[data-acao]');
     if (!alvo) return;
     const acao = alvo.dataset.acao;
@@ -2352,6 +2360,7 @@ window.Telas.planoOperacoes = (function () {
   }
 
   function aoMudar(e) {
+    if (etapa === 'calendario' && Telas.calendario.aoMudar(e, ctxCalendario(), acoesCalendario)) return;
     const campo = e.target.dataset.campo;
     const op = opAtual();
     if (campo === 'pl-variedade') {

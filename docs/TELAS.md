@@ -19,6 +19,7 @@ Regras de negócio ficam em `docs/DECISOES.md`.
 | 04.1 | Operações (grupo Defensivo) | telas/04.1-operacoes-defensivos.md | referencias/04.1-operacao-defensivos.png | Construída |
 | 04.2 | Operações (grupo Semente) | telas/04.2-operacoes-sementes.md | quadro de design (telas A e B) | Construída: passos Plantio (variedade, data e população; Tabela, Mapa e Previsão de colheita) e TSI |
 | 04.3 | Operações (grupo Fertilidade) | telas/04.3-operacoes-fertilidade.md | — (layout da Tela 04.1) | Construída: operações do modelo, matéria-prima e cadastro (produtos de cliente a conferir) |
+| 05 | Calendário Agrícola | telas/05-calendario-agricola.md | referencias/05-calendario-agricola.png | Construída: Infográfico por fase e Tabela com prazo para encerramento da OS |
 
 Situação: A definir → Pronta para construir → Construída.
 
