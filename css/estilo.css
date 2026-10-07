@@ -1655,3 +1655,13 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
 .definir__linha-nome { display: flex; flex-wrap: wrap; gap: 16px; }
 .definir__linha-nome .definir__nome { flex: 1 1 260px; }
 .definir__copiar { flex: 2 1 320px; margin: 0; }
+
+/* Copiar operação: lista das operações do grupo que podem receber a cópia */
+.copiar-para { display: flex; flex-direction: column; gap: 6px; max-height: 360px; overflow: auto; margin: 0; padding: 0; border: 0; }
+.copiar-para__item { display: grid; grid-template-columns: auto 1fr auto; column-gap: 10px; align-items: center; padding: 10px 12px; border: 1px solid var(--borda); border-radius: 8px; cursor: pointer; }
+.copiar-para__item:hover { border-color: #b4beb8; }
+.copiar-para__item:has(input:checked) { border-color: var(--verde-600); background: var(--verde-100); }
+.copiar-para__item input { margin: 0; accent-color: var(--verde-600); }
+.copiar-para__nome { font-weight: 600; font-size: 14px; }
+.copiar-para__dap { font-size: 13px; color: var(--texto-suave); }
+.copiar-para__resumo { grid-column: 2 / 4; font-size: 12px; color: var(--texto-suave); }
