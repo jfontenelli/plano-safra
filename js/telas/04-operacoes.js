@@ -42,6 +42,7 @@ window.Telas.planoOperacoes = (function () {
       erroNome: null,          // modal: nome da recomendação repetido
       naoEncontrado: {},       // texto digitado sem escolher na lista e que não está no cadastro: { 'linhaId:pa|produto': texto }
       definindo: null,         // modal "Definir recomendação" aberto: { talhoes, editando }
+      copiadoDe: null,         // modal: recomendação de onde os produtos foram copiados
       renomeandoOp: null,
       renomeandoGrupo: null,
       preCadastro: null,       // { linhaId, produto, principioAtivo, unidade, erro }
@@ -824,7 +825,7 @@ window.Telas.planoOperacoes = (function () {
     const talhoes = talhoesFazenda.filter((t) => ui.marcados.has(t.nome)).map((t) => t.nome);
     if (!talhoes.length) return;
     if (semDap(op)) return;
-    ui.rascunho = null; ui.preCadastro = null; ui.validarOp = null; ui.erroNome = null; ui.naoEncontrado = {};
+    ui.rascunho = null; ui.preCadastro = null; ui.validarOp = null; ui.erroNome = null; ui.naoEncontrado = {}; ui.copiadoDe = null;
     // Talhões marcados que já estão todos na mesma recomendação: abre nela.
     // Senão, cria a próxima (Recomendação 2, Rec 2…), com produto e dose em branco e sem mostrar
     // as outras: o modal é só dessa recomendação. Se for cancelado, a nova vazia é descartada.
@@ -863,7 +864,7 @@ window.Telas.planoOperacoes = (function () {
   function abrirEditar(op, id) {
     const r = op.receitas.find((x) => x.id === id);
     if (!r || semDap(op)) return;
-    ui.rascunho = null; ui.preCadastro = null; ui.validarOp = null; ui.erroNome = null; ui.naoEncontrado = {};
+    ui.rascunho = null; ui.preCadastro = null; ui.validarOp = null; ui.erroNome = null; ui.naoEncontrado = {}; ui.copiadoDe = null;
     ui.receitaPorOp[op.id] = r.id;
     const talhoes = talhoesFazenda.map((t) => t.nome).filter((t) => op.talhoes[t] && op.talhoes[t].receitaId === r.id);
     ui.definindo = { talhoes, editando: true };
@@ -874,7 +875,7 @@ window.Telas.planoOperacoes = (function () {
   function fecharDefinir() {
     const op = opAtual();
     const editando = ui.definindo && ui.definindo.editando;
-    ui.rascunho = null; ui.preCadastro = null; ui.validarOp = null; ui.erroNome = null; ui.naoEncontrado = {};
+    ui.rascunho = null; ui.preCadastro = null; ui.validarOp = null; ui.erroNome = null; ui.naoEncontrado = {}; ui.copiadoDe = null;
     ui.definindo = null;
     if (op) {
       op.receitas.filter((r) => receitaVazia(op, r)).forEach((r) => op.receitas.splice(op.receitas.indexOf(r), 1));
@@ -900,7 +901,11 @@ window.Telas.planoOperacoes = (function () {
             <button class="botao-icone" type="button" data-acao="fechar-definir" aria-label="Fechar">${Icones.fechar}</button>
           </div>
           <div class="definir__corpo">
-            ${r && !somenteLeitura ? campoNome(op) : ''}
+            ${r && !somenteLeitura ? `
+              <div class="definir__linha-nome">
+                ${campoNome(op)}
+                ${!editando && !Planos.talhoesDaReceita(op, r).length ? campoCopiar(op, r) : ''}
+              </div>` : ''}
             ${r ? corpoReceita(op, r) : `
               <p class="recomendacao__vazia">Nenhuma recomendação nesta operação.</p>`}
           </div>
@@ -925,6 +930,37 @@ window.Telas.planoOperacoes = (function () {
                value="${esc(nome)}" autocomplete="off" ${ui.erroNome ? 'aria-invalid="true" aria-describedby="rec-nome-erro"' : ''}>
         ${ui.erroNome ? `<p class="erro-campo" id="rec-nome-erro">${ui.erroNome}</p>` : ''}
       </div>`;
+  }
+
+  // Recomendação nova: "Copiar produtos de" traz os produtos e doses padrão de outra recomendação
+  // da mesma operação, como ponto de partida (dá para adicionar, remover e mudar a dose antes de aplicar)
+  function campoCopiar(op, r) {
+    const origens = op.receitas.filter((x) => x !== r && x.produtos.some(Planos.linhaPreenchida));
+    if (!origens.length) return '';
+    return `
+      <div class="campo definir__copiar">
+        <label class="campo__rotulo" for="rec-copiar">Copiar produtos de</label>
+        <select class="campo__controle" id="rec-copiar" data-campo="copiar-de">
+          <option value="">Escolha uma recomendação</option>
+          ${origens.map((x) => {
+            // "Rec 1 (Fox Xpro, Engeo Pleno S, Nimbus + 2)": até 3 nomes comerciais, o resto resumido
+            const nomes = x.produtos.filter(Planos.linhaPreenchida).map(Planos.nomeLinha);
+            const lista = nomes.slice(0, 3).join(', ') + (nomes.length > 3 ? ` + ${nomes.length - 3}` : '');
+            return `<option value="${x.id}" ${ui.copiadoDe === x.id ? 'selected' : ''}>${esc(nomeCurto(x))} (${esc(lista)})</option>`;
+          }).join('')}
+        </select>
+      </div>`;
+  }
+
+  // Troca os produtos da recomendação em edição pelos da recomendação escolhida (cópia, com ids novos)
+  function copiarProdutos(op, id) {
+    const origem = op.receitas.find((x) => x.id === id);
+    if (!origem) return;
+    ui.copiadoDe = id; ui.validarOp = null; ui.preCadastro = null; ui.naoEncontrado = {};
+    rascunho(op).produtos = origem.produtos.filter(Planos.linhaPreenchida).map((l) => Planos.novaLinha({
+      principioAtivo: l.principioAtivo, produto: l.produto, unidade: l.unidade, dose: l.dose, preCadastro: l.preCadastro }));
+    desenharMantendoFoco('#rec-copiar');
+    Aviso.mostrar(`Produtos de ${esc(nomeCurto(origem))} copiados`);
   }
 
   // ----- Guias de grupo (rodapé) -----
@@ -1157,6 +1193,8 @@ window.Telas.planoOperacoes = (function () {
       // A lista se reordena pelo DAP: a operação continua aberta (sem isso, abriria a nova primeira da lista)
       ui.opPorGrupo[grupoAtual().id] = op.id;
       alterou(); desenharTudo();
+    } else if (campo === 'copiar-de') {
+      if (e.target.value) copiarProdutos(op, e.target.value);
     } else if (campo === 'op-fenologia') {
       op.fenologia = e.target.value; alterou(); desenharTudo();
     } else if (campo === 'linha-dose') {
@@ -1553,6 +1591,25 @@ window.Telas.planoOperacoes = (function () {
     const { talhoes, editando } = ui.definindo;
     const daRec = Planos.talhoesDaReceita(op, r);
     if (!editando && daRec.some((t) => !talhoes.includes(t))) { aplicarEmParte(op, r, talhoes, novas, nome); return; }
+    // Recomendação nova com os mesmos produtos de outra (ex.: copiados dela pelo "Copiar produtos de"):
+    // a composição é a identidade, então os talhões entram na que já existe e a dose diferente
+    // da padrão dela fica como dose própria do talhão
+    const igual = !editando && !daRec.length &&
+      op.receitas.find((x) => x !== r && Planos.composicao(x.produtos) === Planos.composicao(novas));
+    if (igual) {
+      op.receitas.splice(op.receitas.indexOf(r), 1);
+      ui.receitaPorOp[op.id] = igual.id;
+      talhoes.forEach((t) => {
+        const ajuste = op.talhoes[t] = Planos.novoAjuste(igual.id);
+        novas.forEach((l) => {
+          const base = igual.produtos.find((x) => Planos.chaveLinha(x) === Planos.chaveLinha(l));
+          if (base && l.dose !== base.dose) ajuste.doses[base.id] = l.dose;
+        });
+      });
+      const n = talhoes.length;
+      concluirAplicacao(op, igual, `${esc(nomeCurto(igual))} aplicada em ${n} ${n === 1 ? 'talhão' : 'talhões'}`);
+      return;
+    }
     r.nome = nome;
     Planos.talhoesDaReceita(op, r).forEach((t) => {
       const doses = op.talhoes[t].doses;

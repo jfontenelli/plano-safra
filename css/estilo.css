@@ -1650,3 +1650,8 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
 .definir__excluir { margin-right: auto; }
 .definir__excluir .icone { width: 16px; height: 16px; }
 
+
+/* Recomendação nova: nome e "Copiar produtos de" lado a lado */
+.definir__linha-nome { display: flex; flex-wrap: wrap; gap: 16px; }
+.definir__linha-nome .definir__nome { flex: 1 1 260px; }
+.definir__copiar { flex: 2 1 320px; margin: 0; }
