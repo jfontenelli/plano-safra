@@ -97,13 +97,13 @@ Agrônomo da fazenda e líder de operações podem ser a mesma pessoa, conforme 
 
 Detalhe da tela: docs/telas/04.2-operacoes-sementes.md.
 
-- Sequência do planejamento do plantio, por talhão: **variedade e data de plantio** → **população de plantas** → **tratamento de sementes (TSI)**. Os passos Variedade e População podem ser unidos depois.
+- Planejamento do plantio, por talhão, em dois passos: **Plantio** (variedade, data de plantio e população de plantas, numa tabela só) → **tratamento de sementes (TSI)**.
 - **Data de plantio planejada por dia** (data exata por talhão). A janela de plantio recomendada da variedade é só referência: data fora dela gera alerta, sem bloquear.
 - A previsão de colheita (4.3) é agregada por **decêndio**, em hectares, para o agrônomo ver se a colheita fica concentrada e decidir trocar variedade ou data. Capacidade de colheita fica fora da v1.
 - **Mapa de variedades da fazenda**: os talhões pintados pela variedade, com a área total de cada variedade, para visualizar e rotacionar as variedades. O plano é por fazenda, então o mapa é por fazenda (sem visão por empresa). Clicar no talhão abre a definição da variedade.
 - Escolha da variedade com apoio do histórico do talhão: produtividade das 3 últimas safras da cultura e chuva acumulada no ciclo de cada uma.
 - **Germinação média do plano**: na v1, um valor único para todos os talhões (a semente ainda não foi comprada; não há lote).
-- População de plantas: recomendada (cadastro da variedade, referência) e planejada (agrônomo).
+- População de plantas: recomendada (cadastro da variedade, referência, mostrada só no preenchimento) e planejada (agrônomo). Talhão sem variedade não recebe população.
 - **Sementes = população planejada × área ÷ germinação. Bags = sementes ÷ 5.000.000** (1 bag de soja = 5 milhões de sementes).
 - **Tratamento de sementes (TSI)**: receita com nome (TS 1, TS 2…), no padrão da recomendação agronômica (composição de produtos = identidade; dose pode variar por talhão), aplicada **por talhão** (pode mudar após os testes). Composta por grupos de produto: fertilizante, fungicida, inseticida, nematicida, inoculante, polímero, pó secante e grafite.
 - Unidade da dose de TSI vem do cadastro do produto; a unidade usada pelos clientes (por 100 kg de sementes, por bag ou por hectare) e a entrada do PMS no plano serão definidas nos testes. Sem cálculo de quantidade de TSI no plano por enquanto.

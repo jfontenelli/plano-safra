@@ -182,16 +182,17 @@ window.DADOS = {
         const todos = ['T01', 'T02', 'T03', 'T04', 'T05', 'T06', 'T07', 'T08'];
         const op = (produtos, fenologia = '') => ({ fenologia, produtos, talhoes: todos });
         return {
-          // Plantio: variedade e data de plantio planejadas por talhão
-          'Plantio': { plantio: [
-            { talhao: 'T01', variedade: 'BMX Foco IPRO',   data: '2026-09-22' },
-            { talhao: 'T02', variedade: 'BMX Foco IPRO',   data: '2026-09-22' },
-            { talhao: 'T03', variedade: 'BMX Olimpo IPRO', data: '2026-09-28' },
-            { talhao: 'T04', variedade: 'BMX Olimpo IPRO', data: '2026-10-01' },
-            { talhao: 'T05', variedade: 'TMG 2383 IPRO',   data: '2026-10-05' },
-            { talhao: 'T06', variedade: 'NS 7709 IPRO',    data: '2026-09-25' },
-            { talhao: 'T07', variedade: 'M 8372 IPRO',     data: '2026-10-10' },
-            { talhao: 'T08', variedade: 'TMG 2383 IPRO',   data: '2026-10-08' }
+          // Plantio: variedade, data de plantio e população planejada (mil plantas/ha) por talhão,
+          // dentro da população recomendada de cada variedade; germinação média do plano em %
+          'Plantio': { germinacao: 95, plantio: [
+            { talhao: 'T01', variedade: 'BMX Foco IPRO',   data: '2026-09-22', populacao: 300 },
+            { talhao: 'T02', variedade: 'BMX Foco IPRO',   data: '2026-09-22', populacao: 300 },
+            { talhao: 'T03', variedade: 'BMX Olimpo IPRO', data: '2026-09-28', populacao: 250 },
+            { talhao: 'T04', variedade: 'BMX Olimpo IPRO', data: '2026-10-01', populacao: 250 },
+            { talhao: 'T05', variedade: 'TMG 2383 IPRO',   data: '2026-10-05', populacao: 220 },
+            { talhao: 'T06', variedade: 'NS 7709 IPRO',    data: '2026-09-25', populacao: 270 },
+            { talhao: 'T07', variedade: 'M 8372 IPRO',     data: '2026-10-10', populacao: 230 },
+            { talhao: 'T08', variedade: 'TMG 2383 IPRO',   data: '2026-10-08', populacao: 220 }
           ] },
           '1ª Dessecação: pré-plantio': op([['Roundup Original DI', 2.5], ['DMA 806 BR', 1.0]]),
           '2ª Dessecação: pré-plantio': op([['Finale', 2.0]]),

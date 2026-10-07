@@ -17,7 +17,7 @@ Regras de negócio ficam em `docs/DECISOES.md`.
 | 02 | Modal Criar Plano de Safra | telas/02-modal-criar-plano.md | referencias/02-modal-criar-plano.png | Construída |
 | 03 | Lista de planos | telas/03-lista-planos.md | referencias/03-lista-planos.png | Construída |
 | 04.1 | Operações (grupo Defensivo) | telas/04.1-operacoes-defensivos.md | referencias/04.1-operacao-defensivos.png | Construída |
-| 04.2 | Operações (grupo Semente) | telas/04.2-operacoes-sementes.md | quadro de design (telas A1.1, A1.2, A2, A3 e R2) | Em construção: passo Variedade construído; População de plantas e TSI a construir |
+| 04.2 | Operações (grupo Semente) | telas/04.2-operacoes-sementes.md | quadro de design (telas A e B) | Em construção: passo Plantio construído (variedade, data e população; Tabela, Mapa e Previsão de colheita); TSI a construir |
 
 Situação: A definir → Pronta para construir → Construída.
 
