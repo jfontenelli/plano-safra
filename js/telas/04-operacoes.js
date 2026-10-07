@@ -783,7 +783,7 @@ window.Telas.planoOperacoes = (function () {
     const colunas = rec ? rec.produtos.filter(Planos.linhaPreenchida) : Planos.colunasDose(op);
     const vazio = !talhoesFazenda.length ? `Nenhum talhão cadastrado na fazenda ${esc(plano.fazenda)}.`
       : !visiveis.length ? `Todos os talhões ${tsi ? 'com variedade ' : ''}já têm ${T().nome}.` : '';
-    const nColunas = colunas.length + (marcar ? 3 : 2) + (tsi ? 1 : 0);
+    const nColunas = colunas.length + (marcar ? 3 : 2) + 1; // + Produtividade média (Defensivo) ou Variedade (TSI)
     // TSI com talhão sem variedade: avisa por que a caixa dele está desabilitada e leva ao Plantio
     const semVariedade = tsi && marcar && talhoesFazenda.some((t) => !planejado(op, t.nome));
     return `
@@ -799,11 +799,11 @@ window.Telas.planoOperacoes = (function () {
       ])}
       ${rec ? quadroRec(op, rec) : ''}
       <div class="talhoes-rolagem">
-        <table class="tabela tabela--compacta tabela-talhoes">
+        <table class="tabela tabela--compacta tabela-talhoes tabela-doses">
           <thead><tr>
             ${marcar ? `<th class="tabela__marcar"><input type="checkbox" data-acao="marcar-todos" aria-label="Marcar todos"
                  ${todos ? 'checked' : ''} ${marcaveis.length ? '' : 'disabled'}></th>` : ''}
-            <th>Talhão</th><th class="tabela__numero">Área (ha)</th>${tsi ? '<th>Variedade</th>' : ''}
+            <th>Talhão</th><th class="tabela__numero">Área (ha)</th>${tsi ? '<th>Variedade</th>' : `<th class="tabela__numero" title="${esc(textoSafrasMedia())}">Produtividade média (${unidadeProdutividade()})</th>`}
             ${colunas.map((l) => `<th class="tabela__numero">${rotuloProduto(l)} ${etiquetaPre(l)}${seloTipo(l)}</th>`).join('')}
           </tr></thead>
           <tbody>
@@ -823,7 +823,8 @@ window.Telas.planoOperacoes = (function () {
                       : `<input type="checkbox" disabled aria-label="${esc(t.nome)} sem variedade: defina a variedade antes da TSI" title="Defina a variedade antes da TSI">`}</td>` : ''}
                   <th scope="row" class="tabela__talhao">${r ? `${pontoRec(op, r)}<span class="so-leitor">${esc(r.nome)}: </span>` : ''}${esc(t.nome)}</th>
                   <td class="tabela__numero">${Util.area(t.area).replace(' ha', '')}</td>
-                  ${tsi ? `<td>${planejado(op, t.nome) ? esc(op.plantio[t.nome].variedade) : '<span class="tabela__nao-recebe">Sem variedade</span>'}</td>` : ''}
+                  ${tsi ? `<td>${planejado(op, t.nome) ? esc(op.plantio[t.nome].variedade) : '<span class="tabela__nao-recebe">Sem variedade</span>'}</td>`
+                    : `<td class="tabela__numero">${historicoLeitura(t.nome)}</td>`}
                   ${doses}
                 </tr>`;
             }).join('')}
@@ -1253,6 +1254,28 @@ window.Telas.planoOperacoes = (function () {
   function passoVariedade(op) {
     const visao = ui.visaoSemente || 'talhoes';
     return visao === 'colheita' ? visaoColheita(op) : visao === 'mapa' ? `${visaoMapa()}${legendaMapa(op)}` : tabelaVariedade(op);
+  }
+
+  // Unidade da produtividade conforme a cultura do plano (por enquanto só soja: sc/ha)
+  function unidadeProdutividade() {
+    return { Soja: 'sc/ha' }[plano.cultura] || 'sc/ha';
+  }
+
+  // Título da coluna ao passar o mouse: as safras que entram na média ("Média das safras 23/24, 24/25 e 25/26").
+  // São as 3 últimas ocorrências da cultura em cada talhão; podem não ser seguidas (ex.: 20/21, 23/24 e 25/26).
+  function textoSafrasMedia() {
+    const safras = [...new Set(talhoesFazenda.flatMap((t) => historicoTalhao(t.nome).map(([safra]) => safra)))].sort();
+    if (!safras.length) return 'Sem histórico de produtividade';
+    const lista = safras.length > 1 ? `${safras.slice(0, -1).join(', ')} e ${safras[safras.length - 1]}` : safras[0];
+    return `Média ${safras.length > 1 ? 'das safras' : 'da safra'} ${lista}`;
+  }
+
+  // Produtividade média das 3 últimas safras, só o número (Defensivo; no TSI, por enquanto não); as safras ao passar o mouse
+  function historicoLeitura(talhao) {
+    const h = historicoTalhao(talhao);
+    if (!h.length) return '<span class="tabela__nao-recebe">—</span>';
+    const safras = `${h.map(([safra, , sc]) => `${safra}: ${Math.round(sc)}`).join(' · ')} ${unidadeProdutividade()}`;
+    return `<span title="${esc(safras)}">${Math.round(mediaHistorica(h))}<span class="so-leitor"> (${esc(safras)})</span></span>`;
   }
 
   // Mini barras das 3 safras (a mais recente mais escura) e a média em sc/ha

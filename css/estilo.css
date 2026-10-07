@@ -1914,3 +1914,8 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .dica-plantio__link { padding: 0; border: 0; background: none; font: inherit; color: inherit; text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
 .dica-plantio__link:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 2px; border-radius: 3px; }
 .dica-plantio:not(:has(.dica-plantio__fechar)) { padding: 8px 14px; }
+
+
+/* Tabela de talhões do Defensivo e do TSI: números centralizados na coluna (título e valor) */
+.tabela-talhoes.tabela-doses .tabela__numero { text-align: center !important; padding-right: 10px; }
+.tabela-talhoes.tabela-doses thead .tabela__numero .etiqueta-tipo { margin-left: auto; margin-right: auto; }
