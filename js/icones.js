@@ -35,6 +35,8 @@ window.Icones = (function () {
     calendario: svg('<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>'),
     ordenar: svg('<path d="M8 10l4-4 4 4M8 14l4 4 4-4"/>'),
     acima: svg('<path d="M8 14l4-4 4 4"/>'),
-    funil: svg('<path d="M4 5h16l-6 8v5l-4 2v-7Z"/>')
+    funil: svg('<path d="M4 5h16l-6 8v5l-4 2v-7Z"/>'),
+    baixar: svg('<path d="M12 4v11M7 10l5 5 5-5"/><path d="M5 19h14"/>'),
+    mais_opcoes: svg('<circle cx="5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/>')
   };
 })();

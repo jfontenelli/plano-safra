@@ -13,7 +13,7 @@ Ver os planos existentes, filtrar, acompanhar os números gerais e abrir ou cria
 - Título "Plano de Safra" e botão "Criar Plano Safra" no canto superior direito.
 - **Filtrar planos:** Safra, Empresa, Fazenda, Cultura.
 - **Visão geral:** três indicadores.
-- **Planos de Safra:** lista com as colunas Safra, Empresa, Fazenda, Cultura, Área, Custo estimado, Receita projetada, Status, Última atualização, Atualizado por e uma seta.
+- **Planos de Safra:** lista com o botão **⋯** (menu do plano) no começo da linha, as colunas Safra, Empresa, Fazenda, Cultura, Área, Custo estimado, Receita projetada, Status, Última atualização, Atualizado por e uma seta no fim (abrir).
 
 ## Regras
 - Filtro de Safra começa na safra mais recente cadastrada (não em "Todas"). Os demais começam em "Todas".
@@ -24,10 +24,15 @@ Ver os planos existentes, filtrar, acompanhar os números gerais e abrir ou cria
   - Receita projetada: soma dos planos que têm receita; "—" com a dica "Aguardando premissas de produção" quando nenhum tem.
 - Na lista, custo e receita vazios aparecem como "—".
 - Status do plano: "Em construção" (cinza) ou "Aprovado" (verde).
+- **Menu do plano**: pelo **⋯** no começo da linha ou pelo **botão direito** na linha. Itens, nesta ordem: **Excluir · Exportar (.xlsx) · Abrir**.
+  - **Excluir** (em vermelho): só para plano **Em construção**. No Aprovado aparece desabilitado, com "Plano aprovado não pode ser excluído" (o aprovado gerou OS e é a linha de base). Confirmação: título "Excluir plano?", "Soja · Safra 26/27 · Fazenda São José" e "As operações, recomendações e talhões planejados desse plano serão apagados. Essa ação não pode ser desfeita." · Cancelar · **Excluir plano** (vermelho). Depois, aviso "Plano excluído"; sem nenhum plano, volta à Tela 01.
+  - **Exportar (.xlsx)**: baixa o plano em planilha (o mesmo arquivo do botão Exportar dentro do plano; ver docs/DECISOES.md, seção 1).
+  - **Abrir**: o mesmo que a seta.
+  - "Copiar para outra fazenda" fica para quando o cliente pedir.
 
 ## Navegação
 - "Criar Plano Safra" → abre a Tela 02 (modal) por cima desta tela.
-- Seta da linha → abre o plano (por enquanto, página provisória com Safra, Empresa e Fazenda no topo e botão para voltar à lista).
+- Seta da linha ou "Abrir" no menu → abre o plano (Tela 04, Operações).
 
 ## Para testar
 - Ter um jeito simples de alternar entre "sem planos" (mostra Tela 01) e "com planos de exemplo" (mostra esta tela).

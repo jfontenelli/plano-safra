@@ -14,7 +14,8 @@ Tudo aqui é **Definido**, exceto o roteiro de validação (seção 7) e as suge
 - Protótipo em HTML de maior fidelidade, construído no Claude Code a partir das telas de referência. As telas são construídas individualmente e agregadas ao protótipo, uma a uma.
 - O protótipo representa a jornada inteira (inclui custo, orçamento, receita e aprovação). O desenvolvimento entrega por partes.
 - Protótipo v1: o que o cliente preenche fica só no navegador dele e se perde ao fechar a página (sem salvar respostas nem anotações).
-- Protótipo v1: botão "Exportar planejamento (.xlsx)" (colunas do Excel de rascunho) e opção "Importar XLSX" na criação do plano, que aceita só o arquivo exportado pelo próprio protótipo. O import com mapeamento por cliente fica fora da v1. Depois, exportação e importação passam a seguir o layout do cliente.
+- Protótipo v1: botão "Exportar (.xlsx)" (no cabeçalho do plano e no menu do plano da Visão Geral) e opção "Importar XLSX" na criação do plano, que aceita só o arquivo exportado pelo próprio protótipo. O import com mapeamento por cliente fica fora da v1. Depois, exportação e importação passam a seguir o layout do cliente.
+- Arquivo exportado: abas **plano** (identificação, usada para conferir o arquivo no importar) · **operacoes** · **cultura_variedade** · **tratamento_sementes** · **corretivo_fertilizante** · **aplicacao_defensivo**, com os nomes de coluna do Excel de rascunho do cliente (sem as colunas de custo por enquanto). Uma linha por talhão × operação × produto, com a recomendação (Rec 1, TSI 2…), dose padrão, dose do talhão e volume (dose × área).
 - Tecnologia do protótipo: HTML, CSS e JavaScript puros, sem framework (sem React). Prioridade agora é descobrir e estabilizar como o produto funciona, não a estrutura técnica definitiva. Construção no Claude Code com versionamento no GitHub, em repositório privado na conta pessoal (pode ser transferido para a empresa depois), com publicação pelo Netlify.
 - Orientação do Claude Code: CLAUDE.md (regras do projeto), docs/TELAS.md (sequência de telas), docs/DECISOES.md (este doc) e imagens de referência em referencias/ (01-primeiro-uso, 02-modal-criar-plano, 03-lista-planos).
 - Protótipo não é MVP; o MVP sai da validação.
@@ -57,6 +58,7 @@ Agrônomo da fazenda e líder de operações podem ser a mesma pessoa, conforme 
 - Colunas da lista: Safra, Empresa, Fazenda, Cultura, Área, Custo estimado, Receita projetada, Status, Última atualização, Atualizado por.
 - Status do plano: **Em construção** e **Aprovado**.
 - Custo e receita ficam vazios até que as informações que os alimentam existam.
+- **Menu do plano** na lista (⋯ no começo da linha ou botão direito): Excluir · Exportar (.xlsx) · Abrir. **Só plano Em construção pode ser excluído** (o aprovado gerou OS e é a linha de base), com confirmação. "Copiar para outra fazenda" fica para quando o cliente pedir.
 
 ### 4.2 Criar plano (modal "Criar Plano de Safra")
 
@@ -69,7 +71,7 @@ Agrônomo da fazenda e líder de operações podem ser a mesma pessoa, conforme 
 - "Como deseja iniciar o plano?":
   - **Usar modelo** (pré-selecionado): "Use uma estrutura pronta de operações e ajuste conforme necessário." Lista de operações levantada com os clientes, pré-preenchida para ajustar. Serve também de plano de exemplo para o usuário ver como fica.
   - **Plano em branco**: "Monte a lista de operações conforme a realidade da fazenda." Lista de operações vazia.
-  - **Importar XLSX**: "Importe um planejamento existente a partir de uma planilha." Na v1, só o arquivo exportado pelo protótipo.
+  - **Importar XLSX**: "Continue um planejamento exportado por este sistema. Só aceita o arquivo .xlsx gerado pelo botão Exportar do Plano de Safra." Na v1, só o arquivo exportado pelo protótipo. Safra, empresa, fazenda e cultura do modal são conferidas com as do arquivo; se forem diferentes, a pessoa escolhe "Usar os do arquivo" ou "Manter os do modal" (talhões que não existem na fazenda ficam de fora, com aviso).
   - **Clonar safra anterior**: card visível e desabilitado com selo "Em breve", sem ação por enquanto.
 - Botões: Cancelar e "Continuar para o cadastro" (leva à etapa 1). "Continuar" fica desabilitado até os quatro campos estarem preenchidos.
 
@@ -235,9 +237,8 @@ Referência: ordem_servico_compass_erp.docx (telas do Compass).
 - Tela inicial: colunas "Etapa atual" e "Avanço" (ex.: 32 de 48 talhões planejados); juntar "Última atualização" e "Atualizado por"; linha inteira clicável; busca por fazenda.
 - Cultura na lista com complemento quando houver talhões de outra cultura (ex.: "Soja · 3 talhões com milho").
 - Criar nova safra propondo o nome no formato padrão (ex.: 2026/27) para evitar duplicidade.
-- Modal de criação: texto do Importar XLSX "Continue um planejamento exportado por este sistema" na v1 (evita o cliente tentar subir a própria planilha); fazenda filtrada pela empresa; aviso imediato quando a fazenda já tem plano na safra, com atalho "Abrir plano existente"; rodapé com botões sempre visível.
+- Modal de criação: fazenda filtrada pela empresa; aviso imediato quando a fazenda já tem plano na safra, com atalho "Abrir plano existente"; rodapé com botões sempre visível.
 - Poder carregar o modelo de operações depois, dentro da etapa Cadastro, para quem escolheu "Plano em branco".
-- Importar XLSX: avisar quando a safra ou fazenda do arquivo diverge da escolhida no modal.
 - Produtividade e preço em bloco recolhível na etapa Cadastro, com unidade automática pela cultura (sc/ha, @/ha).
 
 ## 9. Notas para o protótipo

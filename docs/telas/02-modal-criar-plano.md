@@ -18,7 +18,7 @@ Definir o contexto do novo plano (safra, empresa, fazenda, cultura) e como ele v
 |---|---|---|
 | Usar modelo (pré-selecionado) | Use uma estrutura pronta de operações e ajuste conforme necessário. | Carrega a lista de operações de exemplo. |
 | Plano em branco | Monte a lista de operações conforme a realidade da fazenda. | Lista de operações vazia. |
-| Importar XLSX | Importe um planejamento existente a partir de uma planilha. | Na v1 aceita só o arquivo exportado pelo próprio protótipo. Implementar depois; por enquanto pode ser escolhido, mas "Continuar para as operações" mostra o aviso "Em construção" por cima do modal e não cria o plano (o que foi preenchido continua no modal). |
+| Importar XLSX | Continue um planejamento exportado por este sistema. Só aceita o arquivo .xlsx gerado pelo botão Exportar do Plano de Safra. | Na v1 aceita só o arquivo exportado pelo próprio protótipo. Ver as regras abaixo. |
 | Clonar safra anterior | Utilize o plano de uma safra anterior como base para o novo planejamento. | Desabilitado, com selo "Em breve". Sem ação. |
 
 - Botões no rodapé: "Cancelar" e "Continuar para as operações".
@@ -28,6 +28,14 @@ Definir o contexto do novo plano (safra, empresa, fazenda, cultura) e como ele v
 - Um único plano por safra e fazenda: se a combinação já existir, não deixar criar outro.
 - "Continuar para as operações" fica desabilitado até os quatro campos estarem preenchidos.
 - Ao continuar, o plano é criado com: status "Em construção", área 0 ha, custo e receita vazios, última atualização = hoje, atualizado por = usuário logado.
+- Com uma opção só na lista (ex.: Cultura, por enquanto só Soja), ela já vem escolhida.
+- **Importar XLSX** (só o arquivo exportado pelo Plano de Safra):
+  - Ao escolher o card, aparece o campo "Arquivo exportado pelo Plano de Safra (.xlsx)" (obrigatório). Ao carregar, mostra de qual plano é ("Planejamento da safra 26/27 · Empresa A · Fazenda São José · Soja") e preenche os campos do modal que estiverem vazios.
+  - **O sistema confere Safra, Empresa, Fazenda e Cultura do modal com as do arquivo.** Se algum for diferente, quadro amarelo "O arquivo é de outro plano" com as diferenças ("Safra: no modal 26/27 · no arquivo 25/26") e os botões **Usar os do arquivo** (troca os campos do modal) e **Manter os do modal** (importa para a safra e a fazenda escolhidas, ex.: começar a 26/27 a partir da 25/26). Mudar um campo depois volta a conferir.
+  - Fazenda diferente: avisa quais talhões do arquivo não existem na fazenda e ficam de fora (o planejamento é por talhão; talhões com o mesmo nome recebem o que estava no arquivo).
+  - Arquivo que não é do sistema (sem a aba "plano"): "Este arquivo não foi exportado pelo Plano de Safra. Na v1, só dá para importar um planejamento exportado por este sistema."
+  - Continuar sem arquivo: "Escolha o arquivo exportado pelo Plano de Safra." Com diferença sem escolha, não continua.
+  - O plano importado abre com grupos, operações, plantio, TSI e recomendações (com as doses de cada talhão) e começa "Em construção". Aviso "Planejamento importado", com os talhões que ficaram de fora, se houver. Produto ou variedade que não está no cadastro entra como pré-cadastro.
 
 ## Navegação
 - "Cancelar" ou X → fecha o modal e volta à tela de origem, sem criar nada.

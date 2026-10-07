@@ -186,11 +186,15 @@ window.Telas.planoOperacoes = (function () {
                   data-acao="alternar-status" title="Protótipo: clique para alternar o status"
                   aria-label="Status: ${esc(plano.status)}. Protótipo: clique para alternar o status">${esc(plano.status)}</button></p>
         </div>
-        <nav class="etapas" aria-label="Etapas do plano">
-          ${ETAPAS.map((e) => `
-            <a class="etapa ${e.id === etapa ? 'etapa--ativa' : ''}" href="#/plano/${plano.id}/${e.id}"
-               ${e.id === etapa ? 'aria-current="page"' : ''}>${e.nome}</a>`).join('')}
-        </nav>
+        <div class="plano__linha-etapas">
+          <nav class="etapas" aria-label="Etapas do plano">
+            ${ETAPAS.map((e) => `
+              <a class="etapa ${e.id === etapa ? 'etapa--ativa' : ''}" href="#/plano/${plano.id}/${e.id}"
+                 ${e.id === etapa ? 'aria-current="page"' : ''}>${e.nome}</a>`).join('')}
+          </nav>
+          <button class="botao botao--secundario botao--p plano__exportar" type="button" data-acao="exportar-plano"
+                  title="Baixar o plano em planilha para guardar ou continuar depois">${Icones.baixar} Exportar (.xlsx)</button>
+        </div>
       </header>
       ${somenteLeitura ? `
         <p class="faixa-leitura">${Icones.cadeado} Plano aprovado: somente leitura. O plano aprovado não muda durante a safra.</p>` : ''}
@@ -2229,6 +2233,8 @@ window.Telas.planoOperacoes = (function () {
         break;
 
       case 'nova-op': sairDaReceita(() => criarOperacao(grupo)); break;
+
+      case 'exportar-plano': ArquivoPlano.exportar(plano); break;
 
       case 'alternar-status':
         sairDaReceita(() => {

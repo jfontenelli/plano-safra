@@ -94,12 +94,14 @@
   // Cria o plano com os dados do modal e abre a etapa Operações.
   // Usar modelo: grupos e operações do modelo. Plano em branco: nenhum grupo (o cliente cria tudo).
   // O primeiro plano criado (a partir do primeiro uso) entra na lista junto com os planos de exemplo.
-  function criarPlano(contexto) {
+  // Importar XLSX: grupos, operações, plantio e recomendações vêm do arquivo exportado, na fazenda escolhida.
+  function criarPlano({ importado, ...contexto }) {
     if (!temPlanos()) carregarPlanosExemplo();
     const plano = {
       id: estado.proximoIdPlano++,
       ...contexto,
-      grupos: contexto.inicio === 'modelo' ? Planos.gruposModelo() : [], // área 0 ha até aplicar em talhões
+      grupos: importado ? ArquivoPlano.montarGrupos(importado, contexto.fazenda)
+        : contexto.inicio === 'modelo' ? Planos.gruposModelo() : [], // área 0 ha até aplicar em talhões
       status: 'Em construção',
       custo: null,
       receita: null,
@@ -108,6 +110,10 @@
     };
     DADOS.planos.push(plano);
     location.hash = `#/plano/${plano.id}`;
+    if (importado) {
+      const fora = ArquivoPlano.talhoesFora(importado, plano.fazenda);
+      Aviso.mostrar(`Planejamento importado${fora.length ? ` · ${fora.length} ${fora.length === 1 ? 'talhão do arquivo não existe' : 'talhões do arquivo não existem'} na Fazenda ${Util.escapar(plano.fazenda)} e ${fora.length === 1 ? 'ficou' : 'ficaram'} de fora` : ''}`);
+    }
   }
 
   // ----- Menu Demonstração -----

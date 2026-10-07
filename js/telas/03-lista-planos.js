@@ -43,6 +43,7 @@ window.Telas.listaPlanos = (function () {
             <table class="tabela">
               <thead>
                 <tr>
+                  <th class="lista-planos__menu"><span class="so-leitor">Mais ações</span></th>
                   <th>Safra</th><th>Empresa</th><th>Fazenda</th><th>Cultura</th>
                   <th class="tabela__numero">Área</th>
                   <th class="tabela__numero">Custo estimado</th>
@@ -68,6 +69,84 @@ window.Telas.listaPlanos = (function () {
       });
     });
     atualizar(conteudo);
+    // Menu do plano: botão direito na linha ou o botão ⋯ no começo da linha (Excluir · Exportar · Abrir)
+    conteudo.addEventListener('contextmenu', (e) => {
+      const tr = e.target.closest('tr[data-plano]');
+      if (!tr || e.target.closest('a, button')) return;
+      e.preventDefault();
+      abrirMenuPlano(Number(tr.dataset.plano), e.target, e.clientX, e.clientY);
+    });
+    conteudo.addEventListener('click', (e) => {
+      const botao = e.target.closest('[data-menu-plano]');
+      if (!botao) return;
+      const caixa = botao.getBoundingClientRect();
+      abrirMenuPlano(Number(botao.dataset.menuPlano), botao, caixa.left, caixa.bottom + 4);
+    });
+  }
+
+  // ----- Menu do plano -----
+  let menuAberto = null;
+  function abrirMenuPlano(id, ancora, x, y) {
+    fecharMenuPlano();
+    const p = DADOS.planos.find((x) => x.id === id);
+    if (!p) return;
+    const menu = document.createElement('div');
+    menu.className = 'menu-contexto';
+    menu.setAttribute('role', 'menu');
+    menu.setAttribute('aria-label', `Plano ${p.safra} · ${p.fazenda}`);
+    // Excluir só para plano em construção; no aprovado aparece desabilitado, com o motivo
+    const aprovado = p.status === 'Aprovado';
+    menu.innerHTML = [['excluir', 'Excluir'], ['exportar', 'Exportar (.xlsx)'], ['abrir', 'Abrir']]
+      .map(([item, rotulo]) => {
+        const bloqueado = item === 'excluir' && aprovado;
+        return `<button class="menu-contexto__item ${item === 'excluir' ? 'menu-contexto__item--perigo' : ''}" type="button" role="menuitem" data-item="${item}"
+                  ${bloqueado ? 'aria-disabled="true" title="Plano aprovado não pode ser excluído"' : ''}>${rotulo}${bloqueado
+                  ? '<span class="menu-contexto__motivo">Plano aprovado não pode ser excluído</span>' : ''}</button>`;
+      }).join('');
+    document.body.appendChild(menu);
+    const { width, height } = menu.getBoundingClientRect();
+    menu.style.left = `${Math.max(8, Math.min(x, window.innerWidth - width - 8))}px`;
+    menu.style.top = `${y + height + 8 > window.innerHeight ? Math.max(8, y - height) : y}px`;
+    const itens = [...menu.querySelectorAll('[data-item]')];
+    const fora = (ev) => { if (!menu.contains(ev.target)) fecharMenuPlano(); };
+    menu.addEventListener('click', (ev) => {
+      const item = ev.target.closest('[data-item]');
+      if (!item || item.getAttribute('aria-disabled') === 'true') return;
+      fecharMenuPlano();
+      if (item.dataset.item === 'abrir') location.hash = `#/plano/${p.id}`;
+      else if (item.dataset.item === 'exportar') ArquivoPlano.exportar(p);
+      else excluirPlano(p);
+    });
+    menu.addEventListener('keydown', (ev) => {
+      const i = itens.indexOf(document.activeElement);
+      if (ev.key === 'ArrowDown') { ev.preventDefault(); itens[(i + 1) % itens.length].focus(); }
+      else if (ev.key === 'ArrowUp') { ev.preventDefault(); itens[(i - 1 + itens.length) % itens.length].focus(); }
+      else if (ev.key === 'Escape' || ev.key === 'Tab') { ev.preventDefault(); fecharMenuPlano(); if (ancora.isConnected) ancora.focus(); }
+    });
+    document.addEventListener('mousedown', fora, true);
+    menuAberto = { menu, fora };
+    itens[0].focus();
+  }
+
+  // Excluir plano (só em construção): confirmação; sem nenhum plano, volta ao primeiro uso (Tela 01)
+  function excluirPlano(p) {
+    Modal.confirmar({
+      titulo: 'Excluir plano?',
+      texto: `<strong>${esc(p.cultura)} · Safra ${esc(p.safra)} · Fazenda ${esc(p.fazenda)}</strong><br>
+              As operações, recomendações e talhões planejados desse plano serão apagados. Essa ação não pode ser desfeita.`,
+      botoes: [{ rotulo: 'Cancelar' }, { rotulo: 'Excluir plano', classe: 'perigo', acao: () => {
+        DADOS.planos.splice(DADOS.planos.indexOf(p), 1);
+        window.dispatchEvent(new HashChangeEvent('hashchange')); // redesenha a tela (lista ou primeiro uso)
+        Aviso.mostrar('Plano excluído');
+      } }]
+    });
+  }
+
+  function fecharMenuPlano() {
+    if (!menuAberto) return;
+    document.removeEventListener('mousedown', menuAberto.fora, true);
+    menuAberto.menu.remove();
+    menuAberto = null;
   }
 
   function planosFiltrados() {
@@ -80,7 +159,7 @@ window.Telas.listaPlanos = (function () {
     conteudo.querySelector('#lp-indicadores').innerHTML = indicadores(planos);
     conteudo.querySelector('#lp-linhas').innerHTML = planos.length
       ? planos.map(linha).join('')
-      : `<tr><td class="tabela__vazia" colspan="11">Nenhum plano encontrado com esses filtros.</td></tr>`;
+      : `<tr><td class="tabela__vazia" colspan="12">Nenhum plano encontrado com esses filtros.</td></tr>`;
   }
 
   // ----- Indicadores, sempre calculados sobre os planos filtrados -----
@@ -124,7 +203,11 @@ window.Telas.listaPlanos = (function () {
   function linha(p) {
     const aprovado = p.status === 'Aprovado';
     return `
-      <tr>
+      <tr data-plano="${p.id}">
+        <td class="lista-planos__menu">
+          <button class="botao-icone" type="button" data-menu-plano="${p.id}" title="Mais ações"
+                  aria-haspopup="menu" aria-label="Mais ações do plano ${esc(p.safra)} · ${esc(p.fazenda)}">${Icones.mais_opcoes}</button>
+        </td>
         <td>${esc(p.safra)}</td>
         <td>${esc(p.empresa)}</td>
         <td>${esc(p.fazenda)}</td>

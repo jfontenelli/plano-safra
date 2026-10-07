@@ -10,8 +10,8 @@ window.Telas.abrirModalCriarPlano = function ({ aoCriar }) {
       texto: 'Use uma estrutura pronta de operações e ajuste conforme necessário.' },
     { valor: 'branco',   titulo: 'Plano em branco', icone: Icones.lapis,
       texto: 'Monte a lista de operações conforme a realidade da fazenda.' },
-    { valor: 'importar', titulo: 'Importar XLSX',   icone: Icones.planilha, emBreve: true,
-      texto: 'Importe um planejamento existente a partir de uma planilha.' },
+    { valor: 'importar', titulo: 'Importar XLSX',   icone: Icones.planilha,
+      texto: 'Continue um planejamento exportado por este sistema. Só aceita o arquivo .xlsx gerado pelo botão Exportar do Plano de Safra.' },
     { valor: 'clonar',   titulo: 'Clonar safra anterior', icone: Icones.copiar, emBreve: true,
       texto: 'Utilize o plano de uma safra anterior como base para o novo planejamento.' }
   ];
@@ -46,6 +46,14 @@ window.Telas.abrirModalCriarPlano = function ({ aoCriar }) {
             ${INICIOS.map(cardInicio).join('')}
           </div>
         </fieldset>
+
+        <div class="importar" hidden>
+          <label class="campo__rotulo" for="cp-arquivo">Arquivo exportado pelo Plano de Safra (.xlsx) ${asterisco()}</label>
+          <input class="importar__arquivo" id="cp-arquivo" type="file" accept=".xlsx">
+          <p class="erro-campo" id="cp-erro-arquivo" role="alert" hidden></p>
+          <p class="importar__ok" id="cp-arquivo-ok" hidden></p>
+          <div class="importar__diferencas" id="cp-diferencas" role="alert" hidden></div>
+        </div>
       </div>
 
       <div class="modal__rodape">
@@ -71,6 +79,86 @@ window.Telas.abrirModalCriarPlano = function ({ aoCriar }) {
 
   preencherSafras();
   selectSafra.focus();
+
+  // ----- Importar XLSX -----
+  // Os campos do modal são conferidos com os do arquivo; se forem diferentes, a pessoa escolhe quais usar.
+  const caixaImportar = form.querySelector('.importar');
+  const inputArquivo = form.querySelector('#cp-arquivo');
+  const erroArquivo = form.querySelector('#cp-erro-arquivo');
+  const okArquivo = form.querySelector('#cp-arquivo-ok');
+  const caixaDiferencas = form.querySelector('#cp-diferencas');
+  const CAMPOS = [['safra', 'Safra'], ['empresa', 'Empresa'], ['fazenda', 'Fazenda'], ['cultura', 'Cultura']];
+  let importado = null;      // arquivo lido: { contexto, germinacao, abas }
+  let manterModal = false;   // a pessoa escolheu "Manter os do modal"
+
+  function importando() { return form.elements.inicio.value === 'importar'; }
+
+  function mostrarImportar() {
+    caixaImportar.hidden = !importando();
+    conferirArquivo();
+  }
+
+  inputArquivo.addEventListener('change', async () => {
+    importado = null; manterModal = false;
+    erroArquivo.hidden = true; okArquivo.hidden = true; caixaDiferencas.hidden = true;
+    const arquivo = inputArquivo.files[0];
+    if (!arquivo) return;
+    const lido = await ArquivoPlano.ler(arquivo);
+    if (lido.erro) { erroArquivo.textContent = lido.erro; erroArquivo.hidden = false; return; }
+    importado = lido;
+    const c = lido.contexto;
+    okArquivo.textContent = `Planejamento da safra ${c.safra} · ${c.empresa} · Fazenda ${c.fazenda} · ${c.cultura}`;
+    okArquivo.hidden = false;
+    // Campos ainda vazios no modal recebem o valor do arquivo
+    CAMPOS.forEach(([campo]) => { if (!form.elements[campo].value) escolher(campo, c[campo]); });
+    conferirArquivo();
+    atualizar();
+  });
+
+  // Coloca o valor na lista (se não existir, entra nela) e escolhe
+  function escolher(campo, valor) {
+    if (!valor) return;
+    const select = form.elements[campo];
+    if (campo === 'safra') {
+      if (!DADOS.safras.includes(valor)) DADOS.safras.push(valor);
+      preencherSafras(valor);
+      return;
+    }
+    if (![...select.options].some((o) => o.value === valor)) select.add(new Option(valor, valor));
+    select.value = valor;
+  }
+
+  function diferencas() {
+    if (!importado || !importando()) return [];
+    return CAMPOS.filter(([campo]) => form.elements[campo].value && form.elements[campo].value !== importado.contexto[campo]);
+  }
+
+  function conferirArquivo() {
+    const lista = manterModal ? [] : diferencas();
+    caixaDiferencas.hidden = !lista.length;
+    if (!lista.length) { caixaDiferencas.innerHTML = ''; return; }
+    const fora = form.elements.fazenda.value ? ArquivoPlano.talhoesFora(importado, form.elements.fazenda.value) : [];
+    const esc = Util.escapar;
+    caixaDiferencas.innerHTML = `
+      <p class="importar__titulo">${Icones.alerta} O arquivo é de outro plano</p>
+      <ul class="importar__lista">
+        ${lista.map(([campo, rotulo]) => `<li>${rotulo}: no modal <strong>${esc(form.elements[campo].value)}</strong> · no arquivo <strong>${esc(importado.contexto[campo])}</strong></li>`).join('')}
+      </ul>
+      ${fora.length ? `<p class="importar__aviso">Mantendo os do modal, ${fora.length} ${fora.length === 1 ? 'talhão do arquivo não existe' : 'talhões do arquivo não existem'} na Fazenda ${esc(form.elements.fazenda.value)} e ${fora.length === 1 ? 'fica' : 'ficam'} de fora (${fora.map(esc).join(', ')}).</p>` : ''}
+      <div class="importar__botoes">
+        <button class="botao botao--secundario botao--p" type="button" data-acao="usar-arquivo">Usar os do arquivo</button>
+        <button class="botao botao--secundario botao--p" type="button" data-acao="manter-modal">Manter os do modal</button>
+      </div>`;
+  }
+
+  form.addEventListener('click', (e) => {
+    const acao = e.target.closest('[data-acao]')?.dataset.acao;
+    if (acao === 'usar-arquivo') {
+      CAMPOS.forEach(([campo]) => escolher(campo, importado.contexto[campo]));
+      conferirArquivo(); atualizar();
+    }
+    if (acao === 'manter-modal') { manterModal = true; conferirArquivo(); atualizar(); }
+  });
 
   // ----- Criar nova safra (última opção da lista de safras) -----
   function preencherSafras(selecionada = '') {
@@ -162,7 +250,11 @@ window.Telas.abrirModalCriarPlano = function ({ aoCriar }) {
     erroContinuar.hidden = !faltando.length;
   }
 
-  form.addEventListener('change', atualizar);
+  form.addEventListener('change', (e) => {
+    if (e.target.name === 'inicio') mostrarImportar();
+    else if (e.target !== inputArquivo) { manterModal = false; conferirArquivo(); }
+    atualizar();
+  });
 
   // ----- Continuar para as operações -----
   form.addEventListener('submit', (e) => {
@@ -171,6 +263,14 @@ window.Telas.abrirModalCriarPlano = function ({ aoCriar }) {
     const { faltando, duplicado } = atualizar();
     if (faltando.length) { form.elements[faltando[0]].focus(); return; }
     if (duplicado) { form.elements.fazenda.focus(); return; }
+    if (importando()) {
+      // Importar: precisa do arquivo lido e, se houver diferença, da escolha da pessoa
+      if (!importado) {
+        if (erroArquivo.hidden) { erroArquivo.textContent = 'Escolha o arquivo exportado pelo Plano de Safra.'; erroArquivo.hidden = false; }
+        inputArquivo.focus(); return;
+      }
+      if (!caixaDiferencas.hidden) { caixaDiferencas.querySelector('button').focus(); return; }
+    }
     const v = valores();
     modal.fechar();
     aoCriar({
@@ -178,7 +278,8 @@ window.Telas.abrirModalCriarPlano = function ({ aoCriar }) {
       empresa: v.empresa,
       fazenda: v.fazenda,
       cultura: v.cultura,
-      inicio: v.inicio
+      inicio: v.inicio,
+      ...(importando() ? { importado } : {})
     });
   });
 

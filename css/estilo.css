@@ -1927,3 +1927,27 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .etiqueta-tipo--potassico      { background: #fbeee6; color: #9a4a1c; }
 .etiqueta-tipo--formulado-npk  { background: #f0eef8; color: #57418f; }
 .etiqueta-tipo--micronutriente { background: #f6f3dc; color: #6b5e10; }
+
+/* Cabeçalho do plano: etapas à esquerda e "Exportar (.xlsx)" à direita, na mesma linha */
+.plano__linha-etapas { align-self: stretch; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 4px 16px; }
+.plano__exportar .icone { width: 16px; height: 16px; }
+
+/* Lista de planos: ⋯ (menu do plano) no começo da linha; a seta de abrir fica no fim */
+.tabela th.lista-planos__menu, .tabela td.lista-planos__menu { width: 1%; padding-left: 8px; padding-right: 0; }
+
+/* Modal Criar plano: Importar XLSX */
+.importar { margin-top: 16px; display: flex; flex-direction: column; gap: 6px; }
+.importar__arquivo { font: inherit; font-size: 14px; }
+.importar__ok { margin: 0; font-size: 13px; color: var(--verde-700); font-weight: 600; }
+.importar__diferencas { margin-top: 4px; padding: 12px 14px; border: 1px solid #f2de9b; border-radius: 8px; background: #fff6d6; font-size: 14px; }
+.importar__titulo { display: flex; align-items: center; gap: 6px; margin: 0 0 6px; font-weight: 700; color: #7a5600; }
+.importar__titulo .icone { width: 16px; height: 16px; }
+.importar__lista { margin: 0 0 8px; padding-left: 20px; }
+.importar__aviso { margin: 0 0 8px; color: #7a5600; }
+.importar__botoes { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* Menu do plano: Excluir em vermelho; desabilitado (plano aprovado) com o motivo embaixo */
+.menu-contexto__item--perigo { color: #b03a2e; }
+.menu-contexto__item[aria-disabled="true"] { color: #9aa49f; cursor: not-allowed; }
+.menu-contexto__item[aria-disabled="true"]:hover { background: transparent; }
+.menu-contexto__motivo { display: block; font-size: 12px; color: var(--texto-suave); }
