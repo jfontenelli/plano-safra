@@ -86,7 +86,6 @@ window.DADOS = {
       { nome: '2ª Fungicida', dap: 55 },
       { nome: '3ª Fungicida', dap: 70 },
       { nome: '4ª Fungicida', dap: 85 },
-      { nome: '5ª Fungicida', dap: 90 },
       { nome: 'Desfolha', dap: 100 }
     ] }
   ],
@@ -130,7 +129,6 @@ window.DADOS = {
           '2ª Fungicida': op([['Priori Xtra', 0.30], ['Ampligo', 0.15]]),
           '3ª Fungicida': op([['Elatus', 0.20], ['Connect', 1.0]]),
           '4ª Fungicida': op([['Cypress', 0.30], ['Premio', 0.05]]),
-          // 5ª Fungicida: sem talhões (Sem operação)
           'Desfolha': op([['Finale', 2.0]])
         };
       })()
