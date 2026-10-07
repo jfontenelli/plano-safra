@@ -1,6 +1,6 @@
 # Tela Operações (grupo Defensivo)
 
-Atualizado em 06/10/2026. Este doc mostra só o estado atual da tela. Decisão alterada é reescrita, não acumulada.
+Atualizado em 07/10/2026. Este doc mostra só o estado atual da tela. Decisão alterada é reescrita, não acumulada.
 Tudo é **Definido**, exceto as seções "Sugestões em teste" e "Em aberto".
 Referência no protótipo: `tela/04-operacoes-defensivos`. Referência visual: mockup de 02/10/2026 (grupos no rodapé) e telas do teste de 06/10/2026 (talhões primeiro, depois a recomendação).
 **A imagem é só referência visual. Quando imagem e documento divergirem (nomes, ordem de colunas, botões, comportamento), vale este documento.**
@@ -72,12 +72,21 @@ Princípio: o peso visual de cada navegação é inverso à frequência de uso. 
 
 **Renomear e excluir** (só com o plano "Em construção")
 - **Renomear: duplo clique no nome** (ou F2 no teclado) transforma o nome em campo de texto na própria lista, com o nome completo (sem truncar). Enter ou sair do campo salva; Esc desfaz. Nome vazio volta ao anterior.
-- **Botão direito no nome** (ou tecla de menu / Shift+F10) abre o menu **Inserir · Excluir · Renomear**:
+- **Nome de operação não se repete no plano** (sem diferenciar maiúsculas e acentos). Na nova operação, o erro aparece embaixo do nome ("Já existe uma operação com esse nome") e "Criar operação" fica desabilitado. Ao renomear, o nome volta ao anterior, com a mesma mensagem.
+- **Botão direito no nome** (ou tecla de menu / Shift+F10) abre o menu **Inserir · Excluir · Renomear · Copiar**:
   - Inserir: mesmo comportamento de "+ Nova operação".
   - Excluir: uma operação por vez. Ver "Sugestões em teste" (exclusão).
   - Renomear: igual ao duplo clique.
+  - Copiar: abre o modal **"Copiar [operação]"** (seção 6.1).
 - Ao passar o mouse no nome: "clique duas vezes para renomear, botão direito para mais opções".
 - O DAP não é editável na lista (só no cabeçalho da operação). A lista continua ordenada pelo DAP.
+
+**6.1 Copiar operação**
+- Leva as recomendações (nome, produtos e doses padrão), os talhões de cada uma e as doses próprias para **outra operação do mesmo grupo, que já existe**. O destino mantém o próprio nome, DAP e fenologia. A origem não muda.
+- Modal **"Copiar [operação]"**: subtítulo "Escolha a operação que vai receber as recomendações agronômicas."; lista das outras operações do grupo, na ordem do DAP, com nome, DAP e resumo ("2 recomendações · 8 talhões" ou "Sem recomendação"); botões Cancelar · **Colar** (verde, habilita ao escolher).
+- Destino com recomendação: confirmação antes de colar. "Substituir o que está em 2ª Fungicida? 2ª Fungicida já tem 1 recomendação em 8 talhões. Ela será substituída pelas de 1ª Fungicida. Essa ação não pode ser desfeita." Botões: Cancelar · Substituir. Destino sem recomendação: cola na hora.
+- Depois de colar, a tela abre o destino em "Todos os talhões". Mensagem: "1ª Fungicida copiada para 2ª Fungicida".
+- Para criar uma operação já preenchida: "+ Nova operação" e depois Copiar para ela.
 
 **Plano aprovado**
 - Nenhuma operação pode ser editada: sem renomear e sem menu do botão direito.
@@ -138,14 +147,16 @@ Regras gerais da base (Plano_Safra_Cultura_Variedade_revisado_Julyane.docx): só
 **Conteúdo**
 - Topo: título ("Definir recomendação" ou "Editar recomendação") · operação e DAP · **"N talhões · X ha"** (sem a lista de nomes, que pode ser muito grande) · X para fechar.
 - Campo **"Nome da recomendação"** e tabela de produtos (seção 8).
+- Ao lado do nome, só na **recomendação nova** e quando a operação já tem outra recomendação com produtos: **"Copiar produtos de"**, lista das recomendações da mesma operação com os produtos, ex.: "Rec 1 (Roundup Original DI, DMA 806 BR)" (até 3 nomes comerciais; o resto como "+ 2"). Ao escolher, a tabela recebe os produtos e as doses padrão dela (substitui o que estava), com a mensagem "Produtos de Rec 1 copiados". Daí dá para adicionar, remover e mudar a dose antes de aplicar. Não aparece no "Editar".
 - Rodapé, numa linha: **[🗑 Excluir recomendação]** à esquerda (só para recomendação já aplicada em talhões; vermelho, estilo secundário, longe do botão principal) · **Cancelar** · **"Aplicar em N talhões"** (ou **"Salvar alterações"** no Editar), o único verde sólido.
 
 **Aplicar** (salva e aplica de uma vez; não existe "Salvar recomendação" separado)
 - Recomendação nova ou todos os talhões dela marcados: grava produtos, doses e nome, e liga os talhões marcados à recomendação (talhão que estava em outra muda para esta). Os talhões que já usavam a recomendação recebem as alterações: dose padrão nova chega a quem segue o padrão (dose própria fica); produto removido ou trocado sai de todos.
+- **Recomendação nova com a mesma composição de outra da operação** (ex.: copiada dela e aplicada): os talhões **entram na que já existe**, e a dose diferente da padrão dela fica como dose própria. Não nasce uma recomendação igual. Mensagem: "Rec 1 aplicada em 1 talhão". Caso típico: incluir um talhão esquecido na Rec 1.
 - **Só parte dos talhões de uma recomendação marcada: a mudança vale só para os marcados.**
   - Mesmos produtos, dose diferente: vira **dose própria** dos marcados; a recomendação não muda. Só a dose que a pessoa alterar no modal é gravada (dose não mexida fica como estava em cada talhão). Mensagem: "Rec 1 aplicada em 2 talhões · doses só desses talhões".
   - Produtos diferentes (adicionar, remover ou trocar): os marcados saem da recomendação. Se outra recomendação já tem essa composição, eles entram nela (dose diferente da padrão dela fica como dose própria; mensagem "1 talhão passou para Rec 2"). Senão, **nasce a próxima recomendação** para eles (mensagem "Rec 2 criada para 2 talhões · Rec 1 continua em 10 talhões"). Nome digitado diferente do original vai para a nova.
-- Depois de aplicar, o modal fecha, a seleção é limpa e **a tela vai para a etiqueta da recomendação aplicada** (etiqueta selecionada, quadro e talhões dela), com a tabela no topo. Mensagem: "Recomendação 1 aplicada em 2 talhões" (ou "Rec 1 salva", no Editar).
+- Depois de aplicar, o modal fecha, a seleção é limpa e **a tela volta para "Todos os talhões"**, com a tabela no topo. Para ver só uma recomendação, a pessoa escolhe a etiqueta dela. Mensagem: "Recomendação 1 aplicada em 2 talhões" (ou "Rec 1 salva", no Editar).
 
 **Cancelar, X ou Esc**: descarta o que foi feito no modal, sem perguntar, e mantém os talhões marcados. Recomendação nova que ficou vazia é descartada (a numeração não pula).
 
@@ -198,6 +209,8 @@ Um verbo por ação, do botão à mensagem:
 | Editar / Salvar alterações | mudar a recomendação inteira, pelo quadro dela |
 | Excluir recomendação | tirar a recomendação dos talhões (marcados ou todos, ver seção 10) |
 | Limpar | desmarcar os talhões |
+| Copiar produtos de | trazer produtos e doses padrão de outra recomendação da operação para a recomendação nova |
+| Copiar / Colar | levar as recomendações de uma operação para outra que já existe |
 
 ## 14. Demonstração (só no protótipo)
 
@@ -223,7 +236,9 @@ Um verbo por ação, do botão à mensagem:
   - Ao confirmar, exclui a operação com seus talhões e produtos. Se a operação aberta foi excluída, abre a primeira restante da lista (ou o estado vazio do grupo).
 - Observar nos testes se o duplo clique e o botão direito na lista de operações são descobertos; se não, mostrar uma dica fixa no cabeçalho da lista.
 - Aplicar em parte dos talhões com produtos diferentes cria outra recomendação a partir da que estava aberta ("abri a Rec 1, saiu uma Rec 2"). Se confundir, avisar no modal assim que a composição mudar: "Esses 2 talhões vão formar uma nova recomendação".
-- Sem as guias no modal, não dá para aplicar uma recomendação existente em talhões novos (cria-se outra com os mesmos produtos). Se fizer falta, testar "Usar recomendação existente".
+- "Copiar produtos de" substitui a tabela do modal sem perguntar. Se o talhão entrar numa recomendação que já existe (mesma composição), o nome digitado no modal é ignorado.
+- Copiar operação: o destino é só do mesmo grupo e as recomendações mantêm o nome da origem (Rec 1…).
+- Copiar e colar no estilo Excel (Ctrl+C / Ctrl+V na linha do talhão) foi considerado e deixado de lado: "Copiar produtos de" atende com menos ambiguidade. Observar nos testes se faz falta.
 
 ## 17. Em aberto
 
@@ -235,3 +250,4 @@ Um verbo por ação, do botão à mensagem:
 6. Preparo do solo e operações só de máquina (sem tipo).
 7. Talhão de outra cultura com a Cultura fixa no topo.
 8. Momento em que o plano entra na lista de planos.
+9. Copiar recomendação de outra operação (ex.: Fungicida 1, 2 e 3) no "Copiar produtos de". Por enquanto, só da mesma operação.
