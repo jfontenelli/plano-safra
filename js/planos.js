@@ -34,7 +34,8 @@ window.Planos = (function () {
   }
 
   function novaOperacao(nome, dap = null) {
-    return { id: novoId('o'), nome, dap, fenologia: '', receitas: [], talhoes: {} };
+    // plantio: só no grupo Semente — { 'T01': { variedade, data ('AAAA-MM-DD') } }
+    return { id: novoId('o'), nome, dap, fenologia: '', receitas: [], talhoes: {}, plantio: {} };
   }
 
   // ----- Receitas -----
@@ -72,6 +73,7 @@ window.Planos = (function () {
       const d = detalhes[op.nome];
       if (!d) return;
       op.fenologia = d.fenologia || '';
+      (d.plantio || []).forEach(({ talhao, variedade, data }) => { op.plantio[talhao] = { variedade, data }; });
       if (!d.produtos || !d.produtos.length) return;
       const receita = novaReceita(op, d.produtos.map(([nome, dose]) => linhaDoProduto(nome, dose)));
       op.receitas.push(receita);

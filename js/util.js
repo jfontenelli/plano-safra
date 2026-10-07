@@ -6,7 +6,7 @@ window.Util = {
   areaPlano(plano) {
     const noPlano = new Set();
     (plano.grupos || []).forEach((g) => g.operacoes.forEach((op) =>
-      Object.keys(op.talhoes).forEach((t) => noPlano.add(t))));
+      [...Object.keys(op.talhoes), ...Object.keys(op.plantio || {})].forEach((t) => noPlano.add(t))));
     return (DADOS.talhoes[plano.fazenda] || [])
       .filter((t) => noPlano.has(t.nome))
       .reduce((soma, t) => soma + t.area, 0);

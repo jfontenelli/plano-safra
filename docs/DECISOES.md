@@ -1,6 +1,6 @@
 # Plano de Safra: decisões
 
-Atualizado em 02/10/2026. Próximo passo: protótipo das telas iniciais no Claude Code (primeiro uso, modal Criar plano, lista de planos).
+Atualizado em 07/10/2026. Próximo passo: grupo Semente no protótipo (docs/telas/04.2-operacoes-sementes.md).
 Imagem do fluxo: artifact "Fluxo do Plano de Safra" (claude.ai/artifact/4kzr4fg15grTw4YSHKmHf2).
 
 Este doc mostra só o estado atual. Decisão alterada é reescrita, não acumulada.
@@ -93,6 +93,21 @@ Agrônomo da fazenda e líder de operações podem ser a mesma pessoa, conforme 
 - Restrição de aplicação do produto (ex.: "somente terrestre") aparece só como informação ao lado do produto, vinda do cadastro. Forma de aplicação e vazão não são preenchidas no plano.
 - **Calendário Agrícola** (nome provisório): aba vizinha com todas as operações ordenadas por DAP/DAE, cresce durante o planejamento e mostra o status de cada item.
 
+### 4.4 Plantio (grupo Semente)
+
+Detalhe da tela: docs/telas/04.2-operacoes-sementes.md.
+
+- Sequência do planejamento do plantio, por talhão: **variedade e data de plantio** → **população de plantas** → **tratamento de sementes (TSI)**. Os passos Variedade e População podem ser unidos depois.
+- **Data de plantio planejada por dia** (data exata por talhão). A janela de plantio recomendada da variedade é só referência: data fora dela gera alerta, sem bloquear.
+- A previsão de colheita (4.3) é agregada por **decêndio**, em hectares, para o agrônomo ver se a colheita fica concentrada e decidir trocar variedade ou data. Capacidade de colheita fica fora da v1.
+- **Mapa de variedades da fazenda**: os talhões pintados pela variedade, com a área total de cada variedade, para visualizar e rotacionar as variedades. O plano é por fazenda, então o mapa é por fazenda (sem visão por empresa). Clicar no talhão abre a definição da variedade.
+- Escolha da variedade com apoio do histórico do talhão: produtividade das 3 últimas safras da cultura e chuva acumulada no ciclo de cada uma.
+- **Germinação média do plano**: na v1, um valor único para todos os talhões (a semente ainda não foi comprada; não há lote).
+- População de plantas: recomendada (cadastro da variedade, referência) e planejada (agrônomo).
+- **Sementes = população planejada × área ÷ germinação. Bags = sementes ÷ 5.000.000** (1 bag de soja = 5 milhões de sementes).
+- **Tratamento de sementes (TSI)**: receita com nome (TS 1, TS 2…), no padrão da recomendação agronômica (composição de produtos = identidade; dose pode variar por talhão), aplicada **por talhão** (pode mudar após os testes). Composta por grupos de produto: fertilizante, fungicida, inseticida, nematicida, inoculante, polímero, pó secante e grafite.
+- Unidade da dose de TSI vem do cadastro do produto; a unidade usada pelos clientes (por 100 kg de sementes, por bag ou por hectare) e a entrada do PMS no plano serão definidas nos testes. Sem cálculo de quantidade de TSI no plano por enquanto.
+
 ## 5. Orçamento e aprovação
 
 - Necessidade de insumos calculada do plano; estoque vem do Compass (integração a definir); necessidade de compra = necessidade − estoque.
@@ -132,7 +147,7 @@ Agrônomo da fazenda e líder de operações podem ser a mesma pessoa, conforme 
 
 ### 6.3 Informações por momento (em revisão)
 
-- **Planejamento:** identificação (safra, empresa, fazenda, talhão, área do talhão, área de aplicação, cultura, variedade); momento (grupo de operação, operação, fenologia, DAP/DAE, data prevista); insumo (grupo, princípio ativo, produto, unidade, dose recomendada e planejada, volume); semente (TSI, PMS e germinação estimados pelo agrônomo corporativo, população, janela de plantio); tratamento de sementes.
+- **Planejamento:** identificação (safra, empresa, fazenda, talhão, área do talhão, área de aplicação, cultura, variedade); momento (grupo de operação, operação, fenologia, DAP/DAE, data prevista); insumo (grupo, princípio ativo, produto, unidade, dose recomendada e planejada, volume); semente (variedade, data de plantio, germinação média do plano, população recomendada e planejada, quantidade de sementes e bags; PMS em aberto, ver 4.4); tratamento de sementes (TSI por talhão).
 - **Programação:** blocos agronômico e operacional, data de abertura, prazo de conclusão, vazão, sequência de mistura (regra a detalhar), local de estoque, parâmetros de voo, observações. Detalhe por tipo de OS em 6.4.
 - **Execução/fechamento:**
   - Apontamento da área executada por talhão, por dia de operação ou pela área total, com saldo a apontar (área prevista − área apontada); cada apontamento guarda data da operação e data de lançamento.

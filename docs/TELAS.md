@@ -16,7 +16,8 @@ Regras de negócio ficam em `docs/DECISOES.md`.
 | 01 | Primeiro uso | telas/01-primeiro-uso.md | referencias/01-primeiro-uso.png | Construída |
 | 02 | Modal Criar Plano de Safra | telas/02-modal-criar-plano.md | referencias/02-modal-criar-plano.png | Construída |
 | 03 | Lista de planos | telas/03-lista-planos.md | referencias/03-lista-planos.png | Construída |
-| 04 | Operações (grupo Defensivo) | telas/04-operacoes-defensivos.md | referencias/04.1-operacao-defensivos.png | Construída |
+| 04.1 | Operações (grupo Defensivo) | telas/04.1-operacoes-defensivos.md | referencias/04.1-operacao-defensivos.png | Construída |
+| 04.2 | Operações (grupo Semente) | telas/04.2-operacoes-sementes.md | quadro de design (telas A1.1, A1.2, A2, A3 e R2) | Em construção: passo Variedade construído; População de plantas e TSI a construir |
 
 Situação: A definir → Pronta para construir → Construída.
 
@@ -34,4 +35,4 @@ Menu "Plano de Safra"
 ```
 
 ## Próximas telas do plano (ainda não desenhadas)
-Operações (demais grupos) → Calendário Agrícola → Suprimentos → Aprovação (etapas conforme docs/telas/04-operacoes-defensivos.md).
+Operações (demais grupos) → Calendário Agrícola → Suprimentos → Aprovação (etapas conforme docs/telas/04.1-operacoes-defensivos.md).

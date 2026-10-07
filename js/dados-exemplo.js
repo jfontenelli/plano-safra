@@ -40,6 +40,66 @@ window.DADOS = {
     ]
   },
 
+  // Cadastro de variedades (exemplo), por cultura, para a região das fazendas (médio-norte de Mato Grosso,
+  // Sorriso/Sinop) e a safra do plano. Valores próximos da realidade, a partir de referências públicas
+  // (consultadas em 07/10/2026):
+  //  - TMG 2383 IPRO: grupo de maturação 8.3; em Sorriso, ciclo de 116 dias e 220 mil plantas/ha
+  //    (tmg.agr.br/cultivar/tmg-2383-ipro; attosementes.com.br/sementes-soja-2022/tmg-2383-ipro)
+  //  - Cultivares de GM 7.6 a 8.1 em Sinop: ciclos de 107 a 118 dias (agrosolsementes.com.br, BMX Olimpo IPRO)
+  //  - Demais: ciclo pelo grupo de maturação no médio-norte do MT; populações e janelas aproximadas
+  //    (calendário de semeadura do MT após o vazio sanitário; plantio cedo abre a janela do milho safrinha).
+  // gm: grupo de maturação · ciclo: dias da semeadura à colheita (null = não informado para a safra)
+  // populacao: recomendada, mil plantas/ha [mínima, máxima] · janela: recomendada, [início, fim] em 'MM-DD'
+  // Pré-cadastros feitos na tela de Operações (grupo Semente) entram aqui, sem recomendação.
+  variedades: [
+    { cultura: 'Soja', nome: 'BMX Foco IPRO',   gm: 7.4, ciclo: 104, populacao: [260, 320], janela: ['09-16', '10-31'] },
+    { cultura: 'Soja', nome: 'NS 7709 IPRO',    gm: 7.7, ciclo: 108, populacao: [240, 300], janela: ['09-16', '10-31'] },
+    { cultura: 'Soja', nome: 'BMX Olimpo IPRO', gm: 8.0, ciclo: 112, populacao: [220, 280], janela: ['09-20', '11-10'] },
+    { cultura: 'Soja', nome: 'TMG 2383 IPRO',   gm: 8.3, ciclo: 116, populacao: [200, 240], janela: ['09-20', '11-10'] },
+    { cultura: 'Soja', nome: 'M 8372 IPRO',     gm: 8.3, ciclo: 118, populacao: [200, 260], janela: ['09-25', '11-20'] },
+    // Sem ciclo cadastrado para a safra: para testar "Informe o ciclo"
+    { cultura: 'Soja', nome: 'TMG 7063 IPRO',   gm: 6.3, ciclo: null, populacao: [300, 360], janela: ['09-16', '10-20'] },
+    { cultura: 'Milho', nome: 'DKB 255 PRO3',   gm: null, ciclo: 135, populacao: [60, 70], janela: ['01-10', '02-28'] }
+  ],
+
+  // Histórico por talhão (últimas 3 safras de soja): [safra, variedade, produtividade (sc/ha), chuva no ciclo (mm)].
+  // Próximo da realidade do médio-norte do MT (Conab): 23/24 teve seca e calor, 3.179 kg/ha (≈ 53 sc/ha);
+  // 24/25, 3.700 kg/ha (≈ 62 sc/ha). Chuva em Sinop: ≈ 1.975 mm/ano; out 151, jan 310, fev 289 mm.
+  // 25/26 é ilustrativa. Valores gerados por talhão; troque por reais se quiser.
+  historico: (function () {
+    const safras = [
+      // [safra, produtividade base (sc/ha), chuva base no ciclo (mm), variedades usadas]
+      ['23/24', 53, 760, ['BMX Olimpo IPRO', 'TMG 2383 IPRO', 'NS 7709 IPRO']],
+      ['24/25', 62, 1050, ['TMG 2383 IPRO', 'BMX Foco IPRO', 'BMX Olimpo IPRO']],
+      ['25/26', 63, 980, ['M 8372 IPRO', 'BMX Olimpo IPRO', 'NS 7709 IPRO']]
+    ];
+    const porFazenda = { 'São José': 12, 'Santa Clara': 8, 'Boa Vista': 10, 'Primavera': 6 };
+    const h = {};
+    Object.entries(porFazenda).forEach(([fazenda, n], f) => {
+      h[fazenda] = {};
+      for (let i = 1; i <= n; i++) {
+        const t = `T${String(i).padStart(2, '0')}`;
+        // Variação de cada talhão (solo, relevo): de −4 a +4 sc/ha e de −50 a +50 mm
+        h[fazenda][t] = safras.map(([safra, prod, chuva, vars], k) => [
+          safra, vars[(i + f + k) % vars.length],
+          prod + ((i * 7 + k * 3 + f) % 9) - 4,
+          chuva + ((i * 13 + k * 17 + f * 5) % 101) - 50
+        ]);
+      }
+    });
+    return h;
+  })(),
+
+  // Desenho dos talhões (fictício) no médio-norte de Mato Grosso, perto de Sorriso, para a visão Mapa.
+  // Cada fazenda: origem [lat, lng], giro (graus), profundidade dos talhões (m) e as linhas de talhões.
+  // Os polígonos são gerados a partir da área de cada talhão (em "talhoes"), então a área do desenho é a mesma.
+  geometriaFazendas: {
+    'São José':    { origem: [-12.5520, -55.8790], giro: 7,  profundidade: 1000, inclinacao: 0.10,
+                     linhas: [['T01', 'T02', 'T03', 'T04'], ['T05', 'T06', 'T07', 'T08'], ['T09', 'T10', 'T11', 'T12']] },
+    'Santa Clara': { origem: [-12.6420, -55.7480], giro: -4, profundidade: 1100, inclinacao: -0.08,
+                     linhas: [['T01', 'T02', 'T03', 'T04'], ['T05', 'T06', 'T07', 'T08']] }
+  },
+
   // Cadastro de defensivos (exemplo). Pré-cadastros feitos na tela de Operações entram aqui.
   // unidade: L, mL, kg, g ou t (a dose é sempre por hectare)
   defensivos: [
@@ -73,9 +133,12 @@ window.DADOS = {
   tiposGrupo: ['Corretivos', 'Sementes', 'Fertilizantes', 'Defensivos', 'Colheita'],
 
   // Modelo de operações (levantado com clientes). Usado pelo "Usar modelo" e pelos planos de exemplo.
-  // Por enquanto, para os testes com usuários, só o grupo Defensivo (os outros grupos do modelo
-  // — Preparo do solo, Corretivos, Semente, Fertilizante e Colheita — estão no histórico do git).
+  // Por enquanto, para os testes com usuários, só os grupos Semente e Defensivo (os outros grupos do
+  // modelo — Preparo do solo, Corretivos, Fertilizante e Colheita — estão no histórico do git).
   modeloOperacoes: [
+    { nome: 'Semente', tipo: 'Sementes', operacoes: [
+      { nome: 'Plantio', dap: 0 }
+    ] },
     { nome: 'Defensivo', tipo: 'Defensivos', operacoes: [
       { nome: '1ª Dessecação: pré-plantio', dap: -15 },
       { nome: '2ª Dessecação: pré-plantio', dap: -5 },
@@ -119,6 +182,17 @@ window.DADOS = {
         const todos = ['T01', 'T02', 'T03', 'T04', 'T05', 'T06', 'T07', 'T08'];
         const op = (produtos, fenologia = '') => ({ fenologia, produtos, talhoes: todos });
         return {
+          // Plantio: variedade e data de plantio planejadas por talhão
+          'Plantio': { plantio: [
+            { talhao: 'T01', variedade: 'BMX Foco IPRO',   data: '2026-09-22' },
+            { talhao: 'T02', variedade: 'BMX Foco IPRO',   data: '2026-09-22' },
+            { talhao: 'T03', variedade: 'BMX Olimpo IPRO', data: '2026-09-28' },
+            { talhao: 'T04', variedade: 'BMX Olimpo IPRO', data: '2026-10-01' },
+            { talhao: 'T05', variedade: 'TMG 2383 IPRO',   data: '2026-10-05' },
+            { talhao: 'T06', variedade: 'NS 7709 IPRO',    data: '2026-09-25' },
+            { talhao: 'T07', variedade: 'M 8372 IPRO',     data: '2026-10-10' },
+            { talhao: 'T08', variedade: 'TMG 2383 IPRO',   data: '2026-10-08' }
+          ] },
           '1ª Dessecação: pré-plantio': op([['Roundup Original DI', 2.5], ['DMA 806 BR', 1.0]]),
           '2ª Dessecação: pré-plantio': op([['Finale', 2.0]]),
           'Pré-emergente': op([['Dual Gold', 1.5]]),

@@ -1015,22 +1015,28 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
   overflow-y: auto;
 }
 
-/* Cabeçalho compacto: título, contexto e status numa linha; etapas logo abaixo */
+/* Cabeçalho numa linha: "Plano de Safra › contexto · status" à esquerda e as etapas à direita */
 .plano__cabecalho {
   flex-shrink: 0;
-  padding: 14px 40px 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0 32px;
+  padding: 0 40px;
   background: var(--superficie);
   border-bottom: 1px solid var(--borda);
 }
 
-.plano__linha { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 20px; }
+.plano__linha { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; padding: 14px 0; }
 
 .plano__titulo {
-  font-size: 22px;
+  font-size: 18px;
   font-weight: 700;
-  color: var(--texto);
+  color: var(--verde-700);
   text-decoration: none;
 }
+.plano__seta { font-size: 20px; line-height: 1; color: var(--texto-suave); }
 .plano__titulo:hover { color: var(--verde-700); text-decoration: underline; }
 
 .plano__contexto {
@@ -1043,12 +1049,15 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
   color: var(--texto-suave);
 }
 .plano__ponto { margin: 0 6px; }
-.plano__contexto .status { margin-left: 10px; }
+.plano__contexto { font-size: 15px; color: var(--texto); }
+.plano__contexto .plano__ponto { color: var(--texto-suave); }
 
-.etapas { display: flex; gap: 32px; margin-top: 4px; }
+.etapas { display: flex; gap: 32px; align-self: stretch; }
 
 .etapa {
-  padding: 10px 2px 9px;
+  display: flex;
+  align-items: center;
+  padding: 14px 2px 11px;
   border-bottom: 3px solid transparent;
   color: var(--texto-suave);
   font-weight: 500;
@@ -1548,10 +1557,9 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
 }
 .filtro-talhoes:hover { border-color: #9aa59f; }
 /* Filtro selecionado: preenchido em verde */
+/* Selecionada: verde-claro com borda verde (o verde sólido fica para as abas e o botão principal) */
 .filtro-talhoes--ativo,
-.filtro-talhoes--ativo:hover { border-color: var(--verde-700); background: var(--verde-700); color: #fff; font-weight: 600; }
-/* bolinha da recomendação com contorno branco, para aparecer sobre o verde */
-.filtro-talhoes--ativo .rec-ponto { box-shadow: 0 0 0 2px #fff; }
+.filtro-talhoes--ativo:hover { border-color: var(--verde-600); background: var(--verde-100); color: var(--verde-800); font-weight: 600; box-shadow: inset 0 0 0 1px var(--verde-600); }
 .filtro-talhoes:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 2px; }
 
 /* Só a tabela rola; a linha de títulos fica fixa no topo dela */
@@ -1643,6 +1651,102 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
 .quadro-rec__produtos { margin: 10px 0 2px; padding: 10px 0 0 17px; border-top: 1px solid var(--borda); list-style: none; font-size: 14px; display: flex; flex-direction: column; gap: 4px; }
 
 .definir__nome { max-width: 360px; margin: 0; }
+
+/* ===== Tela 04.2 · Grupo Semente (operação Plantio) ===== */
+/* Cartão da operação e painel do talhão lado a lado; só a tabela (e o painel) rolam */
+.semente-layout { flex: 1; min-height: 0; display: flex; gap: 16px; }
+.semente-layout > .op-painel { flex: 1; min-width: 0; }
+
+/* Passos do plantio: Variedade · População de plantas · TSI */
+.passos { display: flex; flex-wrap: wrap; gap: 8px; }
+.passo {
+  height: 38px; padding: 0 18px; border: 1px solid #cfd6d2; border-radius: 8px;
+  background: var(--superficie); color: var(--texto); font: inherit; font-size: 14px; cursor: pointer;
+}
+.passo:hover { border-color: #b4beb8; }
+.passo--ativo, .passo--ativo:hover { border-color: var(--verde-700); background: var(--verde-700); color: #fff; font-weight: 600; }
+.passo:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 2px; }
+
+.visoes { display: flex; border: 1px solid #cfd6d2; border-radius: 8px; overflow: hidden; }
+.visoes__botao { height: 32px; padding: 0 14px; border: 0; border-left: 1px solid #cfd6d2; background: var(--superficie); font: inherit; font-size: 13px; color: var(--texto); cursor: pointer; }
+.visoes__botao:first-child { border-left: 0; }
+.visoes__botao--ativo { background: var(--verde-700); color: #fff; font-weight: 600; }
+.visoes__botao:disabled { color: #9aa49f; cursor: not-allowed; }
+.visoes__botao:focus-visible { outline: 2px solid var(--verde-600); outline-offset: -2px; }
+
+/* Tabela do passo Variedade */
+.tabela-variedade tr.linha--aberta > * { background: var(--verde-100); }
+.tabela-variedade tr.linha--aberta > :first-child { box-shadow: inset 3px 0 0 var(--verde-700); }
+.tabela__ciclo { color: var(--texto-suave); }
+.texto-alerta { color: #8a5a00; font-weight: 600; }
+.aviso-janela { display: inline-flex; vertical-align: -2px; color: #8a5a00; }
+.aviso-janela .icone { width: 14px; height: 14px; }
+.aviso-janela-texto { display: flex; align-items: center; gap: 4px; margin: 4px 0 0; font-size: 12px; font-weight: 600; color: #8a5a00; }
+.aviso-janela-texto .icone { width: 14px; height: 14px; }
+
+/* Histórico na tabela: mini barras das 3 safras e a média (abre o painel do talhão) */
+.historico-mini {
+  display: inline-flex; align-items: center; gap: 8px; height: 30px; padding: 0 10px;
+  border: 1px solid var(--borda); border-radius: 8px; background: var(--superficie);
+  font: inherit; font-size: 13px; color: var(--texto); cursor: pointer; white-space: nowrap;
+}
+.historico-mini:hover, .historico-mini--aberto { border-color: var(--verde-700); }
+.historico-mini:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 2px; }
+.historico-mini__barras { display: inline-flex; align-items: flex-end; gap: 3px; height: 20px; }
+.historico-mini__barra { width: 6px; border-radius: 2px; background: #a7cdb9; }
+.historico-mini__barra--ultima { background: var(--verde-600); }
+
+/* Painel lateral do talhão */
+.painel-talhao { width: 440px; flex-shrink: 0; min-height: 0; display: flex; flex-direction: column; padding: 12px 16px; }
+/* Expandido: painel largo e gráficos maiores (a tabela fica mais estreita) */
+.painel-talhao--expandido { width: min(760px, 58%); }
+.painel-talhao__topo { display: flex; align-items: center; gap: 6px; padding-bottom: 10px; border-bottom: 1px solid var(--borda); }
+.painel-talhao__titulo { flex: 1; margin: 0; font-size: 20px; font-weight: 700; }
+.painel-talhao__seta { border: 1px solid var(--verde-700); color: var(--verde-700); }
+.painel-talhao__seta:disabled { border-color: var(--borda); color: #b9c0c5; cursor: not-allowed; }
+.painel-talhao__rolagem { flex: 1; min-height: 0; overflow: auto; display: flex; flex-direction: column; gap: 10px; padding-top: 10px; }
+.painel-talhao__sem-historico { margin: 0; font-size: 14px; color: var(--texto-suave); }
+.painel-talhao__campos { display: flex; flex-direction: column; gap: 10px; padding-top: 10px; border-top: 1px solid var(--borda); }
+.painel-talhao__campos .campo { margin: 0; }
+.painel-talhao__datas, .plantio__datas { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: start; }
+.plantio__datas .campo { margin: 0; }
+.painel-talhao__previsao { display: flex; align-items: center; height: 42px; margin: 0; padding: 0 12px; border-radius: 8px; background: var(--fundo); font-weight: 700; }
+.painel-talhao__pre { padding: 10px 12px; border: 1px solid #f2de9b; border-radius: 8px; background: #fffaeb; display: flex; flex-direction: column; gap: 8px; }
+.painel-talhao__pre .pre-cadastro__titulo { margin: 0; }
+.painel-talhao__pre-botoes { display: flex; justify-content: flex-end; gap: 8px; }
+
+/* Gráfico do painel: produtividade (linha) e chuva no ciclo (barras) por safra */
+/* Ocupa a altura livre do painel (mínimo de 210 px); só a área do gráfico estica */
+.grafico-historico { flex: 1; min-height: 210px; margin: 0; display: flex; flex-direction: column; gap: 6px; }
+.grafico-historico__area { flex: 1; width: 100%; min-height: 120px; overflow: visible; border-bottom: 1px solid #cfd6d2; }
+.grafico-historico__eixo { display: grid; text-align: center; font-size: 11px; color: var(--texto-suave); line-height: 1.35; }
+.grafico-historico__eixo strong { display: block; color: var(--texto); font-weight: 600; }
+.grafico-historico__titulo { font-size: 13px; font-weight: 700; }
+.grafico-historico__legenda { display: flex; gap: 14px; font-size: 12px; color: var(--texto-suave); }
+.grafico-historico__legenda > span { display: inline-flex; align-items: center; gap: 5px; }
+.grafico-historico__linha { width: 14px; height: 3px; background: var(--verde-700); }
+.grafico-historico__barra { width: 10px; height: 10px; background: #b9d7f0; }
+
+/* Visão Colheita */
+.colheita__grafico { margin: 0; padding: 12px 16px 6px; border: 1px solid var(--borda); border-radius: 8px; flex-shrink: 0; }
+.colheita__titulo { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+.colheita__grafico svg { display: block; width: 100%; max-height: 260px; }
+.colheita__vazia { display: flex; align-items: center; gap: 8px; margin: 0; padding: 10px 14px; border: 1px solid #f2de9b; border-radius: 8px; background: #fff6d6; font-size: 14px; font-weight: 600; color: #7a5600; }
+.colheita__vazia .icone { width: 18px; height: 18px; flex-shrink: 0; }
+.tabela-colheita tbody th { font-weight: 600; text-align: left; }
+.colheita__sem th, .colheita__sem td { color: var(--texto-suave); }
+
+/* Modal "Definir variedade e plantio" (talhões marcados) */
+.definir--estreito { max-width: 620px; }
+.plantio__pre { padding: 10px 12px; border: 1px solid #f2de9b; border-radius: 8px; background: #fffaeb; }
+.plantio__pre .pre-cadastro__titulo { margin: 0 0 8px; }
+.plantio__pre-linha { display: flex; flex-wrap: wrap; gap: 8px; }
+.plantio__pre-linha .campo__controle { flex: 1 1 180px; height: 34px; }
+
+@media (max-width: 1200px) {
+  .semente-layout { flex-direction: column; flex: none; }
+  .painel-talhao { width: auto; }
+}
 /* Produto ou princípio ativo repetido (nesta ou em outra recomendação): aviso em vermelho */
 .aviso-repetido { display: flex; align-items: flex-start; gap: 4px; margin: 4px 0 0; font-size: 12px; font-weight: 600; line-height: 1.3; color: #b03a2e; }
 .aviso-repetido .icone { width: 14px; height: 14px; flex-shrink: 0; margin-top: 1px; }
@@ -1665,3 +1769,85 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
 .copiar-para__nome { font-weight: 600; font-size: 14px; }
 .copiar-para__dap { font-size: 13px; color: var(--texto-suave); }
 .copiar-para__resumo { grid-column: 2 / 4; font-size: 12px; color: var(--texto-suave); }
+
+
+/* ===== Plantio: título da página, ícones das visões, ordenação e rodapé da tabela ===== */
+/* Passos à esquerda e visões à direita, na mesma linha */
+.semente-topo { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
+
+.visoes__botao { display: inline-flex; align-items: center; gap: 8px; height: 38px; padding: 0 16px; font-size: 14px; }
+.visoes__botao .icone { width: 18px; height: 18px; }
+
+.titulo-coluna { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
+.titulo-ordenar {
+  display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; padding: 0;
+  border: 0; border-radius: 6px; background: none; color: inherit; cursor: pointer;
+}
+.titulo-ordenar:hover { background: #e3e7e4; }
+.titulo-abrir { padding: 0; border: 0; background: none; font: inherit; font-weight: inherit; color: var(--verde-700); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.titulo-abrir:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 2px; border-radius: 4px; }
+.titulo-ordenar .icone { width: 14px; height: 14px; color: #9aa49f; }
+.titulo-ordenar--ativo .icone { color: var(--verde-700); }
+.titulo-ordenar--desc .icone { transform: rotate(180deg); }
+.titulo-ordenar:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 2px; border-radius: 4px; }
+
+/* Dica acima da tabela (some depois do primeiro uso) */
+.dica-plantio {
+  flex-shrink: 0; display: flex; align-items: center; gap: 10px; margin: 0; padding: 4px 6px 4px 14px;
+  border: 1px solid #f2de9b; border-radius: 8px; background: #fff6d6; font-size: 14px; font-weight: 600; color: #7a5600;
+}
+.dica-plantio .icone { width: 18px; height: 18px; flex-shrink: 0; }
+.dica-plantio p { flex: 1; margin: 0; }
+.dica-plantio__fechar { color: #7a5600; }
+.dica-plantio__fechar:hover { background: #fbe9a8; }
+
+/* Barra de ação: aparece só com talhão marcado */
+.barra-acao {
+  flex-shrink: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 12px;
+  padding: 10px 16px; border-radius: 10px; background: var(--verde-100); box-shadow: inset 0 0 0 1px var(--verde-600);
+}
+.barra-acao__selecao { flex: 1; margin: 0; font-size: 14px; color: var(--texto-suave); }
+.barra-acao__selecao strong { font-size: 15px; color: var(--texto); }
+.barra-acao__definir .icone { width: 18px; height: 18px; }
+
+/* Botão com contorno verde (ação da tabela) */
+.botao--contorno { border: 1px solid var(--borda); background: var(--superficie); color: var(--verde-700); font-weight: 600; }
+.botao--contorno:hover:not(:disabled) { border-color: var(--verde-600); background: var(--verde-100); }
+.botao--contorno .icone { width: 18px; height: 18px; }
+.botao--contorno:disabled { color: #9aa49f; cursor: not-allowed; }
+
+
+/* ===== Plantio · visão Mapa ===== */
+/* O mapa ocupa a altura livre do cartão, sem passar dele; a legenda fica numa linha abaixo */
+.mapa-area { position: relative; flex: 1; min-height: 200px; display: flex; flex-direction: column; }
+.mapa { flex: 1; min-height: 200px; border: 1px solid var(--borda); border-radius: 10px; background: #dfe5e1; }
+.mapa__sem { display: flex; align-items: center; gap: 8px; margin: 0; padding: 16px; color: var(--texto-suave); }
+.mapa__dica {
+  position: absolute; left: 10px; bottom: 10px; z-index: 500; display: flex; align-items: center; gap: 6px; margin: 0;
+  padding: 4px 10px; border-radius: 6px; background: rgba(255, 255, 255, .9); font-size: 12px; color: var(--texto);
+}
+.mapa__dica .icone { width: 14px; height: 14px; }
+/* Legenda abaixo do mapa (sempre à vista: o mapa encolhe para dar lugar a ela) */
+.mapa-legenda { flex-shrink: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 18px; margin: 0; padding: 0; list-style: none; font-size: 13px; }
+.mapa-legenda strong { font-weight: 600; color: var(--texto-suave); }
+.mapa-legenda li { display: flex; align-items: center; gap: 6px; }
+.mapa-legenda__cor { display: inline-block; width: 14px; height: 14px; flex-shrink: 0; border-radius: 3px; border: 1px solid rgba(0, 0, 0, .25); }
+.mapa-legenda__ha { color: var(--texto-suave); }
+/* Nome fixo do talhão: pequeno, sem caixa grande */
+.mapa-rotulo { width: auto !important; height: auto !important; background: none; border: 0; }
+.mapa-rotulo {
+  transform-origin: center; padding: 1px 5px; border-radius: 4px; background: rgba(255, 255, 255, .82);
+  color: #1a1f1c; font: 700 11px/1.3 var(--fonte); white-space: nowrap; translate: -50% -50%; pointer-events: none;
+}
+/* Detalhe ao passar o mouse */
+.leaflet-tooltip.mapa-detalhe { padding: 4px 8px; font: 12px/1.3 var(--fonte); color: #1a1f1c; }
+.leaflet-interactive { cursor: pointer; }
+
+/* Data de plantio: digitável e com botão de calendário (o campo de data do navegador fica atrás do botão) */
+.campo-data { position: relative; display: flex; align-items: center; }
+.campo-data .campo__controle { padding-right: 44px; }
+.campo-data__botao { position: absolute; right: 4px; color: var(--texto-suave); }
+.campo-data__botao:hover { color: var(--verde-700); }
+.campo-data__botao .icone { width: 18px; height: 18px; }
+.campo-data__nativo { position: absolute; right: 4px; bottom: 0; width: 36px; height: 1px; opacity: 0; border: 0; padding: 0; pointer-events: none; }
