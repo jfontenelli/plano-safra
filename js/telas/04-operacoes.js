@@ -1350,17 +1350,22 @@ window.Telas.planoOperacoes = (function () {
     if (redesenhar) desenharTudo();
   }
 
-  // Nova operação: nome e DAP obrigatórios (modal; "Criar operação" só habilita com os dois preenchidos)
-  function criarOperacao(grupo) {
+  // Nova operação: nome e DAP obrigatórios (modal; "Criar operação" só habilita com os dois preenchidos).
+  // Com "origem" (Duplicar, no botão direito da lista): a nova leva as recomendações, os talhões e as
+  // doses da origem; DAP e fenologia não vão (uma operação tem um DAP só: outro DAP = outra operação).
+  function criarOperacao(grupo, origem = null) {
     const modal = Modal.abrir(`
       <form class="formulario" novalidate>
         <div class="modal__corpo">
           <button class="modal__fechar" type="button" aria-label="Fechar" data-fechar>${Icones.fechar}</button>
-          <h2 class="modal__titulo" id="modal-titulo">Nova operação</h2>
-          <p class="modal__subtitulo">Grupo ${esc(grupo.nome)}. Toda operação precisa de nome e DAP.</p>
+          <h2 class="modal__titulo" id="modal-titulo">${origem ? 'Duplicar operação' : 'Nova operação'}</h2>
+          <p class="modal__subtitulo">${origem
+            ? `Cópia de ${esc(origem.nome)}, com as recomendações, os talhões e as doses. Informe o nome e o DAP da nova operação.`
+            : `Grupo ${esc(grupo.nome)}. Toda operação precisa de nome e DAP.`}</p>
           <div class="campo">
             <label class="campo__rotulo" for="no-nome">Nome *</label>
-            <input class="campo__controle" id="no-nome" name="nome" autocomplete="off" required>
+            <input class="campo__controle" id="no-nome" name="nome" autocomplete="off" required
+                   value="${origem ? esc(`${origem.nome} (cópia)`) : ''}">
           </div>
           <div class="campo">
             <label class="campo__rotulo" for="no-dap">DAP *</label>
@@ -1371,7 +1376,7 @@ window.Telas.planoOperacoes = (function () {
         </div>
         <div class="modal__rodape">
           <button class="botao botao--secundario" type="button" data-fechar>Cancelar</button>
-          <button class="botao botao--primario" type="submit" disabled>Criar operação</button>
+          <button class="botao botao--primario" type="submit" disabled>${origem ? 'Duplicar operação' : 'Criar operação'}</button>
         </div>
       </form>`, { classe: 'modal--pequeno' });
     const form = modal.elemento.querySelector('form');
@@ -1389,12 +1394,37 @@ window.Telas.planoOperacoes = (function () {
       e.preventDefault();
       if (form.querySelector('[type=submit]').disabled) return;
       const nova = Planos.novaOperacao(form.elements.nome.value.trim(), dap());
+      if (origem) copiarRecomendacoes(origem, nova);
       grupo.operacoes.push(nova);
       ui.opPorGrupo[grupo.id] = nova.id;
+      ui.filtroTalhoes = 'todos'; ui.quadroAberto = false;
       modal.fechar(); limparSelecao(); alterou(); desenharTudo();
-      Aviso.mostrar(`Operação ${esc(nova.nome)} criada`);
+      Aviso.mostrar(origem ? `Operação ${esc(nova.nome)} criada a partir de ${esc(origem.nome)}` : `Operação ${esc(nova.nome)} criada`);
     });
     form.elements.nome.focus();
+    if (origem) form.elements.nome.select();
+  }
+
+  // Copia recomendações (nome, produtos e doses padrão), talhões e doses próprias, com ids novos
+  function copiarRecomendacoes(origem, destino) {
+    const idsLinha = {};
+    const idsRec = {};
+    destino.receitas = origem.receitas.map((r) => {
+      const copia = { ...r, id: Planos.novoId('r'), produtos: r.produtos.map((l) => {
+        const { id, ...dados } = l;
+        const nova = Planos.novaLinha(dados);
+        idsLinha[id] = nova.id;
+        return nova;
+      }) };
+      idsRec[r.id] = copia.id;
+      return copia;
+    });
+    Object.entries(origem.talhoes).forEach(([talhao, ajuste]) => {
+      if (!idsRec[ajuste.receitaId]) return;
+      const novo = Planos.novoAjuste(idsRec[ajuste.receitaId]);
+      Object.entries(ajuste.doses).forEach(([linha, dose]) => { if (idsLinha[linha]) novo.doses[idsLinha[linha]] = dose; });
+      destino.talhoes[talhao] = novo;
+    });
   }
 
   // Exclui a operação pelo botão direito (hipótese a validar com clientes).
@@ -1793,6 +1823,7 @@ window.Telas.planoOperacoes = (function () {
       if (!op) return;
       abrirMenuContexto(ancora, x, y, op.nome, {
         inserir: () => sairDaReceita(() => criarOperacao(grupo)),
+        duplicar: () => sairDaReceita(() => criarOperacao(grupo, op)),
         excluir: () => sairDaReceita(() => excluirOperacao(grupo, op)),
         renomear: () => sairDaReceita(() => {
           ui.opPorGrupo[grupo.id] = op.id;
@@ -1808,10 +1839,11 @@ window.Telas.planoOperacoes = (function () {
     menu.className = 'menu-contexto';
     menu.setAttribute('role', 'menu');
     menu.setAttribute('aria-label', rotulo);
-    menu.innerHTML = `
-      <button class="menu-contexto__item" type="button" role="menuitem" data-item="inserir">Inserir</button>
-      <button class="menu-contexto__item" type="button" role="menuitem" data-item="excluir">Excluir</button>
-      <button class="menu-contexto__item" type="button" role="menuitem" data-item="renomear">Renomear</button>`;
+    // Duplicar só existe para operações (não para grupos)
+    menu.innerHTML = [['inserir', 'Inserir'], ['duplicar', 'Duplicar'], ['excluir', 'Excluir'], ['renomear', 'Renomear']]
+      .filter(([item]) => acoes[item])
+      .map(([item, rotulo]) => `<button class="menu-contexto__item" type="button" role="menuitem" data-item="${item}">${rotulo}</button>`)
+      .join('');
     document.body.appendChild(menu);
 
     // Abre no ponto do clique; sobe quando não cabe embaixo (caso das guias, no rodapé)
