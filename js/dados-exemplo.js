@@ -13,7 +13,8 @@ window.DADOS = {
   safras:   ['24/25', '25/26'],
   empresas: ['Empresa A', 'Empresa B', 'Empresa C'],
   fazendas: ['São José', 'Boa Vista', 'Santa Clara', 'Primavera'],
-  culturas: ['Soja', 'Milho', 'Algodão'],
+  // Por enquanto o protótipo funciona só para soja (variedades, população, bags e TSI são de soja)
+  culturas: ['Soja'],
 
   // Talhões por fazenda (área em ha). A tela de Operações mostra todos os talhões da fazenda.
   talhoes: {
@@ -58,8 +59,7 @@ window.DADOS = {
     { cultura: 'Soja', nome: 'TMG 2383 IPRO',   gm: 8.3, ciclo: 116, populacao: [200, 240], janela: ['09-20', '11-10'] },
     { cultura: 'Soja', nome: 'M 8372 IPRO',     gm: 8.3, ciclo: 118, populacao: [200, 260], janela: ['09-25', '11-20'] },
     // Sem ciclo cadastrado para a safra: para testar "Informe o ciclo"
-    { cultura: 'Soja', nome: 'TMG 7063 IPRO',   gm: 6.3, ciclo: null, populacao: [300, 360], janela: ['09-16', '10-20'] },
-    { cultura: 'Milho', nome: 'DKB 255 PRO3',   gm: null, ciclo: 135, populacao: [60, 70], janela: ['01-10', '02-28'] }
+    { cultura: 'Soja', nome: 'TMG 7063 IPRO',   gm: 6.3, ciclo: null, populacao: [300, 360], janela: ['09-16', '10-20'] }
   ],
 
   // Histórico por talhão (últimas 3 safras de soja): [safra, variedade, produtividade (sc/ha), chuva no ciclo (mm)].
@@ -103,6 +103,21 @@ window.DADOS = {
   // Cadastro de defensivos (exemplo). Pré-cadastros feitos na tela de Operações entram aqui.
   // unidade: L, mL, kg, g ou t (a dose é sempre por hectare)
   defensivos: [
+    // Tratamento de sementes industrial (TSI), soja. tsi: true = só aparece no passo TSI do Plantio.
+    // classe = grupo do produto no TSI. Dose por 100 kg de sementes, dentro da faixa de bula dos
+    // produtos (Agrofit/MAPA e bulas dos fabricantes); "Co + Mo", pó secante e grafite são genéricos.
+    // Valores ilustrativos para o protótipo: conferir com o agrônomo antes de usar.
+    { tsi: true, classe: 'Inseticida',   produto: 'Standak Top',         principioAtivo: 'Fipronil + Piraclostrobina + Tiofanato-metílico', unidade: 'mL/100 kg' },
+    { tsi: true, classe: 'Inseticida',   produto: 'Cruiser 350 FS',      principioAtivo: 'Tiametoxam',                     unidade: 'mL/100 kg' },
+    { tsi: true, classe: 'Inseticida',   produto: 'CropStar',            principioAtivo: 'Imidacloprido + Tiodicarbe',     unidade: 'mL/100 kg' },
+    { tsi: true, classe: 'Fungicida',    produto: 'Maxim Advanced',      principioAtivo: 'Azoxistrobina + Fludioxonil + Metalaxil-M', unidade: 'mL/100 kg' },
+    { tsi: true, classe: 'Fungicida',    produto: 'Vitavax-Thiram 200 SC', principioAtivo: 'Carboxina + Tiram',            unidade: 'mL/100 kg' },
+    { tsi: true, classe: 'Nematicida',   produto: 'Avicta 500 FS',       principioAtivo: 'Abamectina',                     unidade: 'mL/100 kg' },
+    { tsi: true, classe: 'Inoculante',   produto: 'Masterfix L Soja',    principioAtivo: 'Bradyrhizobium japonicum',       unidade: 'mL/100 kg' },
+    { tsi: true, classe: 'Fertilizante', produto: 'Co + Mo',             principioAtivo: 'Cobalto + Molibdênio',           unidade: 'mL/100 kg' },
+    { tsi: true, classe: 'Polímero',     produto: 'Disco AG Red L-280',  principioAtivo: '',                               unidade: 'mL/100 kg' },
+    { tsi: true, classe: 'Pó secante',   produto: 'Talco agrícola',      principioAtivo: '',                               unidade: 'g/100 kg' },
+    { tsi: true, classe: 'Grafite',      produto: 'Grafite em pó',       principioAtivo: '',                               unidade: 'g/100 kg' },
     { classe: 'Fungicida',  produto: 'Fox Xpro',            principioAtivo: 'Bixafen + Protioconazol + Trifloxistrobina', unidade: 'L' },
     { classe: 'Fungicida',  produto: 'Fox',                 principioAtivo: 'Trifloxistrobina + Protioconazol',           unidade: 'L' },
     { classe: 'Fungicida',  produto: 'Priori Xtra',         principioAtivo: 'Azoxistrobina + Ciproconazol',               unidade: 'L' },
@@ -184,7 +199,13 @@ window.DADOS = {
         return {
           // Plantio: variedade, data de plantio e população planejada (mil plantas/ha) por talhão,
           // dentro da população recomendada de cada variedade; germinação média do plano em %
-          'Plantio': { germinacao: 95, plantio: [
+          // TSI 1 nos talhões sem histórico de nematoide; TSI 2 com nematicida (T06 a T08)
+          'Plantio': { germinacao: 95, tsi: [
+            { produtos: [['Standak Top', 200], ['Masterfix L Soja', 200], ['Co + Mo', 100], ['Disco AG Red L-280', 100]],
+              talhoes: ['T01', 'T02', 'T03', 'T04', 'T05'] },
+            { produtos: [['Maxim Advanced', 100], ['Cruiser 350 FS', 200], ['Avicta 500 FS', 100], ['Masterfix L Soja', 200], ['Disco AG Red L-280', 100]],
+              talhoes: ['T06', 'T07', 'T08'] }
+          ], plantio: [
             { talhao: 'T01', variedade: 'BMX Foco IPRO',   data: '2026-09-22', populacao: 300 },
             { talhao: 'T02', variedade: 'BMX Foco IPRO',   data: '2026-09-22', populacao: 300 },
             { talhao: 'T03', variedade: 'BMX Olimpo IPRO', data: '2026-09-28', populacao: 250 },

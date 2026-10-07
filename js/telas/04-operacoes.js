@@ -15,6 +15,8 @@ window.Telas.planoOperacoes = (function () {
     { id: 'aprovacao',   nome: 'Aprovação' }
   ];
   const UNIDADES = ['L', 'mL', 'kg', 'g', 't'];
+  // TSI: a dose é por quantidade de semente (a unidade usada pelos clientes fica para os testes)
+  const UNIDADES_TSI = ['mL/100 kg', 'g/100 kg', 'mL/ha', 'g/ha'];
 
   // Estado da tela por plano (grupo e operação abertos etc.), mantido ao navegar
   const estados = {};
@@ -495,7 +497,7 @@ window.Telas.planoOperacoes = (function () {
             </tr></thead>
             <tbody>
               ${linhas.length ? linhas.map((l) => linhaRecomendacao(l, erros.linhas[l.id], leitura)).join('')
-                : '<tr><td class="tabela__vazia" colspan="5">Nenhum produto na recomendação.</td></tr>'}
+                : `<tr><td class="tabela__vazia" colspan="5">Nenhum produto na ${T().nome}.</td></tr>`}
             </tbody>
           </table>
           ${erros.semLinhas ? '<p class="erro-campo">Informe pelo menos um produto.</p>' : ''}
@@ -579,7 +581,7 @@ window.Telas.planoOperacoes = (function () {
     const naMesma = repetidoNaMesma(linhas, l);
     if (naMesma) {
       return naMesma === coluna
-        ? `<p class="aviso-repetido">${Icones.alerta} ${coluna === 'produto' ? 'Produto' : 'Princípio ativo'} já está nesta recomendação</p>`
+        ? `<p class="aviso-repetido">${Icones.alerta} ${coluna === 'produto' ? 'Produto' : 'Princípio ativo'} já está nesta ${T().nome}</p>`
         : '';
     }
     const dose = (x) => `${Util.dose(x.dose) || '—'} ${Planos.unidadeDose(x)}`;
@@ -615,13 +617,13 @@ window.Telas.planoOperacoes = (function () {
     if (!texto || texto === atual) { delete ui.naoEncontrado[chave]; return 'ok'; }
     const igual = (v) => v && Util.normalizar(v) === Util.normalizar(texto);
     if (tipo === 'pa') {
-      const d = DADOS.defensivos.find((x) => igual(x.principioAtivo));
+      const d = cadastroAtual().find((x) => igual(x.principioAtivo));
       if (!d) { ui.naoEncontrado[chave] = texto; return 'nao-encontrado'; }
       linha.principioAtivo = d.principioAtivo;
       const prod = Planos.produtoDoCadastro(linha.produto);
       if (prod && prod.principioAtivo !== d.principioAtivo) Object.assign(linha, { produto: '', unidade: '', dose: null, preCadastro: false });
     } else {
-      const d = DADOS.defensivos.find((x) => igual(x.produto));
+      const d = cadastroAtual().find((x) => igual(x.produto));
       if (!d) { ui.naoEncontrado[chave] = texto; return 'nao-encontrado'; }
       Object.assign(linha, { produto: d.produto, principioAtivo: d.principioAtivo || '', unidade: d.unidade, preCadastro: !!d.preCadastro });
     }
@@ -685,7 +687,7 @@ window.Telas.planoOperacoes = (function () {
           <select class="campo__controle campo--compacto ${erros.unidade ? 'campo__controle--erro' : ''}" id="${id('unidade')}" data-pre="unidade" required
                   ${erros.unidade ? 'aria-invalid="true"' : ''}>
             <option value="" ${pc.unidade ? '' : 'selected'} disabled>Unidade</option>
-            ${UNIDADES.map((u) => `<option ${u === pc.unidade ? 'selected' : ''}>${u}</option>`).join('')}
+            ${(ehTsi() ? UNIDADES_TSI : UNIDADES).map((u) => `<option ${u === pc.unidade ? 'selected' : ''}>${u}</option>`).join('')}
           </select>
           <p class="pre-cadastro__msg erro-campo">${erros.unidade || ''}</p>
         </td>
@@ -707,7 +709,17 @@ window.Telas.planoOperacoes = (function () {
   function talhoesVisiveis(op) {
     const rec = recFiltrada(op);
     if (rec) return talhoesFazenda.filter((t) => op.talhoes[t.nome] && op.talhoes[t.nome].receitaId === rec.id);
-    return ui.filtroTalhoes === 'nao-planejados' ? talhoesFazenda.filter((t) => !op.talhoes[t.nome]) : talhoesFazenda;
+    return ui.filtroTalhoes === 'nao-planejados' ? talhoesFazenda.filter((t) => naoPlanejado(op, t)) : talhoesFazenda;
+  }
+
+  // Não planejado = ainda sem recomendação. No TSI, só conta talhão com variedade (sem variedade não recebe TSI).
+  function naoPlanejado(op, t) {
+    return !op.talhoes[t.nome] && (!ehTsi() || planejado(op, t.nome));
+  }
+
+  // Talhão que pode ser marcado: no TSI, só com variedade
+  function marcavel(op, t) {
+    return !ehTsi() || planejado(op, t.nome);
   }
 
   // Recomendações já aplicadas em algum talhão (as que ganham etiqueta nos filtros)
@@ -759,18 +771,27 @@ window.Telas.planoOperacoes = (function () {
 
   function painelTalhoes(op) {
     const rec = recFiltrada(op);
-    const naoPlanejados = talhoesFazenda.filter((t) => !op.talhoes[t.nome]).length;
+    const naoPlanejados = talhoesFazenda.filter((t) => naoPlanejado(op, t)).length;
+    const tsi = ehTsi();
     // Sem talhão não planejado, a etiqueta some (e quem estava nela volta para Todos os talhões)
     if (!naoPlanejados && ui.filtroTalhoes === 'nao-planejados') ui.filtroTalhoes = 'todos';
     const visiveis = talhoesVisiveis(op);
     const marcar = !somenteLeitura;
-    const todos = visiveis.length > 0 && visiveis.every((t) => ui.marcados.has(t.nome));
+    const marcaveis = visiveis.filter((t) => marcavel(op, t));
+    const todos = marcaveis.length > 0 && marcaveis.every((t) => ui.marcados.has(t.nome));
     // Uma coluna por produto: os da recomendação filtrada, ou os de todas as recomendações aplicadas
     const colunas = rec ? rec.produtos.filter(Planos.linhaPreenchida) : Planos.colunasDose(op);
     const vazio = !talhoesFazenda.length ? `Nenhum talhão cadastrado na fazenda ${esc(plano.fazenda)}.`
-      : !visiveis.length ? 'Todos os talhões já têm recomendação.' : '';
-    const nColunas = colunas.length + (marcar ? 3 : 2);
+      : !visiveis.length ? `Todos os talhões ${tsi ? 'com variedade ' : ''}já têm ${T().nome}.` : '';
+    const nColunas = colunas.length + (marcar ? 3 : 2) + (tsi ? 1 : 0);
+    // TSI com talhão sem variedade: avisa por que a caixa dele está desabilitada e leva ao Plantio
+    const semVariedade = tsi && marcar && talhoesFazenda.some((t) => !planejado(op, t.nome));
     return `
+      ${semVariedade ? `
+        <div class="dica-plantio" role="note">${Icones.info}
+          <p>Talhões sem variedade não recebem TSI. Defina a variedade na aba
+            <button class="dica-plantio__link" type="button" data-acao="passo-semente" data-passo="plantio">Plantio</button>.</p>
+        </div>` : ''}
       ${filtrosTalhoes([
         { valor: 'todos', rotulo: `Todos os talhões: ${talhoesFazenda.length}` },
         ...(naoPlanejados ? [{ valor: 'nao-planejados', rotulo: `Não planejados: ${naoPlanejados}` }] : []),
@@ -781,8 +802,8 @@ window.Telas.planoOperacoes = (function () {
         <table class="tabela tabela--compacta tabela-talhoes">
           <thead><tr>
             ${marcar ? `<th class="tabela__marcar"><input type="checkbox" data-acao="marcar-todos" aria-label="Marcar todos"
-                 ${todos ? 'checked' : ''} ${visiveis.length ? '' : 'disabled'}></th>` : ''}
-            <th>Talhão</th><th class="tabela__numero">Área (ha)</th>
+                 ${todos ? 'checked' : ''} ${marcaveis.length ? '' : 'disabled'}></th>` : ''}
+            <th>Talhão</th><th class="tabela__numero">Área (ha)</th>${tsi ? '<th>Variedade</th>' : ''}
             ${colunas.map((l) => `<th class="tabela__numero">${rotuloProduto(l)} ${etiquetaPre(l)}${seloTipo(l)}</th>`).join('')}
           </tr></thead>
           <tbody>
@@ -797,10 +818,12 @@ window.Telas.planoOperacoes = (function () {
               }).join('');
               return `
                 <tr>
-                  ${marcar ? `<td class="tabela__marcar"><input type="checkbox" data-acao="marcar" data-talhao="${esc(t.nome)}"
-                      aria-label="Marcar ${esc(t.nome)}" ${ui.marcados.has(t.nome) ? 'checked' : ''}></td>` : ''}
+                  ${marcar ? `<td class="tabela__marcar">${marcavel(op, t)
+                      ? `<input type="checkbox" data-acao="marcar" data-talhao="${esc(t.nome)}" aria-label="Marcar ${esc(t.nome)}" ${ui.marcados.has(t.nome) ? 'checked' : ''}>`
+                      : `<input type="checkbox" disabled aria-label="${esc(t.nome)} sem variedade: defina a variedade antes da TSI" title="Defina a variedade antes da TSI">`}</td>` : ''}
                   <th scope="row" class="tabela__talhao">${r ? `${pontoRec(op, r)}<span class="so-leitor">${esc(r.nome)}: </span>` : ''}${esc(t.nome)}</th>
                   <td class="tabela__numero">${Util.area(t.area).replace(' ha', '')}</td>
+                  ${tsi ? `<td>${planejado(op, t.nome) ? esc(op.plantio[t.nome].variedade) : '<span class="tabela__nao-recebe">Sem variedade</span>'}</td>` : ''}
                   ${doses}
                 </tr>`;
             }).join('')}
@@ -845,11 +868,11 @@ window.Telas.planoOperacoes = (function () {
         ${n ? `
           <span class="barra-definir__selecao"><strong>${n} ${n === 1 ? 'talhão' : 'talhões'}</strong> · ${Util.area(area)}</span>
           ${comRec ? `
-            <button class="botao botao--perigo-leve barra-definir__excluir" type="button" data-acao="excluir-marcados">${Icones.lixeira} Excluir recomendação</button>` : ''}
+            <button class="botao botao--perigo-leve barra-definir__excluir" type="button" data-acao="excluir-marcados">${Icones.lixeira} Excluir ${T().nome}</button>` : ''}
           <button class="botao botao--secundario barra-definir__limpar" type="button" data-acao="limpar-selecao"
                   title="Desmarcar todos os talhões" aria-label="Limpar seleção: desmarcar todos os talhões">Limpar</button>`
-        : `<span class="barra-definir__texto">${Icones.info} Selecione um ou mais talhões para definir a recomendação.</span>`}
-        <button class="botao botao--primario" type="button" data-acao="definir-recomendacao" ${n ? '' : 'disabled'}>Definir recomendação</button>
+        : `<span class="barra-definir__texto">${Icones.info} Selecione um ou mais talhões para definir a ${T().nome}.</span>`}
+        <button class="botao botao--primario" type="button" data-acao="definir-recomendacao" ${n ? '' : 'disabled'}>Definir ${T().nome}</button>
       </div>`;
   }
 
@@ -857,7 +880,7 @@ window.Telas.planoOperacoes = (function () {
   // Fica dentro da tela (não no Modal genérico) para reaproveitar a busca de produto, o pré-cadastro,
   // as guias de recomendação e o rascunho, que dependem dos eventos da tela.
   function abrirDefinir(op) {
-    const talhoes = talhoesFazenda.filter((t) => ui.marcados.has(t.nome)).map((t) => t.nome);
+    const talhoes = talhoesFazenda.filter((t) => ui.marcados.has(t.nome) && marcavel(op, t)).map((t) => t.nome);
     if (!talhoes.length) return;
     if (semDap(op)) return;
     ui.rascunho = null; ui.preCadastro = null; ui.validarOp = null; ui.erroNome = null; ui.naoEncontrado = {}; ui.copiadoDe = null;
@@ -877,7 +900,7 @@ window.Telas.planoOperacoes = (function () {
         if (doses.every((d) => d === doses[0])) l.dose = doses[0];
       });
     } else {
-      const nova = Planos.novaReceita(op);
+      const nova = Planos.novaReceita(op, [], T().base);
       op.receitas.push(nova);
       ui.receitaPorOp[op.id] = nova.id;
     }
@@ -929,8 +952,8 @@ window.Telas.planoOperacoes = (function () {
         <div class="definir" role="dialog" aria-modal="true" aria-labelledby="definir-titulo" tabindex="-1">
           <div class="definir__topo">
             <div class="definir__titulos">
-              <h2 class="definir__titulo" id="definir-titulo">${editando ? 'Editar recomendação' : 'Definir recomendação'}</h2>
-              <p class="definir__op">${esc(op.nome)} · DAP ${op.dap}</p>
+              <h2 class="definir__titulo" id="definir-titulo">${editando ? 'Editar' : 'Definir'} ${T().nome}</h2>
+              <p class="definir__op">${esc(op.nome)} · ${ehTsi() ? 'Tratamento de sementes industrial' : `DAP ${op.dap}`}</p>
               <p class="definir__alvo">${n} ${n === 1 ? 'talhão' : 'talhões'} · ${Util.area(area)}</p>
             </div>
             <button class="botao-icone" type="button" data-acao="fechar-definir" aria-label="Fechar">${Icones.fechar}</button>
@@ -942,11 +965,11 @@ window.Telas.planoOperacoes = (function () {
                 ${!editando && !Planos.talhoesDaReceita(op, r).length ? campoCopiar(op, r) : ''}
               </div>` : ''}
             ${r ? corpoReceita(op, r) : `
-              <p class="recomendacao__vazia">Nenhuma recomendação nesta operação.</p>`}
+              <p class="recomendacao__vazia">Nenhuma ${T().nome} nesta operação.</p>`}
           </div>
           <div class="definir__rodape">
             ${r && !somenteLeitura && Planos.talhoesDaReceita(op, r).length ? `
-              <button class="botao botao--perigo-leve definir__excluir" type="button" data-acao="excluir-rec">${Icones.lixeira} Excluir recomendação</button>` : ''}
+              <button class="botao botao--perigo-leve definir__excluir" type="button" data-acao="excluir-rec">${Icones.lixeira} Excluir ${T().nome}</button>` : ''}
             <button class="botao botao--secundario" type="button" data-acao="fechar-definir">Cancelar</button>
             <button class="botao botao--primario" type="button" data-acao="aplicar-definicao" ${r ? '' : 'disabled'}>${editando
               ? 'Salvar alterações' : `Aplicar em ${n} ${n === 1 ? 'talhão' : 'talhões'}`}</button>
@@ -960,7 +983,7 @@ window.Telas.planoOperacoes = (function () {
     const nome = rascunho(op).nome;
     return `
       <div class="campo definir__nome">
-        <label class="campo__rotulo" for="rec-nome">Nome da recomendação</label>
+        <label class="campo__rotulo" for="rec-nome">Nome da ${T().nome}</label>
         <input class="campo__controle ${ui.erroNome ? 'campo__controle--erro' : ''}" id="rec-nome" data-campo="nome-rec"
                value="${esc(nome)}" autocomplete="off" ${ui.erroNome ? 'aria-invalid="true" aria-describedby="rec-nome-erro"' : ''}>
         ${ui.erroNome ? `<p class="erro-campo" id="rec-nome-erro">${ui.erroNome}</p>` : ''}
@@ -968,9 +991,26 @@ window.Telas.planoOperacoes = (function () {
   }
 
 
+  // Passo TSI do grupo Semente: a recomendação agronômica (receitas, talhões e doses) da operação Plantio
+  function ehTsi() {
+    return ehSemente(grupoAtual()) && ui.passoSemente === 'tsi';
+  }
+
+  // Produtos do cadastro: no TSI só os de tratamento de sementes; nos defensivos, sem eles
+  function cadastroAtual() {
+    const tsi = ehTsi();
+    return DADOS.defensivos.filter((d) => !!d.tsi === tsi);
+  }
+
+  // Palavras da recomendação agronômica; no TSI, "TSI" ("Definir TSI", "TSI 1 aplicada")
+  function T() {
+    return ehTsi() ? { nome: 'TSI', Nome: 'TSI', base: 'TSI' }
+      : { nome: 'recomendação', Nome: 'Recomendação', base: 'Recomendação' };
+  }
+
   // ================= Grupo Semente: plantio por talhão =================
-  // docs/telas/04.2-operacoes-sementes.md. Passos Variedade · População de plantas · TSI.
-  // Construído: passo Variedade (visões Talhões e Colheita, painel do talhão e modal "Definir variedade").
+  // docs/telas/04.2-operacoes-sementes.md. Passos Plantio (variedade, data e população) · TSI.
+  // O TSI usa a recomendação agronômica da Tela 04.1 com as receitas e os talhões da operação Plantio.
   function ehSemente(grupo) {
     return grupo && grupo.tipo === 'Sementes';
   }
@@ -1188,13 +1228,7 @@ window.Telas.planoOperacoes = (function () {
             </div>
             ${passo === 'plantio' ? visoesVariedade() : ''}
           </div>
-          ${passo === 'plantio' ? passoVariedade(op) : `
-            <section class="em-construcao em-construcao--compacto">
-              <div class="em-construcao__icone" aria-hidden="true">${Icones.casa}</div>
-              <p class="em-construcao__subtitulo">TSI (tratamento de sementes)</p>
-              <h2 class="em-construcao__titulo">Em construção</h2>
-              <p class="em-construcao__texto">Este passo ainda não foi construído no protótipo.</p>
-            </section>`}
+          ${passo === 'plantio' ? passoVariedade(op) : painelTalhoes(op)}
         </section>
         ${comPainel ? painelTalhao(op, ui.painelTalhao) : ''}
       </div>`;
@@ -1412,7 +1446,7 @@ window.Telas.planoOperacoes = (function () {
               <div class="campo">
                 <label class="campo__rotulo" for="pt-populacao">População (mil plantas/ha)</label>
                 ${populacao}
-                <p class="campo__ajuda">${!v ? 'Escolha a variedade antes da população' : v.populacao ? `Recomendada: ${faixaPopulacao(v)}` : ''}</p>
+                <p class="campo__ajuda">${!v ? 'Escolha a variedade antes da população' : v.populacao ? `População recomendada: ${faixaPopulacao(v)} mil plantas/ha` : ''}</p>
                 ${foraDaFaixa(v, pop) ? `<p class="aviso-janela-texto">${Icones.alerta} Fora da população recomendada</p>` : ''}
               </div>
             </div>
@@ -1793,7 +1827,6 @@ window.Telas.planoOperacoes = (function () {
           <option value="__pre__">+ Pré-cadastrar variedade</option>
         </select>
         ${erro('variedade')}`;
-    const prev = v && v.ciclo && pl.data ? somarDias(pl.data, v.ciclo) : null;
     return `
       <div class="definir-fundo">
         <div class="definir definir--estreito" role="dialog" aria-modal="true" aria-labelledby="plantio-titulo" tabindex="-1">
@@ -1818,21 +1851,13 @@ window.Telas.planoOperacoes = (function () {
                 ${foraDaJanela(v, pl.data) ? `<p class="aviso-janela-texto">${Icones.alerta} Fora da janela recomendada</p>` : ''}
               </div>
               <div class="campo">
-                <span class="campo__rotulo">Previsão de colheita</span>
-                <p class="painel-talhao__previsao">${prev ? dataCompleta(prev) : '—'}</p>
-                <p class="campo__ajuda">${prev ? esc(decendio(prev).texto) : v && !v.ciclo ? 'Variedade sem ciclo: informe no painel do talhão' : 'Escolha a variedade e a data'}</p>
-              </div>
-            </div>
-            <div class="plantio__populacao">
-              <div class="campo">
-                <label class="campo__rotulo" for="pl-populacao">População planejada (mil plantas/ha)</label>
+                <label class="campo__rotulo" for="pl-populacao">População (mil plantas/ha)</label>
                 <input class="campo__controle populacao__campo ${classeErro('populacao')}" id="pl-populacao" data-campo="pl-populacao" type="text"
                        inputmode="decimal" autocomplete="off" placeholder="Ex.: 280" value="${esc(pl.populacao || '')}">
                 ${erro('populacao')}
-                ${v && v.populacao ? `<p class="campo__ajuda">Recomendada para ${esc(v.nome)}: ${faixaPopulacao(v)} mil plantas/ha</p>` : ''}
+                ${v && v.populacao ? `<p class="campo__ajuda">População recomendada: ${faixaPopulacao(v)} mil plantas/ha</p>` : ''}
                 <div class="plantio__aviso-populacao" aria-live="polite">${avisoPopulacaoPlantio(v, Util.numero(pl.populacao || ''))}</div>
               </div>
-              <div class="populacao__previa" aria-live="polite">${previaPlantio(op, pl.talhoes, Util.numero(pl.populacao || ''))}</div>
             </div>
           </div>
           <div class="definir__rodape">
@@ -1886,9 +1911,10 @@ window.Telas.planoOperacoes = (function () {
     if (!n) return;
     Modal.confirmar({
       titulo: `Excluir o plantio de ${n} ${n === 1 ? 'talhão' : 'talhões'}?`,
-      texto: `Variedade, data de plantio e população ${n === 1 ? 'desse talhão serão apagadas' : 'desses talhões serão apagadas'}. Essa ação não pode ser desfeita.`,
+      texto: `Variedade, data de plantio, população e TSI ${n === 1 ? 'desse talhão serão apagadas' : 'desses talhões serão apagadas'}. Essa ação não pode ser desfeita.`,
       botoes: [{ rotulo: 'Cancelar' }, { rotulo: 'Excluir plantio', classe: 'perigo', acao: () => {
-        alvo.forEach((t) => { delete op.plantio[t]; });
+        alvo.forEach((t) => { delete op.plantio[t]; delete op.talhoes[t]; });
+        op.receitas = op.receitas.filter((r) => Planos.talhoesDaReceita(op, r).length);
         ui.filtroTalhoes = 'todos';
         limparSelecao(); alterou(); desenharTudo();
         Aviso.mostrar(`Plantio excluído de ${n} ${n === 1 ? 'talhão' : 'talhões'}`);
@@ -1970,30 +1996,16 @@ window.Telas.planoOperacoes = (function () {
     desenharTudo();
   }
 
-  // Modal "Definir plantio": aviso (sem bloquear) e prévia de sementes e bags dos talhões marcados
+  // Modal "Definir plantio": aviso (sem bloquear) quando a população fica fora da recomendada
   function avisoPopulacaoPlantio(v, valor) {
     return foraDaFaixa(v, valor) ? `<p class="aviso-janela-texto">${Icones.alerta} Fora da recomendada para ${esc(v.nome)}</p>` : '';
-  }
-
-  function previaPlantio(op, talhoes, valor) {
-    if (!op.germinacao) {
-      return `<p class="populacao__sem-germinacao">${Icones.info} Informe a germinação média (no total da tabela) para calcular sementes e bags.</p>`;
-    }
-    const area = talhoesFazenda.filter((t) => talhoes.includes(t.nome)).reduce((s, t) => s + t.area, 0);
-    const sementes = valor ? valor * 1000 * area / (op.germinacao / 100) : null;
-    return `
-      <p class="populacao__numero"><span>Total de sementes</span><strong>${sementes ? `${umaCasa(sementes / 1e6)} milhões` : '—'}</strong></p>
-      <p class="populacao__numero"><span>Bags</span><strong>${sementes ? bags(sementes) : '—'}</strong></p>
-      <p class="populacao__germinacao">com germinação média de ${numeroTexto(op.germinacao)}%</p>`;
   }
 
   function digitarPopulacaoPlantio(el) {
     const pl = ui.plantando;
     pl.populacao = soNumero(el);
-    const op = opAtual();
     const valor = Util.numero(pl.populacao);
     raiz.querySelector('.plantio__aviso-populacao').innerHTML = avisoPopulacaoPlantio(variedadeDoCadastro(pl.variedade), valor);
-    raiz.querySelector('.populacao__previa').innerHTML = previaPlantio(op, pl.talhoes, valor);
   }
 
   // Recomendação nova: "Copiar produtos de" traz os produtos e doses padrão de outra recomendação
@@ -2005,7 +2017,7 @@ window.Telas.planoOperacoes = (function () {
       <div class="campo definir__copiar">
         <label class="campo__rotulo" for="rec-copiar">Copiar produtos de</label>
         <select class="campo__controle" id="rec-copiar" data-campo="copiar-de">
-          <option value="">Escolha uma recomendação</option>
+          <option value="">Escolha uma ${T().nome}</option>
           ${origens.map((x) => {
             // "Rec 1 (Fox Xpro, Engeo Pleno S, Nimbus + 2)": até 3 nomes comerciais, o resto resumido
             const nomes = x.produtos.filter(Planos.linhaPreenchida).map(Planos.nomeLinha);
@@ -2060,19 +2072,20 @@ window.Telas.planoOperacoes = (function () {
   function opcoesCombo(linha, tipo, texto) {
     const busca = Util.normalizar(texto.trim());
     const bate = (v) => !busca || Util.normalizar(v).includes(busca);
+    const cadastro = cadastroAtual();
     let opcoes;
     if (tipo === 'pa') {
       // Princípios ativos do cadastro (sem repetir)
-      const pas = [...new Set(DADOS.defensivos.map((d) => d.principioAtivo).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
+      const pas = [...new Set(cadastro.map((d) => d.principioAtivo).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
       opcoes = pas.filter(bate).map((pa) => ({ valor: pa, rotulo: esc(pa),
-        pre: DADOS.defensivos.some((d) => d.principioAtivo === pa && d.preCadastro && !d.produto) }));
+        pre: cadastro.some((d) => d.principioAtivo === pa && d.preCadastro && !d.produto) }));
     } else {
       // Produtos do cadastro. Com princípio ativo escolhido e ainda sem produto, só os que têm ele.
       // Trocando um produto já escolhido (o princípio ativo veio dele), mostra todos, com os do mesmo
       // princípio ativo primeiro; escolher outro produto atualiza o princípio ativo.
       const trocando = !!linha.produto;
       const mesmoPA = (d) => !!linha.principioAtivo && d.principioAtivo === linha.principioAtivo;
-      opcoes = DADOS.defensivos
+      opcoes = cadastro
         .filter((d) => d.produto && (trocando || !linha.principioAtivo || mesmoPA(d)) && bate(d.produto))
         .sort((a, b) => (trocando ? Number(mesmoPA(b)) - Number(mesmoPA(a)) : 0))
         .map((d) => ({ valor: d.produto, rotulo: `${esc(d.produto)}<span class="combo__sub">${esc(d.principioAtivo || '—')} · ${d.unidade}</span>`, pre: d.preCadastro }));
@@ -2201,7 +2214,7 @@ window.Telas.planoOperacoes = (function () {
         desenharMantendoFoco(`[data-acao="marcar"][data-talhao="${alvo.dataset.talhao}"]`); break;
 
       case 'marcar-todos':
-        (ehSemente(grupo) ? talhoesVisiveisPlantio(op) : talhoesVisiveis(op))
+        (ehSemente(grupo) && !ehTsi() ? talhoesVisiveisPlantio(op) : talhoesVisiveis(op).filter((t) => marcavel(op, t)))
           .forEach((t) => { if (alvo.checked) ui.marcados.add(t.nome); else ui.marcados.delete(t.nome); });
         desenharMantendoFoco('[data-acao="marcar-todos"]'); break;
 
@@ -2215,7 +2228,7 @@ window.Telas.planoOperacoes = (function () {
       case 'excluir-plantio': excluirPlantio(op); break;
 
       case 'passo-semente':
-        ui.passoSemente = alvo.dataset.passo; ui.marcados = new Set();
+        ui.passoSemente = alvo.dataset.passo; ui.marcados = new Set(); ui.filtroTalhoes = 'todos'; ui.quadroAberto = false;
         desenharMantendoFoco(`[data-passo="${alvo.dataset.passo}"]`); break;
       case 'visao-semente':
         ui.visaoSemente = alvo.dataset.visao; ui.marcados = new Set();
@@ -2710,7 +2723,7 @@ window.Telas.planoOperacoes = (function () {
     pc.aviso = '';
     if (pc.erros.produto || pc.erros.unidade) { desenharTudo(); return; }
 
-    DADOS.defensivos.push({ classe: '', produto, principioAtivo: pa, unidade: pc.unidade, preCadastro: true });
+    DADOS.defensivos.push({ classe: '', produto, principioAtivo: pa, unidade: pc.unidade, preCadastro: true, ...(ehTsi() ? { tsi: true } : {}) });
     const linha = ui.rascunho.produtos.find((l) => l.id === pc.linhaId);
     Object.assign(linha, { produto, principioAtivo: pa, unidade: pc.unidade, preCadastro: true });
     ui.preCadastro = null;
@@ -2741,8 +2754,8 @@ window.Telas.planoOperacoes = (function () {
     if (n) {
       Modal.confirmar({
         titulo: `Excluir ${esc(r.nome)}?`,
-        texto: `${n === 1 ? 'O talhão ficará' : `Os ${n} talhões ficarão`} sem recomendação. Essa ação não pode ser desfeita.`,
-        botoes: [{ rotulo: 'Cancelar' }, { rotulo: 'Excluir recomendação', classe: 'perigo', acao: () => {
+        texto: `${n === 1 ? 'O talhão ficará' : `Os ${n} talhões ficarão`} sem ${T().nome}. Essa ação não pode ser desfeita.`,
+        botoes: [{ rotulo: 'Cancelar' }, { rotulo: `Excluir ${T().nome}`, classe: 'perigo', acao: () => {
           remover(); Aviso.mostrar(`${esc(nomeCurto(r))} excluída`);
         } }]
       });
@@ -2768,7 +2781,7 @@ window.Telas.planoOperacoes = (function () {
     Modal.confirmar({
       titulo: `Excluir ${esc(r.nome)} de ${n} ${n === 1 ? 'talhão' : 'talhões'}?`,
       texto: textoRestam(nome, restam) + ' Essa ação não pode ser desfeita.',
-      botoes: [{ rotulo: 'Cancelar' }, { rotulo: 'Excluir recomendação', classe: 'perigo', acao: () => {
+      botoes: [{ rotulo: 'Cancelar' }, { rotulo: `Excluir ${T().nome}`, classe: 'perigo', acao: () => {
         alvo.forEach((t) => { delete op.talhoes[t]; });
         if (!restam) { op.receitas.splice(op.receitas.indexOf(r), 1); delete ui.receitaPorOp[op.id]; }
         ui.rascunho = null; ui.validarOp = null; ui.preCadastro = null; ui.erroNome = null;
@@ -2805,14 +2818,14 @@ window.Telas.planoOperacoes = (function () {
       titulo = `Excluir ${esc(r.nome)} de ${plural(n)}?`;
       detalhe = textoRestam(esc(nomeCurto(r)), restam);
     } else {
-      titulo = `Excluir a recomendação de ${plural(n)}?`;
+      titulo = `Excluir a ${T().nome} de ${plural(n)}?`;
       detalhe = recs.map((x) => `${esc(nomeCurto(x.r))} sai de ${plural(x.n)}`).join(', ').replace(/, ([^,]*)$/, ' e $1') + '.';
     }
-    const aviso = ignorados ? ` ${ignorados === 1 ? '1 talhão marcado já não tem' : `${ignorados} talhões marcados já não têm`} recomendação.` : '';
+    const aviso = ignorados ? ` ${ignorados === 1 ? '1 talhão marcado já não tem' : `${ignorados} talhões marcados já não têm`} ${T().nome}.` : '';
     Modal.confirmar({
       titulo,
       texto: `${detalhe}${aviso} Essa ação não pode ser desfeita.`,
-      botoes: [{ rotulo: 'Cancelar' }, { rotulo: 'Excluir recomendação', classe: 'perigo', acao: () => {
+      botoes: [{ rotulo: 'Cancelar' }, { rotulo: `Excluir ${T().nome}`, classe: 'perigo', acao: () => {
         alvo.forEach((t) => { delete op.talhoes[t]; });
         recs.filter((x) => !Planos.talhoesDaReceita(op, x.r).length)
           .forEach((x) => op.receitas.splice(op.receitas.indexOf(x.r), 1));
@@ -2820,7 +2833,7 @@ window.Telas.planoOperacoes = (function () {
         limparSelecao(); alterou(); desenharTudo();
         const rolagem = raiz.querySelector('.talhoes-rolagem');
         if (rolagem) rolagem.scrollTop = 0;
-        Aviso.mostrar(`Recomendação excluída de ${plural(n)}`);
+        Aviso.mostrar(`${T().Nome} excluída de ${plural(n)}`);
       } }]
     });
   }
@@ -2850,7 +2863,7 @@ window.Telas.planoOperacoes = (function () {
     // Nome vazio volta ao anterior; nome repetido na operação não é aceito
     const nome = rascunho(op).nome.trim() || r.nome;
     if (op.receitas.some((x) => x !== r && Util.normalizar(x.nome) === Util.normalizar(nome))) {
-      ui.erroNome = 'Já existe uma recomendação com esse nome'; desenharMantendoFoco('#rec-nome'); return;
+      ui.erroNome = `Já existe uma ${T().nome} com esse nome`; desenharMantendoFoco('#rec-nome'); return;
     }
     const novas = rascunho(op).produtos.filter(Planos.linhaPreenchida).map((l) => ({ ...l }));
     const { talhoes, editando } = ui.definindo;
@@ -2934,7 +2947,7 @@ window.Telas.planoOperacoes = (function () {
     const criada = !destino;
     if (criada) {
       destino = Planos.novaReceita(op, novas.map((l) => Planos.novaLinha({
-        principioAtivo: l.principioAtivo, produto: l.produto, unidade: l.unidade, dose: l.dose, preCadastro: l.preCadastro })));
+        principioAtivo: l.principioAtivo, produto: l.produto, unidade: l.unidade, dose: l.dose, preCadastro: l.preCadastro })), T().base);
       // Nome digitado diferente do original vai para a nova; senão, ela fica com o nome padrão
       if (nome !== r.nome) destino.nome = nome;
       op.receitas.push(destino);

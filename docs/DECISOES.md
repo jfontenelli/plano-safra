@@ -65,6 +65,7 @@ Agrônomo da fazenda e líder de operações podem ser a mesma pessoa, conforme 
 - Safra: escolhida numa lista; se não existir, "Criar nova safra" ali mesmo. A safra tem só o nome por enquanto.
 - Um único plano por safra e fazenda (a refinar).
 - Cultura é definida no nível da fazenda e pode ser alterada no talhão.
+- **Por enquanto o protótipo funciona só para soja**: a lista de culturas tem só Soja (já vem escolhida no modal). Variedades, população, bags e TSI são de soja.
 - "Como deseja iniciar o plano?":
   - **Usar modelo** (pré-selecionado): "Use uma estrutura pronta de operações e ajuste conforme necessário." Lista de operações levantada com os clientes, pré-preenchida para ajustar. Serve também de plano de exemplo para o usuário ver como fica.
   - **Plano em branco**: "Monte a lista de operações conforme a realidade da fazenda." Lista de operações vazia.
@@ -105,7 +106,7 @@ Detalhe da tela: docs/telas/04.2-operacoes-sementes.md.
 - **Germinação média do plano**: na v1, um valor único para todos os talhões (a semente ainda não foi comprada; não há lote).
 - População de plantas: recomendada (cadastro da variedade, referência, mostrada só no preenchimento) e planejada (agrônomo). Talhão sem variedade não recebe população.
 - **Sementes = população planejada × área ÷ germinação. Bags = sementes ÷ 5.000.000** (1 bag de soja = 5 milhões de sementes).
-- **Tratamento de sementes (TSI)**: receita com nome (TS 1, TS 2…), no padrão da recomendação agronômica (composição de produtos = identidade; dose pode variar por talhão), aplicada **por talhão** (pode mudar após os testes). Composta por grupos de produto: fertilizante, fungicida, inseticida, nematicida, inoculante, polímero, pó secante e grafite.
+- **Tratamento de sementes industrial (TSI)**: receita com nome (TSI 1, TSI 2…), só para talhão com variedade, no padrão da recomendação agronômica (composição de produtos = identidade; dose pode variar por talhão), aplicada **por talhão** (pode mudar após os testes). Composta por grupos de produto: fertilizante, fungicida, inseticida, nematicida, inoculante, polímero, pó secante e grafite.
 - Unidade da dose de TSI vem do cadastro do produto; a unidade usada pelos clientes (por 100 kg de sementes, por bag ou por hectare) e a entrada do PMS no plano serão definidas nos testes. Sem cálculo de quantidade de TSI no plano por enquanto.
 
 ## 5. Orçamento e aprovação

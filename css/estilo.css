@@ -1903,3 +1903,14 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .tabela-variedade th, .tabela-variedade td { width: 1%; padding-left: 10px; padding-right: 10px; }
 .tabela-talhoes.tabela-variedade .tabela__numero { padding-right: 10px; }
 .tabela-variedade .tabela__expandir { width: auto; }
+
+/* TSI: grupos de produto (selo abaixo do nome), fora das cores de fungicida, inseticida e herbicida */
+.etiqueta-tipo--nematicida   { background: #fdf0e1; color: #8a4b00; }
+.etiqueta-tipo--inoculante   { background: #e6f4ea; color: #24663b; }
+.etiqueta-tipo--fertilizante { background: #eef3e2; color: #4f6118; }
+.etiqueta-tipo--polimero     { background: #fbe8f2; color: #8c2f62; }
+.etiqueta-tipo--po-secante   { background: #f1efe9; color: #5d5646; }
+.etiqueta-tipo--grafite      { background: #eceeef; color: #3f4649; }
+.dica-plantio__link { padding: 0; border: 0; background: none; font: inherit; color: inherit; text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
+.dica-plantio__link:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 2px; border-radius: 3px; }
+.dica-plantio:not(:has(.dica-plantio__fechar)) { padding: 8px 14px; }

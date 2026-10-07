@@ -183,12 +183,13 @@ window.Telas.abrirModalCriarPlano = function ({ aoCriar }) {
   });
 
   // ----- Pedaços de HTML -----
+  // Com uma opção só (ex.: cultura, por enquanto só Soja), ela já vem escolhida
   function campoLista(nome, rotulo, textoVazio, itens) {
     return `
       <div class="campo">
         <label class="campo__rotulo" for="cp-${nome}">${rotulo} ${asterisco()}</label>
         <select class="campo__controle" id="cp-${nome}" name="${nome}" required>
-          ${opcoes(textoVazio, itens)}
+          ${opcoes(textoVazio, itens, itens.length === 1 ? itens[0] : '')}
         </select>
         ${erroObrigatorio(nome)}
       </div>

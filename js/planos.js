@@ -45,9 +45,10 @@ window.Planos = (function () {
     return op.receitas.reduce((m, r) => Math.max(m, r.numero), 0) + 1;
   }
 
-  function novaReceita(op, produtos = []) {
+  // Nome padrão: "Recomendação 1"; no tratamento de sementes, "TSI 1"
+  function novaReceita(op, produtos = [], base = 'Recomendação') {
     const numero = proximoNumero(op);
-    return { id: novoId('r'), numero, nome: `Recomendação ${numero}`, produtos };
+    return { id: novoId('r'), numero, nome: `${base} ${numero}`, produtos };
   }
 
   function novoAjuste(receitaId) {
@@ -76,6 +77,12 @@ window.Planos = (function () {
       op.fenologia = d.fenologia || '';
       (d.plantio || []).forEach(({ talhao, variedade, data, populacao }) => { op.plantio[talhao] = { variedade, data, populacao }; });
       if (d.germinacao) op.germinacao = d.germinacao;
+      // Tratamento de sementes (TSI) do Plantio: cada um vira "TSI N", nos talhões listados
+      (d.tsi || []).forEach(({ produtos, talhoes }) => {
+        const r = novaReceita(op, produtos.map(([nome, dose]) => linhaDoProduto(nome, dose)), 'TSI');
+        op.receitas.push(r);
+        talhoes.forEach((t) => { op.talhoes[t] = novoAjuste(r.id); });
+      });
       if (!d.produtos || !d.produtos.length) return;
       const receita = novaReceita(op, d.produtos.map(([nome, dose]) => linhaDoProduto(nome, dose)));
       op.receitas.push(receita);
@@ -166,9 +173,11 @@ window.Planos = (function () {
     return linhasTalhao(op, ajuste).find((l) => chaveLinha(l) === chaveLinha(coluna)) || null;
   }
 
-  // "L/ha"; sem produto comercial não há unidade (a dose é do produto)
+  // "L/ha"; unidade do cadastro que já traz a base (TSI: "mL/100 kg") fica como está.
+  // Sem produto comercial não há unidade (a dose é do produto).
   function unidadeDose(linha) {
-    return linha.produto && linha.unidade ? `${linha.unidade}/ha` : '';
+    if (!linha.produto || !linha.unidade) return '';
+    return linha.unidade.includes('/') ? linha.unidade : `${linha.unidade}/ha`;
   }
 
   function nomeLinha(linha) {
