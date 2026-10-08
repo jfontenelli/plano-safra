@@ -37,7 +37,7 @@ Menu "Plano de Safra"
                      │                        └─[Continuar para as operações]→ 04.0 Operações
                      └─[seta da linha]→ abre o plano em 04.0 Operações
 
-Plano aberto: 04.0 Operações ──[Ir para o planejamento]──→ 04.1–04.4 Planejamento → 05 Calendário Agrícola
+Plano aberto (abas no cabeçalho): 04.0 Operações → 04.1–04.4 Planejamento → 05 Calendário Agrícola
 ```
 
 ## Próximas telas do plano (ainda não desenhadas)

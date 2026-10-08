@@ -1,7 +1,7 @@
 /*
  * Tela 04.0 — Operações do plano (docs/telas/04.0-operacoes.md)
  * Etapa 1 do plano: a estrutura vinda do modelo (grupos e operações com DAP, fenologia e previsão de conclusão),
- * para revisar antes do planejamento talhão a talhão. Quem não quiser mexer segue direto para o Planejamento.
+ * para revisar antes do planejamento talhão a talhão. Quem não quiser mexer segue para o Planejamento pelas etapas do cabeçalho.
  * Desenhada dentro da Tela 04 (mesmo cabeçalho do plano); a Tela 04 repassa os eventos para cá.
  */
 window.Telas = window.Telas || {};
@@ -29,8 +29,7 @@ window.Telas.operacoesPlano = (function () {
     return `
       <section class="estrutura">
         <div class="estrutura__aviso" role="note">${Icones.info}
-          <p><strong>Revise as operações cadastradas.</strong> Se estiver tudo certo, siga para o planejamento.</p>
-          <a class="botao botao--primario botao--p" href="#/plano/${plano.id}/planejamento">Ir para o planejamento ${Icones.seta}</a>
+          <p><strong>Revise as operações cadastradas.</strong> Cada operação vira uma Ordem de Serviço (OS) quando o plano for aprovado. Se estiver tudo certo, siga para o planejamento.</p>
         </div>
         ${plano.grupos.length ? plano.grupos.map((g) => grupoHtml(g, ctx)).join('')
           : '<p class="estrutura__vazio">Nenhum grupo de operações no plano.</p>'}
