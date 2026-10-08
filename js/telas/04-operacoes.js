@@ -2520,6 +2520,7 @@ window.Telas.planoOperacoes = (function () {
   }
 
   function aoDigitar(e) {
+    if (etapa === 'calendario' && Telas.calendario.aoDigitar(e, ctxCalendario())) return;
     // Doses: registradas enquanto se digita, sem redesenhar
     if (e.target.dataset.campo === 'linha-dose') {
       // Só números e uma vírgula decimal; o ponto digitado vira vírgula

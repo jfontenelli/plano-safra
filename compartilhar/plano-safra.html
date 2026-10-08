@@ -1973,10 +1973,27 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 
 /* ===== Tela 05 · Calendário Agrícola ===== */
 .calendario { display: flex; flex-direction: column; gap: 14px; padding: 16px 24px; min-height: 0; }
-.calendario__barra { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 12px 20px; }
+.calendario__barra { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 20px; }
+.calendario__filtros { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; }
 .calendario__filtro { display: flex; align-items: center; gap: 10px; }
 .calendario__filtro-rotulo { font-size: 14px; font-weight: 600; }
 .calendario__filtro .campo__controle { min-width: 220px; }
+.cal-filtro { position: relative; }
+.cal-filtro__botao { display: flex; align-items: center; justify-content: space-between; gap: 8px; cursor: pointer; list-style: none; user-select: none; }
+.cal-filtro__botao::-webkit-details-marker { display: none; }
+.cal-filtro__seta { display: inline-flex; width: 16px; height: 16px; transition: transform .15s; }
+.cal-filtro__seta svg { width: 16px; height: 16px; }
+.cal-filtro[open] .cal-filtro__seta { transform: rotate(180deg); }
+.cal-filtro__painel { position: absolute; z-index: 30; top: calc(100% + 4px); left: 0; min-width: 100%; max-height: 320px; overflow-y: auto;
+  background: #fff; border: 1px solid var(--borda, #d8ddd6); border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,.12); padding: 6px 0; }
+.cal-filtro__opcao { display: flex; align-items: center; gap: 8px; padding: 7px 14px; font-size: 14px; cursor: pointer; white-space: nowrap; }
+.cal-filtro__opcao:hover { background: #f2f5f0; }
+.cal-filtro__opcao--todos { font-weight: 600; border-bottom: 1px solid var(--borda, #d8ddd6); margin-bottom: 4px; }
+.cal-filtro__busca { padding: 4px 10px 8px; }
+.cal-filtro__busca .campo__controle { width: 100%; min-width: 0; }
+.cal-filtro__opcao[hidden] { display: none; }
+.cal-filtro__nada { margin: 0; padding: 8px 14px; font-size: 13px; color: #6b7280; }
+.cal-filtro__area { margin-left: auto; padding-left: 16px; color: #6b7280; font-size: 13px; }
 .calendario__visoes .visoes__botao { height: 38px; }
 .calendario__visoes .visoes__botao--ativo { background: var(--verde-100); color: var(--verde-800); box-shadow: inset 0 0 0 1px var(--verde-600); }
 .calendario__vazio { margin: 24px 0; color: var(--texto-suave); }
@@ -2107,6 +2124,54 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .tab-op__fixo { color: var(--texto-suave); }
 .tab-op__prazo { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--texto-suave); white-space: nowrap; }
 .tab-op__vazio { color: var(--texto-suave); }
+
+
+/* ===== Calendário: cards de resumo (topo do Infográfico e da Tabela) ===== */
+.resumo-cards { display: grid; grid-template-columns: repeat(2, minmax(0, max-content)); gap: 12px; }
+@media (max-width: 760px) { .resumo-cards { grid-template-columns: 1fr; } }
+.resumo-card { display: flex; align-items: center; gap: 10px; padding: 8px 16px; background: var(--superficie); border: 1px solid var(--borda); border-radius: var(--raio); box-shadow: var(--sombra); }
+.resumo-card__icone { display: inline-flex; }
+.resumo-card__icone .icone { width: 22px; height: 22px; color: var(--verde-600); stroke-width: 1.6; }
+.resumo-card__texto { flex: 1; min-width: 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 12px; }
+.resumo-card__rotulo { font-size: 14px; color: var(--texto-suave); }
+.resumo-card__valor { font-size: 26px; font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.resumo-card__valor small { font-size: 15px; font-weight: 400; color: var(--texto-suave); }
+.resumo-card__valor--data { font-size: 18px; white-space: nowrap; }
+.resumo-card__barra { height: 8px; border-radius: 4px; background: #e6ebe8; overflow: hidden; }
+.resumo-card__barra span { display: block; height: 100%; border-radius: 4px; background: var(--verde-600); }
+.resumo-card__pct { align-self: flex-end; font-size: 13px; font-weight: 600; color: var(--texto); font-variant-numeric: tabular-nums; }
+.resumo-card__vazio { font-size: 18px; font-weight: 700; color: #9aa49f; }
+.resumo-card__dica { font-size: 13px; color: var(--texto-suave); }
+.calendario__pendentes { display: flex; align-items: center; gap: 8px; margin: 0; font-size: 14px; color: var(--texto-suave); }
+.calendario__pendentes .icone { width: 16px; height: 16px; flex-shrink: 0; }
+.calendario__pendentes strong { color: var(--texto); }
+.calendario__pendentes a { color: var(--verde-700); }
+
+/* ===== Calendário · Tabela: uma linha por operação (com os produtos embaixo) e uma coluna por talhão ===== */
+.cal-piv { overflow: auto; background: var(--superficie); border: 1px solid var(--borda); border-radius: var(--raio); box-shadow: var(--sombra); }
+.cal-piv__tabela { border-collapse: collapse; font-size: 14px; min-width: 100%; }
+.cal-piv__tabela thead th { position: sticky; top: 0; z-index: 2; padding: 10px 14px; background: #f7f8f7; font-size: 13px; font-weight: 600; text-align: left;
+  white-space: nowrap; box-shadow: inset 0 -1px 0 var(--borda); vertical-align: bottom; }
+.cal-piv__tabela td { padding: 8px 14px; border: 1px solid var(--borda); white-space: nowrap; vertical-align: middle; }
+.cal-piv__tabela thead th + th { border-left: 1px solid var(--borda); }
+.cal-piv__tabela tr > :first-child { border-left: 0; }
+.cal-piv__tabela tbody { border-top: 2px solid #cfd8d2; }
+.cal-piv__fase-cab { width: 44px; }
+.cal-piv__num { text-align: center !important; font-variant-numeric: tabular-nums; }
+.cal-piv__talhao { min-width: 110px; text-align: center !important; font-weight: 400 !important; }
+.cal-piv__talhao strong, .cal-piv__talhao span { display: block; }
+.cal-piv__talhao span { font-size: 12px; color: var(--texto-suave); }
+.cal-piv__fen { text-align: center; }
+.cal-piv__data { text-align: center; font-variant-numeric: tabular-nums; }
+.cal-piv__area { text-align: right !important; font-variant-numeric: tabular-nums; }
+.cal-piv__nome { min-width: 250px; white-space: normal !important; }
+.cal-piv__nome strong { display: block; font-weight: 700; }
+.cal-piv__chip { display: inline-block; margin-top: 6px; padding: 2px 10px; border-radius: 999px; background: #eef1ef; color: var(--texto-suave); font-size: 12px; }
+.cal-piv__sem { color: #9aa49f; font-style: italic; }
+.cal-piv__unid { color: var(--texto-suave); }
+.cal-piv__ajuste { background: #fdf0c4; font-weight: 600; }
+.cal-piv__nao { background: #f0f2f1; color: #9aa49f; }
+.cal-piv__nada { padding: 24px !important; text-align: center; color: var(--texto-suave); }
 
 </style>
 </head>
@@ -3842,7 +3907,7 @@ window.Telas.calendario = (function () {
   // ----- Itens do calendário: uma operação de qualquer grupo, ou a colheita (prevista pelo plantio) -----
   function itens(ctx) {
     const { plano, talhoes, estado } = ctx;
-    const filtro = (nome) => estado.talhao === 'todos' || estado.talhao === nome;
+    const filtro = (nome) => talhaoMarcado(estado, nome);
     const daFazenda = talhoes.filter((t) => filtro(t.nome));
     const area = (nomes) => daFazenda.filter((t) => nomes.includes(t.nome)).reduce((s, t) => s + t.area, 0);
     const lista = [];
@@ -3924,7 +3989,7 @@ window.Telas.calendario = (function () {
   // Imagem de cada fase (img/fenologia, uma por estádio). Caminho completo e literal: o script do arquivo único
   // (ferramentas/gerar-compartilhar.js) só embute imagens escritas assim.
   const IMAGENS = {
-    pre: 'data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTAwIDEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNOCA4OEM4IDc4IDE2IDcyIDI0IDc0QzI2IDYyIDM2IDU2IDQ2IDU4QzUyIDUwIDY2IDUyIDcwIDYyQzgwIDYwIDkwIDY4IDkwIDc4Qzk0IDgwIDk0IDg4IDkyIDg4WiIgZmlsbD0iI2E4NjUzYyIvPjxwYXRoIGQ9Ik03MCA2MkM4MCA2MCA5MCA2OCA5MCA3OEM5NCA4MCA5NCA4OCA5MiA4OEg2NEM3MiA4MCA3NCA3MCA3MCA2MloiIGZpbGw9IiM4ZjUyMzAiLz48ZyBmaWxsPSIjN2E0NTI2Ij48ZWxsaXBzZSBjeD0iMzQiIGN5PSI4MCIgcng9IjMuMiIgcnk9IjIiLz48ZWxsaXBzZSBjeD0iNTIiIGN5PSI3MCIgcng9IjIuNiIgcnk9IjEuNyIvPjxlbGxpcHNlIGN4PSI0NiIgY3k9IjgzIiByeD0iMi4yIiByeT0iMS40Ii8+PGVsbGlwc2UgY3g9IjYwIiBjeT0iODAiIHJ4PSIzIiByeT0iMS44Ii8+PGVsbGlwc2UgY3g9IjI0IiBjeT0iODQiIHJ4PSIyIiByeT0iMS4zIi8+PC9nPjxyZWN0IHg9IjQiIHk9Ijg2IiB3aWR0aD0iOTIiIGhlaWdodD0iNSIgcng9IjIuNSIgZmlsbD0iIzdhNDUyNiIvPjwvc3ZnPg0K', plantio: 'data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTAwIDEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZWxsaXBzZSBjeD0iNDAiIGN5PSI1NiIgcng9IjE2IiByeT0iMTMiIGZpbGw9IiNkNGE5NjciLz48ZWxsaXBzZSBjeD0iMzguNyIgY3k9IjU0LjQiIHJ4PSIxNC4xIiByeT0iMTAuNCIgZmlsbD0iI2U4YzQ4YSIvPjxlbGxpcHNlIGN4PSIzMy45IiBjeT0iNTAuNSIgcng9IjQuNSIgcnk9IjIuMSIgZmlsbD0iI2Y1ZGZiNSIgdHJhbnNmb3JtPSJyb3RhdGUoLTIwIDMzLjkgNTAuNSkiLz48ZWxsaXBzZSBjeD0iNjIiIGN5PSI1OCIgcng9IjE1IiByeT0iMTIuNSIgZmlsbD0iI2Q0YTk2NyIvPjxlbGxpcHNlIGN4PSI2MC44IiBjeT0iNTYuNSIgcng9IjEzLjIiIHJ5PSIxMC4wIiBmaWxsPSIjZThjNDhhIi8+PGVsbGlwc2UgY3g9IjU2LjMiIGN5PSI1Mi44IiByeD0iNC4yIiByeT0iMi4wIiBmaWxsPSIjZjVkZmI1IiB0cmFuc2Zvcm09InJvdGF0ZSgtMjAgNTYuMyA1Mi44KSIvPjxlbGxpcHNlIGN4PSIyMCIgY3k9Ijc0IiByeD0iMTEiIHJ5PSI5LjUiIGZpbGw9IiNkNGE5NjciLz48ZWxsaXBzZSBjeD0iMTkuMSIgY3k9IjcyLjkiIHJ4PSI5LjciIHJ5PSI3LjYiIGZpbGw9IiNlOGM0OGEiLz48ZWxsaXBzZSBjeD0iMTUuOCIgY3k9IjcwLjAiIHJ4PSIzLjEiIHJ5PSIxLjUiIGZpbGw9IiNmNWRmYjUiIHRyYW5zZm9ybT0icm90YXRlKC0yMCAxNS44IDcwLjApIi8+PGVsbGlwc2UgY3g9Ijc4IiBjeT0iNzYiIHJ4PSIxMSIgcnk9IjkuNSIgZmlsbD0iI2Q0YTk2NyIvPjxlbGxpcHNlIGN4PSI3Ny4xIiBjeT0iNzQuOSIgcng9IjkuNyIgcnk9IjcuNiIgZmlsbD0iI2U4YzQ4YSIvPjxlbGxpcHNlIGN4PSI3My44IiBjeT0iNzIuMCIgcng9IjMuMSIgcnk9IjEuNSIgZmlsbD0iI2Y1ZGZiNSIgdHJhbnNmb3JtPSJyb3RhdGUoLTIwIDczLjggNzIuMCkiLz48ZWxsaXBzZSBjeD0iNDciIGN5PSI3NyIgcng9IjE4IiByeT0iMTQiIGZpbGw9IiNkNGE5NjciLz48ZWxsaXBzZSBjeD0iNDUuNiIgY3k9Ijc1LjMiIHJ4PSIxNS44IiByeT0iMTEuMiIgZmlsbD0iI2U4YzQ4YSIvPjxlbGxpcHNlIGN4PSI0MC4yIiBjeT0iNzEuMSIgcng9IjUuMCIgcnk9IjIuMiIgZmlsbD0iI2Y1ZGZiNSIgdHJhbnNmb3JtPSJyb3RhdGUoLTIwIDQwLjIgNzEuMSkiLz48ZWxsaXBzZSBjeD0iNTQiIGN5PSI4MyIgcng9IjMuMiIgcnk9IjEuNCIgZmlsbD0iI2E0NzgzYyIvPjwvc3ZnPg==', colheita: 'data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTAwIDEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB4PSIwIiB5PSI4OCIgd2lkdGg9IjEwMCIgaGVpZ2h0PSI2IiByeD0iMyIgZmlsbD0iIzhhNWEzNSIvPjxnIHN0cm9rZT0iIzhhNmEzYSIgc3Ryb2tlLXdpZHRoPSIxLjYiPjxwYXRoIGQ9Ik00IDg5VjY2TTEwIDg5VjY0TTE2IDg5VjY4Ii8+PC9nPjxnIGZpbGw9IiM3YTUyMjgiPjxlbGxpcHNlIGN4PSI2IiBjeT0iNzIiIHJ4PSIxLjYiIHJ5PSIzLjYiIHRyYW5zZm9ybT0icm90YXRlKDI1IDYgNzIpIi8+PGVsbGlwc2UgY3g9IjIiIGN5PSI3OCIgcng9IjEuNiIgcnk9IjMuNiIgdHJhbnNmb3JtPSJyb3RhdGUoLTI1IDIgNzgpIi8+PGVsbGlwc2UgY3g9IjEyIiBjeT0iNzAiIHJ4PSIxLjYiIHJ5PSIzLjYiIHRyYW5zZm9ybT0icm90YXRlKDI1IDEyIDcwKSIvPjxlbGxpcHNlIGN4PSI4IiBjeT0iNzciIHJ4PSIxLjYiIHJ5PSIzLjYiIHRyYW5zZm9ybT0icm90YXRlKC0yNSA4IDc3KSIvPjxlbGxpcHNlIGN4PSIxOCIgY3k9Ijc0IiByeD0iMS42IiByeT0iMy42IiB0cmFuc2Zvcm09InJvdGF0ZSgyNSAxOCA3NCkiLz48L2c+PGcgc3Ryb2tlPSIjOGE2YTNhIiBzdHJva2Utd2lkdGg9IjEuNiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIj48cGF0aCBkPSJNODYgODlWODRNOTEgODlWODVNOTYgODlWODQiLz48L2c+PHBhdGggZD0iTTMwIDY2TDQ0IDYyVjc2TDMwIDgwWiIgZmlsbD0iIzNmNmYyYSIvPjxyZWN0IHg9IjE0IiB5PSI3NiIgd2lkdGg9IjIwIiBoZWlnaHQ9IjgiIHJ4PSIyIiBmaWxsPSIjNGI4ZjMwIi8+PHBhdGggZD0iTTE0IDg0SDM0IiBzdHJva2U9IiMzYTNhM2EiIHN0cm9rZS13aWR0aD0iMiIvPjxjaXJjbGUgY3g9IjIzIiBjeT0iNzAiIHI9IjYiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzNhM2EzYSIgc3Ryb2tlLXdpZHRoPSIxLjYiLz48cGF0aCBkPSJNMjMgNjRWNzZNMTcgNzBIMjkiIHN0cm9rZT0iIzNhM2EzYSIgc3Ryb2tlLXdpZHRoPSIxLjIiLz48cmVjdCB4PSI0MiIgeT0iNTIiIHdpZHRoPSI0MCIgaGVpZ2h0PSIyOCIgcng9IjMiIGZpbGw9IiM0YjhmMzAiLz48cmVjdCB4PSI1OCIgeT0iNDIiIHdpZHRoPSIyMiIgaGVpZ2h0PSIxMSIgcng9IjIiIGZpbGw9IiMzZjdmMmEiLz48cmVjdCB4PSI0NCIgeT0iMzYiIHdpZHRoPSIxNSIgaGVpZ2h0PSIxNyIgcng9IjIiIGZpbGw9IiMzZjdmMmEiLz48cmVjdCB4PSI0NiIgeT0iMzgiIHdpZHRoPSIxMSIgaGVpZ2h0PSIxMCIgcng9IjEuNSIgZmlsbD0iI2JmZTBlZiIvPjxwYXRoIGQ9Ik04MCA0Nkg5MFY1OCIgc3Ryb2tlPSIjM2EzYTNhIiBzdHJva2Utd2lkdGg9IjIuNCIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PGNpcmNsZSBjeD0iNTIiIGN5PSI4MCIgcj0iMTAiIGZpbGw9IiMyZjJmMmYiLz48Y2lyY2xlIGN4PSI1MiIgY3k9IjgwIiByPSI0IiBmaWxsPSIjOWFhMGE2Ii8+PGNpcmNsZSBjeD0iNzYiIGN5PSI4MyIgcj0iNi41IiBmaWxsPSIjMmYyZjJmIi8+PGNpcmNsZSBjeD0iNzYiIGN5PSI4MyIgcj0iMi42IiBmaWxsPSIjOWFhMGE2Ii8+PC9zdmc+DQo=',
+    pre: 'data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTAwIDEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNOCA4OEM4IDc4IDE2IDcyIDI0IDc0QzI2IDYyIDM2IDU2IDQ2IDU4QzUyIDUwIDY2IDUyIDcwIDYyQzgwIDYwIDkwIDY4IDkwIDc4Qzk0IDgwIDk0IDg4IDkyIDg4WiIgZmlsbD0iI2E4NjUzYyIvPjxwYXRoIGQ9Ik03MCA2MkM4MCA2MCA5MCA2OCA5MCA3OEM5NCA4MCA5NCA4OCA5MiA4OEg2NEM3MiA4MCA3NCA3MCA3MCA2MloiIGZpbGw9IiM4ZjUyMzAiLz48ZyBmaWxsPSIjN2E0NTI2Ij48ZWxsaXBzZSBjeD0iMzQiIGN5PSI4MCIgcng9IjMuMiIgcnk9IjIiLz48ZWxsaXBzZSBjeD0iNTIiIGN5PSI3MCIgcng9IjIuNiIgcnk9IjEuNyIvPjxlbGxpcHNlIGN4PSI0NiIgY3k9IjgzIiByeD0iMi4yIiByeT0iMS40Ii8+PGVsbGlwc2UgY3g9IjYwIiBjeT0iODAiIHJ4PSIzIiByeT0iMS44Ii8+PGVsbGlwc2UgY3g9IjI0IiBjeT0iODQiIHJ4PSIyIiByeT0iMS4zIi8+PC9nPjxyZWN0IHg9IjQiIHk9Ijg2IiB3aWR0aD0iOTIiIGhlaWdodD0iNSIgcng9IjIuNSIgZmlsbD0iIzdhNDUyNiIvPjwvc3ZnPg0K', plantio: 'data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTAwIDEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZWxsaXBzZSBjeD0iNDAiIGN5PSI1NiIgcng9IjE2IiByeT0iMTMiIGZpbGw9IiNkNGE5NjciLz48ZWxsaXBzZSBjeD0iMzguNyIgY3k9IjU0LjQiIHJ4PSIxNC4xIiByeT0iMTAuNCIgZmlsbD0iI2U4YzQ4YSIvPjxlbGxpcHNlIGN4PSIzMy45IiBjeT0iNTAuNSIgcng9IjQuNSIgcnk9IjIuMSIgZmlsbD0iI2Y1ZGZiNSIgdHJhbnNmb3JtPSJyb3RhdGUoLTIwIDMzLjkgNTAuNSkiLz48ZWxsaXBzZSBjeD0iNjIiIGN5PSI1OCIgcng9IjE1IiByeT0iMTIuNSIgZmlsbD0iI2Q0YTk2NyIvPjxlbGxpcHNlIGN4PSI2MC44IiBjeT0iNTYuNSIgcng9IjEzLjIiIHJ5PSIxMC4wIiBmaWxsPSIjZThjNDhhIi8+PGVsbGlwc2UgY3g9IjU2LjMiIGN5PSI1Mi44IiByeD0iNC4yIiByeT0iMi4wIiBmaWxsPSIjZjVkZmI1IiB0cmFuc2Zvcm09InJvdGF0ZSgtMjAgNTYuMyA1Mi44KSIvPjxlbGxpcHNlIGN4PSIyMCIgY3k9Ijc0IiByeD0iMTEiIHJ5PSI5LjUiIGZpbGw9IiNkNGE5NjciLz48ZWxsaXBzZSBjeD0iMTkuMSIgY3k9IjcyLjkiIHJ4PSI5LjciIHJ5PSI3LjYiIGZpbGw9IiNlOGM0OGEiLz48ZWxsaXBzZSBjeD0iMTUuOCIgY3k9IjcwLjAiIHJ4PSIzLjEiIHJ5PSIxLjUiIGZpbGw9IiNmNWRmYjUiIHRyYW5zZm9ybT0icm90YXRlKC0yMCAxNS44IDcwLjApIi8+PGVsbGlwc2UgY3g9Ijc4IiBjeT0iNzYiIHJ4PSIxMSIgcnk9IjkuNSIgZmlsbD0iI2Q0YTk2NyIvPjxlbGxpcHNlIGN4PSI3Ny4xIiBjeT0iNzQuOSIgcng9IjkuNyIgcnk9IjcuNiIgZmlsbD0iI2U4YzQ4YSIvPjxlbGxpcHNlIGN4PSI3My44IiBjeT0iNzIuMCIgcng9IjMuMSIgcnk9IjEuNSIgZmlsbD0iI2Y1ZGZiNSIgdHJhbnNmb3JtPSJyb3RhdGUoLTIwIDczLjggNzIuMCkiLz48ZWxsaXBzZSBjeD0iNDciIGN5PSI3NyIgcng9IjE4IiByeT0iMTQiIGZpbGw9IiNkNGE5NjciLz48ZWxsaXBzZSBjeD0iNDUuNiIgY3k9Ijc1LjMiIHJ4PSIxNS44IiByeT0iMTEuMiIgZmlsbD0iI2U4YzQ4YSIvPjxlbGxpcHNlIGN4PSI0MC4yIiBjeT0iNzEuMSIgcng9IjUuMCIgcnk9IjIuMiIgZmlsbD0iI2Y1ZGZiNSIgdHJhbnNmb3JtPSJyb3RhdGUoLTIwIDQwLjIgNzEuMSkiLz48ZWxsaXBzZSBjeD0iNTQiIGN5PSI4MyIgcng9IjMuMiIgcnk9IjEuNCIgZmlsbD0iI2E0NzgzYyIvPjwvc3ZnPg==', colheita: 'data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTAwIDEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB4PSIwIiB5PSI4OCIgd2lkdGg9IjEwMCIgaGVpZ2h0PSI2IiByeD0iMyIgZmlsbD0iIzhhNWEzNSIvPjxnIHN0cm9rZT0iIzhhNmEzYSIgc3Ryb2tlLXdpZHRoPSIxLjYiPjxwYXRoIGQ9Ik00IDg5VjY2TTEwIDg5VjY0TTE2IDg5VjY4Ii8+PC9nPjxnIGZpbGw9IiM3YTUyMjgiPjxlbGxpcHNlIGN4PSI2IiBjeT0iNzIiIHJ4PSIxLjYiIHJ5PSIzLjYiIHRyYW5zZm9ybT0icm90YXRlKDI1IDYgNzIpIi8+PGVsbGlwc2UgY3g9IjIiIGN5PSI3OCIgcng9IjEuNiIgcnk9IjMuNiIgdHJhbnNmb3JtPSJyb3RhdGUoLTI1IDIgNzgpIi8+PGVsbGlwc2UgY3g9IjEyIiBjeT0iNzAiIHJ4PSIxLjYiIHJ5PSIzLjYiIHRyYW5zZm9ybT0icm90YXRlKDI1IDEyIDcwKSIvPjxlbGxpcHNlIGN4PSI4IiBjeT0iNzciIHJ4PSIxLjYiIHJ5PSIzLjYiIHRyYW5zZm9ybT0icm90YXRlKC0yNSA4IDc3KSIvPjxlbGxpcHNlIGN4PSIxOCIgY3k9Ijc0IiByeD0iMS42IiByeT0iMy42IiB0cmFuc2Zvcm09InJvdGF0ZSgyNSAxOCA3NCkiLz48L2c+PGcgc3Ryb2tlPSIjOGE2YTNhIiBzdHJva2Utd2lkdGg9IjEuNiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIj48cGF0aCBkPSJNODYgODlWODRNOTEgODlWODVNOTYgODlWODQiLz48L2c+PHBhdGggZD0iTTMwIDY2TDQ0IDYyVjc2TDMwIDgwWiIgZmlsbD0iIzVmNjY2YyIvPjxyZWN0IHg9IjE0IiB5PSI3NiIgd2lkdGg9IjIwIiBoZWlnaHQ9IjgiIHJ4PSIyIiBmaWxsPSIjOGE5MDk2Ii8+PHBhdGggZD0iTTE0IDg0SDM0IiBzdHJva2U9IiMzYTNhM2EiIHN0cm9rZS13aWR0aD0iMiIvPjxjaXJjbGUgY3g9IjIzIiBjeT0iNzAiIHI9IjYiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzNhM2EzYSIgc3Ryb2tlLXdpZHRoPSIxLjYiLz48cGF0aCBkPSJNMjMgNjRWNzZNMTcgNzBIMjkiIHN0cm9rZT0iIzNhM2EzYSIgc3Ryb2tlLXdpZHRoPSIxLjIiLz48cmVjdCB4PSI0MiIgeT0iNTIiIHdpZHRoPSI0MCIgaGVpZ2h0PSIyOCIgcng9IjMiIGZpbGw9IiM4YTkwOTYiLz48cmVjdCB4PSI1OCIgeT0iNDIiIHdpZHRoPSIyMiIgaGVpZ2h0PSIxMSIgcng9IjIiIGZpbGw9IiM2Zjc2N2MiLz48cmVjdCB4PSI0NCIgeT0iMzYiIHdpZHRoPSIxNSIgaGVpZ2h0PSIxNyIgcng9IjIiIGZpbGw9IiM2Zjc2N2MiLz48cmVjdCB4PSI0NiIgeT0iMzgiIHdpZHRoPSIxMSIgaGVpZ2h0PSIxMCIgcng9IjEuNSIgZmlsbD0iI2JmZTBlZiIvPjxwYXRoIGQ9Ik04MCA0Nkg5MFY1OCIgc3Ryb2tlPSIjM2EzYTNhIiBzdHJva2Utd2lkdGg9IjIuNCIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PGNpcmNsZSBjeD0iNTIiIGN5PSI4MCIgcj0iMTAiIGZpbGw9IiMyZjJmMmYiLz48Y2lyY2xlIGN4PSI1MiIgY3k9IjgwIiByPSI0IiBmaWxsPSIjYzRjOGNjIi8+PGNpcmNsZSBjeD0iNzYiIGN5PSI4MyIgcj0iNi41IiBmaWxsPSIjMmYyZjJmIi8+PGNpcmNsZSBjeD0iNzYiIGN5PSI4MyIgcj0iMi42IiBmaWxsPSIjYzRjOGNjIi8+PC9zdmc+Cg==',
     neutro: 'data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTAwIDEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB4PSIyNiIgeT0iMzAiIHdpZHRoPSI0OCIgaGVpZ2h0PSI0NCIgcng9IjUiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzlhYTBhNiIgc3Ryb2tlLXdpZHRoPSIzIi8+PHBhdGggZD0iTTI2IDQ0SDc0TTM4IDI0VjM2TTYyIDI0VjM2IiBzdHJva2U9IiM5YWEwYTYiIHN0cm9rZS13aWR0aD0iMyIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PC9zdmc+',
     VE: 'data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTAwIDEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZWxsaXBzZSBjeD0iNTAiIGN5PSI5MiIgcng9IjM0IiByeT0iNSIgZmlsbD0iIzhhNWEzNSIvPjxwYXRoIGQ9Ik00NyA5MFE0NiA3MiA1MiA3MlE1NyA3MiA1NSA3OCIgc3Ryb2tlPSIjN2ZhNTNhIiBzdHJva2Utd2lkdGg9IjIuMiIgZmlsbD0ibm9uZSIvPjxlbGxpcHNlIGN4PSI1NSIgY3k9IjgwIiByeD0iMyIgcnk9IjQuMiIgZmlsbD0iI2I3YzY0YyIgdHJhbnNmb3JtPSJyb3RhdGUoMTUgNTUgODApIi8+PC9zdmc+', VC: 'data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTAwIDEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZWxsaXBzZSBjeD0iNTAiIGN5PSI5MiIgcng9IjM0IiByeT0iNSIgZmlsbD0iIzhhNWEzNSIvPjxwYXRoIGQ9Ik01MCA5MEw1MCA2MCIgc3Ryb2tlPSIjNGY3ZDJhIiBzdHJva2Utd2lkdGg9IjIiLz48ZWxsaXBzZSBjeD0iNDMiIGN5PSI4NCIgcng9IjUiIHJ5PSIzIiBmaWxsPSIjYjdjNjRjIiB0cmFuc2Zvcm09InJvdGF0ZSgtMTUgNDMgODQpIi8+PGVsbGlwc2UgY3g9IjU3IiBjeT0iODQiIHJ4PSI1IiByeT0iMyIgZmlsbD0iI2I3YzY0YyIgdHJhbnNmb3JtPSJyb3RhdGUoMTUgNTcgODQpIi8+PGVsbGlwc2UgY3g9IjQwIiBjeT0iNzAiIHJ4PSI2LjUiIHJ5PSI0IiBmaWxsPSIjNGI4ZjMwIiB0cmFuc2Zvcm09InJvdGF0ZSgtMjUgNDAgNzApIi8+PGVsbGlwc2UgY3g9IjYwIiBjeT0iNzAiIHJ4PSI2LjUiIHJ5PSI0IiBmaWxsPSIjNGI4ZjMwIiB0cmFuc2Zvcm09InJvdGF0ZSgyNSA2MCA3MCkiLz48L3N2Zz4=', V1: 'data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTAwIDEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZWxsaXBzZSBjeD0iNTAiIGN5PSI5MiIgcng9IjM0IiByeT0iNSIgZmlsbD0iIzhhNWEzNSIvPjxwYXRoIGQ9Ik01MCA5MEw1MCA1NCIgc3Ryb2tlPSIjNGY3ZDJhIiBzdHJva2Utd2lkdGg9IjIiLz48ZWxsaXBzZSBjeD0iNDAiIGN5PSI3MCIgcng9IjYuNSIgcnk9IjQiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKC0yNSA0MCA3MCkiLz48ZWxsaXBzZSBjeD0iNjAiIGN5PSI3MCIgcng9IjYuNSIgcnk9IjQiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKDI1IDYwIDcwKSIvPjxwYXRoIGQ9Ik01MCA2MkwzOSA1OCIgc3Ryb2tlPSIjNGI4ZjMwIiBzdHJva2Utd2lkdGg9IjEuMyIvPjxlbGxpcHNlIGN4PSIzMy41IiBjeT0iNTciIHJ4PSI1LjUiIHJ5PSIzIiBmaWxsPSIjNGI4ZjMwIiB0cmFuc2Zvcm09InJvdGF0ZSgwIDMzLjUgNTcpIi8+PGVsbGlwc2UgY3g9IjM4IiBjeT0iNTIuNSIgcng9IjUiIHJ5PSIyLjgiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKDU1IDM4IDUyLjUpIi8+PGVsbGlwc2UgY3g9IjM4IiBjeT0iNjEuNSIgcng9IjUiIHJ5PSIyLjgiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKC01NSAzOCA2MS41KSIvPjwvc3ZnPg==', V2: 'data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTAwIDEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZWxsaXBzZSBjeD0iNTAiIGN5PSI5MiIgcng9IjM0IiByeT0iNSIgZmlsbD0iIzhhNWEzNSIvPjxwYXRoIGQ9Ik01MCA5MEw1MCA0NiIgc3Ryb2tlPSIjNGY3ZDJhIiBzdHJva2Utd2lkdGg9IjIiLz48ZWxsaXBzZSBjeD0iNDAiIGN5PSI3MCIgcng9IjYuNSIgcnk9IjQiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKC0yNSA0MCA3MCkiLz48ZWxsaXBzZSBjeD0iNjAiIGN5PSI3MCIgcng9IjYuNSIgcnk9IjQiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKDI1IDYwIDcwKSIvPjxwYXRoIGQ9Ik01MCA2MkwzOSA1OCIgc3Ryb2tlPSIjNGI4ZjMwIiBzdHJva2Utd2lkdGg9IjEuMyIvPjxlbGxpcHNlIGN4PSIzMy41IiBjeT0iNTciIHJ4PSI1LjUiIHJ5PSIzIiBmaWxsPSIjNGI4ZjMwIiB0cmFuc2Zvcm09InJvdGF0ZSgwIDMzLjUgNTcpIi8+PGVsbGlwc2UgY3g9IjM4IiBjeT0iNTIuNSIgcng9IjUiIHJ5PSIyLjgiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKDU1IDM4IDUyLjUpIi8+PGVsbGlwc2UgY3g9IjM4IiBjeT0iNjEuNSIgcng9IjUiIHJ5PSIyLjgiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKC01NSAzOCA2MS41KSIvPjxwYXRoIGQ9Ik01MCA1NEw2MSA1MCIgc3Ryb2tlPSIjNGI4ZjMwIiBzdHJva2Utd2lkdGg9IjEuMyIvPjxlbGxpcHNlIGN4PSI2Ni41IiBjeT0iNDkiIHJ4PSI1LjUiIHJ5PSIzIiBmaWxsPSIjNGI4ZjMwIiB0cmFuc2Zvcm09InJvdGF0ZSgwIDY2LjUgNDkpIi8+PGVsbGlwc2UgY3g9IjYyIiBjeT0iNDQuNSIgcng9IjUiIHJ5PSIyLjgiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKC01NSA2MiA0NC41KSIvPjxlbGxpcHNlIGN4PSI2MiIgY3k9IjUzLjUiIHJ4PSI1IiByeT0iMi44IiBmaWxsPSIjNGI4ZjMwIiB0cmFuc2Zvcm09InJvdGF0ZSg1NSA2MiA1My41KSIvPjwvc3ZnPg==',
     V3: 'data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTAwIDEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZWxsaXBzZSBjeD0iNTAiIGN5PSI5MiIgcng9IjM0IiByeT0iNSIgZmlsbD0iIzhhNWEzNSIvPjxwYXRoIGQ9Ik01MCA5MEw1MCAzOCIgc3Ryb2tlPSIjNGY3ZDJhIiBzdHJva2Utd2lkdGg9IjIiLz48ZWxsaXBzZSBjeD0iNDAiIGN5PSI3MCIgcng9IjYuNSIgcnk9IjQiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKC0yNSA0MCA3MCkiLz48ZWxsaXBzZSBjeD0iNjAiIGN5PSI3MCIgcng9IjYuNSIgcnk9IjQiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKDI1IDYwIDcwKSIvPjxwYXRoIGQ9Ik01MCA2MkwzOSA1OCIgc3Ryb2tlPSIjNGI4ZjMwIiBzdHJva2Utd2lkdGg9IjEuMyIvPjxlbGxpcHNlIGN4PSIzMy41IiBjeT0iNTciIHJ4PSI1LjUiIHJ5PSIzIiBmaWxsPSIjNGI4ZjMwIiB0cmFuc2Zvcm09InJvdGF0ZSgwIDMzLjUgNTcpIi8+PGVsbGlwc2UgY3g9IjM4IiBjeT0iNTIuNSIgcng9IjUiIHJ5PSIyLjgiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKDU1IDM4IDUyLjUpIi8+PGVsbGlwc2UgY3g9IjM4IiBjeT0iNjEuNSIgcng9IjUiIHJ5PSIyLjgiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKC01NSAzOCA2MS41KSIvPjxwYXRoIGQ9Ik01MCA1NEw2MSA1MCIgc3Ryb2tlPSIjNGI4ZjMwIiBzdHJva2Utd2lkdGg9IjEuMyIvPjxlbGxpcHNlIGN4PSI2Ni41IiBjeT0iNDkiIHJ4PSI1LjUiIHJ5PSIzIiBmaWxsPSIjNGI4ZjMwIiB0cmFuc2Zvcm09InJvdGF0ZSgwIDY2LjUgNDkpIi8+PGVsbGlwc2UgY3g9IjYyIiBjeT0iNDQuNSIgcng9IjUiIHJ5PSIyLjgiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKC01NSA2MiA0NC41KSIvPjxlbGxpcHNlIGN4PSI2MiIgY3k9IjUzLjUiIHJ4PSI1IiByeT0iMi44IiBmaWxsPSIjNGI4ZjMwIiB0cmFuc2Zvcm09InJvdGF0ZSg1NSA2MiA1My41KSIvPjxwYXRoIGQ9Ik01MCA0NkwzOSA0MiIgc3Ryb2tlPSIjNGI4ZjMwIiBzdHJva2Utd2lkdGg9IjEuMyIvPjxlbGxpcHNlIGN4PSIzMy41IiBjeT0iNDEiIHJ4PSI1LjUiIHJ5PSIzIiBmaWxsPSIjNGI4ZjMwIiB0cmFuc2Zvcm09InJvdGF0ZSgwIDMzLjUgNDEpIi8+PGVsbGlwc2UgY3g9IjM4IiBjeT0iMzYuNSIgcng9IjUiIHJ5PSIyLjgiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKDU1IDM4IDM2LjUpIi8+PGVsbGlwc2UgY3g9IjM4IiBjeT0iNDUuNSIgcng9IjUiIHJ5PSIyLjgiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKC01NSAzOCA0NS41KSIvPjwvc3ZnPg==', V4: 'data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTAwIDEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZWxsaXBzZSBjeD0iNTAiIGN5PSI5MiIgcng9IjM0IiByeT0iNSIgZmlsbD0iIzhhNWEzNSIvPjxwYXRoIGQ9Ik01MCA5MEw1MCAzMCIgc3Ryb2tlPSIjNGY3ZDJhIiBzdHJva2Utd2lkdGg9IjIiLz48ZWxsaXBzZSBjeD0iNDAiIGN5PSI3MCIgcng9IjYuNSIgcnk9IjQiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKC0yNSA0MCA3MCkiLz48ZWxsaXBzZSBjeD0iNjAiIGN5PSI3MCIgcng9IjYuNSIgcnk9IjQiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKDI1IDYwIDcwKSIvPjxwYXRoIGQ9Ik01MCA2MkwzOSA1OCIgc3Ryb2tlPSIjNGI4ZjMwIiBzdHJva2Utd2lkdGg9IjEuMyIvPjxlbGxpcHNlIGN4PSIzMy41IiBjeT0iNTciIHJ4PSI1LjUiIHJ5PSIzIiBmaWxsPSIjNGI4ZjMwIiB0cmFuc2Zvcm09InJvdGF0ZSgwIDMzLjUgNTcpIi8+PGVsbGlwc2UgY3g9IjM4IiBjeT0iNTIuNSIgcng9IjUiIHJ5PSIyLjgiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKDU1IDM4IDUyLjUpIi8+PGVsbGlwc2UgY3g9IjM4IiBjeT0iNjEuNSIgcng9IjUiIHJ5PSIyLjgiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKC01NSAzOCA2MS41KSIvPjxwYXRoIGQ9Ik01MCA1NEw2MSA1MCIgc3Ryb2tlPSIjNGI4ZjMwIiBzdHJva2Utd2lkdGg9IjEuMyIvPjxlbGxpcHNlIGN4PSI2Ni41IiBjeT0iNDkiIHJ4PSI1LjUiIHJ5PSIzIiBmaWxsPSIjNGI4ZjMwIiB0cmFuc2Zvcm09InJvdGF0ZSgwIDY2LjUgNDkpIi8+PGVsbGlwc2UgY3g9IjYyIiBjeT0iNDQuNSIgcng9IjUiIHJ5PSIyLjgiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKC01NSA2MiA0NC41KSIvPjxlbGxpcHNlIGN4PSI2MiIgY3k9IjUzLjUiIHJ4PSI1IiByeT0iMi44IiBmaWxsPSIjNGI4ZjMwIiB0cmFuc2Zvcm09InJvdGF0ZSg1NSA2MiA1My41KSIvPjxwYXRoIGQ9Ik01MCA0NkwzOSA0MiIgc3Ryb2tlPSIjNGI4ZjMwIiBzdHJva2Utd2lkdGg9IjEuMyIvPjxlbGxpcHNlIGN4PSIzMy41IiBjeT0iNDEiIHJ4PSI1LjUiIHJ5PSIzIiBmaWxsPSIjNGI4ZjMwIiB0cmFuc2Zvcm09InJvdGF0ZSgwIDMzLjUgNDEpIi8+PGVsbGlwc2UgY3g9IjM4IiBjeT0iMzYuNSIgcng9IjUiIHJ5PSIyLjgiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKDU1IDM4IDM2LjUpIi8+PGVsbGlwc2UgY3g9IjM4IiBjeT0iNDUuNSIgcng9IjUiIHJ5PSIyLjgiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKC01NSAzOCA0NS41KSIvPjxwYXRoIGQ9Ik01MCAzOEw2MSAzNCIgc3Ryb2tlPSIjNGI4ZjMwIiBzdHJva2Utd2lkdGg9IjEuMyIvPjxlbGxpcHNlIGN4PSI2Ni41IiBjeT0iMzMiIHJ4PSI1LjUiIHJ5PSIzIiBmaWxsPSIjNGI4ZjMwIiB0cmFuc2Zvcm09InJvdGF0ZSgwIDY2LjUgMzMpIi8+PGVsbGlwc2UgY3g9IjYyIiBjeT0iMjguNSIgcng9IjUiIHJ5PSIyLjgiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKC01NSA2MiAyOC41KSIvPjxlbGxpcHNlIGN4PSI2MiIgY3k9IjM3LjUiIHJ4PSI1IiByeT0iMi44IiBmaWxsPSIjNGI4ZjMwIiB0cmFuc2Zvcm09InJvdGF0ZSg1NSA2MiAzNy41KSIvPjwvc3ZnPg==', V5: 'data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTAwIDEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZWxsaXBzZSBjeD0iNTAiIGN5PSI5MiIgcng9IjM0IiByeT0iNSIgZmlsbD0iIzhhNWEzNSIvPjxwYXRoIGQ9Ik01MCA5MEw1MCAyMiIgc3Ryb2tlPSIjNGY3ZDJhIiBzdHJva2Utd2lkdGg9IjIiLz48ZWxsaXBzZSBjeD0iNDAiIGN5PSI3MCIgcng9IjYuNSIgcnk9IjQiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKC0yNSA0MCA3MCkiLz48ZWxsaXBzZSBjeD0iNjAiIGN5PSI3MCIgcng9IjYuNSIgcnk9IjQiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKDI1IDYwIDcwKSIvPjxwYXRoIGQ9Ik01MCA2MkwzOSA1OCIgc3Ryb2tlPSIjNGI4ZjMwIiBzdHJva2Utd2lkdGg9IjEuMyIvPjxlbGxpcHNlIGN4PSIzMy41IiBjeT0iNTciIHJ4PSI1LjUiIHJ5PSIzIiBmaWxsPSIjNGI4ZjMwIiB0cmFuc2Zvcm09InJvdGF0ZSgwIDMzLjUgNTcpIi8+PGVsbGlwc2UgY3g9IjM4IiBjeT0iNTIuNSIgcng9IjUiIHJ5PSIyLjgiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKDU1IDM4IDUyLjUpIi8+PGVsbGlwc2UgY3g9IjM4IiBjeT0iNjEuNSIgcng9IjUiIHJ5PSIyLjgiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKC01NSAzOCA2MS41KSIvPjxwYXRoIGQ9Ik01MCA1NEw2MSA1MCIgc3Ryb2tlPSIjNGI4ZjMwIiBzdHJva2Utd2lkdGg9IjEuMyIvPjxlbGxpcHNlIGN4PSI2Ni41IiBjeT0iNDkiIHJ4PSI1LjUiIHJ5PSIzIiBmaWxsPSIjNGI4ZjMwIiB0cmFuc2Zvcm09InJvdGF0ZSgwIDY2LjUgNDkpIi8+PGVsbGlwc2UgY3g9IjYyIiBjeT0iNDQuNSIgcng9IjUiIHJ5PSIyLjgiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKC01NSA2MiA0NC41KSIvPjxlbGxpcHNlIGN4PSI2MiIgY3k9IjUzLjUiIHJ4PSI1IiByeT0iMi44IiBmaWxsPSIjNGI4ZjMwIiB0cmFuc2Zvcm09InJvdGF0ZSg1NSA2MiA1My41KSIvPjxwYXRoIGQ9Ik01MCA0NkwzOSA0MiIgc3Ryb2tlPSIjNGI4ZjMwIiBzdHJva2Utd2lkdGg9IjEuMyIvPjxlbGxpcHNlIGN4PSIzMy41IiBjeT0iNDEiIHJ4PSI1LjUiIHJ5PSIzIiBmaWxsPSIjNGI4ZjMwIiB0cmFuc2Zvcm09InJvdGF0ZSgwIDMzLjUgNDEpIi8+PGVsbGlwc2UgY3g9IjM4IiBjeT0iMzYuNSIgcng9IjUiIHJ5PSIyLjgiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKDU1IDM4IDM2LjUpIi8+PGVsbGlwc2UgY3g9IjM4IiBjeT0iNDUuNSIgcng9IjUiIHJ5PSIyLjgiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKC01NSAzOCA0NS41KSIvPjxwYXRoIGQ9Ik01MCAzOEw2MSAzNCIgc3Ryb2tlPSIjNGI4ZjMwIiBzdHJva2Utd2lkdGg9IjEuMyIvPjxlbGxpcHNlIGN4PSI2Ni41IiBjeT0iMzMiIHJ4PSI1LjUiIHJ5PSIzIiBmaWxsPSIjNGI4ZjMwIiB0cmFuc2Zvcm09InJvdGF0ZSgwIDY2LjUgMzMpIi8+PGVsbGlwc2UgY3g9IjYyIiBjeT0iMjguNSIgcng9IjUiIHJ5PSIyLjgiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKC01NSA2MiAyOC41KSIvPjxlbGxpcHNlIGN4PSI2MiIgY3k9IjM3LjUiIHJ4PSI1IiByeT0iMi44IiBmaWxsPSIjNGI4ZjMwIiB0cmFuc2Zvcm09InJvdGF0ZSg1NSA2MiAzNy41KSIvPjxwYXRoIGQ9Ik01MCAzMEwzOSAyNiIgc3Ryb2tlPSIjNGI4ZjMwIiBzdHJva2Utd2lkdGg9IjEuMyIvPjxlbGxpcHNlIGN4PSIzMy41IiBjeT0iMjUiIHJ4PSI1LjUiIHJ5PSIzIiBmaWxsPSIjNGI4ZjMwIiB0cmFuc2Zvcm09InJvdGF0ZSgwIDMzLjUgMjUpIi8+PGVsbGlwc2UgY3g9IjM4IiBjeT0iMjAuNSIgcng9IjUiIHJ5PSIyLjgiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKDU1IDM4IDIwLjUpIi8+PGVsbGlwc2UgY3g9IjM4IiBjeT0iMjkuNSIgcng9IjUiIHJ5PSIyLjgiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKC01NSAzOCAyOS41KSIvPjwvc3ZnPg==', V6: 'data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTAwIDEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZWxsaXBzZSBjeD0iNTAiIGN5PSI5MiIgcng9IjM0IiByeT0iNSIgZmlsbD0iIzhhNWEzNSIvPjxwYXRoIGQ9Ik01MCA5MEw1MCAxNCIgc3Ryb2tlPSIjNGY3ZDJhIiBzdHJva2Utd2lkdGg9IjIiLz48ZWxsaXBzZSBjeD0iNDAiIGN5PSI3MCIgcng9IjYuNSIgcnk9IjQiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKC0yNSA0MCA3MCkiLz48ZWxsaXBzZSBjeD0iNjAiIGN5PSI3MCIgcng9IjYuNSIgcnk9IjQiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKDI1IDYwIDcwKSIvPjxwYXRoIGQ9Ik01MCA2MkwzOSA1OCIgc3Ryb2tlPSIjNGI4ZjMwIiBzdHJva2Utd2lkdGg9IjEuMyIvPjxlbGxpcHNlIGN4PSIzMy41IiBjeT0iNTciIHJ4PSI1LjUiIHJ5PSIzIiBmaWxsPSIjNGI4ZjMwIiB0cmFuc2Zvcm09InJvdGF0ZSgwIDMzLjUgNTcpIi8+PGVsbGlwc2UgY3g9IjM4IiBjeT0iNTIuNSIgcng9IjUiIHJ5PSIyLjgiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKDU1IDM4IDUyLjUpIi8+PGVsbGlwc2UgY3g9IjM4IiBjeT0iNjEuNSIgcng9IjUiIHJ5PSIyLjgiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKC01NSAzOCA2MS41KSIvPjxwYXRoIGQ9Ik01MCA1NEw2MSA1MCIgc3Ryb2tlPSIjNGI4ZjMwIiBzdHJva2Utd2lkdGg9IjEuMyIvPjxlbGxpcHNlIGN4PSI2Ni41IiBjeT0iNDkiIHJ4PSI1LjUiIHJ5PSIzIiBmaWxsPSIjNGI4ZjMwIiB0cmFuc2Zvcm09InJvdGF0ZSgwIDY2LjUgNDkpIi8+PGVsbGlwc2UgY3g9IjYyIiBjeT0iNDQuNSIgcng9IjUiIHJ5PSIyLjgiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKC01NSA2MiA0NC41KSIvPjxlbGxpcHNlIGN4PSI2MiIgY3k9IjUzLjUiIHJ4PSI1IiByeT0iMi44IiBmaWxsPSIjNGI4ZjMwIiB0cmFuc2Zvcm09InJvdGF0ZSg1NSA2MiA1My41KSIvPjxwYXRoIGQ9Ik01MCA0NkwzOSA0MiIgc3Ryb2tlPSIjNGI4ZjMwIiBzdHJva2Utd2lkdGg9IjEuMyIvPjxlbGxpcHNlIGN4PSIzMy41IiBjeT0iNDEiIHJ4PSI1LjUiIHJ5PSIzIiBmaWxsPSIjNGI4ZjMwIiB0cmFuc2Zvcm09InJvdGF0ZSgwIDMzLjUgNDEpIi8+PGVsbGlwc2UgY3g9IjM4IiBjeT0iMzYuNSIgcng9IjUiIHJ5PSIyLjgiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKDU1IDM4IDM2LjUpIi8+PGVsbGlwc2UgY3g9IjM4IiBjeT0iNDUuNSIgcng9IjUiIHJ5PSIyLjgiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKC01NSAzOCA0NS41KSIvPjxwYXRoIGQ9Ik01MCAzOEw2MSAzNCIgc3Ryb2tlPSIjNGI4ZjMwIiBzdHJva2Utd2lkdGg9IjEuMyIvPjxlbGxpcHNlIGN4PSI2Ni41IiBjeT0iMzMiIHJ4PSI1LjUiIHJ5PSIzIiBmaWxsPSIjNGI4ZjMwIiB0cmFuc2Zvcm09InJvdGF0ZSgwIDY2LjUgMzMpIi8+PGVsbGlwc2UgY3g9IjYyIiBjeT0iMjguNSIgcng9IjUiIHJ5PSIyLjgiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKC01NSA2MiAyOC41KSIvPjxlbGxpcHNlIGN4PSI2MiIgY3k9IjM3LjUiIHJ4PSI1IiByeT0iMi44IiBmaWxsPSIjNGI4ZjMwIiB0cmFuc2Zvcm09InJvdGF0ZSg1NSA2MiAzNy41KSIvPjxwYXRoIGQ9Ik01MCAzMEwzOSAyNiIgc3Ryb2tlPSIjNGI4ZjMwIiBzdHJva2Utd2lkdGg9IjEuMyIvPjxlbGxpcHNlIGN4PSIzMy41IiBjeT0iMjUiIHJ4PSI1LjUiIHJ5PSIzIiBmaWxsPSIjNGI4ZjMwIiB0cmFuc2Zvcm09InJvdGF0ZSgwIDMzLjUgMjUpIi8+PGVsbGlwc2UgY3g9IjM4IiBjeT0iMjAuNSIgcng9IjUiIHJ5PSIyLjgiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKDU1IDM4IDIwLjUpIi8+PGVsbGlwc2UgY3g9IjM4IiBjeT0iMjkuNSIgcng9IjUiIHJ5PSIyLjgiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKC01NSAzOCAyOS41KSIvPjxwYXRoIGQ9Ik01MCAyMkw2MSAxOCIgc3Ryb2tlPSIjNGI4ZjMwIiBzdHJva2Utd2lkdGg9IjEuMyIvPjxlbGxpcHNlIGN4PSI2Ni41IiBjeT0iMTciIHJ4PSI1LjUiIHJ5PSIzIiBmaWxsPSIjNGI4ZjMwIiB0cmFuc2Zvcm09InJvdGF0ZSgwIDY2LjUgMTcpIi8+PGVsbGlwc2UgY3g9IjYyIiBjeT0iMTIuNSIgcng9IjUiIHJ5PSIyLjgiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKC01NSA2MiAxMi41KSIvPjxlbGxpcHNlIGN4PSI2MiIgY3k9IjIxLjUiIHJ4PSI1IiByeT0iMi44IiBmaWxsPSIjNGI4ZjMwIiB0cmFuc2Zvcm09InJvdGF0ZSg1NSA2MiAyMS41KSIvPjwvc3ZnPg==',
@@ -3977,27 +4042,82 @@ window.Telas.calendario = (function () {
 
   // ----- Desenho -----
   function desenhar(ctx) {
-    const { talhoes, estado } = ctx;
-    const lista = itens(ctx);
-    const total = estado.talhao === 'todos' ? talhoes.length : 1;
+    const { talhoes, estado, plano } = ctx;
+    // Em construção: todas as operações cadastradas na etapa Operações, já no calendário; o que ainda não tem
+    // talhão planejado aparece como "Sem recomendação" e vai se preenchendo conforme o planejamento.
+    // Plano aprovado: só o que tem produto e dose (ou plantio); o resto não aparece.
+    const lista = itens(ctx).filter((it) => !ctx.somenteLeitura || (it.colheita ? !it.aguardando : it.talhoes.length > 0))
+      .filter((it) => marcado(estado, 'grupo', chaveGrupo(it)));
     return `
       <section class="calendario">
         <div class="calendario__barra">
-          <label class="calendario__filtro">
-            <span class="calendario__filtro-rotulo">Talhão</span>
-            <select class="campo__controle" data-campo="cal-talhao" aria-label="Talhão">
-              <option value="todos" ${estado.talhao === 'todos' ? 'selected' : ''}>Todos os talhões</option>
-              ${talhoes.map((t) => `<option value="${esc(t.nome)}" ${estado.talhao === t.nome ? 'selected' : ''}>${esc(t.nome)} · ${Util.area(t.area)}</option>`).join('')}
-            </select>
-          </label>
+          <div class="calendario__filtros">
+            <div class="calendario__filtro">
+              <span class="calendario__filtro-rotulo">Grupo de operação</span>
+              ${filtroCaixa(estado, 'grupo', opcoesGrupo(plano), ['Todos os grupos', 'Nenhum grupo', 'grupos'], 'Grupo de operação')}
+            </div>
+            <div class="calendario__filtro">
+              <span class="calendario__filtro-rotulo">Talhão</span>
+              ${filtroCaixa(estado, 'talhao', opcoesTalhao(talhoes), ['Todos os talhões', 'Nenhum talhão', 'talhões'], 'Talhões')}
+            </div>
+          </div>
           <div class="visoes calendario__visoes" role="group" aria-label="Visão do calendário">
             ${[['infografico', Icones.grafico, 'Infográfico'], ['tabela', Icones.lista, 'Tabela']].map(([v, icone, rotulo]) => `
               <button class="visoes__botao ${estado.visao === v ? 'visoes__botao--ativo' : ''}" type="button" data-acao="cal-visao"
                       data-visao="${v}" aria-pressed="${estado.visao === v}">${icone}${rotulo}</button>`).join('')}
           </div>
         </div>
-        ${!lista.length ? '<p class="calendario__vazio">Nenhuma operação no plano.</p>'
-          : estado.visao === 'tabela' ? tabela(ctx, lista, total) : infografico(ctx, lista)}
+        ${resumo(ctx)}
+        ${estado.visao === 'tabela' ? tabela(ctx, lista) : infografico(ctx, lista)}
+      </section>`;
+  }
+
+  // ----- Cards de resumo (topo do Infográfico e da Tabela) -----
+  // Previsão de plantio e de colheita, dos talhões com plantio definido (variedade e data)
+  const MESES_CURTOS = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+  function partes(iso) { const [a, m, d] = iso.split('-').map(Number); return { a, m, d }; }
+  function somaDias(iso, n) {
+    const { a, m, d } = partes(iso);
+    const dt = new Date(a, m - 1, d + n);
+    return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
+  }
+  // "01–20/out/2026"; meses diferentes: "22/set–10/out/2026"; anos diferentes: "28/dez/2026–05/jan/2027"
+  function intervalo(isos) {
+    if (!isos.length) return '';
+    const ord = [...isos].sort();
+    const i = partes(ord[0]); const f = partes(ord[ord.length - 1]);
+    const dd = (x) => String(x.d).padStart(2, '0');
+    if (ord[0] === ord[ord.length - 1]) return `${dd(i)}/${MESES_CURTOS[i.m - 1]}/${i.a}`;
+    if (i.a !== f.a) return `${dd(i)}/${MESES_CURTOS[i.m - 1]}/${i.a}–${dd(f)}/${MESES_CURTOS[f.m - 1]}/${f.a}`;
+    if (i.m !== f.m) return `${dd(i)}/${MESES_CURTOS[i.m - 1]}–${dd(f)}/${MESES_CURTOS[f.m - 1]}/${f.a}`;
+    return `${dd(i)}–${dd(f)}/${MESES_CURTOS[f.m - 1]}/${f.a}`;
+  }
+  function plantioDo(plano) {
+    return (plano.grupos.find((g) => g.tipo === 'Sementes') || { operacoes: [] }).operacoes[0] || null;
+  }
+  function previsaoColheita(p) {
+    const v = p && p.variedade ? variedade(p.variedade) : null;
+    return p && p.data && v && v.ciclo ? somaDias(p.data, v.ciclo) : null;
+  }
+
+  function resumo(ctx) {
+    const { plano, talhoes } = ctx;
+    const op = plantioDo(plano);
+    const pl = (op && op.plantio) || {};
+    const comPlantio = talhoes.filter((t) => pl[t.nome] && pl[t.nome].variedade && pl[t.nome].data);
+    const datas = comPlantio.map((t) => pl[t.nome].data);
+    const colheitas = comPlantio.map((t) => previsaoColheita(pl[t.nome])).filter(Boolean);
+    const card = (icone, rotulo, corpo) => `
+      <div class="resumo-card">
+        <span class="resumo-card__icone">${icone}</span>
+        <div class="resumo-card__texto"><span class="resumo-card__rotulo">${rotulo}</span>${corpo}</div>
+      </div>`;
+    const semPlantio = '<span class="resumo-card__vazio">—</span><span class="resumo-card__dica">Defina o plantio na guia Semente</span>';
+    return `
+      <section class="resumo-cards" aria-label="Resumo do planejamento">
+        ${card(Icones.calendario, 'Previsão de plantio', datas.length ? `<span class="resumo-card__valor resumo-card__valor--data">${intervalo(datas)}</span>` : semPlantio)}
+        ${card(Icones.calendario, 'Previsão de colheita', colheitas.length ? `<span class="resumo-card__valor resumo-card__valor--data">${intervalo(colheitas)}</span>`
+          : datas.length ? '<span class="resumo-card__vazio">—</span><span class="resumo-card__dica">Variedade sem ciclo</span>' : semPlantio)}
       </section>`;
   }
 
@@ -4049,50 +4169,200 @@ window.Telas.calendario = (function () {
       </div>`;
   }
 
-  function tabela(ctx, lista, total) {
-    const { somenteLeitura } = ctx;
-    // Uma coluna por produto, na ordem em que aparecem no calendário
-    const produtos = [];
-    lista.forEach((it) => it.produtos.forEach(([chave, p]) => { if (!produtos.some((x) => x.chave === chave)) produtos.push({ chave, nome: p.nome }); }));
-    return `
-      <div class="cal-tabela talhoes-rolagem">
-        <table class="tabela tabela--compacta tabela-talhoes cal-tabela__tabela">
-          <thead><tr>
-            <th class="tabela__numero">DAP</th><th>Fenologia</th><th>Grupo de operação</th><th>Operação</th><th>Prazo para encerramento da OS</th>
-            <th class="tabela__numero">Talhões</th><th class="tabela__numero">Área (ha)</th>
-            ${produtos.map((p) => `<th class="tabela__numero">${esc(p.nome)}</th>`).join('')}
-          </tr></thead>
-          <tbody>
-            ${lista.map((it) => {
-              const idPrazo = it.colheita ? 'colheita' : it.op.id;
-              const prazo = somenteLeitura ? `${it.prazo} ${it.prazo === 1 ? 'dia' : 'dias'}` : `
-                <span class="cal-prazo"><input class="campo__controle cal-prazo__campo" type="text" inputmode="numeric" data-campo="cal-prazo"
-                       data-op="${idPrazo}" value="${it.prazo}" aria-label="Prazo para encerramento da OS de ${esc(it.colheita ? 'Colheita' : it.op.nome)}, em dias"> dias</span>`;
-              const dap = it.aguardando ? 'pelo ciclo' : it.colheita && it.dapMax !== it.dap ? `${it.dap} a ${it.dapMax}` : it.dap ?? '—';
-              return `
-                <tr>
-                  <td class="tabela__numero">${dap}</td>
-                  <td>${esc(it.fenologia || '—')}</td>
-                  <td>${esc(it.grupo.nome)}</td>
-                  <th scope="row" class="cal-tabela__op">${esc(it.colheita ? 'Colheita' : it.op.nome)}</th>
-                  <td>${prazo}</td>
-                  <td class="tabela__numero">${it.talhoes.length}/${total}</td>
-                  <td class="tabela__numero">${Util.area(it.area).replace(' ha', '')}</td>
-                  ${produtos.map((p) => {
-                    const achado = it.produtos.find(([c]) => c === p.chave);
-                    if (!achado) return '<td class="tabela__numero tabela__nao-recebe">—</td>';
-                    const d = dose(achado[1], it.grupo);
-                    return `<td class="tabela__numero" ${d.detalhe ? `title="${esc(d.detalhe)}"` : ''}>${esc(d.texto)}</td>`;
-                  }).join('')}
-                </tr>`;
+  // ----- Tabela: uma linha por operação (abre e fecha), com os produtos embaixo; uma coluna por talhão -----
+  // Faixa da fase à esquerda (as mesmas cores da etapa Operações). Dose do talhão diferente da padrão: amarelo;
+  // talhão que não recebe o produto: "—" em cinza.
+  const FAIXAS = { pre: 'Pré-plantio', plantio: 'Plantio', desenv: 'Manejo da cultura', colheita: 'Colheita' };
+  function faixaDe(it) {
+    if (it.colheita) return 'colheita';
+    if (it.dap === null || it.dap === undefined || it.dap === '') return 'desenv';
+    return it.dap < 0 ? 'pre' : it.dap === 0 ? 'plantio' : 'desenv';
+  }
+
+  // Linhas de baixo de cada operação: [rótulo, unidade, valor por talhão → { texto, classe }]
+  function subLinhas(it, ctx) {
+    const pl = (it.colheita || it.grupo.tipo === 'Sementes') ? ((plantioDo(ctx.plano) || {}).plantio || {}) : null;
+    if (it.colheita) {
+      return [['Previsão de colheita', 'data', (t) => {
+        const prev = previsaoColheita(pl[t.nome]);
+        return prev ? { texto: diaMes(prev) } : { texto: '—', classe: 'cal-piv__nao' };
+      }]];
+    }
+    if (it.grupo.tipo === 'Sementes') {
+      return [
+        ['Data de plantio', 'data', (t) => (pl[t.nome] && pl[t.nome].data ? { texto: diaMes(pl[t.nome].data) } : { texto: '—', classe: 'cal-piv__nao' })],
+        ['População', 'mil pl/ha', (t) => (pl[t.nome] && pl[t.nome].populacao ? { texto: Util.dose(pl[t.nome].populacao).replace(/,00$/, '') } : { texto: '—', classe: 'cal-piv__nao' })]
+      ];
+    }
+    const op = it.op;
+    return Planos.colunasDose(op).map((col) => [Planos.nomeLinha(col), Planos.unidadeDose(col), (t) => {
+      const ajuste = op.talhoes[t.nome];
+      const l = ajuste ? Planos.linhaNoTalhao(op, ajuste, col) : null;
+      if (!l) return { texto: '—', classe: 'cal-piv__nao' };
+      const d = Planos.doseTalhao(op, ajuste, l);
+      const ajustada = l.id in ajuste.doses && d !== l.dose;
+      return { texto: textoDose(d, it.grupo), classe: ajustada ? 'cal-piv__ajuste' : '', titulo: ajustada ? `Dose do talhão; padrão da receita: ${textoDose(l.dose, it.grupo)}` : '' };
+    }]);
+  }
+
+  function diaMes(iso) { const { m, d } = partes(iso); return `${String(d).padStart(2, '0')}/${String(m).padStart(2, '0')}`; }
+
+  // Data prevista: data de plantio + DAP, nos talhões da operação (sem talhão planejado, nos talhões do filtro com
+  // plantio); datas diferentes entre talhões viram intervalo ("22/set–10/out/2026"). Colheita: a previsão de cada talhão.
+  function dataPrevista(it, visiveis, pl) {
+    const nomes = it.talhoes.length ? it.talhoes : visiveis.map((t) => t.nome);
+    const datas = it.colheita
+      ? nomes.map((t) => previsaoColheita(pl[t])).filter(Boolean)
+      : (it.dap === null || it.dap === undefined || it.dap === '') ? []
+      : nomes.filter((t) => pl[t] && pl[t].data).map((t) => somaDias(pl[t].data, Number(it.dap)));
+    return datas.length ? intervalo(datas) : '—';
+  }
+
+  function tabela(ctx, lista) {
+    const { talhoes, estado, plano } = ctx;
+    const visiveis = talhoes.filter((t) => talhaoMarcado(estado, t.nome));
+    const pl = (plantioDo(plano) || {}).plantio || {};
+    // Cada operação ocupa uma linha por produto (DAP, Fenologia e Operação na altura de todas); sem talhão planejado,
+    // uma linha só, com "Sem recomendação" (ou "Sem variedade", no Plantio) na coluna Produto
+    const grupos = [];
+    lista.forEach((it) => {
+      const f = faixaDe(it);
+      if (!grupos.length || grupos[grupos.length - 1].f !== f) grupos.push({ f, linhas: [] });
+      const vazia = !it.colheita && !it.talhoes.length;
+      const subs = vazia ? [] : subLinhas(it, ctx);
+      const n = Math.max(1, subs.length);
+      const nome = it.colheita ? 'Colheita' : it.op.nome || 'Sem operação';
+      const dap = it.aguardando ? 'pelo ciclo' : it.colheita && it.dapMax !== it.dap ? `${it.dap} a ${it.dapMax}` : it.dap ?? '—';
+      const comum = `
+          <td class="cal-piv__num" rowspan="${n}">${dap}</td>
+          <td class="cal-piv__fen" rowspan="${n}">${esc(it.fenologia || '—')}</td>
+          <td class="cal-piv__data" rowspan="${n}">${dataPrevista(it, visiveis, pl)}</td>
+          <td class="cal-piv__area" rowspan="${n}">${it.area ? Util.area(it.area) : '—'}</td>
+          <td class="cal-piv__nome" rowspan="${n}">
+            <strong>${esc(nome)}</strong>
+            <span class="cal-piv__chip">${esc(it.colheita ? it.grupo.nome : nomeGrupo(it.grupo))}</span>
+          </td>`;
+      if (vazia) {
+        grupos[grupos.length - 1].linhas.push(`
+          <tr class="cal-piv__linha cal-piv__linha--inicio">${comum}
+            <td colspan="2" class="cal-piv__sem">${it.grupo.tipo === 'Sementes' ? 'Sem variedade' : 'Sem recomendação'}</td>
+            ${visiveis.map(() => '<td></td>').join('')}
+          </tr>`);
+        return;
+      }
+      subs.forEach(([rotulo, unidade, valor], i) => {
+        grupos[grupos.length - 1].linhas.push(`
+          <tr class="cal-piv__linha ${i ? '' : 'cal-piv__linha--inicio'}">${i ? '' : comum}
+            <td class="cal-piv__produto">${esc(rotulo)}</td>
+            <td class="cal-piv__unid">${unidade === 'data' ? '' : esc(unidade)}</td>
+            ${visiveis.map((t) => {
+              const v = valor(t);
+              return `<td class="cal-piv__num ${v.classe || ''}" ${v.titulo ? `title="${esc(v.titulo)}"` : ''}>${esc(v.texto)}</td>`;
             }).join('')}
-          </tbody>
+          </tr>`);
+      });
+    });
+    const colunasTalhao = visiveis.map((t) => {
+      const v = pl[t.nome] && pl[t.nome].variedade;
+      return `<th class="cal-piv__talhao"><strong>${esc(t.nome)}</strong><span>${esc(v || 'Sem variedade')}</span><span>${Util.area(t.area)}</span></th>`;
+    }).join('');
+    const faixa = (g) => `
+                <th class="tab-op__fase-v tab-op__fase-v--${g.f}" rowspan="${g.linhas.length}" scope="rowgroup">
+                  <div class="tab-op__fase-v-conteudo"><span class="tab-op__fase-v-nome">${FAIXAS[g.f]}</span></div>
+                </th>`;
+    const INICIO = '<tr class="cal-piv__linha cal-piv__linha--inicio">';
+    return `
+      <div class="cal-piv">
+        <table class="cal-piv__tabela">
+          <thead><tr>
+            <th class="cal-piv__fase-cab"><span class="so-leitor">Fase</span></th>
+            <th class="cal-piv__num">DAP</th><th>Fenologia</th><th>Data prevista</th><th class="cal-piv__area">Área</th><th>Operação</th><th>Produto</th><th>Unid.</th>
+            ${colunasTalhao}
+          </tr></thead>
+          ${grupos.length ? grupos.map((g) => `
+            <tbody>
+              ${g.linhas.map((l, i) => (i ? l : l.replace(INICIO, () => INICIO + faixa(g)))).join('')}
+            </tbody>`).join('') : `<tbody><tr><td colspan="${8 + visiveis.length}" class="cal-piv__nada">Nenhuma operação com os filtros escolhidos</td></tr></tbody>`}
         </table>
       </div>`;
   }
 
+  // ----- Filtros (Grupo de operação e Talhão): caixa com Pesquisar, "Todos" e uma marcação por opção -----
+  // estado.talhao / estado.grupo: 'todos' ou a lista dos valores marcados; estado.busca: texto pesquisado em cada caixa
+  function marcado(estado, chave, valor) {
+    const v = estado[chave];
+    return v === undefined || v === 'todos' || (Array.isArray(v) && v.includes(valor));
+  }
+  function talhaoMarcado(estado, nome) { return marcado(estado, 'talhao', nome); }
+  // Grupo de um item do calendário: o id do grupo; a colheita, "colheita"
+  function chaveGrupo(it) { return it.colheita ? 'colheita' : it.grupo.id; }
+  function nomeGrupo(g) { return g.semGrupo ? 'Sem grupo de operação' : g.nome; }
+  // Opções do filtro de grupo: os grupos com operação, na ordem do plano, e a Colheita no fim
+  function opcoesGrupo(plano) {
+    const gs = plano.grupos.filter((g) => g.tipo !== 'Colheita' && g.operacoes.length)
+      .map((g) => ({ valor: g.id, nome: nomeGrupo(g) }));
+    const gc = plano.grupos.find((g) => g.tipo === 'Colheita');
+    return [...gs, { valor: 'colheita', nome: gc ? gc.nome : 'Colheita' }];
+  }
+  function opcoesTalhao(talhoes) {
+    return talhoes.map((t) => ({ valor: t.nome, nome: t.nome, extra: Util.area(t.area) }));
+  }
+  function casaBusca(estado, chave, nome) {
+    const q = Util.normalizar(((estado.busca || {})[chave] || '').trim());
+    return !q || Util.normalizar(nome).includes(q);
+  }
+  // chave: 'talhao' ou 'grupo'; textos: [todos, nenhum, plural]
+  function filtroCaixa(estado, chave, opcoes, [todos, nenhum, plural], rotulo) {
+    const marcadas = opcoes.filter((o) => marcado(estado, chave, o.valor));
+    const texto = marcadas.length === opcoes.length ? todos
+      : !marcadas.length ? nenhum
+      : marcadas.length === 1 ? marcadas[0].nome : `${marcadas.length} ${plural}`;
+    return `
+      <details class="cal-filtro" data-filtro="${chave}" ${estado.filtroAberto === chave ? 'open' : ''}>
+        <summary class="campo__controle cal-filtro__botao" aria-label="${esc(rotulo)}">${esc(texto)}<span class="cal-filtro__seta" aria-hidden="true">${Icones.abaixo}</span></summary>
+        <div class="cal-filtro__painel">
+          <div class="cal-filtro__busca">
+            <input type="search" class="campo__controle" data-campo="cal-busca" data-filtro="${chave}" placeholder="Pesquisar"
+                   aria-label="Pesquisar ${esc(rotulo.toLowerCase())}" value="${esc((estado.busca || {})[chave] || '')}" autocomplete="off">
+          </div>
+          <label class="cal-filtro__opcao cal-filtro__opcao--todos">
+            <input type="checkbox" data-campo="cal-filtro" data-filtro="${chave}" value="todos" ${marcadas.length === opcoes.length ? 'checked' : ''}> ${esc(todos)}
+          </label>
+          ${opcoes.map((o) => `
+            <label class="cal-filtro__opcao" data-nome="${esc(Util.normalizar(o.nome))}" ${casaBusca(estado, chave, o.nome) ? '' : 'hidden'}>
+              <input type="checkbox" data-campo="cal-filtro" data-filtro="${chave}" value="${esc(o.valor)}" ${marcado(estado, chave, o.valor) ? 'checked' : ''}>
+              <span>${esc(o.nome)}</span>${o.extra ? `<span class="cal-filtro__area">${esc(o.extra)}</span>` : ''}
+            </label>`).join('')}
+          <p class="cal-filtro__nada" ${opcoes.some((o) => casaBusca(estado, chave, o.nome)) ? 'hidden' : ''}>Nada encontrado</p>
+        </div>
+      </details>`;
+  }
+
+  // Pesquisar: esconde as opções que não têm o texto no nome (sem redesenhar, para não perder o foco)
+  function aoDigitar(e, ctx) {
+    if (e.target.dataset.campo !== 'cal-busca') return false;
+    ctx.estado.busca = ctx.estado.busca || {};
+    ctx.estado.busca[e.target.dataset.filtro] = e.target.value;
+    const q = Util.normalizar(e.target.value.trim());
+    const painel = e.target.closest('.cal-filtro__painel');
+    const opcoes = [...painel.querySelectorAll('.cal-filtro__opcao[data-nome]')];
+    opcoes.forEach((l) => { l.hidden = !!q && !l.dataset.nome.includes(q); });
+    painel.querySelector('.cal-filtro__nada').hidden = opcoes.some((l) => !l.hidden);
+    return true;
+  }
+
   // ----- Eventos (repassados pela Tela 04). Devolvem true quando o evento era daqui. -----
   function aoClicar(e, ctx, { redesenhar }) {
+    // Clique fora de uma caixa de filtro aberta: fecha
+    document.querySelectorAll('.cal-filtro[open]').forEach((caixa) => {
+      if (!caixa.contains(e.target)) { caixa.open = false; if (ctx.estado.filtroAberto === caixa.dataset.filtro) ctx.estado.filtroAberto = null; }
+    });
+    const botao = e.target.closest('.cal-filtro__botao');
+    if (botao) {
+      const caixa = botao.closest('.cal-filtro');
+      ctx.estado.filtroAberto = caixa.open ? null : caixa.dataset.filtro;
+      return false;
+    }
     const alvo = e.target.closest('[data-acao="cal-visao"]');
     if (!alvo) return false;
     ctx.estado.visao = alvo.dataset.visao;
@@ -4100,27 +4370,23 @@ window.Telas.calendario = (function () {
     return true;
   }
 
-  function aoMudar(e, ctx, { redesenhar, alterou }) {
-    const campo = e.target.dataset.campo;
-    if (campo === 'cal-talhao') { ctx.estado.talhao = e.target.value; redesenhar('[data-campo="cal-talhao"]'); return true; }
-    if (campo === 'cal-prazo') {
-      const n = Math.round(Util.numero(e.target.value));
-      const id = e.target.dataset.op;
-      const plantio = (ctx.plano.grupos.find((g) => g.tipo === 'Sementes') || { operacoes: [] }).operacoes[0];
-      const op = id === 'colheita' ? null : ctx.plano.grupos.flatMap((g) => g.operacoes).find((o) => o.id === id);
-      if (n > 0) {
-        const opColheita = (ctx.plano.grupos.find((g) => g.tipo === 'Colheita') || { operacoes: [] }).operacoes[0];
-        if (id === 'colheita' && opColheita) opColheita.prazo = n;
-        else if (id === 'colheita' && plantio) plantio.prazoColheita = n; else if (op) op.prazo = n;
-        alterou();
-      }
-      redesenhar(null);
-      return true;
-    }
-    return false;
+  // Previsão de conclusão: editada na etapa Operações (aqui não se edita)
+  function aoMudar(e, ctx, { redesenhar }) {
+    if (e.target.dataset.campo !== 'cal-filtro') return false;
+    const est = ctx.estado;
+    const chave = e.target.dataset.filtro;
+    const valores = (chave === 'talhao' ? opcoesTalhao(ctx.talhoes) : opcoesGrupo(ctx.plano)).map((o) => o.valor);
+    let marcados = valores.filter((v) => marcado(est, chave, v));
+    if (e.target.value === 'todos') marcados = e.target.checked ? [...valores] : [];
+    else if (e.target.checked) marcados.push(e.target.value);
+    else marcados = marcados.filter((n) => n !== e.target.value);
+    est[chave] = marcados.length === valores.length ? 'todos' : marcados;
+    est.filtroAberto = chave;
+    redesenhar(`[data-campo="cal-filtro"][data-filtro="${chave}"][value="${CSS.escape(e.target.value)}"]`);
+    return true;
   }
 
-  return { desenhar, aoClicar, aoMudar, prazoDe };
+  return { desenhar, aoClicar, aoMudar, aoDigitar, prazoDe };
 })();
 
 </script>
@@ -7139,6 +7405,7 @@ window.Telas.planoOperacoes = (function () {
   }
 
   function aoDigitar(e) {
+    if (etapa === 'calendario' && Telas.calendario.aoDigitar(e, ctxCalendario())) return;
     // Doses: registradas enquanto se digita, sem redesenhar
     if (e.target.dataset.campo === 'linha-dose') {
       // Só números e uma vírgula decimal; o ponto digitado vira vírgula

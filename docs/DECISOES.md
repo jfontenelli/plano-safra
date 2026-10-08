@@ -102,8 +102,9 @@ Agrônomo da fazenda e líder de operações podem ser a mesma pessoa, conforme 
 - Previsão de colheita = data de plantio + ciclo da variedade para a região da fazenda e a safra do plano. Sem ciclo cadastrado para a safra corrente, abre o pré-cadastro para informar o ciclo. Recalculada com a data real de plantio da OS.
 - Restrição de aplicação do produto (ex.: "somente terrestre") aparece só como informação ao lado do produto, vinda do cadastro. Forma de aplicação e vazão não são preenchidas no plano.
 - **Calendário Agrícola** (nome provisório): aba vizinha com todas as operações ordenadas por DAP/DAE, cresce durante o planejamento e mostra o status de cada item. Detalhe: docs/telas/05-calendario-agricola.md.
-  - Duas visões: **Infográfico** (uma coluna por fase da cultura: Pré-plantio, Plantio, fenologias, Colheita) e **Tabela** (uma linha por operação, uma coluna por produto). Filtro por talhão.
-  - **Prazo para encerramento da OS** (previsão de cumprimento) é informado na Tabela do calendário, por operação, já preenchido com o padrão (5 dias calagem, gessagem, fosfatagem, 1ª dessecação e 1ª adubação potássica; 3 plantio; 2 as demais; 10 colheita).
+  - Duas visões: **Infográfico** (uma coluna por fase da cultura: Pré-plantio, Plantio, fenologias, Colheita) e **Tabela** (uma linha por operação com os produtos embaixo e uma coluna por talhão, com a dose de cada um). Filtro por talhão. Abre com **todas as operações cadastradas** (as ainda não planejadas como "Sem recomendação") e vai se preenchendo conforme o planejamento. **No plano aprovado, só o que tem produto e dose.**
+  - **Cards de resumo** no topo das duas visões: **Previsão de plantio** e **Previsão de colheita** (da primeira à última data dos talhões com plantio definido).
+  - **Prazo para encerramento da OS** (previsão de conclusão) é informado na **etapa Operações**, por operação, já preenchido com o padrão (5 dias calagem, gessagem, fosfatagem, 1ª dessecação e 1ª adubação potássica; 3 plantio; 2 as demais; 10 colheita). O Calendário não mostra nem edita.
   - A **colheita** entra no calendário pela previsão do plantio (data de plantio + ciclo da variedade).
 
 ### 4.4 Plantio (grupo Semente)

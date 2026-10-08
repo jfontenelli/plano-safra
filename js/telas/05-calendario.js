@@ -37,7 +37,7 @@ window.Telas.calendario = (function () {
   // ----- Itens do calendário: uma operação de qualquer grupo, ou a colheita (prevista pelo plantio) -----
   function itens(ctx) {
     const { plano, talhoes, estado } = ctx;
-    const filtro = (nome) => estado.talhao === 'todos' || estado.talhao === nome;
+    const filtro = (nome) => talhaoMarcado(estado, nome);
     const daFazenda = talhoes.filter((t) => filtro(t.nome));
     const area = (nomes) => daFazenda.filter((t) => nomes.includes(t.nome)).reduce((s, t) => s + t.area, 0);
     const lista = [];
@@ -172,27 +172,82 @@ window.Telas.calendario = (function () {
 
   // ----- Desenho -----
   function desenhar(ctx) {
-    const { talhoes, estado } = ctx;
-    const lista = itens(ctx);
-    const total = estado.talhao === 'todos' ? talhoes.length : 1;
+    const { talhoes, estado, plano } = ctx;
+    // Em construção: todas as operações cadastradas na etapa Operações, já no calendário; o que ainda não tem
+    // talhão planejado aparece como "Sem recomendação" e vai se preenchendo conforme o planejamento.
+    // Plano aprovado: só o que tem produto e dose (ou plantio); o resto não aparece.
+    const lista = itens(ctx).filter((it) => !ctx.somenteLeitura || (it.colheita ? !it.aguardando : it.talhoes.length > 0))
+      .filter((it) => marcado(estado, 'grupo', chaveGrupo(it)));
     return `
       <section class="calendario">
         <div class="calendario__barra">
-          <label class="calendario__filtro">
-            <span class="calendario__filtro-rotulo">Talhão</span>
-            <select class="campo__controle" data-campo="cal-talhao" aria-label="Talhão">
-              <option value="todos" ${estado.talhao === 'todos' ? 'selected' : ''}>Todos os talhões</option>
-              ${talhoes.map((t) => `<option value="${esc(t.nome)}" ${estado.talhao === t.nome ? 'selected' : ''}>${esc(t.nome)} · ${Util.area(t.area)}</option>`).join('')}
-            </select>
-          </label>
+          <div class="calendario__filtros">
+            <div class="calendario__filtro">
+              <span class="calendario__filtro-rotulo">Grupo de operação</span>
+              ${filtroCaixa(estado, 'grupo', opcoesGrupo(plano), ['Todos os grupos', 'Nenhum grupo', 'grupos'], 'Grupo de operação')}
+            </div>
+            <div class="calendario__filtro">
+              <span class="calendario__filtro-rotulo">Talhão</span>
+              ${filtroCaixa(estado, 'talhao', opcoesTalhao(talhoes), ['Todos os talhões', 'Nenhum talhão', 'talhões'], 'Talhões')}
+            </div>
+          </div>
           <div class="visoes calendario__visoes" role="group" aria-label="Visão do calendário">
             ${[['infografico', Icones.grafico, 'Infográfico'], ['tabela', Icones.lista, 'Tabela']].map(([v, icone, rotulo]) => `
               <button class="visoes__botao ${estado.visao === v ? 'visoes__botao--ativo' : ''}" type="button" data-acao="cal-visao"
                       data-visao="${v}" aria-pressed="${estado.visao === v}">${icone}${rotulo}</button>`).join('')}
           </div>
         </div>
-        ${!lista.length ? '<p class="calendario__vazio">Nenhuma operação no plano.</p>'
-          : estado.visao === 'tabela' ? tabela(ctx, lista, total) : infografico(ctx, lista)}
+        ${resumo(ctx)}
+        ${estado.visao === 'tabela' ? tabela(ctx, lista) : infografico(ctx, lista)}
+      </section>`;
+  }
+
+  // ----- Cards de resumo (topo do Infográfico e da Tabela) -----
+  // Previsão de plantio e de colheita, dos talhões com plantio definido (variedade e data)
+  const MESES_CURTOS = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+  function partes(iso) { const [a, m, d] = iso.split('-').map(Number); return { a, m, d }; }
+  function somaDias(iso, n) {
+    const { a, m, d } = partes(iso);
+    const dt = new Date(a, m - 1, d + n);
+    return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
+  }
+  // "01–20/out/2026"; meses diferentes: "22/set–10/out/2026"; anos diferentes: "28/dez/2026–05/jan/2027"
+  function intervalo(isos) {
+    if (!isos.length) return '';
+    const ord = [...isos].sort();
+    const i = partes(ord[0]); const f = partes(ord[ord.length - 1]);
+    const dd = (x) => String(x.d).padStart(2, '0');
+    if (ord[0] === ord[ord.length - 1]) return `${dd(i)}/${MESES_CURTOS[i.m - 1]}/${i.a}`;
+    if (i.a !== f.a) return `${dd(i)}/${MESES_CURTOS[i.m - 1]}/${i.a}–${dd(f)}/${MESES_CURTOS[f.m - 1]}/${f.a}`;
+    if (i.m !== f.m) return `${dd(i)}/${MESES_CURTOS[i.m - 1]}–${dd(f)}/${MESES_CURTOS[f.m - 1]}/${f.a}`;
+    return `${dd(i)}–${dd(f)}/${MESES_CURTOS[f.m - 1]}/${f.a}`;
+  }
+  function plantioDo(plano) {
+    return (plano.grupos.find((g) => g.tipo === 'Sementes') || { operacoes: [] }).operacoes[0] || null;
+  }
+  function previsaoColheita(p) {
+    const v = p && p.variedade ? variedade(p.variedade) : null;
+    return p && p.data && v && v.ciclo ? somaDias(p.data, v.ciclo) : null;
+  }
+
+  function resumo(ctx) {
+    const { plano, talhoes } = ctx;
+    const op = plantioDo(plano);
+    const pl = (op && op.plantio) || {};
+    const comPlantio = talhoes.filter((t) => pl[t.nome] && pl[t.nome].variedade && pl[t.nome].data);
+    const datas = comPlantio.map((t) => pl[t.nome].data);
+    const colheitas = comPlantio.map((t) => previsaoColheita(pl[t.nome])).filter(Boolean);
+    const card = (icone, rotulo, corpo) => `
+      <div class="resumo-card">
+        <span class="resumo-card__icone">${icone}</span>
+        <div class="resumo-card__texto"><span class="resumo-card__rotulo">${rotulo}</span>${corpo}</div>
+      </div>`;
+    const semPlantio = '<span class="resumo-card__vazio">—</span><span class="resumo-card__dica">Defina o plantio na guia Semente</span>';
+    return `
+      <section class="resumo-cards" aria-label="Resumo do planejamento">
+        ${card(Icones.calendario, 'Previsão de plantio', datas.length ? `<span class="resumo-card__valor resumo-card__valor--data">${intervalo(datas)}</span>` : semPlantio)}
+        ${card(Icones.calendario, 'Previsão de colheita', colheitas.length ? `<span class="resumo-card__valor resumo-card__valor--data">${intervalo(colheitas)}</span>`
+          : datas.length ? '<span class="resumo-card__vazio">—</span><span class="resumo-card__dica">Variedade sem ciclo</span>' : semPlantio)}
       </section>`;
   }
 
@@ -244,50 +299,200 @@ window.Telas.calendario = (function () {
       </div>`;
   }
 
-  function tabela(ctx, lista, total) {
-    const { somenteLeitura } = ctx;
-    // Uma coluna por produto, na ordem em que aparecem no calendário
-    const produtos = [];
-    lista.forEach((it) => it.produtos.forEach(([chave, p]) => { if (!produtos.some((x) => x.chave === chave)) produtos.push({ chave, nome: p.nome }); }));
-    return `
-      <div class="cal-tabela talhoes-rolagem">
-        <table class="tabela tabela--compacta tabela-talhoes cal-tabela__tabela">
-          <thead><tr>
-            <th class="tabela__numero">DAP</th><th>Fenologia</th><th>Grupo de operação</th><th>Operação</th><th>Prazo para encerramento da OS</th>
-            <th class="tabela__numero">Talhões</th><th class="tabela__numero">Área (ha)</th>
-            ${produtos.map((p) => `<th class="tabela__numero">${esc(p.nome)}</th>`).join('')}
-          </tr></thead>
-          <tbody>
-            ${lista.map((it) => {
-              const idPrazo = it.colheita ? 'colheita' : it.op.id;
-              const prazo = somenteLeitura ? `${it.prazo} ${it.prazo === 1 ? 'dia' : 'dias'}` : `
-                <span class="cal-prazo"><input class="campo__controle cal-prazo__campo" type="text" inputmode="numeric" data-campo="cal-prazo"
-                       data-op="${idPrazo}" value="${it.prazo}" aria-label="Prazo para encerramento da OS de ${esc(it.colheita ? 'Colheita' : it.op.nome)}, em dias"> dias</span>`;
-              const dap = it.aguardando ? 'pelo ciclo' : it.colheita && it.dapMax !== it.dap ? `${it.dap} a ${it.dapMax}` : it.dap ?? '—';
-              return `
-                <tr>
-                  <td class="tabela__numero">${dap}</td>
-                  <td>${esc(it.fenologia || '—')}</td>
-                  <td>${esc(it.grupo.nome)}</td>
-                  <th scope="row" class="cal-tabela__op">${esc(it.colheita ? 'Colheita' : it.op.nome)}</th>
-                  <td>${prazo}</td>
-                  <td class="tabela__numero">${it.talhoes.length}/${total}</td>
-                  <td class="tabela__numero">${Util.area(it.area).replace(' ha', '')}</td>
-                  ${produtos.map((p) => {
-                    const achado = it.produtos.find(([c]) => c === p.chave);
-                    if (!achado) return '<td class="tabela__numero tabela__nao-recebe">—</td>';
-                    const d = dose(achado[1], it.grupo);
-                    return `<td class="tabela__numero" ${d.detalhe ? `title="${esc(d.detalhe)}"` : ''}>${esc(d.texto)}</td>`;
-                  }).join('')}
-                </tr>`;
+  // ----- Tabela: uma linha por operação (abre e fecha), com os produtos embaixo; uma coluna por talhão -----
+  // Faixa da fase à esquerda (as mesmas cores da etapa Operações). Dose do talhão diferente da padrão: amarelo;
+  // talhão que não recebe o produto: "—" em cinza.
+  const FAIXAS = { pre: 'Pré-plantio', plantio: 'Plantio', desenv: 'Manejo da cultura', colheita: 'Colheita' };
+  function faixaDe(it) {
+    if (it.colheita) return 'colheita';
+    if (it.dap === null || it.dap === undefined || it.dap === '') return 'desenv';
+    return it.dap < 0 ? 'pre' : it.dap === 0 ? 'plantio' : 'desenv';
+  }
+
+  // Linhas de baixo de cada operação: [rótulo, unidade, valor por talhão → { texto, classe }]
+  function subLinhas(it, ctx) {
+    const pl = (it.colheita || it.grupo.tipo === 'Sementes') ? ((plantioDo(ctx.plano) || {}).plantio || {}) : null;
+    if (it.colheita) {
+      return [['Previsão de colheita', 'data', (t) => {
+        const prev = previsaoColheita(pl[t.nome]);
+        return prev ? { texto: diaMes(prev) } : { texto: '—', classe: 'cal-piv__nao' };
+      }]];
+    }
+    if (it.grupo.tipo === 'Sementes') {
+      return [
+        ['Data de plantio', 'data', (t) => (pl[t.nome] && pl[t.nome].data ? { texto: diaMes(pl[t.nome].data) } : { texto: '—', classe: 'cal-piv__nao' })],
+        ['População', 'mil pl/ha', (t) => (pl[t.nome] && pl[t.nome].populacao ? { texto: Util.dose(pl[t.nome].populacao).replace(/,00$/, '') } : { texto: '—', classe: 'cal-piv__nao' })]
+      ];
+    }
+    const op = it.op;
+    return Planos.colunasDose(op).map((col) => [Planos.nomeLinha(col), Planos.unidadeDose(col), (t) => {
+      const ajuste = op.talhoes[t.nome];
+      const l = ajuste ? Planos.linhaNoTalhao(op, ajuste, col) : null;
+      if (!l) return { texto: '—', classe: 'cal-piv__nao' };
+      const d = Planos.doseTalhao(op, ajuste, l);
+      const ajustada = l.id in ajuste.doses && d !== l.dose;
+      return { texto: textoDose(d, it.grupo), classe: ajustada ? 'cal-piv__ajuste' : '', titulo: ajustada ? `Dose do talhão; padrão da receita: ${textoDose(l.dose, it.grupo)}` : '' };
+    }]);
+  }
+
+  function diaMes(iso) { const { m, d } = partes(iso); return `${String(d).padStart(2, '0')}/${String(m).padStart(2, '0')}`; }
+
+  // Data prevista: data de plantio + DAP, nos talhões da operação (sem talhão planejado, nos talhões do filtro com
+  // plantio); datas diferentes entre talhões viram intervalo ("22/set–10/out/2026"). Colheita: a previsão de cada talhão.
+  function dataPrevista(it, visiveis, pl) {
+    const nomes = it.talhoes.length ? it.talhoes : visiveis.map((t) => t.nome);
+    const datas = it.colheita
+      ? nomes.map((t) => previsaoColheita(pl[t])).filter(Boolean)
+      : (it.dap === null || it.dap === undefined || it.dap === '') ? []
+      : nomes.filter((t) => pl[t] && pl[t].data).map((t) => somaDias(pl[t].data, Number(it.dap)));
+    return datas.length ? intervalo(datas) : '—';
+  }
+
+  function tabela(ctx, lista) {
+    const { talhoes, estado, plano } = ctx;
+    const visiveis = talhoes.filter((t) => talhaoMarcado(estado, t.nome));
+    const pl = (plantioDo(plano) || {}).plantio || {};
+    // Cada operação ocupa uma linha por produto (DAP, Fenologia e Operação na altura de todas); sem talhão planejado,
+    // uma linha só, com "Sem recomendação" (ou "Sem variedade", no Plantio) na coluna Produto
+    const grupos = [];
+    lista.forEach((it) => {
+      const f = faixaDe(it);
+      if (!grupos.length || grupos[grupos.length - 1].f !== f) grupos.push({ f, linhas: [] });
+      const vazia = !it.colheita && !it.talhoes.length;
+      const subs = vazia ? [] : subLinhas(it, ctx);
+      const n = Math.max(1, subs.length);
+      const nome = it.colheita ? 'Colheita' : it.op.nome || 'Sem operação';
+      const dap = it.aguardando ? 'pelo ciclo' : it.colheita && it.dapMax !== it.dap ? `${it.dap} a ${it.dapMax}` : it.dap ?? '—';
+      const comum = `
+          <td class="cal-piv__num" rowspan="${n}">${dap}</td>
+          <td class="cal-piv__fen" rowspan="${n}">${esc(it.fenologia || '—')}</td>
+          <td class="cal-piv__data" rowspan="${n}">${dataPrevista(it, visiveis, pl)}</td>
+          <td class="cal-piv__area" rowspan="${n}">${it.area ? Util.area(it.area) : '—'}</td>
+          <td class="cal-piv__nome" rowspan="${n}">
+            <strong>${esc(nome)}</strong>
+            <span class="cal-piv__chip">${esc(it.colheita ? it.grupo.nome : nomeGrupo(it.grupo))}</span>
+          </td>`;
+      if (vazia) {
+        grupos[grupos.length - 1].linhas.push(`
+          <tr class="cal-piv__linha cal-piv__linha--inicio">${comum}
+            <td colspan="2" class="cal-piv__sem">${it.grupo.tipo === 'Sementes' ? 'Sem variedade' : 'Sem recomendação'}</td>
+            ${visiveis.map(() => '<td></td>').join('')}
+          </tr>`);
+        return;
+      }
+      subs.forEach(([rotulo, unidade, valor], i) => {
+        grupos[grupos.length - 1].linhas.push(`
+          <tr class="cal-piv__linha ${i ? '' : 'cal-piv__linha--inicio'}">${i ? '' : comum}
+            <td class="cal-piv__produto">${esc(rotulo)}</td>
+            <td class="cal-piv__unid">${unidade === 'data' ? '' : esc(unidade)}</td>
+            ${visiveis.map((t) => {
+              const v = valor(t);
+              return `<td class="cal-piv__num ${v.classe || ''}" ${v.titulo ? `title="${esc(v.titulo)}"` : ''}>${esc(v.texto)}</td>`;
             }).join('')}
-          </tbody>
+          </tr>`);
+      });
+    });
+    const colunasTalhao = visiveis.map((t) => {
+      const v = pl[t.nome] && pl[t.nome].variedade;
+      return `<th class="cal-piv__talhao"><strong>${esc(t.nome)}</strong><span>${esc(v || 'Sem variedade')}</span><span>${Util.area(t.area)}</span></th>`;
+    }).join('');
+    const faixa = (g) => `
+                <th class="tab-op__fase-v tab-op__fase-v--${g.f}" rowspan="${g.linhas.length}" scope="rowgroup">
+                  <div class="tab-op__fase-v-conteudo"><span class="tab-op__fase-v-nome">${FAIXAS[g.f]}</span></div>
+                </th>`;
+    const INICIO = '<tr class="cal-piv__linha cal-piv__linha--inicio">';
+    return `
+      <div class="cal-piv">
+        <table class="cal-piv__tabela">
+          <thead><tr>
+            <th class="cal-piv__fase-cab"><span class="so-leitor">Fase</span></th>
+            <th class="cal-piv__num">DAP</th><th>Fenologia</th><th>Data prevista</th><th class="cal-piv__area">Área</th><th>Operação</th><th>Produto</th><th>Unid.</th>
+            ${colunasTalhao}
+          </tr></thead>
+          ${grupos.length ? grupos.map((g) => `
+            <tbody>
+              ${g.linhas.map((l, i) => (i ? l : l.replace(INICIO, () => INICIO + faixa(g)))).join('')}
+            </tbody>`).join('') : `<tbody><tr><td colspan="${8 + visiveis.length}" class="cal-piv__nada">Nenhuma operação com os filtros escolhidos</td></tr></tbody>`}
         </table>
       </div>`;
   }
 
+  // ----- Filtros (Grupo de operação e Talhão): caixa com Pesquisar, "Todos" e uma marcação por opção -----
+  // estado.talhao / estado.grupo: 'todos' ou a lista dos valores marcados; estado.busca: texto pesquisado em cada caixa
+  function marcado(estado, chave, valor) {
+    const v = estado[chave];
+    return v === undefined || v === 'todos' || (Array.isArray(v) && v.includes(valor));
+  }
+  function talhaoMarcado(estado, nome) { return marcado(estado, 'talhao', nome); }
+  // Grupo de um item do calendário: o id do grupo; a colheita, "colheita"
+  function chaveGrupo(it) { return it.colheita ? 'colheita' : it.grupo.id; }
+  function nomeGrupo(g) { return g.semGrupo ? 'Sem grupo de operação' : g.nome; }
+  // Opções do filtro de grupo: os grupos com operação, na ordem do plano, e a Colheita no fim
+  function opcoesGrupo(plano) {
+    const gs = plano.grupos.filter((g) => g.tipo !== 'Colheita' && g.operacoes.length)
+      .map((g) => ({ valor: g.id, nome: nomeGrupo(g) }));
+    const gc = plano.grupos.find((g) => g.tipo === 'Colheita');
+    return [...gs, { valor: 'colheita', nome: gc ? gc.nome : 'Colheita' }];
+  }
+  function opcoesTalhao(talhoes) {
+    return talhoes.map((t) => ({ valor: t.nome, nome: t.nome, extra: Util.area(t.area) }));
+  }
+  function casaBusca(estado, chave, nome) {
+    const q = Util.normalizar(((estado.busca || {})[chave] || '').trim());
+    return !q || Util.normalizar(nome).includes(q);
+  }
+  // chave: 'talhao' ou 'grupo'; textos: [todos, nenhum, plural]
+  function filtroCaixa(estado, chave, opcoes, [todos, nenhum, plural], rotulo) {
+    const marcadas = opcoes.filter((o) => marcado(estado, chave, o.valor));
+    const texto = marcadas.length === opcoes.length ? todos
+      : !marcadas.length ? nenhum
+      : marcadas.length === 1 ? marcadas[0].nome : `${marcadas.length} ${plural}`;
+    return `
+      <details class="cal-filtro" data-filtro="${chave}" ${estado.filtroAberto === chave ? 'open' : ''}>
+        <summary class="campo__controle cal-filtro__botao" aria-label="${esc(rotulo)}">${esc(texto)}<span class="cal-filtro__seta" aria-hidden="true">${Icones.abaixo}</span></summary>
+        <div class="cal-filtro__painel">
+          <div class="cal-filtro__busca">
+            <input type="search" class="campo__controle" data-campo="cal-busca" data-filtro="${chave}" placeholder="Pesquisar"
+                   aria-label="Pesquisar ${esc(rotulo.toLowerCase())}" value="${esc((estado.busca || {})[chave] || '')}" autocomplete="off">
+          </div>
+          <label class="cal-filtro__opcao cal-filtro__opcao--todos">
+            <input type="checkbox" data-campo="cal-filtro" data-filtro="${chave}" value="todos" ${marcadas.length === opcoes.length ? 'checked' : ''}> ${esc(todos)}
+          </label>
+          ${opcoes.map((o) => `
+            <label class="cal-filtro__opcao" data-nome="${esc(Util.normalizar(o.nome))}" ${casaBusca(estado, chave, o.nome) ? '' : 'hidden'}>
+              <input type="checkbox" data-campo="cal-filtro" data-filtro="${chave}" value="${esc(o.valor)}" ${marcado(estado, chave, o.valor) ? 'checked' : ''}>
+              <span>${esc(o.nome)}</span>${o.extra ? `<span class="cal-filtro__area">${esc(o.extra)}</span>` : ''}
+            </label>`).join('')}
+          <p class="cal-filtro__nada" ${opcoes.some((o) => casaBusca(estado, chave, o.nome)) ? 'hidden' : ''}>Nada encontrado</p>
+        </div>
+      </details>`;
+  }
+
+  // Pesquisar: esconde as opções que não têm o texto no nome (sem redesenhar, para não perder o foco)
+  function aoDigitar(e, ctx) {
+    if (e.target.dataset.campo !== 'cal-busca') return false;
+    ctx.estado.busca = ctx.estado.busca || {};
+    ctx.estado.busca[e.target.dataset.filtro] = e.target.value;
+    const q = Util.normalizar(e.target.value.trim());
+    const painel = e.target.closest('.cal-filtro__painel');
+    const opcoes = [...painel.querySelectorAll('.cal-filtro__opcao[data-nome]')];
+    opcoes.forEach((l) => { l.hidden = !!q && !l.dataset.nome.includes(q); });
+    painel.querySelector('.cal-filtro__nada').hidden = opcoes.some((l) => !l.hidden);
+    return true;
+  }
+
   // ----- Eventos (repassados pela Tela 04). Devolvem true quando o evento era daqui. -----
   function aoClicar(e, ctx, { redesenhar }) {
+    // Clique fora de uma caixa de filtro aberta: fecha
+    document.querySelectorAll('.cal-filtro[open]').forEach((caixa) => {
+      if (!caixa.contains(e.target)) { caixa.open = false; if (ctx.estado.filtroAberto === caixa.dataset.filtro) ctx.estado.filtroAberto = null; }
+    });
+    const botao = e.target.closest('.cal-filtro__botao');
+    if (botao) {
+      const caixa = botao.closest('.cal-filtro');
+      ctx.estado.filtroAberto = caixa.open ? null : caixa.dataset.filtro;
+      return false;
+    }
     const alvo = e.target.closest('[data-acao="cal-visao"]');
     if (!alvo) return false;
     ctx.estado.visao = alvo.dataset.visao;
@@ -295,25 +500,21 @@ window.Telas.calendario = (function () {
     return true;
   }
 
-  function aoMudar(e, ctx, { redesenhar, alterou }) {
-    const campo = e.target.dataset.campo;
-    if (campo === 'cal-talhao') { ctx.estado.talhao = e.target.value; redesenhar('[data-campo="cal-talhao"]'); return true; }
-    if (campo === 'cal-prazo') {
-      const n = Math.round(Util.numero(e.target.value));
-      const id = e.target.dataset.op;
-      const plantio = (ctx.plano.grupos.find((g) => g.tipo === 'Sementes') || { operacoes: [] }).operacoes[0];
-      const op = id === 'colheita' ? null : ctx.plano.grupos.flatMap((g) => g.operacoes).find((o) => o.id === id);
-      if (n > 0) {
-        const opColheita = (ctx.plano.grupos.find((g) => g.tipo === 'Colheita') || { operacoes: [] }).operacoes[0];
-        if (id === 'colheita' && opColheita) opColheita.prazo = n;
-        else if (id === 'colheita' && plantio) plantio.prazoColheita = n; else if (op) op.prazo = n;
-        alterou();
-      }
-      redesenhar(null);
-      return true;
-    }
-    return false;
+  // Previsão de conclusão: editada na etapa Operações (aqui não se edita)
+  function aoMudar(e, ctx, { redesenhar }) {
+    if (e.target.dataset.campo !== 'cal-filtro') return false;
+    const est = ctx.estado;
+    const chave = e.target.dataset.filtro;
+    const valores = (chave === 'talhao' ? opcoesTalhao(ctx.talhoes) : opcoesGrupo(ctx.plano)).map((o) => o.valor);
+    let marcados = valores.filter((v) => marcado(est, chave, v));
+    if (e.target.value === 'todos') marcados = e.target.checked ? [...valores] : [];
+    else if (e.target.checked) marcados.push(e.target.value);
+    else marcados = marcados.filter((n) => n !== e.target.value);
+    est[chave] = marcados.length === valores.length ? 'todos' : marcados;
+    est.filtroAberto = chave;
+    redesenhar(`[data-campo="cal-filtro"][data-filtro="${chave}"][value="${CSS.escape(e.target.value)}"]`);
+    return true;
   }
 
-  return { desenhar, aoClicar, aoMudar, prazoDe };
+  return { desenhar, aoClicar, aoMudar, aoDigitar, prazoDe };
 })();
