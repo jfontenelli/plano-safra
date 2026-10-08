@@ -1981,6 +1981,7 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .cal-fase__nome { font-size: 16px; font-weight: 700; text-transform: uppercase; letter-spacing: .02em; }
 .cal-fase__dap { font-size: 13px; }
 .cal-fase__desenho { display: block; width: 120px; height: 80px; margin: 12px auto 4px; }
+.cal-fase__imagem { object-fit: contain; } /* imagens de img/fenologia (quadradas) dentro da mesma área do desenho */
 .cal-fase__itens { flex: 1; display: flex; flex-direction: column; gap: 14px; padding: 8px 14px 12px; }
 .cal-fase__pe { display: flex; align-items: flex-start; gap: 8px; margin: 0 14px; padding: 10px 0 12px; border-top: 1px solid var(--borda); font-size: 13px; color: var(--texto-suave); }
 .cal-fase__pe .icone { width: 18px; height: 18px; flex-shrink: 0; }

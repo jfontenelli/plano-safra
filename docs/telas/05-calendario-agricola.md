@@ -30,7 +30,7 @@ Ver **todas as operações do plano juntas**, de todos os grupos (Semente, Defen
   - **DAP positivo** → uma coluna por **fenologia** da operação (VE, V2, V4, R1, R3…), em ordem de DAP, com a faixa de DAP no título.
   - **DAP positivo sem fenologia** → coluna **cinza** com o título "25 DAP" e "sem fenologia", na posição do DAP (a operação não some, e fica claro que falta a fenologia).
   - **Colheita** → aparece quando algum talhão tem previsão de colheita (variedade com ciclo e data de plantio). Título com a faixa de DAP pelo ciclo das variedades (ex.: "104 a 118 DAP").
-- **Título** colorido pela fase (pré-plantio, plantio, vegetativo, florescimento, vagens, maturação, colheita; cinza sem fenologia) e, embaixo, uma **ilustração simples em SVG** da fase (solo com calcário, sementes, plântula, flor, vagens, planta madura, grãos).
+- **Título** colorido pela fase (pré-plantio, plantio, vegetativo, florescimento, vagens, maturação, colheita; cinza sem fenologia) e, embaixo, a **imagem da fase**, de `img/fenologia/` (feitas pela usuária, uma por estádio): PRE-PLANTIO, PLANTIO, VE, VC, V1 a V6, R1 a R8 e COLHEITA; **NEUTRO** (calendário) nas colunas sem fenologia ("N DAP") e "Sem DAP".
 - **Cartões** das operações da fase: etiqueta do **grupo** (Semente, Tratamento de semente, Defensivo, Fertilidade, Colheita), nome da operação e os **produtos com a dose**. O Plantio mostra "N variedades"; o TSI (grupo Tratamento de semente) é um cartão próprio na fase do DAP informado, com os produtos. A Colheita mostra "N variedades". Operação sem recomendação: "Sem recomendação", em cinza.
 - **Resumo no pé** de cada fase: área · talhões · operações.
 - **Todas as fases com a mesma altura** (a altura livre da tela, mínimo de 360 px); o **resumo fica travado** no rodapé, na mesma linha em todas as colunas. O que passa da altura **rola dentro da própria fase** (título, ilustração e resumo ficam parados).
@@ -53,6 +53,7 @@ Ver **todas as operações do plano juntas**, de todos os grupos (Semente, Defen
 ## 7. Regras
 
 - A colheita vem do Plantio: previsão = data de plantio + ciclo da variedade; talhão com variedade sem ciclo fica fora da colheita.
+- **A coluna Colheita aparece sempre, no fim.** Antes de haver plantio (variedade, data e ciclo), o título diz "(pelo ciclo da variedade)" e o cartão "Aguardando plantio: a data vem do plantio + ciclo da variedade"; na Tabela, DAP "pelo ciclo".
 - Talhões de cada operação: no Plantio, os talhões com variedade; nas outras, os talhões com recomendação.
 - Quando duas operações caem no mesmo DAP, a ordem segue a das guias (Semente, Defensivo, Fertilidade).
 - O prazo de cada operação e o da colheita vão no arquivo exportado (aba operacoes, coluna previsao_cumprimento; aba plano, prazo_colheita) e voltam no importar.
@@ -70,5 +71,4 @@ Ver **todas as operações do plano juntas**, de todos os grupos (Semente, Defen
 ## 10. Em aberto
 
 1. Datas reais (data de plantio de cada talhão + DAP) e agenda por data — a "Agenda de atividades" foi retirada por enquanto.
-2. Ilustrações definitivas (as atuais são desenhos simples em SVG).
-3. Status de cada item (o DECISOES fala em mostrar o status; hoje só "Sem recomendação" e Talhões x/y).
+2. Status de cada item (o DECISOES fala em mostrar o status; hoje só "Sem recomendação" e Talhões x/y).

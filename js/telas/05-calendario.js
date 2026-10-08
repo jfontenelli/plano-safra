@@ -69,17 +69,24 @@ window.Telas.calendario = (function () {
       });
     });
     // Colheita: talhões com variedade, data de plantio e ciclo; o DAP é o ciclo da variedade
-    if (plantio) {
-      const comPrevisao = daFazenda.filter((t) => {
-        const p = (plantio.plantio || {})[t.nome];
-        const v = p && p.variedade ? variedade(p.variedade) : null;
-        return p && p.data && v && v.ciclo;
-      }).map((t) => t.nome);
+    // Colheita: sempre a última coluna. Com plantio (variedade, data e ciclo), o DAP é o ciclo da variedade;
+    // antes disso, aparece "Aguardando plantio" (o DAP é pelo ciclo, só existe depois do plantio)
+    const comPrevisao = plantio ? daFazenda.filter((t) => {
+      const p = (plantio.plantio || {})[t.nome];
+      const v = p && p.variedade ? variedade(p.variedade) : null;
+      return p && p.data && v && v.ciclo;
+    }).map((t) => t.nome) : [];
+    const prazoColheita = opColheita ? prazoDe(opColheita, gColheita) : (plantio && plantio.prazoColheita) ?? PRAZO_COLHEITA;
+    if (!comPrevisao.length) {
+      lista.push({ colheita: true, aguardando: true, grupo: gColheita || { nome: 'Colheita', tipo: 'Colheita' }, op: opColheita || plantio,
+        dap: null, fenologia: 'Colheita', prazo: prazoColheita, talhoes: [], area: 0, produtos: [], variedades: null });
+    }
+    {
       if (comPrevisao.length) {
         const ciclos = comPrevisao.map((t) => variedade(plantio.plantio[t].variedade).ciclo);
         lista.push({ colheita: true, grupo: gColheita || { nome: 'Colheita', tipo: 'Colheita' }, op: opColheita || plantio,
           dap: Math.min(...ciclos), dapMax: Math.max(...ciclos), fenologia: '',
-          prazo: opColheita ? prazoDe(opColheita, gColheita) : plantio.prazoColheita ?? PRAZO_COLHEITA, talhoes: comPrevisao, area: area(comPrevisao), produtos: [],
+          prazo: prazoColheita, talhoes: comPrevisao, area: area(comPrevisao), produtos: [],
           variedades: new Set(comPrevisao.map((t) => plantio.plantio[t].variedade)) });
       }
     }
@@ -110,20 +117,33 @@ window.Telas.calendario = (function () {
     return item.fenologia ? `fen:${item.fenologia}` : `dap:${item.dap}`;
   }
 
-  // Cor do título e ilustração de cada fase
+  // Imagem de cada fase (img/fenologia, uma por estádio). Caminho completo e literal: o script do arquivo único
+  // (ferramentas/gerar-compartilhar.js) só embute imagens escritas assim.
+  const IMAGENS = {
+    pre: 'img/fenologia/PRE-PLANTIO.svg', plantio: 'img/fenologia/PLANTIO.svg', colheita: 'img/fenologia/COLHEITA.svg',
+    neutro: 'img/fenologia/NEUTRO.svg',
+    VE: 'img/fenologia/VE.svg', VC: 'img/fenologia/VC.svg', V1: 'img/fenologia/V1.svg', V2: 'img/fenologia/V2.svg',
+    V3: 'img/fenologia/V3.svg', V4: 'img/fenologia/V4.svg', V5: 'img/fenologia/V5.svg', V6: 'img/fenologia/V6.svg',
+    R1: 'img/fenologia/R1.svg', R2: 'img/fenologia/R2.svg', R3: 'img/fenologia/R3.svg', R4: 'img/fenologia/R4.svg',
+    R5: 'img/fenologia/R5.svg', R6: 'img/fenologia/R6.svg', R7: 'img/fenologia/R7.svg', R8: 'img/fenologia/R8.svg'
+  };
+
+  // Cor do título e imagem de cada fase.
+  // Sem fenologia ou sem DAP: imagem neutra (calendário).
   function visualDe(chave) {
-    if (chave === 'pre') return { cor: '#6f5b12', desenho: 'solo' };
-    if (chave === 'plantio') return { cor: '#2e7d32', desenho: 'sementes' };
-    if (chave === 'colheita') return { cor: '#23395d', desenho: 'graos' };
+    if (chave === 'pre') return { cor: '#6f5b12', imagem: IMAGENS.pre };
+    if (chave === 'plantio') return { cor: '#2e7d32', imagem: IMAGENS.plantio };
+    if (chave === 'colheita') return { cor: '#23395d', imagem: IMAGENS.colheita };
     if (chave.startsWith('fen:')) {
       const f = chave.slice(4);
-      if (/^V|^VE|^VC/.test(f)) return { cor: '#0f7f74', desenho: 'plantula' };
-      if (f === 'R1' || f === 'R2') return { cor: '#1b7a8c', desenho: 'flor' };
-      if (f === 'R3' || f === 'R4') return { cor: '#2a64a8', desenho: 'vagem' };
-      if (f === 'R5' || f === 'R6') return { cor: '#1d5a6b', desenho: 'vagens' };
-      return { cor: '#5a5520', desenho: 'madura' };
+      const imagem = IMAGENS[f] || IMAGENS.neutro;
+      if (/^V|^VE|^VC/.test(f)) return { cor: '#0f7f74', imagem };
+      if (f === 'R1' || f === 'R2') return { cor: '#1b7a8c', imagem };
+      if (f === 'R3' || f === 'R4') return { cor: '#2a64a8', imagem };
+      if (f === 'R5' || f === 'R6') return { cor: '#1d5a6b', imagem };
+      return { cor: '#5a5520', imagem };
     }
-    return { cor: '#6b7280', desenho: 'plantula' };
+    return { cor: '#6b7280', imagem: IMAGENS.neutro };
   }
 
   function colunas(lista) {
@@ -145,39 +165,11 @@ window.Telas.calendario = (function () {
     const faixa = c.daps.length ? (min === max ? `${min} DAP` : `${min} a ${max} DAP`) : '';
     if (c.chave === 'pre') return ['Pré-plantio', faixa];
     if (c.chave === 'plantio') return ['Plantio', faixa];
-    if (c.chave === 'colheita') return ['Colheita', faixa];
+    if (c.chave === 'colheita') return ['Colheita', faixa || 'pelo ciclo da variedade'];
     if (c.chave === 'sem-dap') return ['Sem DAP', ''];
     if (c.chave.startsWith('fen:')) return [c.chave.slice(4), faixa];
     return [faixa, 'sem fenologia'];
   }
-
-  // Ilustrações simples da fase (SVG, decorativas)
-  const DESENHOS = {
-    solo: '<ellipse cx="60" cy="64" rx="50" ry="9" fill="#e9e1d3"/><path d="M14 64 Q34 26 60 22 Q86 26 106 64Z" fill="#9a6431"/><path d="M28 50 Q44 36 60 34" stroke="#b97d44" stroke-width="3" fill="none"/>' +
-      [[34, 54], [48, 44], [62, 40], [74, 50], [86, 56], [56, 56], [42, 60], [70, 60], [90, 62], [30, 62]].map(([x, y], i) =>
-        `<circle cx="${x}" cy="${y}" r="${i % 3 ? 2.6 : 3.4}" fill="${i % 2 ? '#f4efe4' : '#5c3a1c'}"/>`).join(''),
-    sementes: '<ellipse cx="60" cy="66" rx="44" ry="7" fill="#efe7d6"/>' +
-      [[38, 54, -15], [60, 50, 10], [82, 55, 25], [48, 38, 30], [72, 38, -20]].map(([x, y, r]) =>
-        `<ellipse cx="${x}" cy="${y}" rx="14" ry="11" transform="rotate(${r} ${x} ${y})" fill="#ecc98c" stroke="#c99a52" stroke-width="2"/><path d="M${x - 4} ${y - 2} q4 4 8 0" stroke="#c99a52" stroke-width="1.6" fill="none"/>`).join(''),
-    plantula: '<ellipse cx="60" cy="68" rx="42" ry="7" fill="#9a6431"/><path d="M60 68 V34" stroke="#4f8a2c" stroke-width="4" stroke-linecap="round"/>' +
-      '<path d="M60 40 C44 40 32 30 30 18 C44 18 56 26 60 40Z" fill="#6aae3a"/><path d="M60 36 C76 36 88 26 90 14 C76 14 64 22 60 36Z" fill="#82c346"/>',
-    flor: '<ellipse cx="60" cy="70" rx="40" ry="6" fill="#9a6431"/><path d="M60 70 V22" stroke="#4f8a2c" stroke-width="4"/>' +
-      '<path d="M60 52 C42 54 30 44 28 32 C44 30 56 40 60 52Z" fill="#5fa236"/><path d="M60 44 C78 46 90 36 92 24 C76 22 64 32 60 44Z" fill="#76b941"/>' +
-      [[60, 20], [48, 30], [72, 28], [54, 40], [68, 38]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="5" fill="#b97ad8"/><circle cx="${x}" cy="${y}" r="1.8" fill="#f6e6ff"/>`).join(''),
-    vagem: '<ellipse cx="60" cy="70" rx="40" ry="6" fill="#9a6431"/><path d="M60 70 V20" stroke="#4f8a2c" stroke-width="4"/>' +
-      '<path d="M60 50 C42 52 30 42 28 30 C44 28 56 38 60 50Z" fill="#5fa236"/><path d="M60 40 C78 42 90 32 92 20 C76 18 64 28 60 40Z" fill="#76b941"/>' +
-      [[50, 34, -30], [70, 30, 30], [56, 58, -20], [66, 56, 20]].map(([x, y, r]) => `<rect x="${x - 3}" y="${y - 8}" width="6" height="16" rx="3" transform="rotate(${r} ${x} ${y})" fill="#9cc35a"/>`).join('') +
-      '<circle cx="60" cy="18" r="4" fill="#b97ad8"/>',
-    vagens: '<ellipse cx="60" cy="70" rx="40" ry="6" fill="#9a6431"/>' +
-      [[40, 46, -25], [52, 40, -10], [64, 40, 8], [76, 46, 24], [46, 58, -15], [60, 56, 0], [74, 58, 15]].map(([x, y, r]) =>
-        `<rect x="${x - 6}" y="${y - 16}" width="12" height="32" rx="6" transform="rotate(${r} ${x} ${y})" fill="#a9cc5f" stroke="#7fa23a" stroke-width="1.5"/>`).join(''),
-    madura: '<ellipse cx="60" cy="70" rx="40" ry="6" fill="#9a6431"/><path d="M60 70 V20" stroke="#a5822f" stroke-width="4"/>' +
-      [[48, 34, -30], [72, 30, 30], [52, 50, -20], [68, 48, 20], [58, 24, 0]].map(([x, y, r]) =>
-        `<rect x="${x - 4}" y="${y - 10}" width="8" height="20" rx="4" transform="rotate(${r} ${x} ${y})" fill="#c9a24a"/>`).join(''),
-    graos: '<ellipse cx="60" cy="68" rx="46" ry="7" fill="#efe2bf"/><path d="M18 68 Q60 20 102 68Z" fill="#e1b04c"/>' +
-      [[40, 58], [52, 48], [64, 44], [76, 52], [58, 60], [46, 64], [70, 62], [86, 62], [34, 64]].map(([x, y]) =>
-        `<ellipse cx="${x}" cy="${y}" rx="5" ry="4" fill="#c9922c"/>`).join('')
-  };
 
   // ----- Desenho -----
   function desenhar(ctx) {
@@ -212,7 +204,8 @@ window.Telas.calendario = (function () {
 
   function cartao(item) {
     const n = item.variedades ? item.variedades.size : 0;
-    const extra = item.variedades ? `<p class="cal-cartao__sub">${n ? `${n} ${n === 1 ? 'variedade' : 'variedades'}` : 'Sem variedade'}</p>` : '';
+    const extra = item.aguardando ? '<p class="cal-cartao__sem">Aguardando plantio: a data vem do plantio + ciclo da variedade</p>'
+      : item.variedades ? `<p class="cal-cartao__sub">${n ? `${n} ${n === 1 ? 'variedade' : 'variedades'}` : 'Sem variedade'}</p>` : '';
     const produtos = item.produtos.length ? `
       <ul class="cal-cartao__produtos">
         ${item.produtos.map(([, p]) => {
@@ -233,7 +226,7 @@ window.Telas.calendario = (function () {
     return `
       <div class="cal-info" role="list" aria-label="Calendário por fase da cultura">
         ${cols.map((c, i) => {
-          const { cor, desenho } = visualDe(c.chave);
+          const { cor, imagem } = visualDe(c.chave);
           const [titulo, sub] = tituloColuna(c);
           const talhoes = new Set(c.itens.flatMap((it) => it.talhoes));
           const area = ctx.talhoes.filter((t) => talhoes.has(t.nome)).reduce((s, t) => s + t.area, 0);
@@ -244,7 +237,7 @@ window.Telas.calendario = (function () {
               <header class="cal-fase__titulo" style="background: ${cor}">
                 <span class="cal-fase__nome">${esc(titulo)}</span>${sub ? `<span class="cal-fase__dap">(${esc(sub)})</span>` : ''}
               </header>
-              <svg class="cal-fase__desenho" viewBox="0 0 120 80" aria-hidden="true">${DESENHOS[desenho]}</svg>
+              <img class="cal-fase__desenho cal-fase__imagem" src="${imagem}" alt="">
               <div class="cal-fase__itens">${c.itens.map(cartao).join('')}</div>
               <footer class="cal-fase__pe">${Icones.mapa}<span><strong>${Util.area(area)}</strong> · ${talhoes.size} ${talhoes.size === 1 ? 'talhão' : 'talhões'} · ${nOps} ${nOps === 1 ? 'operação' : 'operações'}</span></footer>
             </section>`;
@@ -271,7 +264,7 @@ window.Telas.calendario = (function () {
               const prazo = somenteLeitura ? `${it.prazo} ${it.prazo === 1 ? 'dia' : 'dias'}` : `
                 <span class="cal-prazo"><input class="campo__controle cal-prazo__campo" type="text" inputmode="numeric" data-campo="cal-prazo"
                        data-op="${idPrazo}" value="${it.prazo}" aria-label="Prazo para encerramento da OS de ${esc(it.colheita ? 'Colheita' : it.op.nome)}, em dias"> dias</span>`;
-              const dap = it.colheita && it.dapMax !== it.dap ? `${it.dap} a ${it.dapMax}` : it.dap ?? '—';
+              const dap = it.aguardando ? 'pelo ciclo' : it.colheita && it.dapMax !== it.dap ? `${it.dap} a ${it.dapMax}` : it.dap ?? '—';
               return `
                 <tr>
                   <td class="tabela__numero">${dap}</td>
