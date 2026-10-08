@@ -13,8 +13,8 @@ Ver **todas as operações do plano juntas**, de todos os grupos (Semente, Defen
 
 ## 2. Lugar na jornada
 
-- Etapa **Calendário Agrícola** do plano (aba no cabeçalho, entre Operações e Suprimentos). Mesmo cabeçalho do plano da Tela 04 (com o botão Exportar).
-- Os dados vêm do que foi planejado nas guias da etapa Operações. O calendário cresce durante o planejamento.
+- Etapa **Calendário Agrícola** do plano (aba no cabeçalho, entre Planejamento e Suprimentos). Mesmo cabeçalho do plano da Tela 04 (com o botão Exportar).
+- Os dados vêm do que foi planejado nas guias da etapa Planejamento. O calendário cresce durante o planejamento.
 
 ## 3. Barra de cima
 
@@ -59,7 +59,7 @@ Ver **todas as operações do plano juntas**, de todos os grupos (Semente, Defen
 
 ## 8. Para testar
 
-- **Santa Clara** (aprovado): fases Pré-plantio · Plantio · VE · V2 · 25 DAP (sem fenologia) · V4 · R1 · 50 DAP · R3 · R5 · R7 · Colheita (104 a 118 DAP). Fenologia nos defensivos do exemplo: Pré-emergente VE, 1ª Pós V2, 2ª Pós V4, 1ª Fungicida R1, 2ª R3, 3ª e 4ª R5, Desfolha R7.
+- **Santa Clara** (aprovado): fases Pré-plantio · Plantio · 1 DAP (sem fenologia) · V2 · V4 · R1 · R3 · R4 · R5 · R7 · Colheita (104 a 118 DAP). Fenologia do exemplo: Pré-emergente sem fenologia (antes da emergência), 1ª Pós V2, 2ª Pós V4, 1ª Fungicida R1, 2ª R3, 3ª R4, 4ª R5, Desfolha R7; adubações de 25 DAP em V4 e 2ª foliar em R3 (do modelo).
 - **São José** (em construção): operações sem recomendação ("Sem recomendação", Talhões 0/12) e colunas cinza sem fenologia; editar o prazo na Tabela.
 
 ## 9. Sugestões em teste (não validadas)

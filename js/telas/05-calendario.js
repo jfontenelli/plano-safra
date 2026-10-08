@@ -14,7 +14,7 @@ window.Telas.calendario = (function () {
   // ----- Prazo para encerramento da OS (dias): o da operação ou o padrão do tipo do grupo -----
   function prazoDe(op, grupo) {
     if (op.prazo !== null && op.prazo !== undefined) return op.prazo;
-    return grupo.tipo === 'Sementes' ? 3 : 2;
+    return grupo.tipo === 'Sementes' ? 3 : grupo.tipo === 'Colheita' ? PRAZO_COLHEITA : 2;
   }
 
   // Fenologia fixa: DAP negativo = Pré-plantio; DAP 0 = Plantio
@@ -43,7 +43,10 @@ window.Telas.calendario = (function () {
     const area = (nomes) => daFazenda.filter((t) => nomes.includes(t.nome)).reduce((s, t) => s + t.area, 0);
     const lista = [];
     let plantio = null;
-    plano.grupos.forEach((grupo) => {
+    // Grupo Colheita: não entra como operação; a colheita vem do plantio (abaixo) e usa o nome e a previsão de conclusão dele
+    const gColheita = plano.grupos.find((g) => g.tipo === 'Colheita');
+    const opColheita = gColheita ? gColheita.operacoes[0] : null;
+    plano.grupos.filter((g) => g.tipo !== 'Colheita').forEach((grupo) => {
       grupo.operacoes.forEach((op) => {
         const semente = grupo.tipo === 'Sementes';
         if (semente && !plantio) plantio = op;
@@ -74,9 +77,9 @@ window.Telas.calendario = (function () {
       }).map((t) => t.nome);
       if (comPrevisao.length) {
         const ciclos = comPrevisao.map((t) => variedade(plantio.plantio[t].variedade).ciclo);
-        lista.push({ colheita: true, grupo: { nome: 'Colheita', tipo: 'Colheita' }, op: plantio,
+        lista.push({ colheita: true, grupo: gColheita || { nome: 'Colheita', tipo: 'Colheita' }, op: opColheita || plantio,
           dap: Math.min(...ciclos), dapMax: Math.max(...ciclos), fenologia: '',
-          prazo: plantio.prazoColheita ?? PRAZO_COLHEITA, talhoes: comPrevisao, area: area(comPrevisao), produtos: [],
+          prazo: opColheita ? prazoDe(opColheita, gColheita) : plantio.prazoColheita ?? PRAZO_COLHEITA, talhoes: comPrevisao, area: area(comPrevisao), produtos: [],
           variedades: new Set(comPrevisao.map((t) => plantio.plantio[t].variedade)) });
       }
     }
@@ -309,7 +312,9 @@ window.Telas.calendario = (function () {
       const plantio = (ctx.plano.grupos.find((g) => g.tipo === 'Sementes') || { operacoes: [] }).operacoes[0];
       const op = id === 'colheita' ? null : ctx.plano.grupos.flatMap((g) => g.operacoes).find((o) => o.id === id);
       if (n > 0) {
-        if (id === 'colheita' && plantio) plantio.prazoColheita = n; else if (op) op.prazo = n;
+        const opColheita = (ctx.plano.grupos.find((g) => g.tipo === 'Colheita') || { operacoes: [] }).operacoes[0];
+        if (id === 'colheita' && opColheita) opColheita.prazo = n;
+        else if (id === 'colheita' && plantio) plantio.prazoColheita = n; else if (op) op.prazo = n;
         alterou();
       }
       redesenhar(null);

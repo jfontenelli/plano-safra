@@ -1,6 +1,6 @@
 # Plano de Safra: decisões
 
-Atualizado em 08/10/2026. Próximo passo: grupo Semente no protótipo (docs/telas/04.2-operacoes-sementes.md).
+Atualizado em 08/10/2026. Próximo passo: Calendário Agrícola revisado (só o que foi planejado, com resumo).
 Imagem do fluxo: artifact "Fluxo do Plano de Safra" (claude.ai/artifact/4kzr4fg15grTw4YSHKmHf2).
 
 Este doc mostra só o estado atual. Decisão alterada é reescrita, não acumulada.
@@ -78,15 +78,17 @@ Agrônomo da fazenda e líder de operações podem ser a mesma pessoa, conforme 
 ### 4.3 Etapas e regras do plano
 
 - Safra, Empresa e Fazenda ficam fixas no topo durante o plano.
-- Etapas do plano: 1 Cadastro → 2 Operações → 3 Calendário Agrícola → 4 Suprimentos → 5 Revisão e aprovação.
-- Dentro de Operações, sub-etapas por grupo de operação, na ordem do cadastro do cliente (sugestão em validação).
-- Etapa Cadastro cria a lista de operações do plano: grupo de operação, operação, DAP e previsão de cumprimento (prazo de conclusão).
-- Etapa Cadastro também tem produtividade esperada (na unidade da cultura) e preço esperado, opcionais, por cultura, valendo para aquela fazenda e safra. Alimentam a receita projetada. Local a refinar com usuários.
+- Etapas do plano: **1 Operações → 2 Planejamento → 3 Calendário Agrícola → 4 Suprimentos → 5 Aprovação**. O plano abre em Operações.
+- Dentro de Planejamento, sub-etapas por grupo de operação, na ordem do cadastro do cliente (sugestão em validação).
+- **Etapa Operações** (docs/telas/04.0-operacoes.md): revisa a estrutura do plano vinda do modelo (grupo de operação, operação, DAP, fenologia e previsão de conclusão). É opcional: quem não quiser mexer segue direto para o Planejamento. Sem resumo nem situação (isso fica no Calendário, depois de planejar).
+- O plano também tem produtividade esperada (na unidade da cultura) e preço esperado, opcionais, por cultura, valendo para aquela fazenda e safra. Alimentam a receita projetada. Local a refinar com usuários.
 - Previsão de cumprimento no modelo: preparo, calcário, fósforo, 1ª dessecação e 1ª metade do K = 5 dias (levantado com clientes); demais: plantio 3, defensivos 2, corretivo/fertilizante 2; colheita 10 (valor de exemplo).
-- Modelo de operações (levantado com clientes) tem 5 grupos: Preparo do solo, Corretivo/Fertilizante, Plantio, Defensivos e Colheita. As duas dessecações pré-plantio são do grupo Defensivos.
-- **Tipos de grupo: Sementes, Tratamento de sementes, Defensivos, Fertilidade e Colheita.** O grupo **Fertilidade** junta corretivos e fertilizantes (inclusive adubação foliar). O grupo **Tratamento de sementes** tem o TSI. No protótipo, as guias são Semente · Tratamento de semente · Defensivo · Fertilidade.
+- Modelo de operações no protótipo: **Semente · Tratamento de semente · Defensivo · Fertilidade · Colheita** (Preparo do solo, levantado com clientes, fica fora por enquanto). As duas dessecações pré-plantio são do grupo Defensivos.
+- **Grupo Colheita:** DAP pelo ciclo da variedade (data de plantio + ciclo, talhão a talhão), fenologia fixa **Colheita** e previsão de conclusão editável. Não aparece nas guias do Planejamento.
+- **Plantio:** DAP 0 fixo. **TSI:** DAP −5 sugerido no modelo (fenologia Pré-plantio pelo DAP).
+- **Tipos de grupo: Sementes, Tratamento de sementes, Defensivos, Fertilidade e Colheita.** O grupo **Fertilidade** junta corretivos e fertilizantes (inclusive adubação foliar). O grupo **Tratamento de sementes** tem o TSI. No protótipo, as guias do Planejamento são Semente · Tratamento de semente · Defensivo · Fertilidade.
 - O menu Cadastros não é prioridade agora.
-- Etapa Operações refina talhão a talhão: cada talhão tem o seu planejamento, e o agrônomo pode aplicar ou copiar para vários talhões de uma vez.
+- Etapa Planejamento refina talhão a talhão: cada talhão tem o seu planejamento, e o agrônomo pode aplicar ou copiar para vários talhões de uma vez.
 - Programação, execução e gestão da OS ficam em outro item do menu lateral (Ordens de Serviço).
 - Plano por safra, empresa, fazenda, talhão e cultura/variedade.
 - Data de plantio (ao menos prevista) e escolha entre DAP ou DAE.
@@ -117,7 +119,7 @@ Detalhe da tela: docs/telas/04.2-operacoes-sementes.md.
 
 Detalhe da tela: docs/telas/04.4-operacoes-tratamento-sementes.md.
 
-- Grupo do tipo **Tratamento de sementes**, guia **Tratamento de semente**, logo depois da guia Semente. Operação **Tratamento de sementes (TSI)**, com **DAP informado pelo agrônomo** (como no Defensivo), sem fenologia.
+- Grupo do tipo **Tratamento de sementes**, guia **Tratamento de semente**, logo depois da guia Semente. Operação **Tratamento de sementes (TSI)**, com DAP no cabeçalho (como no Defensivo), sem fenologia; o modelo sugere **DAP −5**.
 - **Tratamento de sementes industrial (TSI)**: receita com nome (TSI 1, TSI 2…), só para talhão com variedade, no padrão da recomendação agronômica (composição de produtos = identidade; dose pode variar por talhão), aplicada **por talhão** (pode mudar após os testes). Composta por grupos de produto: fertilizante, fungicida, inseticida, nematicida, inoculante, polímero, pó secante e grafite.
 - Unidade da dose de TSI vem do cadastro do produto; a unidade usada pelos clientes (por 100 kg de sementes, por bag ou por hectare) e a entrada do PMS no plano serão definidas nos testes. Sem cálculo de quantidade de TSI no plano por enquanto.
 - Excluir o plantio de um talhão (sem variedade) tira o talhão também do TSI.

@@ -192,21 +192,27 @@ window.DADOS = {
     { nome: 'Semente', tipo: 'Sementes', operacoes: [
       { nome: 'Plantio', dap: 0, prazo: 3 }
     ] },
-    // TSI: sem DAP no modelo; o agrônomo informa (como no Defensivo, sem fenologia)
+    // TSI: DAP −5 como sugestão (tratamento feito alguns dias antes do plantio; fenologia Pré-plantio)
     { nome: 'Tratamento de semente', tipo: 'Tratamento de sementes', operacoes: [
-      { nome: 'Tratamento de sementes (TSI)' }
+      { nome: 'Tratamento de sementes (TSI)', dap: -5 }
     ] },
+    // Fenologia pré-preenchida (DAP positivo), pela literatura para soja no MT (cultivares de 104 a 118 dias):
+    // herbicida pós-emergente em V2 e V4 (glifosato até V4); fungicida preventivo da ferrugem a partir de R1, com
+    // 14 a 21 dias entre aplicações (R3, R4, R5); dessecação pré-colheita em R7 (Embrapa; Rev. Bras. Herbicidas).
+    // DAP × estádio conferido pela duração média dos estádios (Fehr & Caviness) num ciclo de ~110 dias:
+    // R1 ~40, R3 ~50, R4 ~60, R5 ~70, R6 ~85, R7 ~100 (fungicidas ajustados com a usuária: 3ª em R4, 4ª em R5).
+    // Pré-emergente: aplicado antes da emergência, sem estádio (fica sem fenologia).
     { nome: 'Defensivo', tipo: 'Defensivos', operacoes: [
       { nome: '1ª Dessecação: pré-plantio', dap: -15, prazo: 5 },
       { nome: '2ª Dessecação: pré-plantio', dap: -5 },
       { nome: 'Pré-emergente', dap: 1 },
-      { nome: '1ª Pós-emergente', dap: 15 },
-      { nome: '2ª Pós-emergente', dap: 25 },
-      { nome: '1ª Fungicida', dap: 40 },
-      { nome: '2ª Fungicida', dap: 55 },
-      { nome: '3ª Fungicida', dap: 70 },
-      { nome: '4ª Fungicida', dap: 85 },
-      { nome: 'Desfolha', dap: 100 }
+      { nome: '1ª Pós-emergente', dap: 15, fenologia: 'V2' },
+      { nome: '2ª Pós-emergente', dap: 25, fenologia: 'V4' },
+      { nome: '1ª Fungicida', dap: 40, fenologia: 'R1' },
+      { nome: '2ª Fungicida', dap: 55, fenologia: 'R3' },
+      { nome: '3ª Fungicida', dap: 70, fenologia: 'R4' },
+      { nome: '4ª Fungicida', dap: 85, fenologia: 'R5' },
+      { nome: 'Desfolha', dap: 100, fenologia: 'R7' }
     ] },
     { nome: 'Fertilidade', tipo: 'Fertilidade', operacoes: [
       { nome: 'Calagem', dap: -90, prazo: 5 },
@@ -214,10 +220,15 @@ window.DADOS = {
       { nome: '1ª Adubação potássica', dap: -15, prazo: 5 },
       { nome: 'Fosfatagem', dap: -10, prazo: 5 },
       { nome: 'Adubação de plantio', dap: 0 },
-      { nome: '2ª Adubação potássica', dap: 25 },
+      // K em cobertura em V4 (antes do fechamento); foliar a partir de ~20 dias após a emergência (V4) e com 50 DAP (R3)
+      { nome: '2ª Adubação potássica', dap: 25, fenologia: 'V4' },
       // Adubação foliar (micronutrientes: boro, cobre, zinco, ferro), como no plano de fertilidade do cliente
-      { nome: '1ª Adubação foliar', dap: 25 },
-      { nome: '2ª Adubação foliar', dap: 50 }
+      { nome: '1ª Adubação foliar', dap: 25, fenologia: 'V4' },
+      { nome: '2ª Adubação foliar', dap: 50, fenologia: 'R3' }
+    ] },
+    // Colheita: o DAP vem do ciclo da variedade (data de plantio + ciclo); fenologia Colheita; previsão de conclusão 10 dias
+    { nome: 'Colheita', tipo: 'Colheita', operacoes: [
+      { nome: 'Colheita', prazo: 10 }
     ] }
   ],
 
@@ -261,8 +272,7 @@ window.DADOS = {
           'Adubação de plantio': op([['MAP 11-52-00', 180]]),
           '2ª Adubação potássica': { fenologia: 'V4', produtos: [['KCl 00-00-60', 80]], talhoes: ['T05', 'T06', 'T07', 'T08'] },
           // TSI 1 nos talhões sem histórico de nematoide; TSI 2 com nematicida (T06 a T08)
-          // DAP −5: tratamento industrial feito alguns dias antes do plantio
-          'Tratamento de sementes (TSI)': { dap: -5, tsi: [
+          'Tratamento de sementes (TSI)': { tsi: [
             { produtos: [['Standak Top', 200], ['Masterfix L Soja', 200], ['Co + Mo', 100], ['Disco AG Red L-280', 100]],
               talhoes: ['T01', 'T02', 'T03', 'T04', 'T05'] },
             { produtos: [['Maxim Advanced', 100], ['Cruiser 350 FS', 200], ['Avicta 500 FS', 100], ['Masterfix L Soja', 200], ['Disco AG Red L-280', 100]],
@@ -280,13 +290,14 @@ window.DADOS = {
           ] },
           '1ª Dessecação: pré-plantio': op([['Roundup Original DI', 2.5], ['DMA 806 BR', 1.0]]),
           '2ª Dessecação: pré-plantio': op([['Finale', 2.0]]),
-          'Pré-emergente': op([['Dual Gold', 1.5]], 'VE'),
+          // Pré-emergente: aplicado antes da emergência da planta, sem fenologia
+          'Pré-emergente': op([['Dual Gold', 1.5]]),
           '1ª Pós-emergente': op([['Roundup Original DI', 2.0]], 'V2'),
           '2ª Pós-emergente':
             op([['Select 240 EC', 0.45], ['Engeo Pleno', 0.20], ['Unizeb Gold', 1.5]], 'V4'),
           '1ª Fungicida': op([['Fox Xpro', 0.40], ['Engeo Pleno', 0.20]], 'R1'),
           '2ª Fungicida': op([['Priori Xtra', 0.30], ['Ampligo', 0.15]], 'R3'),
-          '3ª Fungicida': op([['Elatus', 0.20], ['Connect', 1.0]], 'R5'),
+          '3ª Fungicida': op([['Elatus', 0.20], ['Connect', 1.0]], 'R4'),
           '4ª Fungicida': op([['Cypress', 0.30], ['Premio', 0.05]], 'R5'),
           'Desfolha': op([['Finale', 2.0]], 'R7')
         };

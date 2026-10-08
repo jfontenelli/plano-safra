@@ -32,7 +32,7 @@ Ver os planos existentes, filtrar, acompanhar os números gerais e abrir ou cria
 
 ## Navegação
 - "Criar Plano Safra" → abre a Tela 02 (modal) por cima desta tela.
-- Seta da linha ou "Abrir" no menu → abre o plano (Tela 04, Operações).
+- Seta da linha ou "Abrir" no menu → abre o plano na etapa Operações (Tela 04.0).
 
 ## Para testar
 - Ter um jeito simples de alternar entre "sem planos" (mostra Tela 01) e "com planos de exemplo" (mostra esta tela).

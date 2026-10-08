@@ -2026,6 +2026,46 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .cal-tabela__tabela th, .cal-tabela__tabela td { padding-left: 10px; padding-right: 10px; }
 .tabela-talhoes.cal-tabela__tabela .tabela__numero { padding-right: 10px; }
 
+
+/* ===== Operações do plano (Tela 04.0): estrutura por grupo, para revisar antes do planejamento ===== */
+.estrutura { display: flex; flex-direction: column; gap: 16px; padding: 16px 24px 24px; }
+.estrutura__aviso { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 0 2px; }
+.estrutura__aviso > .icone { width: 16px; height: 16px; flex-shrink: 0; color: var(--texto-suave); }
+.estrutura__aviso p { flex: 1; min-width: 240px; margin: 0; font-size: 14px; color: var(--texto-suave); }
+.estrutura__aviso p strong { color: var(--texto); font-weight: 600; }
+.estrutura__aviso .botao { margin-left: auto; text-decoration: none; }
+.estrutura__grupo { background: var(--superficie); border: 1px solid var(--borda); border-radius: var(--raio); box-shadow: var(--sombra); overflow: hidden; }
+.estrutura__topo { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 10px 16px; }
+.estrutura__seta .icone { transition: transform .15s; }
+.estrutura__seta--recolhido .icone { transform: rotate(-90deg); }
+.estrutura__nome { margin: 0; padding: 2px 6px; border-radius: 6px; font-size: 16px; }
+.estrutura__nome--editavel { cursor: text; }
+.estrutura__nome--editavel:hover { background: #f4f7f5; }
+.estrutura__nome--editavel:focus-visible, .estrutura__op:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 2px; }
+.estrutura__campo-grupo { width: 280px; max-width: 100%; height: 34px; font-weight: 600; }
+.estrutura__tipo { font-size: 13px; color: var(--texto-suave); }
+.estrutura__nota { margin-left: auto; font-size: 13px; color: var(--texto-suave); }
+.estrutura__excluir { color: var(--texto-suave); font-size: 13px; }
+.estrutura__topo .estrutura__excluir { margin-left: auto; }
+.estrutura__excluir:hover { color: #b42318; }
+.estrutura__excluir .icone { width: 16px; height: 16px; }
+.estrutura__barra { display: flex; justify-content: flex-end; padding: 8px 16px; border-top: 1px solid var(--borda); }
+.estrutura__rolagem { overflow-x: auto; border-top: 1px solid var(--borda); }
+.estrutura__tabela { width: 100%; }
+.estrutura__tabela th, .estrutura__tabela td { white-space: nowrap; }
+.estrutura__celula-nome { width: 100%; text-align: left; font-weight: 400; }
+.estrutura__op { display: inline-block; padding: 2px 6px; margin-left: -6px; border-radius: 6px; cursor: text; }
+.estrutura__op:hover { background: #eef2ef; }
+.estrutura__campo-nome { width: 100%; min-width: 260px; height: 34px; }
+.estrutura__num { width: 72px; height: 34px; text-align: right; font-variant-numeric: tabular-nums; }
+.estrutura__fen { width: 140px; height: 34px; }
+.estrutura__fixo { color: var(--texto-suave); }
+.estrutura__prazo { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--texto-suave); }
+.estrutura__acao { width: 48px; text-align: center; }
+.estrutura__nova { margin: 8px 16px 12px; }
+.estrutura__novo-grupo { align-self: flex-start; }
+.estrutura__vazio { margin: 0; padding: 12px 16px; color: var(--texto-suave); font-size: 14px; border-top: 1px solid var(--borda); }
+
 </style>
 </head>
 <body>
@@ -2302,21 +2342,27 @@ window.DADOS = {
     { nome: 'Semente', tipo: 'Sementes', operacoes: [
       { nome: 'Plantio', dap: 0, prazo: 3 }
     ] },
-    // TSI: sem DAP no modelo; o agrônomo informa (como no Defensivo, sem fenologia)
+    // TSI: DAP −5 como sugestão (tratamento feito alguns dias antes do plantio; fenologia Pré-plantio)
     { nome: 'Tratamento de semente', tipo: 'Tratamento de sementes', operacoes: [
-      { nome: 'Tratamento de sementes (TSI)' }
+      { nome: 'Tratamento de sementes (TSI)', dap: -5 }
     ] },
+    // Fenologia pré-preenchida (DAP positivo), pela literatura para soja no MT (cultivares de 104 a 118 dias):
+    // herbicida pós-emergente em V2 e V4 (glifosato até V4); fungicida preventivo da ferrugem a partir de R1, com
+    // 14 a 21 dias entre aplicações (R3, R4, R5); dessecação pré-colheita em R7 (Embrapa; Rev. Bras. Herbicidas).
+    // DAP × estádio conferido pela duração média dos estádios (Fehr & Caviness) num ciclo de ~110 dias:
+    // R1 ~40, R3 ~50, R4 ~60, R5 ~70, R6 ~85, R7 ~100 (fungicidas ajustados com a usuária: 3ª em R4, 4ª em R5).
+    // Pré-emergente: aplicado antes da emergência, sem estádio (fica sem fenologia).
     { nome: 'Defensivo', tipo: 'Defensivos', operacoes: [
       { nome: '1ª Dessecação: pré-plantio', dap: -15, prazo: 5 },
       { nome: '2ª Dessecação: pré-plantio', dap: -5 },
       { nome: 'Pré-emergente', dap: 1 },
-      { nome: '1ª Pós-emergente', dap: 15 },
-      { nome: '2ª Pós-emergente', dap: 25 },
-      { nome: '1ª Fungicida', dap: 40 },
-      { nome: '2ª Fungicida', dap: 55 },
-      { nome: '3ª Fungicida', dap: 70 },
-      { nome: '4ª Fungicida', dap: 85 },
-      { nome: 'Desfolha', dap: 100 }
+      { nome: '1ª Pós-emergente', dap: 15, fenologia: 'V2' },
+      { nome: '2ª Pós-emergente', dap: 25, fenologia: 'V4' },
+      { nome: '1ª Fungicida', dap: 40, fenologia: 'R1' },
+      { nome: '2ª Fungicida', dap: 55, fenologia: 'R3' },
+      { nome: '3ª Fungicida', dap: 70, fenologia: 'R4' },
+      { nome: '4ª Fungicida', dap: 85, fenologia: 'R5' },
+      { nome: 'Desfolha', dap: 100, fenologia: 'R7' }
     ] },
     { nome: 'Fertilidade', tipo: 'Fertilidade', operacoes: [
       { nome: 'Calagem', dap: -90, prazo: 5 },
@@ -2324,10 +2370,15 @@ window.DADOS = {
       { nome: '1ª Adubação potássica', dap: -15, prazo: 5 },
       { nome: 'Fosfatagem', dap: -10, prazo: 5 },
       { nome: 'Adubação de plantio', dap: 0 },
-      { nome: '2ª Adubação potássica', dap: 25 },
+      // K em cobertura em V4 (antes do fechamento); foliar a partir de ~20 dias após a emergência (V4) e com 50 DAP (R3)
+      { nome: '2ª Adubação potássica', dap: 25, fenologia: 'V4' },
       // Adubação foliar (micronutrientes: boro, cobre, zinco, ferro), como no plano de fertilidade do cliente
-      { nome: '1ª Adubação foliar', dap: 25 },
-      { nome: '2ª Adubação foliar', dap: 50 }
+      { nome: '1ª Adubação foliar', dap: 25, fenologia: 'V4' },
+      { nome: '2ª Adubação foliar', dap: 50, fenologia: 'R3' }
+    ] },
+    // Colheita: o DAP vem do ciclo da variedade (data de plantio + ciclo); fenologia Colheita; previsão de conclusão 10 dias
+    { nome: 'Colheita', tipo: 'Colheita', operacoes: [
+      { nome: 'Colheita', prazo: 10 }
     ] }
   ],
 
@@ -2371,8 +2422,7 @@ window.DADOS = {
           'Adubação de plantio': op([['MAP 11-52-00', 180]]),
           '2ª Adubação potássica': { fenologia: 'V4', produtos: [['KCl 00-00-60', 80]], talhoes: ['T05', 'T06', 'T07', 'T08'] },
           // TSI 1 nos talhões sem histórico de nematoide; TSI 2 com nematicida (T06 a T08)
-          // DAP −5: tratamento industrial feito alguns dias antes do plantio
-          'Tratamento de sementes (TSI)': { dap: -5, tsi: [
+          'Tratamento de sementes (TSI)': { tsi: [
             { produtos: [['Standak Top', 200], ['Masterfix L Soja', 200], ['Co + Mo', 100], ['Disco AG Red L-280', 100]],
               talhoes: ['T01', 'T02', 'T03', 'T04', 'T05'] },
             { produtos: [['Maxim Advanced', 100], ['Cruiser 350 FS', 200], ['Avicta 500 FS', 100], ['Masterfix L Soja', 200], ['Disco AG Red L-280', 100]],
@@ -2390,13 +2440,14 @@ window.DADOS = {
           ] },
           '1ª Dessecação: pré-plantio': op([['Roundup Original DI', 2.5], ['DMA 806 BR', 1.0]]),
           '2ª Dessecação: pré-plantio': op([['Finale', 2.0]]),
-          'Pré-emergente': op([['Dual Gold', 1.5]], 'VE'),
+          // Pré-emergente: aplicado antes da emergência da planta, sem fenologia
+          'Pré-emergente': op([['Dual Gold', 1.5]]),
           '1ª Pós-emergente': op([['Roundup Original DI', 2.0]], 'V2'),
           '2ª Pós-emergente':
             op([['Select 240 EC', 0.45], ['Engeo Pleno', 0.20], ['Unizeb Gold', 1.5]], 'V4'),
           '1ª Fungicida': op([['Fox Xpro', 0.40], ['Engeo Pleno', 0.20]], 'R1'),
           '2ª Fungicida': op([['Priori Xtra', 0.30], ['Ampligo', 0.15]], 'R3'),
-          '3ª Fungicida': op([['Elatus', 0.20], ['Connect', 1.0]], 'R5'),
+          '3ª Fungicida': op([['Elatus', 0.20], ['Connect', 1.0]], 'R4'),
           '4ª Fungicida': op([['Cypress', 0.30], ['Premio', 0.05]], 'R5'),
           'Desfolha': op([['Finale', 2.0]], 'R7')
         };
@@ -2698,7 +2749,7 @@ window.Planos = (function () {
   function gruposModelo() {
     return DADOS.modeloOperacoes.map((g) => ({
       ...novoGrupo(g.nome, g.tipo),
-      operacoes: g.operacoes.map((o) => novaOperacao(o.nome, o.dap, o.prazo ?? null))
+      operacoes: g.operacoes.map((o) => ({ ...novaOperacao(o.nome, o.dap, o.prazo ?? null), fenologia: o.fenologia || '' }))
     }));
   }
 
@@ -2709,7 +2760,7 @@ window.Planos = (function () {
     grupos.forEach((g) => g.operacoes.forEach((op) => {
       const d = detalhes[op.nome];
       if (!d) return;
-      op.fenologia = d.fenologia || '';
+      if (d.fenologia) op.fenologia = d.fenologia; // senão, fica a do modelo
       if (d.dap !== undefined) op.dap = d.dap; // operação sem DAP no modelo (ex.: TSI)
       (d.plantio || []).forEach(({ talhao, variedade, data, populacao }) => { op.plantio[talhao] = { variedade, data, populacao }; });
       if (d.germinacao) op.germinacao = d.germinacao;
@@ -3728,7 +3779,7 @@ window.Telas.calendario = (function () {
   // ----- Prazo para encerramento da OS (dias): o da operação ou o padrão do tipo do grupo -----
   function prazoDe(op, grupo) {
     if (op.prazo !== null && op.prazo !== undefined) return op.prazo;
-    return grupo.tipo === 'Sementes' ? 3 : 2;
+    return grupo.tipo === 'Sementes' ? 3 : grupo.tipo === 'Colheita' ? PRAZO_COLHEITA : 2;
   }
 
   // Fenologia fixa: DAP negativo = Pré-plantio; DAP 0 = Plantio
@@ -3757,7 +3808,10 @@ window.Telas.calendario = (function () {
     const area = (nomes) => daFazenda.filter((t) => nomes.includes(t.nome)).reduce((s, t) => s + t.area, 0);
     const lista = [];
     let plantio = null;
-    plano.grupos.forEach((grupo) => {
+    // Grupo Colheita: não entra como operação; a colheita vem do plantio (abaixo) e usa o nome e a previsão de conclusão dele
+    const gColheita = plano.grupos.find((g) => g.tipo === 'Colheita');
+    const opColheita = gColheita ? gColheita.operacoes[0] : null;
+    plano.grupos.filter((g) => g.tipo !== 'Colheita').forEach((grupo) => {
       grupo.operacoes.forEach((op) => {
         const semente = grupo.tipo === 'Sementes';
         if (semente && !plantio) plantio = op;
@@ -3788,9 +3842,9 @@ window.Telas.calendario = (function () {
       }).map((t) => t.nome);
       if (comPrevisao.length) {
         const ciclos = comPrevisao.map((t) => variedade(plantio.plantio[t].variedade).ciclo);
-        lista.push({ colheita: true, grupo: { nome: 'Colheita', tipo: 'Colheita' }, op: plantio,
+        lista.push({ colheita: true, grupo: gColheita || { nome: 'Colheita', tipo: 'Colheita' }, op: opColheita || plantio,
           dap: Math.min(...ciclos), dapMax: Math.max(...ciclos), fenologia: '',
-          prazo: plantio.prazoColheita ?? PRAZO_COLHEITA, talhoes: comPrevisao, area: area(comPrevisao), produtos: [],
+          prazo: opColheita ? prazoDe(opColheita, gColheita) : plantio.prazoColheita ?? PRAZO_COLHEITA, talhoes: comPrevisao, area: area(comPrevisao), produtos: [],
           variedades: new Set(comPrevisao.map((t) => plantio.plantio[t].variedade)) });
       }
     }
@@ -4023,7 +4077,9 @@ window.Telas.calendario = (function () {
       const plantio = (ctx.plano.grupos.find((g) => g.tipo === 'Sementes') || { operacoes: [] }).operacoes[0];
       const op = id === 'colheita' ? null : ctx.plano.grupos.flatMap((g) => g.operacoes).find((o) => o.id === id);
       if (n > 0) {
-        if (id === 'colheita' && plantio) plantio.prazoColheita = n; else if (op) op.prazo = n;
+        const opColheita = (ctx.plano.grupos.find((g) => g.tipo === 'Colheita') || { operacoes: [] }).operacoes[0];
+        if (id === 'colheita' && opColheita) opColheita.prazo = n;
+        else if (id === 'colheita' && plantio) plantio.prazoColheita = n; else if (op) op.prazo = n;
         alterou();
       }
       redesenhar(null);
@@ -4033,6 +4089,268 @@ window.Telas.calendario = (function () {
   }
 
   return { desenhar, aoClicar, aoMudar, prazoDe };
+})();
+
+</script>
+  <script>
+/*
+ * Tela 04.0 — Operações do plano (docs/telas/04.0-operacoes.md)
+ * Etapa 1 do plano: a estrutura vinda do modelo (grupos e operações com DAP, fenologia e previsão de conclusão),
+ * para revisar antes do planejamento talhão a talhão. Quem não quiser mexer segue direto para o Planejamento.
+ * Desenhada dentro da Tela 04 (mesmo cabeçalho do plano); a Tela 04 repassa os eventos para cá.
+ */
+window.Telas = window.Telas || {};
+
+window.Telas.operacoesPlano = (function () {
+  const esc = Util.escapar;
+
+  // Fenologia fixa: DAP negativo = Pré-plantio; DAP 0 = Plantio; grupo Colheita = Colheita
+  function fenologiaFixa(grupo, op) {
+    if (grupo.tipo === 'Colheita') return 'Colheita';
+    if (op.dap === null || op.dap === undefined || op.dap === '') return null;
+    if (op.dap < 0) return 'Pré-plantio';
+    if (op.dap === 0) return 'Plantio';
+    return null;
+  }
+
+  // Operações na ordem do DAP (sem DAP no fim), como na lista do Planejamento
+  function ordenadas(grupo) {
+    return [...grupo.operacoes].sort((a, b) => (a.dap ?? Infinity) - (b.dap ?? Infinity));
+  }
+
+  // ----- Desenho -----
+  function desenhar(ctx) {
+    const { plano, somenteLeitura, estado } = ctx;
+    return `
+      <section class="estrutura">
+        <div class="estrutura__aviso" role="note">${Icones.info}
+          <p><strong>Revise as operações cadastradas.</strong> Se estiver tudo certo, siga para o planejamento.</p>
+          <a class="botao botao--primario botao--p" href="#/plano/${plano.id}/planejamento">Ir para o planejamento ${Icones.seta}</a>
+        </div>
+        ${plano.grupos.length ? plano.grupos.map((g) => grupoHtml(g, ctx)).join('')
+          : '<p class="estrutura__vazio">Nenhum grupo de operações no plano.</p>'}
+        ${somenteLeitura ? '' : `
+          <button class="link-acao estrutura__novo-grupo" type="button" data-acao="est-novo-grupo">${Icones.mais} Novo grupo de operações</button>`}
+      </section>`;
+    function grupoHtml(g) {
+      // Grupos começam minimizados: só abre o que a pessoa expandir (ou onde ela acabou de criar uma operação)
+      const recolhido = !estado.abertos.has(g.id);
+      const n = g.operacoes.length;
+      // Semente e Colheita: operação fixa (sem excluir grupo nem operações); plano aprovado: só leitura.
+      // TSI: uma operação só; quem não faz exclui o grupo (sem "Excluir todas as operações")
+      const fixo = ctx.somenteLeitura || g.tipo === 'Sementes' || g.tipo === 'Colheita';
+      return `
+        <section class="estrutura__grupo" aria-label="Grupo ${esc(g.nome)}">
+          <div class="estrutura__topo">
+            <button class="botao-icone estrutura__seta ${recolhido ? 'estrutura__seta--recolhido' : ''}" type="button" data-acao="est-recolher"
+                    data-grupo="${g.id}" aria-expanded="${!recolhido}"
+                    aria-label="${recolhido ? 'Mostrar' : 'Recolher'} operações de ${esc(g.nome)}" title="${recolhido ? 'Mostrar' : 'Recolher'} operações">${Icones.abaixo}</button>
+            ${nomeGrupo(g, ctx)}
+            <span class="estrutura__tipo">${g.tipo ? `tipo ${esc(g.tipo)} · ` : ''}${n} ${n === 1 ? 'operação' : 'operações'}</span>
+            ${g.tipo === 'Colheita' ? '<span class="estrutura__nota">A data vem do plantio: data de plantio + ciclo da variedade</span>' : ''}
+            ${fixo ? '' : `
+              <button class="link-acao estrutura__excluir" type="button" data-acao="est-excluir-grupo" data-grupo="${g.id}"
+                      title="Excluir o grupo do plano (ex.: quem não faz TSI)">${Icones.lixeira} Excluir grupo</button>`}
+          </div>
+          ${recolhido ? '' : `
+            ${n && !fixo && g.tipo !== 'Tratamento de sementes' ? `
+              <div class="estrutura__barra">
+                <button class="link-acao estrutura__excluir" type="button" data-acao="est-excluir-todas" data-grupo="${g.id}"
+                        title="Excluir todas as operações deste grupo (o grupo continua)">${Icones.lixeira} Excluir todas as operações</button>
+              </div>` : ''}
+            ${n ? `
+              <div class="estrutura__rolagem">
+                <table class="tabela tabela--compacta estrutura__tabela">
+                  <thead><tr>
+                    <th>Operação</th><th class="tabela__numero">DAP</th><th>Fenologia</th><th>Previsão de conclusão</th>
+                    ${somenteLeitura ? '' : '<th class="estrutura__acao"><span class="so-leitor">Excluir</span></th>'}
+                  </tr></thead>
+                  <tbody>${ordenadas(g).map((op) => linha(g, op, ctx)).join('')}</tbody>
+                </table>
+              </div>` : '<p class="estrutura__vazio">Nenhuma operação neste grupo.</p>'}
+            ${somenteLeitura || g.tipo === 'Colheita' || g.tipo === 'Sementes' ? '' : `
+              <button class="link-acao estrutura__nova" type="button" data-acao="est-nova-op" data-grupo="${g.id}">${Icones.mais} Nova operação</button>`}`}
+        </section>`;
+    }
+  }
+
+  // Nome do grupo: dois cliques (ou F2) para renomear
+  function nomeGrupo(g, { somenteLeitura, estado }) {
+    if (estado.renomeandoGrupo === g.id) {
+      return `<input class="campo__controle estrutura__campo-grupo" data-campo="est-nome-grupo" data-grupo="${g.id}" value="${esc(g.nome)}"
+                     aria-label="Nome do grupo" data-foco-inicial>`;
+    }
+    return somenteLeitura ? `<h2 class="estrutura__nome">${esc(g.nome)}</h2>`
+      : `<h2 class="estrutura__nome estrutura__nome--editavel" tabindex="0" data-est-renomear-grupo="${g.id}"
+             title="Clique duas vezes para renomear">${esc(g.nome)}</h2>`;
+  }
+
+  function linha(g, op, { somenteLeitura, estado }) {
+    const fixa = fenologiaFixa(g, op);
+    // Nome: texto; dois cliques (ou F2) para renomear
+    const nome = estado.renomeandoOp === op.id
+      ? `<input class="campo__controle estrutura__campo-nome" data-campo="est-nome-op" data-op="${op.id}" value="${esc(op.nome)}"
+                aria-label="Nome da operação" data-foco-inicial>`
+      : somenteLeitura ? esc(op.nome)
+        : `<span class="estrutura__op" tabindex="0" data-est-renomear-op="${op.id}" title="Clique duas vezes para renomear">${esc(op.nome)}</span>`;
+    // DAP: Plantio sempre 0 (não muda); Colheita pelo ciclo da variedade; demais editáveis
+    const dap = g.tipo === 'Sementes' ? '<span class="estrutura__fixo" title="O plantio é sempre o DAP 0">0</span>'
+      : g.tipo === 'Colheita' ? '<span class="estrutura__fixo" title="Data de plantio + ciclo da variedade, talhão a talhão">Pelo ciclo</span>'
+        : somenteLeitura ? `${op.dap ?? '—'}`
+          : `<input class="campo__controle estrutura__num" type="text" inputmode="numeric" data-campo="est-dap" data-op="${op.id}"
+                    value="${op.dap ?? ''}" placeholder="—" aria-label="DAP de ${esc(op.nome)}">`;
+    const fenologia = fixa || somenteLeitura
+      ? `<span class="estrutura__fixo">${esc(fixa || op.fenologia || '—')}</span>`
+      : `<select class="campo__controle estrutura__fen" data-campo="est-fenologia" data-op="${op.id}" aria-label="Fenologia de ${esc(op.nome)}">
+           <option value="">—</option>
+           ${DADOS.fenologia.map((f) => `<option ${f === op.fenologia ? 'selected' : ''}>${f}</option>`).join('')}
+         </select>`;
+    const prazo = Telas.calendario.prazoDe(op, g);
+    const previsao = somenteLeitura ? `${prazo} ${prazo === 1 ? 'dia' : 'dias'}` : `
+      <span class="estrutura__prazo"><input class="campo__controle estrutura__num" type="text" inputmode="numeric" data-campo="est-prazo"
+             data-op="${op.id}" value="${prazo}" aria-label="Previsão de conclusão de ${esc(op.nome)}, em dias"> dias</span>`;
+    return `
+      <tr>
+        <td class="estrutura__celula-nome">${nome}</td>
+        <td class="tabela__numero">${dap}</td>
+        <td>${fenologia}</td>
+        <td>${previsao}</td>
+        ${somenteLeitura ? '' : `<td class="estrutura__acao">${g.tipo === 'Sementes' || g.tipo === 'Colheita' ? '' : `
+          <button class="botao-icone" type="button" data-acao="est-excluir-op" data-grupo="${g.id}" data-op="${op.id}"
+                  title="Excluir operação" aria-label="Excluir ${esc(op.nome)}">${Icones.lixeira}</button>`}</td>`}
+      </tr>`;
+  }
+
+  // ----- Eventos (repassados pela Tela 04). Devolvem true quando o evento era daqui. -----
+  function acharOp(plano, id) {
+    for (const g of plano.grupos) {
+      const op = g.operacoes.find((o) => o.id === id);
+      if (op) return { g, op };
+    }
+    return null;
+  }
+
+  function aoClicar(e, ctx, acoes) {
+    const alvo = e.target.closest('[data-acao^="est-"]');
+    if (!alvo) return false;
+    const { plano, estado } = ctx;
+    const grupo = plano.grupos.find((g) => g.id === alvo.dataset.grupo);
+    switch (alvo.dataset.acao) {
+      case 'est-recolher':
+        if (estado.abertos.has(grupo.id)) estado.abertos.delete(grupo.id); else estado.abertos.add(grupo.id);
+        acoes.redesenhar(`[data-acao="est-recolher"][data-grupo="${grupo.id}"]`); break;
+      case 'est-nova-op': estado.abertos.add(grupo.id); acoes.criarOperacao(grupo); break;
+      case 'est-excluir-op': acoes.excluirOperacao(grupo, grupo.operacoes.find((o) => o.id === alvo.dataset.op)); break;
+      case 'est-novo-grupo': acoes.novoGrupo(); break;
+      case 'est-excluir-todas': excluirTodas(grupo, ctx, acoes); break;
+      case 'est-excluir-grupo': acoes.excluirGrupo(grupo); break;
+    }
+    return true;
+  }
+
+  // Excluir todas as operações do grupo de uma vez (o modelo não serve): o grupo fica, vazio, para receber as do usuário.
+  // Confirma com o impacto (operações e talhões já planejados); depois, Desfazer.
+  function excluirTodas(grupo, ctx, acoes) {
+    const ops = [...grupo.operacoes];
+    const comTalhoes = ops.filter((o) => Object.keys(o.talhoes || {}).length).length;
+    const n = ops.length;
+    Modal.confirmar({
+      titulo: n === 1 ? `Excluir a operação de ${esc(grupo.nome)}?` : `Excluir as ${n} operações de ${esc(grupo.nome)}?`,
+      texto: `O grupo continua, vazio, para você cadastrar as suas operações.${comTalhoes
+        ? ` ${comTalhoes} ${comTalhoes === 1 ? 'operação já tem' : 'operações já têm'} talhões planejados, que também serão apagados.` : ''}`,
+      botoes: [{ rotulo: 'Cancelar' }, { rotulo: 'Excluir operações', classe: 'perigo', acao: () => {
+        grupo.operacoes = [];
+        acoes.alterou(); acoes.redesenhar(null);
+        Aviso.mostrar(`${n} ${n === 1 ? 'operação excluída' : 'operações excluídas'} de ${esc(grupo.nome)}`, { acao: 'Desfazer', aoAgir: () => {
+          grupo.operacoes = ops; acoes.alterou(); acoes.redesenhar(null);
+        } });
+      } }]
+    });
+  }
+
+  function aoDuploClique(e, ctx, acoes) {
+    if (ctx.somenteLeitura) return false;
+    const g = e.target.closest('[data-est-renomear-grupo]');
+    const o = e.target.closest('[data-est-renomear-op]');
+    if (!g && !o) return false;
+    ctx.estado.renomeandoGrupo = g ? g.dataset.estRenomearGrupo : null;
+    ctx.estado.renomeandoOp = o ? o.dataset.estRenomearOp : null;
+    acoes.redesenhar(null);
+    return true;
+  }
+
+  function aoTeclar(e, ctx, acoes) {
+    const el = e.target;
+    if (!ctx.somenteLeitura && e.key === 'F2' && (el.dataset.estRenomearGrupo || el.dataset.estRenomearOp)) {
+      e.preventDefault();
+      ctx.estado.renomeandoGrupo = el.dataset.estRenomearGrupo || null;
+      ctx.estado.renomeandoOp = el.dataset.estRenomearOp || null;
+      acoes.redesenhar(null);
+      return true;
+    }
+    const campo = el.dataset.campo || '';
+    if (!campo.startsWith('est-')) return false;
+    if (e.key === 'Enter') { e.preventDefault(); el.blur(); }
+    if (e.key === 'Escape' && (campo === 'est-nome-op' || campo === 'est-nome-grupo')) {
+      e.preventDefault(); e.stopPropagation();
+      ctx.estado.renomeandoOp = null; ctx.estado.renomeandoGrupo = null;
+      acoes.redesenhar(null);
+    }
+    return true;
+  }
+
+  // Nomes: gravam ao sair do campo (Enter tira o foco). Vazio volta ao anterior; operação com nome repetido não vale.
+  function aoDesfocar(e, ctx, acoes) {
+    const el = e.target;
+    const { plano, estado } = ctx;
+    if (el.dataset.campo === 'est-nome-grupo' && estado.renomeandoGrupo) {
+      const g = plano.grupos.find((x) => x.id === el.dataset.grupo);
+      const v = el.value.trim();
+      estado.renomeandoGrupo = null;
+      if (g && v && v !== g.nome) { g.nome = v; acoes.alterou(); }
+      acoes.redesenhar(`[data-est-renomear-grupo="${el.dataset.grupo}"]`);
+      return true;
+    }
+    if (el.dataset.campo === 'est-nome-op' && estado.renomeandoOp) {
+      const achado = acharOp(plano, el.dataset.op);
+      const v = el.value.trim();
+      estado.renomeandoOp = null;
+      if (achado && v && v !== achado.op.nome) {
+        if (acoes.nomeOperacaoRepetido(v, achado.op)) Aviso.mostrar('Já existe uma operação com esse nome');
+        else { achado.op.nome = v; acoes.alterou(); }
+      }
+      acoes.redesenhar(`[data-est-renomear-op="${el.dataset.op}"]`);
+      return true;
+    }
+    return false;
+  }
+
+  function aoMudar(e, ctx, acoes) {
+    const campo = e.target.dataset.campo || '';
+    if (!['est-dap', 'est-fenologia', 'est-prazo'].includes(campo)) return false;
+    const achado = acharOp(ctx.plano, e.target.dataset.op);
+    if (!achado) return true;
+    const { op } = achado;
+    if (campo === 'est-dap') {
+      const n = Util.numero(e.target.value);
+      // DAP é obrigatório: apagar não vale, o campo volta ao valor anterior
+      if (n === null && op.dap !== null && op.dap !== undefined) {
+        e.target.value = op.dap; Aviso.mostrar('Toda operação precisa de DAP'); return true;
+      }
+      op.dap = n === null ? null : Math.round(n);
+      if (op.dap !== null && op.dap <= 0) op.fenologia = ''; // pré-plantio e plantio: fenologia fixa
+    } else if (campo === 'est-fenologia') {
+      op.fenologia = e.target.value;
+    } else if (campo === 'est-prazo') {
+      const n = Math.round(Util.numero(e.target.value));
+      if (n > 0) op.prazo = n;
+    }
+    acoes.alterou();
+    acoes.redesenhar(`[data-campo="${campo}"][data-op="${op.id}"]`);
+    return true;
+  }
+
+  return { desenhar, aoClicar, aoDuploClique, aoTeclar, aoDesfocar, aoMudar };
 })();
 
 </script>
@@ -4048,7 +4366,8 @@ window.Telas = window.Telas || {};
 window.Telas.planoOperacoes = (function () {
   const esc = Util.escapar;
   const ETAPAS = [
-    { id: 'operacoes',   nome: 'Operações' },
+    { id: 'operacoes',   nome: 'Operações' },     // estrutura do plano (Tela 04.0)
+    { id: 'planejamento', nome: 'Planejamento' }, // talhão a talhão, por grupo (esta tela)
     { id: 'calendario',  nome: 'Calendário Agrícola' },
     { id: 'suprimentos', nome: 'Suprimentos' },
     { id: 'aprovacao',   nome: 'Aprovação' }
@@ -4127,8 +4446,14 @@ window.Telas.planoOperacoes = (function () {
     return ui.listaRecolhidaPorGrupo[g.id] ?? ehSemente(g);
   }
 
+  // Guias do Planejamento: todos os grupos, menos o Colheita (vem do plantio; não há o que planejar talhão a talhão)
+  function gruposPlanejamento() {
+    return plano.grupos.filter((g) => g.tipo !== 'Colheita');
+  }
+
   function grupoAtual() {
-    return plano.grupos.find((g) => g.id === ui.grupoId) || plano.grupos[0] || null;
+    const grupos = gruposPlanejamento();
+    return grupos.find((g) => g.id === ui.grupoId) || grupos[0] || null;
   }
 
   // Operações ordenadas pelo DAP padrão (sem DAP no fim)
@@ -4185,11 +4510,13 @@ window.Telas.planoOperacoes = (function () {
     raiz.innerHTML = `
       ${cabecalho()}
       <div class="plano__rolagem">
-        ${etapa === 'operacoes' ? corpoOperacoes() : etapa === 'calendario' ? Telas.calendario.desenhar(ctxCalendario()) : etapaEmConstrucao()}
+        ${etapa === 'operacoes' ? Telas.operacoesPlano.desenhar(ctxEstrutura())
+          : etapa === 'planejamento' ? corpoOperacoes()
+          : etapa === 'calendario' ? Telas.calendario.desenhar(ctxCalendario()) : etapaEmConstrucao()}
       </div>
-      ${etapa === 'operacoes' ? rodapeGrupos() : ''}
-      ${etapa === 'operacoes' && ui.definindo && opAtual() ? modalDefinir(opAtual()) : ''}
-      ${etapa === 'operacoes' && ui.plantando && opAtual() ? modalPlantio(opAtual()) : ''}
+      ${etapa === 'planejamento' ? rodapeGrupos() : ''}
+      ${etapa === 'planejamento' && ui.definindo && opAtual() ? modalDefinir(opAtual()) : ''}
+      ${etapa === 'planejamento' && ui.plantando && opAtual() ? modalPlantio(opAtual()) : ''}
     `;
     // Redesenhar não pode jogar a página (nem a lista de operações ou o modal) de volta ao topo
     raiz.querySelector('.plano__rolagem').scrollTop = rolagemAntes;
@@ -4245,6 +4572,21 @@ window.Telas.planoOperacoes = (function () {
     return { plano, somenteLeitura, talhoes: talhoesFazenda, estado: ui.calendario };
   }
   const acoesCalendario = { redesenhar: (foco) => (foco ? desenharMantendoFoco(foco) : desenharTudo()), alterou: () => alterou() };
+
+  // Operações do plano (Tela 04.0, etapa 1): desenhada aqui dentro, com o mesmo cabeçalho do plano
+  function ctxEstrutura() {
+    ui.estrutura = ui.estrutura || { abertos: new Set(), renomeandoGrupo: null, renomeandoOp: null };
+    return { plano, somenteLeitura, estado: ui.estrutura };
+  }
+  const acoesEstrutura = {
+    redesenhar: (foco) => (foco ? desenharMantendoFoco(foco) : desenharTudo()),
+    alterou: () => alterou(),
+    criarOperacao: (grupo) => criarOperacao(grupo),
+    excluirOperacao: (grupo, op) => excluirOperacao(grupo, op),
+    novoGrupo: () => novoGrupo(),
+    excluirGrupo: (grupo) => excluirGrupo(grupo),
+    nomeOperacaoRepetido: (nome, op) => nomeOperacaoRepetido(nome, op)
+  };
 
   function etapaEmConstrucao() {
     const nome = ETAPAS.find((e) => e.id === etapa).nome;
@@ -4363,6 +4705,7 @@ window.Telas.planoOperacoes = (function () {
   }
 
   function aoDuploClique(e) {
+    if (etapa === 'operacoes' && Telas.operacoesPlano.aoDuploClique(e, ctxEstrutura(), acoesEstrutura)) return;
     const nome = e.target.closest('[data-renomear-op]');
     if (!nome || somenteLeitura) return;
     ui.renomeandoOp = nome.dataset.renomearOp; desenharTudo();
@@ -6205,7 +6548,7 @@ window.Telas.planoOperacoes = (function () {
       <footer class="grupos" aria-label="Grupos de operações">
         <span class="grupos__rotulo">Grupo de operações</span>
         <div class="grupos__guias" role="tablist">
-          ${plano.grupos.map((g) => {
+          ${gruposPlanejamento().map((g) => {
             const ativo = atual && g.id === atual.id;
             if (ui.renomeandoGrupo === g.id) {
               return `<span class="guia guia--ativa guia--editando"><input class="guia__campo" data-campo="nome-grupo"
@@ -6304,6 +6647,7 @@ window.Telas.planoOperacoes = (function () {
 
   // ================= Ações =================
   function aoClicar(e) {
+    if (etapa === 'operacoes' && Telas.operacoesPlano.aoClicar(e, ctxEstrutura(), acoesEstrutura)) return;
     if (etapa === 'calendario' && Telas.calendario.aoClicar(e, ctxCalendario(), acoesCalendario)) return;
     const alvo = e.target.closest('[data-acao]');
     if (!alvo) return;
@@ -6467,6 +6811,7 @@ window.Telas.planoOperacoes = (function () {
   }
 
   function aoMudar(e) {
+    if (etapa === 'operacoes' && Telas.operacoesPlano.aoMudar(e, ctxEstrutura(), acoesEstrutura)) return;
     if (etapa === 'calendario' && Telas.calendario.aoMudar(e, ctxCalendario(), acoesCalendario)) return;
     const campo = e.target.dataset.campo;
     const op = opAtual();
@@ -6570,6 +6915,7 @@ window.Telas.planoOperacoes = (function () {
   }
 
   function aoDesfocar(e) {
+    if (etapa === 'operacoes' && Telas.operacoesPlano.aoDesfocar(e, ctxEstrutura(), acoesEstrutura)) return;
     const el = e.target;
     if (el.dataset.combo) {
       // Sem escolher uma opção: texto igual a um item do cadastro vale como escolhido;
@@ -6615,6 +6961,7 @@ window.Telas.planoOperacoes = (function () {
   }
 
   function aoTeclar(e) {
+    if (etapa === 'operacoes' && Telas.operacoesPlano.aoTeclar(e, ctxEstrutura(), acoesEstrutura)) return;
     const el = e.target;
     // Cabeçalho da operação: F2 no nome abre o campo
     if (el.dataset.renomearOp && e.key === 'F2' && !somenteLeitura) {
@@ -7363,7 +7710,7 @@ window.Telas.planoOperacoes = (function () {
     'plano-safra':    { titulo: 'Plano de Safra', menu: 'plano-safra',
                         desenhar: () => temPlanos() ? Telas.listaPlanos.desenhar() : Telas.primeiroUso(),
                         aoMostrar: (conteudo) => { if (temPlanos()) Telas.listaPlanos.aoMostrar(conteudo); } },
-    // Plano aberto: #/plano/<id>/<etapa>. Etapa Operações = Tela 04; as demais, em construção.
+    // Plano aberto: #/plano/<id>/<etapa>. Abre em Operações (Tela 04.0); Planejamento = Tela 04; Calendário = Tela 05.
     'plano':          { titulo: 'Plano de Safra', menu: 'plano-safra',
                         desenhar: () => Telas.planoOperacoes.desenhar(),
                         aoMostrar: (conteudo, id, etapa) => Telas.planoOperacoes.aoMostrar(conteudo, buscarPlano(id), etapa) },

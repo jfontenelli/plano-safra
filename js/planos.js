@@ -64,7 +64,7 @@ window.Planos = (function () {
   function gruposModelo() {
     return DADOS.modeloOperacoes.map((g) => ({
       ...novoGrupo(g.nome, g.tipo),
-      operacoes: g.operacoes.map((o) => novaOperacao(o.nome, o.dap, o.prazo ?? null))
+      operacoes: g.operacoes.map((o) => ({ ...novaOperacao(o.nome, o.dap, o.prazo ?? null), fenologia: o.fenologia || '' }))
     }));
   }
 
@@ -75,7 +75,7 @@ window.Planos = (function () {
     grupos.forEach((g) => g.operacoes.forEach((op) => {
       const d = detalhes[op.nome];
       if (!d) return;
-      op.fenologia = d.fenologia || '';
+      if (d.fenologia) op.fenologia = d.fenologia; // senão, fica a do modelo
       if (d.dap !== undefined) op.dap = d.dap; // operação sem DAP no modelo (ex.: TSI)
       (d.plantio || []).forEach(({ talhao, variedade, data, populacao }) => { op.plantio[talhao] = { variedade, data, populacao }; });
       if (d.germinacao) op.germinacao = d.germinacao;

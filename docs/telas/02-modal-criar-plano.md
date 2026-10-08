@@ -39,4 +39,4 @@ Definir o contexto do novo plano (safra, empresa, fazenda, cultura) e como ele v
 
 ## Navegação
 - "Cancelar" ou X → fecha o modal e volta à tela de origem, sem criar nada.
-- "Continuar para as operações" → Tela 04 · Operações do plano, no primeiro grupo de operações.
+- "Continuar para as operações" → etapa Operações do plano (Tela 04.0).

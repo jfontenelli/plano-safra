@@ -9,7 +9,8 @@ window.Telas = window.Telas || {};
 window.Telas.planoOperacoes = (function () {
   const esc = Util.escapar;
   const ETAPAS = [
-    { id: 'operacoes',   nome: 'Operações' },
+    { id: 'operacoes',   nome: 'Operações' },     // estrutura do plano (Tela 04.0)
+    { id: 'planejamento', nome: 'Planejamento' }, // talhão a talhão, por grupo (esta tela)
     { id: 'calendario',  nome: 'Calendário Agrícola' },
     { id: 'suprimentos', nome: 'Suprimentos' },
     { id: 'aprovacao',   nome: 'Aprovação' }
@@ -88,8 +89,14 @@ window.Telas.planoOperacoes = (function () {
     return ui.listaRecolhidaPorGrupo[g.id] ?? ehSemente(g);
   }
 
+  // Guias do Planejamento: todos os grupos, menos o Colheita (vem do plantio; não há o que planejar talhão a talhão)
+  function gruposPlanejamento() {
+    return plano.grupos.filter((g) => g.tipo !== 'Colheita');
+  }
+
   function grupoAtual() {
-    return plano.grupos.find((g) => g.id === ui.grupoId) || plano.grupos[0] || null;
+    const grupos = gruposPlanejamento();
+    return grupos.find((g) => g.id === ui.grupoId) || grupos[0] || null;
   }
 
   // Operações ordenadas pelo DAP padrão (sem DAP no fim)
@@ -146,11 +153,13 @@ window.Telas.planoOperacoes = (function () {
     raiz.innerHTML = `
       ${cabecalho()}
       <div class="plano__rolagem">
-        ${etapa === 'operacoes' ? corpoOperacoes() : etapa === 'calendario' ? Telas.calendario.desenhar(ctxCalendario()) : etapaEmConstrucao()}
+        ${etapa === 'operacoes' ? Telas.operacoesPlano.desenhar(ctxEstrutura())
+          : etapa === 'planejamento' ? corpoOperacoes()
+          : etapa === 'calendario' ? Telas.calendario.desenhar(ctxCalendario()) : etapaEmConstrucao()}
       </div>
-      ${etapa === 'operacoes' ? rodapeGrupos() : ''}
-      ${etapa === 'operacoes' && ui.definindo && opAtual() ? modalDefinir(opAtual()) : ''}
-      ${etapa === 'operacoes' && ui.plantando && opAtual() ? modalPlantio(opAtual()) : ''}
+      ${etapa === 'planejamento' ? rodapeGrupos() : ''}
+      ${etapa === 'planejamento' && ui.definindo && opAtual() ? modalDefinir(opAtual()) : ''}
+      ${etapa === 'planejamento' && ui.plantando && opAtual() ? modalPlantio(opAtual()) : ''}
     `;
     // Redesenhar não pode jogar a página (nem a lista de operações ou o modal) de volta ao topo
     raiz.querySelector('.plano__rolagem').scrollTop = rolagemAntes;
@@ -206,6 +215,21 @@ window.Telas.planoOperacoes = (function () {
     return { plano, somenteLeitura, talhoes: talhoesFazenda, estado: ui.calendario };
   }
   const acoesCalendario = { redesenhar: (foco) => (foco ? desenharMantendoFoco(foco) : desenharTudo()), alterou: () => alterou() };
+
+  // Operações do plano (Tela 04.0, etapa 1): desenhada aqui dentro, com o mesmo cabeçalho do plano
+  function ctxEstrutura() {
+    ui.estrutura = ui.estrutura || { abertos: new Set(), renomeandoGrupo: null, renomeandoOp: null };
+    return { plano, somenteLeitura, estado: ui.estrutura };
+  }
+  const acoesEstrutura = {
+    redesenhar: (foco) => (foco ? desenharMantendoFoco(foco) : desenharTudo()),
+    alterou: () => alterou(),
+    criarOperacao: (grupo) => criarOperacao(grupo),
+    excluirOperacao: (grupo, op) => excluirOperacao(grupo, op),
+    novoGrupo: () => novoGrupo(),
+    excluirGrupo: (grupo) => excluirGrupo(grupo),
+    nomeOperacaoRepetido: (nome, op) => nomeOperacaoRepetido(nome, op)
+  };
 
   function etapaEmConstrucao() {
     const nome = ETAPAS.find((e) => e.id === etapa).nome;
@@ -324,6 +348,7 @@ window.Telas.planoOperacoes = (function () {
   }
 
   function aoDuploClique(e) {
+    if (etapa === 'operacoes' && Telas.operacoesPlano.aoDuploClique(e, ctxEstrutura(), acoesEstrutura)) return;
     const nome = e.target.closest('[data-renomear-op]');
     if (!nome || somenteLeitura) return;
     ui.renomeandoOp = nome.dataset.renomearOp; desenharTudo();
@@ -2166,7 +2191,7 @@ window.Telas.planoOperacoes = (function () {
       <footer class="grupos" aria-label="Grupos de operações">
         <span class="grupos__rotulo">Grupo de operações</span>
         <div class="grupos__guias" role="tablist">
-          ${plano.grupos.map((g) => {
+          ${gruposPlanejamento().map((g) => {
             const ativo = atual && g.id === atual.id;
             if (ui.renomeandoGrupo === g.id) {
               return `<span class="guia guia--ativa guia--editando"><input class="guia__campo" data-campo="nome-grupo"
@@ -2265,6 +2290,7 @@ window.Telas.planoOperacoes = (function () {
 
   // ================= Ações =================
   function aoClicar(e) {
+    if (etapa === 'operacoes' && Telas.operacoesPlano.aoClicar(e, ctxEstrutura(), acoesEstrutura)) return;
     if (etapa === 'calendario' && Telas.calendario.aoClicar(e, ctxCalendario(), acoesCalendario)) return;
     const alvo = e.target.closest('[data-acao]');
     if (!alvo) return;
@@ -2428,6 +2454,7 @@ window.Telas.planoOperacoes = (function () {
   }
 
   function aoMudar(e) {
+    if (etapa === 'operacoes' && Telas.operacoesPlano.aoMudar(e, ctxEstrutura(), acoesEstrutura)) return;
     if (etapa === 'calendario' && Telas.calendario.aoMudar(e, ctxCalendario(), acoesCalendario)) return;
     const campo = e.target.dataset.campo;
     const op = opAtual();
@@ -2531,6 +2558,7 @@ window.Telas.planoOperacoes = (function () {
   }
 
   function aoDesfocar(e) {
+    if (etapa === 'operacoes' && Telas.operacoesPlano.aoDesfocar(e, ctxEstrutura(), acoesEstrutura)) return;
     const el = e.target;
     if (el.dataset.combo) {
       // Sem escolher uma opção: texto igual a um item do cadastro vale como escolhido;
@@ -2576,6 +2604,7 @@ window.Telas.planoOperacoes = (function () {
   }
 
   function aoTeclar(e) {
+    if (etapa === 'operacoes' && Telas.operacoesPlano.aoTeclar(e, ctxEstrutura(), acoesEstrutura)) return;
     const el = e.target;
     // Cabeçalho da operação: F2 no nome abre o campo
     if (el.dataset.renomearOp && e.key === 'F2' && !somenteLeitura) {

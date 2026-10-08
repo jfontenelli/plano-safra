@@ -11,7 +11,7 @@
     'plano-safra':    { titulo: 'Plano de Safra', menu: 'plano-safra',
                         desenhar: () => temPlanos() ? Telas.listaPlanos.desenhar() : Telas.primeiroUso(),
                         aoMostrar: (conteudo) => { if (temPlanos()) Telas.listaPlanos.aoMostrar(conteudo); } },
-    // Plano aberto: #/plano/<id>/<etapa>. Etapa Operações = Tela 04; as demais, em construção.
+    // Plano aberto: #/plano/<id>/<etapa>. Abre em Operações (Tela 04.0); Planejamento = Tela 04; Calendário = Tela 05.
     'plano':          { titulo: 'Plano de Safra', menu: 'plano-safra',
                         desenhar: () => Telas.planoOperacoes.desenhar(),
                         aoMostrar: (conteudo, id, etapa) => Telas.planoOperacoes.aoMostrar(conteudo, buscarPlano(id), etapa) },
