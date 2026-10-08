@@ -1,6 +1,6 @@
 # Tela 05 — Calendário Agrícola
 
-Atualizado em 07/10/2026. Este doc mostra só o estado atual da tela. Decisão alterada é reescrita, não acumulada.
+Atualizado em 08/10/2026. Este doc mostra só o estado atual da tela. Decisão alterada é reescrita, não acumulada.
 Tudo é **Definido**, exceto as seções "Sugestões em teste" e "Em aberto".
 Imagem: `referencias/05-calendario-agricola.png` (versão Infográfico). Quando imagem e documento divergirem, vale este documento.
 **Situação no protótipo:** construída.
@@ -31,7 +31,7 @@ Ver **todas as operações do plano juntas**, de todos os grupos (Semente, Defen
   - **DAP positivo sem fenologia** → coluna **cinza** com o título "25 DAP" e "sem fenologia", na posição do DAP (a operação não some, e fica claro que falta a fenologia).
   - **Colheita** → aparece quando algum talhão tem previsão de colheita (variedade com ciclo e data de plantio). Título com a faixa de DAP pelo ciclo das variedades (ex.: "104 a 118 DAP").
 - **Título** colorido pela fase (pré-plantio, plantio, vegetativo, florescimento, vagens, maturação, colheita; cinza sem fenologia) e, embaixo, uma **ilustração simples em SVG** da fase (solo com calcário, sementes, plântula, flor, vagens, planta madura, grãos).
-- **Cartões** das operações da fase: etiqueta do **grupo** (Semente, Defensivo, Fertilidade, Colheita), nome da operação e os **produtos com a dose**. O Plantio mostra "N variedades" e os produtos do TSI. A Colheita mostra "N variedades". Operação sem recomendação: "Sem recomendação", em cinza.
+- **Cartões** das operações da fase: etiqueta do **grupo** (Semente, Tratamento de semente, Defensivo, Fertilidade, Colheita), nome da operação e os **produtos com a dose**. O Plantio mostra "N variedades"; o TSI (grupo Tratamento de semente) é um cartão próprio na fase do DAP informado, com os produtos. A Colheita mostra "N variedades". Operação sem recomendação: "Sem recomendação", em cinza.
 - **Resumo no pé** de cada fase: área · talhões · operações.
 - **Todas as fases com a mesma altura** (a altura livre da tela, mínimo de 360 px); o **resumo fica travado** no rodapé, na mesma linha em todas as colunas. O que passa da altura **rola dentro da própria fase** (título, ilustração e resumo ficam parados).
 - Sem o prazo para encerramento da OS (ele fica na Tabela).

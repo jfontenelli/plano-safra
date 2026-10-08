@@ -45,7 +45,6 @@ window.Telas.planoOperacoes = (function () {
       naoEncontrado: {},       // texto digitado sem escolher na lista e que não está no cadastro: { 'linhaId:pa|produto': texto }
       definindo: null,         // modal "Definir recomendação" aberto: { talhoes, editando }
       plantando: null,         // modal "Definir variedade" (grupo Semente): { talhoes, variedade, data, dataTexto, preVariedade, erros }
-      passoSemente: 'plantio', // grupo Semente: plantio | tsi
       visaoSemente: 'talhoes', // passo Plantio, "Exibir": talhoes (tabela) | mapa | colheita (previsão de colheita)
       painelTalhao: null,      // talhão aberto no painel lateral (passo Variedade)
       prePainel: null,         // painel: nome da variedade em pré-cadastro
@@ -232,10 +231,10 @@ window.Telas.planoOperacoes = (function () {
           </div>
         </div>`;
     }
-    // Grupo Semente: o Plantio (DAP 0) ocupa a página toda, sem a lista de operações
+    // Grupos Semente e Tratamento de semente: a operação (DAP 0) ocupa a página toda, sem a lista de operações
     return `
       <div class="ops">
-        ${ehSemente(grupo) && opAtual() ? '' : listaOperacoes(grupo)}
+        ${(ehSemente(grupo) || ehGrupoTsi(grupo)) && opAtual() ? '' : listaOperacoes(grupo)}
         <section class="ops-detalhe" aria-live="polite">${detalhe(grupo)}</section>
       </div>
     `;
@@ -338,6 +337,7 @@ window.Telas.planoOperacoes = (function () {
         ? 'Nenhuma operação neste grupo.' : 'Nenhuma operação neste grupo. Use "+ Nova operação" para criar.'}</p></div>`;
     }
     if (ehSemente(grupo)) return detalheSemente(op);
+    if (ehGrupoTsi(grupo)) return detalheTsi(op);
     if (!usaRecomendacao(grupo)) {
       return `
         <div class="cartao op-cabecalho">
@@ -363,7 +363,7 @@ window.Telas.planoOperacoes = (function () {
       </section>`;
   }
 
-  // semFenologia: grupo Semente (o plantio é o DAP 0; não tem fenologia)
+  // semFenologia: grupo Tratamento de semente (só o DAP)
   function cabecalhoOperacao(op, { semFenologia = false } = {}) {
     const erroDap = errosVisiveis(op).dap;
     const dap = somenteLeitura
@@ -740,12 +740,18 @@ window.Telas.planoOperacoes = (function () {
 
   // Não planejado = ainda sem recomendação. No TSI, só conta talhão com variedade (sem variedade não recebe TSI).
   function naoPlanejado(op, t) {
-    return !op.talhoes[t.nome] && (!ehTsi() || planejado(op, t.nome));
+    return !op.talhoes[t.nome] && (!ehTsi() || temVariedade(t.nome));
   }
 
   // Talhão que pode ser marcado: no TSI, só com variedade
   function marcavel(op, t) {
-    return !ehTsi() || planejado(op, t.nome);
+    return !ehTsi() || temVariedade(t.nome);
+  }
+
+  // "Não planejados" só aparece quando filtra de fato: há talhão planejado e talhão que falta.
+  // Antes de começar (nenhum planejado) seria igual a "Todos os talhões"; com tudo planejado, some.
+  function etiquetaNaoPlanejados(planejaveis, naoPlanejados) {
+    return naoPlanejados > 0 && naoPlanejados < planejaveis;
   }
 
   // Recomendações já aplicadas em algum talhão (as que ganham etiqueta nos filtros)
@@ -786,7 +792,9 @@ window.Telas.planoOperacoes = (function () {
 
   // Filtros dos talhões (todos os grupos): etiquetas "Todos os talhões: 12", "Não planejados: 8", "● Rec 1".
   // Selecionada: fundo verde-claro e borda verde (não o verde sólido das abas, para não competir com elas).
+  // Só aparecem com duas etiquetas ou mais: "Todos os talhões" sozinha não filtra nada (ex.: antes da 1ª definição)
   function filtrosTalhoes(itens) {
+    if (itens.length < 2) return '';
     return `
       <div class="filtros-talhoes" role="group" aria-label="Filtrar talhões">
         ${itens.map(({ valor, rotulo }) => `
@@ -798,9 +806,10 @@ window.Telas.planoOperacoes = (function () {
   function painelTalhoes(op) {
     const rec = recFiltrada(op);
     const naoPlanejados = talhoesFazenda.filter((t) => naoPlanejado(op, t)).length;
+    const comNaoPlanejados = etiquetaNaoPlanejados(talhoesFazenda.filter((t) => marcavel(op, t)).length, naoPlanejados);
     const tsi = ehTsi();
     // Sem talhão não planejado, a etiqueta some (e quem estava nela volta para Todos os talhões)
-    if (!naoPlanejados && ui.filtroTalhoes === 'nao-planejados') ui.filtroTalhoes = 'todos';
+    if (!comNaoPlanejados && ui.filtroTalhoes === 'nao-planejados') ui.filtroTalhoes = 'todos';
     const visiveis = talhoesVisiveis(op);
     const marcar = !somenteLeitura;
     const marcaveis = visiveis.filter((t) => marcavel(op, t));
@@ -810,17 +819,19 @@ window.Telas.planoOperacoes = (function () {
     const vazio = !talhoesFazenda.length ? `Nenhum talhão cadastrado na fazenda ${esc(plano.fazenda)}.`
       : !visiveis.length ? `Todos os talhões ${tsi ? 'com variedade ' : ''}já têm ${T().nome}.` : '';
     const nColunas = colunas.length + (marcar ? 3 : 2) + 1; // + Produtividade média (Defensivo) ou Variedade (TSI)
-    // TSI com talhão sem variedade: avisa por que a caixa dele está desabilitada e leva ao Plantio
-    const semVariedade = tsi && marcar && talhoesFazenda.some((t) => !planejado(op, t.nome));
+    // TSI com talhão sem variedade: avisa por que a caixa dele está desabilitada e leva à guia do Plantio
+    const semVariedade = tsi && marcar && talhoesFazenda.some((t) => !temVariedade(t.nome));
+    const gSementes = grupoSementes();
     return `
       ${semVariedade ? `
         <div class="dica-plantio" role="note">${Icones.info}
-          <p>Talhões sem variedade não recebem TSI. Defina a variedade na aba
-            <button class="dica-plantio__link" type="button" data-acao="passo-semente" data-passo="plantio">Plantio</button>.</p>
+          <p>Talhões sem variedade não recebem TSI. ${gSementes ? `Defina a variedade na guia
+            <button class="dica-plantio__link" type="button" data-acao="ir-plantio">${esc(gSementes.nome)}</button>.`
+            : 'Crie um grupo do tipo Sementes para definir a variedade.'}</p>
         </div>` : ''}
       ${filtrosTalhoes([
         { valor: 'todos', rotulo: `Todos os talhões: ${talhoesFazenda.length}` },
-        ...(naoPlanejados ? [{ valor: 'nao-planejados', rotulo: `Não planejados: ${naoPlanejados}` }] : []),
+        ...(comNaoPlanejados ? [{ valor: 'nao-planejados', rotulo: `Não planejados: ${naoPlanejados}` }] : []),
         ...recsAplicadas(op).map((r) => ({ valor: `rec:${r.id}`, rotulo: `${pontoRec(op, r)}${esc(nomeCurto(r))}` }))
       ])}
       ${rec ? quadroRec(op, rec) : ''}
@@ -849,7 +860,7 @@ window.Telas.planoOperacoes = (function () {
                       : `<input type="checkbox" disabled aria-label="${esc(t.nome)} sem variedade: defina a variedade antes da TSI" title="Defina a variedade antes da TSI">`}</td>` : ''}
                   <th scope="row" class="tabela__talhao">${r ? `${pontoRec(op, r)}<span class="so-leitor">${esc(r.nome)}: </span>` : ''}${esc(t.nome)}</th>
                   <td class="tabela__numero">${Util.area(t.area).replace(' ha', '')}</td>
-                  ${tsi ? `<td>${planejado(op, t.nome) ? esc(op.plantio[t.nome].variedade) : '<span class="tabela__nao-recebe">Sem variedade</span>'}</td>`
+                  ${tsi ? `<td>${temVariedade(t.nome) ? esc(opPlantio().plantio[t.nome].variedade) : '<span class="tabela__nao-recebe">Sem variedade</span>'}</td>`
                     : `<td class="tabela__numero">${historicoLeitura(t.nome)}</td>`}
                   ${doses}
                 </tr>`;
@@ -1018,9 +1029,40 @@ window.Telas.planoOperacoes = (function () {
   }
 
 
-  // Passo TSI do grupo Semente: a recomendação agronômica (receitas, talhões e doses) da operação Plantio
+  // ================= Grupo Tratamento de semente (TSI) =================
+  // docs/telas/04.4-operacoes-tratamento-sementes.md. A recomendação agronômica (receitas, talhões e doses)
+  // da operação de TSI, só para talhão com variedade (a variedade vem do Plantio, no grupo do tipo Sementes).
+  function ehGrupoTsi(grupo) {
+    return grupo && grupo.tipo === 'Tratamento de sementes';
+  }
+
   function ehTsi() {
-    return ehSemente(grupoAtual()) && ui.passoSemente === 'tsi';
+    return ehGrupoTsi(grupoAtual());
+  }
+
+  function grupoSementes() {
+    return plano.grupos.find(ehSemente) || null;
+  }
+
+  // Operação de plantio (a primeira do grupo Sementes): de onde vem a variedade de cada talhão
+  function opPlantio() {
+    const g = grupoSementes();
+    return (g && g.operacoes[0]) || null;
+  }
+
+  function temVariedade(talhao) {
+    const op = opPlantio();
+    return !!(op && op.plantio && planejado(op, talhao));
+  }
+
+  function detalheTsi(op) {
+    // Cabeçalho como no Defensivo (nome e DAP informado pelo agrônomo), sem a fenologia
+    return `<section class="cartao op-painel" aria-label="${esc(op.nome)}">${cabecalhoOperacao(op, { semFenologia: true })}${painelTalhoes(op)}</section>`;
+  }
+
+  // Cabeçalho do Plantio: só o nome (o DAP é sempre 0)
+  function cabecalhoPaginaInteira(op) {
+    return `<div class="op-cabecalho__linha">${nomeOperacao(op)}</div>`;
   }
 
   // Produtos do cadastro: no TSI só os de tratamento de sementes; nos defensivos, sem eles.
@@ -1047,8 +1089,8 @@ window.Telas.planoOperacoes = (function () {
   }
 
   // ================= Grupo Semente: plantio por talhão =================
-  // docs/telas/04.2-operacoes-sementes.md. Passos Plantio (variedade, data e população) · TSI.
-  // O TSI usa a recomendação agronômica da Tela 04.1 com as receitas e os talhões da operação Plantio.
+  // docs/telas/04.2-operacoes-sementes.md. Plantio: variedade, data e população por talhão.
+  // O TSI fica no grupo Tratamento de semente (ver ehGrupoTsi).
   function ehSemente(grupo) {
     return grupo && grupo.tipo === 'Sementes';
   }
@@ -1211,8 +1253,29 @@ window.Telas.planoOperacoes = (function () {
 
   // Talhões na ordem escolhida no título da coluna (sem ordem: a dos talhões).
   // Valor vazio (sem variedade, sem data) fica sempre no fim.
+  // Etiquetas do Plantio (como no Defensivo): Todos os talhões · Não planejados (= sem variedade).
+  // Só filtram a Tabela; quando "Não planejados" não filtra nada (ver etiquetaNaoPlanejados), some e volta para Todos.
+  function naoPlanejadosPlantio(op) {
+    return talhoesFazenda.filter((t) => !planejado(op, t.nome));
+  }
+
+  function filtroPlantio(op) {
+    if (ui.filtroTalhoes !== 'nao-planejados' || !etiquetaNaoPlanejados(talhoesFazenda.length, naoPlanejadosPlantio(op).length)) ui.filtroTalhoes = 'todos';
+    return ui.filtroTalhoes;
+  }
+
+  function filtrosPlantio(op) {
+    filtroPlantio(op);
+    const naoPlanejados = naoPlanejadosPlantio(op).length;
+    return filtrosTalhoes([
+      { valor: 'todos', rotulo: `Todos os talhões: ${talhoesFazenda.length}` },
+      ...(etiquetaNaoPlanejados(talhoesFazenda.length, naoPlanejados) ? [{ valor: 'nao-planejados', rotulo: `Não planejados: ${naoPlanejados}` }] : [])
+    ]);
+  }
+
   function talhoesVisiveisPlantio(op) {
-    const lista = [...talhoesFazenda];
+    const filtrar = (ui.visaoSemente || 'talhoes') === 'talhoes' && filtroPlantio(op) === 'nao-planejados';
+    const lista = filtrar ? naoPlanejadosPlantio(op) : [...talhoesFazenda];
     const ordem = ui.ordemSemente;
     const c = ordem && colunaPlantio(ordem.coluna);
     if (!c) return lista;
@@ -1248,25 +1311,19 @@ window.Telas.planoOperacoes = (function () {
   }
 
   // ----- Cartão da operação de plantio -----
-  const PASSOS_SEMENTE = [['plantio', 'Plantio'], ['tsi', 'TSI']];
-
   function detalheSemente(op) {
     if (!op.plantio) op.plantio = {};
-    const passo = ui.passoSemente || 'plantio';
-    const comPainel = passo === 'plantio' && ['talhoes', 'mapa'].includes(ui.visaoSemente || 'talhoes') &&
+    const comPainel = ['talhoes', 'mapa'].includes(ui.visaoSemente || 'talhoes') &&
       ui.painelTalhao && talhoesFazenda.some((t) => t.nome === ui.painelTalhao);
     return `
       <div class="semente-layout">
         <section class="cartao op-painel" aria-label="${esc(op.nome)}">
+          ${cabecalhoPaginaInteira(op)}
           <div class="semente-topo">
-            <div class="passos" role="tablist" aria-label="Passos do plantio">
-              ${PASSOS_SEMENTE.map(([id, nome]) => `
-                <button class="passo ${passo === id ? 'passo--ativo' : ''}" type="button" role="tab" aria-selected="${passo === id}"
-                        data-acao="passo-semente" data-passo="${id}">${nome}</button>`).join('')}
-            </div>
-            ${passo === 'plantio' ? visoesVariedade() : ''}
+            ${(ui.visaoSemente || 'talhoes') === 'talhoes' ? filtrosPlantio(op) : ''}
+            ${visoesVariedade()}
           </div>
-          ${passo === 'plantio' ? passoVariedade(op) : painelTalhoes(op)}
+          ${passoVariedade(op)}
         </section>
         ${comPainel ? painelTalhao(op, ui.painelTalhao) : ''}
       </div>`;
@@ -1281,8 +1338,7 @@ window.Telas.planoOperacoes = (function () {
               data-visao="${valor}" aria-pressed="${visao === valor}">${rotulo}</button>`;
     return `
       <div class="exibir">
-        <span class="exibir__rotulo" id="exibir-rotulo">Exibir</span>
-        <div class="visoes" role="group" aria-labelledby="exibir-rotulo">
+        <div class="visoes" role="group" aria-label="Exibir">
           ${botao('talhoes', 'Tabela')}${botao('mapa', 'Mapa')}${botao('colheita', 'Previsão de colheita')}
         </div>
       </div>`;
@@ -1973,8 +2029,12 @@ window.Telas.planoOperacoes = (function () {
       titulo: `Excluir o plantio de ${n} ${n === 1 ? 'talhão' : 'talhões'}?`,
       texto: `Variedade, data de plantio, população e TSI ${n === 1 ? 'desse talhão serão apagadas' : 'desses talhões serão apagadas'}. Essa ação não pode ser desfeita.`,
       botoes: [{ rotulo: 'Cancelar' }, { rotulo: 'Excluir plantio', classe: 'perigo', acao: () => {
-        alvo.forEach((t) => { delete op.plantio[t]; delete op.talhoes[t]; });
-        op.receitas = op.receitas.filter((r) => Planos.talhoesDaReceita(op, r).length);
+        alvo.forEach((t) => { delete op.plantio[t]; });
+        // Sem variedade, o talhão sai também do TSI (grupo Tratamento de semente); TSI sem talhão deixa de existir
+        plano.grupos.filter(ehGrupoTsi).forEach((g) => g.operacoes.forEach((o) => {
+          alvo.forEach((t) => { delete o.talhoes[t]; });
+          o.receitas = o.receitas.filter((r) => Planos.talhoesDaReceita(o, r).length);
+        }));
         ui.filtroTalhoes = 'todos';
         limparSelecao(); alterou(); desenharTudo();
         Aviso.mostrar(`Plantio excluído de ${n} ${n === 1 ? 'talhão' : 'talhões'}`);
@@ -2277,7 +2337,7 @@ window.Telas.planoOperacoes = (function () {
         desenharMantendoFoco(`[data-acao="marcar"][data-talhao="${alvo.dataset.talhao}"]`); break;
 
       case 'marcar-todos':
-        (ehSemente(grupo) && !ehTsi() ? talhoesVisiveisPlantio(op) : talhoesVisiveis(op).filter((t) => marcavel(op, t)))
+        (ehSemente(grupo) ? talhoesVisiveisPlantio(op) : talhoesVisiveis(op).filter((t) => marcavel(op, t)))
           .forEach((t) => { if (alvo.checked) ui.marcados.add(t.nome); else ui.marcados.delete(t.nome); });
         desenharMantendoFoco('[data-acao="marcar-todos"]'); break;
 
@@ -2290,9 +2350,16 @@ window.Telas.planoOperacoes = (function () {
       case 'pl-pre-salvar': salvarPreVariedade(); break;
       case 'excluir-plantio': excluirPlantio(op); break;
 
-      case 'passo-semente':
-        ui.passoSemente = alvo.dataset.passo; ui.marcados = new Set(); ui.filtroTalhoes = 'todos'; ui.quadroAberto = false;
-        desenharMantendoFoco(`[data-passo="${alvo.dataset.passo}"]`); break;
+      // Link do aviso do TSI: abre a guia do grupo Sementes (Plantio)
+      case 'ir-plantio': {
+        const g = grupoSementes();
+        if (!g) break;
+        sairDaReceita(() => {
+          ui.grupoId = g.id; ui.renomeandoOp = null; ui.filtroTalhoes = 'todos'; ui.quadroAberto = false;
+          limparSelecao(); pararRenomearNaLista(); desenharTudo();
+        });
+        break;
+      }
       case 'visao-semente':
         ui.visaoSemente = alvo.dataset.visao; ui.marcados = new Set();
         desenharMantendoFoco(`[data-visao="${alvo.dataset.visao}"]`); break;
@@ -2349,7 +2416,8 @@ window.Telas.planoOperacoes = (function () {
         if (duplo && !somenteLeitura) { ui.renomeandoGrupo = id; desenharTudo(); break; }
         if (ui.grupoId === id) break;
         sairDaReceita(() => {
-          ui.grupoId = id; ui.renomeandoOp = null;
+          // Cada guia abre em Todos os talhões ("Não planejados" muda de sentido entre os grupos)
+          ui.grupoId = id; ui.renomeandoOp = null; ui.filtroTalhoes = 'todos'; ui.quadroAberto = false;
           limparSelecao(); pararRenomearNaLista(); desenharTudo();
         });
         break;

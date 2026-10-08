@@ -76,9 +76,10 @@ window.Planos = (function () {
       const d = detalhes[op.nome];
       if (!d) return;
       op.fenologia = d.fenologia || '';
+      if (d.dap !== undefined) op.dap = d.dap; // operação sem DAP no modelo (ex.: TSI)
       (d.plantio || []).forEach(({ talhao, variedade, data, populacao }) => { op.plantio[talhao] = { variedade, data, populacao }; });
       if (d.germinacao) op.germinacao = d.germinacao;
-      // Tratamento de sementes (TSI) do Plantio: cada um vira "TSI N", nos talhões listados
+      // Tratamento de sementes (TSI): cada um vira "TSI N", nos talhões listados
       (d.tsi || []).forEach(({ produtos, talhoes }) => {
         const r = novaReceita(op, produtos.map(([nome, dose]) => linhaDoProduto(nome, dose)), 'TSI');
         op.receitas.push(r);

@@ -49,7 +49,7 @@ window.Telas.calendario = (function () {
         if (semente && !plantio) plantio = op;
         const recebem = daFazenda.map((t) => t.nome).filter((t) =>
           semente ? !!((op.plantio || {})[t] && op.plantio[t].variedade) : !!op.talhoes[t]);
-        // Produtos: um por produto comercial, com a dose de cada talhão (receitas da operação; no Plantio, o TSI)
+        // Produtos: um por produto comercial, com a dose de cada talhão (receitas da operação; no grupo Tratamento de semente, as TSI)
         const produtos = new Map();
         daFazenda.forEach((t) => {
           const ajuste = op.talhoes[t.nome];

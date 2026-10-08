@@ -1,6 +1,6 @@
 # Plano de Safra: decisões
 
-Atualizado em 07/10/2026. Próximo passo: grupo Semente no protótipo (docs/telas/04.2-operacoes-sementes.md).
+Atualizado em 08/10/2026. Próximo passo: grupo Semente no protótipo (docs/telas/04.2-operacoes-sementes.md).
 Imagem do fluxo: artifact "Fluxo do Plano de Safra" (claude.ai/artifact/4kzr4fg15grTw4YSHKmHf2).
 
 Este doc mostra só o estado atual. Decisão alterada é reescrita, não acumulada.
@@ -84,7 +84,7 @@ Agrônomo da fazenda e líder de operações podem ser a mesma pessoa, conforme 
 - Etapa Cadastro também tem produtividade esperada (na unidade da cultura) e preço esperado, opcionais, por cultura, valendo para aquela fazenda e safra. Alimentam a receita projetada. Local a refinar com usuários.
 - Previsão de cumprimento no modelo: preparo, calcário, fósforo, 1ª dessecação e 1ª metade do K = 5 dias (levantado com clientes); demais: plantio 3, defensivos 2, corretivo/fertilizante 2; colheita 10 (valor de exemplo).
 - Modelo de operações (levantado com clientes) tem 5 grupos: Preparo do solo, Corretivo/Fertilizante, Plantio, Defensivos e Colheita. As duas dessecações pré-plantio são do grupo Defensivos.
-- **Tipos de grupo: Sementes, Defensivos, Fertilidade e Colheita.** O grupo **Fertilidade** junta corretivos e fertilizantes (inclusive adubação foliar). No protótipo, as guias são Semente · Defensivo · Fertilidade.
+- **Tipos de grupo: Sementes, Tratamento de sementes, Defensivos, Fertilidade e Colheita.** O grupo **Fertilidade** junta corretivos e fertilizantes (inclusive adubação foliar). O grupo **Tratamento de sementes** tem o TSI. No protótipo, as guias são Semente · Tratamento de semente · Defensivo · Fertilidade.
 - O menu Cadastros não é prioridade agora.
 - Etapa Operações refina talhão a talhão: cada talhão tem o seu planejamento, e o agrônomo pode aplicar ou copiar para vários talhões de uma vez.
 - Programação, execução e gestão da OS ficam em outro item do menu lateral (Ordens de Serviço).
@@ -105,7 +105,7 @@ Agrônomo da fazenda e líder de operações podem ser a mesma pessoa, conforme 
 
 Detalhe da tela: docs/telas/04.2-operacoes-sementes.md.
 
-- Planejamento do plantio, por talhão, em dois passos: **Plantio** (variedade, data de plantio e população de plantas, numa tabela só) → **tratamento de sementes (TSI)**.
+- Planejamento do plantio, por talhão: **variedade, data de plantio e população de plantas**, numa tabela só. O **tratamento de sementes (TSI)** fica num grupo próprio, logo depois (4.4.1).
 - **Data de plantio planejada por dia** (data exata por talhão). A janela de plantio recomendada da variedade é só referência: data fora dela gera alerta, sem bloquear.
 - A previsão de colheita (4.3) é agregada por **decêndio**, em hectares, para o agrônomo ver se a colheita fica concentrada e decidir trocar variedade ou data. Capacidade de colheita fica fora da v1.
 - **Mapa de variedades da fazenda**: os talhões pintados pela variedade, com a área total de cada variedade, para visualizar e rotacionar as variedades. O plano é por fazenda, então o mapa é por fazenda (sem visão por empresa). Clicar no talhão abre a definição da variedade.
@@ -113,8 +113,14 @@ Detalhe da tela: docs/telas/04.2-operacoes-sementes.md.
 - **Germinação média do plano**: na v1, um valor único para todos os talhões (a semente ainda não foi comprada; não há lote).
 - População de plantas: recomendada (cadastro da variedade, referência, mostrada só no preenchimento) e planejada (agrônomo). Talhão sem variedade não recebe população.
 - **Sementes = população planejada × área ÷ germinação. Bags = sementes ÷ 5.000.000** (1 bag de soja = 5 milhões de sementes).
+### 4.4.1 Tratamento de sementes (grupo Tratamento de semente)
+
+Detalhe da tela: docs/telas/04.4-operacoes-tratamento-sementes.md.
+
+- Grupo do tipo **Tratamento de sementes**, guia **Tratamento de semente**, logo depois da guia Semente. Operação **Tratamento de sementes (TSI)**, com **DAP informado pelo agrônomo** (como no Defensivo), sem fenologia.
 - **Tratamento de sementes industrial (TSI)**: receita com nome (TSI 1, TSI 2…), só para talhão com variedade, no padrão da recomendação agronômica (composição de produtos = identidade; dose pode variar por talhão), aplicada **por talhão** (pode mudar após os testes). Composta por grupos de produto: fertilizante, fungicida, inseticida, nematicida, inoculante, polímero, pó secante e grafite.
 - Unidade da dose de TSI vem do cadastro do produto; a unidade usada pelos clientes (por 100 kg de sementes, por bag ou por hectare) e a entrada do PMS no plano serão definidas nos testes. Sem cálculo de quantidade de TSI no plano por enquanto.
+- Excluir o plantio de um talhão (sem variedade) tira o talhão também do TSI.
 ### 4.5 Fertilidade (corretivos e fertilizantes)
 
 Detalhe da tela: docs/telas/04.3-operacoes-fertilidade.md.

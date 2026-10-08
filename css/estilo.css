@@ -1770,7 +1770,7 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
 
 
 /* ===== Plantio: título da página, ícones das visões, ordenação e rodapé da tabela ===== */
-/* Passos à esquerda e visões à direita, na mesma linha */
+/* Plantio: etiquetas à esquerda e visões (Tabela, Mapa, Previsão de colheita) à direita, na mesma linha */
 .semente-topo { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
 
 .visoes__botao { display: inline-flex; align-items: center; gap: 8px; height: 38px; padding: 0 16px; font-size: 14px; }
@@ -1881,8 +1881,7 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .populacao__sem-germinacao .icone { width: 16px; height: 16px; flex-shrink: 0; }
 
 /* Plantio: "Exibir" Tabela · Mapa · Previsão de colheita (selecionada em verde-claro; o verde sólido é dos passos) */
-.exibir { display: flex; align-items: center; gap: 10px; }
-.exibir__rotulo { font-size: 14px; color: var(--texto-suave); }
+.exibir { display: flex; align-items: center; gap: 10px; margin-left: auto; }
 .exibir .visoes__botao { height: 36px; padding: 0 16px; }
 .exibir .visoes__botao--ativo { background: var(--verde-100); color: var(--verde-800); box-shadow: inset 0 0 0 1px var(--verde-600); }
 
@@ -1989,6 +1988,7 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .cal-cartao__dose { display: block; color: var(--texto-suave); }
 .cal-etiqueta { align-self: flex-start; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; }
 .cal-etiqueta--sementes   { background: #e6f2ec; color: #1e6b3f; }
+.cal-etiqueta--tratamento-de-sementes { background: #f3e9f5; color: #7a3f86; }
 .cal-etiqueta--defensivos { background: #e7effa; color: #2a5a9b; }
 .cal-etiqueta--fertilidade { background: #f1ece4; color: #6b5435; }
 .cal-etiqueta--colheita   { background: #fbeee0; color: #8a4b00; }

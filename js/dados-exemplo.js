@@ -134,7 +134,7 @@ window.DADOS = {
     { fertilidade: true, classe: 'Micronutriente', produto: 'Nutre Fer',                    principioAtivo: 'Ferro',               unidade: 'L' },
     { fertilidade: true, classe: 'Micronutriente', produto: 'Nutre Cobre',                  principioAtivo: 'Cobre',               unidade: 'L' },
     { fertilidade: true, classe: 'Micronutriente', produto: 'Nutre Zinco',                  principioAtivo: 'Zinco',               unidade: 'L' },
-    // Tratamento de sementes industrial (TSI), soja. tsi: true = só aparece no passo TSI do Plantio.
+    // Tratamento de sementes industrial (TSI), soja. tsi: true = só aparece no grupo Tratamento de semente.
     // classe = grupo do produto no TSI. Dose por 100 kg de sementes, dentro da faixa de bula dos
     // produtos (Agrofit/MAPA e bulas dos fabricantes); "Co + Mo", pó secante e grafite são genéricos.
     // Valores ilustrativos para o protótipo: conferir com o agrônomo antes de usar.
@@ -176,8 +176,8 @@ window.DADOS = {
   fenologia: ['VE', 'VC', 'V1', 'V2', 'V3', 'V4', 'V5', 'V6', 'R1', 'R2', 'R3', 'R4', 'R5', 'R6', 'R7', 'R8'],
 
   // Tipos de grupo de operação (definem as informações mínimas pedidas no grupo)
-  // Fertilidade junta corretivos e fertilizantes
-  tiposGrupo: ['Sementes', 'Defensivos', 'Fertilidade', 'Colheita'],
+  // Fertilidade junta corretivos e fertilizantes; Tratamento de sementes = TSI (só talhão com variedade)
+  tiposGrupo: ['Sementes', 'Tratamento de sementes', 'Defensivos', 'Fertilidade', 'Colheita'],
 
   // Modelo de operações (levantado com clientes). Usado pelo "Usar modelo" e pelos planos de exemplo.
   // prazo: prazo para encerramento da OS, em dias (DECISOES 4.3: preparo, calcário, fósforo, 1ª dessecação e
@@ -191,6 +191,10 @@ window.DADOS = {
   modeloOperacoes: [
     { nome: 'Semente', tipo: 'Sementes', operacoes: [
       { nome: 'Plantio', dap: 0, prazo: 3 }
+    ] },
+    // TSI: sem DAP no modelo; o agrônomo informa (como no Defensivo, sem fenologia)
+    { nome: 'Tratamento de semente', tipo: 'Tratamento de sementes', operacoes: [
+      { nome: 'Tratamento de sementes (TSI)' }
     ] },
     { nome: 'Defensivo', tipo: 'Defensivos', operacoes: [
       { nome: '1ª Dessecação: pré-plantio', dap: -15, prazo: 5 },
@@ -257,12 +261,14 @@ window.DADOS = {
           'Adubação de plantio': op([['MAP 11-52-00', 180]]),
           '2ª Adubação potássica': { fenologia: 'V4', produtos: [['KCl 00-00-60', 80]], talhoes: ['T05', 'T06', 'T07', 'T08'] },
           // TSI 1 nos talhões sem histórico de nematoide; TSI 2 com nematicida (T06 a T08)
-          'Plantio': { germinacao: 95, tsi: [
+          // DAP −5: tratamento industrial feito alguns dias antes do plantio
+          'Tratamento de sementes (TSI)': { dap: -5, tsi: [
             { produtos: [['Standak Top', 200], ['Masterfix L Soja', 200], ['Co + Mo', 100], ['Disco AG Red L-280', 100]],
               talhoes: ['T01', 'T02', 'T03', 'T04', 'T05'] },
             { produtos: [['Maxim Advanced', 100], ['Cruiser 350 FS', 200], ['Avicta 500 FS', 100], ['Masterfix L Soja', 200], ['Disco AG Red L-280', 100]],
               talhoes: ['T06', 'T07', 'T08'] }
-          ], plantio: [
+          ] },
+          'Plantio': { germinacao: 95, plantio: [
             { talhao: 'T01', variedade: 'BMX Foco IPRO',   data: '2026-09-22', populacao: 300 },
             { talhao: 'T02', variedade: 'BMX Foco IPRO',   data: '2026-09-22', populacao: 300 },
             { talhao: 'T03', variedade: 'BMX Olimpo IPRO', data: '2026-09-28', populacao: 250 },

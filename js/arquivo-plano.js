@@ -17,7 +17,7 @@ window.ArquivoPlano = (function () {
   }
 
   function abaDoGrupo(grupo) {
-    if (grupo.tipo === 'Sementes') return 'tratamento_sementes';
+    if (grupo.tipo === 'Tratamento de sementes') return 'tratamento_sementes';
     if (grupo.tipo === 'Fertilidade') return 'corretivo_fertilizante';
     return 'aplicacao_defensivo';
   }
