@@ -84,8 +84,9 @@ Agrônomo da fazenda e líder de operações podem ser a mesma pessoa, conforme 
 - O plano também tem produtividade esperada (na unidade da cultura) e preço esperado, opcionais, por cultura, valendo para aquela fazenda e safra. Alimentam a receita projetada. Local a refinar com usuários.
 - Previsão de cumprimento no modelo: preparo, calcário, fósforo, 1ª dessecação e 1ª metade do K = 5 dias (levantado com clientes); demais: plantio 3, defensivos 2, corretivo/fertilizante 2; colheita 10 (valor de exemplo).
 - Modelo de operações no protótipo: **Semente · Tratamento de semente · Defensivo · Fertilidade · Colheita** (Preparo do solo, levantado com clientes, fica fora por enquanto). As duas dessecações pré-plantio são do grupo Defensivos.
-- **Grupo Colheita:** DAP pelo ciclo da variedade (data de plantio + ciclo, talhão a talhão), fenologia fixa **Colheita** e previsão de conclusão editável. Não aparece nas guias do Planejamento.
-- **Plantio:** DAP 0 fixo. **TSI:** DAP −5 sugerido no modelo (fenologia Pré-plantio pelo DAP).
+- **Grupo Colheita:** DAP pelo ciclo da variedade (data de plantio + ciclo, talhão a talhão), sem fenologia e previsão de conclusão editável. Não aparece nas guias do Planejamento.
+- **Grupo sem operação some do plano** (não teve apontamento), inclusive das guias do Planejamento; Semente e Colheita ficam.
+- **Plantio:** DAP 0 fixo. **TSI:** DAP −5 sugerido no modelo (Pré-plantio).
 - **Tipos de grupo: Sementes, Tratamento de sementes, Defensivos, Fertilidade e Colheita.** O grupo **Fertilidade** junta corretivos e fertilizantes (inclusive adubação foliar). O grupo **Tratamento de sementes** tem o TSI. No protótipo, as guias do Planejamento são Semente · Tratamento de semente · Defensivo · Fertilidade.
 - O menu Cadastros não é prioridade agora.
 - Etapa Planejamento refina talhão a talhão: cada talhão tem o seu planejamento, e o agrônomo pode aplicar ou copiar para vários talhões de uma vez.
@@ -94,7 +95,8 @@ Agrônomo da fazenda e líder de operações podem ser a mesma pessoa, conforme 
 - Data de plantio (ao menos prevista) e escolha entre DAP ou DAE.
 - Planejamento por grupo (fertilizantes, sementes, defensivos).
 - Momento da operação = fenologia + DAP/DAE (negativo no pré-plantio). Sem DAP padrão, o agrônomo informa.
-- Fenologia fixa: **DAP negativo = "Pré-plantio"; DAP 0 = "Plantio"** (já escrita, sem escolha). Com DAP positivo, o agrônomo escolhe o estádio.
+- **Pré-plantio (DAP negativo), Plantio (DAP 0) e Colheita não têm fenologia** ("—"). Com DAP positivo (Desenvolvimento), o agrônomo escolhe o estádio.
+- Fases da safra na etapa Operações: **Pré-plantio · Plantio · Desenvolvimento · Colheita**, definidas pelo DAP.
 - Operação "opcional" é só anotação.
 - Previsão de colheita = data de plantio + ciclo da variedade para a região da fazenda e a safra do plano. Sem ciclo cadastrado para a safra corrente, abre o pré-cadastro para informar o ciclo. Recalculada com a data real de plantio da OS.
 - Restrição de aplicação do produto (ex.: "somente terrestre") aparece só como informação ao lado do produto, vinda do cadastro. Forma de aplicação e vazão não são preenchidas no plano.

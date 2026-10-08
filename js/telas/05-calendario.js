@@ -17,11 +17,10 @@ window.Telas.calendario = (function () {
     return grupo.tipo === 'Sementes' ? 3 : grupo.tipo === 'Colheita' ? PRAZO_COLHEITA : 2;
   }
 
-  // Fenologia fixa: DAP negativo = Pré-plantio; DAP 0 = Plantio
+  // Pré-plantio (DAP negativo), Plantio (DAP 0) e Colheita não têm fenologia
   function fenologiaDe(op) {
     if (op.dap === null || op.dap === undefined || op.dap === '') return '';
-    if (op.dap < 0) return 'Pré-plantio';
-    if (op.dap === 0) return 'Plantio';
+    if (op.dap <= 0) return '';
     return op.fenologia || '';
   }
 
@@ -79,7 +78,7 @@ window.Telas.calendario = (function () {
     const prazoColheita = opColheita ? prazoDe(opColheita, gColheita) : (plantio && plantio.prazoColheita) ?? PRAZO_COLHEITA;
     if (!comPrevisao.length) {
       lista.push({ colheita: true, aguardando: true, grupo: gColheita || { nome: 'Colheita', tipo: 'Colheita' }, op: opColheita || plantio,
-        dap: null, fenologia: 'Colheita', prazo: prazoColheita, talhoes: [], area: 0, produtos: [], variedades: null });
+        dap: null, fenologia: '', prazo: prazoColheita, talhoes: [], area: 0, produtos: [], variedades: null });
     }
     {
       if (comPrevisao.length) {

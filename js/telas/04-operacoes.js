@@ -218,16 +218,13 @@ window.Telas.planoOperacoes = (function () {
 
   // Operações do plano (Tela 04.0, etapa 1): desenhada aqui dentro, com o mesmo cabeçalho do plano
   function ctxEstrutura() {
-    ui.estrutura = ui.estrutura || { abertos: new Set(), renomeandoGrupo: null, renomeandoOp: null };
+    ui.estrutura = ui.estrutura || { renomeandoOp: null };
     return { plano, somenteLeitura, estado: ui.estrutura };
   }
   const acoesEstrutura = {
     redesenhar: (foco) => (foco ? desenharMantendoFoco(foco) : desenharTudo()),
     alterou: () => alterou(),
-    criarOperacao: (grupo) => criarOperacao(grupo),
-    excluirOperacao: (grupo, op) => excluirOperacao(grupo, op),
-    novoGrupo: () => novoGrupo(),
-    excluirGrupo: (grupo) => excluirGrupo(grupo),
+    novoGrupo: (aoCriar) => novoGrupo(aoCriar),
     nomeOperacaoRepetido: (nome, op) => nomeOperacaoRepetido(nome, op)
   };
 
@@ -396,10 +393,10 @@ window.Telas.planoOperacoes = (function () {
       : `<input class="campo__controle op-cabecalho__dap ${erroDap ? 'campo__controle--erro' : ''}" id="op-dap" type="text" inputmode="numeric"
                 data-campo="op-dap" value="${op.dap ?? ''}" placeholder="—" ${erroDap ? 'aria-invalid="true"' : ''}>
          ${erroDap ? '<p class="erro-campo">Informação obrigatória</p>' : ''}`;
-    // Fenologia já escrita e sem escolha (todos os grupos): DAP negativo = "Pré-plantio"; DAP 0 = "Plantio"
+    // Pré-plantio (DAP negativo) e Plantio (DAP 0) não têm fenologia: "—", sem escolha
     const temDap = op.dap !== null && op.dap !== undefined && op.dap !== '';
-    const fixa = temDap && op.dap < 0 ? ['Pré-plantio', 'DAP negativo: antes do plantio']
-      : temDap && op.dap === 0 ? ['Plantio', 'DAP 0: dia do plantio'] : null;
+    const fixa = temDap && op.dap < 0 ? ['—', 'Pré-plantio (DAP negativo): sem fenologia']
+      : temDap && op.dap === 0 ? ['—', 'Plantio (DAP 0): sem fenologia'] : null;
     const fenologia = somenteLeitura
       ? `<span class="campo__valor">${fixa ? fixa[0] : op.fenologia || '—'}</span>`
       : fixa
@@ -3128,7 +3125,8 @@ window.Telas.planoOperacoes = (function () {
   }
 
   // ----- Grupos -----
-  function novoGrupo() {
+  // aoCriar(grupo): chamado com o grupo criado (ex.: a etapa Operações move a operação para ele)
+  function novoGrupo(aoCriar) {
     const modal = Modal.abrir(`
       <form class="formulario" novalidate>
         <div class="modal__corpo">
@@ -3162,8 +3160,11 @@ window.Telas.planoOperacoes = (function () {
       e.preventDefault();
       if (form.querySelector('[type=submit]').disabled) return;
       const grupo = Planos.novoGrupo(form.elements.nome.value.trim(), form.elements.tipo.value);
-      plano.grupos.push(grupo);
+      // Entra antes do grupo Colheita, que fica sempre por último
+      const iColheita = plano.grupos.findIndex((g) => g.tipo === 'Colheita');
+      plano.grupos.splice(iColheita >= 0 ? iColheita : plano.grupos.length, 0, grupo);
       ui.grupoId = grupo.id;
+      if (typeof aoCriar === 'function') aoCriar(grupo);
       modal.fechar(); limparSelecao(); pararRenomearNaLista(); alterou(); desenharTudo();
     });
     form.elements.nome.focus();

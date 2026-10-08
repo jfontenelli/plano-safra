@@ -2034,35 +2034,44 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .estrutura__aviso > .icone { width: 16px; height: 16px; flex-shrink: 0; color: var(--texto-suave); }
 .estrutura__aviso p { flex: 1; min-width: 240px; margin: 0; font-size: 14px; color: var(--texto-suave); }
 .estrutura__aviso p strong { color: var(--texto); font-weight: 600; }
-.estrutura__aviso .botao { margin-left: auto; text-decoration: none; }
-.estrutura__grupo { background: var(--superficie); border: 1px solid var(--borda); border-radius: var(--raio); box-shadow: var(--sombra); overflow: hidden; }
-.estrutura__topo { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 10px 16px; }
-.estrutura__seta .icone { transition: transform .15s; }
-.estrutura__seta--recolhido .icone { transform: rotate(-90deg); }
-.estrutura__nome { margin: 0; padding: 2px 6px; border-radius: 6px; font-size: 16px; }
-.estrutura__nome--editavel { cursor: text; }
-.estrutura__nome--editavel:hover { background: #f4f7f5; }
-.estrutura__nome--editavel:focus-visible, .estrutura__op:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 2px; }
-.estrutura__campo-grupo { width: 280px; max-width: 100%; height: 34px; font-weight: 600; }
-.estrutura__tipo { font-size: 13px; color: var(--texto-suave); }
-.estrutura__nota { margin-left: auto; font-size: 13px; color: var(--texto-suave); }
-.estrutura__excluir { color: var(--texto-suave); font-size: 13px; }
-.estrutura__topo .estrutura__excluir { margin-left: auto; }
-.estrutura__excluir:hover { color: #b42318; }
-.estrutura__excluir .icone { width: 16px; height: 16px; }
-.estrutura__barra { display: flex; justify-content: flex-end; padding: 8px 16px; border-top: 1px solid var(--borda); }
-.estrutura__rolagem { overflow-x: auto; border-top: 1px solid var(--borda); }
-.estrutura__tabela { width: 100%; }
-.estrutura__tabela th, .estrutura__tabela td { white-space: nowrap; }
-.estrutura__celula-nome { width: 100%; text-align: left; font-weight: 400; }
-.estrutura__op { display: inline-block; padding: 2px 6px; margin-left: -6px; border-radius: 6px; cursor: text; }
-.estrutura__op:hover { background: #eef2ef; }
-.estrutura__campo-nome { width: 100%; min-width: 260px; height: 34px; }
-.estrutura__num { width: 72px; height: 34px; text-align: right; font-variant-numeric: tabular-nums; }
-.estrutura__fen { width: 140px; height: 34px; }
-.estrutura__fixo { color: var(--texto-suave); }
-.estrutura__prazo { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--texto-suave); }
-.estrutura__acao { width: 48px; text-align: center; }
-.estrutura__nova { margin: 8px 16px 12px; }
-.estrutura__novo-grupo { align-self: flex-start; }
-.estrutura__vazio { margin: 0; padding: 12px 16px; color: var(--texto-suave); font-size: 14px; border-top: 1px solid var(--borda); }
+.estrutura__aviso { padding: 8px 8px 8px 14px; border: 1px solid #f0d98a; border-radius: var(--raio); background: #fffbea; }
+.estrutura__fechar { margin-left: auto; width: 30px; height: 30px; }
+.estrutura__fechar .icone { width: 16px; height: 16px; }
+/* Tabela por fase (Pré-plantio, Plantio, Desenvolvimento, Colheita), do tamanho do conteúdo: as colunas ficam juntas */
+/* Largura toda da área (acompanha o menu recolhido ou expandido e o tamanho da tela). Cada coluna tem uma proporção
+   fixa: a sobra se divide entre todas, sem abrir um vão no meio. Sem rolagem própria: o cabeçalho (sticky) fica preso
+   no topo da área que rola (a da etapa). */
+.tab-op__caixa { width: 100%; background: var(--superficie); border: 1px solid var(--borda); border-radius: var(--raio); box-shadow: var(--sombra); }
+.tab-op { width: 100%; table-layout: fixed; border-collapse: collapse; font-size: 14px; }
+.tab-op__c-dap { width: 8%; }
+.tab-op__c-fen { width: 13%; }
+.tab-op__c-op { width: 33%; }
+.tab-op__c-grupo { width: 25%; }
+.tab-op__c-prazo { width: 15%; }
+.tab-op__c-acao { width: 6%; }
+.tab-op td, .tab-op thead th { overflow: hidden; text-overflow: ellipsis; }
+.tab-op thead th { position: sticky; top: 0; z-index: 2; padding: 12px 16px; box-shadow: inset 0 -1px 0 var(--borda); text-align: left; font-size: 13px; font-weight: 600;
+  background: #f7f8f7; border-bottom: 1px solid var(--borda); white-space: nowrap; }
+.tab-op td { padding: 6px 16px; border-top: 1px solid var(--borda); vertical-align: middle; }
+.tab-op__dap { text-align: center !important; font-variant-numeric: tabular-nums; }
+.tab-op__acao { text-align: center; }
+.tab-op__faixa th { padding: 0; background: #eef4ef; border-top: 1px solid var(--borda); text-align: left; font-weight: 600; }
+.tab-op__faixa-linha { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; padding: 10px 16px; }
+.tab-op__faixa-linha > .icone, .tab-op__ico { width: 18px; height: 18px; flex-shrink: 0; color: var(--verde-700); }
+.tab-op__fase { font-size: 15px; }
+.tab-op__qtd { font-size: 13px; font-weight: 400; color: var(--texto-suave); }
+.tab-op__adicionar { margin-left: auto; padding-left: 24px; font-size: 13px; font-weight: 500; }
+.tab-op__adicionar .icone { width: 15px; height: 15px; }
+.tab-op__op { font-weight: 600; }
+.tab-op__nome { display: inline-block; padding: 2px 6px; margin-left: -6px; border-radius: 6px; cursor: text; }
+.tab-op__nome:hover { background: #eef2ef; }
+.tab-op__nome:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 2px; }
+.tab-op__campo { width: 100%; height: 34px; }
+.tab-op__grupo { display: flex; align-items: center; gap: 8px; white-space: nowrap; color: var(--texto-suave); }
+.tab-op__sel-grupo { flex: 1; min-width: 0; max-width: 280px; height: 34px; }
+.tab-op__num { width: 72px; max-width: 100%; height: 34px; text-align: right; font-variant-numeric: tabular-nums; }
+.tab-op__dap .tab-op__num { text-align: center; }
+.tab-op__fen { width: 100%; max-width: 160px; height: 34px; }
+.tab-op__fixo { color: var(--texto-suave); }
+.tab-op__prazo { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--texto-suave); white-space: nowrap; }
+.tab-op__vazio { color: var(--texto-suave); }

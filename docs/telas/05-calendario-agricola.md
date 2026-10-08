@@ -42,7 +42,7 @@ Ver **todas as operações do plano juntas**, de todos os grupos (Semente, Defen
 - Colunas: **DAP** · **Fenologia** · **Grupo de operação** · **Operação** · **Prazo para encerramento da OS** · **Talhões** (ex.: 11/12) · **Área (ha)** · **uma coluna por produto** (nome do produto no título; dose com unidade na célula; "—" quando a operação não usa o produto).
 - Colunas só com a **largura necessária** (a tabela não estica até a borda); com muitos produtos, rolagem horizontal dentro da tabela.
 - **Prazo para encerramento da OS**: campo editável, em dias, que vale para a operação inteira (todos os talhões). Já vem com o padrão: **5 dias** calagem, gessagem, fosfatagem, 1ª dessecação e 1ª adubação potássica; **3 dias** plantio; **2 dias** as demais (e operação nova criada pela pessoa); **10 dias** colheita. No plano aprovado, só texto.
-- Fenologia da linha: "Pré-plantio" (DAP negativo), "Plantio" (DAP 0) ou a escolhida na operação; "—" sem fenologia. Colheita: DAP em faixa ("104 a 118").
+- Fenologia da linha: a escolhida na operação; "—" no pré-plantio (DAP negativo), no plantio (DAP 0), na colheita e sem fenologia. Colheita: DAP em faixa ("104 a 118").
 
 ## 6. Doses
 

@@ -2044,38 +2044,47 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .estrutura__aviso > .icone { width: 16px; height: 16px; flex-shrink: 0; color: var(--texto-suave); }
 .estrutura__aviso p { flex: 1; min-width: 240px; margin: 0; font-size: 14px; color: var(--texto-suave); }
 .estrutura__aviso p strong { color: var(--texto); font-weight: 600; }
-.estrutura__aviso .botao { margin-left: auto; text-decoration: none; }
-.estrutura__grupo { background: var(--superficie); border: 1px solid var(--borda); border-radius: var(--raio); box-shadow: var(--sombra); overflow: hidden; }
-.estrutura__topo { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 10px 16px; }
-.estrutura__seta .icone { transition: transform .15s; }
-.estrutura__seta--recolhido .icone { transform: rotate(-90deg); }
-.estrutura__nome { margin: 0; padding: 2px 6px; border-radius: 6px; font-size: 16px; }
-.estrutura__nome--editavel { cursor: text; }
-.estrutura__nome--editavel:hover { background: #f4f7f5; }
-.estrutura__nome--editavel:focus-visible, .estrutura__op:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 2px; }
-.estrutura__campo-grupo { width: 280px; max-width: 100%; height: 34px; font-weight: 600; }
-.estrutura__tipo { font-size: 13px; color: var(--texto-suave); }
-.estrutura__nota { margin-left: auto; font-size: 13px; color: var(--texto-suave); }
-.estrutura__excluir { color: var(--texto-suave); font-size: 13px; }
-.estrutura__topo .estrutura__excluir { margin-left: auto; }
-.estrutura__excluir:hover { color: #b42318; }
-.estrutura__excluir .icone { width: 16px; height: 16px; }
-.estrutura__barra { display: flex; justify-content: flex-end; padding: 8px 16px; border-top: 1px solid var(--borda); }
-.estrutura__rolagem { overflow-x: auto; border-top: 1px solid var(--borda); }
-.estrutura__tabela { width: 100%; }
-.estrutura__tabela th, .estrutura__tabela td { white-space: nowrap; }
-.estrutura__celula-nome { width: 100%; text-align: left; font-weight: 400; }
-.estrutura__op { display: inline-block; padding: 2px 6px; margin-left: -6px; border-radius: 6px; cursor: text; }
-.estrutura__op:hover { background: #eef2ef; }
-.estrutura__campo-nome { width: 100%; min-width: 260px; height: 34px; }
-.estrutura__num { width: 72px; height: 34px; text-align: right; font-variant-numeric: tabular-nums; }
-.estrutura__fen { width: 140px; height: 34px; }
-.estrutura__fixo { color: var(--texto-suave); }
-.estrutura__prazo { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--texto-suave); }
-.estrutura__acao { width: 48px; text-align: center; }
-.estrutura__nova { margin: 8px 16px 12px; }
-.estrutura__novo-grupo { align-self: flex-start; }
-.estrutura__vazio { margin: 0; padding: 12px 16px; color: var(--texto-suave); font-size: 14px; border-top: 1px solid var(--borda); }
+.estrutura__aviso { padding: 8px 8px 8px 14px; border: 1px solid #f0d98a; border-radius: var(--raio); background: #fffbea; }
+.estrutura__fechar { margin-left: auto; width: 30px; height: 30px; }
+.estrutura__fechar .icone { width: 16px; height: 16px; }
+/* Tabela por fase (Pré-plantio, Plantio, Desenvolvimento, Colheita), do tamanho do conteúdo: as colunas ficam juntas */
+/* Largura toda da área (acompanha o menu recolhido ou expandido e o tamanho da tela). Cada coluna tem uma proporção
+   fixa: a sobra se divide entre todas, sem abrir um vão no meio. Sem rolagem própria: o cabeçalho (sticky) fica preso
+   no topo da área que rola (a da etapa). */
+.tab-op__caixa { width: 100%; background: var(--superficie); border: 1px solid var(--borda); border-radius: var(--raio); box-shadow: var(--sombra); }
+.tab-op { width: 100%; table-layout: fixed; border-collapse: collapse; font-size: 14px; }
+.tab-op__c-dap { width: 8%; }
+.tab-op__c-fen { width: 13%; }
+.tab-op__c-op { width: 33%; }
+.tab-op__c-grupo { width: 25%; }
+.tab-op__c-prazo { width: 15%; }
+.tab-op__c-acao { width: 6%; }
+.tab-op td, .tab-op thead th { overflow: hidden; text-overflow: ellipsis; }
+.tab-op thead th { position: sticky; top: 0; z-index: 2; padding: 12px 16px; box-shadow: inset 0 -1px 0 var(--borda); text-align: left; font-size: 13px; font-weight: 600;
+  background: #f7f8f7; border-bottom: 1px solid var(--borda); white-space: nowrap; }
+.tab-op td { padding: 6px 16px; border-top: 1px solid var(--borda); vertical-align: middle; }
+.tab-op__dap { text-align: center !important; font-variant-numeric: tabular-nums; }
+.tab-op__acao { text-align: center; }
+.tab-op__faixa th { padding: 0; background: #eef4ef; border-top: 1px solid var(--borda); text-align: left; font-weight: 600; }
+.tab-op__faixa-linha { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; padding: 10px 16px; }
+.tab-op__faixa-linha > .icone, .tab-op__ico { width: 18px; height: 18px; flex-shrink: 0; color: var(--verde-700); }
+.tab-op__fase { font-size: 15px; }
+.tab-op__qtd { font-size: 13px; font-weight: 400; color: var(--texto-suave); }
+.tab-op__adicionar { margin-left: auto; padding-left: 24px; font-size: 13px; font-weight: 500; }
+.tab-op__adicionar .icone { width: 15px; height: 15px; }
+.tab-op__op { font-weight: 600; }
+.tab-op__nome { display: inline-block; padding: 2px 6px; margin-left: -6px; border-radius: 6px; cursor: text; }
+.tab-op__nome:hover { background: #eef2ef; }
+.tab-op__nome:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 2px; }
+.tab-op__campo { width: 100%; height: 34px; }
+.tab-op__grupo { display: flex; align-items: center; gap: 8px; white-space: nowrap; color: var(--texto-suave); }
+.tab-op__sel-grupo { flex: 1; min-width: 0; max-width: 280px; height: 34px; }
+.tab-op__num { width: 72px; max-width: 100%; height: 34px; text-align: right; font-variant-numeric: tabular-nums; }
+.tab-op__dap .tab-op__num { text-align: center; }
+.tab-op__fen { width: 100%; max-width: 160px; height: 34px; }
+.tab-op__fixo { color: var(--texto-suave); }
+.tab-op__prazo { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--texto-suave); white-space: nowrap; }
+.tab-op__vazio { color: var(--texto-suave); }
 
 </style>
 </head>
@@ -3791,11 +3800,10 @@ window.Telas.calendario = (function () {
     return grupo.tipo === 'Sementes' ? 3 : grupo.tipo === 'Colheita' ? PRAZO_COLHEITA : 2;
   }
 
-  // Fenologia fixa: DAP negativo = Pré-plantio; DAP 0 = Plantio
+  // Pré-plantio (DAP negativo), Plantio (DAP 0) e Colheita não têm fenologia
   function fenologiaDe(op) {
     if (op.dap === null || op.dap === undefined || op.dap === '') return '';
-    if (op.dap < 0) return 'Pré-plantio';
-    if (op.dap === 0) return 'Plantio';
+    if (op.dap <= 0) return '';
     return op.fenologia || '';
   }
 
@@ -3853,7 +3861,7 @@ window.Telas.calendario = (function () {
     const prazoColheita = opColheita ? prazoDe(opColheita, gColheita) : (plantio && plantio.prazoColheita) ?? PRAZO_COLHEITA;
     if (!comPrevisao.length) {
       lista.push({ colheita: true, aguardando: true, grupo: gColheita || { nome: 'Colheita', tipo: 'Colheita' }, op: opColheita || plantio,
-        dap: null, fenologia: 'Colheita', prazo: prazoColheita, talhoes: [], area: 0, produtos: [], variedades: null });
+        dap: null, fenologia: '', prazo: prazoColheita, talhoes: [], area: 0, produtos: [], variedades: null });
     }
     {
       if (comPrevisao.length) {
@@ -3894,7 +3902,7 @@ window.Telas.calendario = (function () {
   // Imagem de cada fase (img/fenologia, uma por estádio). Caminho completo e literal: o script do arquivo único
   // (ferramentas/gerar-compartilhar.js) só embute imagens escritas assim.
   const IMAGENS = {
-    pre: 'data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTAwIDEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNOCA4OEM4IDc4IDE2IDcyIDI0IDc0QzI2IDYyIDM2IDU2IDQ2IDU4QzUyIDUwIDY2IDUyIDcwIDYyQzgwIDYwIDkwIDY4IDkwIDc4Qzk0IDgwIDk0IDg4IDkyIDg4WiIgZmlsbD0iI2E4NjUzYyIvPjxwYXRoIGQ9Ik03MCA2MkM4MCA2MCA5MCA2OCA5MCA3OEM5NCA4MCA5NCA4OCA5MiA4OEg2NEM3MiA4MCA3NCA3MCA3MCA2MloiIGZpbGw9IiM4ZjUyMzAiLz48ZyBmaWxsPSIjN2E0NTI2Ij48ZWxsaXBzZSBjeD0iMzQiIGN5PSI4MCIgcng9IjMuMiIgcnk9IjIiLz48ZWxsaXBzZSBjeD0iNTIiIGN5PSI3MCIgcng9IjIuNiIgcnk9IjEuNyIvPjxlbGxpcHNlIGN4PSI0NiIgY3k9IjgzIiByeD0iMi4yIiByeT0iMS40Ii8+PGVsbGlwc2UgY3g9IjYwIiBjeT0iODAiIHJ4PSIzIiByeT0iMS44Ii8+PGVsbGlwc2UgY3g9IjI0IiBjeT0iODQiIHJ4PSIyIiByeT0iMS4zIi8+PC9nPjxyZWN0IHg9IjQiIHk9Ijg2IiB3aWR0aD0iOTIiIGhlaWdodD0iNSIgcng9IjIuNSIgZmlsbD0iIzdhNDUyNiIvPjwvc3ZnPgo=', plantio: 'data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTAwIDEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZWxsaXBzZSBjeD0iNDAiIGN5PSI1NiIgcng9IjE2IiByeT0iMTMiIGZpbGw9IiNkNGE5NjciLz48ZWxsaXBzZSBjeD0iMzguNyIgY3k9IjU0LjQiIHJ4PSIxNC4xIiByeT0iMTAuNCIgZmlsbD0iI2U4YzQ4YSIvPjxlbGxpcHNlIGN4PSIzMy45IiBjeT0iNTAuNSIgcng9IjQuNSIgcnk9IjIuMSIgZmlsbD0iI2Y1ZGZiNSIgdHJhbnNmb3JtPSJyb3RhdGUoLTIwIDMzLjkgNTAuNSkiLz48ZWxsaXBzZSBjeD0iNjIiIGN5PSI1OCIgcng9IjE1IiByeT0iMTIuNSIgZmlsbD0iI2Q0YTk2NyIvPjxlbGxpcHNlIGN4PSI2MC44IiBjeT0iNTYuNSIgcng9IjEzLjIiIHJ5PSIxMC4wIiBmaWxsPSIjZThjNDhhIi8+PGVsbGlwc2UgY3g9IjU2LjMiIGN5PSI1Mi44IiByeD0iNC4yIiByeT0iMi4wIiBmaWxsPSIjZjVkZmI1IiB0cmFuc2Zvcm09InJvdGF0ZSgtMjAgNTYuMyA1Mi44KSIvPjxlbGxpcHNlIGN4PSIyMCIgY3k9Ijc0IiByeD0iMTEiIHJ5PSI5LjUiIGZpbGw9IiNkNGE5NjciLz48ZWxsaXBzZSBjeD0iMTkuMSIgY3k9IjcyLjkiIHJ4PSI5LjciIHJ5PSI3LjYiIGZpbGw9IiNlOGM0OGEiLz48ZWxsaXBzZSBjeD0iMTUuOCIgY3k9IjcwLjAiIHJ4PSIzLjEiIHJ5PSIxLjUiIGZpbGw9IiNmNWRmYjUiIHRyYW5zZm9ybT0icm90YXRlKC0yMCAxNS44IDcwLjApIi8+PGVsbGlwc2UgY3g9Ijc4IiBjeT0iNzYiIHJ4PSIxMSIgcnk9IjkuNSIgZmlsbD0iI2Q0YTk2NyIvPjxlbGxpcHNlIGN4PSI3Ny4xIiBjeT0iNzQuOSIgcng9IjkuNyIgcnk9IjcuNiIgZmlsbD0iI2U4YzQ4YSIvPjxlbGxpcHNlIGN4PSI3My44IiBjeT0iNzIuMCIgcng9IjMuMSIgcnk9IjEuNSIgZmlsbD0iI2Y1ZGZiNSIgdHJhbnNmb3JtPSJyb3RhdGUoLTIwIDczLjggNzIuMCkiLz48ZWxsaXBzZSBjeD0iNDciIGN5PSI3NyIgcng9IjE4IiByeT0iMTQiIGZpbGw9IiNkNGE5NjciLz48ZWxsaXBzZSBjeD0iNDUuNiIgY3k9Ijc1LjMiIHJ4PSIxNS44IiByeT0iMTEuMiIgZmlsbD0iI2U4YzQ4YSIvPjxlbGxpcHNlIGN4PSI0MC4yIiBjeT0iNzEuMSIgcng9IjUuMCIgcnk9IjIuMiIgZmlsbD0iI2Y1ZGZiNSIgdHJhbnNmb3JtPSJyb3RhdGUoLTIwIDQwLjIgNzEuMSkiLz48ZWxsaXBzZSBjeD0iNTQiIGN5PSI4MyIgcng9IjMuMiIgcnk9IjEuNCIgZmlsbD0iI2E0NzgzYyIvPjwvc3ZnPg==', colheita: 'data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTAwIDEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB4PSIwIiB5PSI4OCIgd2lkdGg9IjEwMCIgaGVpZ2h0PSI2IiByeD0iMyIgZmlsbD0iIzhhNWEzNSIvPjxnIHN0cm9rZT0iIzhhNmEzYSIgc3Ryb2tlLXdpZHRoPSIxLjYiPjxwYXRoIGQ9Ik00IDg5VjY2TTEwIDg5VjY0TTE2IDg5VjY4Ii8+PC9nPjxnIGZpbGw9IiM3YTUyMjgiPjxlbGxpcHNlIGN4PSI2IiBjeT0iNzIiIHJ4PSIxLjYiIHJ5PSIzLjYiIHRyYW5zZm9ybT0icm90YXRlKDI1IDYgNzIpIi8+PGVsbGlwc2UgY3g9IjIiIGN5PSI3OCIgcng9IjEuNiIgcnk9IjMuNiIgdHJhbnNmb3JtPSJyb3RhdGUoLTI1IDIgNzgpIi8+PGVsbGlwc2UgY3g9IjEyIiBjeT0iNzAiIHJ4PSIxLjYiIHJ5PSIzLjYiIHRyYW5zZm9ybT0icm90YXRlKDI1IDEyIDcwKSIvPjxlbGxpcHNlIGN4PSI4IiBjeT0iNzciIHJ4PSIxLjYiIHJ5PSIzLjYiIHRyYW5zZm9ybT0icm90YXRlKC0yNSA4IDc3KSIvPjxlbGxpcHNlIGN4PSIxOCIgY3k9Ijc0IiByeD0iMS42IiByeT0iMy42IiB0cmFuc2Zvcm09InJvdGF0ZSgyNSAxOCA3NCkiLz48L2c+PGcgc3Ryb2tlPSIjOGE2YTNhIiBzdHJva2Utd2lkdGg9IjEuNiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIj48cGF0aCBkPSJNODYgODlWODRNOTEgODlWODVNOTYgODlWODQiLz48L2c+PHBhdGggZD0iTTMwIDY2TDQ0IDYyVjc2TDMwIDgwWiIgZmlsbD0iIzNmNmYyYSIvPjxyZWN0IHg9IjE0IiB5PSI3NiIgd2lkdGg9IjIwIiBoZWlnaHQ9IjgiIHJ4PSIyIiBmaWxsPSIjNGI4ZjMwIi8+PHBhdGggZD0iTTE0IDg0SDM0IiBzdHJva2U9IiMzYTNhM2EiIHN0cm9rZS13aWR0aD0iMiIvPjxjaXJjbGUgY3g9IjIzIiBjeT0iNzAiIHI9IjYiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzNhM2EzYSIgc3Ryb2tlLXdpZHRoPSIxLjYiLz48cGF0aCBkPSJNMjMgNjRWNzZNMTcgNzBIMjkiIHN0cm9rZT0iIzNhM2EzYSIgc3Ryb2tlLXdpZHRoPSIxLjIiLz48cmVjdCB4PSI0MiIgeT0iNTIiIHdpZHRoPSI0MCIgaGVpZ2h0PSIyOCIgcng9IjMiIGZpbGw9IiM0YjhmMzAiLz48cmVjdCB4PSI1OCIgeT0iNDIiIHdpZHRoPSIyMiIgaGVpZ2h0PSIxMSIgcng9IjIiIGZpbGw9IiMzZjdmMmEiLz48cmVjdCB4PSI0NCIgeT0iMzYiIHdpZHRoPSIxNSIgaGVpZ2h0PSIxNyIgcng9IjIiIGZpbGw9IiMzZjdmMmEiLz48cmVjdCB4PSI0NiIgeT0iMzgiIHdpZHRoPSIxMSIgaGVpZ2h0PSIxMCIgcng9IjEuNSIgZmlsbD0iI2JmZTBlZiIvPjxwYXRoIGQ9Ik04MCA0Nkg5MFY1OCIgc3Ryb2tlPSIjM2EzYTNhIiBzdHJva2Utd2lkdGg9IjIuNCIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PGNpcmNsZSBjeD0iNTIiIGN5PSI4MCIgcj0iMTAiIGZpbGw9IiMyZjJmMmYiLz48Y2lyY2xlIGN4PSI1MiIgY3k9IjgwIiByPSI0IiBmaWxsPSIjOWFhMGE2Ii8+PGNpcmNsZSBjeD0iNzYiIGN5PSI4MyIgcj0iNi41IiBmaWxsPSIjMmYyZjJmIi8+PGNpcmNsZSBjeD0iNzYiIGN5PSI4MyIgcj0iMi42IiBmaWxsPSIjOWFhMGE2Ii8+PC9zdmc+Cg==',
+    pre: 'data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTAwIDEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNOCA4OEM4IDc4IDE2IDcyIDI0IDc0QzI2IDYyIDM2IDU2IDQ2IDU4QzUyIDUwIDY2IDUyIDcwIDYyQzgwIDYwIDkwIDY4IDkwIDc4Qzk0IDgwIDk0IDg4IDkyIDg4WiIgZmlsbD0iI2E4NjUzYyIvPjxwYXRoIGQ9Ik03MCA2MkM4MCA2MCA5MCA2OCA5MCA3OEM5NCA4MCA5NCA4OCA5MiA4OEg2NEM3MiA4MCA3NCA3MCA3MCA2MloiIGZpbGw9IiM4ZjUyMzAiLz48ZyBmaWxsPSIjN2E0NTI2Ij48ZWxsaXBzZSBjeD0iMzQiIGN5PSI4MCIgcng9IjMuMiIgcnk9IjIiLz48ZWxsaXBzZSBjeD0iNTIiIGN5PSI3MCIgcng9IjIuNiIgcnk9IjEuNyIvPjxlbGxpcHNlIGN4PSI0NiIgY3k9IjgzIiByeD0iMi4yIiByeT0iMS40Ii8+PGVsbGlwc2UgY3g9IjYwIiBjeT0iODAiIHJ4PSIzIiByeT0iMS44Ii8+PGVsbGlwc2UgY3g9IjI0IiBjeT0iODQiIHJ4PSIyIiByeT0iMS4zIi8+PC9nPjxyZWN0IHg9IjQiIHk9Ijg2IiB3aWR0aD0iOTIiIGhlaWdodD0iNSIgcng9IjIuNSIgZmlsbD0iIzdhNDUyNiIvPjwvc3ZnPg0K', plantio: 'data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTAwIDEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZWxsaXBzZSBjeD0iNDAiIGN5PSI1NiIgcng9IjE2IiByeT0iMTMiIGZpbGw9IiNkNGE5NjciLz48ZWxsaXBzZSBjeD0iMzguNyIgY3k9IjU0LjQiIHJ4PSIxNC4xIiByeT0iMTAuNCIgZmlsbD0iI2U4YzQ4YSIvPjxlbGxpcHNlIGN4PSIzMy45IiBjeT0iNTAuNSIgcng9IjQuNSIgcnk9IjIuMSIgZmlsbD0iI2Y1ZGZiNSIgdHJhbnNmb3JtPSJyb3RhdGUoLTIwIDMzLjkgNTAuNSkiLz48ZWxsaXBzZSBjeD0iNjIiIGN5PSI1OCIgcng9IjE1IiByeT0iMTIuNSIgZmlsbD0iI2Q0YTk2NyIvPjxlbGxpcHNlIGN4PSI2MC44IiBjeT0iNTYuNSIgcng9IjEzLjIiIHJ5PSIxMC4wIiBmaWxsPSIjZThjNDhhIi8+PGVsbGlwc2UgY3g9IjU2LjMiIGN5PSI1Mi44IiByeD0iNC4yIiByeT0iMi4wIiBmaWxsPSIjZjVkZmI1IiB0cmFuc2Zvcm09InJvdGF0ZSgtMjAgNTYuMyA1Mi44KSIvPjxlbGxpcHNlIGN4PSIyMCIgY3k9Ijc0IiByeD0iMTEiIHJ5PSI5LjUiIGZpbGw9IiNkNGE5NjciLz48ZWxsaXBzZSBjeD0iMTkuMSIgY3k9IjcyLjkiIHJ4PSI5LjciIHJ5PSI3LjYiIGZpbGw9IiNlOGM0OGEiLz48ZWxsaXBzZSBjeD0iMTUuOCIgY3k9IjcwLjAiIHJ4PSIzLjEiIHJ5PSIxLjUiIGZpbGw9IiNmNWRmYjUiIHRyYW5zZm9ybT0icm90YXRlKC0yMCAxNS44IDcwLjApIi8+PGVsbGlwc2UgY3g9Ijc4IiBjeT0iNzYiIHJ4PSIxMSIgcnk9IjkuNSIgZmlsbD0iI2Q0YTk2NyIvPjxlbGxpcHNlIGN4PSI3Ny4xIiBjeT0iNzQuOSIgcng9IjkuNyIgcnk9IjcuNiIgZmlsbD0iI2U4YzQ4YSIvPjxlbGxpcHNlIGN4PSI3My44IiBjeT0iNzIuMCIgcng9IjMuMSIgcnk9IjEuNSIgZmlsbD0iI2Y1ZGZiNSIgdHJhbnNmb3JtPSJyb3RhdGUoLTIwIDczLjggNzIuMCkiLz48ZWxsaXBzZSBjeD0iNDciIGN5PSI3NyIgcng9IjE4IiByeT0iMTQiIGZpbGw9IiNkNGE5NjciLz48ZWxsaXBzZSBjeD0iNDUuNiIgY3k9Ijc1LjMiIHJ4PSIxNS44IiByeT0iMTEuMiIgZmlsbD0iI2U4YzQ4YSIvPjxlbGxpcHNlIGN4PSI0MC4yIiBjeT0iNzEuMSIgcng9IjUuMCIgcnk9IjIuMiIgZmlsbD0iI2Y1ZGZiNSIgdHJhbnNmb3JtPSJyb3RhdGUoLTIwIDQwLjIgNzEuMSkiLz48ZWxsaXBzZSBjeD0iNTQiIGN5PSI4MyIgcng9IjMuMiIgcnk9IjEuNCIgZmlsbD0iI2E0NzgzYyIvPjwvc3ZnPg==', colheita: 'data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTAwIDEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB4PSIwIiB5PSI4OCIgd2lkdGg9IjEwMCIgaGVpZ2h0PSI2IiByeD0iMyIgZmlsbD0iIzhhNWEzNSIvPjxnIHN0cm9rZT0iIzhhNmEzYSIgc3Ryb2tlLXdpZHRoPSIxLjYiPjxwYXRoIGQ9Ik00IDg5VjY2TTEwIDg5VjY0TTE2IDg5VjY4Ii8+PC9nPjxnIGZpbGw9IiM3YTUyMjgiPjxlbGxpcHNlIGN4PSI2IiBjeT0iNzIiIHJ4PSIxLjYiIHJ5PSIzLjYiIHRyYW5zZm9ybT0icm90YXRlKDI1IDYgNzIpIi8+PGVsbGlwc2UgY3g9IjIiIGN5PSI3OCIgcng9IjEuNiIgcnk9IjMuNiIgdHJhbnNmb3JtPSJyb3RhdGUoLTI1IDIgNzgpIi8+PGVsbGlwc2UgY3g9IjEyIiBjeT0iNzAiIHJ4PSIxLjYiIHJ5PSIzLjYiIHRyYW5zZm9ybT0icm90YXRlKDI1IDEyIDcwKSIvPjxlbGxpcHNlIGN4PSI4IiBjeT0iNzciIHJ4PSIxLjYiIHJ5PSIzLjYiIHRyYW5zZm9ybT0icm90YXRlKC0yNSA4IDc3KSIvPjxlbGxpcHNlIGN4PSIxOCIgY3k9Ijc0IiByeD0iMS42IiByeT0iMy42IiB0cmFuc2Zvcm09InJvdGF0ZSgyNSAxOCA3NCkiLz48L2c+PGcgc3Ryb2tlPSIjOGE2YTNhIiBzdHJva2Utd2lkdGg9IjEuNiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIj48cGF0aCBkPSJNODYgODlWODRNOTEgODlWODVNOTYgODlWODQiLz48L2c+PHBhdGggZD0iTTMwIDY2TDQ0IDYyVjc2TDMwIDgwWiIgZmlsbD0iIzNmNmYyYSIvPjxyZWN0IHg9IjE0IiB5PSI3NiIgd2lkdGg9IjIwIiBoZWlnaHQ9IjgiIHJ4PSIyIiBmaWxsPSIjNGI4ZjMwIi8+PHBhdGggZD0iTTE0IDg0SDM0IiBzdHJva2U9IiMzYTNhM2EiIHN0cm9rZS13aWR0aD0iMiIvPjxjaXJjbGUgY3g9IjIzIiBjeT0iNzAiIHI9IjYiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzNhM2EzYSIgc3Ryb2tlLXdpZHRoPSIxLjYiLz48cGF0aCBkPSJNMjMgNjRWNzZNMTcgNzBIMjkiIHN0cm9rZT0iIzNhM2EzYSIgc3Ryb2tlLXdpZHRoPSIxLjIiLz48cmVjdCB4PSI0MiIgeT0iNTIiIHdpZHRoPSI0MCIgaGVpZ2h0PSIyOCIgcng9IjMiIGZpbGw9IiM0YjhmMzAiLz48cmVjdCB4PSI1OCIgeT0iNDIiIHdpZHRoPSIyMiIgaGVpZ2h0PSIxMSIgcng9IjIiIGZpbGw9IiMzZjdmMmEiLz48cmVjdCB4PSI0NCIgeT0iMzYiIHdpZHRoPSIxNSIgaGVpZ2h0PSIxNyIgcng9IjIiIGZpbGw9IiMzZjdmMmEiLz48cmVjdCB4PSI0NiIgeT0iMzgiIHdpZHRoPSIxMSIgaGVpZ2h0PSIxMCIgcng9IjEuNSIgZmlsbD0iI2JmZTBlZiIvPjxwYXRoIGQ9Ik04MCA0Nkg5MFY1OCIgc3Ryb2tlPSIjM2EzYTNhIiBzdHJva2Utd2lkdGg9IjIuNCIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PGNpcmNsZSBjeD0iNTIiIGN5PSI4MCIgcj0iMTAiIGZpbGw9IiMyZjJmMmYiLz48Y2lyY2xlIGN4PSI1MiIgY3k9IjgwIiByPSI0IiBmaWxsPSIjOWFhMGE2Ii8+PGNpcmNsZSBjeD0iNzYiIGN5PSI4MyIgcj0iNi41IiBmaWxsPSIjMmYyZjJmIi8+PGNpcmNsZSBjeD0iNzYiIGN5PSI4MyIgcj0iMi42IiBmaWxsPSIjOWFhMGE2Ii8+PC9zdmc+DQo=',
     neutro: 'data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTAwIDEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB4PSIyNiIgeT0iMzAiIHdpZHRoPSI0OCIgaGVpZ2h0PSI0NCIgcng9IjUiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzlhYTBhNiIgc3Ryb2tlLXdpZHRoPSIzIi8+PHBhdGggZD0iTTI2IDQ0SDc0TTM4IDI0VjM2TTYyIDI0VjM2IiBzdHJva2U9IiM5YWEwYTYiIHN0cm9rZS13aWR0aD0iMyIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PC9zdmc+',
     VE: 'data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTAwIDEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZWxsaXBzZSBjeD0iNTAiIGN5PSI5MiIgcng9IjM0IiByeT0iNSIgZmlsbD0iIzhhNWEzNSIvPjxwYXRoIGQ9Ik00NyA5MFE0NiA3MiA1MiA3MlE1NyA3MiA1NSA3OCIgc3Ryb2tlPSIjN2ZhNTNhIiBzdHJva2Utd2lkdGg9IjIuMiIgZmlsbD0ibm9uZSIvPjxlbGxpcHNlIGN4PSI1NSIgY3k9IjgwIiByeD0iMyIgcnk9IjQuMiIgZmlsbD0iI2I3YzY0YyIgdHJhbnNmb3JtPSJyb3RhdGUoMTUgNTUgODApIi8+PC9zdmc+', VC: 'data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTAwIDEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZWxsaXBzZSBjeD0iNTAiIGN5PSI5MiIgcng9IjM0IiByeT0iNSIgZmlsbD0iIzhhNWEzNSIvPjxwYXRoIGQ9Ik01MCA5MEw1MCA2MCIgc3Ryb2tlPSIjNGY3ZDJhIiBzdHJva2Utd2lkdGg9IjIiLz48ZWxsaXBzZSBjeD0iNDMiIGN5PSI4NCIgcng9IjUiIHJ5PSIzIiBmaWxsPSIjYjdjNjRjIiB0cmFuc2Zvcm09InJvdGF0ZSgtMTUgNDMgODQpIi8+PGVsbGlwc2UgY3g9IjU3IiBjeT0iODQiIHJ4PSI1IiByeT0iMyIgZmlsbD0iI2I3YzY0YyIgdHJhbnNmb3JtPSJyb3RhdGUoMTUgNTcgODQpIi8+PGVsbGlwc2UgY3g9IjQwIiBjeT0iNzAiIHJ4PSI2LjUiIHJ5PSI0IiBmaWxsPSIjNGI4ZjMwIiB0cmFuc2Zvcm09InJvdGF0ZSgtMjUgNDAgNzApIi8+PGVsbGlwc2UgY3g9IjYwIiBjeT0iNzAiIHJ4PSI2LjUiIHJ5PSI0IiBmaWxsPSIjNGI4ZjMwIiB0cmFuc2Zvcm09InJvdGF0ZSgyNSA2MCA3MCkiLz48L3N2Zz4=', V1: 'data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTAwIDEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZWxsaXBzZSBjeD0iNTAiIGN5PSI5MiIgcng9IjM0IiByeT0iNSIgZmlsbD0iIzhhNWEzNSIvPjxwYXRoIGQ9Ik01MCA5MEw1MCA1NCIgc3Ryb2tlPSIjNGY3ZDJhIiBzdHJva2Utd2lkdGg9IjIiLz48ZWxsaXBzZSBjeD0iNDAiIGN5PSI3MCIgcng9IjYuNSIgcnk9IjQiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKC0yNSA0MCA3MCkiLz48ZWxsaXBzZSBjeD0iNjAiIGN5PSI3MCIgcng9IjYuNSIgcnk9IjQiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKDI1IDYwIDcwKSIvPjxwYXRoIGQ9Ik01MCA2MkwzOSA1OCIgc3Ryb2tlPSIjNGI4ZjMwIiBzdHJva2Utd2lkdGg9IjEuMyIvPjxlbGxpcHNlIGN4PSIzMy41IiBjeT0iNTciIHJ4PSI1LjUiIHJ5PSIzIiBmaWxsPSIjNGI4ZjMwIiB0cmFuc2Zvcm09InJvdGF0ZSgwIDMzLjUgNTcpIi8+PGVsbGlwc2UgY3g9IjM4IiBjeT0iNTIuNSIgcng9IjUiIHJ5PSIyLjgiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKDU1IDM4IDUyLjUpIi8+PGVsbGlwc2UgY3g9IjM4IiBjeT0iNjEuNSIgcng9IjUiIHJ5PSIyLjgiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKC01NSAzOCA2MS41KSIvPjwvc3ZnPg==', V2: 'data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTAwIDEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZWxsaXBzZSBjeD0iNTAiIGN5PSI5MiIgcng9IjM0IiByeT0iNSIgZmlsbD0iIzhhNWEzNSIvPjxwYXRoIGQ9Ik01MCA5MEw1MCA0NiIgc3Ryb2tlPSIjNGY3ZDJhIiBzdHJva2Utd2lkdGg9IjIiLz48ZWxsaXBzZSBjeD0iNDAiIGN5PSI3MCIgcng9IjYuNSIgcnk9IjQiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKC0yNSA0MCA3MCkiLz48ZWxsaXBzZSBjeD0iNjAiIGN5PSI3MCIgcng9IjYuNSIgcnk9IjQiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKDI1IDYwIDcwKSIvPjxwYXRoIGQ9Ik01MCA2MkwzOSA1OCIgc3Ryb2tlPSIjNGI4ZjMwIiBzdHJva2Utd2lkdGg9IjEuMyIvPjxlbGxpcHNlIGN4PSIzMy41IiBjeT0iNTciIHJ4PSI1LjUiIHJ5PSIzIiBmaWxsPSIjNGI4ZjMwIiB0cmFuc2Zvcm09InJvdGF0ZSgwIDMzLjUgNTcpIi8+PGVsbGlwc2UgY3g9IjM4IiBjeT0iNTIuNSIgcng9IjUiIHJ5PSIyLjgiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKDU1IDM4IDUyLjUpIi8+PGVsbGlwc2UgY3g9IjM4IiBjeT0iNjEuNSIgcng9IjUiIHJ5PSIyLjgiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKC01NSAzOCA2MS41KSIvPjxwYXRoIGQ9Ik01MCA1NEw2MSA1MCIgc3Ryb2tlPSIjNGI4ZjMwIiBzdHJva2Utd2lkdGg9IjEuMyIvPjxlbGxpcHNlIGN4PSI2Ni41IiBjeT0iNDkiIHJ4PSI1LjUiIHJ5PSIzIiBmaWxsPSIjNGI4ZjMwIiB0cmFuc2Zvcm09InJvdGF0ZSgwIDY2LjUgNDkpIi8+PGVsbGlwc2UgY3g9IjYyIiBjeT0iNDQuNSIgcng9IjUiIHJ5PSIyLjgiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKC01NSA2MiA0NC41KSIvPjxlbGxpcHNlIGN4PSI2MiIgY3k9IjUzLjUiIHJ4PSI1IiByeT0iMi44IiBmaWxsPSIjNGI4ZjMwIiB0cmFuc2Zvcm09InJvdGF0ZSg1NSA2MiA1My41KSIvPjwvc3ZnPg==',
     V3: 'data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTAwIDEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZWxsaXBzZSBjeD0iNTAiIGN5PSI5MiIgcng9IjM0IiByeT0iNSIgZmlsbD0iIzhhNWEzNSIvPjxwYXRoIGQ9Ik01MCA5MEw1MCAzOCIgc3Ryb2tlPSIjNGY3ZDJhIiBzdHJva2Utd2lkdGg9IjIiLz48ZWxsaXBzZSBjeD0iNDAiIGN5PSI3MCIgcng9IjYuNSIgcnk9IjQiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKC0yNSA0MCA3MCkiLz48ZWxsaXBzZSBjeD0iNjAiIGN5PSI3MCIgcng9IjYuNSIgcnk9IjQiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKDI1IDYwIDcwKSIvPjxwYXRoIGQ9Ik01MCA2MkwzOSA1OCIgc3Ryb2tlPSIjNGI4ZjMwIiBzdHJva2Utd2lkdGg9IjEuMyIvPjxlbGxpcHNlIGN4PSIzMy41IiBjeT0iNTciIHJ4PSI1LjUiIHJ5PSIzIiBmaWxsPSIjNGI4ZjMwIiB0cmFuc2Zvcm09InJvdGF0ZSgwIDMzLjUgNTcpIi8+PGVsbGlwc2UgY3g9IjM4IiBjeT0iNTIuNSIgcng9IjUiIHJ5PSIyLjgiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKDU1IDM4IDUyLjUpIi8+PGVsbGlwc2UgY3g9IjM4IiBjeT0iNjEuNSIgcng9IjUiIHJ5PSIyLjgiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKC01NSAzOCA2MS41KSIvPjxwYXRoIGQ9Ik01MCA1NEw2MSA1MCIgc3Ryb2tlPSIjNGI4ZjMwIiBzdHJva2Utd2lkdGg9IjEuMyIvPjxlbGxpcHNlIGN4PSI2Ni41IiBjeT0iNDkiIHJ4PSI1LjUiIHJ5PSIzIiBmaWxsPSIjNGI4ZjMwIiB0cmFuc2Zvcm09InJvdGF0ZSgwIDY2LjUgNDkpIi8+PGVsbGlwc2UgY3g9IjYyIiBjeT0iNDQuNSIgcng9IjUiIHJ5PSIyLjgiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKC01NSA2MiA0NC41KSIvPjxlbGxpcHNlIGN4PSI2MiIgY3k9IjUzLjUiIHJ4PSI1IiByeT0iMi44IiBmaWxsPSIjNGI4ZjMwIiB0cmFuc2Zvcm09InJvdGF0ZSg1NSA2MiA1My41KSIvPjxwYXRoIGQ9Ik01MCA0NkwzOSA0MiIgc3Ryb2tlPSIjNGI4ZjMwIiBzdHJva2Utd2lkdGg9IjEuMyIvPjxlbGxpcHNlIGN4PSIzMy41IiBjeT0iNDEiIHJ4PSI1LjUiIHJ5PSIzIiBmaWxsPSIjNGI4ZjMwIiB0cmFuc2Zvcm09InJvdGF0ZSgwIDMzLjUgNDEpIi8+PGVsbGlwc2UgY3g9IjM4IiBjeT0iMzYuNSIgcng9IjUiIHJ5PSIyLjgiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKDU1IDM4IDM2LjUpIi8+PGVsbGlwc2UgY3g9IjM4IiBjeT0iNDUuNSIgcng9IjUiIHJ5PSIyLjgiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKC01NSAzOCA0NS41KSIvPjwvc3ZnPg==', V4: 'data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTAwIDEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZWxsaXBzZSBjeD0iNTAiIGN5PSI5MiIgcng9IjM0IiByeT0iNSIgZmlsbD0iIzhhNWEzNSIvPjxwYXRoIGQ9Ik01MCA5MEw1MCAzMCIgc3Ryb2tlPSIjNGY3ZDJhIiBzdHJva2Utd2lkdGg9IjIiLz48ZWxsaXBzZSBjeD0iNDAiIGN5PSI3MCIgcng9IjYuNSIgcnk9IjQiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKC0yNSA0MCA3MCkiLz48ZWxsaXBzZSBjeD0iNjAiIGN5PSI3MCIgcng9IjYuNSIgcnk9IjQiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKDI1IDYwIDcwKSIvPjxwYXRoIGQ9Ik01MCA2MkwzOSA1OCIgc3Ryb2tlPSIjNGI4ZjMwIiBzdHJva2Utd2lkdGg9IjEuMyIvPjxlbGxpcHNlIGN4PSIzMy41IiBjeT0iNTciIHJ4PSI1LjUiIHJ5PSIzIiBmaWxsPSIjNGI4ZjMwIiB0cmFuc2Zvcm09InJvdGF0ZSgwIDMzLjUgNTcpIi8+PGVsbGlwc2UgY3g9IjM4IiBjeT0iNTIuNSIgcng9IjUiIHJ5PSIyLjgiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKDU1IDM4IDUyLjUpIi8+PGVsbGlwc2UgY3g9IjM4IiBjeT0iNjEuNSIgcng9IjUiIHJ5PSIyLjgiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKC01NSAzOCA2MS41KSIvPjxwYXRoIGQ9Ik01MCA1NEw2MSA1MCIgc3Ryb2tlPSIjNGI4ZjMwIiBzdHJva2Utd2lkdGg9IjEuMyIvPjxlbGxpcHNlIGN4PSI2Ni41IiBjeT0iNDkiIHJ4PSI1LjUiIHJ5PSIzIiBmaWxsPSIjNGI4ZjMwIiB0cmFuc2Zvcm09InJvdGF0ZSgwIDY2LjUgNDkpIi8+PGVsbGlwc2UgY3g9IjYyIiBjeT0iNDQuNSIgcng9IjUiIHJ5PSIyLjgiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKC01NSA2MiA0NC41KSIvPjxlbGxpcHNlIGN4PSI2MiIgY3k9IjUzLjUiIHJ4PSI1IiByeT0iMi44IiBmaWxsPSIjNGI4ZjMwIiB0cmFuc2Zvcm09InJvdGF0ZSg1NSA2MiA1My41KSIvPjxwYXRoIGQ9Ik01MCA0NkwzOSA0MiIgc3Ryb2tlPSIjNGI4ZjMwIiBzdHJva2Utd2lkdGg9IjEuMyIvPjxlbGxpcHNlIGN4PSIzMy41IiBjeT0iNDEiIHJ4PSI1LjUiIHJ5PSIzIiBmaWxsPSIjNGI4ZjMwIiB0cmFuc2Zvcm09InJvdGF0ZSgwIDMzLjUgNDEpIi8+PGVsbGlwc2UgY3g9IjM4IiBjeT0iMzYuNSIgcng9IjUiIHJ5PSIyLjgiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKDU1IDM4IDM2LjUpIi8+PGVsbGlwc2UgY3g9IjM4IiBjeT0iNDUuNSIgcng9IjUiIHJ5PSIyLjgiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKC01NSAzOCA0NS41KSIvPjxwYXRoIGQ9Ik01MCAzOEw2MSAzNCIgc3Ryb2tlPSIjNGI4ZjMwIiBzdHJva2Utd2lkdGg9IjEuMyIvPjxlbGxpcHNlIGN4PSI2Ni41IiBjeT0iMzMiIHJ4PSI1LjUiIHJ5PSIzIiBmaWxsPSIjNGI4ZjMwIiB0cmFuc2Zvcm09InJvdGF0ZSgwIDY2LjUgMzMpIi8+PGVsbGlwc2UgY3g9IjYyIiBjeT0iMjguNSIgcng9IjUiIHJ5PSIyLjgiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKC01NSA2MiAyOC41KSIvPjxlbGxpcHNlIGN4PSI2MiIgY3k9IjM3LjUiIHJ4PSI1IiByeT0iMi44IiBmaWxsPSIjNGI4ZjMwIiB0cmFuc2Zvcm09InJvdGF0ZSg1NSA2MiAzNy41KSIvPjwvc3ZnPg==', V5: 'data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTAwIDEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZWxsaXBzZSBjeD0iNTAiIGN5PSI5MiIgcng9IjM0IiByeT0iNSIgZmlsbD0iIzhhNWEzNSIvPjxwYXRoIGQ9Ik01MCA5MEw1MCAyMiIgc3Ryb2tlPSIjNGY3ZDJhIiBzdHJva2Utd2lkdGg9IjIiLz48ZWxsaXBzZSBjeD0iNDAiIGN5PSI3MCIgcng9IjYuNSIgcnk9IjQiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKC0yNSA0MCA3MCkiLz48ZWxsaXBzZSBjeD0iNjAiIGN5PSI3MCIgcng9IjYuNSIgcnk9IjQiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKDI1IDYwIDcwKSIvPjxwYXRoIGQ9Ik01MCA2MkwzOSA1OCIgc3Ryb2tlPSIjNGI4ZjMwIiBzdHJva2Utd2lkdGg9IjEuMyIvPjxlbGxpcHNlIGN4PSIzMy41IiBjeT0iNTciIHJ4PSI1LjUiIHJ5PSIzIiBmaWxsPSIjNGI4ZjMwIiB0cmFuc2Zvcm09InJvdGF0ZSgwIDMzLjUgNTcpIi8+PGVsbGlwc2UgY3g9IjM4IiBjeT0iNTIuNSIgcng9IjUiIHJ5PSIyLjgiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKDU1IDM4IDUyLjUpIi8+PGVsbGlwc2UgY3g9IjM4IiBjeT0iNjEuNSIgcng9IjUiIHJ5PSIyLjgiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKC01NSAzOCA2MS41KSIvPjxwYXRoIGQ9Ik01MCA1NEw2MSA1MCIgc3Ryb2tlPSIjNGI4ZjMwIiBzdHJva2Utd2lkdGg9IjEuMyIvPjxlbGxpcHNlIGN4PSI2Ni41IiBjeT0iNDkiIHJ4PSI1LjUiIHJ5PSIzIiBmaWxsPSIjNGI4ZjMwIiB0cmFuc2Zvcm09InJvdGF0ZSgwIDY2LjUgNDkpIi8+PGVsbGlwc2UgY3g9IjYyIiBjeT0iNDQuNSIgcng9IjUiIHJ5PSIyLjgiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKC01NSA2MiA0NC41KSIvPjxlbGxpcHNlIGN4PSI2MiIgY3k9IjUzLjUiIHJ4PSI1IiByeT0iMi44IiBmaWxsPSIjNGI4ZjMwIiB0cmFuc2Zvcm09InJvdGF0ZSg1NSA2MiA1My41KSIvPjxwYXRoIGQ9Ik01MCA0NkwzOSA0MiIgc3Ryb2tlPSIjNGI4ZjMwIiBzdHJva2Utd2lkdGg9IjEuMyIvPjxlbGxpcHNlIGN4PSIzMy41IiBjeT0iNDEiIHJ4PSI1LjUiIHJ5PSIzIiBmaWxsPSIjNGI4ZjMwIiB0cmFuc2Zvcm09InJvdGF0ZSgwIDMzLjUgNDEpIi8+PGVsbGlwc2UgY3g9IjM4IiBjeT0iMzYuNSIgcng9IjUiIHJ5PSIyLjgiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKDU1IDM4IDM2LjUpIi8+PGVsbGlwc2UgY3g9IjM4IiBjeT0iNDUuNSIgcng9IjUiIHJ5PSIyLjgiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKC01NSAzOCA0NS41KSIvPjxwYXRoIGQ9Ik01MCAzOEw2MSAzNCIgc3Ryb2tlPSIjNGI4ZjMwIiBzdHJva2Utd2lkdGg9IjEuMyIvPjxlbGxpcHNlIGN4PSI2Ni41IiBjeT0iMzMiIHJ4PSI1LjUiIHJ5PSIzIiBmaWxsPSIjNGI4ZjMwIiB0cmFuc2Zvcm09InJvdGF0ZSgwIDY2LjUgMzMpIi8+PGVsbGlwc2UgY3g9IjYyIiBjeT0iMjguNSIgcng9IjUiIHJ5PSIyLjgiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKC01NSA2MiAyOC41KSIvPjxlbGxpcHNlIGN4PSI2MiIgY3k9IjM3LjUiIHJ4PSI1IiByeT0iMi44IiBmaWxsPSIjNGI4ZjMwIiB0cmFuc2Zvcm09InJvdGF0ZSg1NSA2MiAzNy41KSIvPjxwYXRoIGQ9Ik01MCAzMEwzOSAyNiIgc3Ryb2tlPSIjNGI4ZjMwIiBzdHJva2Utd2lkdGg9IjEuMyIvPjxlbGxpcHNlIGN4PSIzMy41IiBjeT0iMjUiIHJ4PSI1LjUiIHJ5PSIzIiBmaWxsPSIjNGI4ZjMwIiB0cmFuc2Zvcm09InJvdGF0ZSgwIDMzLjUgMjUpIi8+PGVsbGlwc2UgY3g9IjM4IiBjeT0iMjAuNSIgcng9IjUiIHJ5PSIyLjgiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKDU1IDM4IDIwLjUpIi8+PGVsbGlwc2UgY3g9IjM4IiBjeT0iMjkuNSIgcng9IjUiIHJ5PSIyLjgiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKC01NSAzOCAyOS41KSIvPjwvc3ZnPg==', V6: 'data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTAwIDEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZWxsaXBzZSBjeD0iNTAiIGN5PSI5MiIgcng9IjM0IiByeT0iNSIgZmlsbD0iIzhhNWEzNSIvPjxwYXRoIGQ9Ik01MCA5MEw1MCAxNCIgc3Ryb2tlPSIjNGY3ZDJhIiBzdHJva2Utd2lkdGg9IjIiLz48ZWxsaXBzZSBjeD0iNDAiIGN5PSI3MCIgcng9IjYuNSIgcnk9IjQiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKC0yNSA0MCA3MCkiLz48ZWxsaXBzZSBjeD0iNjAiIGN5PSI3MCIgcng9IjYuNSIgcnk9IjQiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKDI1IDYwIDcwKSIvPjxwYXRoIGQ9Ik01MCA2MkwzOSA1OCIgc3Ryb2tlPSIjNGI4ZjMwIiBzdHJva2Utd2lkdGg9IjEuMyIvPjxlbGxpcHNlIGN4PSIzMy41IiBjeT0iNTciIHJ4PSI1LjUiIHJ5PSIzIiBmaWxsPSIjNGI4ZjMwIiB0cmFuc2Zvcm09InJvdGF0ZSgwIDMzLjUgNTcpIi8+PGVsbGlwc2UgY3g9IjM4IiBjeT0iNTIuNSIgcng9IjUiIHJ5PSIyLjgiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKDU1IDM4IDUyLjUpIi8+PGVsbGlwc2UgY3g9IjM4IiBjeT0iNjEuNSIgcng9IjUiIHJ5PSIyLjgiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKC01NSAzOCA2MS41KSIvPjxwYXRoIGQ9Ik01MCA1NEw2MSA1MCIgc3Ryb2tlPSIjNGI4ZjMwIiBzdHJva2Utd2lkdGg9IjEuMyIvPjxlbGxpcHNlIGN4PSI2Ni41IiBjeT0iNDkiIHJ4PSI1LjUiIHJ5PSIzIiBmaWxsPSIjNGI4ZjMwIiB0cmFuc2Zvcm09InJvdGF0ZSgwIDY2LjUgNDkpIi8+PGVsbGlwc2UgY3g9IjYyIiBjeT0iNDQuNSIgcng9IjUiIHJ5PSIyLjgiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKC01NSA2MiA0NC41KSIvPjxlbGxpcHNlIGN4PSI2MiIgY3k9IjUzLjUiIHJ4PSI1IiByeT0iMi44IiBmaWxsPSIjNGI4ZjMwIiB0cmFuc2Zvcm09InJvdGF0ZSg1NSA2MiA1My41KSIvPjxwYXRoIGQ9Ik01MCA0NkwzOSA0MiIgc3Ryb2tlPSIjNGI4ZjMwIiBzdHJva2Utd2lkdGg9IjEuMyIvPjxlbGxpcHNlIGN4PSIzMy41IiBjeT0iNDEiIHJ4PSI1LjUiIHJ5PSIzIiBmaWxsPSIjNGI4ZjMwIiB0cmFuc2Zvcm09InJvdGF0ZSgwIDMzLjUgNDEpIi8+PGVsbGlwc2UgY3g9IjM4IiBjeT0iMzYuNSIgcng9IjUiIHJ5PSIyLjgiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKDU1IDM4IDM2LjUpIi8+PGVsbGlwc2UgY3g9IjM4IiBjeT0iNDUuNSIgcng9IjUiIHJ5PSIyLjgiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKC01NSAzOCA0NS41KSIvPjxwYXRoIGQ9Ik01MCAzOEw2MSAzNCIgc3Ryb2tlPSIjNGI4ZjMwIiBzdHJva2Utd2lkdGg9IjEuMyIvPjxlbGxpcHNlIGN4PSI2Ni41IiBjeT0iMzMiIHJ4PSI1LjUiIHJ5PSIzIiBmaWxsPSIjNGI4ZjMwIiB0cmFuc2Zvcm09InJvdGF0ZSgwIDY2LjUgMzMpIi8+PGVsbGlwc2UgY3g9IjYyIiBjeT0iMjguNSIgcng9IjUiIHJ5PSIyLjgiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKC01NSA2MiAyOC41KSIvPjxlbGxpcHNlIGN4PSI2MiIgY3k9IjM3LjUiIHJ4PSI1IiByeT0iMi44IiBmaWxsPSIjNGI4ZjMwIiB0cmFuc2Zvcm09InJvdGF0ZSg1NSA2MiAzNy41KSIvPjxwYXRoIGQ9Ik01MCAzMEwzOSAyNiIgc3Ryb2tlPSIjNGI4ZjMwIiBzdHJva2Utd2lkdGg9IjEuMyIvPjxlbGxpcHNlIGN4PSIzMy41IiBjeT0iMjUiIHJ4PSI1LjUiIHJ5PSIzIiBmaWxsPSIjNGI4ZjMwIiB0cmFuc2Zvcm09InJvdGF0ZSgwIDMzLjUgMjUpIi8+PGVsbGlwc2UgY3g9IjM4IiBjeT0iMjAuNSIgcng9IjUiIHJ5PSIyLjgiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKDU1IDM4IDIwLjUpIi8+PGVsbGlwc2UgY3g9IjM4IiBjeT0iMjkuNSIgcng9IjUiIHJ5PSIyLjgiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKC01NSAzOCAyOS41KSIvPjxwYXRoIGQ9Ik01MCAyMkw2MSAxOCIgc3Ryb2tlPSIjNGI4ZjMwIiBzdHJva2Utd2lkdGg9IjEuMyIvPjxlbGxpcHNlIGN4PSI2Ni41IiBjeT0iMTciIHJ4PSI1LjUiIHJ5PSIzIiBmaWxsPSIjNGI4ZjMwIiB0cmFuc2Zvcm09InJvdGF0ZSgwIDY2LjUgMTcpIi8+PGVsbGlwc2UgY3g9IjYyIiBjeT0iMTIuNSIgcng9IjUiIHJ5PSIyLjgiIGZpbGw9IiM0YjhmMzAiIHRyYW5zZm9ybT0icm90YXRlKC01NSA2MiAxMi41KSIvPjxlbGxpcHNlIGN4PSI2MiIgY3k9IjIxLjUiIHJ4PSI1IiByeT0iMi44IiBmaWxsPSIjNGI4ZjMwIiB0cmFuc2Zvcm09InJvdGF0ZSg1NSA2MiAyMS41KSIvPjwvc3ZnPg==',
@@ -4097,8 +4105,8 @@ window.Telas.calendario = (function () {
   <script>
 /*
  * Tela 04.0 — Operações do plano (docs/telas/04.0-operacoes.md)
- * Etapa 1 do plano: a estrutura vinda do modelo (grupos e operações com DAP, fenologia e previsão de conclusão),
- * para revisar antes do planejamento talhão a talhão. Quem não quiser mexer segue para o Planejamento pelas etapas do cabeçalho.
+ * Etapa 1 do plano: as operações vindas do modelo, numa tabela por fase da cultura (Pré-plantio, Plantio,
+ * Desenvolvimento, Colheita), para revisar antes do planejamento talhão a talhão. A fase vem do DAP.
  * Desenhada dentro da Tela 04 (mesmo cabeçalho do plano); a Tela 04 repassa os eventos para cá.
  */
 window.Telas = window.Telas || {};
@@ -4106,123 +4114,131 @@ window.Telas = window.Telas || {};
 window.Telas.operacoesPlano = (function () {
   const esc = Util.escapar;
 
-  // Fenologia fixa: DAP negativo = Pré-plantio; DAP 0 = Plantio; grupo Colheita = Colheita
-  function fenologiaFixa(grupo, op) {
-    if (grupo.tipo === 'Colheita') return 'Colheita';
-    if (op.dap === null || op.dap === undefined || op.dap === '') return null;
-    if (op.dap < 0) return 'Pré-plantio';
-    if (op.dap === 0) return 'Plantio';
-    return null;
+  // Faixas na ordem em que as coisas acontecem; dapNovo = DAP sugerido para a operação adicionada na faixa
+  const FASES = [
+    { id: 'pre', nome: 'Pré-plantio', dapNovo: -1 },
+    { id: 'plantio', nome: 'Plantio', dapNovo: 0 },
+    { id: 'desenv', nome: 'Desenvolvimento', dapNovo: 1 },
+    { id: 'colheita', nome: 'Colheita', dapNovo: null }
+  ];
+
+  // Plantio (grupo Sementes) e Colheita: operação fixa (não troca de grupo, não se exclui)
+  const fixo = (g) => g.tipo === 'Sementes' || g.tipo === 'Colheita';
+
+  // Fase pelo DAP: negativo = Pré-plantio; 0 = Plantio; positivo (ou sem DAP) = Desenvolvimento; grupo Colheita = Colheita
+  function faseDe(g, op) {
+    if (g.tipo === 'Colheita') return 'colheita';
+    if (g.tipo === 'Sementes') return 'plantio';
+    if (op.dap === null || op.dap === undefined || op.dap === '') return 'desenv';
+    return op.dap < 0 ? 'pre' : op.dap === 0 ? 'plantio' : 'desenv';
   }
 
-  // Operações na ordem do DAP (sem DAP no fim), como na lista do Planejamento
-  function ordenadas(grupo) {
-    return [...grupo.operacoes].sort((a, b) => (a.dap ?? Infinity) - (b.dap ?? Infinity));
-  }
+  // Ícone de cada tipo de grupo (na coluna Grupo de operação)
+  const ICONE_TIPO = {
+    'Sementes': '<svg viewBox="0 0 24 24" class="tab-op__ico" style="color:#d9822b" aria-hidden="true"><ellipse cx="12" cy="12" rx="6" ry="8" transform="rotate(30 12 12)" fill="none" stroke="currentColor" stroke-width="2"/></svg>',
+    'Tratamento de sementes': '<svg viewBox="0 0 24 24" class="tab-op__ico" style="color:#b0682f" aria-hidden="true"><ellipse cx="12" cy="12" rx="6" ry="8" transform="rotate(30 12 12)" fill="currentColor"/><path d="M9 15c2-1 4-4 5-7" stroke="#fff" stroke-width="1.6" fill="none"/></svg>',
+    'Defensivos': '<svg viewBox="0 0 24 24" class="tab-op__ico" style="color:#2a64a8" aria-hidden="true"><path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>',
+    'Fertilidade': '<svg viewBox="0 0 24 24" class="tab-op__ico" style="color:#3c8d2f" aria-hidden="true"><path d="M5 19c0-8 5-13 14-14-1 9-6 14-14 14z" fill="currentColor"/><path d="M5 19l8-8" stroke="#fff" stroke-width="1.6"/></svg>',
+    'Colheita': '<svg viewBox="0 0 24 24" class="tab-op__ico" style="color:#b8860b" aria-hidden="true"><path d="M12 21V8M12 8c-3 0-4-2-4-4 3 0 4 2 4 4zm0 0c3 0 4-2 4-4-3 0-4 2-4 4zm0 5c-3 0-4-2-4-4 3 0 4 2 4 4zm0 0c3 0 4-2 4-4-3 0-4 2-4 4z" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>'
+  };
+  const iconeFase = (id) => (id === 'colheita' ? ICONE_TIPO.Colheita : Icones.broto);
 
   // ----- Desenho -----
   function desenhar(ctx) {
-    const { plano, somenteLeitura, estado } = ctx;
+    const { plano } = ctx;
+    const porFase = {};
+    FASES.forEach((f) => { porFase[f.id] = []; });
+    plano.grupos.forEach((g) => g.operacoes.forEach((op) => porFase[faseDe(g, op)].push({ g, op })));
     return `
       <section class="estrutura">
-        <div class="estrutura__aviso" role="note">${Icones.info}
-          <p><strong>Revise as operações cadastradas.</strong> Cada operação vira uma Ordem de Serviço (OS) quando o plano for aprovado. Se estiver tudo certo, siga para o planejamento.</p>
+        ${ctx.estado.avisoFechado ? '' : `
+          <div class="estrutura__aviso" role="note">${Icones.info}
+            <p><strong>Revise as operações cadastradas.</strong> Cada operação vira uma Ordem de Serviço (OS) quando o plano for aprovado. Se estiver tudo certo, siga para o planejamento.</p>
+            <button class="botao-icone estrutura__fechar" type="button" data-acao="est-fechar-aviso" aria-label="Fechar o aviso" title="Fechar">${Icones.fechar}</button>
+          </div>`}
+        <div class="tab-op__caixa">
+          <table class="tab-op">
+            <colgroup>
+              <col class="tab-op__c-dap"><col class="tab-op__c-fen"><col class="tab-op__c-op"><col class="tab-op__c-grupo"><col class="tab-op__c-prazo">
+              ${ctx.somenteLeitura ? '' : '<col class="tab-op__c-acao">'}
+            </colgroup>
+            <thead><tr>
+              <th class="tab-op__dap">DAP</th><th>Fenologia</th><th>Operação</th><th>Grupo de operação</th><th>Previsão de conclusão</th>
+              ${ctx.somenteLeitura ? '' : '<th class="tab-op__acao"><span class="so-leitor">Excluir</span></th>'}
+            </tr></thead>
+            ${FASES.map((f) => faixa(f, porFase[f.id], ctx)).join('')}
+          </table>
         </div>
-        ${plano.grupos.length ? plano.grupos.map((g) => grupoHtml(g, ctx)).join('')
-          : '<p class="estrutura__vazio">Nenhum grupo de operações no plano.</p>'}
-        ${somenteLeitura ? '' : `
-          <button class="link-acao estrutura__novo-grupo" type="button" data-acao="est-novo-grupo">${Icones.mais} Novo grupo de operações</button>`}
       </section>`;
-    function grupoHtml(g) {
-      // Grupos começam minimizados: só abre o que a pessoa expandir (ou onde ela acabou de criar uma operação)
-      const recolhido = !estado.abertos.has(g.id);
-      const n = g.operacoes.length;
-      // Semente e Colheita: operação fixa (sem excluir grupo nem operações); plano aprovado: só leitura.
-      // TSI: uma operação só; quem não faz exclui o grupo (sem "Excluir todas as operações")
-      const fixo = ctx.somenteLeitura || g.tipo === 'Sementes' || g.tipo === 'Colheita';
-      return `
-        <section class="estrutura__grupo" aria-label="Grupo ${esc(g.nome)}">
-          <div class="estrutura__topo">
-            <button class="botao-icone estrutura__seta ${recolhido ? 'estrutura__seta--recolhido' : ''}" type="button" data-acao="est-recolher"
-                    data-grupo="${g.id}" aria-expanded="${!recolhido}"
-                    aria-label="${recolhido ? 'Mostrar' : 'Recolher'} operações de ${esc(g.nome)}" title="${recolhido ? 'Mostrar' : 'Recolher'} operações">${Icones.abaixo}</button>
-            ${nomeGrupo(g, ctx)}
-            <span class="estrutura__tipo">${g.tipo ? `tipo ${esc(g.tipo)} · ` : ''}${n} ${n === 1 ? 'operação' : 'operações'}</span>
-            ${g.tipo === 'Colheita' ? '<span class="estrutura__nota">A data vem do plantio: data de plantio + ciclo da variedade</span>' : ''}
-            ${fixo ? '' : `
-              <button class="link-acao estrutura__excluir" type="button" data-acao="est-excluir-grupo" data-grupo="${g.id}"
-                      title="Excluir o grupo do plano (ex.: quem não faz TSI)">${Icones.lixeira} Excluir grupo</button>`}
+  }
+
+  function faixa(f, itens, ctx) {
+    const colunas = ctx.somenteLeitura ? 5 : 6;
+    const n = itens.length;
+    const linhas = [...itens].sort((a, b) => (a.op.dap ?? Infinity) - (b.op.dap ?? Infinity));
+    return `
+      <tbody>
+        <tr class="tab-op__faixa"><th colspan="${colunas}" scope="rowgroup">
+          <div class="tab-op__faixa-linha">
+            ${iconeFase(f.id)}<span class="tab-op__fase">${f.nome}</span>
+            <span class="tab-op__qtd">${n} ${n === 1 ? 'operação' : 'operações'}</span>
+            ${f.id === 'colheita' ? '<span class="tab-op__qtd">· a data vem do plantio + ciclo da variedade</span>'
+              : ctx.somenteLeitura ? '' : `
+              <button class="link-acao tab-op__adicionar" type="button" data-acao="est-nova-op" data-fase="${f.id}">${Icones.mais} Adicionar operação</button>`}
           </div>
-          ${recolhido ? '' : `
-            ${n && !fixo && g.tipo !== 'Tratamento de sementes' ? `
-              <div class="estrutura__barra">
-                <button class="link-acao estrutura__excluir" type="button" data-acao="est-excluir-todas" data-grupo="${g.id}"
-                        title="Excluir todas as operações deste grupo (o grupo continua)">${Icones.lixeira} Excluir todas as operações</button>
-              </div>` : ''}
-            ${n ? `
-              <div class="estrutura__rolagem">
-                <table class="tabela tabela--compacta estrutura__tabela">
-                  <thead><tr>
-                    <th>Operação</th><th class="tabela__numero">DAP</th><th>Fenologia</th><th>Previsão de conclusão</th>
-                    ${somenteLeitura ? '' : '<th class="estrutura__acao"><span class="so-leitor">Excluir</span></th>'}
-                  </tr></thead>
-                  <tbody>${ordenadas(g).map((op) => linha(g, op, ctx)).join('')}</tbody>
-                </table>
-              </div>` : '<p class="estrutura__vazio">Nenhuma operação neste grupo.</p>'}
-            ${somenteLeitura || g.tipo === 'Colheita' || g.tipo === 'Sementes' ? '' : `
-              <button class="link-acao estrutura__nova" type="button" data-acao="est-nova-op" data-grupo="${g.id}">${Icones.mais} Nova operação</button>`}`}
-        </section>`;
-    }
+        </th></tr>
+        ${n ? linhas.map(({ g, op }) => linha(g, op, f.id, ctx)).join('')
+          : `<tr><td colspan="${colunas}" class="tab-op__vazio">Nenhuma operação nesta fase.</td></tr>`}
+      </tbody>`;
   }
 
-  // Nome do grupo: dois cliques (ou F2) para renomear
-  function nomeGrupo(g, { somenteLeitura, estado }) {
-    if (estado.renomeandoGrupo === g.id) {
-      return `<input class="campo__controle estrutura__campo-grupo" data-campo="est-nome-grupo" data-grupo="${g.id}" value="${esc(g.nome)}"
-                     aria-label="Nome do grupo" data-foco-inicial>`;
-    }
-    return somenteLeitura ? `<h2 class="estrutura__nome">${esc(g.nome)}</h2>`
-      : `<h2 class="estrutura__nome estrutura__nome--editavel" tabindex="0" data-est-renomear-grupo="${g.id}"
-             title="Clique duas vezes para renomear">${esc(g.nome)}</h2>`;
-  }
-
-  function linha(g, op, { somenteLeitura, estado }) {
-    const fixa = fenologiaFixa(g, op);
+  function linha(g, op, fase, ctx) {
+    const { somenteLeitura, estado, plano } = ctx;
+    // DAP: Plantio sempre 0; Colheita pelo ciclo da variedade; demais editáveis
+    const dap = g.tipo === 'Sementes' ? '<span class="tab-op__fixo" title="O plantio é sempre o DAP 0">0</span>'
+      : g.tipo === 'Colheita' ? '<span class="tab-op__fixo" title="Data de plantio + ciclo da variedade, talhão a talhão">Pelo ciclo</span>'
+        : somenteLeitura ? `${op.dap ?? '—'}`
+          : `<input class="campo__controle tab-op__num" type="text" inputmode="numeric" data-campo="est-dap" data-op="${op.id}"
+                    value="${op.dap ?? ''}" placeholder="—" aria-label="DAP de ${esc(op.nome)}">`;
+    // Fenologia: só no Desenvolvimento (Pré-plantio, Plantio e Colheita não têm fenologia)
+    const fenologia = fase !== 'desenv' ? '<span class="tab-op__fixo" title="Sem fenologia nesta fase">—</span>'
+      : somenteLeitura ? `<span class="tab-op__fixo">${esc(op.fenologia || '—')}</span>`
+        : `<select class="campo__controle tab-op__fen" data-campo="est-fenologia" data-op="${op.id}" aria-label="Fenologia de ${esc(op.nome)}">
+             <option value="">—</option>
+             ${DADOS.fenologia.map((f) => `<option ${f === op.fenologia ? 'selected' : ''}>${f}</option>`).join('')}
+           </select>`;
     // Nome: texto; dois cliques (ou F2) para renomear
     const nome = estado.renomeandoOp === op.id
-      ? `<input class="campo__controle estrutura__campo-nome" data-campo="est-nome-op" data-op="${op.id}" value="${esc(op.nome)}"
+      ? `<input class="campo__controle tab-op__campo" data-campo="est-nome-op" data-op="${op.id}" value="${esc(op.nome)}"
                 aria-label="Nome da operação" data-foco-inicial>`
       : somenteLeitura ? esc(op.nome)
-        : `<span class="estrutura__op" tabindex="0" data-est-renomear-op="${op.id}" title="Clique duas vezes para renomear">${esc(op.nome)}</span>`;
-    // DAP: Plantio sempre 0 (não muda); Colheita pelo ciclo da variedade; demais editáveis
-    const dap = g.tipo === 'Sementes' ? '<span class="estrutura__fixo" title="O plantio é sempre o DAP 0">0</span>'
-      : g.tipo === 'Colheita' ? '<span class="estrutura__fixo" title="Data de plantio + ciclo da variedade, talhão a talhão">Pelo ciclo</span>'
-        : somenteLeitura ? `${op.dap ?? '—'}`
-          : `<input class="campo__controle estrutura__num" type="text" inputmode="numeric" data-campo="est-dap" data-op="${op.id}"
-                    value="${op.dap ?? ''}" placeholder="—" aria-label="DAP de ${esc(op.nome)}">`;
-    const fenologia = fixa || somenteLeitura
-      ? `<span class="estrutura__fixo">${esc(fixa || op.fenologia || '—')}</span>`
-      : `<select class="campo__controle estrutura__fen" data-campo="est-fenologia" data-op="${op.id}" aria-label="Fenologia de ${esc(op.nome)}">
-           <option value="">—</option>
-           ${DADOS.fenologia.map((f) => `<option ${f === op.fenologia ? 'selected' : ''}>${f}</option>`).join('')}
-         </select>`;
+        : `<span class="tab-op__nome" tabindex="0" data-est-renomear-op="${op.id}" title="Clique duas vezes para renomear">${esc(op.nome)}</span>`;
+    // Grupo: Plantio e Colheita fixos; as demais escolhem entre os grupos (ou criam um novo)
+    const grupo = fixo(g) || somenteLeitura
+      ? `<span class="tab-op__grupo">${ICONE_TIPO[g.tipo] || ''}${esc(g.nome)}</span>`
+      : `<span class="tab-op__grupo">${ICONE_TIPO[g.tipo] || ''}
+           <select class="campo__controle tab-op__sel-grupo" data-campo="est-grupo" data-op="${op.id}" aria-label="Grupo de operação de ${esc(op.nome)}">
+             ${plano.grupos.filter((x) => !fixo(x)).map((x) => `<option value="${x.id}" ${x === g ? 'selected' : ''}>${esc(x.nome)}</option>`).join('')}
+             <option value="__novo__">+ Novo grupo de operação</option>
+           </select></span>`;
     const prazo = Telas.calendario.prazoDe(op, g);
     const previsao = somenteLeitura ? `${prazo} ${prazo === 1 ? 'dia' : 'dias'}` : `
-      <span class="estrutura__prazo"><input class="campo__controle estrutura__num" type="text" inputmode="numeric" data-campo="est-prazo"
+      <span class="tab-op__prazo"><input class="campo__controle tab-op__num" type="text" inputmode="numeric" data-campo="est-prazo"
              data-op="${op.id}" value="${prazo}" aria-label="Previsão de conclusão de ${esc(op.nome)}, em dias"> dias</span>`;
     return `
       <tr>
-        <td class="estrutura__celula-nome">${nome}</td>
-        <td class="tabela__numero">${dap}</td>
+        <td class="tab-op__dap">${dap}</td>
         <td>${fenologia}</td>
+        <td class="tab-op__op">${nome}</td>
+        <td>${grupo}</td>
         <td>${previsao}</td>
-        ${somenteLeitura ? '' : `<td class="estrutura__acao">${g.tipo === 'Sementes' || g.tipo === 'Colheita' ? '' : `
-          <button class="botao-icone" type="button" data-acao="est-excluir-op" data-grupo="${g.id}" data-op="${op.id}"
+        ${somenteLeitura ? '' : `<td class="tab-op__acao">${fixo(g) ? '' : `
+          <button class="botao-icone" type="button" data-acao="est-excluir-op" data-op="${op.id}"
                   title="Excluir operação" aria-label="Excluir ${esc(op.nome)}">${Icones.lixeira}</button>`}</td>`}
       </tr>`;
   }
 
-  // ----- Eventos (repassados pela Tela 04). Devolvem true quando o evento era daqui. -----
+  // ----- Ações -----
   function acharOp(plano, id) {
     for (const g of plano.grupos) {
       const op = g.operacoes.find((o) => o.id === id);
@@ -4231,115 +4247,146 @@ window.Telas.operacoesPlano = (function () {
     return null;
   }
 
+  // Grupo que fica sem nenhuma operação some do plano (e das guias do Planejamento); Semente e Colheita ficam.
+  // Devolve a posição do grupo removido (para o Desfazer), ou -1.
+  function removerSeVazio(plano, g) {
+    if (g.operacoes.length || fixo(g)) return -1;
+    const i = plano.grupos.indexOf(g);
+    plano.grupos.splice(i, 1);
+    return i;
+  }
+
+  // Nome livre para a operação nova: "Nova operação", "Nova operação 2"…
+  function nomeNovo(acoes) {
+    let n = 1;
+    let nome = 'Nova operação';
+    while (acoes.nomeOperacaoRepetido(nome, null)) nome = `Nova operação ${++n}`;
+    return nome;
+  }
+
+  // Adicionar operação na faixa: entra no primeiro grupo que recebe operações (troca na coluna Grupo),
+  // com o DAP da fase, e já abre o nome para editar
+  function novaOperacao(fase, ctx, acoes) {
+    const { plano, estado } = ctx;
+    const g = plano.grupos.find((x) => !fixo(x));
+    if (!g) { Aviso.mostrar('Crie um grupo de operação no Planejamento para adicionar operações'); return; }
+    const f = FASES.find((x) => x.id === fase);
+    const op = Planos.novaOperacao(nomeNovo(acoes), f.dapNovo);
+    g.operacoes.push(op);
+    estado.renomeandoOp = op.id;
+    acoes.alterou(); acoes.redesenhar(null);
+  }
+
+  // Excluir operação: com talhões planejados, confirma com o impacto; depois, Desfazer (volta o grupo, se tinha sumido)
+  function excluirOperacao(id, ctx, acoes) {
+    const { plano } = ctx;
+    const achado = acharOp(plano, id);
+    if (!achado) return;
+    const { g, op } = achado;
+    const remover = () => {
+      const i = g.operacoes.indexOf(op);
+      g.operacoes.splice(i, 1);
+      const ig = removerSeVazio(plano, g);
+      acoes.alterou(); acoes.redesenhar(null);
+      Aviso.mostrar(`${esc(op.nome)} excluída${ig >= 0 ? ` (o grupo ${esc(g.nome)} ficou vazio e saiu do plano)` : ''}`, { acao: 'Desfazer', aoAgir: () => {
+        if (ig >= 0) plano.grupos.splice(ig, 0, g);
+        g.operacoes.splice(i, 0, op);
+        acoes.alterou(); acoes.redesenhar(null);
+      } });
+    };
+    const talhoes = Object.keys(op.talhoes || {}).length + Object.keys(op.plantio || {}).length;
+    if (!talhoes) { remover(); return; }
+    Modal.confirmar({
+      titulo: `Excluir ${esc(op.nome)}?`,
+      texto: `Ela já está planejada em ${talhoes} ${talhoes === 1 ? 'talhão' : 'talhões'}; esse planejamento também será apagado.`,
+      botoes: [{ rotulo: 'Cancelar' }, { rotulo: 'Excluir operação', classe: 'perigo', acao: remover }]
+    });
+  }
+
+  // Trocar o grupo da operação (ou criar um grupo novo para ela); o grupo de origem que ficar vazio some
+  function moverParaGrupo(op, origem, destino, ctx, acoes) {
+    if (destino === origem) return;
+    origem.operacoes.splice(origem.operacoes.indexOf(op), 1);
+    destino.operacoes.push(op);
+    removerSeVazio(ctx.plano, origem);
+    acoes.alterou();
+  }
+
+  // ----- Eventos (repassados pela Tela 04). Devolvem true quando o evento era daqui. -----
   function aoClicar(e, ctx, acoes) {
     const alvo = e.target.closest('[data-acao^="est-"]');
     if (!alvo) return false;
-    const { plano, estado } = ctx;
-    const grupo = plano.grupos.find((g) => g.id === alvo.dataset.grupo);
-    switch (alvo.dataset.acao) {
-      case 'est-recolher':
-        if (estado.abertos.has(grupo.id)) estado.abertos.delete(grupo.id); else estado.abertos.add(grupo.id);
-        acoes.redesenhar(`[data-acao="est-recolher"][data-grupo="${grupo.id}"]`); break;
-      case 'est-nova-op': estado.abertos.add(grupo.id); acoes.criarOperacao(grupo); break;
-      case 'est-excluir-op': acoes.excluirOperacao(grupo, grupo.operacoes.find((o) => o.id === alvo.dataset.op)); break;
-      case 'est-novo-grupo': acoes.novoGrupo(); break;
-      case 'est-excluir-todas': excluirTodas(grupo, ctx, acoes); break;
-      case 'est-excluir-grupo': acoes.excluirGrupo(grupo); break;
-    }
+    // O aviso do topo é só um aviso: fechado, não volta para este plano enquanto a página estiver aberta
+    if (alvo.dataset.acao === 'est-fechar-aviso') { ctx.estado.avisoFechado = true; acoes.redesenhar(null); }
+    if (alvo.dataset.acao === 'est-nova-op') novaOperacao(alvo.dataset.fase, ctx, acoes);
+    if (alvo.dataset.acao === 'est-excluir-op') excluirOperacao(alvo.dataset.op, ctx, acoes);
     return true;
-  }
-
-  // Excluir todas as operações do grupo de uma vez (o modelo não serve): o grupo fica, vazio, para receber as do usuário.
-  // Confirma com o impacto (operações e talhões já planejados); depois, Desfazer.
-  function excluirTodas(grupo, ctx, acoes) {
-    const ops = [...grupo.operacoes];
-    const comTalhoes = ops.filter((o) => Object.keys(o.talhoes || {}).length).length;
-    const n = ops.length;
-    Modal.confirmar({
-      titulo: n === 1 ? `Excluir a operação de ${esc(grupo.nome)}?` : `Excluir as ${n} operações de ${esc(grupo.nome)}?`,
-      texto: `O grupo continua, vazio, para você cadastrar as suas operações.${comTalhoes
-        ? ` ${comTalhoes} ${comTalhoes === 1 ? 'operação já tem' : 'operações já têm'} talhões planejados, que também serão apagados.` : ''}`,
-      botoes: [{ rotulo: 'Cancelar' }, { rotulo: 'Excluir operações', classe: 'perigo', acao: () => {
-        grupo.operacoes = [];
-        acoes.alterou(); acoes.redesenhar(null);
-        Aviso.mostrar(`${n} ${n === 1 ? 'operação excluída' : 'operações excluídas'} de ${esc(grupo.nome)}`, { acao: 'Desfazer', aoAgir: () => {
-          grupo.operacoes = ops; acoes.alterou(); acoes.redesenhar(null);
-        } });
-      } }]
-    });
   }
 
   function aoDuploClique(e, ctx, acoes) {
     if (ctx.somenteLeitura) return false;
-    const g = e.target.closest('[data-est-renomear-grupo]');
     const o = e.target.closest('[data-est-renomear-op]');
-    if (!g && !o) return false;
-    ctx.estado.renomeandoGrupo = g ? g.dataset.estRenomearGrupo : null;
-    ctx.estado.renomeandoOp = o ? o.dataset.estRenomearOp : null;
+    if (!o) return false;
+    ctx.estado.renomeandoOp = o.dataset.estRenomearOp;
     acoes.redesenhar(null);
     return true;
   }
 
   function aoTeclar(e, ctx, acoes) {
     const el = e.target;
-    if (!ctx.somenteLeitura && e.key === 'F2' && (el.dataset.estRenomearGrupo || el.dataset.estRenomearOp)) {
+    if (!ctx.somenteLeitura && e.key === 'F2' && el.dataset.estRenomearOp) {
       e.preventDefault();
-      ctx.estado.renomeandoGrupo = el.dataset.estRenomearGrupo || null;
-      ctx.estado.renomeandoOp = el.dataset.estRenomearOp || null;
+      ctx.estado.renomeandoOp = el.dataset.estRenomearOp;
       acoes.redesenhar(null);
       return true;
     }
     const campo = el.dataset.campo || '';
     if (!campo.startsWith('est-')) return false;
     if (e.key === 'Enter') { e.preventDefault(); el.blur(); }
-    if (e.key === 'Escape' && (campo === 'est-nome-op' || campo === 'est-nome-grupo')) {
+    if (e.key === 'Escape' && campo === 'est-nome-op') {
       e.preventDefault(); e.stopPropagation();
-      ctx.estado.renomeandoOp = null; ctx.estado.renomeandoGrupo = null;
+      ctx.estado.renomeandoOp = null;
       acoes.redesenhar(null);
     }
     return true;
   }
 
-  // Nomes: gravam ao sair do campo (Enter tira o foco). Vazio volta ao anterior; operação com nome repetido não vale.
+  // Nome: grava ao sair do campo (Enter tira o foco). Vazio volta ao anterior; nome repetido não vale.
   function aoDesfocar(e, ctx, acoes) {
     const el = e.target;
-    const { plano, estado } = ctx;
-    if (el.dataset.campo === 'est-nome-grupo' && estado.renomeandoGrupo) {
-      const g = plano.grupos.find((x) => x.id === el.dataset.grupo);
-      const v = el.value.trim();
-      estado.renomeandoGrupo = null;
-      if (g && v && v !== g.nome) { g.nome = v; acoes.alterou(); }
-      acoes.redesenhar(`[data-est-renomear-grupo="${el.dataset.grupo}"]`);
-      return true;
+    if (el.dataset.campo !== 'est-nome-op' || !ctx.estado.renomeandoOp) return false;
+    const achado = acharOp(ctx.plano, el.dataset.op);
+    const v = el.value.trim();
+    ctx.estado.renomeandoOp = null;
+    if (achado && v && v !== achado.op.nome) {
+      if (acoes.nomeOperacaoRepetido(v, achado.op)) Aviso.mostrar('Já existe uma operação com esse nome');
+      else { achado.op.nome = v; acoes.alterou(); }
     }
-    if (el.dataset.campo === 'est-nome-op' && estado.renomeandoOp) {
-      const achado = acharOp(plano, el.dataset.op);
-      const v = el.value.trim();
-      estado.renomeandoOp = null;
-      if (achado && v && v !== achado.op.nome) {
-        if (acoes.nomeOperacaoRepetido(v, achado.op)) Aviso.mostrar('Já existe uma operação com esse nome');
-        else { achado.op.nome = v; acoes.alterou(); }
-      }
-      acoes.redesenhar(`[data-est-renomear-op="${el.dataset.op}"]`);
-      return true;
-    }
-    return false;
+    acoes.redesenhar(`[data-est-renomear-op="${el.dataset.op}"]`);
+    return true;
   }
 
   function aoMudar(e, ctx, acoes) {
     const campo = e.target.dataset.campo || '';
-    if (!['est-dap', 'est-fenologia', 'est-prazo'].includes(campo)) return false;
+    if (!['est-dap', 'est-fenologia', 'est-prazo', 'est-grupo'].includes(campo)) return false;
     const achado = acharOp(ctx.plano, e.target.dataset.op);
     if (!achado) return true;
-    const { op } = achado;
-    if (campo === 'est-dap') {
+    const { g, op } = achado;
+    if (campo === 'est-grupo') {
+      if (e.target.value === '__novo__') {
+        e.target.value = g.id; // volta ao grupo atual até o novo ser criado
+        acoes.novoGrupo((novo) => moverParaGrupo(op, g, novo, ctx, acoes));
+        return true;
+      }
+      moverParaGrupo(op, g, ctx.plano.grupos.find((x) => x.id === e.target.value), ctx, acoes);
+    } else if (campo === 'est-dap') {
       const n = Util.numero(e.target.value);
       // DAP é obrigatório: apagar não vale, o campo volta ao valor anterior
       if (n === null && op.dap !== null && op.dap !== undefined) {
         e.target.value = op.dap; Aviso.mostrar('Toda operação precisa de DAP'); return true;
       }
       op.dap = n === null ? null : Math.round(n);
-      if (op.dap !== null && op.dap <= 0) op.fenologia = ''; // pré-plantio e plantio: fenologia fixa
+      if (op.dap !== null && op.dap <= 0) op.fenologia = ''; // pré-plantio e plantio: sem fenologia
     } else if (campo === 'est-fenologia') {
       op.fenologia = e.target.value;
     } else if (campo === 'est-prazo') {
@@ -4576,16 +4623,13 @@ window.Telas.planoOperacoes = (function () {
 
   // Operações do plano (Tela 04.0, etapa 1): desenhada aqui dentro, com o mesmo cabeçalho do plano
   function ctxEstrutura() {
-    ui.estrutura = ui.estrutura || { abertos: new Set(), renomeandoGrupo: null, renomeandoOp: null };
+    ui.estrutura = ui.estrutura || { renomeandoOp: null };
     return { plano, somenteLeitura, estado: ui.estrutura };
   }
   const acoesEstrutura = {
     redesenhar: (foco) => (foco ? desenharMantendoFoco(foco) : desenharTudo()),
     alterou: () => alterou(),
-    criarOperacao: (grupo) => criarOperacao(grupo),
-    excluirOperacao: (grupo, op) => excluirOperacao(grupo, op),
-    novoGrupo: () => novoGrupo(),
-    excluirGrupo: (grupo) => excluirGrupo(grupo),
+    novoGrupo: (aoCriar) => novoGrupo(aoCriar),
     nomeOperacaoRepetido: (nome, op) => nomeOperacaoRepetido(nome, op)
   };
 
@@ -4754,10 +4798,10 @@ window.Telas.planoOperacoes = (function () {
       : `<input class="campo__controle op-cabecalho__dap ${erroDap ? 'campo__controle--erro' : ''}" id="op-dap" type="text" inputmode="numeric"
                 data-campo="op-dap" value="${op.dap ?? ''}" placeholder="—" ${erroDap ? 'aria-invalid="true"' : ''}>
          ${erroDap ? '<p class="erro-campo">Informação obrigatória</p>' : ''}`;
-    // Fenologia já escrita e sem escolha (todos os grupos): DAP negativo = "Pré-plantio"; DAP 0 = "Plantio"
+    // Pré-plantio (DAP negativo) e Plantio (DAP 0) não têm fenologia: "—", sem escolha
     const temDap = op.dap !== null && op.dap !== undefined && op.dap !== '';
-    const fixa = temDap && op.dap < 0 ? ['Pré-plantio', 'DAP negativo: antes do plantio']
-      : temDap && op.dap === 0 ? ['Plantio', 'DAP 0: dia do plantio'] : null;
+    const fixa = temDap && op.dap < 0 ? ['—', 'Pré-plantio (DAP negativo): sem fenologia']
+      : temDap && op.dap === 0 ? ['—', 'Plantio (DAP 0): sem fenologia'] : null;
     const fenologia = somenteLeitura
       ? `<span class="campo__valor">${fixa ? fixa[0] : op.fenologia || '—'}</span>`
       : fixa
@@ -7486,7 +7530,8 @@ window.Telas.planoOperacoes = (function () {
   }
 
   // ----- Grupos -----
-  function novoGrupo() {
+  // aoCriar(grupo): chamado com o grupo criado (ex.: a etapa Operações move a operação para ele)
+  function novoGrupo(aoCriar) {
     const modal = Modal.abrir(`
       <form class="formulario" novalidate>
         <div class="modal__corpo">
@@ -7520,8 +7565,11 @@ window.Telas.planoOperacoes = (function () {
       e.preventDefault();
       if (form.querySelector('[type=submit]').disabled) return;
       const grupo = Planos.novoGrupo(form.elements.nome.value.trim(), form.elements.tipo.value);
-      plano.grupos.push(grupo);
+      // Entra antes do grupo Colheita, que fica sempre por último
+      const iColheita = plano.grupos.findIndex((g) => g.tipo === 'Colheita');
+      plano.grupos.splice(iColheita >= 0 ? iColheita : plano.grupos.length, 0, grupo);
       ui.grupoId = grupo.id;
+      if (typeof aoCriar === 'function') aoCriar(grupo);
       modal.fechar(); limparSelecao(); pararRenomearNaLista(); alterou(); desenharTudo();
     });
     form.elements.nome.focus();
