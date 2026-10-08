@@ -12,15 +12,15 @@ Definir o contexto do novo plano (safra, empresa, fazenda, cultura) e como ele v
 - Título: "Criar Plano de Safra"; subtítulo: "Defina o contexto do novo planejamento."; botão X para fechar.
 - Campos, nesta ordem, todos obrigatórios: Safra, Empresa, Fazenda, Cultura.
 - Abaixo de Safra, link "+ Criar nova safra".
-- Pergunta "Como deseja iniciar o plano?" com quatro cards (um selecionado por vez):
+- Pergunta "Como deseja iniciar o plano?" com três cards (um selecionado por vez):
 
 | Card | Texto | Comportamento |
 |---|---|---|
 | Usar modelo (pré-selecionado) | Use uma estrutura pronta de operações e ajuste conforme necessário. | Carrega a lista de operações de exemplo. |
-| Plano em branco | Monte a lista de operações conforme a realidade da fazenda. | Lista de operações vazia. |
-| Importar XLSX | Continue um planejamento exportado por este sistema. Só aceita o arquivo .xlsx gerado pelo botão Exportar do Plano de Safra. | Na v1 aceita só o arquivo exportado pelo próprio protótipo. Ver as regras abaixo. |
+| Importar XLSX | Continue um plano exportado por este sistema (.xlsx). | Na v1 aceita só o arquivo exportado pelo próprio protótipo. Ver as regras abaixo. |
 | Clonar safra anterior | Utilize o plano de uma safra anterior como base para o novo planejamento. | Desabilitado, com selo "Em breve". Sem ação. |
 
+- Na v1 **não há "Plano em branco"**: o plano sempre nasce do modelo (ou do arquivo importado), e quem quiser outra estrutura exclui grupos ou operações e cria os seus na etapa Operações (Tela 04.0).
 - Botões no rodapé: "Cancelar" e "Continuar para as operações".
 
 ## Regras

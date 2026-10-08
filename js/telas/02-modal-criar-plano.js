@@ -8,10 +8,8 @@ window.Telas.abrirModalCriarPlano = function ({ aoCriar }) {
   const INICIOS = [
     { valor: 'modelo',   titulo: 'Usar modelo',     icone: Icones.lista,
       texto: 'Use uma estrutura pronta de operações e ajuste conforme necessário.' },
-    { valor: 'branco',   titulo: 'Plano em branco', icone: Icones.lapis,
-      texto: 'Monte a lista de operações conforme a realidade da fazenda.' },
     { valor: 'importar', titulo: 'Importar XLSX',   icone: Icones.planilha,
-      texto: 'Continue um planejamento exportado por este sistema. Só aceita o arquivo .xlsx gerado pelo botão Exportar do Plano de Safra.' },
+      texto: 'Continue um plano exportado por este sistema (.xlsx).' },
     { valor: 'clonar',   titulo: 'Clonar safra anterior', icone: Icones.copiar, emBreve: true,
       texto: 'Utilize o plano de uma safra anterior como base para o novo planejamento.' }
   ];

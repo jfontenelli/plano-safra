@@ -584,7 +584,7 @@ select.campo__controle option { color: var(--texto); }
 
 .inicios__grade {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 12px;
 }
 
@@ -631,6 +631,15 @@ select.campo__controle option { color: var(--texto); }
 .card-inicio__icone .icone { width: 22px; height: 22px; }
 
 .card-inicio__textos { display: flex; flex-direction: column; gap: 4px; }
+
+/* Três cards lado a lado: rádio, ícone e título na 1ª linha; a descrição embaixo, com a largura toda do card */
+.inicios__grade .card-inicio { display: grid; grid-template-columns: auto auto 1fr; align-items: start; align-content: start; gap: 8px 10px; padding: 14px; }
+.inicios__grade .card-inicio__radio { margin: 1px 0 0; }
+.inicios__grade .card-inicio__icone { margin: 0; display: inline-flex; }
+.inicios__grade .card-inicio__titulo { line-height: 20px; }
+.inicios__grade .card-inicio__textos { display: contents; }
+.inicios__grade .card-inicio__titulo { grid-column: 3; }
+.inicios__grade .card-inicio__texto { grid-column: 1 / -1; align-self: start; }
 
 .card-inicio__titulo {
   display: flex;
@@ -1946,6 +1955,7 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 
 /* Modal Criar plano: Importar XLSX */
 .importar { margin-top: 16px; display: flex; flex-direction: column; gap: 6px; }
+.importar[hidden] { display: none; } /* só com "Importar XLSX" escolhido */
 .importar__arquivo { font: inherit; font-size: 14px; }
 .importar__ok { margin: 0; font-size: 13px; color: var(--verde-700); font-weight: 600; }
 .importar__diferencas { margin-top: 4px; padding: 12px 14px; border: 1px solid #f2de9b; border-radius: 8px; background: #fff6d6; font-size: 14px; }
@@ -3195,10 +3205,8 @@ window.Telas.abrirModalCriarPlano = function ({ aoCriar }) {
   const INICIOS = [
     { valor: 'modelo',   titulo: 'Usar modelo',     icone: Icones.lista,
       texto: 'Use uma estrutura pronta de operações e ajuste conforme necessário.' },
-    { valor: 'branco',   titulo: 'Plano em branco', icone: Icones.lapis,
-      texto: 'Monte a lista de operações conforme a realidade da fazenda.' },
     { valor: 'importar', titulo: 'Importar XLSX',   icone: Icones.planilha,
-      texto: 'Continue um planejamento exportado por este sistema. Só aceita o arquivo .xlsx gerado pelo botão Exportar do Plano de Safra.' },
+      texto: 'Continue um plano exportado por este sistema (.xlsx).' },
     { valor: 'clonar',   titulo: 'Clonar safra anterior', icone: Icones.copiar, emBreve: true,
       texto: 'Utilize o plano de uma safra anterior como base para o novo planejamento.' }
   ];
@@ -7791,7 +7799,7 @@ window.Telas.planoOperacoes = (function () {
   }
 
   // Cria o plano com os dados do modal e abre a etapa Operações.
-  // Usar modelo: grupos e operações do modelo. Plano em branco: nenhum grupo (o cliente cria tudo).
+  // Usar modelo: grupos e operações do modelo (na v1 não há "Plano em branco": o usuário ajusta o modelo na etapa Operações).
   // O primeiro plano criado (a partir do primeiro uso) entra na lista junto com os planos de exemplo.
   // Importar XLSX: grupos, operações, plantio e recomendações vêm do arquivo exportado, na fazenda escolhida.
   function criarPlano({ importado, ...contexto }) {

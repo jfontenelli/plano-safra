@@ -92,7 +92,7 @@
   }
 
   // Cria o plano com os dados do modal e abre a etapa Operações.
-  // Usar modelo: grupos e operações do modelo. Plano em branco: nenhum grupo (o cliente cria tudo).
+  // Usar modelo: grupos e operações do modelo (na v1 não há "Plano em branco": o usuário ajusta o modelo na etapa Operações).
   // O primeiro plano criado (a partir do primeiro uso) entra na lista junto com os planos de exemplo.
   // Importar XLSX: grupos, operações, plantio e recomendações vêm do arquivo exportado, na fazenda escolhida.
   function criarPlano({ importado, ...contexto }) {

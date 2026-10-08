@@ -70,8 +70,8 @@ Agrônomo da fazenda e líder de operações podem ser a mesma pessoa, conforme 
 - **Por enquanto o protótipo funciona só para soja**: a lista de culturas tem só Soja (já vem escolhida no modal). Variedades, população, bags e TSI são de soja.
 - "Como deseja iniciar o plano?":
   - **Usar modelo** (pré-selecionado): "Use uma estrutura pronta de operações e ajuste conforme necessário." Lista de operações levantada com os clientes, pré-preenchida para ajustar. Serve também de plano de exemplo para o usuário ver como fica.
-  - **Plano em branco**: "Monte a lista de operações conforme a realidade da fazenda." Lista de operações vazia.
-  - **Importar XLSX**: "Continue um planejamento exportado por este sistema. Só aceita o arquivo .xlsx gerado pelo botão Exportar do Plano de Safra." Na v1, só o arquivo exportado pelo protótipo. Safra, empresa, fazenda e cultura do modal são conferidas com as do arquivo; se forem diferentes, a pessoa escolhe "Usar os do arquivo" ou "Manter os do modal" (talhões que não existem na fazenda ficam de fora, com aviso).
+  - **Sem "Plano em branco" na v1**: o plano sempre nasce do modelo (ou do arquivo importado); quem quiser outra estrutura exclui grupos ou operações e cria os seus na etapa Operações.
+  - **Importar XLSX**: "Continue um plano exportado por este sistema (.xlsx)." Na v1, só o arquivo exportado pelo protótipo. Safra, empresa, fazenda e cultura do modal são conferidas com as do arquivo; se forem diferentes, a pessoa escolhe "Usar os do arquivo" ou "Manter os do modal" (talhões que não existem na fazenda ficam de fora, com aviso).
   - **Clonar safra anterior**: card visível e desabilitado com selo "Em breve", sem ação por enquanto.
 - Botões: Cancelar e "Continuar para o cadastro" (leva à etapa 1). "Continuar" fica desabilitado até os quatro campos estarem preenchidos.
 
@@ -249,7 +249,6 @@ Referência: ordem_servico_compass_erp.docx (telas do Compass).
 - Cultura na lista com complemento quando houver talhões de outra cultura (ex.: "Soja · 3 talhões com milho").
 - Criar nova safra propondo o nome no formato padrão (ex.: 2026/27) para evitar duplicidade.
 - Modal de criação: fazenda filtrada pela empresa; aviso imediato quando a fazenda já tem plano na safra, com atalho "Abrir plano existente"; rodapé com botões sempre visível.
-- Poder carregar o modelo de operações depois, dentro da etapa Cadastro, para quem escolheu "Plano em branco".
 - Produtividade e preço em bloco recolhível na etapa Cadastro, com unidade automática pela cultura (sc/ha, @/ha).
 
 ## 9. Notas para o protótipo
