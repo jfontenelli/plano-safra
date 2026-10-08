@@ -2037,12 +2037,13 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .estrutura__aviso { padding: 8px 8px 8px 14px; border: 1px solid #f0d98a; border-radius: var(--raio); background: #fffbea; }
 .estrutura__fechar { margin-left: auto; width: 30px; height: 30px; }
 .estrutura__fechar .icone { width: 16px; height: 16px; }
-/* Tabela por fase (Pré-plantio, Plantio, Desenvolvimento, Colheita), do tamanho do conteúdo: as colunas ficam juntas */
+/* Tabela por fase (Pré-plantio, Plantio, Manejo da cultura, Colheita), do tamanho do conteúdo: as colunas ficam juntas */
 /* Largura toda da área (acompanha o menu recolhido ou expandido e o tamanho da tela). Cada coluna tem uma proporção
    fixa: a sobra se divide entre todas, sem abrir um vão no meio. Sem rolagem própria: o cabeçalho (sticky) fica preso
    no topo da área que rola (a da etapa). */
 .tab-op__caixa { width: 100%; background: var(--superficie); border: 1px solid var(--borda); border-radius: var(--raio); box-shadow: var(--sombra); }
 .tab-op { width: 100%; table-layout: fixed; border-collapse: collapse; font-size: 14px; }
+.tab-op__c-fase { width: 44px; }
 .tab-op__c-dap { width: 8%; }
 .tab-op__c-fen { width: 13%; }
 .tab-op__c-op { width: 33%; }
@@ -2055,6 +2056,21 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .tab-op td { padding: 6px 16px; border-top: 1px solid var(--borda); vertical-align: middle; }
 .tab-op__dap { text-align: center !important; font-variant-numeric: tabular-nums; }
 .tab-op__acao { text-align: center; }
+/* Faixa da fase na vertical, à esquerda, ocupando as linhas da fase (nome deitado e ícone embaixo) */
+.tab-op__fase-cab { padding: 0 !important; }
+.tab-op__fase-v { padding: 0; border-top: 1px solid #fff; vertical-align: middle; }
+/* Cores das fases (definidas pela usuária) */
+.tab-op__fase-v--pre { background: #E3D7CF; } /* #A37B60 clareado (70% de branco) */
+.tab-op__fase-v--plantio { background: #D7E0D2; } /* #79966A clareado (70% de branco) */
+.tab-op__fase-v--desenv { background: #C3D6CE; } /* #36765B clareado (70% de branco) */
+.tab-op__fase-v--colheita { background: #E8DFCC; } /* #B39456 clareado (70% de branco) */
+.tab-op__fase-v-conteudo { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; min-height: 100%; padding: 10px 0; }
+.tab-op__fase-v-nome { writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; font-size: 13px; font-weight: 700; color: #111; letter-spacing: .02em; }
+.tab-op__grupo-fase tr:first-child td { border-top: 2px solid #d6e3d8; }
+.tab-op__mais { width: 30px; height: 30px; font-size: 18px; line-height: 1; color: var(--texto-suave); opacity: 0; }
+.tab-op tr:hover .tab-op__mais, .tab-op__mais:focus-visible { opacity: 1; }
+.tab-op__nome--vazio { color: #9aa49f; font-style: italic; font-weight: 400; }
+.tab-op__dica { margin: 0; font-size: 13px; color: var(--texto-suave); }
 .tab-op__faixa th { padding: 0; background: #eef4ef; border-top: 1px solid var(--borda); text-align: left; font-weight: 600; }
 .tab-op__faixa-linha { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; padding: 10px 16px; }
 .tab-op__faixa-linha > .icone, .tab-op__ico { width: 18px; height: 18px; flex-shrink: 0; color: var(--verde-700); }
@@ -2069,6 +2085,12 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .tab-op__campo { width: 100%; height: 34px; }
 .tab-op__grupo { display: flex; align-items: center; gap: 8px; white-space: nowrap; color: var(--texto-suave); }
 .tab-op__sel-grupo { flex: 1; min-width: 0; max-width: 280px; height: 34px; }
+.tab-op__grupo-nome { padding: 2px 4px; border-radius: 6px; cursor: text; }
+/* Operação sem grupo (o grupo dela foi excluído): destaque em âmbar até escolher o grupo */
+.tab-op__sem-grupo { color: #8a5a00; }
+.tab-op__sem-grupo > .icone { width: 16px; height: 16px; flex-shrink: 0; }
+.tab-op__sel-grupo--vazio { border-color: #e0b84a; background: #fffbea; color: #8a5a00; }
+.tab-op__grupo-nome:hover { background: #eef2ef; }
 .tab-op__num { width: 72px; max-width: 100%; height: 34px; text-align: right; font-variant-numeric: tabular-nums; }
 .tab-op__dap .tab-op__num { text-align: center; }
 .tab-op__fen { width: 100%; max-width: 160px; height: 34px; }

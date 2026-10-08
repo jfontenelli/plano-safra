@@ -16,7 +16,7 @@ Regras de negócio ficam em `docs/DECISOES.md`.
 | 01 | Primeiro uso | telas/01-primeiro-uso.md | referencias/01-primeiro-uso.png | Construída |
 | 02 | Modal Criar Plano de Safra | telas/02-modal-criar-plano.md | referencias/02-modal-criar-plano.png | Construída |
 | 03 | Lista de planos | telas/03-lista-planos.md | referencias/03-lista-planos.png | Construída |
-| 04.0 | Operações (estrutura do plano) | telas/04.0-operacoes.md | rascunhos/calendario-estados.html (etapa 1) | Construída: tabela por fase (Pré-plantio, Plantio, Desenvolvimento, Colheita), grupo escolhido na linha, grupo vazio some; grupo Colheita |
+| 04.0 | Operações (estrutura do plano) | telas/04.0-operacoes.md | rascunhos/calendario-estados.html (etapa 1) | Construída: tabela por fase (Pré-plantio, Plantio, Manejo da cultura, Colheita), grupo escolhido na linha, grupo vazio some; grupo Colheita |
 | 04.1 | Planejamento (grupo Defensivo) | telas/04.1-operacoes-defensivos.md | referencias/04.1-operacao-defensivos.png | Construída |
 | 04.2 | Planejamento (grupo Semente) | telas/04.2-operacoes-sementes.md | quadro de design (telas A e B) | Construída: Plantio (variedade, data e população; Tabela, Mapa e Previsão de colheita) |
 | 04.3 | Planejamento (grupo Fertilidade) | telas/04.3-operacoes-fertilidade.md | — (layout da Tela 04.1) | Construída: operações do modelo, matéria-prima e cadastro (produtos de cliente a conferir) |

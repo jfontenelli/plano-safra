@@ -90,8 +90,9 @@ window.Telas.planoOperacoes = (function () {
   }
 
   // Guias do Planejamento: todos os grupos, menos o Colheita (vem do plantio; não há o que planejar talhão a talhão)
+  // e sem o "Sem grupo" (operações de um grupo excluído, até o usuário escolher o grupo delas na etapa Operações)
   function gruposPlanejamento() {
-    return plano.grupos.filter((g) => g.tipo !== 'Colheita');
+    return plano.grupos.filter((g) => g.tipo !== 'Colheita' && !g.semGrupo);
   }
 
   function grupoAtual() {
@@ -225,6 +226,7 @@ window.Telas.planoOperacoes = (function () {
     redesenhar: (foco) => (foco ? desenharMantendoFoco(foco) : desenharTudo()),
     alterou: () => alterou(),
     novoGrupo: (aoCriar) => novoGrupo(aoCriar),
+    menu: (ancora, x, y, rotulo, itens) => abrirMenuContexto(ancora, x, y, rotulo, itens),
     nomeOperacaoRepetido: (nome, op) => nomeOperacaoRepetido(nome, op)
   };
 
@@ -3170,33 +3172,22 @@ window.Telas.planoOperacoes = (function () {
     form.elements.nome.focus();
   }
 
+  // Excluir grupo (botão direito na guia): a mesma regra da etapa Operações — as operações continuam no plano,
+  // "Sem grupo", até o usuário escolher o grupo de cada uma (na etapa Operações). Se era a guia aberta, abre a vizinha.
   function excluirGrupo(grupo) {
-    const remover = () => {
-      const indice = plano.grupos.indexOf(grupo);
-      const eraAtual = grupo === grupoAtual();
-      plano.grupos.splice(indice, 1);
-      // pelo botão direito dá para excluir outra guia: a aberta só muda se for a excluída
-      if (eraAtual) ui.grupoId = (plano.grupos[indice] || plano.grupos[indice - 1] || {}).id || null;
-      pararRenomearNaLista();
-      limparSelecao(); alterou(); desenharTudo();
-      return indice;
-    };
-    const n = grupo.operacoes.length;
-    if (n) {
-      Modal.confirmar({
-        titulo: `Excluir o grupo ${esc(grupo.nome)}?`,
-        texto: `${n} ${n === 1 ? 'operação será removida' : 'operações serão removidas'} do plano.`,
-        botoes: [{ rotulo: 'Cancelar' }, { rotulo: 'Excluir grupo', classe: 'perigo', acao: () => {
-          remover(); Aviso.mostrar(`Grupo ${esc(grupo.nome)} excluído`);
-        } }]
-      });
-    } else {
-      const indice = remover();
-      Aviso.mostrar(`Grupo ${esc(grupo.nome)} excluído`, { acao: 'Desfazer', aoAgir: () => {
-        plano.grupos.splice(indice, 0, grupo); ui.grupoId = grupo.id;
+    const indice = gruposPlanejamento().indexOf(grupo);
+    const acoes = {
+      ...acoesEstrutura,
+      redesenhar: () => {
+        if (!plano.grupos.includes(grupo) && ui.grupoId === grupo.id) {
+          const vizinhos = gruposPlanejamento();
+          ui.grupoId = (vizinhos[indice] || vizinhos[indice - 1] || {}).id || null;
+        }
+        pararRenomearNaLista(); limparSelecao();
         if (raiz.isConnected) desenharTudo();
-      } });
-    }
+      }
+    };
+    Telas.operacoesPlano.excluirGrupo(grupo, ctxEstrutura(), acoes);
   }
 
   let ultimoCliqueGuia = { id: null, quando: 0 };
@@ -3208,6 +3199,7 @@ window.Telas.planoOperacoes = (function () {
   let menuContexto = null;
 
   function aoMenuContexto(e) {
+    if (etapa === 'operacoes' && Telas.operacoesPlano.aoMenuContexto(e, ctxEstrutura(), acoesEstrutura)) return;
     if (somenteLeitura) return;
     const guia = e.target.closest('.guia[data-grupo]');
     const nomeOp = !listaRecolhida() && e.target.closest('.ops-item__nome[data-op]');
@@ -3255,7 +3247,7 @@ window.Telas.planoOperacoes = (function () {
     menu.setAttribute('role', 'menu');
     menu.setAttribute('aria-label', rotulo);
     // Copiar só existe para operações (não para grupos)
-    menu.innerHTML = [['inserir', 'Inserir'], ['excluir', 'Excluir'], ['renomear', 'Renomear'], ['copiar', 'Copiar']]
+    menu.innerHTML = [['inserir', 'Inserir'], ['excluir', 'Excluir'], ['renomear', 'Renomear'], ['copiar', 'Copiar'], ['limpar', 'Limpar conteúdo']]
       .filter(([item]) => acoes[item])
       .map(([item, rotulo]) => `<button class="menu-contexto__item" type="button" role="menuitem" data-item="${item}">${rotulo}</button>`)
       .join('');

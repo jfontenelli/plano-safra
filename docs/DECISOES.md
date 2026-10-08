@@ -86,6 +86,7 @@ Agrônomo da fazenda e líder de operações podem ser a mesma pessoa, conforme 
 - Modelo de operações no protótipo: **Semente · Tratamento de semente · Defensivo · Fertilidade · Colheita** (Preparo do solo, levantado com clientes, fica fora por enquanto). As duas dessecações pré-plantio são do grupo Defensivos.
 - **Grupo Colheita:** DAP pelo ciclo da variedade (data de plantio + ciclo, talhão a talhão), sem fenologia e previsão de conclusão editável. Não aparece nas guias do Planejamento.
 - **Grupo sem operação some do plano** (não teve apontamento), inclusive das guias do Planejamento; Semente e Colheita ficam.
+- **Excluir um grupo mantém as operações**: elas ficam "Sem grupo" até o usuário escolher o grupo de cada uma (na etapa Operações); sem grupo, a operação não aparece no Planejamento. Vale na etapa Operações e no Planejamento (botão direito na guia).
 - **Plantio:** DAP 0 fixo. **TSI:** DAP −5 sugerido no modelo (Pré-plantio).
 - **Tipos de grupo: Sementes, Tratamento de sementes, Defensivos, Fertilidade e Colheita.** O grupo **Fertilidade** junta corretivos e fertilizantes (inclusive adubação foliar). O grupo **Tratamento de sementes** tem o TSI. No protótipo, as guias do Planejamento são Semente · Tratamento de semente · Defensivo · Fertilidade.
 - O menu Cadastros não é prioridade agora.
@@ -95,8 +96,8 @@ Agrônomo da fazenda e líder de operações podem ser a mesma pessoa, conforme 
 - Data de plantio (ao menos prevista) e escolha entre DAP ou DAE.
 - Planejamento por grupo (fertilizantes, sementes, defensivos).
 - Momento da operação = fenologia + DAP/DAE (negativo no pré-plantio). Sem DAP padrão, o agrônomo informa.
-- **Pré-plantio (DAP negativo), Plantio (DAP 0) e Colheita não têm fenologia** ("—"). Com DAP positivo (Desenvolvimento), o agrônomo escolhe o estádio.
-- Fases da safra na etapa Operações: **Pré-plantio · Plantio · Desenvolvimento · Colheita**, definidas pelo DAP.
+- **Pré-plantio (DAP negativo), Plantio (DAP 0) e Colheita não têm fenologia** ("—"). Com DAP positivo (Manejo da cultura), o agrônomo escolhe o estádio.
+- Fases da safra na etapa Operações: **Pré-plantio · Plantio · Manejo da cultura · Colheita**, definidas pelo DAP.
 - Operação "opcional" é só anotação.
 - Previsão de colheita = data de plantio + ciclo da variedade para a região da fazenda e a safra do plano. Sem ciclo cadastrado para a safra corrente, abre o pré-cadastro para informar o ciclo. Recalculada com a data real de plantio da OS.
 - Restrição de aplicação do produto (ex.: "somente terrestre") aparece só como informação ao lado do produto, vinda do cadastro. Forma de aplicação e vazão não são preenchidas no plano.
