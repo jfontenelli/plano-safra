@@ -36,6 +36,13 @@ Protótipo navegável e preenchível do Plano de Safra (UniSystem), usado para v
 - Dados ficam só na memória do navegador; ao fechar a página, se perdem (decisão da v1).
 - Dados de exemplo em arquivo separado (`js/dados-exemplo.js`), fáceis de editar.
 
+## Compartilhar (arquivo único)
+- Para mandar o protótipo a alguém, a usuária compartilha só um HTML: `compartilhar/plano-safra.html`.
+- Ele é gerado por `node ferramentas/gerar-compartilhar.js`, que junta CSS, JS e imagens de `img/` (em base64) num arquivo só. Única exceção à regra "sem etapa de build"; não muda como o protótipo funciona.
+- Sempre regere o arquivo depois de mudar o protótipo (antes do commit).
+- Imagens: referencie com o caminho completo e literal (ex.: `'img/fenologia/plantio.png'`), nunca montado com variáveis, senão o script não consegue embutir. Mantenha as imagens leves (< 100 KB).
+- Mapa (Leaflet) e .xlsx (SheetJS) continuam vindo por CDN: precisam de internet.
+
 ## Estrutura sugerida
 - `index.html` — casca única (menu lateral + área de conteúdo).
 - `css/estilo.css` — variáveis de cor, tipografia e componentes.
