@@ -25,12 +25,6 @@ window.Telas.abrirModalCriarPlano = function ({ aoCriar }) {
           <label class="campo__rotulo" for="cp-safra">Safra ${asterisco()}</label>
           <select class="campo__controle" id="cp-safra" name="safra" required></select>
           ${erroObrigatorio('safra')}
-          <div class="nova-safra" hidden>
-            <input class="campo__controle" id="cp-nova-safra" type="text" placeholder="Nome da safra (ex.: 26/27)"
-                   aria-label="Nome da nova safra" autocomplete="off">
-            <button class="botao botao--primario" type="button" data-acao="adicionar-safra">Adicionar</button>
-            <button class="botao botao--secundario" type="button" data-acao="cancelar-safra">Cancelar</button>
-          </div>
         </div>
 
         ${campoLista('empresa', 'Empresa', 'Selecione uma empresa', DADOS.empresas)}
@@ -65,8 +59,6 @@ window.Telas.abrirModalCriarPlano = function ({ aoCriar }) {
 
   const form = modal.elemento.querySelector('form');
   const selectSafra = form.elements.safra;
-  const caixaNovaSafra = form.querySelector('.nova-safra');
-  const inputNovaSafra = form.querySelector('#cp-nova-safra');
   const NOVA_SAFRA = '__nova-safra__';
   let safraAnterior = '';
   const erroDuplicado = form.querySelector('#cp-erro-duplicado');
@@ -165,7 +157,7 @@ window.Telas.abrirModalCriarPlano = function ({ aoCriar }) {
     safraAnterior = selecionada;
   }
 
-  // Escolher "+ Criar nova safra" volta a lista ao valor anterior e abre o campo do nome.
+  // Escolher "+ Criar nova safra" volta a lista ao valor anterior e abre a janela "Nova safra".
   // Registrado no próprio select, antes da validação do formulário.
   selectSafra.addEventListener('change', () => {
     if (selectSafra.value === NOVA_SAFRA) {
@@ -176,37 +168,49 @@ window.Telas.abrirModalCriarPlano = function ({ aoCriar }) {
     }
   });
 
+  // Janela pequena por cima do formulário: só sai dela por Confirmar (ou Enter) ou Cancelar (ou Esc).
+  // Clicar fora não fecha: o cursor volta ao campo e aparece "Confirme ou cancele a nova safra".
   function abrirNovaSafra() {
-    caixaNovaSafra.hidden = false;
-    inputNovaSafra.value = '';
-    inputNovaSafra.focus();
+    const janela = Modal.abrir(`
+      <form class="formulario" novalidate>
+        <div class="modal__corpo">
+          <h2 class="modal__titulo" id="modal-titulo-safra">Nova safra</h2>
+          <p class="modal__subtitulo">A safra nova entra na lista e fica selecionada.</p>
+          <div class="campo">
+            <label class="campo__rotulo" for="ns-nome">Safra ${asterisco()}</label>
+            <input class="campo__controle" id="ns-nome" type="text" placeholder="Nome da safra (ex.: 26/27)" autocomplete="off">
+            <p class="aviso-janela-texto" id="ns-finalizar" role="alert" hidden>${Icones.alerta} Confirme ou cancele a nova safra.</p>
+          </div>
+        </div>
+        <div class="modal__rodape">
+          <button class="botao botao--secundario" type="button" data-fechar>Cancelar</button>
+          <button class="botao botao--primario" type="submit" disabled>Confirmar</button>
+        </div>
+      </form>
+    `, {
+      classe: 'modal--pequeno',
+      idTitulo: 'modal-titulo-safra',
+      devolverFoco: selectSafra,
+      aoClicarFora: () => { aviso.hidden = false; input.focus(); }
+    });
+    const formSafra = janela.elemento.querySelector('form');
+    const input = formSafra.querySelector('#ns-nome');
+    const aviso = formSafra.querySelector('#ns-finalizar');
+    const confirmar = formSafra.querySelector('[type="submit"]');
+    input.addEventListener('input', () => { confirmar.disabled = !input.value.trim(); });
+    formSafra.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const nome = input.value.trim();
+      if (!nome) { input.focus(); return; }
+      // Se o nome já existe, só seleciona a safra existente
+      if (!DADOS.safras.includes(nome)) DADOS.safras.push(nome);
+      preencherSafras(nome);
+      janela.fechar();
+      form.elements.empresa.focus();
+      atualizar();
+    });
+    input.focus();
   }
-
-  function fecharNovaSafra() {
-    caixaNovaSafra.hidden = true;
-  }
-
-  function adicionarSafra() {
-    const nome = inputNovaSafra.value.trim();
-    if (!nome) { inputNovaSafra.focus(); return; }
-    // Se o nome já existe, só seleciona a safra existente
-    if (!DADOS.safras.includes(nome)) DADOS.safras.push(nome);
-    preencherSafras(nome);
-    fecharNovaSafra();
-    selectSafra.focus();
-    atualizar();
-  }
-
-  form.addEventListener('click', (e) => {
-    const acao = e.target.closest('[data-acao]')?.dataset.acao;
-    if (acao === 'adicionar-safra') adicionarSafra();
-    if (acao === 'cancelar-safra') { fecharNovaSafra(); selectSafra.focus(); }
-  });
-
-  inputNovaSafra.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') { e.preventDefault(); adicionarSafra(); }
-    if (e.key === 'Escape') { e.stopPropagation(); fecharNovaSafra(); selectSafra.focus(); }
-  });
 
   // ----- Validação: quatro campos preenchidos e um plano por safra e fazenda -----
   function valores() {

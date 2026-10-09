@@ -11,7 +11,7 @@ Definir o contexto do novo plano (safra, empresa, fazenda, cultura) e como ele v
 ## Conteúdo
 - Título: "Criar Plano de Safra"; subtítulo: "Defina o contexto do novo planejamento."; botão X para fechar.
 - Campos, nesta ordem, todos obrigatórios: Safra, Empresa, Fazenda, Cultura.
-- Abaixo de Safra, link "+ Criar nova safra".
+- Na lista de Safra, a última opção é "+ Criar nova safra".
 - Pergunta "Como deseja iniciar o plano?" com três cards (um selecionado por vez):
 
 | Card | Texto | Comportamento |
@@ -24,7 +24,11 @@ Definir o contexto do novo plano (safra, empresa, fazenda, cultura) e como ele v
 - Botões no rodapé: "Cancelar" e "Continuar para as operações".
 
 ## Regras
-- "Criar nova safra": abre um campo para digitar o nome; a safra nova entra na lista já selecionada. A safra tem só o nome.
+- "Criar nova safra": abre uma **janela pequena por cima do formulário**, "**Nova safra**" (subtítulo "A safra nova entra na lista e fica selecionada."), com o campo **Safra*** ("Nome da safra (ex.: 26/27)", já com o cursor) e os botões **Cancelar** e **Confirmar** (desabilitado com o campo vazio). A safra tem só o nome.
+  - **Confirmar** ou **Enter**: a janela fecha, a safra nova entra na lista já selecionada e o cursor vai para Empresa. Nome que já existe: só seleciona a safra existente.
+  - **Cancelar** ou **Esc**: fecha sem criar; a Safra volta ao que estava.
+  - **Clicar fora** (no formulário de trás) não fecha nem deixa seguir para Empresa: o cursor volta ao campo e aparece, em âmbar, "Confirme ou cancele a nova safra."
+  - Motivo: no teste com usuários, com o campo dentro do formulário e o botão Adicionar, as pessoas digitavam e seguiam sem adicionar, achando que estava salvo.
 - Um único plano por safra e fazenda: se a combinação já existir, não deixar criar outro.
 - "Continuar para as operações" fica desabilitado até os quatro campos estarem preenchidos.
 - Ao continuar, o plano é criado com: status "Em construção", área 0 ha, custo e receita vazios, última atualização = hoje, atualizado por = usuário logado.

@@ -550,14 +550,6 @@ select.campo__controle option { color: var(--texto); }
 .link-acao .icone { width: 16px; height: 16px; stroke-width: 2.2; }
 .link-acao[hidden] { display: none; }
 
-.nova-safra {
-  display: flex;
-  gap: 8px;
-  margin-top: 8px;
-}
-.nova-safra[hidden] { display: none; }
-.nova-safra .botao { height: 42px; flex-shrink: 0; }
-
 /* ===== Tela 02 · Cards "Como deseja iniciar o plano?" ===== */
 .inicios {
   margin: 8px 0 20px;

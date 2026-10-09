@@ -4,13 +4,15 @@
  * Fecha pela tecla Esc, clicando fora, em qualquer elemento com data-fechar
  * ou ao trocar de tela pelo menu. Enquanto aberto, o Tab fica preso dentro dele.
  * opcoes.devolverFoco: elemento que recebe o foco ao fechar (padrão: o que tinha o foco ao abrir).
+ * opcoes.aoClicarFora: se informado, clicar fora não fecha; chama esta função (ex.: pedir para finalizar).
+ * opcoes.idTitulo: id do título (padrão "modal-titulo"; outro id quando abre por cima de outro modal).
  */
 window.Modal = {
   abrir(html, opcoes = {}) {
     const fundo = document.createElement('div');
     fundo.className = 'modal-fundo';
     fundo.innerHTML = `<div class="modal ${opcoes.classe || ''}" role="dialog" aria-modal="true"
-                            aria-labelledby="modal-titulo">${html}</div>`;
+                            aria-labelledby="${opcoes.idTitulo || 'modal-titulo'}">${html}</div>`;
 
     const focoAnterior = opcoes.devolverFoco || document.activeElement;
 
@@ -42,6 +44,7 @@ window.Modal = {
     }
 
     fundo.addEventListener('click', (e) => {
+      if (e.target === fundo && opcoes.aoClicarFora) { opcoes.aoClicarFora(); return; }
       if (e.target === fundo || e.target.closest('[data-fechar]')) fechar();
     });
     document.addEventListener('keydown', aoTeclar);
