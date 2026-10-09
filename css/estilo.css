@@ -1369,7 +1369,7 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
   cursor: pointer;
   white-space: normal;
 }
-.combo__opcao:hover { background: var(--verde-100); }
+.combo__opcao:hover, .combo__opcao--ativa { background: var(--verde-100); }
 .combo__opcao--pre {
   display: flex;
   align-items: center;
@@ -1881,6 +1881,24 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .tabela-variedade th, .tabela-variedade td { width: 1%; padding-left: 10px; padding-right: 10px; }
 .tabela-talhoes.tabela-variedade .tabela__numero { padding-right: 10px; }
 .tabela-variedade .tabela__expandir { width: auto; }
+
+/* ===== Edição direto na tabela (plano em construção) ===== */
+/* Célula editável: fundo branco; o campo só mostra a borda ao passar o mouse e ao editar. Calculada: fundo cinza */
+.tabela .tabela__calculada { background: #f3f5f4; color: var(--texto-suave); }
+.tabela .tabela__editavel { background: var(--superficie); padding-top: 3px; padding-bottom: 3px; }
+.celula {
+  width: 100%; min-width: 0; height: 32px; padding: 0 6px; border: 1px solid transparent; border-radius: 6px;
+  background: transparent; font: inherit; color: inherit;
+}
+.celula:hover { border-color: var(--borda); }
+.celula:focus { outline: none; border-color: var(--verde-600); background: #fff; box-shadow: 0 0 0 2px var(--verde-100); }
+.celula::placeholder { color: #b9c0c5; }
+.celula--numero { width: 72px; text-align: right; }
+.tabela-doses .celula--numero { width: 80px; text-align: center; }
+.celula--data { width: 96px; }
+.celula--lista { min-width: 210px; cursor: pointer; }
+.celula-linha { display: inline-flex; align-items: center; gap: 4px; }
+.celula-linha--numero { justify-content: flex-end; }
 
 /* TSI: grupos de produto (selo abaixo do nome), fora das cores de fungicida, inseticida e herbicida */
 .etiqueta-tipo--nematicida   { background: #fdf0e1; color: #8a4b00; }
