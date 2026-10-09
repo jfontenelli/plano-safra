@@ -173,11 +173,15 @@ window.Telas.calendario = (function () {
   // ----- Desenho -----
   function desenhar(ctx) {
     const { talhoes, estado, plano } = ctx;
-    // Em construção: todas as operações cadastradas na etapa Operações, já no calendário; o que ainda não tem
-    // talhão planejado aparece como "Sem recomendação" e vai se preenchendo conforme o planejamento.
-    // Plano aprovado: só o que tem produto e dose (ou plantio); o resto não aparece.
-    const lista = itens(ctx).filter((it) => !ctx.somenteLeitura || (it.colheita ? !it.aguardando : it.talhoes.length > 0))
-      .filter((it) => marcado(estado, 'grupo', chaveGrupo(it)));
+    // Só o que já foi planejado (produto e dose, ou plantio; Colheita depois do plantio), em construção ou aprovado.
+    // Nada planejado ainda: um aviso no lugar da Tabela e do Infográfico.
+    const planejados = itens(ctx).filter((it) => (it.colheita ? !it.aguardando : it.talhoes.length > 0));
+    const lista = planejados.filter((it) => marcado(estado, 'grupo', chaveGrupo(it)));
+    const vazio = `
+        <div class="estrutura__aviso calendario__vazio" role="note">${Icones.info}
+          <p><strong>Nenhuma operação planejada ainda.</strong> As operações planejadas aparecem aqui com datas e doses por talhão.</p>
+        </div>`;
+    // O calendário ocupa a área logo abaixo das abas: filtros e Infográfico/Tabela na barra; previsões em texto embaixo
     return `
       <section class="calendario">
         <div class="calendario__barra">
@@ -192,13 +196,13 @@ window.Telas.calendario = (function () {
             </div>
           </div>
           <div class="visoes calendario__visoes" role="group" aria-label="Visão do calendário">
-            ${[['infografico', Icones.grafico, 'Infográfico'], ['tabela', Icones.lista, 'Tabela']].map(([v, icone, rotulo]) => `
+            ${[['tabela', Icones.lista, 'Tabela'], ['infografico', Icones.grafico, 'Infográfico']].map(([v, icone, rotulo]) => `
               <button class="visoes__botao ${estado.visao === v ? 'visoes__botao--ativo' : ''}" type="button" data-acao="cal-visao"
                       data-visao="${v}" aria-pressed="${estado.visao === v}">${icone}${rotulo}</button>`).join('')}
           </div>
         </div>
         ${resumo(ctx)}
-        ${estado.visao === 'tabela' ? tabela(ctx, lista) : infografico(ctx, lista)}
+        ${!planejados.length ? vazio : estado.visao === 'tabela' ? tabela(ctx, lista) : infografico(ctx, lista)}
       </section>`;
   }
 
@@ -237,18 +241,14 @@ window.Telas.calendario = (function () {
     const comPlantio = talhoes.filter((t) => pl[t.nome] && pl[t.nome].variedade && pl[t.nome].data);
     const datas = comPlantio.map((t) => pl[t.nome].data);
     const colheitas = comPlantio.map((t) => previsaoColheita(pl[t.nome])).filter(Boolean);
-    const card = (icone, rotulo, corpo) => `
-      <div class="resumo-card">
-        <span class="resumo-card__icone">${icone}</span>
-        <div class="resumo-card__texto"><span class="resumo-card__rotulo">${rotulo}</span>${corpo}</div>
-      </div>`;
-    const semPlantio = '<span class="resumo-card__vazio">—</span><span class="resumo-card__dica">Defina o plantio na guia Semente</span>';
+    const item = (rotulo, valor, dica) => `
+      <span class="previsoes__item"><strong>${rotulo}:</strong> ${valor ? `<span class="previsoes__data">${valor}</span>` : `<span class="previsoes__data">—</span> <span class="previsoes__dica">(${dica})</span>`}</span>`;
     return `
-      <section class="resumo-cards" aria-label="Resumo do planejamento">
-        ${card(Icones.calendario, 'Previsão de plantio', datas.length ? `<span class="resumo-card__valor resumo-card__valor--data">${intervalo(datas)}</span>` : semPlantio)}
-        ${card(Icones.calendario, 'Previsão de colheita', colheitas.length ? `<span class="resumo-card__valor resumo-card__valor--data">${intervalo(colheitas)}</span>`
-          : datas.length ? '<span class="resumo-card__vazio">—</span><span class="resumo-card__dica">Variedade sem ciclo</span>' : semPlantio)}
-      </section>`;
+      <p class="previsoes" aria-label="Previsões do plano">${Icones.calendario}
+        ${item('Plantio estimado', datas.length ? intervalo(datas) : '', 'defina o plantio na guia Semente')}
+        <span class="previsoes__ponto" aria-hidden="true">·</span>
+        ${item('Colheita estimada', colheitas.length ? intervalo(colheitas) : '', datas.length ? 'variedade sem ciclo' : 'defina o plantio na guia Semente')}
+      </p>`;
   }
 
   function etiqueta(grupo) {
@@ -331,7 +331,7 @@ window.Telas.calendario = (function () {
       if (!l) return { texto: '—', classe: 'cal-piv__nao' };
       const d = Planos.doseTalhao(op, ajuste, l);
       const ajustada = l.id in ajuste.doses && d !== l.dose;
-      return { texto: textoDose(d, it.grupo), classe: ajustada ? 'cal-piv__ajuste' : '', titulo: ajustada ? `Dose do talhão; padrão da receita: ${textoDose(l.dose, it.grupo)}` : '' };
+      return { texto: textoDose(d, it.grupo), titulo: ajustada ? `Dose do talhão; padrão da receita: ${textoDose(l.dose, it.grupo)}` : '' };
     }]);
   }
 
@@ -348,11 +348,44 @@ window.Telas.calendario = (function () {
     return datas.length ? intervalo(datas) : '—';
   }
 
+  // Colunas fixas da Tabela, na ordem; congeladas à esquerda ao rolar para os talhões. Cada uma pode ser ocultada
+  // pelo botão do cabeçalho e exibida de novo pela faixa estreita que fica no lugar dela (como no Excel).
+  // nivel 'op': uma célula por operação (na altura de todos os produtos); 'linha': uma por produto
+  const COLUNAS = [
+    { id: 'dap', rotulo: 'DAP', largura: 64, nivel: 'op', classe: 'cal-piv__num' },
+    { id: 'fen', rotulo: 'Fenologia', largura: 96, nivel: 'op', classe: 'cal-piv__fen' },
+    { id: 'data', rotulo: 'Data prevista', largura: 120, nivel: 'op', classe: 'cal-piv__data' },
+    { id: 'area', rotulo: 'Área', largura: 84, nivel: 'op', classe: 'cal-piv__area' },
+    { id: 'op', rotulo: 'Operação', largura: 170, nivel: 'op', classe: 'cal-piv__nome' },
+    { id: 'prod', rotulo: 'Produto', largura: 150, nivel: 'linha', classe: 'cal-piv__produto' },
+    { id: 'unid', rotulo: 'Unid.', largura: 96, nivel: 'linha', classe: 'cal-piv__unid' }
+  ];
+  const LARGURA_FASE = 44;
+  const LARGURA_OCULTA = 14;
+
   function tabela(ctx, lista) {
     const { talhoes, estado, plano } = ctx;
     const visiveis = talhoes.filter((t) => talhaoMarcado(estado, t.nome));
     const pl = (plantioDo(plano) || {}).plantio || {};
-    // Cada operação ocupa uma linha por produto (DAP, Fenologia e Operação na altura de todas); sem talhão planejado,
+    const ocultas = new Set(estado.colunasOcultas || []);
+    // Deslocamento de cada coluna congelada: soma das larguras à esquerda (oculta conta só a faixa estreita)
+    let x = LARGURA_FASE;
+    const pos = {};
+    COLUNAS.forEach((c) => { const w = ocultas.has(c.id) ? LARGURA_OCULTA : c.largura; pos[c.id] = { left: x, w }; x += w; });
+    const ultima = COLUNAS[COLUNAS.length - 1].id;
+    const fixa = (c, extra = '') => {
+      const { left, w } = pos[c.id];
+      return `style="left: ${left}px; width: ${w}px; min-width: ${w}px; max-width: ${w}px" class="cal-piv__fixa ${c.id === ultima ? 'cal-piv__fixa--ultima' : ''} ${extra}"`;
+    };
+    // Faixa estreita no lugar de uma coluna oculta
+    const celOculta = (c, rowspan = 1) => `<td ${fixa(c, 'cal-piv__oculta')} rowspan="${rowspan}"></td>`;
+    // Talhões também podem ser ocultados (id "t:Nome"); não são congelados, a faixa fica no lugar deles
+    const idTalhao = (t) => `t:${t.nome}`;
+    const talhaoOculto = (t) => ocultas.has(idTalhao(t));
+    const LARGURA_TALHAO_OCULTO = `style="width: ${LARGURA_OCULTA}px; min-width: ${LARGURA_OCULTA}px; max-width: ${LARGURA_OCULTA}px"`;
+    const celTalhaoOculto = `<td ${LARGURA_TALHAO_OCULTO} class="cal-piv__oculta"></td>`;
+
+    // Cada operação ocupa uma linha por produto (as colunas da operação na altura de todas); sem talhão planejado,
     // uma linha só, com "Sem recomendação" (ou "Sem variedade", no Plantio) na coluna Produto
     const grupos = [];
     lista.forEach((it) => {
@@ -363,56 +396,86 @@ window.Telas.calendario = (function () {
       const n = Math.max(1, subs.length);
       const nome = it.colheita ? 'Colheita' : it.op.nome || 'Sem operação';
       const dap = it.aguardando ? 'pelo ciclo' : it.colheita && it.dapMax !== it.dap ? `${it.dap} a ${it.dapMax}` : it.dap ?? '—';
-      const comum = `
-          <td class="cal-piv__num" rowspan="${n}">${dap}</td>
-          <td class="cal-piv__fen" rowspan="${n}">${esc(it.fenologia || '—')}</td>
-          <td class="cal-piv__data" rowspan="${n}">${dataPrevista(it, visiveis, pl)}</td>
-          <td class="cal-piv__area" rowspan="${n}">${it.area ? Util.area(it.area) : '—'}</td>
-          <td class="cal-piv__nome" rowspan="${n}">
-            <strong>${esc(nome)}</strong>
-            <span class="cal-piv__chip">${esc(it.colheita ? it.grupo.nome : nomeGrupo(it.grupo))}</span>
-          </td>`;
+      const conteudoOp = {
+        dap: () => dap,
+        fen: () => esc(it.fenologia || '—'),
+        data: () => dataPrevista(it, visiveis, pl),
+        area: () => (it.area ? Util.area(it.area) : '—'),
+        op: () => `<strong>${esc(nome)}</strong><span class="cal-piv__chip">${esc(it.colheita ? it.grupo.nome : nomeGrupo(it.grupo))}</span>`
+      };
+      const celulasOp = COLUNAS.filter((c) => c.nivel === 'op').map((c) => (ocultas.has(c.id) ? celOculta(c, n)
+        : `<td ${fixa(c, c.classe)} rowspan="${n}">${conteudoOp[c.id]()}</td>`)).join('');
+      const colsLinha = COLUNAS.filter((c) => c.nivel === 'linha');
+      const linhaFixa = (conteudo) => colsLinha.map((c) => (ocultas.has(c.id) ? celOculta(c) : `<td ${fixa(c, c.classe)}>${conteudo[c.id]}</td>`)).join('');
       if (vazia) {
+        // "Sem recomendação" na coluna Produto (ou na Unid., se o Produto estiver oculto)
+        const texto = `<span class="cal-piv__sem">${it.grupo.tipo === 'Sementes' ? 'Sem variedade' : 'Sem recomendação'}</span>`;
+        const naProd = !ocultas.has('prod');
         grupos[grupos.length - 1].linhas.push(`
-          <tr class="cal-piv__linha cal-piv__linha--inicio">${comum}
-            <td colspan="2" class="cal-piv__sem">${it.grupo.tipo === 'Sementes' ? 'Sem variedade' : 'Sem recomendação'}</td>
-            ${visiveis.map(() => '<td></td>').join('')}
+          <tr class="cal-piv__linha cal-piv__linha--inicio">${celulasOp}${linhaFixa({ prod: naProd ? texto : '', unid: naProd ? '' : texto })}
+            ${visiveis.map((t) => (talhaoOculto(t) ? celTalhaoOculto : '<td></td>')).join('')}
           </tr>`);
         return;
       }
       subs.forEach(([rotulo, unidade, valor], i) => {
         grupos[grupos.length - 1].linhas.push(`
-          <tr class="cal-piv__linha ${i ? '' : 'cal-piv__linha--inicio'}">${i ? '' : comum}
-            <td class="cal-piv__produto">${esc(rotulo)}</td>
-            <td class="cal-piv__unid">${unidade === 'data' ? '' : esc(unidade)}</td>
+          <tr class="cal-piv__linha ${i ? '' : 'cal-piv__linha--inicio'}">${i ? '' : celulasOp}${linhaFixa({ prod: esc(rotulo), unid: unidade === 'data' ? '' : esc(unidade) })}
             ${visiveis.map((t) => {
+              if (talhaoOculto(t)) return celTalhaoOculto;
               const v = valor(t);
               return `<td class="cal-piv__num ${v.classe || ''}" ${v.titulo ? `title="${esc(v.titulo)}"` : ''}>${esc(v.texto)}</td>`;
             }).join('')}
           </tr>`);
       });
     });
+    // Cabeçalho: clicar (ou botão direito) em qualquer lugar dele abre o menu "Ocultar coluna"; coluna oculta: faixa
+    // estreita que exibe de novo. atributos(extra) devolve style e class da célula (congelada ou de talhão)
+    const algumaOculta = COLUNAS.some((c) => ocultas.has(c.id)) || visiveis.some(talhaoOculto);
+    const celCabecalho = (id, rotulo, conteudo, atributos) => {
+      const col = esc(id);
+      if (ocultas.has(id)) {
+        return `<th ${atributos('cal-piv__oculta')}><button class="cal-piv__exibir" type="button" data-acao="cal-col-exibir" data-col="${col}"
+                  title="Exibir a coluna ${esc(rotulo)}" aria-label="Exibir a coluna ${esc(rotulo)}"></button></th>`;
+      }
+      const aberto = estado.menuColuna === id;
+      return `
+            <th ${atributos(`cal-piv__th-menu ${aberto ? 'cal-piv__th-menu--aberto' : ''}`)} data-acao="cal-col-menu" data-col="${col}">
+              <button class="cal-piv__cab" type="button" data-acao="cal-col-menu" data-col="${col}" aria-haspopup="menu" aria-expanded="${aberto}"
+                      title="Botão direito: ocultar a coluna ${esc(rotulo)}">${conteudo}</button>
+              ${aberto ? `
+              <div class="cal-piv__menu" role="menu">
+                <button type="button" role="menuitem" data-acao="cal-col-ocultar" data-col="${col}">Ocultar coluna</button>
+                ${algumaOculta ? '<button type="button" role="menuitem" data-acao="cal-col-exibir-todas">Exibir todas as colunas</button>' : ''}
+                <hr class="cal-piv__menu-divisor">
+                <button type="button" role="menuitem" data-acao="cal-col-congelar">${estado.descongelado ? 'Congelar colunas' : 'Descongelar colunas'}</button>
+              </div>` : ''}
+            </th>`;
+    };
+    const cabecalho = COLUNAS.map((c) => celCabecalho(c.id, c.rotulo, c.rotulo,
+      (extra) => fixa(c, `${extra} ${c.id === 'dap' && !ocultas.has(c.id) ? 'cal-piv__num' : ''}`))).join('');
     const colunasTalhao = visiveis.map((t) => {
       const v = pl[t.nome] && pl[t.nome].variedade;
-      return `<th class="cal-piv__talhao"><strong>${esc(t.nome)}</strong><span>${esc(v || 'Sem variedade')}</span><span>${Util.area(t.area)}</span></th>`;
+      return celCabecalho(idTalhao(t), t.nome,
+        `<strong>${esc(t.nome)}</strong><span>${esc(v || 'Sem variedade')}</span><span>${Util.area(t.area)}</span>`,
+        (extra) => (talhaoOculto(t) ? `${LARGURA_TALHAO_OCULTO} class="${extra}"` : `class="cal-piv__talhao ${extra}"`));
     }).join('');
     const faixa = (g) => `
-                <th class="tab-op__fase-v tab-op__fase-v--${g.f}" rowspan="${g.linhas.length}" scope="rowgroup">
+                <th class="tab-op__fase-v tab-op__fase-v--${g.f} cal-piv__fixa cal-piv__fixa--fase" rowspan="${g.linhas.length}" scope="rowgroup">
                   <div class="tab-op__fase-v-conteudo"><span class="tab-op__fase-v-nome">${FAIXAS[g.f]}</span></div>
                 </th>`;
     const INICIO = '<tr class="cal-piv__linha cal-piv__linha--inicio">';
     return `
       <div class="cal-piv">
-        <table class="cal-piv__tabela">
+        <table class="cal-piv__tabela ${estado.descongelado ? 'cal-piv__tabela--solta' : ''}">
           <thead><tr>
-            <th class="cal-piv__fase-cab"><span class="so-leitor">Fase</span></th>
-            <th class="cal-piv__num">DAP</th><th>Fenologia</th><th>Data prevista</th><th class="cal-piv__area">Área</th><th>Operação</th><th>Produto</th><th>Unid.</th>
+            <th class="cal-piv__fase-cab cal-piv__fixa cal-piv__fixa--fase"><span class="so-leitor">Fase</span></th>
+            ${cabecalho}
             ${colunasTalhao}
           </tr></thead>
           ${grupos.length ? grupos.map((g) => `
             <tbody>
               ${g.linhas.map((l, i) => (i ? l : l.replace(INICIO, () => INICIO + faixa(g)))).join('')}
-            </tbody>`).join('') : `<tbody><tr><td colspan="${8 + visiveis.length}" class="cal-piv__nada">Nenhuma operação com os filtros escolhidos</td></tr></tbody>`}
+            </tbody>`).join('') : `<tbody><tr><td colspan="${1 + COLUNAS.length + visiveis.length}" class="cal-piv__nada">Nenhuma operação com os filtros escolhidos</td></tr></tbody>`}
         </table>
       </div>`;
   }
@@ -487,6 +550,27 @@ window.Telas.calendario = (function () {
     document.querySelectorAll('.cal-filtro[open]').forEach((caixa) => {
       if (!caixa.contains(e.target)) { caixa.open = false; if (ctx.estado.filtroAberto === caixa.dataset.filtro) ctx.estado.filtroAberto = null; }
     });
+    const est = ctx.estado;
+    let col = e.target.closest('[data-acao^="cal-col-"]');
+    // O menu da coluna só abre pelo botão direito (ou fecha pelo Esc); o clique esquerdo no cabeçalho não faz nada
+    if (col && col.dataset.acao === 'cal-col-menu' && !menuPeloDireito) col = null;
+    menuPeloDireito = false;
+    if (col) {
+      const id = col.dataset.col;
+      const ocultas = new Set(est.colunasOcultas || []);
+      const acao = col.dataset.acao;
+      if (acao === 'cal-col-menu') est.menuColuna = est.menuColuna === id ? null : id;
+      else if (acao === 'cal-col-ocultar') { ocultas.add(id); est.menuColuna = null; }
+      else if (acao === 'cal-col-exibir') ocultas.delete(id);
+      else if (acao === 'cal-col-exibir-todas') { ocultas.clear(); est.menuColuna = null; }
+      else if (acao === 'cal-col-congelar') { est.descongelado = !est.descongelado; est.menuColuna = null; }
+      est.colunasOcultas = [...ocultas];
+      redesenhar(acao === 'cal-col-menu' && est.menuColuna ? '.cal-piv__menu [role="menuitem"]'
+        : acao === 'cal-col-ocultar' ? `[data-acao="cal-col-exibir"][data-col="${CSS.escape(id)}"]`
+        : acao === 'cal-col-exibir' ? `button[data-acao="cal-col-menu"][data-col="${CSS.escape(id)}"]` : '.cal-piv');
+      return true;
+    }
+    if (est.menuColuna && !e.target.closest('.cal-piv__menu')) { est.menuColuna = null; redesenhar(); }
     const botao = e.target.closest('.cal-filtro__botao');
     if (botao) {
       const caixa = botao.closest('.cal-filtro');
@@ -515,6 +599,36 @@ window.Telas.calendario = (function () {
     redesenhar(`[data-campo="cal-filtro"][data-filtro="${chave}"][value="${CSS.escape(e.target.value)}"]`);
     return true;
   }
+
+  // Esc: com uma caixa de filtro aberta, fecha a caixa (não age com modal ou menu aberto, que têm o próprio Esc)
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape' || document.querySelector('.modal-fundo, .menu-contexto')) return;
+    const menuCol = document.querySelector('.cal-piv__menu');
+    if (menuCol) {
+      e.preventDefault();
+      alternarMenuColuna(menuCol.closest('th'));
+      return;
+    }
+    const caixa = document.querySelector('.calendario .cal-filtro[open]');
+    if (!caixa) return;
+    e.preventDefault();
+    caixa.open = false;
+    caixa.querySelector('.cal-filtro__botao').focus();
+  });
+
+  // Botão direito no cabeçalho da coluna (como no Excel): abre o menu Ocultar coluna (se já estiver aberto, mantém).
+  // Também pela tecla de menu (ou Shift+F10) com o cabeçalho em foco. O clique passa pelo aoClicar da tela.
+  let menuPeloDireito = false;
+  function alternarMenuColuna(th) {
+    menuPeloDireito = true;
+    th.querySelector('.cal-piv__cab').click();
+  }
+  document.addEventListener('contextmenu', (e) => {
+    const th = e.target.closest('.cal-piv__th-menu');
+    if (!th || e.target.closest('.cal-piv__menu')) return;
+    e.preventDefault();
+    if (!th.querySelector('.cal-piv__menu')) alternarMenuColuna(th);
+  });
 
   return { desenhar, aoClicar, aoMudar, aoDigitar, prazoDe };
 })();

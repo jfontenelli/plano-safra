@@ -1954,6 +1954,13 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .cal-filtro__nada { margin: 0; padding: 8px 14px; font-size: 13px; color: #6b7280; }
 .cal-filtro__area { margin-left: auto; padding-left: 16px; color: #6b7280; font-size: 13px; }
 .calendario__visoes .visoes__botao { height: 38px; }
+.calendario { padding-top: 10px; gap: 10px; }
+.previsoes { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; margin: -2px 0 0; font-size: 14px; color: var(--texto-suave); }
+.previsoes .icone { width: 16px; height: 16px; color: var(--verde-600); }
+.previsoes strong { color: var(--texto); font-weight: 700; }
+.previsoes__data { color: var(--texto); font-variant-numeric: tabular-nums; }
+.previsoes__dica { font-size: 13px; }
+.previsoes__ponto { color: #b5bdb8; }
 .calendario__visoes .visoes__botao--ativo { background: var(--verde-100); color: var(--verde-800); box-shadow: inset 0 0 0 1px var(--verde-600); }
 .calendario__vazio { margin: 24px 0; color: var(--texto-suave); }
 
@@ -2108,13 +2115,42 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 
 /* ===== Calendário · Tabela: uma linha por operação (com os produtos embaixo) e uma coluna por talhão ===== */
 .cal-piv { overflow: auto; background: var(--superficie); border: 1px solid var(--borda); border-radius: var(--raio); box-shadow: var(--sombra); }
-.cal-piv__tabela { border-collapse: collapse; font-size: 14px; min-width: 100%; }
-.cal-piv__tabela thead th { position: sticky; top: 0; z-index: 2; padding: 10px 14px; background: #f7f8f7; font-size: 13px; font-weight: 600; text-align: left;
-  white-space: nowrap; box-shadow: inset 0 -1px 0 var(--borda); vertical-align: bottom; }
-.cal-piv__tabela td { padding: 8px 14px; border: 1px solid var(--borda); white-space: nowrap; vertical-align: middle; }
-.cal-piv__tabela thead th + th { border-left: 1px solid var(--borda); }
-.cal-piv__tabela tr > :first-child { border-left: 0; }
-.cal-piv__tabela tbody { border-top: 2px solid #cfd8d2; }
+/* Bordas separadas (com border-collapse as bordas das colunas congeladas somem ao rolar) */
+.cal-piv__tabela { border-collapse: separate; border-spacing: 0; font-size: 14px; min-width: 100%; }
+.cal-piv__tabela th, .cal-piv__tabela td { box-sizing: border-box; }
+.cal-piv__tabela thead th { position: sticky; top: 0; z-index: 2; padding: 10px 8px 10px 12px; background: #f7f8f7; font-size: 13px; font-weight: 600; text-align: left;
+  white-space: nowrap; vertical-align: bottom; border-right: 1px solid var(--borda); border-bottom: 2px solid #cfd8d2; }
+.cal-piv__tabela td { padding: 8px 12px; border-right: 1px solid var(--borda); border-bottom: 1px solid var(--borda); white-space: nowrap; vertical-align: middle; background: var(--superficie); }
+.cal-piv__tabela tbody tr:last-child > * { border-bottom: 2px solid #cfd8d2; }
+.cal-piv__tabela tbody:last-child tr:last-child > * { border-bottom: 0; }
+/* Colunas congeladas à esquerda (Fase até Unid.); posição e largura vêm do JS (dependem das colunas ocultas) */
+.cal-piv__fixa { position: sticky; z-index: 1; }
+.cal-piv__tabela thead .cal-piv__fixa { z-index: 3; }
+.cal-piv__fixa--fase { left: 0; width: 44px; min-width: 44px; max-width: 44px; }
+.cal-piv__fixa--ultima { box-shadow: 4px 0 6px -3px rgba(0, 0, 0, .18); }
+/* Descongelar colunas (menu do botão direito): tudo rola junto; o cabeçalho continua parado ao rolar para baixo */
+.cal-piv__tabela--solta .cal-piv__fixa { left: auto !important; }
+.cal-piv__tabela--solta .cal-piv__fixa--ultima { box-shadow: none; }
+/* Operação, Produto e Data prevista estreitas, com quebra de linha */
+.cal-piv__tabela .cal-piv__nome, .cal-piv__tabela .cal-piv__produto, .cal-piv__tabela .cal-piv__data { white-space: normal; overflow-wrap: anywhere; }
+.cal-piv__tabela thead th.cal-piv__fixa { white-space: normal; }
+/* Cabeçalho da coluna: o botão direito abre o menu Ocultar coluna */
+.cal-piv__tabela thead th.cal-piv__th-menu { cursor: context-menu; }
+/* Nomes das colunas fixas (DAP até Unid.) centralizados na horizontal e na vertical */
+.cal-piv__tabela thead th.cal-piv__fixa.cal-piv__th-menu { padding-left: 8px; padding-right: 8px; text-align: center; vertical-align: middle; }
+.cal-piv__tabela thead th.cal-piv__th-menu--aberto { background: #eaf0ec; }
+.cal-piv__cab { display: block; width: 100%; padding: 0; border: 0; background: none; font: inherit; color: inherit; text-align: inherit; cursor: inherit; }
+.cal-piv__menu { position: absolute; top: calc(100% - 4px); right: 4px; z-index: 5; min-width: 190px; padding: 4px 0; background: #fff;
+  border: 1px solid var(--borda); border-radius: 8px; box-shadow: 0 8px 24px rgba(0, 0, 0, .14); }
+.cal-piv__menu button { display: block; width: 100%; padding: 8px 14px; border: 0; background: none; font: inherit; font-size: 14px; font-weight: 400;
+  text-align: left; color: var(--texto); cursor: pointer; }
+.cal-piv__menu button:hover, .cal-piv__menu button:focus-visible { background: #f2f5f0; }
+.cal-piv__menu-divisor { margin: 4px 0; border: 0; border-top: 1px solid var(--borda); }
+/* Coluna oculta: faixa estreita com traço duplo; no cabeçalho, clicar exibe a coluna de novo */
+.cal-piv__tabela .cal-piv__oculta { padding: 0 !important; background: #eef1ef; }
+.cal-piv__exibir { display: block; width: 100%; height: 100%; min-height: 60px; padding: 0; border: 0; cursor: pointer;
+  background: linear-gradient(90deg, transparent 5px, #9aa49f 5px, #9aa49f 6px, transparent 6px, transparent 8px, #9aa49f 8px, #9aa49f 9px, transparent 9px); }
+.cal-piv__exibir:hover, .cal-piv__exibir:focus-visible { background-color: var(--verde-100); }
 .cal-piv__fase-cab { width: 44px; }
 .cal-piv__num { text-align: center !important; font-variant-numeric: tabular-nums; }
 .cal-piv__talhao { min-width: 110px; text-align: center !important; font-weight: 400 !important; }
@@ -2123,11 +2159,10 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .cal-piv__fen { text-align: center; }
 .cal-piv__data { text-align: center; font-variant-numeric: tabular-nums; }
 .cal-piv__area { text-align: right !important; font-variant-numeric: tabular-nums; }
-.cal-piv__nome { min-width: 250px; white-space: normal !important; }
+
 .cal-piv__nome strong { display: block; font-weight: 700; }
 .cal-piv__chip { display: inline-block; margin-top: 6px; padding: 2px 10px; border-radius: 999px; background: #eef1ef; color: var(--texto-suave); font-size: 12px; }
 .cal-piv__sem { color: #9aa49f; font-style: italic; }
 .cal-piv__unid { color: var(--texto-suave); }
-.cal-piv__ajuste { background: #fdf0c4; font-weight: 600; }
 .cal-piv__nao { background: #f0f2f1; color: #9aa49f; }
 .cal-piv__nada { padding: 24px !important; text-align: center; color: var(--texto-suave); }

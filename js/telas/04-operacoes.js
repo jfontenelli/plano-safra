@@ -205,14 +205,14 @@ window.Telas.planoOperacoes = (function () {
                   title="Baixar o plano em planilha para guardar ou continuar depois">${Icones.baixar} Exportar (.xlsx)</button>
         </div>
       </header>
-      ${somenteLeitura ? `
+      ${somenteLeitura && etapa !== 'calendario' ? `
         <p class="faixa-leitura">${Icones.cadeado} Plano aprovado: somente leitura. O plano aprovado não muda durante a safra.</p>` : ''}
     `;
   }
 
   // Calendário Agrícola (Tela 05): desenhado aqui dentro, com o mesmo cabeçalho do plano
   function ctxCalendario() {
-    ui.calendario = ui.calendario || { visao: 'infografico', talhao: 'todos' };
+    ui.calendario = ui.calendario || { visao: 'tabela', talhao: 'todos' };
     return { plano, somenteLeitura, talhoes: talhoesFazenda, estado: ui.calendario };
   }
   const acoesCalendario = { redesenhar: (foco) => (foco ? desenharMantendoFoco(foco) : desenharTudo()), alterou: () => alterou() };

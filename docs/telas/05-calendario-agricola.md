@@ -2,7 +2,7 @@
 
 Atualizado em 08/10/2026. Este doc mostra só o estado atual da tela. Decisão alterada é reescrita, não acumulada.
 Tudo é **Definido**, exceto as seções "Sugestões em teste" e "Em aberto".
-Imagens: `referencias/05-calendario-agricola.png` (Infográfico) e `referencias/05-calendario-tabela.png` (cards e Tabela). Quando imagem e documento divergirem, vale este documento.
+Imagens: `referencias/05-calendario-agricola.png` (Infográfico) e `referencias/05-calendario-tabela.png` (Tabela; os cards da imagem viraram uma linha de texto). Quando imagem e documento divergirem, vale este documento.
 **Situação no protótipo:** construída.
 
 ---
@@ -19,15 +19,15 @@ Ver **todas as operações do plano juntas**, de todos os grupos (Semente, Defen
 ## 3. Barra de cima
 
 - **Talhão**: "Todos os talhões" ou um talhão ("T01 · 120 ha"). Com um talhão, o calendário mostra só o que ele recebe, com a dose dele, e "Talhões" vira 1/1.
-- **Infográfico | Tabela** (botões com ícone; o selecionado em verde-claro com borda verde). Abre no Infográfico.
+- **Tabela | Infográfico** (botões com ícone, nessa ordem; o selecionado em verde-claro com borda verde). **Abre na Tabela**, a visão principal; o Infográfico é complementar.
 - Sem "Visão consolidada" e sem "Agenda de atividades" (estão na imagem, mas foram retirados).
 
-## 4. Cards de resumo (no topo do Infográfico e da Tabela)
+## 4. Previsões de plantio e de colheita (texto abaixo dos filtros)
 
-- Só dois cards (Área e Talhões planejados foram testados e retirados):
-- **Previsão de plantio**: da primeira à última data de plantio (talhões com plantio definido: variedade e data) ("01–20/out/2026"; meses diferentes: "22/set–10/out/2026").
-- **Previsão de colheita**: da primeira à última previsão (data de plantio + ciclo da variedade).
-- Sem plantio: "—" e "Defina o plantio na guia Semente". Os cards valem para a fazenda toda (não mudam com o filtro de talhão).
+- Uma linha de texto logo abaixo dos filtros, no Infográfico e na Tabela: **Plantio estimado:** 22/set–10/out/2026 · **Colheita estimada:** 04/jan–05/fev/2027 (títulos em negrito, datas sem negrito). (Antes eram cards; os cards, e os de Área e Talhões planejados, foram testados e retirados.)
+- **Plantio estimado**: da primeira à última data de plantio (talhões com plantio definido: variedade e data) ("01–20/out/2026"; meses diferentes: "22/set–10/out/2026").
+- **Colheita estimada**: da primeira à última previsão (data de plantio + ciclo da variedade).
+- Sem plantio: "— (defina o plantio na guia Semente)"; com plantio e variedade sem ciclo, na colheita: "— (variedade sem ciclo)". Valem para a fazenda toda (não mudam com o filtro de talhão).
 
 ## 5. Infográfico
 
@@ -47,12 +47,17 @@ Ver **todas as operações do plano juntas**, de todos os grupos (Semente, Defen
 
 - **Faixa da fase na vertical, à esquerda** (Pré-plantio, Plantio, Manejo da cultura, Colheita), nas mesmas cores da etapa Operações.
 - Colunas: **DAP · Fenologia · Data prevista · Área · Operação · Produto · Unid.** e **uma coluna por talhão** (nome, variedade e área no cabeçalho; com o filtro, só os talhões marcados).
-- **Filtros Grupo de operação e Talhão** (à esquerda, acima dos cards; Infográfico/Tabela à direita): cada um é uma caixa com a busca **Pesquisar** no topo, "Todos os grupos" / "Todos os talhões" e uma marcação por opção (no talhão, com a área); dá para marcar vários. O botão mostra "Todos…", o nome (um só), "N grupos" / "N talhões" ou "Nenhum…". Os grupos são os do plano com operação, na ordem do plano, e a Colheita no fim. Valem para o Infográfico e a Tabela.
-- **Uma linha por produto**, com a unidade e a **dose de cada talhão**; DAP, Fenologia e Operação ocupam a altura de todos os produtos da operação. Na célula da Operação, o nome em negrito e o **grupo como etiqueta** embaixo. No Plantio, as linhas são **Data de plantio** e **População** (mil pl/ha); na Colheita, **Previsão de colheita**. Operação sem talhão planejado: uma linha, com **"Sem recomendação"** (no Plantio, "Sem variedade") na coluna Produto.
+- **Filtros Grupo de operação e Talhão** (à esquerda; Tabela/Infográfico à direita; as previsões em texto logo abaixo): cada um é uma caixa com a busca **Pesquisar** no topo, "Todos os grupos" / "Todos os talhões" e uma marcação por opção (no talhão, com a área); dá para marcar vários. O botão mostra "Todos…", o nome (um só), "N grupos" / "N talhões" ou "Nenhum…". Os grupos são os do plano com operação, na ordem do plano, e a Colheita no fim. Valem para o Infográfico e a Tabela.
+- **Calendário sempre ampliado**: ocupa a área logo abaixo das abas do plano, sem botão Expandir/Recolher (testado e retirado). Acima dele, só a barra (filtros e Tabela/Infográfico) e a linha das previsões. No plano aprovado, a faixa "somente leitura" não aparece no Calendário (o selo **Aprovado** fica no cabeçalho). Com uma caixa de filtro aberta, a tecla **Esc** fecha a caixa.
+- **Uma linha por produto**, com a unidade e a **dose de cada talhão**; DAP, Fenologia, Data prevista, Área e Operação ocupam a altura de todos os produtos da operação. Na célula da Operação, o nome em negrito e o **grupo como etiqueta** embaixo. No Plantio, as linhas são **Data de plantio** e **População** (mil pl/ha); na Colheita, **Previsão de colheita**. Operação sem talhão planejado: uma linha, com **"Sem recomendação"** (no Plantio, "Sem variedade") na coluna Produto (na Unid., se o Produto estiver oculto).
 - **Linhas de grade** entre todas as colunas; sem abrir e fechar.
-- **Data prevista:** data de plantio + DAP da operação, nos talhões que recebem a operação (sem talhão planejado, nos talhões do filtro com plantio). Datas diferentes entre talhões viram **intervalo**, no formato dos cards ("22/set–10/out/2026"). Colheita: a previsão de colheita dos talhões. Sem plantio ou sem DAP: "—".
+- **Colunas congeladas** ao rolar para a direita: faixa da Fase, DAP, Fenologia, Data prevista, Área, Operação, Produto e Unid. ficam paradas à esquerda (com uma sombra na borda depois da Unid.); só os talhões rolam. O cabeçalho também fica parado ao rolar para baixo. No menu do botão direito do cabeçalho (qualquer coluna), **Descongelar colunas** faz tudo rolar junto (mesma ordem e larguras; o cabeçalho continua parado ao rolar para baixo); o item vira **Congelar colunas** para voltar. Abre sempre congelada.
+- **Nomes das colunas de DAP até Unid.** centralizados na horizontal e na vertical, na célula do cabeçalho.
+- **Larguras fixas** das colunas congeladas: Fase 44 px · DAP 64 · Fenologia 96 · Data prevista 120 · Área 84 · Operação 170 · Produto 150 · Unid. 96. Operação, Produto e Data prevista quebram a linha quando o texto não cabe.
+- **Ocultar e exibir colunas** (como no Excel), em **todas as colunas**, de DAP até Unid. e cada talhão: o **botão direito** em qualquer lugar do cabeçalho da coluna (sem seta; o clique esquerdo não faz nada) abre o menu **Ocultar coluna** (e **Exibir todas as colunas**, quando há alguma oculta). A coluna oculta vira uma **faixa estreita com traço duplo**; clicar na faixa exibe a coluna de novo. As demais colunas congeladas se ajustam à esquerda. Com o menu aberto, **Esc** ou um clique fora fecha o menu. Só a faixa da Fase não tem esse menu. Ocultar um talhão só estreita a coluna (ele continua no filtro Talhão, que tira a coluna da tabela).
+- **Data prevista:** data de plantio + DAP da operação, nos talhões que recebem a operação (sem talhão planejado, nos talhões do filtro com plantio). Datas diferentes entre talhões viram **intervalo**, no formato das previsões ("22/set–10/out/2026"). Colheita: a previsão de colheita dos talhões. Sem plantio ou sem DAP: "—".
 - **Área:** soma da área dos talhões que recebem a operação (com o filtro, só os talhões marcados); no Plantio, os talhões com variedade; na Colheita, os com previsão. Sem talhão planejado: "—".
-- **Dose do talhão diferente da padrão da receita**: célula em **amarelo** (ao passar o mouse, a dose padrão). **Talhão que não recebe** o produto: "—" em cinza.
+- **Dose do talhão diferente da padrão da receita**: sem destaque de cor por enquanto (o amarelo foi testado e retirado); ao passar o mouse, a dose padrão. **Talhão que não recebe** o produto: "—" em cinza.
 - A **previsão de conclusão** não aparece nem se edita aqui: fica na etapa Operações.
 - Fenologia da linha: a escolhida na operação; "—" no pré-plantio (DAP negativo), no plantio (DAP 0), na colheita e sem fenologia. Colheita: DAP em faixa ("104 a 118").
 
@@ -64,11 +69,11 @@ Ver **todas as operações do plano juntas**, de todos os grupos (Semente, Defen
 
 ## 8. Regras
 
-- **Todas as operações cadastradas na etapa Operações** aparecem, já na ordem do DAP. As que ainda não têm talhão planejado mostram "Sem recomendação" (no Plantio, "Sem variedade"); na Tabela, sem seta e sem linhas de produto. Qualquer mudança em Operações ou no Planejamento aparece ao voltar ao Calendário.
-- **Plano aprovado:** só aparece o que tem produto e dose (no Plantio, variedade); operação sem recomendação não aparece no Infográfico nem na Tabela.
+- **Só as operações já planejadas** aparecem (com produto e dose; no Plantio, variedade), na ordem do DAP, **em construção e no aprovado**. Operação ainda sem recomendação não aparece no Infográfico nem na Tabela. Qualquer mudança em Operações ou no Planejamento aparece ao voltar ao Calendário. (Antes, em construção, todas as operações cadastradas apareciam como "Sem recomendação"; testado e trocado.)
+- **Nada planejado ainda:** no lugar da Tabela e do Infográfico, um aviso (amarelo-claro, como o da etapa Operações): "**Nenhuma operação planejada ainda.** As operações planejadas aparecem aqui com datas e doses por talhão." Os filtros e as previsões continuam na barra. Com operações planejadas, o aviso não aparece; se os filtros esconderem tudo, a Tabela diz "Nenhuma operação com os filtros escolhidos".
 
 - A colheita vem do Plantio: previsão = data de plantio + ciclo da variedade; talhão com variedade sem ciclo fica fora da colheita.
-- **A coluna Colheita aparece sempre, no fim.** Antes de haver plantio (variedade, data e ciclo), o título diz "(pelo ciclo da variedade)" e o cartão "Aguardando plantio: a data vem do plantio + ciclo da variedade"; na Tabela, DAP "pelo ciclo".
+- **A Colheita aparece no fim, depois que houver plantio** (variedade, data e ciclo), com a previsão de colheita.
 - Talhões de cada operação: no Plantio, os talhões com variedade; nas outras, os talhões com recomendação.
 - Quando duas operações caem no mesmo DAP, a ordem segue a das guias (Semente, Defensivo, Fertilidade).
 - O prazo de cada operação e o da colheita vão no arquivo exportado (aba operacoes, coluna previsao_cumprimento; aba plano, prazo_colheita) e voltam no importar.
@@ -76,7 +81,7 @@ Ver **todas as operações do plano juntas**, de todos os grupos (Semente, Defen
 ## 9. Para testar
 
 - **Santa Clara** (aprovado): fases Pré-plantio · Plantio · 1 DAP (sem fenologia) · V2 · V4 · R1 · R3 · R4 · R5 · R7 · Colheita (104 a 118 DAP). Fenologia do exemplo: Pré-emergente sem fenologia (antes da emergência), 1ª Pós V2, 2ª Pós V4, 1ª Fungicida R1, 2ª R3, 3ª R4, 4ª R5, Desfolha R7; adubações de 25 DAP em V4 e 2ª foliar em R3 (do modelo).
-- **São José** (em construção): operações sem recomendação ("Sem recomendação", Talhões 0/12) e colunas cinza sem fenologia; editar o prazo na Tabela.
+- **São José** (em construção): o que já estiver planejado; sem nada planejado, o aviso "Nenhuma operação planejada ainda".
 
 ## 10. Sugestões em teste (não validadas)
 
