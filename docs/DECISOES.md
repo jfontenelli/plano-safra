@@ -116,7 +116,7 @@ Detalhe da tela: docs/telas/04.2-operacoes-sementes.md.
 - **Mapa de variedades da fazenda**: os talhões pintados pela variedade, com a área total de cada variedade, para visualizar e rotacionar as variedades. O plano é por fazenda, então o mapa é por fazenda (sem visão por empresa). Clicar no talhão abre a definição da variedade.
 - Escolha da variedade com apoio do histórico do talhão: produtividade das 3 últimas safras da cultura e chuva acumulada no ciclo de cada uma.
 - **Germinação por talhão** (%): na v1, estimada no plano (a semente ainda não foi comprada; não há lote). Informada por talhão, com atalho para aplicar o mesmo valor em todos os talhões.
-- População de plantas: recomendada (cadastro da variedade, referência, mostrada só no preenchimento) e planejada (agrônomo). Talhão sem variedade não recebe população.
+- População de plantas: recomendada (cadastro da variedade, referência, mostrada só no preenchimento) e planejada (agrônomo). Talhão sem variedade também pode receber população (liberado para os testes; travar de novo se confundir).
 - **Sementes = população planejada × área ÷ germinação. Bags = sementes ÷ 5.000.000** (1 bag de soja = 5 milhões de sementes).
 ### 4.4.1 Tratamento de sementes (grupo Tratamento de semente)
 

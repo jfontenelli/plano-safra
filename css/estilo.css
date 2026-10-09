@@ -1674,6 +1674,9 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
 .painel-talhao__topo { display: flex; align-items: center; gap: 6px; padding-bottom: 10px; border-bottom: 1px solid var(--borda); }
 .painel-talhao__titulo { flex: 1; margin: 0; font-size: 20px; font-weight: 700; }
 .painel-talhao__seta { border: 1px solid var(--verde-700); color: var(--verde-700); }
+/* Ampliar/reduzir o painel: fundo branco e setas na cor verde */
+.painel-talhao__tamanho { background: var(--superficie); color: var(--verde-700); }
+.painel-talhao__tamanho:hover { background: var(--verde-100); }
 .painel-talhao__seta:disabled { border-color: var(--borda); color: #b9c0c5; cursor: not-allowed; }
 .painel-talhao__rolagem { flex: 1; min-height: 0; overflow: auto; display: flex; flex-direction: column; gap: 10px; padding-top: 10px; }
 .painel-talhao__sem-historico { margin: 0; font-size: 14px; color: var(--texto-suave); }
@@ -1681,6 +1684,7 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
 .painel-talhao__campos .campo { margin: 0; }
 .painel-talhao__datas, .plantio__datas { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: start; }
 .plantio__datas .campo { margin: 0; }
+.plantio__orientacao { margin: 0 0 4px; }
 .painel-talhao__previsao { display: flex; align-items: center; height: 42px; margin: 0; padding: 0 12px; border-radius: 8px; background: var(--fundo); font-weight: 700; }
 .painel-talhao__pre { padding: 10px 12px; border: 1px solid #f2de9b; border-radius: 8px; background: #fffaeb; display: flex; flex-direction: column; gap: 8px; }
 .painel-talhao__pre .pre-cadastro__titulo { margin: 0; }
@@ -1787,10 +1791,10 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .barra-acao--vazia .barra-acao__selecao .icone { width: 18px; height: 18px; flex-shrink: 0; }
 
 /* Painel: germinação e, ao lado, "Aplicar em todos os talhões" (o campo com a largura da Data de plantio) */
-.painel-talhao__germinacao { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: start; }
-/* Texto alinhado ao topo do campo (com quebra, as duas linhas cabem na altura do campo); a caixa na primeira linha */
-.painel-talhao__todos { display: flex; align-items: flex-start; gap: 8px; padding-top: 4px; font-size: 13px; line-height: 1.3; cursor: pointer; }
-.painel-talhao__todos input { flex-shrink: 0; width: 16px; height: 16px; margin: 1px 0 0; accent-color: var(--verde-700); }
+.painel-talhao__germinacao { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: center; }
+/* Botão "Aplicar germinação em todos os talhões" (ação de uma vez, com Desfazer); pode quebrar em duas linhas */
+.painel-talhao__aplicar .botao { width: 100%; height: auto; min-height: 34px; padding: 4px 10px; line-height: 1.25; white-space: normal; }
+.painel-talhao__todos { margin: 0; font-size: 13px; color: var(--texto-suave); }
 
 /* Botão com contorno verde (ação da tabela) */
 .botao--contorno { border: 1px solid var(--borda); background: var(--superficie); color: var(--verde-700); font-weight: 600; }
