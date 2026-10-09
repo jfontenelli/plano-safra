@@ -52,8 +52,8 @@ window.Telas.planoOperacoes = (function () {
       erroPrePainel: null,
       painelExpandido: false,  // painel do talhão largo (gráficos maiores)
       ordemSemente: null,      // ordem da tabela do Plantio: { coluna, sentido: asc | desc }
-      erroGerminacao: null,    // germinação inválida digitada: { texto }
-      dicaPlantioVista: false, // a dica acima da tabela some depois do primeiro uso (abrir o painel ou definir variedade)
+      erroGerminacao: null,    // painel: germinação inválida digitada { talhao, texto }
+      germinacaoTodos: false,  // painel: caixa "Aplicar em todos os talhões" da germinação marcada
       dataPainel: null,        // painel: data digitada inválida { talhao, texto }
       copiadoDe: null,         // modal: recomendação de onde os produtos foram copiados
       renomeandoOp: null,
@@ -1257,7 +1257,7 @@ window.Telas.planoOperacoes = (function () {
   const COLUNAS_PLANTIO = [
     { id: 'talhao', rotulo: 'Talhão', valor: (op, t) => t.nome, texto: (op, t) => t.nome },
     { id: 'area', rotulo: 'Área (ha)', numero: true, valor: (op, t) => t.area, texto: (op, t) => Util.area(t.area).replace(' ha', '') },
-    { id: 'produtividade', rotulo: 'Produtividade histórica',
+    { id: 'produtividade', rotulo: 'Produtividade histórica', sub: '(sc/ha)', centro: true,
       valor: (op, t) => mediaHistorica(historicoTalhao(t.nome)),
       texto: (op, t) => { const m = mediaHistorica(historicoTalhao(t.nome)); return m ? `${umaCasa(m)} sc/ha` : ''; } },
     { id: 'variedade', rotulo: 'Variedade (ciclo)', valor: (op, t) => variedadeTalhao(op, t.nome) || null, texto: (op, t) => variedadeTalhao(op, t.nome) },
@@ -1266,6 +1266,8 @@ window.Telas.planoOperacoes = (function () {
       texto: (op, t) => { const pl = op.plantio[t.nome]; return previsaoColheita(pl) ? textoData(previsaoColheita(pl)) : semCiclo(pl) ? 'Informe o ciclo' : ''; } },
     { id: 'populacao', rotulo: 'População', sub: '(mil plantas/ha)', numero: true,
       valor: (op, t) => populacaoDe(op, t.nome), texto: (op, t) => { const n = populacaoDe(op, t.nome); return n ? numeroTexto(n) : ''; } },
+    { id: 'germinacao', rotulo: 'Germinação', sub: '(%)', numero: true,
+      valor: (op, t) => germinacaoDe(op, t.nome), texto: (op, t) => { const n = germinacaoDe(op, t.nome); return n ? numeroTexto(n) : ''; } },
     { id: 'sementes', rotulo: 'Total de sementes', numero: true,
       valor: (op, t) => sementesDe(op, t), texto: (op, t) => { const n = sementesDe(op, t); return n ? milhoes(n) : ''; } },
     { id: 'bags', rotulo: 'Bags', numero: true,
@@ -1273,7 +1275,7 @@ window.Telas.planoOperacoes = (function () {
   ];
   const colunaPlantio = (id) => COLUNAS_PLANTIO.find((c) => c.id === id);
   // Colunas do tamanho do conteúdo; a Variedade fica com o espaço que sobra
-  const classeColuna = (c) => (c.numero ? 'tabela__numero' : c.id === 'variedade' ? 'tabela__expandir' : '');
+  const classeColuna = (c) => (c.centro ? 'tabela__centro' : c.numero ? 'tabela__numero' : c.id === 'variedade' ? 'tabela__expandir' : '');
 
 
   // Talhões na ordem escolhida no título da coluna (sem ordem: a dos talhões).
@@ -1398,25 +1400,19 @@ window.Telas.planoOperacoes = (function () {
     return `<span title="${esc(safras)}">${Math.round(mediaHistorica(h))}<span class="so-leitor"> (${esc(safras)})</span></span>`;
   }
 
-  // Mini barras das 3 safras (a mais recente mais escura) e a média em sc/ha
-  function miniHistorico(talhao) {
+  // Média das 3 safras, só o número (a unidade fica no nome da coluna), como link: abre o painel do talhão,
+  // onde fica o gráfico safra a safra
+  function linkHistorico(talhao) {
     const h = historicoTalhao(talhao);
-    if (!h.length) return '<span class="tabela__nao-recebe">Sem histórico</span>';
-    const barras = h.map(([, , sc], i) => {
-      const altura = Math.max(3, Math.min(20, Math.round((sc - 40) / 2)));
-      return `<span class="historico-mini__barra ${i === h.length - 1 ? 'historico-mini__barra--ultima' : ''}" style="height: ${altura}px"></span>`;
-    }).join('');
-    return `<span class="historico-mini__barras" aria-hidden="true">${barras}</span><strong>${umaCasa(mediaHistorica(h))}</strong> sc/ha`;
+    return h.length ? umaCasa(mediaHistorica(h)) : 'Sem histórico';
   }
 
-  // Tabela única: plantio e população por talhão; todas as colunas ordenam (setas) e filtram (funil).
-  // No pé da tabela, a germinação média do plano, que calcula o total de sementes e os bags.
+  // Tabela única: plantio, população e germinação por talhão; todas as colunas ordenam (setas).
   function tabelaVariedade(op) {
     const visiveis = talhoesVisiveisPlantio(op);
     const marcar = !somenteLeitura;
     const todos = visiveis.length > 0 && visiveis.every((t) => ui.marcados.has(t.nome));
     const vazio = '<span class="tabela__nao-recebe">—</span>';
-    let comPopulacao = 0;
     const linhas = visiveis.map((t) => {
       const p = op.plantio[t.nome];
       const v = p && p.variedade ? variedadeDoCadastro(p.variedade) : null;
@@ -1424,7 +1420,6 @@ window.Telas.planoOperacoes = (function () {
       const aberto = ui.painelTalhao === t.nome;
       const pop = populacaoDe(op, t.nome);
       const s = sementesDe(op, t);
-      if (pop) comPopulacao++;
       const variedade = v
         ? `${esc(v.nome)} <span class="tabela__ciclo">(${v.ciclo ? `${v.ciclo} d` : 'ciclo não informado'})</span>${v.preCadastro ? ' <span class="etiqueta-pre">Pré-cadastro</span>' : ''}`
         : '<span class="tabela__nao-recebe">Não planejado</span>';
@@ -1433,6 +1428,7 @@ window.Telas.planoOperacoes = (function () {
         : vazio;
       const colheita = prev ? diaMes(prev)
         : semCiclo(p) ? '<span class="texto-alerta">Informe o ciclo</span>' : vazio;
+      const germ = germinacaoDe(op, t.nome);
       const populacao = pop
         ? `${foraDaFaixa(v, pop) ? `<span class="aviso-janela" title="Fora da população recomendada (${faixaPopulacao(v)} mil plantas/ha)">${Icones.alerta}<span class="so-leitor">Fora da população recomendada</span></span> ` : ''}${numeroTexto(pop)}`
         : vazio;
@@ -1442,12 +1438,13 @@ window.Telas.planoOperacoes = (function () {
               aria-label="Marcar ${esc(t.nome)}" ${ui.marcados.has(t.nome) ? 'checked' : ''}></td>` : ''}
           <th scope="row" class="tabela__talhao">${esc(t.nome)}</th>
           <td class="tabela__numero">${Util.area(t.area).replace(' ha', '')}</td>
-          <td><button class="historico-mini ${aberto ? 'historico-mini--aberto' : ''}" type="button" data-acao="abrir-painel"
-                      data-talhao="${esc(t.nome)}" aria-label="Abrir o painel do ${esc(t.nome)}">${miniHistorico(t.nome)}</button></td>
+          <td class="tabela__centro"><button class="titulo-abrir link-historico ${aberto ? 'link-historico--aberto' : ''}" type="button" data-acao="abrir-painel"
+                      data-talhao="${esc(t.nome)}" title="Abrir o histórico e o plantio do ${esc(t.nome)}">${linkHistorico(t.nome)}</button></td>
           <td class="tabela__expandir">${variedade}</td>
           <td>${plantio}</td>
           <td>${colheita}</td>
           <td class="tabela__numero">${populacao}</td>
+          <td class="tabela__numero">${germ ? numeroTexto(germ) : vazio}</td>
           <td class="tabela__numero">${s ? milhoes(s) : vazio}</td>
           <td class="tabela__numero tabela__forte">${s ? bags(s) : vazio}</td>
         </tr>`;
@@ -1456,13 +1453,7 @@ window.Telas.planoOperacoes = (function () {
       const c = colunaPlantio(id);
       return tituloOrdenavel(id, c.sub ? `${c.rotulo} ${c.sub}` : c.rotulo, classeColuna(c));
     };
-    const semGerminacao = comPopulacao && !op.germinacao;
     return `
-      ${marcar && !ui.dicaPlantioVista ? `
-        <div class="dica-plantio" role="note">${Icones.info}
-          <p>Clique na produtividade histórica para definir o plantio talhão a talhão. Ou marque vários talhões para definir em lote.</p>
-          <button class="botao-icone dica-plantio__fechar" type="button" data-acao="fechar-dica" aria-label="Fechar a dica" title="Fechar">${Icones.fechar}</button>
-        </div>` : ''}
       <div class="populacao-area">
         <div class="talhoes-rolagem">
           <table class="tabela tabela--compacta tabela-talhoes tabela-variedade tabela-populacao">
@@ -1472,26 +1463,25 @@ window.Telas.planoOperacoes = (function () {
               ${COLUNAS_PLANTIO.map((c) => titulo(c.id)).join('')}
             </tr></thead>
             <tbody>
-              ${linhas || `<tr><td class="tabela__vazia" colspan="${marcar ? 10 : 9}">Nenhum talhão com esses filtros.</td></tr>`}
+              ${linhas || `<tr><td class="tabela__vazia" colspan="${marcar ? 11 : 10}">Nenhum talhão com esses filtros.</td></tr>`}
             </tbody>
-            <tfoot><tr>
-              <td colspan="${marcar ? 10 : 9}">
-                <div class="tabela__rodape-germinacao">
-                  ${campoGerminacao(op)}
-                  ${semGerminacao ? '<span class="texto-alerta">Informe a germinação média para calcular sementes e bags</span>' : ''}
-                </div>
-              </td>
-            </tr></tfoot>
           </table>
         </div>
       </div>
       ${marcar ? barraPlantio(op) : ''}`;
   }
 
-  // Barra de ação: só aparece com talhão marcado (quantos e área · Excluir plantio · Limpar · Definir variedade)
+  // Barra de ação, sempre visível: sem talhão marcado, a orientação e o "Definir plantio" desabilitado;
+  // com talhão marcado, quantos e área · Excluir plantio · Limpar · Definir plantio
   function barraPlantio(op) {
     const n = ui.marcados.size;
-    if (!n) return '';
+    if (!n) {
+      return `
+      <div class="barra-acao barra-acao--vazia" role="region" aria-label="Definir plantio">
+        <p class="barra-acao__selecao">${Icones.info} Selecione um ou mais talhões para definir o plantio</p>
+        <button class="botao botao--primario barra-acao__definir" type="button" disabled>${Icones.broto} Definir plantio</button>
+      </div>`;
+    }
     const area = talhoesFazenda.filter((t) => ui.marcados.has(t.nome)).reduce((s, t) => s + t.area, 0);
     const comPlantio = [...ui.marcados].some((t) => temPlantio(op, t));
     return `
@@ -1555,6 +1545,20 @@ window.Telas.planoOperacoes = (function () {
       ? `<p class="campo__valor">${pop ? numeroTexto(pop) : '—'}</p>`
       : `<input class="campo__controle populacao__campo" id="pt-populacao" data-campo="pt-populacao" type="text" inputmode="decimal"
                 autocomplete="off" placeholder="Ex.: 280" value="${pop ? numeroTexto(pop) : ''}" ${v ? '' : 'disabled'}>`;
+    const germ = germinacaoDe(op, talhao);
+    const erroGerm = ui.erroGerminacao && ui.erroGerminacao.talhao === talhao ? ui.erroGerminacao : null;
+    const germinacao = somenteLeitura
+      ? `<p class="campo__valor">${germ ? `${numeroTexto(germ)}%` : '—'}</p>`
+      : `<div class="painel-talhao__germinacao">
+         <input class="campo__controle populacao__campo ${erroGerm ? 'campo__controle--erro' : ''}" id="pt-germinacao" data-campo="pt-germinacao" type="text"
+                inputmode="decimal" autocomplete="off" placeholder="Ex.: 85" value="${esc(erroGerm ? erroGerm.texto : germ ? numeroTexto(germ) : '')}"
+                ${erroGerm ? 'aria-invalid="true" aria-describedby="pt-germinacao-erro"' : ''}>
+         <label class="painel-talhao__todos">
+           <input type="checkbox" data-campo="pt-germinacao-todos" ${ui.germinacaoTodos ? 'checked' : ''}>
+           Aplicar em todos os talhões
+         </label>
+         </div>
+         ${erroGerm ? '<p class="erro-campo" id="pt-germinacao-erro">Informe de 1 a 100.</p>' : ''}`;
     const data = somenteLeitura
       ? `<p class="campo__valor">${p.data ? dataCompleta(p.data) : '—'}</p>`
       : campoData('pt-data', 'pt-data', p.data, ui.dataPainel && ui.dataPainel.talhao === talhao ? ui.dataPainel.texto : null,
@@ -1592,6 +1596,10 @@ window.Telas.planoOperacoes = (function () {
                 <p class="campo__ajuda">${!v ? 'Escolha a variedade antes da população' : v.populacao ? `População recomendada: ${faixaPopulacao(v)} mil plantas/ha` : ''}</p>
                 ${foraDaFaixa(v, pop) ? `<p class="aviso-janela-texto">${Icones.alerta} Fora da população recomendada</p>` : ''}
               </div>
+            </div>
+            <div class="campo">
+              <label class="campo__rotulo" for="pt-germinacao">Germinação (%)</label>
+              ${germinacao}
             </div>
           </div>
         </div>
@@ -1854,7 +1862,7 @@ window.Telas.planoOperacoes = (function () {
   // ----- Ações do painel do talhão -----
   function abrirPainel(talhao) {
     ui.painelTalhao = talhao; ui.prePainel = null; ui.erroPrePainel = null; ui.dataPainel = null;
-    ui.dicaPlantioVista = true;
+    ui.erroGerminacao = null; ui.germinacaoTodos = false;
     desenharMantendoFoco('.painel-talhao__titulo');
     mostrarLinhaAberta();
   }
@@ -1877,6 +1885,7 @@ window.Telas.planoOperacoes = (function () {
     const alvo = lista[i + sentido];
     if (!alvo) return;
     ui.painelTalhao = alvo.nome; ui.prePainel = null; ui.erroPrePainel = null; ui.dataPainel = null;
+    ui.erroGerminacao = null; ui.germinacaoTodos = false;
     desenharMantendoFoco(`[data-acao="${sentido < 0 ? 'painel-anterior' : 'painel-proximo'}"]:not([disabled]), [data-acao="fechar-painel"]`);
     mostrarLinhaAberta();
   }
@@ -1936,8 +1945,10 @@ window.Telas.planoOperacoes = (function () {
     const atuais = talhoes.map((t) => op.plantio[t] || {});
     const igual = (campo) => (atuais.every((p) => p[campo] && p[campo] === atuais[0][campo]) ? atuais[0][campo] : '');
     const populacao = igual('populacao');
+    const germs = talhoes.map((t) => germinacaoDe(op, t));
+    const germinacao = germs.every((g) => g && g === germs[0]) ? germs[0] : null;
     ui.plantando = { talhoes, variedade: igual('variedade'), data: igual('data'), populacao: populacao ? numeroTexto(populacao) : '',
-                     preVariedade: null, erros: {} };
+                     germinacao: germinacao ? numeroTexto(germinacao) : '', preVariedade: null, erros: {} };
     desenharMantendoFoco('.definir');
   }
 
@@ -2002,6 +2013,14 @@ window.Telas.planoOperacoes = (function () {
                 <div class="plantio__aviso-populacao" aria-live="polite">${avisoPopulacaoPlantio(v, Util.numero(pl.populacao || ''))}</div>
               </div>
             </div>
+            <div class="plantio__datas">
+              <div class="campo">
+                <label class="campo__rotulo" for="pl-germinacao">Germinação (%)</label>
+                <input class="campo__controle populacao__campo ${classeErro('germinacao')}" id="pl-germinacao" data-campo="pl-germinacao" type="text"
+                       inputmode="decimal" autocomplete="off" placeholder="Ex.: 85" value="${esc(pl.germinacao || '')}">
+                ${erro('germinacao')}
+              </div>
+            </div>
           </div>
           <div class="definir__rodape">
             <button class="botao botao--secundario" type="button" data-acao="pl-fechar">Cancelar</button>
@@ -2021,18 +2040,22 @@ window.Telas.planoOperacoes = (function () {
     // População é opcional aqui (pode ficar para depois); em branco, a que o talhão já tinha fica
     const populacao = (pl.populacao || '').trim() ? Util.numero(pl.populacao) : null;
     if ((pl.populacao || '').trim() && !(populacao > 0)) pl.erros.populacao = 'Informe um número maior que zero.';
+    // Germinação também opcional (em branco, fica a que o talhão já tinha); de 1 a 100
+    const germinacao = (pl.germinacao || '').trim() ? Util.numero(pl.germinacao) : null;
+    if ((pl.germinacao || '').trim() && !(germinacao > 0 && germinacao <= 100)) pl.erros.germinacao = 'Informe de 1 a 100.';
     if (Object.keys(pl.erros).length) { desenharTudo(); return; }
+    if (!op.germinacoes) op.germinacoes = {};
     pl.talhoes.forEach((t) => {
       op.plantio[t] = { ...(op.plantio[t] || {}), variedade: pl.variedade, data: pl.data, ...(populacao ? { populacao } : {}) };
+      if (germinacao) op.germinacoes[t] = germinacao;
     });
     const n = pl.talhoes.length;
     ui.plantando = null;
-    ui.dicaPlantioVista = true;
     ui.filtroTalhoes = 'todos';
     limparSelecao(); alterou(); desenharTudo();
     const rolagem = raiz.querySelector('.talhoes-rolagem');
     if (rolagem) rolagem.scrollTop = 0;
-    Aviso.mostrar(`${esc(pl.variedade)} em ${n} ${n === 1 ? 'talhão' : 'talhões'} · plantio em ${dataCompleta(pl.data)}${populacao ? ` · ${numeroTexto(populacao)} mil plantas/ha` : ''}`);
+    Aviso.mostrar(`${esc(pl.variedade)} em ${n} ${n === 1 ? 'talhão' : 'talhões'} · plantio em ${dataCompleta(pl.data)}${populacao ? ` · ${numeroTexto(populacao)} mil plantas/ha` : ''}${germinacao ? ` · germinação ${numeroTexto(germinacao)}%` : ''}`);
   }
 
   function salvarPreVariedade() {
@@ -2054,9 +2077,9 @@ window.Telas.planoOperacoes = (function () {
     if (!n) return;
     Modal.confirmar({
       titulo: `Excluir o plantio de ${n} ${n === 1 ? 'talhão' : 'talhões'}?`,
-      texto: `Variedade, data de plantio, população e TSI ${n === 1 ? 'desse talhão serão apagadas' : 'desses talhões serão apagadas'}. Essa ação não pode ser desfeita.`,
+      texto: `Variedade, data de plantio, população, germinação e TSI ${n === 1 ? 'desse talhão serão apagadas' : 'desses talhões serão apagadas'}. Essa ação não pode ser desfeita.`,
       botoes: [{ rotulo: 'Cancelar' }, { rotulo: 'Excluir plantio', classe: 'perigo', acao: () => {
-        alvo.forEach((t) => { delete op.plantio[t]; });
+        alvo.forEach((t) => { delete op.plantio[t]; if (op.germinacoes) delete op.germinacoes[t]; });
         // Sem variedade, o talhão sai também do TSI (grupo Tratamento de semente); TSI sem talhão deixa de existir
         plano.grupos.filter(ehGrupoTsi).forEach((g) => g.operacoes.forEach((o) => {
           alvo.forEach((t) => { delete o.talhoes[t]; });
@@ -2083,10 +2106,16 @@ window.Telas.planoOperacoes = (function () {
     return p && p.populacao ? p.populacao : null;
   }
 
+  // Germinação do talhão (%), à parte do plantio
+  function germinacaoDe(op, talhao) {
+    return (op.germinacoes || {})[talhao] || null;
+  }
+
   // Sem população ou sem germinação: null ("—")
   function sementesDe(op, t) {
     const pop = populacaoDe(op, t.nome);
-    return pop && op.germinacao ? pop * 1000 * t.area / (op.germinacao / 100) : null;
+    const germ = germinacaoDe(op, t.nome);
+    return pop && germ ? pop * 1000 * t.area / (germ / 100) : null;
   }
 
   function numeroTexto(n) {
@@ -2111,36 +2140,35 @@ window.Telas.planoOperacoes = (function () {
     return v;
   }
 
-  // Germinação média do plano (linha de Total da tabela): um valor só para todos os talhões
-  function campoGerminacao(op) {
-    if (somenteLeitura) {
-      return `<span class="germinacao"><span class="germinacao__rotulo">Germinação média</span>
-                <strong>${op.germinacao ? `${numeroTexto(op.germinacao)}%` : '—'}</strong></span>`;
-    }
-    const erro = ui.erroGerminacao;
-    return `
-      <span class="germinacao">
-        <label class="germinacao__rotulo" for="germinacao">Germinação média</label>
-        <input class="campo__controle germinacao__campo ${erro ? 'campo__controle--erro' : ''}" id="germinacao" data-campo="germinacao"
-               type="text" inputmode="decimal" autocomplete="off" placeholder="—"
-               value="${esc(erro ? erro.texto : op.germinacao ? numeroTexto(op.germinacao) : '')}"
-               ${erro ? 'aria-invalid="true" aria-describedby="germinacao-erro"' : ''}>
-        <span>%</span>
-        ${erro ? '<span class="erro-campo germinacao__erro" id="germinacao-erro">Informe de 1 a 100.</span>' : ''}
-      </span>`;
-  }
-
-  function salvarGerminacao(op, texto) {
+  // Germinação do talhão no painel (de 1 a 100; vazio apaga). Com "Aplicar em todos os talhões" marcada,
+  // o valor vai para todos os talhões da fazenda, com ou sem variedade.
+  function salvarGerminacaoPainel(op, texto) {
+    const talhao = ui.painelTalhao;
     const n = Util.numero(texto);
     if (texto.trim() && (n === null || n <= 0 || n > 100)) {
-      ui.erroGerminacao = { texto };
-      desenharMantendoFoco('#germinacao'); return;
+      ui.erroGerminacao = { talhao, texto };
+      desenharMantendoFoco('#pt-germinacao'); return;
     }
     ui.erroGerminacao = null;
-    const antes = op.germinacao;
-    op.germinacao = texto.trim() ? n : null;
-    if (op.germinacao !== antes) alterou();
-    desenharTudo();
+    if (!op.germinacoes) op.germinacoes = {};
+    const alvos = ui.germinacaoTodos ? talhoesFazenda.map((t) => t.nome) : [talhao];
+    alvos.forEach((t) => { if (texto.trim()) op.germinacoes[t] = n; else delete op.germinacoes[t]; });
+    alterou();
+    desenharMantendoFoco('#pt-germinacao');
+    if (ui.germinacaoTodos && texto.trim()) Aviso.mostrar(`Germinação de ${numeroTexto(n)}% em todos os talhões`);
+  }
+
+  // Marcar "Aplicar em todos os talhões" já leva a germinação deste talhão para todos
+  function marcarGerminacaoTodos(op, marcado) {
+    ui.germinacaoTodos = marcado;
+    const n = germinacaoDe(op, ui.painelTalhao);
+    if (marcado && n) {
+      if (!op.germinacoes) op.germinacoes = {};
+      talhoesFazenda.forEach((t) => { op.germinacoes[t.nome] = n; });
+      alterou();
+      Aviso.mostrar(`Germinação de ${numeroTexto(n)}% em todos os talhões`);
+    }
+    desenharMantendoFoco('[data-campo="pt-germinacao-todos"]');
   }
 
   // Modal "Definir plantio": aviso (sem bloquear) quando a população fica fora da recomendada
@@ -2397,7 +2425,6 @@ window.Telas.planoOperacoes = (function () {
         try { nativo.showPicker(); } catch (erro) { nativo.focus(); nativo.click(); }
         break;
       }
-      case 'fechar-dica': ui.dicaPlantioVista = true; desenharMantendoFoco('[data-acao="marcar-todos"]'); break;
       case 'abrir-primeiro': {
         const primeiro = talhoesVisiveisPlantio(op)[0];
         if (primeiro) abrirPainel(primeiro.nome);
@@ -2491,7 +2518,8 @@ window.Telas.planoOperacoes = (function () {
       alterarPlantioPainel(op, 'data', iso || ''); return;
     }
     if (campo === 'pt-ciclo') { salvarCiclo(e.target.value); return; }
-    if (campo === 'germinacao') { salvarGerminacao(op, e.target.value); return; }
+    if (campo === 'pt-germinacao') { salvarGerminacaoPainel(op, e.target.value); return; }
+    if (campo === 'pt-germinacao-todos') { marcarGerminacaoTodos(op, e.target.checked); return; }
     if (campo === 'pt-populacao') {
       const n = Util.numero(e.target.value);
       alterarPlantioPainel(op, 'populacao', n && n > 0 ? n : null); return;
@@ -2546,7 +2574,8 @@ window.Telas.planoOperacoes = (function () {
     }
     if (e.target.dataset.campo === 'pl-pre') { ui.plantando.preVariedade = e.target.value; return; }
     // Germinação e população só com números e uma vírgula
-    if (e.target.dataset.campo === 'germinacao' || e.target.dataset.campo === 'pt-populacao') { soNumero(e.target); return; }
+    if (e.target.dataset.campo === 'pt-germinacao' || e.target.dataset.campo === 'pt-populacao') { soNumero(e.target); return; }
+    if (e.target.dataset.campo === 'pl-germinacao') { ui.plantando.germinacao = soNumero(e.target); return; }
     if (e.target.dataset.campo === 'pl-populacao') { digitarPopulacaoPlantio(e.target); return; }
     if (e.target.dataset.combo) {
       const linha = linhaDoElemento(e.target);
@@ -2655,8 +2684,8 @@ window.Telas.planoOperacoes = (function () {
     // Esc fecha o modal "Definir recomendação" ou "Definir plantio" (os campos acima já tratam o próprio Esc)
     if (e.key === 'Escape' && ui.definindo && el.closest('.definir')) { e.preventDefault(); fecharDefinir(); }
     if (e.key === 'Escape' && ui.plantando && el.closest('.definir')) { e.preventDefault(); fecharPlantio(); }
-    if (e.key === 'Enter' && el.dataset.campo === 'pl-populacao') { e.preventDefault(); aplicarPlantio(opAtual()); return; }
-    if (e.key === 'Enter' && (el.dataset.campo === 'germinacao' || el.dataset.campo === 'pt-populacao')) { e.preventDefault(); el.blur(); return; }
+    if (e.key === 'Enter' && (el.dataset.campo === 'pl-populacao' || el.dataset.campo === 'pl-germinacao')) { e.preventDefault(); aplicarPlantio(opAtual()); return; }
+    if (e.key === 'Enter' && (el.dataset.campo === 'pt-germinacao' || el.dataset.campo === 'pt-populacao')) { e.preventDefault(); el.blur(); return; }
     // Painel do talhão: Enter no ciclo ou no pré-cadastro salva; Esc fecha o painel
     if (e.key === 'Enter' && el.dataset.campo === 'pt-ciclo') { e.preventDefault(); salvarCiclo(el.value); return; }
     if (e.key === 'Enter' && el.dataset.campo === 'pt-pre') { e.preventDefault(); salvarPrePainel(); return; }

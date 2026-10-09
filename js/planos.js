@@ -36,8 +36,8 @@ window.Planos = (function () {
   // prazo: prazo para encerramento da OS, em dias (informado no Calendário Agrícola; null = padrão do grupo)
   function novaOperacao(nome, dap = null, prazo = null) {
     // Só no grupo Semente: plantio { 'T01': { variedade, data ('AAAA-MM-DD'), populacao (mil plantas/ha) } }
-    // e germinação média do plano (%, um valor só para todos os talhões)
-    return { id: novoId('o'), nome, dap, fenologia: '', prazo, receitas: [], talhoes: {}, plantio: {}, germinacao: null };
+    // e germinação por talhão (%): germinacoes { 'T01': 95 }, à parte do plantio (talhão só com germinação não conta como planejado)
+    return { id: novoId('o'), nome, dap, fenologia: '', prazo, receitas: [], talhoes: {}, plantio: {}, germinacoes: {} };
   }
 
   // ----- Receitas -----
@@ -78,7 +78,8 @@ window.Planos = (function () {
       if (d.fenologia) op.fenologia = d.fenologia; // senão, fica a do modelo
       if (d.dap !== undefined) op.dap = d.dap; // operação sem DAP no modelo (ex.: TSI)
       (d.plantio || []).forEach(({ talhao, variedade, data, populacao }) => { op.plantio[talhao] = { variedade, data, populacao }; });
-      if (d.germinacao) op.germinacao = d.germinacao;
+      // Germinação dos exemplos: o mesmo valor em todos os talhões do plantio
+      if (d.germinacao) (d.plantio || []).forEach(({ talhao }) => { op.germinacoes[talhao] = d.germinacao; });
       // Tratamento de sementes (TSI): cada um vira "TSI N", nos talhões listados
       (d.tsi || []).forEach(({ produtos, talhoes }) => {
         const r = novaReceita(op, produtos.map(([nome, dose]) => linhaDoProduto(nome, dose)), 'TSI');

@@ -262,7 +262,7 @@ window.DADOS = {
         const op = (produtos, fenologia = '') => ({ fenologia, produtos, talhoes: todos });
         return {
           // Plantio: variedade, data de plantio e população planejada (mil plantas/ha) por talhão,
-          // dentro da população recomendada de cada variedade; germinação média do plano em %
+          // dentro da população recomendada de cada variedade; germinação em %, a mesma em todos os talhões
           // Fertilidade: calcário e base em todos; gesso só onde a análise de subsuperfície pediu (T01 a T04);
           // cobertura potássica só nos talhões mais arenosos (T05 a T08); T07 com dose maior de KCl
           'Calagem': op([['Calcário dolomítico PRNT 85%', 2]]),

@@ -36,7 +36,7 @@ window.ArquivoPlano = (function () {
       ['campo', 'valor'],
       ['formato', FORMATO], ['versao', VERSAO],
       ['safra', plano.safra], ['empresa', plano.empresa], ['fazenda', plano.fazenda], ['cultura', plano.cultura],
-      ['status', plano.status], ['germinacao_media', plantio && plantio.germinacao ? plantio.germinacao : ''],
+      ['status', plano.status],
       ['exportado_em', Util.hojeISO()], ['exportado_por', DADOS.usuario.nome]
     ];
 
@@ -53,13 +53,15 @@ window.ArquivoPlano = (function () {
     if (sementes) {
       sementes.operacoes.forEach((op) => {
         talhoes.forEach((t) => {
-          const p = (op.plantio || {})[t.nome];
+          // Germinação por talhão (pode existir sem plantio)
+          const g = (op.germinacoes || {})[t.nome] || null;
+          const p = (op.plantio || {})[t.nome] || (g ? {} : null);
           if (!p) return;
           const v = p.variedade ? DADOS.variedades.find((x) => x.nome === p.variedade) : null;
-          const sem = p.populacao && op.germinacao ? p.populacao * 1000 * t.area / (op.germinacao / 100) : null;
+          const sem = p.populacao && g ? p.populacao * 1000 * t.area / (g / 100) : null;
           abaVariedade.push([plano.fazenda, t.nome, t.area, plano.cultura, sementes.nome, op.nome, p.variedade || '',
             p.data || '', p.populacao || '', v && v.populacao ? `${v.populacao[0]}-${v.populacao[1]}` : '',
-            op.germinacao || '', sem ? Math.round(sem) : '', sem ? Math.round(sem / 5e5) / 10 : '']);
+            g || '', sem ? Math.round(sem) : '', sem ? Math.round(sem / 5e5) / 10 : '']);
         });
       });
     }
@@ -117,7 +119,8 @@ window.ArquivoPlano = (function () {
         if (campos.formato !== FORMATO) { resolver(naoEhDoSistema); return; }
         resolver({
           contexto: { safra: String(campos.safra), empresa: String(campos.empresa), fazenda: String(campos.fazenda), cultura: String(campos.cultura) },
-          germinacao: campos.germinacao_media === '' ? null : Number(campos.germinacao_media),
+          // Arquivos antigos tinham uma germinação média do plano; vale para os talhões sem germinação na linha
+          germinacao: campos.germinacao_media === '' || campos.germinacao_media === undefined ? null : Number(campos.germinacao_media),
           prazoColheita: campos.prazo_colheita ? Number(campos.prazo_colheita) : null,
           abas: Object.fromEntries(['operacoes', 'cultura_variedade', ...ABAS_REC].map((n) => [n, linhas(n)]))
         });
@@ -149,7 +152,6 @@ window.ArquivoPlano = (function () {
       const op = Planos.novaOperacao(String(x.operacao), x.dap === '' ? null : Number(x.dap),
         x.previsao_cumprimento === '' || x.previsao_cumprimento === undefined ? null : Number(x.previsao_cumprimento));
       op.fenologia = String(x.fenologia || '');
-      if (g.tipo === 'Sementes' && dados.germinacao) op.germinacao = dados.germinacao;
       if (g.tipo === 'Sementes' && dados.prazoColheita) op.prazoColheita = dados.prazoColheita;
       g.operacoes.push(op);
     });
@@ -162,6 +164,9 @@ window.ArquivoPlano = (function () {
       if (variedade && !DADOS.variedades.some((v) => v.nome === variedade)) {
         DADOS.variedades.push({ cultura: String(x.cultura), nome: variedade, gm: null, ciclo: null, populacao: null, janela: null, preCadastro: true });
       }
+      const germinacao = x.perc_germinacao !== '' && x.perc_germinacao !== undefined ? Number(x.perc_germinacao) : dados.germinacao;
+      if (germinacao) op.germinacoes[talhao] = germinacao;
+      if (!variedade && !x.data_plantio) return; // linha só com germinação
       op.plantio[talhao] = { variedade, data: String(x.data_plantio || ''), ...(x.pop_plantas_planejada !== '' ? { populacao: Number(x.pop_plantas_planejada) } : {}) };
     });
 
