@@ -56,6 +56,7 @@ Agrônomo da fazenda e líder de operações podem ser a mesma pessoa, conforme 
 - Filtro de safra começa na safra mais recente cadastrada (não em "Todas").
 - Colunas da lista: Safra, Empresa, Fazenda, Cultura, Área, Custo estimado, Receita projetada, Status, Última atualização, Atualizado por.
 - Status do plano: **Em construção** e **Aprovado**.
+- **Salvamento automático** do plano (sem botão Salvar), com o sinal "✓ Salvo automaticamente" no cabeçalho do plano. No protótipo é só o sinal.
 - Custo e receita ficam vazios até que as informações que os alimentam existam.
 - **Menu do plano** na lista (⋯ no começo da linha ou botão direito): Excluir · Exportar (.xlsx) · Abrir. **Só plano Em construção pode ser excluído** (o aprovado gerou OS e é a linha de base), com confirmação. "Copiar para outra fazenda" fica para quando o cliente pedir.
 

@@ -1029,6 +1029,10 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
 .plano__ponto { margin: 0 4px; }
 .plano__contexto { font-size: 14px; color: var(--texto); }
 .plano__contexto .plano__ponto { color: var(--texto-suave); }
+/* Salvamento automático: sinal discreto depois do status */
+.salvo { display: inline-flex; align-items: center; gap: 4px; margin-left: 14px; font-size: 13px; color: var(--texto-suave); white-space: nowrap; }
+.salvo .icone { width: 14px; height: 14px; color: var(--verde-700); }
+.salvo--salvando { font-style: italic; }
 
 .etapas { display: flex; flex-wrap: wrap; gap: 0 28px; font-size: 14px; }
 
@@ -1234,9 +1238,6 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
 }
 
 /* Status no subtítulo do plano: clique alterna (só no protótipo) */
-.status--botao { border: 0; font: inherit; font-size: 13px; font-weight: 500; cursor: pointer; }
-.status--botao:hover { filter: brightness(.96); }
-.status--botao:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 2px; }
 
 /* --- Detalhe --- */
 .ops-detalhe {
@@ -1905,7 +1906,7 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .celula::placeholder { color: #b9c0c5; }
 .celula--numero { width: 72px; text-align: right; }
 .tabela-doses .celula--numero { width: 80px; text-align: center; }
-.celula--data { width: 96px; }
+.celula--data { width: 112px; }
 .celula--lista { min-width: 210px; cursor: pointer; }
 .celula-linha { display: inline-flex; align-items: center; gap: 4px; }
 .celula-linha--numero { justify-content: flex-end; }
@@ -2089,8 +2090,8 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .tab-op__fase-v-conteudo { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; min-height: 100%; padding: 10px 0; }
 .tab-op__fase-v-nome { writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; font-size: 13px; font-weight: 700; color: #111; letter-spacing: .02em; }
 .tab-op__grupo-fase tr:first-child td { border-top: 2px solid #d6e3d8; }
-.tab-op__mais { width: 30px; height: 30px; font-size: 18px; line-height: 1; color: var(--texto-suave); opacity: 0; }
-.tab-op tr:hover .tab-op__mais, .tab-op__mais:focus-visible { opacity: 1; }
+/* ⋯ sempre visível em todas as linhas (no teste, ao aparecer só com o mouse em cima, não era encontrado) */
+.tab-op__mais { width: 30px; height: 30px; font-size: 18px; line-height: 1; color: var(--texto-suave); }
 .tab-op__nome--vazio { color: #9aa49f; font-style: italic; font-weight: 400; }
 .tab-op__dica { margin: 0; font-size: 13px; color: var(--texto-suave); }
 .tab-op__faixa th { padding: 0; background: #eef4ef; border-top: 1px solid var(--borda); text-align: left; font-weight: 600; }
@@ -2698,6 +2699,7 @@ window.Icones = (function () {
     // Painel do talhão: ampliar (setas diagonais para fora) e reduzir (setas diagonais para dentro)
     ampliar: svg('<path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>'),
     reduzir: svg('<path d="M4 14h6v6M20 10h-6V4M14 10l7-7M3 21l7-7"/>'),
+    certo:  svg('<path d="M5 12l5 5 9-10"/>'),
     cadeado: svg('<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>'),
     casa:   svg('<path d="M3 20h18"/><path d="M5 20V9l7-5 7 5v11"/><path d="M10 20v-6h4v6"/>'),
     copiar: svg('<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/>'),
@@ -5069,6 +5071,7 @@ window.Telas.planoOperacoes = (function () {
     raiz.addEventListener('dblclick', aoDuploClique);
     raiz.addEventListener('change', aoMudar);
     raiz.addEventListener('input', aoDigitar);
+    raiz.addEventListener('paste', aoColar);
     raiz.addEventListener('keydown', aoTeclar);
     raiz.addEventListener('focusin', aoFocar);
     raiz.addEventListener('focusout', aoDesfocar);
@@ -5130,6 +5133,36 @@ window.Telas.planoOperacoes = (function () {
   function alterou() {
     plano.atualizadoEm = Util.hojeISO();
     plano.atualizadoPor = DADOS.usuario.nome;
+    marcarSalvando();
+  }
+
+  // ----- Salvamento automático (sinal no cabeçalho) -----
+  // Sem botão Salvar: cada alteração mostra "Salvando…" por um instante e volta para "Salvo automaticamente".
+  // No protótipo é só o sinal (os dados ficam na memória do navegador).
+  let salvandoAte = 0;
+  let temporizadorSalvo = null;
+
+  function marcarSalvando() {
+    plano.salvoEm = new Date();
+    salvandoAte = Date.now() + 900;
+    atualizarSinalSalvo();
+    clearTimeout(temporizadorSalvo);
+    temporizadorSalvo = setTimeout(atualizarSinalSalvo, 950);
+  }
+
+  function sinalSalvo() {
+    if (somenteLeitura) return '';
+    const salvando = Date.now() < salvandoAte;
+    const hora = plano.salvoEm ? plano.salvoEm.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '';
+    const dica = hora ? `Todas as alterações foram salvas · hoje, ${hora}` : 'As alterações são salvas automaticamente';
+    return `<span class="salvo ${salvando ? 'salvo--salvando' : ''}" data-salvo title="${dica}" role="status" aria-live="polite">${salvando
+      ? 'Salvando…' : `${Icones.certo} Salvo automaticamente`}</span>`;
+  }
+
+  // Troca só o sinal (sem redesenhar a tela)
+  function atualizarSinalSalvo() {
+    const el = raiz && raiz.querySelector('[data-salvo]');
+    if (el) el.outerHTML = sinalSalvo();
   }
 
   // Ao trocar de operação, grupo ou status: limpa a seleção da tabela e fecha o modal
@@ -5189,9 +5222,8 @@ window.Telas.planoOperacoes = (function () {
         <span class="plano__seta" aria-hidden="true">›</span>
         <p class="plano__contexto">${contexto.map(esc).join('<span class="plano__ponto">·</span>')}
           <span class="plano__ponto">·</span>
-          <button class="status status--botao ${somenteLeitura ? 'status--aprovado' : 'status--construcao'}" type="button"
-                  data-acao="alternar-status" title="Protótipo: clique para alternar o status"
-                  aria-label="Status: ${esc(plano.status)}. Protótipo: clique para alternar o status">${esc(plano.status)}</button></p>
+          <span class="status ${somenteLeitura ? 'status--aprovado' : 'status--construcao'}">${esc(plano.status)}</span>
+          ${sinalSalvo()}</p>
         </div>
         <div class="plano__linha-etapas">
           <nav class="etapas" aria-label="Etapas do plano">
@@ -5914,24 +5946,78 @@ window.Telas.planoOperacoes = (function () {
                    title="${esc(dica)}" aria-label="Dose de ${esc(Planos.nomeLinha(l))} no ${esc(t.nome)}">`;
   }
 
-  // Grava a dose digitada só para este talhão (dose própria; a recomendação não muda).
-  // Igual à padrão, ou apagada, volta a seguir a padrão da recomendação. Inválida: volta ao valor anterior.
-  function salvarDoseCelula(op, el) {
-    const ajuste = op.talhoes[el.dataset.talhao];
-    const l = ajuste ? Planos.linhasTalhao(op, ajuste).find((x) => x.id === el.dataset.linha) : null;
-    if (!l) return;
-    const texto = el.value.trim();
+  // Grava a dose de um talhão (dose própria; a recomendação não muda). Igual à padrão, ou vazia, volta a seguir
+  // a padrão. Devolve { erro } ou { l, ajuste, vazia }.
+  function gravarDose(op, talhao, linhaId, texto) {
+    const ajuste = op.talhoes[talhao];
+    const l = ajuste ? Planos.linhasTalhao(op, ajuste).find((x) => x.id === linhaId) : null;
+    if (!l) return { erro: 'Talhão sem este produto.' };
     const n = Util.numero(texto);
-    if (texto && !(n > 0)) { el.value = el.defaultValue; Aviso.mostrar('Dose: informe um número maior que zero.'); return; }
+    if (texto && !(n > 0)) return { erro: 'Dose: informe um número maior que zero.' };
     if (!texto || n === l.dose) delete ajuste.doses[l.id]; else ajuste.doses[l.id] = n;
+    return { l, ajuste, vazia: !texto };
+  }
+
+  function salvarDoseCelula(op, el) {
+    const g = gravarDose(op, el.dataset.talhao, el.dataset.linha, el.value.trim());
+    if (g.erro) { el.value = el.defaultValue; Aviso.mostrar(g.erro); return; }
     alterou();
+    const { l, ajuste } = g;
     const d = Planos.doseTalhao(op, ajuste, l);
     el.value = d === null || d === undefined ? '' : formatarDose(d);
     el.defaultValue = el.value;
     const r = Planos.receitaDoTalhao(op, ajuste);
     const propria = l.id in ajuste.doses;
     if (r) el.title = propria ? `Dose deste talhão · padrão da ${nomeCurto(r)}: ${formatarDose(l.dose)} ${Planos.unidadeDose(l)}` : `Dose padrão da ${nomeCurto(r)}`;
-    if (!texto) Aviso.mostrar(`${esc(el.dataset.talhao)} volta à dose padrão da ${esc(nomeCurto(r))}`);
+    if (g.vazia) Aviso.mostrar(`${esc(el.dataset.talhao)} volta à dose padrão da ${esc(nomeCurto(r))}`);
+  }
+
+  // ----- Colar várias linhas (e colunas) copiadas do Excel -----
+  // Colado numa célula editável: preenche essa célula e as de baixo (um valor por talhão, na ordem da tabela);
+  // com colunas (Tab), também as células editáveis ao lado. Valor inválido não entra; no fim, um aviso só.
+  // Um valor só (sem quebra de linha nem Tab) cola normalmente no campo.
+  function aoColar(e) {
+    const el = e.target;
+    if (somenteLeitura || !el.matches || !el.matches('.tabela-talhoes [data-variedade="tb"], .tabela-talhoes [data-campo^="tb-"]')) return;
+    const texto = (e.clipboardData || window.clipboardData).getData('text') || '';
+    const linhas = texto.replace(/\r/g, '').replace(/\n+$/, '').split('\n');
+    if (linhas.length < 2 && !linhas[0].includes('\t')) return;
+    e.preventDefault();
+    const op = opAtual();
+    const editaveis = (tr) => [...tr.querySelectorAll('[data-variedade="tb"], [data-campo^="tb-"]')];
+    const trs = [...el.closest('tbody').rows];
+    const inicio = trs.indexOf(el.closest('tr'));
+    const coluna = editaveis(trs[inicio]).indexOf(el);
+    let colados = 0; let sobraram = 0;
+    const erros = [];
+    linhas.forEach((linha, i) => {
+      const tr = trs[inicio + i];
+      if (!tr) { sobraram++; return; }
+      linha.split('\t').forEach((valor, j) => {
+        const alvo = editaveis(tr)[coluna + j];
+        if (!alvo) return;
+        const v = valor.trim();
+        const talhao = alvo.dataset.talhao;
+        let erro = null;
+        if (alvo.dataset.variedade) {
+          if (!v) return;
+          const achada = acharVariedade(v);
+          if (achada) op.plantio[talhao] = { ...(op.plantio[talhao] || { variedade: '', data: '' }), variedade: achada.nome };
+          else erro = 'variedade não encontrada';
+        } else if (alvo.dataset.campo === 'tb-dose') {
+          erro = gravarDose(op, talhao, alvo.dataset.linha, v).erro || null;
+        } else {
+          erro = gravarCampoPlantio(op, talhao, alvo.dataset.campo, v).erro || null;
+        }
+        if (erro) erros.push(talhao); else colados++;
+      });
+    });
+    alterou();
+    redesenharMantendoCelula();
+    const partes = [`${colados} ${colados === 1 ? 'valor colado' : 'valores colados'}`];
+    if (erros.length) partes.push(`${erros.length} não ${erros.length === 1 ? 'entrou' : 'entraram'} (valor inválido: ${[...new Set(erros)].map(esc).join(', ')})`);
+    if (sobraram) partes.push(`${sobraram} ${sobraram === 1 ? 'linha sobrou' : 'linhas sobraram'} (não há mais talhões abaixo)`);
+    Aviso.mostrar(partes.join(' · '));
   }
 
   // Quadro da recomendação filtrada: nome · talhões · área, "Editar" e "Ver produtos" (começa recolhido)
@@ -5972,7 +6058,7 @@ window.Telas.planoOperacoes = (function () {
             <button class="botao botao--perigo-leve barra-definir__excluir" type="button" data-acao="excluir-marcados">${Icones.lixeira} Excluir ${T().nome}</button>` : ''}
           <button class="botao botao--secundario barra-definir__limpar" type="button" data-acao="limpar-selecao"
                   title="Desmarcar todos os talhões" aria-label="Limpar seleção: desmarcar todos os talhões">Limpar</button>`
-        : `<span class="barra-definir__texto">${Icones.info} Selecione um ou mais talhões para definir a ${T().nome}.</span>`}
+        : `<span class="barra-definir__texto">${Icones.info} Edite os dados na tabela ou selecione vários talhões para definir ${ehTsi() ? 'o TSI' : 'a recomendação'} em lote</span>`}
         <button class="botao botao--primario" type="button" data-acao="definir-recomendacao" ${n ? '' : 'disabled'}>Definir ${T().nome}</button>
       </div>`;
   }
@@ -6179,19 +6265,32 @@ window.Telas.planoOperacoes = (function () {
     return v ? `${v.nome} (${v.ciclo ? `${v.ciclo} d` : 'ciclo não informado'})` : '';
   }
 
+  // Nome sem o que vem entre parênteses no fim ("BMX Foco IPRO (104 d)" → "BMX Foco IPRO"), para achar o colado
+  function nomeBusca(texto) {
+    return String(texto || '').replace(/\s*\([^)]*\)\s*$/, '').trim();
+  }
+
+  // Variedade da cultura com esse nome (sem diferenciar maiúscula nem acento); senão, null
+  function acharVariedade(texto) {
+    const busca = Util.normalizar(nomeBusca(texto));
+    return busca ? variedadesDaCultura().find((v) => Util.normalizar(v.nome) === busca) || null : null;
+  }
+
   function campoVariedade(onde, { id = '', talhao = '', nome = '', classe = 'campo__controle', rotulo = 'Variedade' } = {}) {
-    const texto = rotuloCurtoVariedade(variedadeDoCadastro(nome));
-    return `
+    const v = variedadeDoCadastro(nome);
+    const texto = v ? v.nome : '';
+    const ciclo = v && onde !== 'tb' && v.ciclo ? `<p class="campo__ajuda">Ciclo de ${v.ciclo} dias</p>` : '';
+    return `${ciclo ? '<div>' : ''}
       <div class="combo combo--variedade">
         <input class="${classe}" ${id ? `id="${id}"` : ''} type="text" data-variedade="${onde}" ${talhao ? `data-talhao="${esc(talhao)}"` : ''}
                value="${esc(texto)}" data-rotulo="${esc(texto)}" placeholder="${onde === 'tb' ? 'Não planejado' : 'Buscar variedade'}"
                autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-label="${esc(rotulo)}">
         <div class="combo__lista" role="listbox" hidden></div>
-      </div>`;
+      </div>${ciclo ? `${ciclo}</div>` : ''}`;
   }
 
   function opcoesVariedade(texto) {
-    const busca = Util.normalizar(texto.trim());
+    const busca = Util.normalizar(nomeBusca(texto));
     const lista = variedadesDaCultura().filter((v) => !busca || Util.normalizar(v.nome).includes(busca))
       .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
     const opcoes = lista.map((v) => ({ valor: v.nome,
@@ -6207,7 +6306,7 @@ window.Telas.planoOperacoes = (function () {
     const texto = input.value === input.dataset.rotulo ? '' : input.value;
     const { opcoes, nenhuma } = opcoesVariedade(texto);
     lista.innerHTML = (nenhuma ? '<div class="combo__nada">Nenhuma variedade encontrada</div>' : '') + opcoes.map((o, i) => `
-      <div class="combo__opcao ${o.preCadastrar ? 'combo__opcao--pre' : ''} ${i === 0 ? 'combo__opcao--ativa' : ''}" role="option" data-indice="${i}"
+      <div class="combo__opcao ${o.preCadastrar ? 'combo__opcao--pre' : ''} ${i === 0 && !o.preCadastrar ? 'combo__opcao--ativa' : ''}" role="option" data-indice="${i}"
            data-valor="${esc(o.valor)}" ${o.preCadastrar ? 'data-pre-cadastrar' : ''}>
         ${o.rotulo} ${o.pre ? '<span class="etiqueta-pre">Pré-cadastro</span>' : ''}
       </div>`).join('');
@@ -6238,19 +6337,35 @@ window.Telas.planoOperacoes = (function () {
       if (r.erro) { Aviso.mostrar(r.erro); return; }
       nome = r.nome;
     }
+    aplicarVariedade(input, nome);
+  }
+
+  // Grava a variedade. Escolhida (clique ou Enter), o cursor vai para a data de plantio; ao sair do campo
+  // (semFoco), o cursor fica onde a pessoa foi.
+  function aplicarVariedade(input, nome, { semFoco = false } = {}) {
     fecharBuscaVariedade(input, { voltar: false });
     const op = opAtual();
     const onde = input.dataset.variedade;
     if (onde === 'pl') {
       ui.plantando.variedade = nome; delete ui.plantando.erros.variedade;
-      desenharMantendoFoco('#pl-data'); atualizarRodapePlantio(op); return;
+      if (semFoco) redesenharMantendoCelula(); else desenharMantendoFoco('#pl-data');
+      return;
     }
-    if (onde === 'pt') { alterarPlantioPainel(op, 'variedade', nome); return; }
-    const t = input.dataset.talhao;
+    const t = onde === 'pt' ? ui.painelTalhao : input.dataset.talhao;
     op.plantio[t] = { ...(op.plantio[t] || { variedade: '', data: '' }), variedade: nome };
     alterou();
-    // Escolhida a variedade, o cursor vai para a data de plantio do mesmo talhão
-    desenharMantendoFoco(`[data-campo="tb-data"][data-talhao="${CSS.escape(t)}"]`);
+    if (semFoco) { redesenharMantendoCelula(); return; }
+    desenharMantendoFoco(onde === 'pt' ? '#pt-data' : `[data-campo="tb-data"][data-talhao="${CSS.escape(t)}"]`);
+  }
+
+  // Saiu do campo ou deu Enter sem opção escolhida: nome igual a uma variedade vale; senão, volta ao anterior
+  function aceitarVariedadeDigitada(input, { semFoco = false } = {}) {
+    const texto = input.value.trim();
+    if (!texto || texto === input.dataset.rotulo) { fecharBuscaVariedade(input); return; }
+    const v = acharVariedade(texto);
+    if (v) { aplicarVariedade(input, v.nome, { semFoco }); return; }
+    fecharBuscaVariedade(input);
+    Aviso.mostrar('Variedade não encontrada: escolha na lista ou pré-cadastre.');
   }
 
   // Setas escolhem a opção ativa; Enter confirma; Esc desiste
@@ -6270,7 +6385,7 @@ window.Telas.planoOperacoes = (function () {
       novo.scrollIntoView({ block: 'nearest' });
     } else if (e.key === 'Enter') {
       e.preventDefault();
-      if (!lista.hidden && (ativa || opcoes[0])) escolherVariedade(el, ativa || opcoes[0]);
+      if (!lista.hidden && ativa) escolherVariedade(el, ativa); else aceitarVariedadeDigitada(el);
     } else if (e.key === 'Escape') {
       e.preventDefault(); e.stopPropagation();
       fecharBuscaVariedade(el);
@@ -6399,7 +6514,7 @@ window.Telas.planoOperacoes = (function () {
   }
 
   // Colunas da tabela do Plantio: valor (para ordenar) e texto (o que a célula mostra; '' = vazio)
-  const textoData = (iso) => (iso ? diaMes(iso) : '');
+  const textoData = (iso) => (iso ? dataCompleta(iso) : '');
   const COLUNAS_PLANTIO = [
     { id: 'talhao', rotulo: 'Talhão', valor: (op, t) => t.nome, texto: (op, t) => t.nome },
     { id: 'area', rotulo: 'Área (ha)', numero: true, valor: (op, t) => t.area, texto: (op, t) => Util.area(t.area).replace(' ha', '') },
@@ -6407,7 +6522,7 @@ window.Telas.planoOperacoes = (function () {
       valor: (op, t) => mediaHistorica(historicoTalhao(t.nome)),
       texto: (op, t) => { const m = mediaHistorica(historicoTalhao(t.nome)); return m ? `${umaCasa(m)} sc/ha` : ''; } },
     { id: 'variedade', rotulo: 'Variedade (ciclo)', valor: (op, t) => variedadeTalhao(op, t.nome) || null, texto: (op, t) => variedadeTalhao(op, t.nome) },
-    { id: 'plantio', rotulo: 'Plantio', valor: (op, t) => (op.plantio[t.nome] || {}).data || null, texto: (op, t) => textoData((op.plantio[t.nome] || {}).data) },
+    { id: 'plantio', rotulo: 'Data de plantio', valor: (op, t) => (op.plantio[t.nome] || {}).data || null, texto: (op, t) => textoData((op.plantio[t.nome] || {}).data) },
     { id: 'colheita', rotulo: 'Previsão de colheita', valor: (op, t) => previsaoColheita(op.plantio[t.nome]),
       texto: (op, t) => { const pl = op.plantio[t.nome]; return previsaoColheita(pl) ? textoData(previsaoColheita(pl)) : semCiclo(pl) ? 'Informe o ciclo' : ''; } },
     { id: 'populacao', rotulo: 'População', sub: '(mil plantas/ha)', numero: true,
@@ -6572,15 +6687,15 @@ window.Telas.planoOperacoes = (function () {
     const alertaPop = foraDaFaixa(v, pop)
       ? `<span class="aviso-janela" title="Fora da população recomendada (${faixaPopulacao(v)} mil plantas/ha)">${Icones.alerta}<span class="so-leitor">Fora da população recomendada</span></span>` : '';
     const variedade = editar
-      ? `<span class="celula-linha">${campoVariedade('tb', { talhao: t.nome, nome: v ? v.nome : '', classe: 'celula celula--lista', rotulo: `Variedade do ${t.nome}` })}${v && v.preCadastro ? '<span class="etiqueta-pre">Pré-cadastro</span>' : ''}</span>`
+      ? `<span class="celula-linha">${campoVariedade('tb', { talhao: t.nome, nome: v ? v.nome : '', classe: 'celula celula--lista', rotulo: `Variedade do ${t.nome}` })}${v ? `<span class="tabela__ciclo">(${v.ciclo ? `${v.ciclo} d` : 'ciclo não informado'})</span>` : ''}${v && v.preCadastro ? '<span class="etiqueta-pre">Pré-cadastro</span>' : ''}</span>`
       : v ? `${esc(v.nome)} <span class="tabela__ciclo">(${v.ciclo ? `${v.ciclo} d` : 'ciclo não informado'})</span>${v.preCadastro ? ' <span class="etiqueta-pre">Pré-cadastro</span>' : ''}`
         : '<span class="tabela__nao-recebe">Não planejado</span>';
-    const campo = (nomeCampo, valor, classe, rotulo, extra = '') => `<input class="celula ${classe}" data-campo="${nomeCampo}" data-talhao="${nome}" type="text"
-             autocomplete="off" placeholder="—" value="${esc(valor)}" aria-label="${rotulo} do ${nome}" ${extra}>`;
+    const campo = (nomeCampo, valor, classe, rotulo, extra = '', exemplo = '—') => `<input class="celula ${classe}" data-campo="${nomeCampo}" data-talhao="${nome}" type="text"
+             autocomplete="off" placeholder="${exemplo}" value="${esc(valor)}" aria-label="${rotulo} do ${nome}" ${extra}>`;
     const plantio = editar
-      ? `<span class="celula-linha">${campo('tb-data', p && p.data ? diaMes(p.data) : '', 'celula--data', 'Data de plantio', 'inputmode="numeric" maxlength="10"')}<span data-cel="alerta-data">${alertaData}</span></span>`
-      : p && p.data ? `${diaMes(p.data)}${alertaData ? ` ${alertaData}` : ''}` : vazio;
-    const colheita = prev ? diaMes(prev) : semCiclo(p) ? '<span class="texto-alerta">Informe o ciclo</span>' : vazio;
+      ? `<span class="celula-linha">${campo('tb-data', p && p.data ? dataCompleta(p.data) : '', 'celula--data', 'Data de plantio', 'inputmode="numeric" maxlength="10"', 'dd/mm/aaaa')}<span data-cel="alerta-data">${alertaData}</span></span>`
+      : p && p.data ? `${dataCompleta(p.data)}${alertaData ? ` ${alertaData}` : ''}` : vazio;
+    const colheita = prev ? dataCompleta(prev) : semCiclo(p) ? '<span class="texto-alerta">Informe o ciclo</span>' : vazio;
     const populacao = editar
       ? `<span class="celula-linha celula-linha--numero"><span data-cel="alerta-pop">${alertaPop}</span>${campo('tb-populacao', pop ? numeroTexto(pop) : '', 'celula--numero', 'População', 'inputmode="decimal"')}</span>`
       : pop ? `${alertaPop ? `${alertaPop} ` : ''}${numeroTexto(pop)}` : vazio;
@@ -6644,7 +6759,7 @@ window.Telas.planoOperacoes = (function () {
     if (!n) {
       return `
       <div class="barra-acao barra-acao--vazia" role="region" aria-label="Definir plantio">
-        <p class="barra-acao__selecao">${Icones.info} Selecione um ou mais talhões para definir o plantio</p>
+        <p class="barra-acao__selecao">${Icones.info} Edite os dados na tabela ou selecione vários talhões para definir o plantio em lote</p>
         <button class="botao botao--primario barra-acao__definir" type="button" disabled>${Icones.broto} Definir plantio</button>
       </div>`;
     }
@@ -7300,41 +7415,40 @@ window.Telas.planoOperacoes = (function () {
     return dataDeTexto(`${d}${ano}`);
   }
 
-  // Grava o que foi digitado ou escolhido na célula. Inválido: volta ao valor anterior, com aviso.
-  // Variedade redesenha a tela (muda etiquetas, filtros e o TSI); data, população e germinação só atualizam a linha.
-  function salvarCelulaPlantio(op, el) {
-    const t = el.dataset.talhao;
-    const campo = el.dataset.campo;
-    const texto = el.value.trim();
-    const voltar = (mensagem) => { el.value = el.defaultValue; Aviso.mostrar(mensagem); };
+  // Grava data, população ou germinação de um talhão. Devolve { erro } (inválido) ou { mostrar } (texto formatado)
+  function gravarCampoPlantio(op, t, campo, texto) {
     const p = { ...(op.plantio[t] || { variedade: '', data: '' }) };
     let mostrar = '';
-    if (campo === 'tb-variedade') {
-      p.variedade = el.value;
-    } else if (campo === 'tb-data') {
+    if (campo === 'tb-data') {
       const iso = texto ? dataDaCelula(texto) : '';
-      if (iso === null) { voltar('Data inválida. Use dd/mm.'); return; }
+      if (iso === null) return { erro: 'Data inválida. Use dd/mm/aaaa.' };
       p.data = iso;
-      mostrar = iso ? diaMes(iso) : '';
+      mostrar = iso ? dataCompleta(iso) : '';
     } else if (campo === 'tb-populacao') {
       const n = Util.numero(texto);
-      if (texto && !(n > 0)) { voltar('População: informe um número maior que zero.'); return; }
+      if (texto && !(n > 0)) return { erro: 'População: informe um número maior que zero.' };
       if (n) p.populacao = n; else delete p.populacao;
       mostrar = n ? numeroTexto(n) : '';
     } else if (campo === 'tb-germinacao') {
       const n = Util.numero(texto);
-      if (texto && !(n > 0 && n <= 100)) { voltar('Germinação: informe de 1 a 100.'); return; }
+      if (texto && !(n > 0 && n <= 100)) return { erro: 'Germinação: informe de 1 a 100.' };
       if (!op.germinacoes) op.germinacoes = {};
       if (n) op.germinacoes[t] = n; else delete op.germinacoes[t];
-      mostrar = n ? numeroTexto(n) : '';
+      return { mostrar: n ? numeroTexto(n) : '' };
     }
-    if (campo !== 'tb-germinacao') {
-      if (!p.variedade && !p.data && !p.populacao) delete op.plantio[t]; else op.plantio[t] = p;
-    }
+    if (!p.variedade && !p.data && !p.populacao) delete op.plantio[t]; else op.plantio[t] = p;
+    return { mostrar };
+  }
+
+  // Grava o que foi digitado na célula. Inválido: volta ao valor anterior, com aviso.
+  // Data, população e germinação só atualizam a linha (com o painel aberto neste talhão, redesenha tudo).
+  function salvarCelulaPlantio(op, el) {
+    const t = el.dataset.talhao;
+    const r = gravarCampoPlantio(op, t, el.dataset.campo, el.value.trim());
+    if (r.erro) { el.value = el.defaultValue; Aviso.mostrar(r.erro); return; }
     alterou();
-    // Com o painel aberto neste talhão, ou ao trocar a variedade, redesenha tudo (mantendo o foco onde ele foi parar)
-    if (campo === 'tb-variedade' || ui.painelTalhao === t) { redesenharMantendoCelula(); return; }
-    el.value = mostrar; el.defaultValue = mostrar;
+    if (ui.painelTalhao === t) { redesenharMantendoCelula(); return; }
+    el.value = r.mostrar; el.defaultValue = r.mostrar;
     atualizarLinhaPlantio(op, t);
   }
 
@@ -7355,8 +7469,11 @@ window.Telas.planoOperacoes = (function () {
   function redesenharMantendoCelula() {
     setTimeout(() => {
       const a = document.activeElement;
-      const seletor = a && a.dataset && a.dataset.campo && a.dataset.talhao
-        ? `[data-campo="${a.dataset.campo}"][data-talhao="${CSS.escape(a.dataset.talhao)}"]` : null;
+      const d = (a && a.dataset) || {};
+      const talhao = d.talhao ? `[data-talhao="${CSS.escape(d.talhao)}"]` : '';
+      const seletor = a && a.id ? `#${CSS.escape(a.id)}`
+        : d.campo && d.talhao ? `[data-campo="${d.campo}"]${talhao}${d.linha ? `[data-linha="${CSS.escape(d.linha)}"]` : ''}`
+        : d.variedade && d.talhao ? `[data-variedade="${d.variedade}"]${talhao}` : null;
       if (seletor) desenharMantendoFoco(seletor); else desenharTudo();
     }, 0);
   }
@@ -7645,16 +7762,6 @@ window.Telas.planoOperacoes = (function () {
 
       case 'exportar-plano': ArquivoPlano.exportar(plano); break;
 
-      case 'alternar-status':
-        sairDaReceita(() => {
-          plano.status = somenteLeitura ? 'Em construção' : 'Aprovado';
-          somenteLeitura = plano.status === 'Aprovado';
-          ui.renomeandoOp = null; ui.renomeandoGrupo = null;
-          limparSelecao(); pararRenomearNaLista();
-          desenharMantendoFoco('[data-acao="alternar-status"]');
-        }, { removerVazia: false });
-        break;
-
       case 'adicionar-linha':
         rascunho(op).produtos.push(Planos.novaLinha()); desenharTudo();
         raiz.querySelector('.tabela-rec tbody tr:last-child [data-combo="pa"]')?.focus();
@@ -7887,8 +7994,8 @@ window.Telas.planoOperacoes = (function () {
     if (etapa === 'operacoes' && Telas.operacoesPlano.aoDesfocar(e, ctxEstrutura(), acoesEstrutura)) return;
     const el = e.target;
     if (el.dataset.variedade) {
-      // Sem escolher uma opção, volta ao que estava (a escolha é pelo mousedown na opção, antes de sair do campo)
-      setTimeout(() => { if (raiz.contains(el) && el !== document.activeElement) fecharBuscaVariedade(el); }, 150);
+      // Sem escolher uma opção: nome igual a uma variedade vale (ex.: colado); senão, volta ao que estava
+      setTimeout(() => { if (raiz.contains(el) && el !== document.activeElement) aceitarVariedadeDigitada(el, { semFoco: true }); }, 150);
       return;
     }
     if (el.dataset.combo) {
@@ -8476,7 +8583,7 @@ window.Telas.planoOperacoes = (function () {
             <label class="campo__rotulo" for="ng-tipo">Tipo</label>
             <select class="campo__controle" id="ng-tipo" name="tipo" required>
               <option value="" disabled selected>Selecione o tipo</option>
-              ${DADOS.tiposGrupo.map((t) => `<option>${t}</option>`).join('')}
+              ${DADOS.tiposGrupo.filter((t) => t !== 'Colheita').map((t) => `<option>${t}</option>`).join('')}
             </select>
           </div>
         </div>
