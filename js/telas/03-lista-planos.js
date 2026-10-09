@@ -16,9 +16,6 @@ window.Telas.listaPlanos = (function () {
     return `
       <header class="cabecalho">
         <h1 class="cabecalho__titulo">Plano de Safra</h1>
-        <button class="botao botao--primario" type="button" data-acao="criar-plano">
-          ${Icones.mais} Criar Plano Safra
-        </button>
       </header>
 
       <div class="pagina">
@@ -32,13 +29,13 @@ window.Telas.listaPlanos = (function () {
           </div>
         </section>
 
-        <section aria-labelledby="titulo-visao-geral">
-          <h2 class="secao__titulo" id="titulo-visao-geral">Visão geral</h2>
-          <div class="indicadores" id="lp-indicadores"></div>
-        </section>
-
         <section aria-labelledby="titulo-planos">
-          <h2 class="secao__titulo" id="titulo-planos">Planos de Safra</h2>
+          <div class="secao__topo">
+            <h2 class="secao__titulo" id="titulo-planos">Planos de Safra</h2>
+            <button class="botao botao--primario" type="button" data-acao="criar-plano">
+              ${Icones.mais} Criar Plano Safra
+            </button>
+          </div>
           <div class="cartao tabela-rolagem">
             <table class="tabela">
               <thead>
@@ -156,47 +153,9 @@ window.Telas.listaPlanos = (function () {
 
   function atualizar(conteudo) {
     const planos = planosFiltrados();
-    conteudo.querySelector('#lp-indicadores').innerHTML = indicadores(planos);
     conteudo.querySelector('#lp-linhas').innerHTML = planos.length
       ? planos.map(linha).join('')
       : `<tr><td class="tabela__vazia" colspan="12">Nenhum plano encontrado com esses filtros.</td></tr>`;
-  }
-
-  // ----- Indicadores, sempre calculados sobre os planos filtrados -----
-  function indicadores(planos) {
-    const area = planos.reduce((soma, p) => soma + Util.areaPlano(p), 0);
-    const comCusto = planos.filter((p) => p.custo !== null && p.custo !== undefined);
-    const comReceita = planos.filter((p) => p.receita !== null && p.receita !== undefined);
-    const soma = (lista, campo) => lista.reduce((s, p) => s + p[campo], 0);
-
-    return `
-      ${indicador('area', Icones.broto, 'Área planejada', Util.area(area),
-        `${planos.length} ${planos.length === 1 ? 'plano cadastrado' : 'planos cadastrados'}`)}
-      ${indicador('custo', Icones.moedas, 'Custo estimado',
-        comCusto.length ? Util.reaisResumido(soma(comCusto, 'custo')) : '—',
-        comCusto.length ? planosComValor(comCusto.length, planos.length) : 'Aguardando orçamento')}
-      ${indicador('receita', Icones.grafico, 'Receita projetada',
-        comReceita.length ? Util.reaisResumido(soma(comReceita, 'receita')) : '—',
-        comReceita.length ? planosComValor(comReceita.length, planos.length) : 'Aguardando premissas de produção')}
-    `;
-  }
-
-  // Quando só parte dos planos tem valor, avisa quantos entraram na soma
-  function planosComValor(com, total) {
-    return com === total ? `Soma de ${total} ${total === 1 ? 'plano' : 'planos'}` : `Soma de ${com} de ${total} planos`;
-  }
-
-  function indicador(tipo, icone, titulo, valor, dica) {
-    return `
-      <div class="cartao indicador indicador--${tipo}">
-        <span class="indicador__icone">${icone}</span>
-        <div>
-          <p class="indicador__titulo">${titulo}</p>
-          <p class="indicador__valor">${valor}</p>
-          <p class="indicador__dica">${dica}</p>
-        </div>
-      </div>
-    `;
   }
 
   // ----- Lista -----

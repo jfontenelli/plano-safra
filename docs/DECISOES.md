@@ -52,9 +52,8 @@ Agrônomo da fazenda e líder de operações podem ser a mesma pessoa, conforme 
 ### 4.1 Tela inicial do Plano de Safra
 
 - **Primeiro uso** (nenhum plano cadastrado): ilustração, título "Comece o planejamento da sua safra", texto "O Plano de Safra organiza as necessidades de compra de insumos, gera o Calendário Agrícola e, após a aprovação, cria automaticamente as Ordens de Serviço." e um único botão "Criar Plano Safra". A partir do primeiro plano, essa tela não aparece mais.
-- **Com planos**: filtros (Safra, Empresa, Fazenda, Cultura) + botão "Criar Plano Safra"; indicadores (Área planejada, Custo estimado, Receita projetada); lista de planos.
+- **Com planos**: filtros (Safra, Empresa, Fazenda, Cultura); lista de planos com o botão "Criar Plano Safra" à direita do título da lista. Sem indicadores (cards de Visão geral) no topo.
 - Filtro de safra começa na safra mais recente cadastrada (não em "Todas").
-- Indicadores calculados sobre os planos filtrados. Custo e receita vazios aparecem como "—" com a dica "Aguardando orçamento" e "Aguardando premissas de produção".
 - Colunas da lista: Safra, Empresa, Fazenda, Cultura, Área, Custo estimado, Receita projetada, Status, Última atualização, Atualizado por.
 - Status do plano: **Em construção** e **Aprovado**.
 - Custo e receita ficam vazios até que as informações que os alimentam existam.
