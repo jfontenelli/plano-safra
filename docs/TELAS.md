@@ -22,6 +22,7 @@ Regras de negócio ficam em `docs/DECISOES.md`.
 | 04.3 | Planejamento (grupo Fertilidade) | telas/04.3-operacoes-fertilidade.md | — (layout da Tela 04.1) | Construída: operações do modelo, matéria-prima e cadastro (produtos de cliente a conferir) |
 | 04.4 | Planejamento (grupo Tratamento de semente) | telas/04.4-operacoes-tratamento-sementes.md | — (layout da Tela 04.1) | Construída: TSI (saiu do grupo Semente), DAP −5 sugerido |
 | 05 | Calendário Agrícola | telas/05-calendario-agricola.md | referencias/05-calendario-agricola.png | Construída: Infográfico por fase e Tabela com prazo para encerramento da OS |
+| 06 | Suprimentos | telas/06-suprimentos.md | referencias/suprimentos.png | A definir: falta fechar o cálculo do TSI |
 
 Situação: A definir → Pronta para construir → Construída.
 
