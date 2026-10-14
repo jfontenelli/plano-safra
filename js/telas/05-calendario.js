@@ -300,14 +300,8 @@ window.Telas.calendario = (function () {
   }
 
   // ----- Tabela: uma linha por operação (abre e fecha), com os produtos embaixo; uma coluna por talhão -----
-  // Faixa da fase à esquerda (as mesmas cores da etapa Operações). Dose do talhão diferente da padrão: amarelo;
-  // talhão que não recebe o produto: "—" em cinza.
-  const FAIXAS = { pre: 'Pré-plantio', plantio: 'Plantio', desenv: 'Manejo da cultura', colheita: 'Colheita' };
-  function faixaDe(it) {
-    if (it.colheita) return 'colheita';
-    if (it.dap === null || it.dap === undefined || it.dap === '') return 'desenv';
-    return it.dap < 0 ? 'pre' : it.dap === 0 ? 'plantio' : 'desenv';
-  }
+  // Na ordem da safra, sem faixa com o nome da fase (como na etapa Operações). Dose do talhão diferente da padrão:
+  // amarelo; talhão que não recebe o produto: "—" em cinza.
 
   // Linhas de baixo de cada operação: [rótulo, unidade, valor por talhão → { texto, classe }]
   function subLinhas(it, ctx) {
@@ -360,7 +354,6 @@ window.Telas.calendario = (function () {
     { id: 'prod', rotulo: 'Produto', largura: 150, nivel: 'linha', classe: 'cal-piv__produto' },
     { id: 'unid', rotulo: 'Unid.', largura: 96, nivel: 'linha', classe: 'cal-piv__unid' }
   ];
-  const LARGURA_FASE = 44;
   const LARGURA_OCULTA = 14;
 
   function tabela(ctx, lista) {
@@ -369,7 +362,7 @@ window.Telas.calendario = (function () {
     const pl = (plantioDo(plano) || {}).plantio || {};
     const ocultas = new Set(estado.colunasOcultas || []);
     // Deslocamento de cada coluna congelada: soma das larguras à esquerda (oculta conta só a faixa estreita)
-    let x = LARGURA_FASE;
+    let x = 0;
     const pos = {};
     COLUNAS.forEach((c) => { const w = ocultas.has(c.id) ? LARGURA_OCULTA : c.largura; pos[c.id] = { left: x, w }; x += w; });
     const ultima = COLUNAS[COLUNAS.length - 1].id;
@@ -387,10 +380,8 @@ window.Telas.calendario = (function () {
 
     // Cada operação ocupa uma linha por produto (as colunas da operação na altura de todas); sem talhão planejado,
     // uma linha só, com "Sem recomendação" (ou "Sem variedade", no Plantio) na coluna Produto
-    const grupos = [];
+    const linhas = [];
     lista.forEach((it) => {
-      const f = faixaDe(it);
-      if (!grupos.length || grupos[grupos.length - 1].f !== f) grupos.push({ f, linhas: [] });
       const vazia = !it.colheita && !it.talhoes.length;
       const subs = vazia ? [] : subLinhas(it, ctx);
       const n = Math.max(1, subs.length);
@@ -411,14 +402,14 @@ window.Telas.calendario = (function () {
         // "Sem recomendação" na coluna Produto (ou na Unid., se o Produto estiver oculto)
         const texto = `<span class="cal-piv__sem">${it.grupo.tipo === 'Sementes' ? 'Sem variedade' : 'Sem recomendação'}</span>`;
         const naProd = !ocultas.has('prod');
-        grupos[grupos.length - 1].linhas.push(`
+        linhas.push(`
           <tr class="cal-piv__linha cal-piv__linha--inicio">${celulasOp}${linhaFixa({ prod: naProd ? texto : '', unid: naProd ? '' : texto })}
             ${visiveis.map((t) => (talhaoOculto(t) ? celTalhaoOculto : '<td></td>')).join('')}
           </tr>`);
         return;
       }
       subs.forEach(([rotulo, unidade, valor], i) => {
-        grupos[grupos.length - 1].linhas.push(`
+        linhas.push(`
           <tr class="cal-piv__linha ${i ? '' : 'cal-piv__linha--inicio'}">${i ? '' : celulasOp}${linhaFixa({ prod: esc(rotulo), unid: unidade === 'data' ? '' : esc(unidade) })}
             ${visiveis.map((t) => {
               if (talhaoOculto(t)) return celTalhaoOculto;
@@ -459,23 +450,14 @@ window.Telas.calendario = (function () {
         `<strong>${esc(t.nome)}</strong><span>${esc(v || 'Sem variedade')}</span><span>${Util.area(t.area)}</span>`,
         (extra) => (talhaoOculto(t) ? `${LARGURA_TALHAO_OCULTO} class="${extra}"` : `class="cal-piv__talhao ${extra}"`));
     }).join('');
-    const faixa = (g) => `
-                <th class="tab-op__fase-v tab-op__fase-v--${g.f} cal-piv__fixa cal-piv__fixa--fase" rowspan="${g.linhas.length}" scope="rowgroup">
-                  <div class="tab-op__fase-v-conteudo"><span class="tab-op__fase-v-nome">${FAIXAS[g.f]}</span></div>
-                </th>`;
-    const INICIO = '<tr class="cal-piv__linha cal-piv__linha--inicio">';
     return `
       <div class="cal-piv">
         <table class="cal-piv__tabela ${estado.descongelado ? 'cal-piv__tabela--solta' : ''}">
           <thead><tr>
-            <th class="cal-piv__fase-cab cal-piv__fixa cal-piv__fixa--fase"><span class="so-leitor">Fase</span></th>
             ${cabecalho}
             ${colunasTalhao}
           </tr></thead>
-          ${grupos.length ? grupos.map((g) => `
-            <tbody>
-              ${g.linhas.map((l, i) => (i ? l : l.replace(INICIO, () => INICIO + faixa(g)))).join('')}
-            </tbody>`).join('') : `<tbody><tr><td colspan="${1 + COLUNAS.length + visiveis.length}" class="cal-piv__nada">Nenhuma operação com os filtros escolhidos</td></tr></tbody>`}
+          ${linhas.length ? `<tbody>${linhas.join('')}</tbody>` : `<tbody><tr><td colspan="${COLUNAS.length + visiveis.length}" class="cal-piv__nada">Nenhuma operação com os filtros escolhidos</td></tr></tbody>`}
         </table>
       </div>`;
   }

@@ -31,7 +31,7 @@ Identificar os novos planos: informações gerais (safra, empresa, atividade, cu
   - Motivo: no teste com usuários, com o campo dentro do formulário e o botão Adicionar, as pessoas digitavam e seguiam sem adicionar, achando que estava salvo.
 - Ao escolher a fazenda, **todos os talhões vêm marcados** e a área aparece na hora; a pessoa desmarca os que não quer. Trocar a fazenda marca de novo todos os talhões da nova.
 - Talhões não são obrigatórios: sem nenhum, a área fica "Pendente" e o plano pode ser criado.
-- **O plano mostra só os talhões incluídos** (Planejamento, mapa, Calendário, importação). Incluir talhões depois, dentro do plano: a detalhar.
+- **O plano mostra só os talhões incluídos** (Planejamento, mapa, Calendário, importação). Incluir ou remover talhões depois, dentro do plano: **Mais ações ▾ → Editar talhões** (só na versão em construção; ver DECISOES 4.2).
 - **Um plano por fazenda**: com duas fazendas, nascem dois planos.
 - Um único plano por safra e fazenda: não deixa repetir a fazenda em dois blocos ("A Fazenda X já está em outro bloco.") nem criar um plano que já existe ("Já existe um plano da safra 26/27 para a Fazenda X."), avisos abaixo do campo Fazenda.
 - "Criar Plano de Safra" parece desabilitado até tudo estar certo; clicado, mostra "Preenchimento obrigatório" nos campos vazios e, ao lado dos botões, "Preencha os campos obrigatórios." ou "Confira as fazendas.".

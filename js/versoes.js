@@ -3,16 +3,24 @@
  *
  * plano.versoes = [versao], da mais antiga para a mais nova
  * versao        = { num: '0.1', status: 'construcao' | 'publicada', grupos (cópia do planejamento),
+ *                   talhoes (nomes dos talhões incluídos na versão; null = todos os da fazenda),
  *                   criadaEm, criadaPor, origem ('0.1' | null),
  *                   salvaEm, salvaPor (em construção), publicadaEm, publicadaPor }
  * plano.versaoAberta = número da versão na tela.
  * plano.grupos       = área de trabalho: o planejamento da versão aberta, que as telas leem e alteram.
+ * plano.talhoes      = área de trabalho: os talhões da versão aberta (Editar talhões, só na versão em construção).
  *                      Na versão em construção, cada alteração é salva na hora (salvamento automático).
  *
  * Versão publicada é imutável. Só pode haver uma versão em construção por plano.
  */
 window.Versoes = (function () {
   const copiar = (grupos) => structuredClone(grupos || []);
+  const copiarTalhoes = (t) => (t ? [...t] : null);
+
+  // Versões de antes dos talhões por versão: recebem os talhões do plano (os escolhidos no Criar Plano)
+  function garantirTalhoes(plano) {
+    lista(plano).forEach((v) => { if (!('talhoes' in v)) v.talhoes = copiarTalhoes(plano.talhoes); });
+  }
 
   function agora() { return new Date(); }
   function usuario() { return DADOS.usuario.nome; }
@@ -40,12 +48,13 @@ window.Versoes = (function () {
    * datas: { criadaEm, publicadaEm, por } para os planos de exemplo.
    */
   function iniciar(plano, grupos, { quando = agora(), por = usuario() } = {}) {
-    plano.versoes = [{ num: '0.1', status: 'publicada', grupos: [], criadaEm: quando, criadaPor: por,
+    const talhoes = copiarTalhoes(plano.talhoes);
+    plano.versoes = [{ num: '0.1', status: 'publicada', grupos: [], talhoes, criadaEm: quando, criadaPor: por,
                        origem: null, publicadaEm: quando, publicadaPor: por }];
     plano.versaoAberta = '0.1';
     plano.grupos = [];
     if (grupos && grupos.length) {
-      plano.versoes.push({ num: '0.2', status: 'construcao', grupos: copiar(grupos), criadaEm: quando, criadaPor: por,
+      plano.versoes.push({ num: '0.2', status: 'construcao', grupos: copiar(grupos), talhoes: copiarTalhoes(talhoes), criadaEm: quando, criadaPor: por,
                            origem: '0.1', salvaEm: quando, salvaPor: por });
       abrir(plano, '0.2');
     }
@@ -60,8 +69,9 @@ window.Versoes = (function () {
   // Opção de início escolhida: nasce a 0.2 em construção com esse conteúdo (pode ser vazio) e abre
   function comecar(plano, grupos) {
     const num = proximoNumero(plano);
-    plano.versoes.push({ num, status: 'construcao', grupos: copiar(grupos), criadaEm: agora(), criadaPor: usuario(),
-                         origem: '0.1', salvaEm: agora(), salvaPor: usuario() });
+    garantirTalhoes(plano);
+    plano.versoes.push({ num, status: 'construcao', grupos: copiar(grupos), talhoes: copiarTalhoes(buscar(plano, '0.1').talhoes),
+                         criadaEm: agora(), criadaPor: usuario(), origem: '0.1', salvaEm: agora(), salvaPor: usuario() });
     abrir(plano, num);
     return num;
   }
@@ -70,16 +80,19 @@ window.Versoes = (function () {
   function abrir(plano, num) {
     const v = buscar(plano, num);
     if (!v) return;
+    garantirTalhoes(plano);
     const anterior = aberta(plano);
     if (anterior && anterior !== v && anterior.status === 'construcao') salvar(plano);
     plano.versaoAberta = num;
     plano.grupos = copiar(v.grupos);
+    plano.talhoes = copiarTalhoes(v.talhoes);
   }
 
   function salvar(plano) {
     const v = aberta(plano);
     if (!v || v.status !== 'construcao') return;
     v.grupos = copiar(plano.grupos);
+    v.talhoes = copiarTalhoes(plano.talhoes);
     v.salvaEm = agora();
     v.salvaPor = usuario();
   }
@@ -97,9 +110,11 @@ window.Versoes = (function () {
   function criarNova(plano, origemNum) {
     const existente = emConstrucao(plano);
     if (existente) return { jaExiste: existente.num };
+    garantirTalhoes(plano);
     const origem = buscar(plano, origemNum) || ultimaPublicada(plano);
     const num = proximoNumero(plano);
-    plano.versoes.push({ num, status: 'construcao', grupos: copiar(origem.grupos), criadaEm: agora(), criadaPor: usuario(),
+    plano.versoes.push({ num, status: 'construcao', grupos: copiar(origem.grupos), talhoes: copiarTalhoes(origem.talhoes),
+                         criadaEm: agora(), criadaPor: usuario(),
                          origem: origem.num, salvaEm: agora(), salvaPor: usuario() });
     abrir(plano, num);
     return { num, origem: origem.num };
@@ -108,6 +123,12 @@ window.Versoes = (function () {
   // Planejamento da versão (a aberta usa a área de trabalho)
   function grupos(plano, v) {
     return v.num === plano.versaoAberta ? plano.grupos : v.grupos;
+  }
+
+  // Talhões da versão (a aberta usa a área de trabalho); null = todos os da fazenda
+  function talhoes(plano, v) {
+    if (!v || v.num === plano.versaoAberta) return plano.talhoes;
+    return 'talhoes' in v ? v.talhoes : plano.talhoes;
   }
 
   // "13/10 às 14:20"
@@ -128,6 +149,6 @@ window.Versoes = (function () {
 
   return {
     lista, buscar, aberta, emConstrucao, ultimaPublicada, deTrabalho, somenteLeitura, proximoNumero,
-    iniciar, aIniciar, comecar, abrir, salvar, publicar, criarNova, grupos, quando, rotuloStatus, detalhe
+    iniciar, aIniciar, comecar, abrir, salvar, publicar, criarNova, grupos, talhoes, quando, rotuloStatus, detalhe
   };
 })();

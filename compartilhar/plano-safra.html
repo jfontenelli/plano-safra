@@ -2074,7 +2074,6 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
    no topo da área que rola (a da etapa). */
 .tab-op__caixa { width: 100%; background: var(--superficie); border: 1px solid var(--borda); border-radius: var(--raio); box-shadow: var(--sombra); }
 .tab-op { width: 100%; table-layout: fixed; border-collapse: collapse; font-size: 14px; }
-.tab-op__c-fase { width: 44px; }
 .tab-op__c-dap { width: 8%; }
 .tab-op__c-fen { width: 13%; }
 .tab-op__c-op { width: 33%; }
@@ -2087,17 +2086,6 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .tab-op td { padding: 6px 16px; border-top: 1px solid var(--borda); vertical-align: middle; }
 .tab-op__dap { text-align: center !important; font-variant-numeric: tabular-nums; }
 .tab-op__acao { text-align: center; }
-/* Faixa da fase na vertical, à esquerda, ocupando as linhas da fase (nome deitado e ícone embaixo) */
-.tab-op__fase-cab { padding: 0 !important; }
-.tab-op__fase-v { padding: 0; border-top: 1px solid #fff; vertical-align: middle; }
-/* Cores das fases (definidas pela usuária) */
-.tab-op__fase-v--pre { background: #E3D7CF; } /* #A37B60 clareado (70% de branco) */
-.tab-op__fase-v--plantio { background: #D7E0D2; } /* #79966A clareado (70% de branco) */
-.tab-op__fase-v--desenv { background: #C3D6CE; } /* #36765B clareado (70% de branco) */
-.tab-op__fase-v--colheita { background: #E8DFCC; } /* #B39456 clareado (70% de branco) */
-.tab-op__fase-v-conteudo { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; min-height: 100%; padding: 10px 0; }
-.tab-op__fase-v-nome { writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; font-size: 13px; font-weight: 700; color: #111; letter-spacing: .02em; }
-.tab-op__grupo-fase tr:first-child td { border-top: 2px solid #d6e3d8; }
 /* ⋯ sempre visível em todas as linhas (no teste, ao aparecer só com o mouse em cima, não era encontrado) */
 .tab-op__mais { width: 30px; height: 30px; font-size: 18px; line-height: 1; color: var(--texto-suave); }
 /* "+" ao lado do ⋯: insere uma linha logo abaixo */
@@ -2170,7 +2158,6 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 /* Colunas congeladas à esquerda (Fase até Unid.); posição e largura vêm do JS (dependem das colunas ocultas) */
 .cal-piv__fixa { position: sticky; z-index: 1; }
 .cal-piv__tabela thead .cal-piv__fixa { z-index: 3; }
-.cal-piv__fixa--fase { left: 0; width: 44px; min-width: 44px; max-width: 44px; }
 .cal-piv__fixa--ultima { box-shadow: 4px 0 6px -3px rgba(0, 0, 0, .18); }
 /* Descongelar colunas (menu do botão direito): tudo rola junto; o cabeçalho continua parado ao rolar para baixo */
 .cal-piv__tabela--solta .cal-piv__fixa { left: auto !important; }
@@ -2364,6 +2351,22 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .cp-talhoes__item input { width: 16px; height: 16px; accent-color: var(--verde-700); }
 .cp-talhoes__item--todos { border-bottom: 1px solid var(--borda); font-weight: 600; }
 .cp-talhoes__area { margin-left: auto; color: var(--texto-suave); }
+
+/* ===== Editar talhões (Mais ações do plano) ===== */
+.et-lista { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); max-height: 340px; overflow: auto; margin-top: 4px;
+  border: 1px solid var(--borda); border-radius: var(--raio); padding: 4px 0; }
+.et-item { display: flex; align-items: center; gap: 8px; padding: 7px 12px; font-size: 14px; cursor: pointer; }
+.et-item:hover { background: var(--verde-100); }
+.et-item input { width: 16px; height: 16px; accent-color: var(--verde-700); }
+.et-item--todos { grid-column: 1 / -1; border-bottom: 1px solid var(--borda); font-weight: 600; }
+.et-item__area { margin-left: auto; color: var(--texto-suave); font-variant-numeric: tabular-nums; }
+.et-item__planejado { padding: 1px 6px; border-radius: 999px; background: #eef4ef; color: var(--verde-700); font-size: 11px; font-weight: 600; }
+.et-item--sai { color: #b03a2e; text-decoration: line-through; }
+.et-item--sai .et-item__planejado { background: #fdf0ee; color: #b03a2e; }
+.et-item--entra { background: #f3f8f3; }
+.et-resumo { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 12px; margin: 12px 0 0; font-size: 14px; }
+.et-resumo__mudanca { color: var(--texto-suave); }
+@media (max-width: 520px) { .et-lista { grid-template-columns: 1fr; } }
 .cp-adicionar { margin: 14px 0 18px; }
 @media (max-width: 760px) {
   .cp-gerais { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -2852,15 +2855,17 @@ window.DADOS = {
  * Cálculos e formatação usados por várias telas.
  */
 window.Util = {
-  // Talhões incluídos no plano (escolhidos no modal Criar Plano). Sem a lista: todos os da fazenda.
-  talhoesPlano(plano) {
+  // Talhões incluídos no plano (Criar Plano; depois, Editar talhões), da versão aberta ou da versão indicada.
+  // Sem a lista: todos os da fazenda.
+  talhoesPlano(plano, versao) {
     const todos = DADOS.talhoes[plano.fazenda] || [];
-    return plano.talhoes ? todos.filter((t) => plano.talhoes.includes(t.nome)) : todos;
+    const nomes = versao && window.Versoes ? Versoes.talhoes(plano, versao) : plano.talhoes;
+    return nomes ? todos.filter((t) => nomes.includes(t.nome)) : todos;
   },
 
   // Área de cultivo = soma das áreas dos talhões incluídos no plano (ha); sem talhões, null ("Pendente")
-  areaCultivo(plano) {
-    const talhoes = Util.talhoesPlano(plano);
+  areaCultivo(plano, versao) {
+    const talhoes = Util.talhoesPlano(plano, versao);
     return talhoes.length ? talhoes.reduce((soma, t) => soma + t.area, 0) : null;
   },
 
@@ -3302,16 +3307,24 @@ window.Planos = (function () {
  *
  * plano.versoes = [versao], da mais antiga para a mais nova
  * versao        = { num: '0.1', status: 'construcao' | 'publicada', grupos (cópia do planejamento),
+ *                   talhoes (nomes dos talhões incluídos na versão; null = todos os da fazenda),
  *                   criadaEm, criadaPor, origem ('0.1' | null),
  *                   salvaEm, salvaPor (em construção), publicadaEm, publicadaPor }
  * plano.versaoAberta = número da versão na tela.
  * plano.grupos       = área de trabalho: o planejamento da versão aberta, que as telas leem e alteram.
+ * plano.talhoes      = área de trabalho: os talhões da versão aberta (Editar talhões, só na versão em construção).
  *                      Na versão em construção, cada alteração é salva na hora (salvamento automático).
  *
  * Versão publicada é imutável. Só pode haver uma versão em construção por plano.
  */
 window.Versoes = (function () {
   const copiar = (grupos) => structuredClone(grupos || []);
+  const copiarTalhoes = (t) => (t ? [...t] : null);
+
+  // Versões de antes dos talhões por versão: recebem os talhões do plano (os escolhidos no Criar Plano)
+  function garantirTalhoes(plano) {
+    lista(plano).forEach((v) => { if (!('talhoes' in v)) v.talhoes = copiarTalhoes(plano.talhoes); });
+  }
 
   function agora() { return new Date(); }
   function usuario() { return DADOS.usuario.nome; }
@@ -3339,12 +3352,13 @@ window.Versoes = (function () {
    * datas: { criadaEm, publicadaEm, por } para os planos de exemplo.
    */
   function iniciar(plano, grupos, { quando = agora(), por = usuario() } = {}) {
-    plano.versoes = [{ num: '0.1', status: 'publicada', grupos: [], criadaEm: quando, criadaPor: por,
+    const talhoes = copiarTalhoes(plano.talhoes);
+    plano.versoes = [{ num: '0.1', status: 'publicada', grupos: [], talhoes, criadaEm: quando, criadaPor: por,
                        origem: null, publicadaEm: quando, publicadaPor: por }];
     plano.versaoAberta = '0.1';
     plano.grupos = [];
     if (grupos && grupos.length) {
-      plano.versoes.push({ num: '0.2', status: 'construcao', grupos: copiar(grupos), criadaEm: quando, criadaPor: por,
+      plano.versoes.push({ num: '0.2', status: 'construcao', grupos: copiar(grupos), talhoes: copiarTalhoes(talhoes), criadaEm: quando, criadaPor: por,
                            origem: '0.1', salvaEm: quando, salvaPor: por });
       abrir(plano, '0.2');
     }
@@ -3359,8 +3373,9 @@ window.Versoes = (function () {
   // Opção de início escolhida: nasce a 0.2 em construção com esse conteúdo (pode ser vazio) e abre
   function comecar(plano, grupos) {
     const num = proximoNumero(plano);
-    plano.versoes.push({ num, status: 'construcao', grupos: copiar(grupos), criadaEm: agora(), criadaPor: usuario(),
-                         origem: '0.1', salvaEm: agora(), salvaPor: usuario() });
+    garantirTalhoes(plano);
+    plano.versoes.push({ num, status: 'construcao', grupos: copiar(grupos), talhoes: copiarTalhoes(buscar(plano, '0.1').talhoes),
+                         criadaEm: agora(), criadaPor: usuario(), origem: '0.1', salvaEm: agora(), salvaPor: usuario() });
     abrir(plano, num);
     return num;
   }
@@ -3369,16 +3384,19 @@ window.Versoes = (function () {
   function abrir(plano, num) {
     const v = buscar(plano, num);
     if (!v) return;
+    garantirTalhoes(plano);
     const anterior = aberta(plano);
     if (anterior && anterior !== v && anterior.status === 'construcao') salvar(plano);
     plano.versaoAberta = num;
     plano.grupos = copiar(v.grupos);
+    plano.talhoes = copiarTalhoes(v.talhoes);
   }
 
   function salvar(plano) {
     const v = aberta(plano);
     if (!v || v.status !== 'construcao') return;
     v.grupos = copiar(plano.grupos);
+    v.talhoes = copiarTalhoes(plano.talhoes);
     v.salvaEm = agora();
     v.salvaPor = usuario();
   }
@@ -3396,9 +3414,11 @@ window.Versoes = (function () {
   function criarNova(plano, origemNum) {
     const existente = emConstrucao(plano);
     if (existente) return { jaExiste: existente.num };
+    garantirTalhoes(plano);
     const origem = buscar(plano, origemNum) || ultimaPublicada(plano);
     const num = proximoNumero(plano);
-    plano.versoes.push({ num, status: 'construcao', grupos: copiar(origem.grupos), criadaEm: agora(), criadaPor: usuario(),
+    plano.versoes.push({ num, status: 'construcao', grupos: copiar(origem.grupos), talhoes: copiarTalhoes(origem.talhoes),
+                         criadaEm: agora(), criadaPor: usuario(),
                          origem: origem.num, salvaEm: agora(), salvaPor: usuario() });
     abrir(plano, num);
     return { num, origem: origem.num };
@@ -3407,6 +3427,12 @@ window.Versoes = (function () {
   // Planejamento da versão (a aberta usa a área de trabalho)
   function grupos(plano, v) {
     return v.num === plano.versaoAberta ? plano.grupos : v.grupos;
+  }
+
+  // Talhões da versão (a aberta usa a área de trabalho); null = todos os da fazenda
+  function talhoes(plano, v) {
+    if (!v || v.num === plano.versaoAberta) return plano.talhoes;
+    return 'talhoes' in v ? v.talhoes : plano.talhoes;
   }
 
   // "13/10 às 14:20"
@@ -3427,7 +3453,7 @@ window.Versoes = (function () {
 
   return {
     lista, buscar, aberta, emConstrucao, ultimaPublicada, deTrabalho, somenteLeitura, proximoNumero,
-    iniciar, aIniciar, comecar, abrir, salvar, publicar, criarNova, grupos, quando, rotuloStatus, detalhe
+    iniciar, aIniciar, comecar, abrir, salvar, publicar, criarNova, grupos, talhoes, quando, rotuloStatus, detalhe
   };
 })();
 
@@ -4490,7 +4516,7 @@ window.Telas.listaPlanos = (function () {
   function linha(p) {
     const versao = Versoes.deTrabalho(p);
     const publicada = versao.status === 'publicada';
-    const area = Util.areaCultivo(p);
+    const area = Util.areaCultivo(p, versao);
     return `
       <tr class="lista-planos__linha" data-plano="${p.id}" tabindex="0"
           title="Abrir a versão ${versao.num} (${publicada ? 'publicada, em consulta' : 'em construção'})"
@@ -4837,14 +4863,8 @@ window.Telas.calendario = (function () {
   }
 
   // ----- Tabela: uma linha por operação (abre e fecha), com os produtos embaixo; uma coluna por talhão -----
-  // Faixa da fase à esquerda (as mesmas cores da etapa Operações). Dose do talhão diferente da padrão: amarelo;
-  // talhão que não recebe o produto: "—" em cinza.
-  const FAIXAS = { pre: 'Pré-plantio', plantio: 'Plantio', desenv: 'Manejo da cultura', colheita: 'Colheita' };
-  function faixaDe(it) {
-    if (it.colheita) return 'colheita';
-    if (it.dap === null || it.dap === undefined || it.dap === '') return 'desenv';
-    return it.dap < 0 ? 'pre' : it.dap === 0 ? 'plantio' : 'desenv';
-  }
+  // Na ordem da safra, sem faixa com o nome da fase (como na etapa Operações). Dose do talhão diferente da padrão:
+  // amarelo; talhão que não recebe o produto: "—" em cinza.
 
   // Linhas de baixo de cada operação: [rótulo, unidade, valor por talhão → { texto, classe }]
   function subLinhas(it, ctx) {
@@ -4897,7 +4917,6 @@ window.Telas.calendario = (function () {
     { id: 'prod', rotulo: 'Produto', largura: 150, nivel: 'linha', classe: 'cal-piv__produto' },
     { id: 'unid', rotulo: 'Unid.', largura: 96, nivel: 'linha', classe: 'cal-piv__unid' }
   ];
-  const LARGURA_FASE = 44;
   const LARGURA_OCULTA = 14;
 
   function tabela(ctx, lista) {
@@ -4906,7 +4925,7 @@ window.Telas.calendario = (function () {
     const pl = (plantioDo(plano) || {}).plantio || {};
     const ocultas = new Set(estado.colunasOcultas || []);
     // Deslocamento de cada coluna congelada: soma das larguras à esquerda (oculta conta só a faixa estreita)
-    let x = LARGURA_FASE;
+    let x = 0;
     const pos = {};
     COLUNAS.forEach((c) => { const w = ocultas.has(c.id) ? LARGURA_OCULTA : c.largura; pos[c.id] = { left: x, w }; x += w; });
     const ultima = COLUNAS[COLUNAS.length - 1].id;
@@ -4924,10 +4943,8 @@ window.Telas.calendario = (function () {
 
     // Cada operação ocupa uma linha por produto (as colunas da operação na altura de todas); sem talhão planejado,
     // uma linha só, com "Sem recomendação" (ou "Sem variedade", no Plantio) na coluna Produto
-    const grupos = [];
+    const linhas = [];
     lista.forEach((it) => {
-      const f = faixaDe(it);
-      if (!grupos.length || grupos[grupos.length - 1].f !== f) grupos.push({ f, linhas: [] });
       const vazia = !it.colheita && !it.talhoes.length;
       const subs = vazia ? [] : subLinhas(it, ctx);
       const n = Math.max(1, subs.length);
@@ -4948,14 +4965,14 @@ window.Telas.calendario = (function () {
         // "Sem recomendação" na coluna Produto (ou na Unid., se o Produto estiver oculto)
         const texto = `<span class="cal-piv__sem">${it.grupo.tipo === 'Sementes' ? 'Sem variedade' : 'Sem recomendação'}</span>`;
         const naProd = !ocultas.has('prod');
-        grupos[grupos.length - 1].linhas.push(`
+        linhas.push(`
           <tr class="cal-piv__linha cal-piv__linha--inicio">${celulasOp}${linhaFixa({ prod: naProd ? texto : '', unid: naProd ? '' : texto })}
             ${visiveis.map((t) => (talhaoOculto(t) ? celTalhaoOculto : '<td></td>')).join('')}
           </tr>`);
         return;
       }
       subs.forEach(([rotulo, unidade, valor], i) => {
-        grupos[grupos.length - 1].linhas.push(`
+        linhas.push(`
           <tr class="cal-piv__linha ${i ? '' : 'cal-piv__linha--inicio'}">${i ? '' : celulasOp}${linhaFixa({ prod: esc(rotulo), unid: unidade === 'data' ? '' : esc(unidade) })}
             ${visiveis.map((t) => {
               if (talhaoOculto(t)) return celTalhaoOculto;
@@ -4996,23 +5013,14 @@ window.Telas.calendario = (function () {
         `<strong>${esc(t.nome)}</strong><span>${esc(v || 'Sem variedade')}</span><span>${Util.area(t.area)}</span>`,
         (extra) => (talhaoOculto(t) ? `${LARGURA_TALHAO_OCULTO} class="${extra}"` : `class="cal-piv__talhao ${extra}"`));
     }).join('');
-    const faixa = (g) => `
-                <th class="tab-op__fase-v tab-op__fase-v--${g.f} cal-piv__fixa cal-piv__fixa--fase" rowspan="${g.linhas.length}" scope="rowgroup">
-                  <div class="tab-op__fase-v-conteudo"><span class="tab-op__fase-v-nome">${FAIXAS[g.f]}</span></div>
-                </th>`;
-    const INICIO = '<tr class="cal-piv__linha cal-piv__linha--inicio">';
     return `
       <div class="cal-piv">
         <table class="cal-piv__tabela ${estado.descongelado ? 'cal-piv__tabela--solta' : ''}">
           <thead><tr>
-            <th class="cal-piv__fase-cab cal-piv__fixa cal-piv__fixa--fase"><span class="so-leitor">Fase</span></th>
             ${cabecalho}
             ${colunasTalhao}
           </tr></thead>
-          ${grupos.length ? grupos.map((g) => `
-            <tbody>
-              ${g.linhas.map((l, i) => (i ? l : l.replace(INICIO, () => INICIO + faixa(g)))).join('')}
-            </tbody>`).join('') : `<tbody><tr><td colspan="${1 + COLUNAS.length + visiveis.length}" class="cal-piv__nada">Nenhuma operação com os filtros escolhidos</td></tr></tbody>`}
+          ${linhas.length ? `<tbody>${linhas.join('')}</tbody>` : `<tbody><tr><td colspan="${COLUNAS.length + visiveis.length}" class="cal-piv__nada">Nenhuma operação com os filtros escolhidos</td></tr></tbody>`}
         </table>
       </div>`;
   }
@@ -6016,7 +6024,7 @@ window.Telas.planoOperacoes = (function () {
   const ETAPAS = [
     { id: 'operacoes',   nome: 'Operações' },     // estrutura do plano (Tela 04.0)
     { id: 'planejamento', nome: 'Planejamento' }, // talhão a talhão, por grupo (esta tela)
-    { id: 'calendario',  nome: 'Calendário Agrícola' }
+    { id: 'calendario',  nome: 'Resumo' } // Calendário Agrícola do plano (Tela 05), com o nome Resumo dentro do plano
   ];
   const UNIDADES = ['L', 'mL', 'kg', 'g', 't'];
   // TSI: a dose é por quantidade de semente (a unidade usada pelos clientes fica para os testes)
@@ -6148,12 +6156,11 @@ window.Telas.planoOperacoes = (function () {
     atualizarEstadoSalvo();
   }
 
-  // ----- Estado de salvamento (versão em construção): "Salvo às 14:20" -----
+  // ----- Estado de salvamento (versão em construção): "✓ Salvamento automático"; quando e por quem, ao passar o mouse -----
   function estadoSalvo() {
     const v = Versoes.aberta(plano);
     if (somenteLeitura || !v) return '';
-    const hora = new Date(v.salvaEm).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-    return `<span class="estado-salvo" data-salvo role="status" title="${esc(Versoes.detalhe(v))}">Salvo às ${hora}</span>`;
+    return `<span class="estado-salvo" data-salvo role="status" title="${esc(Versoes.detalhe(v))}">${Icones.certo} Salvamento automático</span>`;
   }
 
   // Troca só o texto (sem redesenhar a tela)
@@ -6268,7 +6275,8 @@ window.Telas.planoOperacoes = (function () {
       <button class="botao botao--primario botao--p" type="button" data-acao="ver-publicar">Publicar versão</button>`;
   }
 
-  // "Mais ações ▾": Exportar (.xlsx) · Trocar versão (a lista de versões abre no mesmo lugar)
+  // "Mais ações ▾": Editar talhões (só na versão em construção) · Exportar (.xlsx) · Trocar versão
+  // (a lista de versões abre no mesmo lugar)
   function maisAcoes() {
     return `
       <span class="versoes mais-acoes">
@@ -6276,6 +6284,7 @@ window.Telas.planoOperacoes = (function () {
                 aria-expanded="${ui.maisAcoes}">Mais ações ${Icones.abaixo}</button>
         ${ui.maisAcoes ? `
           <div class="mais-acoes__menu" role="menu" aria-label="Mais ações">
+            ${somenteLeitura ? '' : `<button class="menu-contexto__item" type="button" role="menuitem" data-acao="editar-talhoes">${Icones.talhoes} Editar talhões</button>`}
             <button class="menu-contexto__item" type="button" role="menuitem" data-acao="exportar-plano">${Icones.baixar} Exportar (.xlsx)</button>
             <button class="menu-contexto__item" type="button" role="menuitem" data-acao="ver-trocar">${Icones.relogio} Trocar versão</button>
           </div>` : ''}
@@ -6303,6 +6312,7 @@ window.Telas.planoOperacoes = (function () {
   function abrirVersao(num) {
     Versoes.abrir(plano, num);
     somenteLeitura = Versoes.somenteLeitura(plano);
+    talhoesFazenda = Util.talhoesPlano(plano); // cada versão tem os seus talhões
     limparSelecao();
     Object.assign(ui, { versoes: null, jaExiste: false, maisAcoes: false, rascunho: null, receitaPorOp: {},
                         renomeandoOp: null, renomeandoGrupo: null, painelTalhao: null, preCadastro: null, validarOp: null });
@@ -6345,6 +6355,103 @@ window.Telas.planoOperacoes = (function () {
         break;
       }
     }
+  }
+
+  // ----- Editar talhões (Mais ações; só na versão em construção) -----
+  // Modal com todos os talhões da fazenda (como no Criar Plano). Aplicar: os incluídos entram sem planejamento;
+  // os removidos levam o planejamento deles (plantio, germinação, recomendações e doses). Com algum removido já
+  // planejado, confirma antes. Depois, Desfazer (volta os talhões com o planejamento que tinham).
+  function talhaoPlanejado(nome) {
+    return plano.grupos.some((g) => g.operacoes.some((op) => (op.talhoes && op.talhoes[nome]) || (op.plantio && op.plantio[nome])));
+  }
+
+  function editarTalhoes() {
+    const todos = DADOS.talhoes[plano.fazenda] || [];
+    const antes = talhoesFazenda.map((t) => t.nome);
+    let marcados = new Set(antes);
+    const modal = Modal.abrir(`
+      <form class="formulario" novalidate>
+        <div class="modal__corpo">
+          <button class="modal__fechar" type="button" aria-label="Fechar" data-fechar>${Icones.fechar}</button>
+          <h2 class="modal__titulo" id="modal-titulo">Editar talhões</h2>
+          <p class="modal__subtitulo">Inclua ou remova talhões da Fazenda ${esc(plano.fazenda)} no plano de safra.</p>
+          <div class="et-lista" data-et-lista></div>
+          <p class="et-resumo" data-et-resumo aria-live="polite"></p>
+        </div>
+        <div class="modal__rodape">
+          <button class="botao botao--secundario" type="button" data-fechar>Cancelar</button>
+          <button class="botao botao--primario" type="submit">Aplicar</button>
+        </div>
+      </form>`, { classe: 'modal--pequeno' });
+    const form = modal.elemento.querySelector('form');
+    const desenharLista = () => {
+      const tudo = todos.length && todos.every((t) => marcados.has(t.nome));
+      form.querySelector('[data-et-lista]').innerHTML = `
+        <label class="et-item et-item--todos"><input type="checkbox" data-talhao="__todos__" ${tudo ? 'checked' : ''}
+          ${marcados.size && !tudo ? 'data-intermediario' : ''}> Todos</label>
+        ${todos.map((t) => `
+          <label class="et-item ${antes.includes(t.nome) && !marcados.has(t.nome) ? 'et-item--sai' : ''} ${!antes.includes(t.nome) && marcados.has(t.nome) ? 'et-item--entra' : ''}">
+            <input type="checkbox" data-talhao="${esc(t.nome)}" ${marcados.has(t.nome) ? 'checked' : ''}>
+            ${esc(t.nome)}
+            ${antes.includes(t.nome) && talhaoPlanejado(t.nome) ? '<span class="et-item__planejado" title="Este talhão já tem planejamento">planejado</span>' : ''}
+            <span class="et-item__area">${Util.area(t.area)}</span>
+          </label>`).join('')}`;
+      form.querySelectorAll('[data-intermediario]').forEach((c) => { c.indeterminate = true; });
+      const area = todos.filter((t) => marcados.has(t.nome)).reduce((s, t) => s + t.area, 0);
+      const entram = todos.filter((t) => marcados.has(t.nome) && !antes.includes(t.nome)).length;
+      const saem = antes.filter((n) => !marcados.has(n)).length;
+      form.querySelector('[data-et-resumo]').innerHTML = `
+        <span><strong>${marcados.size} de ${todos.length} talhões</strong> · Área de cultivo: ${marcados.size ? Util.area(area) : 'Pendente'}</span>
+        ${entram || saem ? `<span class="et-resumo__mudanca">${[entram ? `${entram} ${entram === 1 ? 'incluído' : 'incluídos'}` : '', saem ? `${saem} ${saem === 1 ? 'removido' : 'removidos'}` : ''].filter(Boolean).join(' · ')}</span>` : ''}`;
+    };
+    desenharLista();
+    form.addEventListener('change', (e) => {
+      const nome = e.target.dataset.talhao;
+      if (!nome) return;
+      if (nome === '__todos__') marcados = new Set(e.target.checked ? todos.map((t) => t.nome) : []);
+      else if (e.target.checked) marcados.add(nome); else marcados.delete(nome);
+      desenharLista();
+    });
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const saem = antes.filter((n) => !marcados.has(n));
+      const entram = todos.filter((t) => marcados.has(t.nome) && !antes.includes(t.nome)).map((t) => t.nome);
+      modal.fechar();
+      if (!saem.length && !entram.length) return;
+      const planejados = saem.filter(talhaoPlanejado);
+      const aplicar = () => aplicarTalhoes(todos.filter((t) => marcados.has(t.nome)).map((t) => t.nome), saem, entram);
+      if (!planejados.length) { aplicar(); return; }
+      const nomes = planejados.length === 1 ? planejados[0] : `${planejados.slice(0, -1).join(', ')} e ${planejados[planejados.length - 1]}`;
+      Modal.confirmar({
+        titulo: `Remover ${saem.length} ${saem.length === 1 ? 'talhão' : 'talhões'}?`,
+        texto: `${esc(nomes)} já ${planejados.length === 1 ? 'tem' : 'têm'} planejamento (plantio, recomendações e doses). Esse planejamento será apagado.`,
+        botoes: [{ rotulo: 'Cancelar' }, { rotulo: saem.length === 1 ? 'Remover talhão' : 'Remover talhões', classe: 'perigo', acao: aplicar }]
+      });
+    });
+  }
+
+  function aplicarTalhoes(novos, saem, entram) {
+    const voltar = { grupos: structuredClone(plano.grupos), talhoes: plano.talhoes ? [...plano.talhoes] : null };
+    plano.talhoes = novos;
+    plano.grupos.forEach((g) => g.operacoes.forEach((op) => saem.forEach((n) => {
+      if (op.talhoes) delete op.talhoes[n];
+      if (op.plantio) delete op.plantio[n];
+      if (op.germinacoes) delete op.germinacoes[n];
+    })));
+    const atualizar = () => {
+      talhoesFazenda = Util.talhoesPlano(plano);
+      limparSelecao();
+      ui.painelTalhao = null;
+      ui.filtroTalhoes = 'todos';
+      alterou(); desenharTudo();
+    };
+    atualizar();
+    const partes = [entram.length ? `${entram.length} ${entram.length === 1 ? 'incluído' : 'incluídos'}` : '',
+      saem.length ? `${saem.length} ${saem.length === 1 ? 'removido' : 'removidos'}` : ''].filter(Boolean).join(', ');
+    Aviso.mostrar(`Talhões atualizados: ${partes}`, { acao: 'Desfazer', aoAgir: () => {
+      plano.grupos = voltar.grupos; plano.talhoes = voltar.talhoes;
+      if (raiz.isConnected) atualizar(); else { Versoes.salvar(plano); }
+    } });
   }
 
   // Calendário Agrícola (Tela 05): desenhado aqui dentro, com o mesmo cabeçalho do plano
@@ -8870,6 +8977,8 @@ window.Telas.planoOperacoes = (function () {
       case 'nova-op': sairDaReceita(() => criarOperacao(grupo)); break;
 
       case 'exportar-plano': ui.maisAcoes = false; desenharTudo(); ArquivoPlano.exportar(plano); break;
+
+      case 'editar-talhoes': ui.maisAcoes = false; desenharTudo(); editarTalhoes(); break;
 
       case 'adicionar-linha':
         rascunho(op).produtos.push(Planos.novaLinha()); desenharTudo();

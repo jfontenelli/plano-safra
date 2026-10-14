@@ -2064,7 +2064,6 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
    no topo da área que rola (a da etapa). */
 .tab-op__caixa { width: 100%; background: var(--superficie); border: 1px solid var(--borda); border-radius: var(--raio); box-shadow: var(--sombra); }
 .tab-op { width: 100%; table-layout: fixed; border-collapse: collapse; font-size: 14px; }
-.tab-op__c-fase { width: 44px; }
 .tab-op__c-dap { width: 8%; }
 .tab-op__c-fen { width: 13%; }
 .tab-op__c-op { width: 33%; }
@@ -2077,17 +2076,6 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .tab-op td { padding: 6px 16px; border-top: 1px solid var(--borda); vertical-align: middle; }
 .tab-op__dap { text-align: center !important; font-variant-numeric: tabular-nums; }
 .tab-op__acao { text-align: center; }
-/* Faixa da fase na vertical, à esquerda, ocupando as linhas da fase (nome deitado e ícone embaixo) */
-.tab-op__fase-cab { padding: 0 !important; }
-.tab-op__fase-v { padding: 0; border-top: 1px solid #fff; vertical-align: middle; }
-/* Cores das fases (definidas pela usuária) */
-.tab-op__fase-v--pre { background: #E3D7CF; } /* #A37B60 clareado (70% de branco) */
-.tab-op__fase-v--plantio { background: #D7E0D2; } /* #79966A clareado (70% de branco) */
-.tab-op__fase-v--desenv { background: #C3D6CE; } /* #36765B clareado (70% de branco) */
-.tab-op__fase-v--colheita { background: #E8DFCC; } /* #B39456 clareado (70% de branco) */
-.tab-op__fase-v-conteudo { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; min-height: 100%; padding: 10px 0; }
-.tab-op__fase-v-nome { writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; font-size: 13px; font-weight: 700; color: #111; letter-spacing: .02em; }
-.tab-op__grupo-fase tr:first-child td { border-top: 2px solid #d6e3d8; }
 /* ⋯ sempre visível em todas as linhas (no teste, ao aparecer só com o mouse em cima, não era encontrado) */
 .tab-op__mais { width: 30px; height: 30px; font-size: 18px; line-height: 1; color: var(--texto-suave); }
 /* "+" ao lado do ⋯: insere uma linha logo abaixo */
@@ -2160,7 +2148,6 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 /* Colunas congeladas à esquerda (Fase até Unid.); posição e largura vêm do JS (dependem das colunas ocultas) */
 .cal-piv__fixa { position: sticky; z-index: 1; }
 .cal-piv__tabela thead .cal-piv__fixa { z-index: 3; }
-.cal-piv__fixa--fase { left: 0; width: 44px; min-width: 44px; max-width: 44px; }
 .cal-piv__fixa--ultima { box-shadow: 4px 0 6px -3px rgba(0, 0, 0, .18); }
 /* Descongelar colunas (menu do botão direito): tudo rola junto; o cabeçalho continua parado ao rolar para baixo */
 .cal-piv__tabela--solta .cal-piv__fixa { left: auto !important; }
@@ -2354,6 +2341,22 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .cp-talhoes__item input { width: 16px; height: 16px; accent-color: var(--verde-700); }
 .cp-talhoes__item--todos { border-bottom: 1px solid var(--borda); font-weight: 600; }
 .cp-talhoes__area { margin-left: auto; color: var(--texto-suave); }
+
+/* ===== Editar talhões (Mais ações do plano) ===== */
+.et-lista { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); max-height: 340px; overflow: auto; margin-top: 4px;
+  border: 1px solid var(--borda); border-radius: var(--raio); padding: 4px 0; }
+.et-item { display: flex; align-items: center; gap: 8px; padding: 7px 12px; font-size: 14px; cursor: pointer; }
+.et-item:hover { background: var(--verde-100); }
+.et-item input { width: 16px; height: 16px; accent-color: var(--verde-700); }
+.et-item--todos { grid-column: 1 / -1; border-bottom: 1px solid var(--borda); font-weight: 600; }
+.et-item__area { margin-left: auto; color: var(--texto-suave); font-variant-numeric: tabular-nums; }
+.et-item__planejado { padding: 1px 6px; border-radius: 999px; background: #eef4ef; color: var(--verde-700); font-size: 11px; font-weight: 600; }
+.et-item--sai { color: #b03a2e; text-decoration: line-through; }
+.et-item--sai .et-item__planejado { background: #fdf0ee; color: #b03a2e; }
+.et-item--entra { background: #f3f8f3; }
+.et-resumo { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 12px; margin: 12px 0 0; font-size: 14px; }
+.et-resumo__mudanca { color: var(--texto-suave); }
+@media (max-width: 520px) { .et-lista { grid-template-columns: 1fr; } }
 .cp-adicionar { margin: 14px 0 18px; }
 @media (max-width: 760px) {
   .cp-gerais { grid-template-columns: repeat(2, minmax(0, 1fr)); }

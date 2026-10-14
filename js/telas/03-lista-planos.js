@@ -366,7 +366,7 @@ window.Telas.listaPlanos = (function () {
   function linha(p) {
     const versao = Versoes.deTrabalho(p);
     const publicada = versao.status === 'publicada';
-    const area = Util.areaCultivo(p);
+    const area = Util.areaCultivo(p, versao);
     return `
       <tr class="lista-planos__linha" data-plano="${p.id}" tabindex="0"
           title="Abrir a versão ${versao.num} (${publicada ? 'publicada, em consulta' : 'em construção'})"

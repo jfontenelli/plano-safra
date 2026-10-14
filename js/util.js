@@ -2,15 +2,17 @@
  * Cálculos e formatação usados por várias telas.
  */
 window.Util = {
-  // Talhões incluídos no plano (escolhidos no modal Criar Plano). Sem a lista: todos os da fazenda.
-  talhoesPlano(plano) {
+  // Talhões incluídos no plano (Criar Plano; depois, Editar talhões), da versão aberta ou da versão indicada.
+  // Sem a lista: todos os da fazenda.
+  talhoesPlano(plano, versao) {
     const todos = DADOS.talhoes[plano.fazenda] || [];
-    return plano.talhoes ? todos.filter((t) => plano.talhoes.includes(t.nome)) : todos;
+    const nomes = versao && window.Versoes ? Versoes.talhoes(plano, versao) : plano.talhoes;
+    return nomes ? todos.filter((t) => nomes.includes(t.nome)) : todos;
   },
 
   // Área de cultivo = soma das áreas dos talhões incluídos no plano (ha); sem talhões, null ("Pendente")
-  areaCultivo(plano) {
-    const talhoes = Util.talhoesPlano(plano);
+  areaCultivo(plano, versao) {
+    const talhoes = Util.talhoesPlano(plano, versao);
     return talhoes.length ? talhoes.reduce((soma, t) => soma + t.area, 0) : null;
   },
 

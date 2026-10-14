@@ -11,7 +11,7 @@ window.Telas.planoOperacoes = (function () {
   const ETAPAS = [
     { id: 'operacoes',   nome: 'Operações' },     // estrutura do plano (Tela 04.0)
     { id: 'planejamento', nome: 'Planejamento' }, // talhão a talhão, por grupo (esta tela)
-    { id: 'calendario',  nome: 'Calendário Agrícola' }
+    { id: 'calendario',  nome: 'Resumo' } // Calendário Agrícola do plano (Tela 05), com o nome Resumo dentro do plano
   ];
   const UNIDADES = ['L', 'mL', 'kg', 'g', 't'];
   // TSI: a dose é por quantidade de semente (a unidade usada pelos clientes fica para os testes)
@@ -143,12 +143,11 @@ window.Telas.planoOperacoes = (function () {
     atualizarEstadoSalvo();
   }
 
-  // ----- Estado de salvamento (versão em construção): "Salvo às 14:20" -----
+  // ----- Estado de salvamento (versão em construção): "✓ Salvamento automático"; quando e por quem, ao passar o mouse -----
   function estadoSalvo() {
     const v = Versoes.aberta(plano);
     if (somenteLeitura || !v) return '';
-    const hora = new Date(v.salvaEm).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-    return `<span class="estado-salvo" data-salvo role="status" title="${esc(Versoes.detalhe(v))}">Salvo às ${hora}</span>`;
+    return `<span class="estado-salvo" data-salvo role="status" title="${esc(Versoes.detalhe(v))}">${Icones.certo} Salvamento automático</span>`;
   }
 
   // Troca só o texto (sem redesenhar a tela)
@@ -263,7 +262,8 @@ window.Telas.planoOperacoes = (function () {
       <button class="botao botao--primario botao--p" type="button" data-acao="ver-publicar">Publicar versão</button>`;
   }
 
-  // "Mais ações ▾": Exportar (.xlsx) · Trocar versão (a lista de versões abre no mesmo lugar)
+  // "Mais ações ▾": Editar talhões (só na versão em construção) · Exportar (.xlsx) · Trocar versão
+  // (a lista de versões abre no mesmo lugar)
   function maisAcoes() {
     return `
       <span class="versoes mais-acoes">
@@ -271,6 +271,7 @@ window.Telas.planoOperacoes = (function () {
                 aria-expanded="${ui.maisAcoes}">Mais ações ${Icones.abaixo}</button>
         ${ui.maisAcoes ? `
           <div class="mais-acoes__menu" role="menu" aria-label="Mais ações">
+            ${somenteLeitura ? '' : `<button class="menu-contexto__item" type="button" role="menuitem" data-acao="editar-talhoes">${Icones.talhoes} Editar talhões</button>`}
             <button class="menu-contexto__item" type="button" role="menuitem" data-acao="exportar-plano">${Icones.baixar} Exportar (.xlsx)</button>
             <button class="menu-contexto__item" type="button" role="menuitem" data-acao="ver-trocar">${Icones.relogio} Trocar versão</button>
           </div>` : ''}
@@ -298,6 +299,7 @@ window.Telas.planoOperacoes = (function () {
   function abrirVersao(num) {
     Versoes.abrir(plano, num);
     somenteLeitura = Versoes.somenteLeitura(plano);
+    talhoesFazenda = Util.talhoesPlano(plano); // cada versão tem os seus talhões
     limparSelecao();
     Object.assign(ui, { versoes: null, jaExiste: false, maisAcoes: false, rascunho: null, receitaPorOp: {},
                         renomeandoOp: null, renomeandoGrupo: null, painelTalhao: null, preCadastro: null, validarOp: null });
@@ -340,6 +342,103 @@ window.Telas.planoOperacoes = (function () {
         break;
       }
     }
+  }
+
+  // ----- Editar talhões (Mais ações; só na versão em construção) -----
+  // Modal com todos os talhões da fazenda (como no Criar Plano). Aplicar: os incluídos entram sem planejamento;
+  // os removidos levam o planejamento deles (plantio, germinação, recomendações e doses). Com algum removido já
+  // planejado, confirma antes. Depois, Desfazer (volta os talhões com o planejamento que tinham).
+  function talhaoPlanejado(nome) {
+    return plano.grupos.some((g) => g.operacoes.some((op) => (op.talhoes && op.talhoes[nome]) || (op.plantio && op.plantio[nome])));
+  }
+
+  function editarTalhoes() {
+    const todos = DADOS.talhoes[plano.fazenda] || [];
+    const antes = talhoesFazenda.map((t) => t.nome);
+    let marcados = new Set(antes);
+    const modal = Modal.abrir(`
+      <form class="formulario" novalidate>
+        <div class="modal__corpo">
+          <button class="modal__fechar" type="button" aria-label="Fechar" data-fechar>${Icones.fechar}</button>
+          <h2 class="modal__titulo" id="modal-titulo">Editar talhões</h2>
+          <p class="modal__subtitulo">Inclua ou remova talhões da Fazenda ${esc(plano.fazenda)} no plano de safra.</p>
+          <div class="et-lista" data-et-lista></div>
+          <p class="et-resumo" data-et-resumo aria-live="polite"></p>
+        </div>
+        <div class="modal__rodape">
+          <button class="botao botao--secundario" type="button" data-fechar>Cancelar</button>
+          <button class="botao botao--primario" type="submit">Aplicar</button>
+        </div>
+      </form>`, { classe: 'modal--pequeno' });
+    const form = modal.elemento.querySelector('form');
+    const desenharLista = () => {
+      const tudo = todos.length && todos.every((t) => marcados.has(t.nome));
+      form.querySelector('[data-et-lista]').innerHTML = `
+        <label class="et-item et-item--todos"><input type="checkbox" data-talhao="__todos__" ${tudo ? 'checked' : ''}
+          ${marcados.size && !tudo ? 'data-intermediario' : ''}> Todos</label>
+        ${todos.map((t) => `
+          <label class="et-item ${antes.includes(t.nome) && !marcados.has(t.nome) ? 'et-item--sai' : ''} ${!antes.includes(t.nome) && marcados.has(t.nome) ? 'et-item--entra' : ''}">
+            <input type="checkbox" data-talhao="${esc(t.nome)}" ${marcados.has(t.nome) ? 'checked' : ''}>
+            ${esc(t.nome)}
+            ${antes.includes(t.nome) && talhaoPlanejado(t.nome) ? '<span class="et-item__planejado" title="Este talhão já tem planejamento">planejado</span>' : ''}
+            <span class="et-item__area">${Util.area(t.area)}</span>
+          </label>`).join('')}`;
+      form.querySelectorAll('[data-intermediario]').forEach((c) => { c.indeterminate = true; });
+      const area = todos.filter((t) => marcados.has(t.nome)).reduce((s, t) => s + t.area, 0);
+      const entram = todos.filter((t) => marcados.has(t.nome) && !antes.includes(t.nome)).length;
+      const saem = antes.filter((n) => !marcados.has(n)).length;
+      form.querySelector('[data-et-resumo]').innerHTML = `
+        <span><strong>${marcados.size} de ${todos.length} talhões</strong> · Área de cultivo: ${marcados.size ? Util.area(area) : 'Pendente'}</span>
+        ${entram || saem ? `<span class="et-resumo__mudanca">${[entram ? `${entram} ${entram === 1 ? 'incluído' : 'incluídos'}` : '', saem ? `${saem} ${saem === 1 ? 'removido' : 'removidos'}` : ''].filter(Boolean).join(' · ')}</span>` : ''}`;
+    };
+    desenharLista();
+    form.addEventListener('change', (e) => {
+      const nome = e.target.dataset.talhao;
+      if (!nome) return;
+      if (nome === '__todos__') marcados = new Set(e.target.checked ? todos.map((t) => t.nome) : []);
+      else if (e.target.checked) marcados.add(nome); else marcados.delete(nome);
+      desenharLista();
+    });
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const saem = antes.filter((n) => !marcados.has(n));
+      const entram = todos.filter((t) => marcados.has(t.nome) && !antes.includes(t.nome)).map((t) => t.nome);
+      modal.fechar();
+      if (!saem.length && !entram.length) return;
+      const planejados = saem.filter(talhaoPlanejado);
+      const aplicar = () => aplicarTalhoes(todos.filter((t) => marcados.has(t.nome)).map((t) => t.nome), saem, entram);
+      if (!planejados.length) { aplicar(); return; }
+      const nomes = planejados.length === 1 ? planejados[0] : `${planejados.slice(0, -1).join(', ')} e ${planejados[planejados.length - 1]}`;
+      Modal.confirmar({
+        titulo: `Remover ${saem.length} ${saem.length === 1 ? 'talhão' : 'talhões'}?`,
+        texto: `${esc(nomes)} já ${planejados.length === 1 ? 'tem' : 'têm'} planejamento (plantio, recomendações e doses). Esse planejamento será apagado.`,
+        botoes: [{ rotulo: 'Cancelar' }, { rotulo: saem.length === 1 ? 'Remover talhão' : 'Remover talhões', classe: 'perigo', acao: aplicar }]
+      });
+    });
+  }
+
+  function aplicarTalhoes(novos, saem, entram) {
+    const voltar = { grupos: structuredClone(plano.grupos), talhoes: plano.talhoes ? [...plano.talhoes] : null };
+    plano.talhoes = novos;
+    plano.grupos.forEach((g) => g.operacoes.forEach((op) => saem.forEach((n) => {
+      if (op.talhoes) delete op.talhoes[n];
+      if (op.plantio) delete op.plantio[n];
+      if (op.germinacoes) delete op.germinacoes[n];
+    })));
+    const atualizar = () => {
+      talhoesFazenda = Util.talhoesPlano(plano);
+      limparSelecao();
+      ui.painelTalhao = null;
+      ui.filtroTalhoes = 'todos';
+      alterou(); desenharTudo();
+    };
+    atualizar();
+    const partes = [entram.length ? `${entram.length} ${entram.length === 1 ? 'incluído' : 'incluídos'}` : '',
+      saem.length ? `${saem.length} ${saem.length === 1 ? 'removido' : 'removidos'}` : ''].filter(Boolean).join(', ');
+    Aviso.mostrar(`Talhões atualizados: ${partes}`, { acao: 'Desfazer', aoAgir: () => {
+      plano.grupos = voltar.grupos; plano.talhoes = voltar.talhoes;
+      if (raiz.isConnected) atualizar(); else { Versoes.salvar(plano); }
+    } });
   }
 
   // Calendário Agrícola (Tela 05): desenhado aqui dentro, com o mesmo cabeçalho do plano
@@ -2865,6 +2964,8 @@ window.Telas.planoOperacoes = (function () {
       case 'nova-op': sairDaReceita(() => criarOperacao(grupo)); break;
 
       case 'exportar-plano': ui.maisAcoes = false; desenharTudo(); ArquivoPlano.exportar(plano); break;
+
+      case 'editar-talhoes': ui.maisAcoes = false; desenharTudo(); editarTalhoes(); break;
 
       case 'adicionar-linha':
         rascunho(op).produtos.push(Planos.novaLinha()); desenharTudo();

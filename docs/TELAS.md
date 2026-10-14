@@ -13,7 +13,7 @@ Regras de negócio ficam em `docs/DECISOES.md`.
 
 | Nº | Tela | Arquivo | Imagem | Situação |
 |---|---|---|---|---|
-| — | Menu e contexto do plano | DECISOES 4.0 e 4.1.1 | rascunhos/navegacao-contexto.html | Construída: menu com Visão Geral · Planejamento · Calendário Agrícola · Suprimentos; cabeçalho fixo com versão, "Salvo às…" (salvamento automático), Publicar versão / Criar nova versão e Mais ações (Exportar, Trocar versão) |
+| — | Menu e contexto do plano | DECISOES 4.0 e 4.1.1 | rascunhos/navegacao-contexto.html | Construída: menu com Visão Geral · Planejamento · Calendário Agrícola · Suprimentos; cabeçalho fixo com versão, "✓ Salvamento automático", Publicar versão / Criar nova versão e Mais ações (Editar talhões, Exportar, Trocar versão); abas Operações · Planejamento · Resumo; talhões por versão |
 | 01 | Primeiro uso | telas/01-primeiro-uso.md | referencias/01-primeiro-uso.png | Construída |
 | 02 | Modal Criar Plano de Safra e modal "Como deseja iniciar o plano?" | telas/02-modal-criar-plano.md | referencias/02-modal-criar-plano.png (antiga) | Construída: informações gerais com Atividade, várias fazendas (um plano por fazenda) com talhões e área de cultivo; início em modal ao abrir o plano (modelo, XLSX, copiar plano publicado, do zero) |
 | 03 | Visão Geral (lista de planos) | telas/03-lista-planos.md | referencias/03-lista-planos.png, rascunhos/navegacao-contexto.html | Construída: guias Visão Geral e Histórico de versões, filtros com Atividade e Status, Área de cultivo, status Não iniciado, clique na linha abre, menu ⋯ (comparação de versões: a detalhar) |
@@ -22,7 +22,7 @@ Regras de negócio ficam em `docs/DECISOES.md`.
 | 04.2 | Planejamento (grupo Semente) | telas/04.2-operacoes-sementes.md | quadro de design (telas A e B) | Construída: Plantio (variedade, data e população; Tabela, Mapa e Previsão de colheita) |
 | 04.3 | Planejamento (grupo Fertilidade) | telas/04.3-operacoes-fertilidade.md | — (layout da Tela 04.1) | Construída: operações do modelo, matéria-prima e cadastro (produtos de cliente a conferir) |
 | 04.4 | Planejamento (grupo Tratamento de semente) | telas/04.4-operacoes-tratamento-sementes.md | — (layout da Tela 04.1) | Construída: TSI (saiu do grupo Semente), DAP −5 sugerido |
-| 05 | Calendário Agrícola (aba do Planejamento) | telas/05-calendario-agricola.md | referencias/05-calendario-agricola.png | Construída: Infográfico por fase e Tabela com prazo para encerramento da OS |
+| 05 | Calendário Agrícola (aba Resumo do plano) | telas/05-calendario-agricola.md | referencias/05-calendario-agricola.png | Construída: Infográfico por fase e Tabela com prazo para encerramento da OS |
 | 06 | Suprimentos | telas/06-suprimentos.md | referencias/suprimentos.png | A definir: falta fechar o cálculo do TSI |
 
 | — | Calendário Agrícola e Suprimentos do menu (vários planos somados) | DECISOES 4.0 | — | A definir |

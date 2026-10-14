@@ -14,7 +14,7 @@ Mostrar, para o plano de uma fazenda, **quanto de cada insumo o plano precisa, q
 ## 2. Lugar na jornada
 
 - Etapa **Suprimentos**, dentro do plano, **para uma fazenda só** (o plano é por fazenda). Não é uma visão consolidada de várias fazendas: os filtros de Empresa e Fazenda da imagem não entram.
-- Cabeçalho do plano, igual às outras etapas: "Plano de Safra › Safra 26/27 · Empresa A · Fazenda Santa Maria · Cultura Soja · [status] · ✓ Salvo automaticamente".
+- Cabeçalho do plano, igual às outras etapas: "Plano de Safra › Safra 26/27 · Empresa A · Fazenda Santa Maria · Cultura Soja · [status]", com "✓ Salvamento automático" à direita.
 - Abas: **Operações · Planejamento · Calendário Agrícola · Suprimentos · Aprovação**, com **Suprimentos** selecionada.
 
 ## 3. Conteúdo (de cima para baixo)
@@ -72,7 +72,7 @@ Custo total dos insumos · Custos extras · Custo total planejado · Custo plane
 
 ### 3.6 Rodapé
 
-- **Sem botão "Salvar planejamento"**: vale o **salvamento automático** do plano (sinal "✓ Salvo automaticamente" no cabeçalho).
+- **Sem botão "Salvar planejamento"**: vale o **salvamento automático** do plano (sinal "✓ Salvamento automático" no cabeçalho).
 - **Sem botão "Continuar para Aprovação"**: a pessoa segue pelas abas do cabeçalho.
 
 ## 4. Regras
