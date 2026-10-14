@@ -2575,6 +2575,39 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .cal-lista__talhoes > .icone { width: 14px; height: 14px; margin-top: 2px; flex-shrink: 0; color: var(--texto-suave); }
 .cal-lista__mais { margin-left: 4px; font-size: 13px; font-weight: 600; }
 
+/* ===== Calendário Agrícola do menu: ciclo das culturas por empresa e fazenda ===== */
+.cabecalho__subtitulo { margin: 4px 0 0; font-size: 14px; color: var(--texto-suave); }
+.cag-etiqueta { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 999px; background: #EEF4F0; font-size: 13px; color: #2F4A3D; white-space: nowrap; }
+.cag-etiqueta .icone { width: 15px; height: 15px; }
+.cag { display: flex; flex-direction: column; gap: 10px; }
+.cag__legenda { display: flex; flex-wrap: wrap; gap: 6px 20px; font-size: 13px; color: #33443B; }
+.cag__legenda > span { display: inline-flex; align-items: center; gap: 6px; }
+.cag__cor { width: 18px; height: 10px; border-radius: 3px; }
+.cag__cor--hoje { width: 0; height: 14px; border-radius: 0; border-left: 2px dotted #8A958F; }
+.cag__rolagem { overflow-x: auto; border: 1px solid var(--borda); border-radius: var(--raio); background: var(--superficie); }
+.cag__tabela { min-width: 1000px; }
+.cag__linha { display: grid; grid-template-columns: 200px 140px 100px minmax(0, 1fr); border-bottom: 1px solid #EDF1EE; font-size: 14px; }
+.cag__linha > span { display: flex; flex-direction: column; justify-content: center; padding: 10px 12px; min-width: 0; }
+.cag__linha small { font-size: 12px; color: var(--texto-suave); }
+.cag__linha--cab { background: #F5F8F6; border-bottom: 1px solid var(--borda); font-size: 12px; font-weight: 700; color: #4A5A52; text-transform: uppercase; letter-spacing: .03em; }
+.cag__linha--cab > span { padding-top: 9px; padding-bottom: 9px; }
+.cag__num { align-items: flex-end; text-align: right; font-variant-numeric: tabular-nums; }
+.cag__meses { display: grid !important; padding: 0 !important; border-left: 1px solid var(--borda); }
+.cag__meses > span { padding: 9px 0; text-align: center; border-left: 1px solid var(--borda); }
+.cag__meses > span:first-child { border-left: 0; }
+.cag__empresa { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 12px; background: #EEF4F0; border-bottom: 1px solid var(--borda); font-size: 14px; }
+.cag__empresa span { color: #4A5A52; }
+.cag__ciclo { font-weight: 600; }
+.cag__ciclo--safra { color: var(--verde-700) !important; }
+.cag__ciclo--safrinha { color: #8A5523 !important; }
+.cag__tempo { position: relative; min-height: 52px; padding: 0 !important; border-left: 1px solid var(--borda);
+  background-image: linear-gradient(to right, #EDF1EE 1px, transparent 1px); background-size: calc(100% / 12) 100%; }
+.cag__barra { position: absolute; top: 50%; height: 18px; margin-top: -9px; border-radius: 5px; }
+.cag__hoje { position: absolute; top: 0; bottom: 0; width: 0; border-left: 2px dotted #8A958F; pointer-events: none; }
+.cag__sem { position: relative; z-index: 1; align-self: flex-start; margin-left: 10px; padding: 2px 6px; background: var(--superficie); font-size: 13px; font-style: italic; color: #6B7A72; }
+.cag__pendente { color: var(--texto-suave); }
+.cag__vazio, .cag__nota { margin: 0; font-size: 13px; color: var(--texto-suave); }
+
 </style>
 </head>
 <body>
@@ -2708,6 +2741,8 @@ window.DADOS = {
   fazendas: ['São José', 'Boa Vista', 'Santa Clara', 'Primavera'],
   // Por enquanto o protótipo funciona só para soja (variedades, população, bags e TSI são de soja)
   culturas: ['Soja'],
+  // Culturas que aparecem nos planos (os de exemplo têm milho e algodão safrinha), para os filtros
+  culturasPlanos: ['Soja', 'Milho', 'Algodão'],
 
   // Talhões por fazenda (área em ha). A tela de Operações mostra todos os talhões da fazenda.
   talhoes: {
@@ -2752,7 +2787,22 @@ window.DADOS = {
     { cultura: 'Soja', nome: 'TMG 2383 IPRO',   gm: 8.3, ciclo: 116, populacao: [200, 240], janela: ['09-20', '11-10'] },
     { cultura: 'Soja', nome: 'M 8372 IPRO',     gm: 8.3, ciclo: 118, populacao: [200, 260], janela: ['09-25', '11-20'] },
     // Sem ciclo cadastrado para a safra: para testar "Informe o ciclo"
-    { cultura: 'Soja', nome: 'TMG 7063 IPRO',   gm: 6.3, ciclo: null, populacao: [300, 360], janela: ['09-16', '10-20'] }
+    { cultura: 'Soja', nome: 'TMG 7063 IPRO',   gm: 6.3, ciclo: null, populacao: [300, 360], janela: ['09-16', '10-20'] },
+    // Milho safrinha (2ª safra) no médio-norte do MT: plantio logo depois da colheita da soja, de janeiro até o
+    // começo de março (depois disso, a falta de chuva no fim do ciclo derruba a produtividade); colheita de
+    // maio a julho. Híbridos precoces, 120 a 135 dias da semeadura à colheita; 60 a 70 mil plantas/ha.
+    // Valores aproximados para o protótipo (referências públicas de Embrapa, Imea e catálogos das empresas): conferir.
+    { cultura: 'Milho', nome: 'DKB 360 PRO3',  ciclo: 125, populacao: [60, 68], janela: ['01-01', '03-05'] },
+    { cultura: 'Milho', nome: 'AG 8700 PRO3',  ciclo: 130, populacao: [60, 66], janela: ['01-01', '03-01'] },
+    { cultura: 'Milho', nome: 'P3707VYH',      ciclo: 128, populacao: [62, 70], janela: ['01-01', '03-05'] },
+    { cultura: 'Milho', nome: 'FS 575 PWU',    ciclo: 132, populacao: [58, 65], janela: ['01-01', '02-28'] },
+    // Algodão 2ª safra no MT: plantio de janeiro a meados de fevereiro, logo depois da soja precoce; colheita de
+    // julho a setembro. Cultivares de 160 a 180 dias; 8 a 10 plantas por metro (≈ 90 a 110 mil plantas/ha).
+    // Valores aproximados para o protótipo (Imea, Ampa, IMAmt e catálogos das empresas): conferir.
+    { cultura: 'Algodão', nome: 'TMG 44 B2RF',   ciclo: 165, populacao: [90, 110], janela: ['01-05', '02-15'] },
+    { cultura: 'Algodão', nome: 'FM 985 GLTP',   ciclo: 175, populacao: [90, 105], janela: ['01-05', '02-10'] },
+    { cultura: 'Algodão', nome: 'IMA 5801 B2RF', ciclo: 170, populacao: [90, 110], janela: ['01-05', '02-15'] },
+    { cultura: 'Algodão', nome: 'DP 1746 B2RF',  ciclo: 170, populacao: [85, 105], janela: ['01-05', '02-10'] }
   ],
 
   // Histórico por talhão (últimas 3 safras de soja): [safra, variedade, produtividade (sc/ha), chuva no ciclo (mm)].
@@ -2790,7 +2840,9 @@ window.DADOS = {
     'São José':    { origem: [-12.5520, -55.8790], giro: 7,  profundidade: 1000, inclinacao: 0.10,
                      linhas: [['T01', 'T02', 'T03', 'T04'], ['T05', 'T06', 'T07', 'T08'], ['T09', 'T10', 'T11', 'T12']] },
     'Santa Clara': { origem: [-12.6420, -55.7480], giro: -4, profundidade: 1100, inclinacao: -0.08,
-                     linhas: [['T01', 'T02', 'T03', 'T04'], ['T05', 'T06', 'T07', 'T08']] }
+                     linhas: [['T01', 'T02', 'T03', 'T04'], ['T05', 'T06', 'T07', 'T08']] },
+    'Boa Vista':   { origem: [-12.4980, -55.6920], giro: 3,  profundidade: 1050, inclinacao: 0.06,
+                     linhas: [['T01', 'T02', 'T03', 'T04', 'T05'], ['T06', 'T07', 'T08', 'T09', 'T10']] }
   },
 
   // Cadastro de defensivos (exemplo). Pré-cadastros feitos na tela de Operações entram aqui.
@@ -2862,7 +2914,13 @@ window.DADOS = {
     { classe: 'Herbicida',  produto: 'Dual Gold',           principioAtivo: 'S-metolacloro',                              unidade: 'L' },
     { classe: 'Herbicida',  produto: 'Spider',              principioAtivo: 'Diclosulam',                                 unidade: 'g' },
     { classe: 'Herbicida',  produto: 'Select 240 EC',       principioAtivo: 'Cletodim',                                   unidade: 'L' },
-    { classe: 'Herbicida',  produto: 'DMA 806 BR',          principioAtivo: '2,4-D',                                      unidade: 'L' }
+    { classe: 'Herbicida',  produto: 'DMA 806 BR',          principioAtivo: '2,4-D',                                      unidade: 'L' },
+    // Milho e algodão (exemplos para os planos de safrinha; conferir registro e dose na bula)
+    { fertilidade: true, classe: 'Nitrogenado', produto: 'Ureia 45%',      principioAtivo: 'Ureia',               garantia: 'N 45%', unidade: 'kg' },
+    { classe: 'Herbicida',  produto: 'Primóleo',            principioAtivo: 'Atrazina',                                   unidade: 'L' },
+    { classe: 'Herbicida',  produto: 'Callisto',            principioAtivo: 'Mesotriona',                                 unidade: 'L' },
+    { classe: 'Regulador',  produto: 'Pix HC',              principioAtivo: 'Cloreto de mepiquate',                       unidade: 'L' },
+    { classe: 'Desfolhante', produto: 'Dropp Ultra',        principioAtivo: 'Tidiazurom + Diurom',                        unidade: 'L' }
   ],
 
   // Estádios fenológicos da soja (exemplo; depois virão do menu Cadastros)
@@ -2924,6 +2982,51 @@ window.DADOS = {
       { nome: 'Colheita', prazo: 10 }
     ] }
   ],
+
+  // Modelos de operações das outras culturas (só para os planos de exemplo de safrinha, por enquanto).
+  // DAP pela prática no médio-norte do MT; sem fenologia (o cadastro de estádios é o da soja).
+  modelosCultura: {
+    // Milho safrinha: as sementes já vêm tratadas (sem grupo TSI). Cigarrinha (Dalbulus maidis) no começo do
+    // ciclo, cobertura nitrogenada em V4–V6 (≈ 25 DAP), lagarta-do-cartucho e um fungicida antes do pendoamento.
+    'Milho': [
+      { nome: 'Semente', tipo: 'Sementes', operacoes: [{ nome: 'Plantio', dap: 0, prazo: 3 }] },
+      { nome: 'Defensivo', tipo: 'Defensivos', operacoes: [
+        { nome: '1ª Inseticida: cigarrinha', dap: 7 },
+        { nome: '2ª Inseticida: cigarrinha', dap: 15 },
+        { nome: 'Herbicida pós-emergente', dap: 20 },
+        { nome: 'Inseticida: lagarta-do-cartucho', dap: 30 },
+        { nome: 'Fungicida', dap: 55 }
+      ] },
+      { nome: 'Fertilidade', tipo: 'Fertilidade', operacoes: [
+        { nome: 'Adubação de plantio', dap: 0 },
+        { nome: 'Adubação potássica', dap: 20 },
+        { nome: 'Cobertura nitrogenada', dap: 25 }
+      ] },
+      { nome: 'Colheita', tipo: 'Colheita', operacoes: [{ nome: 'Colheita', prazo: 10 }] }
+    ],
+    // Algodão 2ª safra: sementes tratadas na origem. Pré-emergente no plantio, regulador de crescimento em duas
+    // aplicações, controle de pragas e de ramulária, e desfolhante para a colheita (≈ 150 DAP).
+    'Algodão': [
+      { nome: 'Semente', tipo: 'Sementes', operacoes: [{ nome: 'Plantio', dap: 0, prazo: 3 }] },
+      { nome: 'Defensivo', tipo: 'Defensivos', operacoes: [
+        { nome: 'Herbicida pré-emergente', dap: 0 },
+        { nome: 'Herbicida pós-emergente', dap: 25 },
+        { nome: '1ª Regulador de crescimento', dap: 40 },
+        { nome: 'Inseticida', dap: 45 },
+        { nome: '2ª Regulador de crescimento', dap: 60 },
+        { nome: '1ª Fungicida: ramulária', dap: 70 },
+        { nome: '2ª Fungicida: ramulária', dap: 90 },
+        { nome: 'Desfolhante', dap: 150 }
+      ] },
+      { nome: 'Fertilidade', tipo: 'Fertilidade', operacoes: [
+        { nome: 'Adubação de plantio', dap: 0 },
+        { nome: 'Cobertura nitrogenada', dap: 30 },
+        { nome: 'Cobertura potássica', dap: 30 },
+        { nome: 'Boro foliar', dap: 50 }
+      ] },
+      { nome: 'Colheita', tipo: 'Colheita', operacoes: [{ nome: 'Colheita', prazo: 15 }] }
+    ]
+  },
 
   // Planos de safra cadastrados. Começa vazio = menu "Plano de Safra" abre a Tela 01 (Primeiro uso).
   planos: [],
@@ -2996,6 +3099,77 @@ window.DADOS = {
           '3ª Fungicida': op([['Elatus', 0.20], ['Connect', 1.0]], 'R4'),
           '4ª Fungicida': op([['Cypress', 0.30], ['Premio', 0.05]], 'R5'),
           'Desfolha': op([['Finale', 2.0]], 'R7')
+        };
+      })()
+    },
+    {
+      // Milho safrinha na Santa Clara, depois da soja: cada talhão é plantado 3 dias depois da colheita prevista
+      // da soja nele (plantio da soja + ciclo da variedade)
+      safra: '26/27', empresa: 'Empresa A', atividade: 'Agricultura', fazenda: 'Santa Clara', cultura: 'Milho', ciclo: 'Safrinha',
+      modelo: 'Milho',
+      versoes: { criadaEm: '2026-09-28T10:20', publicadaEm: '2026-10-06T16:40' },
+      custo: null, receita: null,
+      atualizadoEm: '2026-10-06', atualizadoPor: 'Maria Gonçalves',
+      operacoes: (function () {
+        const todos = ['T01', 'T02', 'T03', 'T04', 'T05', 'T06', 'T07', 'T08'];
+        const op = (produtos) => ({ produtos, talhoes: todos });
+        return {
+          'Plantio': { germinacao: 95, plantio: [
+            { talhao: 'T01', variedade: 'DKB 360 PRO3', data: '2027-01-07', populacao: 64 },
+            { talhao: 'T02', variedade: 'DKB 360 PRO3', data: '2027-01-07', populacao: 64 },
+            { talhao: 'T06', variedade: 'P3707VYH',     data: '2027-01-14', populacao: 66 },
+            { talhao: 'T03', variedade: 'AG 8700 PRO3', data: '2027-01-21', populacao: 62 },
+            { talhao: 'T04', variedade: 'AG 8700 PRO3', data: '2027-01-24', populacao: 62 },
+            { talhao: 'T05', variedade: 'P3707VYH',     data: '2027-02-01', populacao: 66 },
+            { talhao: 'T08', variedade: 'FS 575 PWU',   data: '2027-02-04', populacao: 60 },
+            { talhao: 'T07', variedade: 'FS 575 PWU',   data: '2027-02-08', populacao: 60 }
+          ] },
+          'Adubação de plantio': op([['MAP 11-52-00', 120]]),
+          'Adubação potássica': op([['KCl 00-00-60', 80]]),
+          'Cobertura nitrogenada': op([['Ureia 45%', 150]]),
+          '1ª Inseticida: cigarrinha': op([['Engeo Pleno', 0.25]]),
+          '2ª Inseticida: cigarrinha': op([['Connect', 1.0]]),
+          'Herbicida pós-emergente': op([['Primóleo', 3.0], ['Callisto', 0.3]]),
+          'Inseticida: lagarta-do-cartucho': op([['Premio', 0.10]]),
+          'Fungicida': op([['Priori Xtra', 0.30]])
+        };
+      })()
+    },
+    {
+      // Algodão 2ª safra na Boa Vista (Empresa B): plantio de meados de janeiro a 10 de fevereiro
+      safra: '26/27', empresa: 'Empresa B', atividade: 'Agricultura', fazenda: 'Boa Vista', cultura: 'Algodão', ciclo: 'Safrinha',
+      modelo: 'Algodão',
+      versoes: { criadaEm: '2026-09-29T14:00', publicadaEm: '2026-10-08T11:15' },
+      custo: null, receita: null,
+      atualizadoEm: '2026-10-08', atualizadoPor: 'Carlos Souza',
+      operacoes: (function () {
+        const todos = ['T01', 'T02', 'T03', 'T04', 'T05', 'T06', 'T07', 'T08', 'T09', 'T10'];
+        const op = (produtos) => ({ produtos, talhoes: todos });
+        return {
+          'Plantio': { germinacao: 85, plantio: [
+            { talhao: 'T01', variedade: 'TMG 44 B2RF',   data: '2027-01-12', populacao: 100 },
+            { talhao: 'T02', variedade: 'TMG 44 B2RF',   data: '2027-01-12', populacao: 100 },
+            { talhao: 'T03', variedade: 'FM 985 GLTP',   data: '2027-01-16', populacao: 95 },
+            { talhao: 'T04', variedade: 'FM 985 GLTP',   data: '2027-01-18', populacao: 95 },
+            { talhao: 'T05', variedade: 'IMA 5801 B2RF', data: '2027-01-22', populacao: 100 },
+            { talhao: 'T06', variedade: 'IMA 5801 B2RF', data: '2027-01-25', populacao: 100 },
+            { talhao: 'T07', variedade: 'DP 1746 B2RF',  data: '2027-01-29', populacao: 95 },
+            { talhao: 'T08', variedade: 'DP 1746 B2RF',  data: '2027-02-02', populacao: 95 },
+            { talhao: 'T09', variedade: 'TMG 44 B2RF',   data: '2027-02-06', populacao: 100 },
+            { talhao: 'T10', variedade: 'TMG 44 B2RF',   data: '2027-02-10', populacao: 100 }
+          ] },
+          'Adubação de plantio': op([['Formulado 02-20-18', 350]]),
+          'Cobertura nitrogenada': op([['Ureia 45%', 150]]),
+          'Cobertura potássica': op([['KCl 00-00-60', 120]]),
+          'Boro foliar': op([['Nutre Boro', 1.0]]),
+          'Herbicida pré-emergente': op([['Dual Gold', 1.5]]),
+          'Herbicida pós-emergente': op([['Roundup Original DI', 2.0]]),
+          '1ª Regulador de crescimento': op([['Pix HC', 0.20]]),
+          'Inseticida': op([['Engeo Pleno', 0.25]]),
+          '2ª Regulador de crescimento': op([['Pix HC', 0.30]]),
+          '1ª Fungicida: ramulária': op([['Priori Xtra', 0.30]]),
+          '2ª Fungicida: ramulária': op([['Priori Xtra', 0.30]]),
+          'Desfolhante': op([['Dropp Ultra', 0.20]])
         };
       })()
     }
@@ -3303,9 +3477,9 @@ window.Planos = (function () {
     return { id: novoId('g'), nome, tipo, operacoes: [] };
   }
 
-  // Grupos e operações do modelo, sem receitas e sem talhões
-  function gruposModelo() {
-    return DADOS.modeloOperacoes.map((g) => ({
+  // Grupos e operações do modelo (o da soja, ou o de outra cultura), sem receitas e sem talhões
+  function gruposModelo(modelo = DADOS.modeloOperacoes) {
+    return modelo.map((g) => ({
       ...novoGrupo(g.nome, g.tipo),
       operacoes: g.operacoes.map((o) => ({ ...novaOperacao(o.nome, o.dap, o.prazo ?? null), fenologia: o.fenologia || '' }))
     }));
@@ -3327,8 +3501,8 @@ window.Planos = (function () {
 
   // Modelo preenchido com o detalhe dos planos de exemplo (ver dados-exemplo.js).
   // Os produtos de cada operação viram a Receita 1, aplicada nos talhões listados.
-  function montarExemplo(detalhes) {
-    const grupos = gruposModelo();
+  function montarExemplo(detalhes, modelo) {
+    const grupos = gruposModelo(modelo);
     grupos.forEach((g) => g.operacoes.forEach((op) => {
       const d = detalhes[op.nome];
       if (!d) return;
@@ -4356,7 +4530,7 @@ window.Telas.listaPlanos = (function () {
           ${filtro('safra', 'Safra', presentes('safra', DADOS.safras))}
           ${filtro('empresa', 'Empresa', presentes('empresa', DADOS.empresas))}
           ${filtro('atividade', 'Atividade', presentes('atividade', DADOS.atividades))}
-          ${filtro('cultura', 'Cultura', presentes('cultura', DADOS.culturas))}
+          ${filtro('cultura', 'Cultura', presentes('cultura', DADOS.culturasPlanos))}
           ${filtro('fazenda', 'Fazenda', presentes('fazenda', DADOS.fazendas))}
           ${filtro('status', 'Status', presentes('status', STATUS), 'Todos')}
           <button class="link-acao filtros__limpar" type="button" data-acao="lp-limpar">${Icones.limpar} Limpar filtros</button>
@@ -5638,6 +5812,187 @@ window.Telas.calendario = (function () {
   });
 
   return { desenhar, aoClicar, aoMudar, aoDigitar, prazoDe };
+})();
+
+</script>
+  <script>
+/*
+ * Calendário Agrícola do menu (DECISOES 4.0): vários planos somados, na safra escolhida.
+ * Uma linha por plano (empresa · fazenda · cultura · safra/safrinha), agrupada por empresa, com uma barra do ciclo
+ * da cultura na linha do tempo da safra (julho a junho): do primeiro plantio à última colheita prevista.
+ * Usa a última versão publicada de cada plano (DECISOES 4.0).
+ */
+window.Telas = window.Telas || {};
+
+window.Telas.calendarioAgricola = (function () {
+  const esc = Util.escapar;
+  const NOMES_MESES = ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'];
+  // Cor de cada cultura na linha do tempo (outras: cinza)
+  const COR = { Soja: '#1E7A4C', Milho: '#D9A21B', 'Algodão': '#3F6FB0' };
+
+  let filtros = {};
+  // Safra/Safrinha do plano: ainda não é escolhida ao criar o plano (DECISOES 4.2: a detalhar); por enquanto, Safra
+  const cicloDe = (p) => p.ciclo || 'Safra';
+  const valorDe = (p, campo) => p[campo];
+  function presentes(campo, cadastro) {
+    const naLista = new Set(DADOS.planos.map((p) => valorDe(p, campo)));
+    return cadastro.filter((item) => naLista.has(item));
+  }
+  const filtrosIniciais = () => ({ safra: Util.safraMaisRecente(presentes('safra', DADOS.safras)), empresa: '', fazenda: '', cultura: '' });
+
+  // ----- Datas -----
+  const dataDe = (iso) => { const [a, m, d] = iso.split('-').map(Number); return new Date(a, m - 1, d); };
+  const somaDias = (iso, n) => { const d = dataDe(iso); d.setDate(d.getDate() + n); return d; };
+  const ddmm = (d) => `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`;
+  // Safra "26/27": de 1º de julho de 2026 a 30 de junho de 2027; se alguma colheita passar de junho (ex.: algodão
+  // de 2ª safra, colhido de julho a setembro), a linha do tempo vai até o fim do mês dessa colheita
+  function janela(safra, ultimaData) {
+    const ano = 2000 + Number(String(safra).split('/')[0]);
+    const ini = new Date(ano, 6, 1);
+    let fim = new Date(ano + 1, 6, 1);
+    if (ultimaData && ultimaData >= fim) fim = new Date(ultimaData.getFullYear(), ultimaData.getMonth() + 1, 1);
+    const meses = [];
+    for (let d = new Date(ini); d < fim; d.setMonth(d.getMonth() + 1)) meses.push(NOMES_MESES[d.getMonth()]);
+    return { ini, fim, meses };
+  }
+  const pct = (d, { ini, fim }) => Math.min(100, Math.max(0, (d - ini) / (fim - ini) * 100));
+
+  // Ciclo da cultura no plano (última versão publicada): primeiro plantio e última colheita prevista
+  // (plantio + ciclo da variedade), nos talhões incluídos com data de plantio
+  function cicloDoPlano(p) {
+    const v = Versoes.ultimaPublicada(p);
+    if (!v) return { versao: null };
+    const grupos = Versoes.grupos(p, v);
+    const talhoes = Util.talhoesPlano(p, v).map((t) => t.nome);
+    const op = (grupos.find((g) => g.tipo === 'Sementes') || { operacoes: [] }).operacoes[0];
+    const pl = (op && op.plantio) || {};
+    const plantios = []; const colheitas = [];
+    talhoes.forEach((t) => {
+      const x = pl[t];
+      if (!x || !x.data) return;
+      plantios.push(dataDe(x.data));
+      const variedade = DADOS.variedades.find((vv) => vv.nome === x.variedade);
+      if (variedade && variedade.ciclo) colheitas.push(somaDias(x.data, variedade.ciclo));
+    });
+    if (!plantios.length) return { versao: v };
+    const min = (xs) => new Date(Math.min(...xs)); const max = (xs) => new Date(Math.max(...xs));
+    return { versao: v, plantioIni: min(plantios), plantioFim: max(plantios),
+      colheitaIni: colheitas.length ? min(colheitas) : null, colheitaFim: colheitas.length ? max(colheitas) : null };
+  }
+
+  // ----- Desenho -----
+  function desenhar() {
+    filtros = filtrosIniciais();
+    return `
+      <header class="cabecalho">
+        <div>
+          <h1 class="cabecalho__titulo">Calendário Agrícola</h1>
+          <p class="cabecalho__subtitulo">O ciclo de cada cultura, do plantio à colheita, em todas as empresas e fazendas da safra.</p>
+        </div>
+        <span class="cag-etiqueta" title="Mostra a última versão publicada de cada plano. Alterações em versões em construção aparecem aqui depois de publicadas.">${Icones.info} Últimas versões publicadas</span>
+      </header>
+      <div class="pagina">
+        <section class="cartao filtros" aria-label="Filtrar o calendário">
+          ${filtro('safra', 'Safra', presentes('safra', DADOS.safras), null)}
+          ${filtro('empresa', 'Empresa', presentes('empresa', DADOS.empresas))}
+          ${filtro('fazenda', 'Fazenda', presentes('fazenda', DADOS.fazendas))}
+          ${filtro('cultura', 'Cultura', presentes('cultura', DADOS.culturasPlanos))}
+          <button class="link-acao filtros__limpar" type="button" data-acao="cag-limpar">${Icones.limpar} Limpar filtros</button>
+        </section>
+        <section class="cag" aria-label="Linha do tempo da safra" data-cag></section>
+      </div>`;
+  }
+
+  // todos = null: sem a opção "Todas" (a Safra é sempre uma só)
+  function filtro(nome, rotulo, itens, todos = 'Todas') {
+    return `
+      <div class="campo">
+        <label class="campo__rotulo" for="cag-${nome}">${rotulo}</label>
+        <select class="campo__controle" id="cag-${nome}" data-filtro="${nome}">
+          ${todos ? `<option value="">${todos}</option>` : ''}
+          ${itens.map((item) => `<option value="${esc(item)}" ${item === filtros[nome] ? 'selected' : ''}>${esc(item)}</option>`).join('')}
+        </select>
+      </div>`;
+  }
+
+  function linhaDoTempo() {
+    const planos = DADOS.planos.filter((p) => ['safra', 'empresa', 'fazenda', 'cultura'].every((c) => !filtros[c] || valorDe(p, c) === filtros[c]));
+    if (!planos.length) return '<p class="cag__vazio">Nenhum plano com esses filtros.</p>';
+    const fins = planos.map((p) => { const c = cicloDoPlano(p); return c.colheitaFim || c.plantioFim; }).filter(Boolean);
+    const j = janela(filtros.safra, fins.length ? new Date(Math.max(...fins)) : null);
+    const grade = `grid-template-columns: repeat(${j.meses.length}, minmax(0, 1fr))`;
+    const fundo = `background-size: calc(100% / ${j.meses.length}) 100%`;
+    const hoje = new Date();
+    const hojeNaSafra = hoje >= j.ini && hoje < j.fim;
+    const marcaHoje = hojeNaSafra ? `<span class="cag__hoje" style="left: ${pct(hoje, j).toFixed(2)}%" aria-hidden="true"></span>` : '';
+    // Agrupado por empresa (na ordem do cadastro); dentro, por fazenda, a safra antes da safrinha, e por cultura
+    const empresas = DADOS.empresas.filter((e) => planos.some((p) => p.empresa === e));
+    const culturas = [...new Set(planos.map((p) => p.cultura))];
+    return `
+      <div class="cag__legenda">
+        ${culturas.map((c) => `<span><span class="cag__cor" style="background: ${COR[c] || '#7B8A82'}" aria-hidden="true"></span>${esc(c)}</span>`).join('')}
+        ${hojeNaSafra ? '<span><span class="cag__cor cag__cor--hoje" aria-hidden="true"></span>Hoje</span>' : ''}
+      </div>
+      <div class="cag__rolagem">
+        <div class="cag__tabela" role="table" aria-label="Ciclo das culturas por empresa e fazenda">
+          <div class="cag__linha cag__linha--cab" role="row">
+            <span role="columnheader">Fazenda</span><span role="columnheader">Cultura · safra</span>
+            <span role="columnheader" class="cag__num">Área</span>
+            <span role="columnheader" class="cag__meses" style="${grade}">${j.meses.map((m) => `<span>${m}</span>`).join('')}</span>
+          </div>
+          ${empresas.map((e) => {
+            const doGrupo = planos.filter((p) => p.empresa === e)
+              .sort((a, b) => a.fazenda.localeCompare(b.fazenda) || (cicloDe(a) === 'Safrinha') - (cicloDe(b) === 'Safrinha') || a.cultura.localeCompare(b.cultura));
+            const ciclos = doGrupo.map((p) => ({ p, c: cicloDoPlano(p) }));
+            const area = ciclos.reduce((s, { p, c }) => s + (Util.areaCultivo(p, c.versao) || 0), 0);
+            const fazendas = new Set(doGrupo.map((p) => p.fazenda)).size;
+            return `
+              <div class="cag__empresa" role="row"><strong role="cell">${esc(e)}</strong>
+                <span role="cell">${fazendas} ${fazendas === 1 ? 'fazenda' : 'fazendas'} · ${Util.area(area)}</span></div>
+              ${ciclos.map(({ p, c }) => linha(p, c, j, marcaHoje, fundo)).join('')}`;
+          }).join('')}
+        </div>
+      </div>
+      <p class="cag__nota">Cada barra é o ciclo da cultura: do primeiro plantio à última colheita prevista (plantio + ciclo da variedade). Passe o mouse para ver as datas.</p>`;
+  }
+
+  function linha(p, c, j, marcaHoje, fundo) {
+    const area = Util.areaCultivo(p, c.versao);
+    let barra;
+    if (!c.plantioIni) {
+      barra = `<span class="cag__sem">${c.versao && !Versoes.aIniciar(p) ? 'Plantio ainda não definido na versão publicada' : 'Plano ainda sem versão publicada com operações'}</span>`;
+    } else {
+      const fim = c.colheitaFim || c.plantioFim;
+      const esq = pct(c.plantioIni, j); const dir = pct(fim, j);
+      const dica = `${p.cultura} · ${cicloDe(p)}: plantio de ${ddmm(c.plantioIni)} a ${ddmm(c.plantioFim)}`
+        + (c.colheitaIni ? ` · colheita prevista de ${ddmm(c.colheitaIni)} a ${ddmm(c.colheitaFim)}` : ' · colheita sem previsão (variedade sem ciclo)')
+        + (area ? ` · ${Util.area(area)}` : '');
+      barra = `<span class="cag__barra" style="left: ${esq.toFixed(2)}%; width: ${Math.max(0.6, dir - esq).toFixed(2)}%; background: ${COR[p.cultura] || '#7B8A82'}"
+                     title="${esc(dica)}" role="img" aria-label="${esc(dica)}"></span>`;
+    }
+    return `
+      <div class="cag__linha" role="row">
+        <span role="cell"><strong>${esc(p.fazenda)}</strong><small>${c.versao ? `versão ${esc(c.versao.num)} publicada` : 'sem versão publicada'}</small></span>
+        <span role="cell">${esc(p.cultura)}<small class="cag__ciclo cag__ciclo--${cicloDe(p) === 'Safrinha' ? 'safrinha' : 'safra'}">${esc(cicloDe(p))}</small></span>
+        <span role="cell" class="cag__num">${area ? Util.area(area) : '<span class="cag__pendente">Pendente</span>'}</span>
+        <span role="cell" class="cag__tempo" style="${fundo}">${barra}${marcaHoje}</span>
+      </div>`;
+  }
+
+  function aoMostrar(conteudo) {
+    const atualizar = () => { conteudo.querySelector('[data-cag]').innerHTML = linhaDoTempo(); };
+    conteudo.querySelectorAll('[data-filtro]').forEach((select) => {
+      select.addEventListener('change', () => { filtros[select.dataset.filtro] = select.value; atualizar(); });
+    });
+    conteudo.querySelector('[data-acao="cag-limpar"]').addEventListener('click', () => {
+      filtros = filtrosIniciais();
+      conteudo.querySelectorAll('[data-filtro]').forEach((select) => { select.value = filtros[select.dataset.filtro]; });
+      atualizar();
+    });
+    atualizar();
+  }
+
+  return { desenhar, aoMostrar };
 })();
 
 </script>
@@ -10486,9 +10841,11 @@ window.Telas.planoOperacoes = (function () {
                           estado.ultimoPlanoId = Number(id);
                           Telas.planoOperacoes.aoMostrar(conteudo, buscarPlano(id), etapa);
                         } },
-    // Calendário Agrícola e Suprimentos do menu: vários planos somados (a construir)
+    // Calendário Agrícola do menu: vários planos somados (o ciclo de cada cultura, por empresa e fazenda)
     'calendario':     { titulo: 'Calendário Agrícola', menu: 'calendario',
-                        desenhar: () => temPlanos() ? Telas.emConstrucao('Calendário Agrícola') : Telas.semPlanos('calendario') },
+                        desenhar: () => temPlanos() ? Telas.calendarioAgricola.desenhar() : Telas.semPlanos('calendario'),
+                        aoMostrar: (conteudo) => { if (temPlanos()) Telas.calendarioAgricola.aoMostrar(conteudo); } },
+    // Suprimentos do menu: vários planos somados (a construir)
     'suprimentos':    { titulo: 'Suprimentos', menu: 'suprimentos',
                         desenhar: () => temPlanos() ? Telas.emConstrucao('Suprimentos') : Telas.semPlanos('suprimentos') },
     'ordens-servico': { titulo: 'Ordens de Serviço', menu: 'ordens-servico',
@@ -10634,12 +10991,12 @@ window.Telas.planoOperacoes = (function () {
 
   // Mantém as safras já cadastradas (inclusive a criada no modal) e inclui a dos exemplos
   function carregarPlanosExemplo() {
-    DADOS.planos = DADOS.planosExemplo.map(({ operacoes, versoes, ...p }) => {
+    DADOS.planos = DADOS.planosExemplo.map(({ operacoes, versoes, modelo, ...p }) => {
       if (!DADOS.safras.includes(p.safra)) DADOS.safras.push(p.safra);
       const plano = { ...p, id: estado.proximoIdPlano++ };
       // Versões do exemplo: 0.1 publicada e 0.2 com o planejamento (em construção ou publicada)
       const criada = new Date(versoes.criadaEm);
-      Versoes.iniciar(plano, Planos.montarExemplo(operacoes), { quando: criada, por: p.atualizadoPor });
+      Versoes.iniciar(plano, Planos.montarExemplo(operacoes, modelo ? DADOS.modelosCultura[modelo] : undefined), { quando: criada, por: p.atualizadoPor });
       if (versoes.publicadaEm) {
         Versoes.publicar(plano);
         Object.assign(Versoes.aberta(plano), { publicadaEm: new Date(versoes.publicadaEm), publicadaPor: p.atualizadoPor });

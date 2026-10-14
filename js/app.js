@@ -21,9 +21,11 @@
                           estado.ultimoPlanoId = Number(id);
                           Telas.planoOperacoes.aoMostrar(conteudo, buscarPlano(id), etapa);
                         } },
-    // Calendário Agrícola e Suprimentos do menu: vários planos somados (a construir)
+    // Calendário Agrícola do menu: vários planos somados (o ciclo de cada cultura, por empresa e fazenda)
     'calendario':     { titulo: 'Calendário Agrícola', menu: 'calendario',
-                        desenhar: () => temPlanos() ? Telas.emConstrucao('Calendário Agrícola') : Telas.semPlanos('calendario') },
+                        desenhar: () => temPlanos() ? Telas.calendarioAgricola.desenhar() : Telas.semPlanos('calendario'),
+                        aoMostrar: (conteudo) => { if (temPlanos()) Telas.calendarioAgricola.aoMostrar(conteudo); } },
+    // Suprimentos do menu: vários planos somados (a construir)
     'suprimentos':    { titulo: 'Suprimentos', menu: 'suprimentos',
                         desenhar: () => temPlanos() ? Telas.emConstrucao('Suprimentos') : Telas.semPlanos('suprimentos') },
     'ordens-servico': { titulo: 'Ordens de Serviço', menu: 'ordens-servico',
@@ -169,12 +171,12 @@
 
   // Mantém as safras já cadastradas (inclusive a criada no modal) e inclui a dos exemplos
   function carregarPlanosExemplo() {
-    DADOS.planos = DADOS.planosExemplo.map(({ operacoes, versoes, ...p }) => {
+    DADOS.planos = DADOS.planosExemplo.map(({ operacoes, versoes, modelo, ...p }) => {
       if (!DADOS.safras.includes(p.safra)) DADOS.safras.push(p.safra);
       const plano = { ...p, id: estado.proximoIdPlano++ };
       // Versões do exemplo: 0.1 publicada e 0.2 com o planejamento (em construção ou publicada)
       const criada = new Date(versoes.criadaEm);
-      Versoes.iniciar(plano, Planos.montarExemplo(operacoes), { quando: criada, por: p.atualizadoPor });
+      Versoes.iniciar(plano, Planos.montarExemplo(operacoes, modelo ? DADOS.modelosCultura[modelo] : undefined), { quando: criada, por: p.atualizadoPor });
       if (versoes.publicadaEm) {
         Versoes.publicar(plano);
         Object.assign(Versoes.aberta(plano), { publicadaEm: new Date(versoes.publicadaEm), publicadaPor: p.atualizadoPor });

@@ -60,9 +60,9 @@ window.Planos = (function () {
     return { id: novoId('g'), nome, tipo, operacoes: [] };
   }
 
-  // Grupos e operações do modelo, sem receitas e sem talhões
-  function gruposModelo() {
-    return DADOS.modeloOperacoes.map((g) => ({
+  // Grupos e operações do modelo (o da soja, ou o de outra cultura), sem receitas e sem talhões
+  function gruposModelo(modelo = DADOS.modeloOperacoes) {
+    return modelo.map((g) => ({
       ...novoGrupo(g.nome, g.tipo),
       operacoes: g.operacoes.map((o) => ({ ...novaOperacao(o.nome, o.dap, o.prazo ?? null), fenologia: o.fenologia || '' }))
     }));
@@ -84,8 +84,8 @@ window.Planos = (function () {
 
   // Modelo preenchido com o detalhe dos planos de exemplo (ver dados-exemplo.js).
   // Os produtos de cada operação viram a Receita 1, aplicada nos talhões listados.
-  function montarExemplo(detalhes) {
-    const grupos = gruposModelo();
+  function montarExemplo(detalhes, modelo) {
+    const grupos = gruposModelo(modelo);
     grupos.forEach((g) => g.operacoes.forEach((op) => {
       const d = detalhes[op.nome];
       if (!d) return;

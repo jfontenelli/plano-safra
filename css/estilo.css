@@ -2564,3 +2564,36 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .cal-lista__talhoes { display: flex; align-items: flex-start; gap: 6px; margin-top: 4px; font-size: 13px; color: var(--texto); line-height: 1.4; }
 .cal-lista__talhoes > .icone { width: 14px; height: 14px; margin-top: 2px; flex-shrink: 0; color: var(--texto-suave); }
 .cal-lista__mais { margin-left: 4px; font-size: 13px; font-weight: 600; }
+
+/* ===== Calendário Agrícola do menu: ciclo das culturas por empresa e fazenda ===== */
+.cabecalho__subtitulo { margin: 4px 0 0; font-size: 14px; color: var(--texto-suave); }
+.cag-etiqueta { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 999px; background: #EEF4F0; font-size: 13px; color: #2F4A3D; white-space: nowrap; }
+.cag-etiqueta .icone { width: 15px; height: 15px; }
+.cag { display: flex; flex-direction: column; gap: 10px; }
+.cag__legenda { display: flex; flex-wrap: wrap; gap: 6px 20px; font-size: 13px; color: #33443B; }
+.cag__legenda > span { display: inline-flex; align-items: center; gap: 6px; }
+.cag__cor { width: 18px; height: 10px; border-radius: 3px; }
+.cag__cor--hoje { width: 0; height: 14px; border-radius: 0; border-left: 2px dotted #8A958F; }
+.cag__rolagem { overflow-x: auto; border: 1px solid var(--borda); border-radius: var(--raio); background: var(--superficie); }
+.cag__tabela { min-width: 1000px; }
+.cag__linha { display: grid; grid-template-columns: 200px 140px 100px minmax(0, 1fr); border-bottom: 1px solid #EDF1EE; font-size: 14px; }
+.cag__linha > span { display: flex; flex-direction: column; justify-content: center; padding: 10px 12px; min-width: 0; }
+.cag__linha small { font-size: 12px; color: var(--texto-suave); }
+.cag__linha--cab { background: #F5F8F6; border-bottom: 1px solid var(--borda); font-size: 12px; font-weight: 700; color: #4A5A52; text-transform: uppercase; letter-spacing: .03em; }
+.cag__linha--cab > span { padding-top: 9px; padding-bottom: 9px; }
+.cag__num { align-items: flex-end; text-align: right; font-variant-numeric: tabular-nums; }
+.cag__meses { display: grid !important; padding: 0 !important; border-left: 1px solid var(--borda); }
+.cag__meses > span { padding: 9px 0; text-align: center; border-left: 1px solid var(--borda); }
+.cag__meses > span:first-child { border-left: 0; }
+.cag__empresa { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 12px; background: #EEF4F0; border-bottom: 1px solid var(--borda); font-size: 14px; }
+.cag__empresa span { color: #4A5A52; }
+.cag__ciclo { font-weight: 600; }
+.cag__ciclo--safra { color: var(--verde-700) !important; }
+.cag__ciclo--safrinha { color: #8A5523 !important; }
+.cag__tempo { position: relative; min-height: 52px; padding: 0 !important; border-left: 1px solid var(--borda);
+  background-image: linear-gradient(to right, #EDF1EE 1px, transparent 1px); background-size: calc(100% / 12) 100%; }
+.cag__barra { position: absolute; top: 50%; height: 18px; margin-top: -9px; border-radius: 5px; }
+.cag__hoje { position: absolute; top: 0; bottom: 0; width: 0; border-left: 2px dotted #8A958F; pointer-events: none; }
+.cag__sem { position: relative; z-index: 1; align-self: flex-start; margin-left: 10px; padding: 2px 6px; background: var(--superficie); font-size: 13px; font-style: italic; color: #6B7A72; }
+.cag__pendente { color: var(--texto-suave); }
+.cag__vazio, .cag__nota { margin: 0; font-size: 13px; color: var(--texto-suave); }

@@ -53,7 +53,7 @@ window.Telas.listaPlanos = (function () {
           ${filtro('safra', 'Safra', presentes('safra', DADOS.safras))}
           ${filtro('empresa', 'Empresa', presentes('empresa', DADOS.empresas))}
           ${filtro('atividade', 'Atividade', presentes('atividade', DADOS.atividades))}
-          ${filtro('cultura', 'Cultura', presentes('cultura', DADOS.culturas))}
+          ${filtro('cultura', 'Cultura', presentes('cultura', DADOS.culturasPlanos))}
           ${filtro('fazenda', 'Fazenda', presentes('fazenda', DADOS.fazendas))}
           ${filtro('status', 'Status', presentes('status', STATUS), 'Todos')}
           <button class="link-acao filtros__limpar" type="button" data-acao="lp-limpar">${Icones.limpar} Limpar filtros</button>
