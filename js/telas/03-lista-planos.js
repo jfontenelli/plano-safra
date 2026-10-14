@@ -241,22 +241,10 @@ window.Telas.listaPlanos = (function () {
   }
 
   // Abrir uma versão pelo Histórico. Plano não iniciado: o modal de início.
-  // Com alterações não salvas em outra versão do plano, pergunta antes (como no "Trocar versão").
   function abrirVersao(p, num) {
     if (Versoes.aIniciar(p)) { abrirPlano(p); return; }
-    const ir = () => { Versoes.abrir(p, num); location.hash = `#/plano/${p.id}`; };
-    if (!p.pendente || num === p.versaoAberta) {
-      if (num === p.versaoAberta) location.hash = `#/plano/${p.id}`; else ir();
-      return;
-    }
-    const atual = p.versaoAberta;
-    Modal.confirmar({
-      titulo: 'Alterações não salvas',
-      texto: `Há alterações não salvas na versão ${esc(atual)}. Salvar antes de abrir a versão ${esc(num)}?`,
-      botoes: [{ rotulo: 'Cancelar' },
-        { rotulo: 'Abrir sem salvar', acao: ir },
-        { rotulo: 'Salvar e abrir', classe: 'primario', acao: () => { Versoes.salvar(p); ir(); } }]
-    });
+    if (num !== p.versaoAberta) Versoes.abrir(p, num);
+    location.hash = `#/plano/${p.id}`;
   }
 
   // Abrir um plano. Ainda não iniciado (só a 0.1, vazia): primeiro o modal "Como deseja iniciar o plano?";

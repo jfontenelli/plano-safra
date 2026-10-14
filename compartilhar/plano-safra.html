@@ -2239,11 +2239,16 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .plano__acoes-versao .estado-salvo { margin-left: 6px; }
 
 .estado-salvo { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; color: var(--texto-suave); white-space: nowrap; }
-.estado-salvo--pendente { color: #b45f06; font-weight: 600; }
-.estado-salvo--ok { color: var(--verde-700); font-weight: 600; }
 .estado-salvo .icone { width: 15px; height: 15px; stroke-width: 2.2; }
 
 .versoes { position: relative; }
+/* "Mais ações ▾": menu e lista de versões alinhados pela direita do botão */
+.mais-acoes .botao .icone { width: 16px; height: 16px; }
+.mais-acoes__menu { position: absolute; z-index: 30; top: calc(100% + 6px); right: 0; min-width: 200px; padding: 6px 0;
+  border: 1px solid var(--borda); border-radius: 8px; background: var(--superficie); box-shadow: 0 8px 24px rgba(0, 0, 0, .12); }
+.mais-acoes__menu .menu-contexto__item { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+.mais-acoes__menu .icone { width: 16px; height: 16px; }
+.mais-acoes .versoes-lista { left: auto; right: 0; }
 .link-versoes {
   display: inline-flex;
   align-items: center;
@@ -2363,6 +2368,18 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .inicios__grade--quatro { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .inicio-plano__copiar { max-width: 100%; }
 .inicio-plano__nota { margin: 0; font-size: 13px; color: var(--texto-suave); }
+
+/* ===== Operações · Filtro "Grupo de operação" (acima da tabela) ===== */
+.filtro-grupos { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; padding: 12px 16px;
+  border: 1px solid var(--borda); border-radius: var(--raio); background: var(--superficie); box-shadow: var(--sombra); }
+.filtro-grupos__rotulo { margin-right: 6px; font-size: 14px; color: var(--texto-suave); }
+.filtro-grupos__botao { display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 14px;
+  border: 1px solid #cfd6d2; border-radius: 8px; background: var(--superficie); color: var(--texto); font: inherit; font-size: 14px; cursor: pointer; }
+.filtro-grupos__botao:hover { border-color: #9aa59f; }
+.filtro-grupos__botao:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 2px; }
+.filtro-grupos__botao .tab-op__ico, .filtro-grupos__botao .icone { width: 16px; height: 16px; }
+.filtro-grupos__botao--ativo, .filtro-grupos__botao--ativo:hover { border-color: var(--verde-700); background: var(--verde-700); color: #fff; font-weight: 600; }
+.filtro-grupos__botao--ativo .tab-op__ico { color: #fff !important; } /* o ícone tem a cor do tipo no próprio SVG */
 
 </style>
 </head>
@@ -3251,8 +3268,7 @@ window.Planos = (function () {
  *                   salvaEm, salvaPor (em construção), publicadaEm, publicadaPor }
  * plano.versaoAberta = número da versão na tela.
  * plano.grupos       = área de trabalho: o planejamento da versão aberta, que as telas leem e alteram.
- *                      Na versão em construção, as mudanças só vão para a versão no "Salvar alterações".
- * plano.pendente     = true quando há alterações não salvas na versão em construção.
+ *                      Na versão em construção, cada alteração é salva na hora (salvamento automático).
  *
  * Versão publicada é imutável. Só pode haver uma versão em construção por plano.
  */
@@ -3289,7 +3305,6 @@ window.Versoes = (function () {
                        origem: null, publicadaEm: quando, publicadaPor: por }];
     plano.versaoAberta = '0.1';
     plano.grupos = [];
-    plano.pendente = false;
     if (grupos && grupos.length) {
       plano.versoes.push({ num: '0.2', status: 'construcao', grupos: copiar(grupos), criadaEm: quando, criadaPor: por,
                            origem: '0.1', salvaEm: quando, salvaPor: por });
@@ -3312,13 +3327,14 @@ window.Versoes = (function () {
     return num;
   }
 
-  // Abre a versão na área de trabalho (descarta alterações não salvas: quem chama confirma antes)
+  // Abre a versão na área de trabalho. Antes, grava a versão em construção que estava aberta (salvamento automático).
   function abrir(plano, num) {
     const v = buscar(plano, num);
     if (!v) return;
+    const anterior = aberta(plano);
+    if (anterior && anterior !== v && anterior.status === 'construcao') salvar(plano);
     plano.versaoAberta = num;
     plano.grupos = copiar(v.grupos);
-    plano.pendente = false;
   }
 
   function salvar(plano) {
@@ -3327,7 +3343,6 @@ window.Versoes = (function () {
     v.grupos = copiar(plano.grupos);
     v.salvaEm = agora();
     v.salvaPor = usuario();
-    plano.pendente = false;
   }
 
   function publicar(plano) {
@@ -4312,22 +4327,10 @@ window.Telas.listaPlanos = (function () {
   }
 
   // Abrir uma versão pelo Histórico. Plano não iniciado: o modal de início.
-  // Com alterações não salvas em outra versão do plano, pergunta antes (como no "Trocar versão").
   function abrirVersao(p, num) {
     if (Versoes.aIniciar(p)) { abrirPlano(p); return; }
-    const ir = () => { Versoes.abrir(p, num); location.hash = `#/plano/${p.id}`; };
-    if (!p.pendente || num === p.versaoAberta) {
-      if (num === p.versaoAberta) location.hash = `#/plano/${p.id}`; else ir();
-      return;
-    }
-    const atual = p.versaoAberta;
-    Modal.confirmar({
-      titulo: 'Alterações não salvas',
-      texto: `Há alterações não salvas na versão ${esc(atual)}. Salvar antes de abrir a versão ${esc(num)}?`,
-      botoes: [{ rotulo: 'Cancelar' },
-        { rotulo: 'Abrir sem salvar', acao: ir },
-        { rotulo: 'Salvar e abrir', classe: 'primario', acao: () => { Versoes.salvar(p); ir(); } }]
-    });
+    if (num !== p.versaoAberta) Versoes.abrir(p, num);
+    location.hash = `#/plano/${p.id}`;
   }
 
   // Abrir um plano. Ainda não iniciado (só a 0.1, vazia): primeiro o modal "Como deseja iniciar o plano?";
@@ -5179,10 +5182,16 @@ window.Telas.operacoesPlano = (function () {
   // ----- Desenho -----
   function desenhar(ctx) {
     const { plano } = ctx;
+    // Filtro por grupo de operação (barra acima da tabela): '' = Todos. Grupo que sumiu do plano volta a Todos.
+    const comOperacao = plano.grupos.filter((g) => g.operacoes.length);
+    if (ctx.estado.filtroGrupo && !comOperacao.some((g) => g.id === ctx.estado.filtroGrupo)) ctx.estado.filtroGrupo = '';
+    const filtro = ctx.estado.filtroGrupo || '';
     const porFase = {};
     FASES.forEach((f) => { porFase[f.id] = []; });
-    plano.grupos.forEach((g) => g.operacoes.forEach((op) => porFase[faseDe(g, op)].push({ g, op })));
+    plano.grupos.filter((g) => !filtro || g.id === filtro)
+      .forEach((g) => g.operacoes.forEach((op) => porFase[faseDe(g, op)].push({ g, op })));
     const ler = ctx.somenteLeitura;
+    // Com filtro, as fases sem operação daquele grupo não aparecem
     return `
       <section class="estrutura">
         ${ctx.estado.avisoFechado ? '' : `
@@ -5190,6 +5199,14 @@ window.Telas.operacoesPlano = (function () {
             <p><strong>Revise as operações cadastradas.</strong> Cada operação vira uma Ordem de Serviço (OS) a partir da versão publicada. Se estiver tudo certo, siga para o planejamento.</p>
             <button class="botao-icone estrutura__fechar" type="button" data-acao="est-fechar-aviso" aria-label="Fechar o aviso" title="Fechar">${Icones.fechar}</button>
           </div>`}
+        <div class="filtro-grupos" role="group" aria-label="Filtrar por grupo de operação">
+          <span class="filtro-grupos__rotulo">Grupo de operação</span>
+          <button class="filtro-grupos__botao ${filtro ? '' : 'filtro-grupos__botao--ativo'}" type="button" data-acao="est-filtro" data-grupo=""
+                  aria-pressed="${!filtro}">Todos</button>
+          ${comOperacao.map((g) => `
+            <button class="filtro-grupos__botao ${g.id === filtro ? 'filtro-grupos__botao--ativo' : ''}" type="button" data-acao="est-filtro"
+                    data-grupo="${g.id}" aria-pressed="${g.id === filtro}">${semGrupo(g) ? Icones.alerta : ICONE_TIPO[g.tipo] || ''}${esc(semGrupo(g) ? 'Sem grupo de operação' : g.nome)}</button>`).join('')}
+        </div>
         <div class="tab-op__caixa">
           <table class="tab-op">
             <colgroup>
@@ -5201,7 +5218,7 @@ window.Telas.operacoesPlano = (function () {
               <th class="tab-op__dap">DAP</th><th>Fenologia</th><th>Operação</th><th>Grupo de operação</th><th>Previsão de conclusão</th>
               ${ler ? '' : '<th class="tab-op__acao"><span class="so-leitor">Ações</span></th>'}
             </tr></thead>
-            ${FASES.map((f) => faixa(f, porFase[f.id], ctx)).join('')}
+            ${FASES.filter((f) => !filtro || porFase[f.id].length).map((f) => faixa(f, porFase[f.id], ctx)).join('')}
           </table>
         </div>
         ${ler ? '' : '<p class="tab-op__dica">Botão direito numa linha (ou ⋯ no fim dela): Inserir · Excluir · Limpar conteúdo.</p>'}
@@ -5328,6 +5345,7 @@ window.Telas.operacoesPlano = (function () {
 
   // Linha nova (Inserir): sem nome e sem grupo, como uma linha limpa; já abre o nome para digitar
   function criarLinha(dap, ctx, acoes) {
+    ctx.estado.filtroGrupo = ''; // a linha nova nasce sem grupo: volta a Todos para ela aparecer
     const op = Planos.novaOperacao('', dap);
     semGrupoDoPlano(ctx.plano).operacoes.push(op);
     ctx.estado.renomeandoOp = op.id;
@@ -5451,6 +5469,7 @@ window.Telas.operacoesPlano = (function () {
   function limparConteudo(op, g, ctx, acoes) {
     const { plano } = ctx;
     const limpar = () => {
+      ctx.estado.filtroGrupo = ''; // a linha fica sem grupo: volta a Todos para ela continuar à vista
       const antes = { nome: op.nome, dap: op.dap, faseSemDap: op.faseSemDap, fenologia: op.fenologia, prazo: op.prazo, receitas: op.receitas, talhoes: op.talhoes, grupo: g, i: g.operacoes.indexOf(op) };
       op.faseSemDap = faseDe(g, op);
       op.nome = ''; op.dap = null; op.fenologia = ''; op.prazo = null; op.receitas = []; op.talhoes = {};
@@ -5519,6 +5538,7 @@ window.Telas.operacoesPlano = (function () {
     if (!alvo) return false;
     // O aviso do topo é só um aviso: fechado, não volta para este plano enquanto a página estiver aberta
     if (alvo.dataset.acao === 'est-fechar-aviso') { ctx.estado.avisoFechado = true; acoes.redesenhar(null); }
+    if (alvo.dataset.acao === 'est-filtro') { ctx.estado.filtroGrupo = alvo.dataset.grupo; acoes.redesenhar(null); }
     if (alvo.dataset.acao === 'est-nova-op') novaOperacao(alvo.dataset.fase, ctx, acoes);
     if (alvo.dataset.acao === 'est-excluir-op') excluirOperacao(alvo.dataset.op, ctx, acoes);
     if (alvo.dataset.acao === 'est-menu') {
@@ -5878,10 +5898,11 @@ window.Telas.planoOperacoes = (function () {
       rascunho: null,          // cópia da receita aberta, editada até "Aplicar em N talhões": { receitaId, nome, produtos }
       versoes: null,           // cabeçalho: lista do "Trocar versão" aberta ({ trocarPara: num } = aviso de alterações não salvas)
       jaExiste: false,         // cabeçalho: aviso "Já existe uma versão em construção" (Criar nova versão)
-      salvoAgora: false,       // cabeçalho: "Alterações salvas" logo depois do Salvar alterações
+      maisAcoes: false,        // cabeçalho: menu "Mais ações" aberto
     };
     ui.versoes = null;
     ui.jaExiste = false;
+    ui.maisAcoes = false;
     if (!somenteLeitura) limparReceitasVazias();
     raiz = conteudo.querySelector('#plano-raiz');
     raiz.addEventListener('click', aoClicar);
@@ -5949,26 +5970,19 @@ window.Telas.planoOperacoes = (function () {
     return valor.toLocaleString('pt-BR', { maximumFractionDigits: 3 });
   }
 
-  // Toda alteração atualiza "Última atualização" e "Atualizado por" do plano e marca alterações não salvas
+  // Salvamento automático (como no Excel com o OneDrive): toda alteração grava na versão em construção
+  // e atualiza "Última atualização" e "Atualizado por" do plano. Não há botão Salvar.
   function alterou() {
     plano.atualizadoEm = Util.hojeISO();
     plano.atualizadoPor = DADOS.usuario.nome;
-    if (!plano.pendente || ui.salvoAgora) {
-      plano.pendente = true;
-      ui.salvoAgora = false;
-      atualizarEstadoSalvo();
-    }
+    if (!somenteLeitura) Versoes.salvar(plano);
+    atualizarEstadoSalvo();
   }
 
-  // ----- Estado de salvamento (versão em construção) -----
-  // "Alterações não salvas" · "Alterações salvas" (logo depois de salvar) · "Salvo às 14:20"
-  let temporizadorSalvo = null;
-
+  // ----- Estado de salvamento (versão em construção): "Salvo às 14:20" -----
   function estadoSalvo() {
     const v = Versoes.aberta(plano);
     if (somenteLeitura || !v) return '';
-    if (plano.pendente) return '<span class="estado-salvo estado-salvo--pendente" data-salvo role="status">Alterações não salvas</span>';
-    if (ui.salvoAgora) return `<span class="estado-salvo estado-salvo--ok" data-salvo role="status">${Icones.certo} Alterações salvas</span>`;
     const hora = new Date(v.salvaEm).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
     return `<span class="estado-salvo" data-salvo role="status" title="${esc(Versoes.detalhe(v))}">Salvo às ${hora}</span>`;
   }
@@ -6026,8 +6040,8 @@ window.Telas.planoOperacoes = (function () {
     raiz.querySelector(seletor)?.focus({ preventScroll: true });
   }
 
-  // Cabeçalho fixo: "Plano de Safra › contexto | Versão 0.2 [status] · Trocar versão" e, embaixo, as abas
-  // com Exportar e os botões da versão à direita (DECISOES 4.1.1)
+  // Cabeçalho fixo: "Plano de Safra › contexto | Versão 0.2 [status]" e, embaixo, as abas e, à direita,
+  // "Salvo às…", o botão da versão (Publicar versão ou Criar nova versão) e "Mais ações" (DECISOES 4.1.1)
   function cabecalho() {
     const contexto = [`Safra ${plano.safra}`, plano.empresa, `Fazenda ${plano.fazenda}`, `Cultura ${plano.cultura}`];
     const v = Versoes.aberta(plano);
@@ -6042,11 +6056,6 @@ window.Telas.planoOperacoes = (function () {
             <span class="plano__versao">Versão ${esc(v.num)}
               <span class="status ${somenteLeitura ? 'status--aprovado' : 'status--construcao'}">${Versoes.rotuloStatus(v)}</span>
               ${somenteLeitura ? `<span class="plano__versao-info">${esc(Versoes.detalhe(v))}</span>` : ''}</span>
-            <span class="versoes">
-              <button class="link-versoes" type="button" data-acao="ver-trocar" aria-haspopup="menu"
-                      aria-expanded="${!!ui.versoes}">${Icones.relogio} Trocar versão</button>
-              ${ui.versoes ? listaVersoes() : ''}
-            </span>
           </div>
         </div>
         <div class="plano__linha-etapas">
@@ -6056,9 +6065,8 @@ window.Telas.planoOperacoes = (function () {
                  ${e.id === etapa ? 'aria-current="page"' : ''}>${e.nome}</a>`).join('')}
           </nav>
           <div class="plano__acoes-versao">
-            <button class="botao botao--secundario botao--p plano__exportar" type="button" data-acao="exportar-plano"
-                    title="Baixar o plano em planilha para guardar ou continuar depois">${Icones.baixar} Exportar (.xlsx)</button>
             ${acoesVersao()}
+            ${maisAcoes()}
           </div>
         </div>
       </header>
@@ -6067,8 +6075,8 @@ window.Telas.planoOperacoes = (function () {
     `;
   }
 
-  // Botões da versão: em construção, Salvar alterações (secundário) e Publicar versão (principal);
-  // publicada, Criar nova versão (com o aviso quando já existe outra em construção)
+  // Botão da versão: em construção, "Salvo às…" e Publicar versão; publicada, Criar nova versão
+  // (com o aviso quando já existe outra em construção)
   function acoesVersao() {
     if (somenteLeitura) {
       const construcao = Versoes.emConstrucao(plano);
@@ -6086,14 +6094,26 @@ window.Telas.planoOperacoes = (function () {
     }
     return `
       ${estadoSalvo()}
-      <button class="botao botao--secundario botao--p" type="button" data-acao="ver-salvar">Salvar alterações</button>
       <button class="botao botao--primario botao--p" type="button" data-acao="ver-publicar">Publicar versão</button>`;
+  }
+
+  // "Mais ações ▾": Exportar (.xlsx) · Trocar versão (a lista de versões abre no mesmo lugar)
+  function maisAcoes() {
+    return `
+      <span class="versoes mais-acoes">
+        <button class="botao botao--secundario botao--p" type="button" data-acao="ver-mais" aria-haspopup="menu"
+                aria-expanded="${ui.maisAcoes}">Mais ações ${Icones.abaixo}</button>
+        ${ui.maisAcoes ? `
+          <div class="mais-acoes__menu" role="menu" aria-label="Mais ações">
+            <button class="menu-contexto__item" type="button" role="menuitem" data-acao="exportar-plano">${Icones.baixar} Exportar (.xlsx)</button>
+            <button class="menu-contexto__item" type="button" role="menuitem" data-acao="ver-trocar">${Icones.relogio} Trocar versão</button>
+          </div>` : ''}
+        ${ui.versoes ? listaVersoes() : ''}
+      </span>`;
   }
 
   // "Trocar versão": versões do plano, da mais recente para a mais antiga
   function listaVersoes() {
-    const destino = ui.versoes.trocarPara;
-    const atual = Versoes.aberta(plano);
     return `
       <div class="versoes-lista" role="menu" aria-label="Versões deste plano">
         <p class="versoes-lista__titulo">Versões deste plano</p>
@@ -6105,15 +6125,6 @@ window.Telas.planoOperacoes = (function () {
             <span class="status ${v.status === 'publicada' ? 'status--aprovado' : 'status--construcao'}">${v.status === 'publicada' ? 'Consulta' : 'Editável'}</span>
             <span class="versoes-item__info">${esc(Versoes.detalhe(v))}</span>
           </button>`).join('')}
-        ${destino ? `
-          <div class="versoes-alerta" role="alert">
-            <strong>Há alterações não salvas na versão ${esc(atual.num)}.</strong> Salvar antes de abrir a versão ${esc(destino)}?
-            <div class="versoes-alerta__acoes">
-              <button class="botao botao--secundario botao--p" type="button" data-acao="ver-fechar-aviso">Cancelar</button>
-              <button class="botao botao--secundario botao--p" type="button" data-acao="ver-abrir-sem-salvar">Abrir sem salvar</button>
-              <button class="botao botao--primario botao--p" type="button" data-acao="ver-salvar-e-abrir">Salvar e abrir</button>
-            </div>
-          </div>` : ''}
       </div>`;
   }
 
@@ -6122,7 +6133,7 @@ window.Telas.planoOperacoes = (function () {
     Versoes.abrir(plano, num);
     somenteLeitura = Versoes.somenteLeitura(plano);
     limparSelecao();
-    Object.assign(ui, { versoes: null, jaExiste: false, salvoAgora: false, rascunho: null, receitaPorOp: {},
+    Object.assign(ui, { versoes: null, jaExiste: false, maisAcoes: false, rascunho: null, receitaPorOp: {},
                         renomeandoOp: null, renomeandoGrupo: null, painelTalhao: null, preCadastro: null, validarOp: null });
     if (!somenteLeitura) limparReceitasVazias();
     desenharTudo();
@@ -6131,27 +6142,17 @@ window.Telas.planoOperacoes = (function () {
   // Ações do cabeçalho da versão (data-acao="ver-…")
   function acaoVersao(acao, alvo) {
     switch (acao) {
+      case 'ver-mais':
+        ui.maisAcoes = !ui.maisAcoes; ui.versoes = null; ui.jaExiste = false; desenharTudo(); break;
       case 'ver-trocar':
-        ui.versoes = ui.versoes ? null : {}; ui.jaExiste = false; desenharTudo(); break;
+        ui.versoes = ui.versoes ? null : {}; ui.maisAcoes = false; ui.jaExiste = false; desenharTudo(); break;
       case 'ver-abrir': {
         const num = alvo.dataset.versao;
         if (num === plano.versaoAberta) { ui.versoes = null; ui.jaExiste = false; desenharTudo(); break; }
-        if (plano.pendente) { ui.versoes = { trocarPara: num }; ui.jaExiste = false; desenharTudo(); break; }
         abrirVersao(num); break;
       }
       case 'ver-fechar-aviso':
         ui.versoes = null; ui.jaExiste = false; desenharTudo(); break;
-      case 'ver-abrir-sem-salvar':
-        abrirVersao(ui.versoes.trocarPara); break;
-      case 'ver-salvar-e-abrir':
-        Versoes.salvar(plano); abrirVersao(ui.versoes.trocarPara); break;
-      case 'ver-salvar':
-        Versoes.salvar(plano);
-        ui.salvoAgora = true;
-        atualizarEstadoSalvo();
-        clearTimeout(temporizadorSalvo);
-        temporizadorSalvo = setTimeout(() => { ui.salvoAgora = false; atualizarEstadoSalvo(); }, 4000);
-        break;
       case 'ver-publicar': {
         const num = plano.versaoAberta;
         Modal.confirmar({
@@ -8697,7 +8698,7 @@ window.Telas.planoOperacoes = (function () {
 
       case 'nova-op': sairDaReceita(() => criarOperacao(grupo)); break;
 
-      case 'exportar-plano': ArquivoPlano.exportar(plano); break;
+      case 'exportar-plano': ui.maisAcoes = false; desenharTudo(); ArquivoPlano.exportar(plano); break;
 
       case 'adicionar-linha':
         rascunho(op).produtos.push(Planos.novaLinha()); desenharTudo();
@@ -9038,11 +9039,11 @@ window.Telas.planoOperacoes = (function () {
     if (e.key === 'Escape' && ui.painelTalhao && el.closest('.painel-talhao')) { e.preventDefault(); fecharPainel(); }
   }
 
-  // Clique fora da lista "Trocar versão" ou do aviso de versão em construção: fecha
+  // Clique fora de "Mais ações", da lista "Trocar versão" ou do aviso de versão em construção: fecha
   document.addEventListener('mousedown', (e) => {
-    if (!raiz || !raiz.isConnected || !(ui && (ui.versoes || ui.jaExiste))) return;
+    if (!raiz || !raiz.isConnected || !(ui && (ui.versoes || ui.jaExiste || ui.maisAcoes))) return;
     if (e.target.closest('.versoes, .versoes-alerta, [data-acao="ver-nova"]')) return;
-    ui.versoes = null; ui.jaExiste = false; desenharTudo();
+    ui.versoes = null; ui.jaExiste = false; ui.maisAcoes = false; desenharTudo();
   });
 
   // Clique na opção do combobox: mousedown para escolher antes do campo perder o foco

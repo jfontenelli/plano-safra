@@ -46,10 +46,16 @@ window.Telas.operacoesPlano = (function () {
   // ----- Desenho -----
   function desenhar(ctx) {
     const { plano } = ctx;
+    // Filtro por grupo de operação (barra acima da tabela): '' = Todos. Grupo que sumiu do plano volta a Todos.
+    const comOperacao = plano.grupos.filter((g) => g.operacoes.length);
+    if (ctx.estado.filtroGrupo && !comOperacao.some((g) => g.id === ctx.estado.filtroGrupo)) ctx.estado.filtroGrupo = '';
+    const filtro = ctx.estado.filtroGrupo || '';
     const porFase = {};
     FASES.forEach((f) => { porFase[f.id] = []; });
-    plano.grupos.forEach((g) => g.operacoes.forEach((op) => porFase[faseDe(g, op)].push({ g, op })));
+    plano.grupos.filter((g) => !filtro || g.id === filtro)
+      .forEach((g) => g.operacoes.forEach((op) => porFase[faseDe(g, op)].push({ g, op })));
     const ler = ctx.somenteLeitura;
+    // Com filtro, as fases sem operação daquele grupo não aparecem
     return `
       <section class="estrutura">
         ${ctx.estado.avisoFechado ? '' : `
@@ -57,6 +63,14 @@ window.Telas.operacoesPlano = (function () {
             <p><strong>Revise as operações cadastradas.</strong> Cada operação vira uma Ordem de Serviço (OS) a partir da versão publicada. Se estiver tudo certo, siga para o planejamento.</p>
             <button class="botao-icone estrutura__fechar" type="button" data-acao="est-fechar-aviso" aria-label="Fechar o aviso" title="Fechar">${Icones.fechar}</button>
           </div>`}
+        <div class="filtro-grupos" role="group" aria-label="Filtrar por grupo de operação">
+          <span class="filtro-grupos__rotulo">Grupo de operação</span>
+          <button class="filtro-grupos__botao ${filtro ? '' : 'filtro-grupos__botao--ativo'}" type="button" data-acao="est-filtro" data-grupo=""
+                  aria-pressed="${!filtro}">Todos</button>
+          ${comOperacao.map((g) => `
+            <button class="filtro-grupos__botao ${g.id === filtro ? 'filtro-grupos__botao--ativo' : ''}" type="button" data-acao="est-filtro"
+                    data-grupo="${g.id}" aria-pressed="${g.id === filtro}">${semGrupo(g) ? Icones.alerta : ICONE_TIPO[g.tipo] || ''}${esc(semGrupo(g) ? 'Sem grupo de operação' : g.nome)}</button>`).join('')}
+        </div>
         <div class="tab-op__caixa">
           <table class="tab-op">
             <colgroup>
@@ -68,7 +82,7 @@ window.Telas.operacoesPlano = (function () {
               <th class="tab-op__dap">DAP</th><th>Fenologia</th><th>Operação</th><th>Grupo de operação</th><th>Previsão de conclusão</th>
               ${ler ? '' : '<th class="tab-op__acao"><span class="so-leitor">Ações</span></th>'}
             </tr></thead>
-            ${FASES.map((f) => faixa(f, porFase[f.id], ctx)).join('')}
+            ${FASES.filter((f) => !filtro || porFase[f.id].length).map((f) => faixa(f, porFase[f.id], ctx)).join('')}
           </table>
         </div>
         ${ler ? '' : '<p class="tab-op__dica">Botão direito numa linha (ou ⋯ no fim dela): Inserir · Excluir · Limpar conteúdo.</p>'}
@@ -195,6 +209,7 @@ window.Telas.operacoesPlano = (function () {
 
   // Linha nova (Inserir): sem nome e sem grupo, como uma linha limpa; já abre o nome para digitar
   function criarLinha(dap, ctx, acoes) {
+    ctx.estado.filtroGrupo = ''; // a linha nova nasce sem grupo: volta a Todos para ela aparecer
     const op = Planos.novaOperacao('', dap);
     semGrupoDoPlano(ctx.plano).operacoes.push(op);
     ctx.estado.renomeandoOp = op.id;
@@ -318,6 +333,7 @@ window.Telas.operacoesPlano = (function () {
   function limparConteudo(op, g, ctx, acoes) {
     const { plano } = ctx;
     const limpar = () => {
+      ctx.estado.filtroGrupo = ''; // a linha fica sem grupo: volta a Todos para ela continuar à vista
       const antes = { nome: op.nome, dap: op.dap, faseSemDap: op.faseSemDap, fenologia: op.fenologia, prazo: op.prazo, receitas: op.receitas, talhoes: op.talhoes, grupo: g, i: g.operacoes.indexOf(op) };
       op.faseSemDap = faseDe(g, op);
       op.nome = ''; op.dap = null; op.fenologia = ''; op.prazo = null; op.receitas = []; op.talhoes = {};
@@ -386,6 +402,7 @@ window.Telas.operacoesPlano = (function () {
     if (!alvo) return false;
     // O aviso do topo é só um aviso: fechado, não volta para este plano enquanto a página estiver aberta
     if (alvo.dataset.acao === 'est-fechar-aviso') { ctx.estado.avisoFechado = true; acoes.redesenhar(null); }
+    if (alvo.dataset.acao === 'est-filtro') { ctx.estado.filtroGrupo = alvo.dataset.grupo; acoes.redesenhar(null); }
     if (alvo.dataset.acao === 'est-nova-op') novaOperacao(alvo.dataset.fase, ctx, acoes);
     if (alvo.dataset.acao === 'est-excluir-op') excluirOperacao(alvo.dataset.op, ctx, acoes);
     if (alvo.dataset.acao === 'est-menu') {

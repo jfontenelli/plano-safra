@@ -7,8 +7,7 @@
  *                   salvaEm, salvaPor (em construção), publicadaEm, publicadaPor }
  * plano.versaoAberta = número da versão na tela.
  * plano.grupos       = área de trabalho: o planejamento da versão aberta, que as telas leem e alteram.
- *                      Na versão em construção, as mudanças só vão para a versão no "Salvar alterações".
- * plano.pendente     = true quando há alterações não salvas na versão em construção.
+ *                      Na versão em construção, cada alteração é salva na hora (salvamento automático).
  *
  * Versão publicada é imutável. Só pode haver uma versão em construção por plano.
  */
@@ -45,7 +44,6 @@ window.Versoes = (function () {
                        origem: null, publicadaEm: quando, publicadaPor: por }];
     plano.versaoAberta = '0.1';
     plano.grupos = [];
-    plano.pendente = false;
     if (grupos && grupos.length) {
       plano.versoes.push({ num: '0.2', status: 'construcao', grupos: copiar(grupos), criadaEm: quando, criadaPor: por,
                            origem: '0.1', salvaEm: quando, salvaPor: por });
@@ -68,13 +66,14 @@ window.Versoes = (function () {
     return num;
   }
 
-  // Abre a versão na área de trabalho (descarta alterações não salvas: quem chama confirma antes)
+  // Abre a versão na área de trabalho. Antes, grava a versão em construção que estava aberta (salvamento automático).
   function abrir(plano, num) {
     const v = buscar(plano, num);
     if (!v) return;
+    const anterior = aberta(plano);
+    if (anterior && anterior !== v && anterior.status === 'construcao') salvar(plano);
     plano.versaoAberta = num;
     plano.grupos = copiar(v.grupos);
-    plano.pendente = false;
   }
 
   function salvar(plano) {
@@ -83,7 +82,6 @@ window.Versoes = (function () {
     v.grupos = copiar(plano.grupos);
     v.salvaEm = agora();
     v.salvaPor = usuario();
-    plano.pendente = false;
   }
 
   function publicar(plano) {

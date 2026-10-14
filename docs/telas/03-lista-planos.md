@@ -35,8 +35,8 @@ Ver os planos existentes, filtrar e abrir ou criar um plano.
   - "Copiar para outra fazenda" fica para quando o cliente pedir.
 - **Histórico de versões**:
   - Planos na ordem Safra (mais recente primeiro), Fazenda e Cultura; versões da mais nova para a mais antiga. O filtro Status vale para o status de cada versão; a 0.1 de um plano não iniciado aparece como "Não iniciado".
-  - Última atualização / Atualizado por: em construção, o último "Salvar alterações"; publicada, a publicação.
-  - Um clique na linha (ou Enter) abre aquela versão (publicada em consulta). Com alterações não salvas em outra versão do plano: Cancelar · Abrir sem salvar · Salvar e abrir. Plano não iniciado: o modal de início.
+  - Última atualização / Atualizado por: em construção, a última alteração (salvamento automático); publicada, a publicação.
+  - Um clique na linha (ou Enter) abre aquela versão (publicada em consulta). Plano não iniciado: o modal de início.
 
 ## Navegação
 - "Criar Plano Safra" → abre a Tela 02 (modal) por cima desta tela.
