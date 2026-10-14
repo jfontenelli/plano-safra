@@ -2560,3 +2560,7 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .cal-rodape .icone { width: 14px; height: 14px; }
 .calendario__corpo { padding-top: 10px; }
 .cal-mes__filtros .campo__controle.cal-filtro__botao { height: 32px; min-height: 32px; }
+/* Lista do dia: nomes dos talhões; com muitos, "+N talhões" mostra todos */
+.cal-lista__talhoes { display: flex; align-items: flex-start; gap: 6px; margin-top: 4px; font-size: 13px; color: var(--texto); line-height: 1.4; }
+.cal-lista__talhoes > .icone { width: 14px; height: 14px; margin-top: 2px; flex-shrink: 0; color: var(--texto-suave); }
+.cal-lista__mais { margin-left: 4px; font-size: 13px; font-weight: 600; }

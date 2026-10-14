@@ -573,19 +573,34 @@ window.Telas.calendario = (function () {
   }
 
   // Operações do dia: só o nome, a área e os talhões (sem os detalhes da operação)
-  function listaDia(evs, iso) {
+  // Talhões da operação na lista do dia: os nomes, até 6; com mais, "+N talhões" mostra todos (e "Mostrar menos" volta)
+  const TALHOES_VISIVEIS = 6;
+  const chaveOp = (ev) => (ev.it.colheita ? 'colheita' : ev.it.op.id);
+  function talhoesDaOp(ev, est) {
+    const nomes = [...new Set(ev.talhoes)].sort((a, b) => a.localeCompare(b, 'pt-BR', { numeric: true }));
+    const aberto = (est.talhoesAbertos || []).includes(chaveOp(ev));
+    const mostrar = aberto || nomes.length <= TALHOES_VISIVEIS ? nomes : nomes.slice(0, TALHOES_VISIVEIS - 1);
+    const resto = nomes.length - mostrar.length;
+    return `
+      <span class="cal-lista__talhoes">${Icones.mapa}<span>${mostrar.map(esc).join(', ')}
+        ${resto ? `<button class="link-acao cal-lista__mais" type="button" data-acao="cal-talhoes" data-op="${esc(chaveOp(ev))}">+${resto} talhões</button>`
+          : aberto ? `<button class="link-acao cal-lista__mais" type="button" data-acao="cal-talhoes" data-op="${esc(chaveOp(ev))}">Mostrar menos</button>` : ''}</span></span>`;
+  }
+
+  function listaDia(evs, iso, est) {
     const lista = doDia(evs, iso);
     return `
       <h3 class="cal-painel__subtitulo">Operações do dia (${lista.length})</h3>
       ${lista.length ? `<ul class="cal-lista">${lista.map((ev) => `
-        <li class="cal-lista__item" title="${esc(`${faixaDias(ev)} · ${ev.talhoes.join(', ')}`)}">
+        <li class="cal-lista__item" title="${esc(faixaDias(ev))}">
           <span class="cal-ponto cal-ponto--${ev.tipo}"></span>
           <span><strong class="cal-lista__nome">${esc(ev.nome)}</strong>
-            <span class="cal-lista__info">${Util.area(ev.area)} · ${plural(ev.talhoes.length, 'talhão', 'talhões')}</span></span>
+            <span class="cal-lista__info">${Util.area(ev.area)} · ${plural(new Set(ev.talhoes).size, 'talhão', 'talhões')}</span>
+            ${talhoesDaOp(ev, est)}</span>
         </li>`).join('')}</ul>` : '<p class="cal-painel__vazio">Nenhuma operação neste dia.</p>'}`;
   }
 
-  function painelDia(evs, iso) {
+  function painelDia(evs, iso, est) {
     const d = dataDe(iso);
     return `
       <aside class="cal-painel" aria-label="Operações de ${esc(tituloPeriodo('dia', iso))}">
@@ -593,7 +608,7 @@ window.Telas.calendario = (function () {
           <div><h2 class="cal-painel__titulo">${tituloPeriodo('dia', iso)}</h2><p class="cal-painel__semana">${DIAS_SEMANA[d.getDay()]}${iso === hojeIso() ? ' · Hoje' : ''}</p></div>
           <button class="botao-icone" type="button" data-acao="cal-dia-fechar" aria-label="Fechar" title="Fechar">${Icones.fechar}</button>
         </header>
-        ${listaDia(evs, iso)}
+        ${listaDia(evs, iso, est)}
       </aside>`;
   }
 
@@ -612,7 +627,7 @@ window.Telas.calendario = (function () {
       corpo = `
         <div class="cal-dia-unico ${ref === hojeIso() ? 'cal-dia--hoje' : ''}">
           <p class="cal-painel__semana">${DIAS_SEMANA[d.getDay()]}${ref === hojeIso() ? ' <span class="cal-hoje">Hoje</span>' : ''}</p>
-          ${listaDia(todos, ref)}
+          ${listaDia(todos, ref, est)}
         </div>`;
     } else {
       const ini = periodo('semana', de).de;
@@ -640,7 +655,7 @@ window.Telas.calendario = (function () {
           ${corpo}
           ${rodapeArea(escala, ref, escala === 'dia' ? doDia(todos, ref) : doPeriodo)}
         </div>
-        ${aberto ? painelDia(todos, aberto) : ''}
+        ${aberto ? painelDia(todos, aberto, est) : ''}
       </div>`;
   }
 
@@ -808,6 +823,15 @@ window.Telas.calendario = (function () {
       const caixa = botao.closest('.cal-filtro');
       ctx.estado.filtroAberto = caixa.open ? null : caixa.dataset.filtro;
       return false;
+    }
+    // "+N talhões" / "Mostrar menos" na lista do dia
+    const tal = e.target.closest('[data-acao="cal-talhoes"]');
+    if (tal) {
+      const abertos = new Set(est.talhoesAbertos || []);
+      if (abertos.has(tal.dataset.op)) abertos.delete(tal.dataset.op); else abertos.add(tal.dataset.op);
+      est.talhoesAbertos = [...abertos];
+      redesenhar(`[data-acao="cal-talhoes"][data-op="${CSS.escape(tal.dataset.op)}"]`);
+      return true;
     }
     const leg = e.target.closest('[data-acao="cal-leg"], [data-acao="cal-leg-todos"]');
     if (leg) {
