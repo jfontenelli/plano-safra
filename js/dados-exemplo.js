@@ -12,6 +12,9 @@ window.DADOS = {
   // Listas do modal "Criar Plano de Safra". Safras novas criadas no modal entram aqui.
   safras:   ['24/25', '25/26'],
   empresas: ['Empresa A', 'Empresa B', 'Empresa C'],
+  // Atividade produtiva. Por enquanto só Agricultura (soja); as outras aparecem como "Em breve"
+  atividades: ['Agricultura', 'Pecuária', 'Silvicultura'],
+  atividadesEmBreve: ['Pecuária', 'Silvicultura'],
   fazendas: ['São José', 'Boa Vista', 'Santa Clara', 'Primavera'],
   // Por enquanto o protótipo funciona só para soja (variedades, população, bags e TSI são de soja)
   culturas: ['Soja'],
@@ -236,13 +239,15 @@ window.DADOS = {
   planos: [],
 
   // Planos carregados pelo menu Demonstração → "Ver com planos de exemplo".
-  // O mesmo plano (modelo de operações) em duas fazendas: um em construção e um aprovado.
+  // O mesmo plano (modelo de operações) em duas fazendas: um com a versão 0.2 em construção e um com a 0.2 publicada.
   // "operacoes" detalha, por nome de operação do modelo: fenologia, produtos [nome, dose],
   // talhões que recebem e ajustes por talhão. Operações não listadas ficam sem recomendação e sem talhões.
   planosExemplo: [
     {
-      safra: '26/27', empresa: 'Empresa A', fazenda: 'São José', cultura: 'Soja', inicio: 'modelo',
-      status: 'Em construção',
+      safra: '26/27', empresa: 'Empresa A', atividade: 'Agricultura', fazenda: 'São José', cultura: 'Soja',
+      // Sem "talhoes": o plano inclui todos os talhões da fazenda
+      // Versões: 0.1 publicada (registro inicial) e 0.2 em construção
+      versoes: { criadaEm: '2026-09-30T09:12' },
       custo: null,   // aguardando orçamento
       receita: null, // aguardando premissas de produção
       atualizadoEm: '2026-09-30', atualizadoPor: 'João da Silva',
@@ -250,8 +255,9 @@ window.DADOS = {
       operacoes: {}
     },
     {
-      safra: '26/27', empresa: 'Empresa A', fazenda: 'Santa Clara', cultura: 'Soja', inicio: 'modelo',
-      status: 'Aprovado',
+      safra: '26/27', empresa: 'Empresa A', atividade: 'Agricultura', fazenda: 'Santa Clara', cultura: 'Soja',
+      // Versões: 0.1 publicada (registro inicial) e 0.2 publicada (sem versão em construção)
+      versoes: { criadaEm: '2026-09-18T08:40', publicadaEm: '2026-09-25T17:05' },
       // PROVISÓRIO: valores digitados até existirem as telas de orçamento e premissas.
       // Custo ≈ R$ 3.150/ha; receita ≈ 63 sc/ha × R$ 122/sc (845 ha).
       custo: 2661750,

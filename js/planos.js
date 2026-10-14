@@ -68,6 +68,20 @@ window.Planos = (function () {
     }));
   }
 
+  // Só os grupos fixos do modelo (Plantio e Colheita): o "Começar do zero" do início do plano
+  function gruposFixos() {
+    return gruposModelo().filter((g) => g.tipo === 'Sementes' || g.tipo === 'Colheita');
+  }
+
+  // "Copiar plano existente": grupos, operações e recomendações (produtos e doses padrão),
+  // sem talhões, áreas, plantio e germinação
+  function copiarSemTalhoes(grupos) {
+    return structuredClone(grupos).map((g) => ({
+      ...g,
+      operacoes: g.operacoes.map((op) => ({ ...op, talhoes: {}, ...(op.plantio ? { plantio: {}, germinacoes: {} } : {}) }))
+    }));
+  }
+
   // Modelo preenchido com o detalhe dos planos de exemplo (ver dados-exemplo.js).
   // Os produtos de cada operação viram a Receita 1, aplicada nos talhões listados.
   function montarExemplo(detalhes) {
@@ -189,7 +203,7 @@ window.Planos = (function () {
 
   return {
     novoId, novaLinha, linhaDoProduto, novaOperacao, novaReceita, novoAjuste, novoGrupo,
-    gruposModelo, montarExemplo, produtoDoCadastro,
+    gruposModelo, gruposFixos, copiarSemTalhoes, montarExemplo, produtoDoCadastro,
     linhaPreenchida, chaveLinha, composicao, receitaDoTalhao, talhoesDaReceita,
     linhasTalhao, doseTalhao, temAjuste, statusTalhao, resumo,
     colunasDose, linhaNoTalhao, unidadeDose, nomeLinha

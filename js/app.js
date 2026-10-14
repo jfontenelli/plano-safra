@@ -7,14 +7,25 @@
   // Rotas. "menu" diz qual item do menu fica destacado.
   // "desenhar" devolve o HTML da tela; "aoMostrar" (opcional) roda depois que ele está na página.
   const ROTAS = {
-    // Sem planos: Tela 01. Com planos: Tela 03.
-    'plano-safra':    { titulo: 'Plano de Safra', menu: 'plano-safra',
+    // Visão Geral. Sem planos: Tela 01. Com planos: Tela 03.
+    'plano-safra':    { titulo: 'Visão Geral', menu: 'visao-geral',
                         desenhar: () => temPlanos() ? Telas.listaPlanos.desenhar() : Telas.primeiroUso(),
                         aoMostrar: (conteudo) => { if (temPlanos()) Telas.listaPlanos.aoMostrar(conteudo); } },
-    // Plano aberto: #/plano/<id>/<etapa>. Abre em Operações (Tela 04.0); Planejamento = Tela 04; Calendário = Tela 05.
-    'plano':          { titulo: 'Plano de Safra', menu: 'plano-safra',
+    // Menu Planejamento: abre o plano mais recente (ver rotaAtual); sem planos, o convite para criar o primeiro
+    'planejamento':   { titulo: 'Planejamento', menu: 'planejamento',
+                        desenhar: () => Telas.semPlanos('planejamento') },
+    // Plano aberto: #/plano/<id>/<aba>. Abre em Operações (Tela 04.0); Planejamento = Tela 04; Calendário = Tela 05.
+    'plano':          { titulo: 'Planejamento', menu: 'planejamento',
                         desenhar: () => Telas.planoOperacoes.desenhar(),
-                        aoMostrar: (conteudo, id, etapa) => Telas.planoOperacoes.aoMostrar(conteudo, buscarPlano(id), etapa) },
+                        aoMostrar: (conteudo, id, etapa) => {
+                          estado.ultimoPlanoId = Number(id);
+                          Telas.planoOperacoes.aoMostrar(conteudo, buscarPlano(id), etapa);
+                        } },
+    // Calendário Agrícola e Suprimentos do menu: vários planos somados (a construir)
+    'calendario':     { titulo: 'Calendário Agrícola', menu: 'calendario',
+                        desenhar: () => temPlanos() ? Telas.emConstrucao('Calendário Agrícola') : Telas.semPlanos('calendario') },
+    'suprimentos':    { titulo: 'Suprimentos', menu: 'suprimentos',
+                        desenhar: () => temPlanos() ? Telas.emConstrucao('Suprimentos') : Telas.semPlanos('suprimentos') },
     'ordens-servico': { titulo: 'Ordens de Serviço', menu: 'ordens-servico',
                         desenhar: () => Telas.emConstrucao('Ordens de Serviço') },
     'cadastros':      { titulo: 'Cadastros', menu: 'cadastros',
@@ -28,7 +39,8 @@
   // Estado da sessão (só em memória)
   const estado = {
     menuRecolhido: false, // menu começa expandido
-    proximoIdPlano: 1
+    proximoIdPlano: 1,
+    ultimoPlanoId: null   // último plano aberto (o menu Planejamento abre nele)
   };
 
   const menu = document.getElementById('menu');
@@ -45,16 +57,34 @@
     return DADOS.planos.find((p) => String(p.id) === id);
   }
 
+  // Plano mais recente: o último aberto ou, se nenhum foi aberto, o atualizado por último
+  function planoMaisRecente() {
+    return buscarPlano(String(estado.ultimoPlanoId))
+      || [...DADOS.planos].sort((a, b) => a.atualizadoEm.localeCompare(b.atualizadoEm)).pop();
+  }
+
   function rotaAtual() {
-    const [nome, parametro, extra] = location.hash.replace(/^#\/?/, '').split('/');
+    let [nome, parametro, extra] = location.hash.replace(/^#\/?/, '').split('/');
     if (!ROTAS[nome]) return { nome: ROTA_INICIAL };
+    // Menu Planejamento com planos: abre o plano mais recente, na versão em que ele está
+    if (nome === 'planejamento' && temPlanos()) {
+      [nome, parametro, extra] = ['plano', String(planoMaisRecente().id), undefined];
+      history.replaceState(null, '', `#/plano/${parametro}`);
+    }
     // Plano que não existe mais (ex.: página recarregada) volta para a lista
     if (nome === 'plano' && !buscarPlano(parametro)) return { nome: ROTA_INICIAL };
+    // Plano ainda não iniciado (ex.: pelo menu Planejamento): Visão Geral, com o modal "Como deseja iniciar o plano?"
+    if (nome === 'plano' && Versoes.aIniciar(buscarPlano(parametro))) {
+      const plano = buscarPlano(parametro);
+      history.replaceState(null, '', `#/${ROTA_INICIAL}`);
+      Telas.listaPlanos.mostrarSafra(plano.safra);
+      return { nome: ROTA_INICIAL, iniciar: plano };
+    }
     return { nome, parametro, extra };
   }
 
   function mostrarTela() {
-    const { nome, parametro, extra } = rotaAtual();
+    const { nome, parametro, extra, iniciar } = rotaAtual();
     const rota = ROTAS[nome];
 
     document.querySelector('.aviso')?.remove();
@@ -62,6 +92,7 @@
     if (rota.aoMostrar) rota.aoMostrar(conteudo, parametro, extra);
     conteudo.scrollTop = 0;
     document.title = `${rota.titulo} · UniSystem`;
+    if (iniciar) Telas.listaPlanos.abrirPlano(iniciar);
 
     document.querySelectorAll('.menu__item[data-rota]').forEach((item) => {
       const ativo = item.dataset.rota === rota.menu;
@@ -91,29 +122,36 @@
     `;
   }
 
-  // Cria o plano com os dados do modal e abre a etapa Operações.
-  // Usar modelo: grupos e operações do modelo (na v1 não há "Plano em branco": o usuário ajusta o modelo na etapa Operações).
+  // Cria um plano por fazenda do modal (Safra + Empresa + Fazenda + Cultura identificam o plano) e volta para a
+  // Visão Geral, com o filtro na safra dos planos criados (uma linha por fazenda).
+  // Cada plano nasce só com a versão 0.1, vazia e publicada (DECISOES 4.1.1): ao abrir, o Planejamento mostra
+  // as opções de início (modelo, do zero, importar XLSX, copiar plano existente).
   // O primeiro plano criado (a partir do primeiro uso) entra na lista junto com os planos de exemplo.
-  // Importar XLSX: grupos, operações, plantio e recomendações vêm do arquivo exportado, na fazenda escolhida.
-  function criarPlano({ importado, ...contexto }) {
+  // talhoes: os talhões incluídos (pode ser vazio: Área de cultivo "Pendente").
+  function criarPlanos({ fazendas, ...contexto }) {
     if (!temPlanos()) carregarPlanosExemplo();
-    const plano = {
-      id: estado.proximoIdPlano++,
-      ...contexto,
-      grupos: importado ? ArquivoPlano.montarGrupos(importado, contexto.fazenda)
-        : contexto.inicio === 'modelo' ? Planos.gruposModelo() : [], // área 0 ha até aplicar em talhões
-      status: 'Em construção',
-      custo: null,
-      receita: null,
-      atualizadoEm: Util.hojeISO(),
-      atualizadoPor: DADOS.usuario.nome
-    };
-    DADOS.planos.push(plano);
-    location.hash = `#/plano/${plano.id}`;
-    if (importado) {
-      const fora = ArquivoPlano.talhoesFora(importado, plano.fazenda);
-      Aviso.mostrar(`Planejamento importado${fora.length ? ` · ${fora.length} ${fora.length === 1 ? 'talhão do arquivo não existe' : 'talhões do arquivo não existem'} na Fazenda ${Util.escapar(plano.fazenda)} e ${fora.length === 1 ? 'ficou' : 'ficaram'} de fora` : ''}`);
-    }
+    const criados = fazendas.map(({ fazenda, talhoes }) => {
+      const plano = {
+        id: estado.proximoIdPlano++,
+        ...contexto,
+        fazenda,
+        talhoes,
+        custo: null,
+        receita: null,
+        atualizadoEm: Util.hojeISO(),
+        atualizadoPor: DADOS.usuario.nome
+      };
+      Versoes.iniciar(plano, []);
+      DADOS.planos.push(plano);
+      return plano;
+    });
+    const nomes = criados.map((p) => Util.escapar(p.fazenda)).join(', ');
+    const aviso = () => Aviso.mostrar(criados.length === 1 ? `Plano criado: Fazenda ${nomes}. Clique na linha para começar.`
+      : `${criados.length} planos criados (${nomes}). Clique na linha de cada um para começar.`);
+    Telas.listaPlanos.mostrarSafra(contexto.safra);
+    // O aviso entra depois de desenhar a lista (mostrarTela apaga o aviso anterior)
+    if (location.hash === '#/plano-safra') { mostrarTela(); aviso(); }
+    else { window.addEventListener('hashchange', aviso, { once: true }); location.hash = '#/plano-safra'; }
   }
 
   // ----- Menu Demonstração -----
@@ -131,9 +169,17 @@
 
   // Mantém as safras já cadastradas (inclusive a criada no modal) e inclui a dos exemplos
   function carregarPlanosExemplo() {
-    DADOS.planos = DADOS.planosExemplo.map(({ operacoes, ...p }) => {
+    DADOS.planos = DADOS.planosExemplo.map(({ operacoes, versoes, ...p }) => {
       if (!DADOS.safras.includes(p.safra)) DADOS.safras.push(p.safra);
-      return { ...p, grupos: Planos.montarExemplo(operacoes), id: estado.proximoIdPlano++ };
+      const plano = { ...p, id: estado.proximoIdPlano++ };
+      // Versões do exemplo: 0.1 publicada e 0.2 com o planejamento (em construção ou publicada)
+      const criada = new Date(versoes.criadaEm);
+      Versoes.iniciar(plano, Planos.montarExemplo(operacoes), { quando: criada, por: p.atualizadoPor });
+      if (versoes.publicadaEm) {
+        Versoes.publicar(plano);
+        Object.assign(Versoes.aberta(plano), { publicadaEm: new Date(versoes.publicadaEm), publicadaPor: p.atualizadoPor });
+      }
+      return plano;
     });
   }
 
@@ -172,7 +218,7 @@
     const botao = e.target.closest('[data-acao]');
     if (!botao) return;
     if (botao.dataset.acao === 'criar-plano') {
-      Telas.abrirModalCriarPlano({ aoCriar: criarPlano });
+      Telas.abrirModalCriarPlano({ aoCriar: criarPlanos });
     }
   });
 
@@ -180,5 +226,7 @@
 
   desenharUsuario();
   aplicarEstadoMenu();
+  // Ao abrir o protótipo, já vem com os planos de exemplo (Demonstração → "Começar do zero" volta ao primeiro uso)
+  carregarPlanosExemplo();
   mostrarTela();
 })();

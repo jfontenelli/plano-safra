@@ -1,20 +1,20 @@
 /*
  * Tela 01 — Primeiro uso (docs/telas/01-primeiro-uso.md)
- * Aparece no menu "Plano de Safra" quando ainda não existe nenhum plano.
+ * Aparece na Visão Geral (menu Plano de Safra) quando ainda não existe nenhum plano.
  */
 window.Telas = window.Telas || {};
 
 window.Telas.primeiroUso = function () {
   return `
     <header class="cabecalho">
-      <h1 class="cabecalho__titulo">Plano de Safra</h1>
+      <h1 class="cabecalho__titulo">Visão Geral</h1>
     </header>
     <section class="primeiro-uso">
       ${ilustracao()}
       <h2 class="primeiro-uso__titulo">Comece o planejamento da sua safra</h2>
       <p class="primeiro-uso__texto">
         O Plano de Safra organiza as necessidades de compra de insumos, gera o Calendário Agrícola
-        e, após a aprovação, cria automaticamente as Ordens de Serviço.
+        e, a partir da versão publicada, cria automaticamente as Ordens de Serviço.
       </p>
       <button class="botao botao--primario botao--grande" type="button" data-acao="criar-plano">
         <svg class="botao__icone" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>

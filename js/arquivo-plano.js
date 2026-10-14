@@ -36,7 +36,7 @@ window.ArquivoPlano = (function () {
       ['campo', 'valor'],
       ['formato', FORMATO], ['versao', VERSAO],
       ['safra', plano.safra], ['empresa', plano.empresa], ['fazenda', plano.fazenda], ['cultura', plano.cultura],
-      ['status', plano.status],
+      ['versao_plano', `${plano.versaoAberta} · ${Versoes.rotuloStatus(Versoes.aberta(plano))}`],
       ['exportado_em', Util.hojeISO()], ['exportado_por', DADOS.usuario.nome]
     ];
 
@@ -129,17 +129,17 @@ window.ArquivoPlano = (function () {
     });
   }
 
-  // Talhões do arquivo que não existem na fazenda escolhida (ficam de fora)
-  function talhoesFora(dados, fazenda) {
-    const daFazenda = new Set((DADOS.talhoes[fazenda] || []).map((t) => t.nome));
+  // Talhões do arquivo que não estão no plano (não existem na fazenda ou não foram incluídos): ficam de fora
+  function talhoesFora(dados, plano) {
+    const daFazenda = new Set(Util.talhoesPlano(plano).map((t) => t.nome));
     const doArquivo = new Set();
     ['cultura_variedade', ...ABAS_REC].forEach((n) => dados.abas[n].forEach((x) => x.talhao && doArquivo.add(String(x.talhao))));
     return [...doArquivo].filter((t) => !daFazenda.has(t)).sort();
   }
 
-  // Monta os grupos do plano a partir do arquivo lido, para a fazenda escolhida
-  function montarGrupos(dados, fazenda) {
-    const daFazenda = new Set((DADOS.talhoes[fazenda] || []).map((t) => t.nome));
+  // Monta os grupos do plano a partir do arquivo lido, só com os talhões do plano
+  function montarGrupos(dados, plano) {
+    const daFazenda = new Set(Util.talhoesPlano(plano).map((t) => t.nome));
     const grupos = [];
     const acharOp = (grupo, operacao) => {
       const g = grupos.find((x) => x.nome === grupo);

@@ -1,0 +1,406 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Rascunho · Navegação e versões do plano</title>
+  <!-- Rascunho da parte 1 (menu, contexto e versões do plano). Não faz parte do protótipo (index.html). -->
+  <link rel="icon" type="image/png" href="../img/icone-unisystem.png">
+  <link rel="stylesheet" href="../css/estilo.css">
+  <style>
+    /* Barra do rascunho (fora do produto) */
+    .rasc-barra { position: fixed; left: 0; right: 0; top: 0; z-index: 30; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px;
+      padding: 8px 20px; background: #fff8db; border-bottom: 1px dashed #d9b400; font-size: 13px; }
+    .rasc-barra strong { font-size: 14px; }
+    .rasc-grupo { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .rasc-grupo > span { color: #6b5a00; font-weight: 600; }
+    .rasc-grupo button { height: 28px; padding: 0 12px; border: 1px solid #d9b400; border-radius: 999px; background: #fff; cursor: pointer; font: inherit; }
+    .rasc-grupo button[aria-pressed="true"] { background: #3d3200; border-color: #3d3200; color: #fff; }
+    .rasc-explica { flex-basis: 100%; margin: 0; color: #4d4300; }
+    .app { padding-top: var(--rasc-altura, 92px); height: 100vh; }
+
+    /* Menu: grupo Plano de Safra com subitens */
+    .menu__grupo { display: flex; flex-direction: column; gap: 2px; }
+    .menu__pai { font-weight: 600; color: #fff; }
+    .menu__pai .menu__seta-grupo { margin-left: auto; width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; transform: rotate(180deg); }
+    .menu__subitens { display: flex; flex-direction: column; gap: 2px; margin: 2px 0 8px 23px; padding-left: 10px; border-left: 1px solid rgba(255,255,255,.18); }
+    .menu__sub { height: 40px; gap: 12px; padding: 0 10px; font-size: 14px; }
+    .menu__sub .menu__icone { width: 19px; height: 19px; }
+    .menu__sub.menu__item--ativo { background: rgba(255,255,255,.14); }
+    .menu--recolhido .menu__pai .menu__seta-grupo { display: none; }
+    .menu--recolhido .menu__subitens { margin: 2px 0 8px; padding: 6px 0; border-left: 0; border-radius: var(--raio); background: rgba(0,0,0,.14); }
+    .menu--recolhido .menu__sub { justify-content: center; padding: 0; }
+
+    /* Cabeçalho fixo do plano */
+    .cab-linha { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; width: 100%; padding: 10px 0 4px; }
+    .cab-b { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+    .cab-acoes { display: flex; align-items: center; gap: 10px; }
+    .cab-versao { display: inline-flex; align-items: center; gap: 8px; }
+    .cab-versao__num { font-weight: 700; }
+    .cab-versao__sep { color: #b9c2bd; }
+    .cab-versao__info { font-size: 13px; color: var(--texto-suave); }
+    .trocar { position: relative; }
+    .link-trocar { display: inline-flex; align-items: center; gap: 4px; border: 0; background: none; padding: 2px 6px; border-radius: 6px;
+      color: var(--verde-700); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
+    .link-trocar:hover, .link-trocar[aria-expanded="true"] { background: var(--verde-100); }
+    .link-trocar svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .estado-salvo { font-size: 13px; color: var(--texto-suave); white-space: nowrap; }
+    .estado-salvo--pendente { color: #b45f06; font-weight: 600; }
+
+    /* Lista de versões (Trocar versão) */
+    .pop { position: absolute; top: calc(100% + 6px); left: 0; z-index: 10; width: 460px; max-width: 80vw; padding: 8px;
+      border: 1px solid var(--borda); border-radius: 12px; background: var(--superficie); box-shadow: 0 10px 30px rgba(16,24,20,.16); }
+    .pop__titulo { margin: 4px 8px 8px; font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--texto-suave); }
+    .versao { display: grid; grid-template-columns: 44px 1fr auto; align-items: center; gap: 2px 10px; width: 100%; padding: 8px; border: 0; border-radius: 8px;
+      background: none; font: inherit; text-align: left; cursor: pointer; }
+    .versao:hover { background: #f4f7f5; }
+    .versao--atual { background: var(--verde-100); }
+    .versao__num { grid-row: span 2; font-size: 16px; font-weight: 700; color: var(--verde-700); }
+    .versao__info { font-size: 13px; color: var(--texto-suave); }
+    .versao .status { grid-row: span 2; }
+    .pop__rodape { margin: 6px 8px 2px; padding-top: 8px; border-top: 1px solid var(--borda); font-size: 13px; }
+    .pop__rodape a { color: var(--verde-700); font-weight: 600; }
+    .alerta { margin: 8px; padding: 10px 12px; border: 1px solid #f0d58a; border-radius: 10px; background: #fff8e6; color: #6b4e00; font-size: 14px; }
+    .alerta b { color: #4d3800; }
+    .alerta__acoes { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; margin-top: 10px; }
+    .alerta--solto { position: absolute; top: calc(100% + 6px); right: 0; z-index: 10; width: 400px; margin: 0; box-shadow: 0 10px 30px rgba(16,24,20,.16); }
+    .cab-acoes { position: relative; }
+
+    /* Aviso discreto "Alterações salvas" (no lugar do texto de estado) */
+    .salvo-ok { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; color: var(--verde-700); font-weight: 600; }
+    .salvo-ok svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+
+    /* Conteúdo ilustrativo */
+    .miolo { padding: 20px 24px 40px; }
+    .vazio-ctx { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px; padding: 96px 24px; color: var(--texto-suave); }
+    .vazio-ctx__icone { display: grid; place-items: center; width: 80px; height: 80px; margin-bottom: 6px; border-radius: 50%; background: var(--verde-100); }
+    .vazio-ctx__icone svg { width: 38px; height: 38px; fill: none; stroke: var(--verde-700); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+    .vazio-ctx h2 { font-size: 20px; color: var(--texto); }
+    .vazio-ctx p { margin: 0 0 8px; max-width: 56ch; }
+    .placeholder { padding: 14px 18px; color: var(--texto-suave); font-size: 14px; }
+    .ilustra { font-size: 12px; color: #8a949c; margin: 8px 0 0; }
+    .inicio-plan { max-width: 880px; margin: 0 auto; padding: 48px 24px; text-align: center; }
+    .inicio-plan h2 { font-size: 21px; }
+    .inicio-plan p { margin: 8px auto 24px; max-width: 60ch; color: var(--texto-suave); }
+    .inicio-plan__grade { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 14px; text-align: left; }
+    .inicio-plan__card { display: flex; flex-direction: column; gap: 6px; padding: 16px; border: 1px solid var(--borda); border-radius: 12px;
+      background: var(--superficie); font: inherit; text-align: left; cursor: pointer; box-shadow: var(--sombra); }
+    .inicio-plan__card:hover { border-color: var(--verde-600); background: #f7fbf9; }
+    .inicio-plan__card span { font-size: 14px; color: var(--texto-suave); }
+    .menu-contexto { min-width: 230px; }
+    .menu-contexto__sep { margin: 6px 4px; border: 0; border-top: 1px solid var(--borda); }
+  </style>
+</head>
+<body>
+  <div class="rasc-barra" id="rasc-barra">
+    <strong>Rascunho · Parte 1: menu, contexto e versões</strong>
+    <div class="rasc-grupo" id="rasc-estados"><span>Estado</span></div>
+    <p class="rasc-explica" id="rasc-explica"></p>
+  </div>
+
+  <div class="app">
+    <aside class="menu" id="menu">
+      <div class="menu__topo">
+        <img class="menu__logo" src="../img/icone-unisystem.png" alt="UniSystem">
+        <span class="menu__marca">UniSystem</span>
+      </div>
+      <nav class="menu__nav" aria-label="Menu principal">
+        <div class="menu__grupo">
+          <a class="menu__item menu__pai" href="#" title="Plano de Safra" aria-expanded="true">
+            <svg class="menu__icone" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21v-9"/><path d="M12 12c0-4 2.5-6.5 7-6.5 0 4.5-2.5 6.5-7 6.5Z"/><path d="M12 14c0-3.5-2.2-5.5-6.5-5.5 0 3.8 2.2 5.5 6.5 5.5Z"/></svg>
+            <span class="menu__texto">Plano de Safra</span>
+            <svg class="menu__seta-grupo" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+          </a>
+          <div class="menu__subitens" id="subitens"></div>
+        </div>
+        <a class="menu__item" href="#" title="Ordens de Serviço">
+          <svg class="menu__icone" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1"/><path d="M9 10h6M9 14h6M9 18h3"/></svg>
+          <span class="menu__texto">Ordens de Serviço</span>
+        </a>
+        <a class="menu__item" href="#" title="Cadastros">
+          <svg class="menu__icone" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z"/><path d="M14 3v5h5"/><path d="M9 12h6M9 16h6"/></svg>
+          <span class="menu__texto">Cadastros</span>
+        </a>
+      </nav>
+      <button class="menu__alternar" id="menu-alternar" type="button" title="Recolher menu">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
+      </button>
+      <div class="menu__rodape">
+        <div class="menu__usuario"><span class="menu__avatar">JF</span><span class="menu__usuario-nome">Julyane Fontenelli</span></div>
+      </div>
+    </aside>
+
+    <main class="conteudo" id="conteudo"></main>
+  </div>
+
+<script>
+  const ICONE = {
+    visao: '<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
+    planejamento: '<path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12l2 2 4-4"/><path d="M9 17h6"/>',
+    calendario: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><path d="M8 14h2M14 14h2M8 17h2"/>',
+    suprimentos: '<path d="M21 8 12 3 3 8v8l9 5 9-5Z"/><path d="M3 8l9 5 9-5M12 13v8"/>',
+    versoes: '<circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/>',
+    cadeado: '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
+    ok: '<path d="M5 12l5 5 9-10"/>',
+  };
+  const svg = (k, cls = 'menu__icone') => `<svg class="${cls}" viewBox="0 0 24 24" aria-hidden="true">${ICONE[k]}</svg>`;
+  const svgIcone = (k) => `<svg class="icone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONE[k]}</svg>`;
+
+  const ITENS = [
+    { id: 'visao', nome: 'Visão Geral' },
+    { id: 'planejamento', nome: 'Planejamento' },
+    { id: 'calendario', nome: 'Calendário Agrícola' },
+    { id: 'suprimentos', nome: 'Suprimentos' },
+  ];
+  const ABAS = ['Operações', 'Planejamento', 'Calendário Agrícola'];
+  const VAZIO = { planejamento: 'o planejamento', calendario: 'o Calendário Agrícola', suprimentos: 'os Suprimentos' };
+  const TEXTO_PLANO = 'O Plano de Safra organiza as necessidades de compra de insumos, gera o Calendário Agrícola e, a partir da versão publicada, cria automaticamente as Ordens de Serviço.';
+  const TEXTO_VAZIO = {
+    planejamento: TEXTO_PLANO,
+    calendario: TEXTO_PLANO,
+    suprimentos: 'O plano organiza a necessidade de insumos por safra, empresa, fazenda e cultura. Depois de criado, ele abre aqui automaticamente.',
+  };
+
+  // Estados do rascunho. "versoes" = histórico do plano nesse estado; "aberta" = versão na tela.
+  const P01 = { num: '0.1', status: 'pub', info: 'Publicada em 10/10 às 09:12 por Julyane Fontenelli · registro inicial' };
+  const P02 = { num: '0.2', status: 'pub', info: 'Publicada em 12/10 às 17:05 por Julyane Fontenelli' };
+  const C03 = { num: '0.3', status: 'cons', info: 'Salva em 13/10 às 14:20 por Julyane Fontenelli · origem 0.2' };
+  const ESTADOS = [
+    { id: 'vazio', rotulo: '1 Nenhum plano', explica: 'Nenhum plano cadastrado: as telas convidam a criar o primeiro plano. (Na Visão Geral continua a Tela 01, Primeiro uso.)' },
+    { id: 'novo', rotulo: '2 Plano recém-criado (0.1)', versoes: [P01], aberta: '0.1',
+      explica: 'Ao criar o plano, nasce só a versão 0.1, publicada e sem operações. No Planejamento aparecem direto as 4 formas de começar; escolher uma cria a 0.2 em construção.' },
+    { id: 'cons', rotulo: '3 Em construção (0.3)', versoes: [C03, P02, P01], aberta: '0.3',
+      explica: 'Versão em construção: editável, com Salvar alterações (secundário) e Publicar versão (principal).' },
+    { id: 'salvo', rotulo: '4 Depois de Salvar alterações', versoes: [C03, P02, P01], aberta: '0.3',
+      explica: 'Salvar alterações: a 0.3 continua em construção. Confirmação discreta "Alterações salvas" no lugar do texto de estado.' },
+    { id: 'publicar', rotulo: '5 Publicar versão', versoes: [C03, P02, P01], aberta: '0.3',
+      explica: 'Confirmação antes de publicar. Depois de publicar, a 0.3 fica em consulta e não nasce a 0.4 sozinha.' },
+    { id: 'pub', rotulo: '6 Consulta de versão publicada', versoes: [P02, P01], aberta: '0.2',
+      explica: 'Versão publicada: tudo bloqueado, com data, hora e responsável da publicação, e o botão Criar nova versão (geraria a 0.3, com origem 0.2).' },
+    { id: 'jaexiste', rotulo: '7 Criar nova versão com outra em construção', versoes: [C03, P02, P01], aberta: '0.1',
+      explica: 'Só uma versão em construção por plano. A pessoa está na 0.1 e pediu nova versão, mas a 0.3 já está em construção: o sistema oferece abrir a 0.3.' },
+    { id: 'trocar', rotulo: '8 Trocar versão', versoes: [C03, P02, P01], aberta: '0.3',
+      explica: '"Trocar versão" lista as versões do plano aberto, da mais recente para a mais antiga.' },
+    { id: 'naosalvas', rotulo: '9 Trocar versão com alterações não salvas', versoes: [C03, P02, P01], aberta: '0.3',
+      explica: 'A pessoa escolheu a 0.2 com alterações não salvas na 0.3: o aviso aparece antes de trocar.' },
+  ];
+
+  const s = { estado: 'novo', item: 'planejamento', aba: 'Planejamento' };
+  const est = () => ESTADOS.find((e) => e.id === s.estado);
+  const aberta = () => est().versoes.find((v) => v.num === est().aberta);
+  const emConstrucao = () => aberta().status === 'cons';
+  const popAberto = () => s.estado === 'trocar' || s.estado === 'naosalvas';
+
+  function desenharMenu() {
+    document.getElementById('subitens').innerHTML = ITENS.map((i) => `
+      <a class="menu__item menu__sub ${i.id === s.item ? 'menu__item--ativo' : ''}" href="#" data-item="${i.id}" title="${i.nome}"
+         ${i.id === s.item ? 'aria-current="page"' : ''}>${svg(i.id)}<span class="menu__texto">${i.nome}</span></a>`).join('');
+  }
+
+  // ---------- Cabeçalho fixo ----------
+  function listaVersoes() {
+    const aviso = s.estado === 'naosalvas' ? `<div class="alerta" role="alert">
+        <b>Há alterações não salvas na versão 0.3.</b> Salvar antes de abrir a versão 0.2?
+        <div class="alerta__acoes">
+          <button class="botao botao--secundario botao--p" type="button">Cancelar</button>
+          <button class="botao botao--secundario botao--p" type="button">Abrir sem salvar</button>
+          <button class="botao botao--primario botao--p" type="button">Salvar e abrir</button>
+        </div></div>` : '';
+    return `<div class="pop" role="menu">
+      <p class="pop__titulo">Versões deste plano</p>
+      ${est().versoes.map((v) => `<button class="versao ${v.num === est().aberta ? 'versao--atual' : ''}" type="button" role="menuitem">
+          <span class="versao__num">${v.num}</span>
+          <span><b>${v.status === 'cons' ? 'Em construção' : 'Publicada'}</b>${v.num === est().aberta ? ' · aberta agora' : ''}</span>
+          <span class="status ${v.status === 'cons' ? 'status--construcao' : 'status--aprovado'}">${v.status === 'cons' ? 'Editável' : 'Consulta'}</span>
+          <span class="versao__info">${v.info}</span></button>`).join('')}
+      ${aviso}
+      <p class="pop__rodape"><a href="#" data-item="visao">Ver histórico e comparar versões na Visão Geral</a></p>
+    </div>`;
+  }
+
+  function acoesVersao() {
+    if (s.item !== 'planejamento' || s.estado === 'novo') return '';
+    if (!emConstrucao()) {
+      const ja = s.estado === 'jaexiste' ? `<div class="alerta alerta--solto" role="alert">
+          <b>Já existe uma versão em construção (0.3).</b> Só pode haver uma por plano. Abra a 0.3 para continuar o trabalho em andamento.
+          <div class="alerta__acoes">
+            <button class="botao botao--secundario botao--p" type="button">Cancelar</button>
+            <button class="botao botao--primario botao--p" type="button">Abrir versão 0.3</button>
+          </div></div>` : '';
+      return `<div class="cab-acoes">
+        <button class="botao botao--primario botao--p" type="button">Criar nova versão</button>${ja}</div>`;
+    }
+    const estado = s.estado === 'salvo'
+      ? `<span class="salvo-ok" role="status">${svg('ok', '')} Alterações salvas</span>`
+      : s.estado === 'naosalvas'
+        ? '<span class="estado-salvo estado-salvo--pendente">Alterações não salvas</span>'
+        : '<span class="estado-salvo">Salvo às 14:20</span>';
+    return `<div class="cab-acoes">${estado}
+        <button class="botao botao--secundario botao--p" type="button">Salvar alterações</button>
+        <button class="botao botao--primario botao--p" type="button" data-estado="publicar">Publicar versão</button></div>`;
+  }
+
+  function cabecalho() {
+    const v = aberta();
+    const status = v.status === 'cons'
+      ? '<span class="status status--construcao">Em construção</span>'
+      : '<span class="status status--aprovado">Publicada</span>';
+    const info = v.status === 'pub' ? `<span class="cab-versao__info">${v.info.split(' · ')[0]}</span>` : '';
+    const abas = s.item === 'planejamento' ? `<nav class="etapas" aria-label="Abas do Planejamento">
+        ${ABAS.map((a) => `<a class="etapa ${a === s.aba ? 'etapa--ativa' : ''}" href="#" data-aba="${a}">${a}</a>`).join('')}</nav>` : '';
+    return `<header class="plano__cabecalho">
+        <div class="cab-linha">
+          <div class="cab-b">
+            <a class="plano__titulo" href="#" data-item="visao" title="Voltar à Visão Geral para escolher outro plano">Plano de Safra</a>
+            <span class="plano__seta" aria-hidden="true">›</span>
+            <p class="plano__contexto">Safra 26/27<span class="plano__ponto">·</span>Empresa A<span class="plano__ponto">·</span>Fazenda São José<span class="plano__ponto">·</span>Soja</p>
+            <span class="cab-versao__sep" aria-hidden="true">|</span>
+            <span class="cab-versao"><span class="cab-versao__num">Versão ${v.num}</span>${status}${info}</span>
+            <span class="trocar">
+              <button class="link-trocar" type="button" data-acao="trocar" aria-expanded="${popAberto()}">${svg('versoes', '')} Trocar versão</button>
+              ${popAberto() ? listaVersoes() : ''}
+            </span>
+          </div>
+          ${acoesVersao()}
+        </div>
+        ${abas}
+      </header>
+      ${v.status === 'pub' ? `<p class="faixa-leitura">${svgIcone('cadeado')} Versão ${v.num} publicada: somente consulta. Para alterar, use Criar nova versão.</p>` : ''}`;
+  }
+
+  // ---------- Telas ----------
+  function vazio() {
+    return `<div class="vazio-ctx">
+      <span class="vazio-ctx__icone">${svg(s.item, '')}</span>
+      <h2>Crie seu primeiro plano para visualizar ${VAZIO[s.item]}</h2>
+      <p>${TEXTO_VAZIO[s.item]}</p>
+      <button class="botao botao--primario" type="button">+ Criar Plano de Safra</button></div>`;
+  }
+
+  const INICIOS = [
+    ['Começar em branco', 'Crie os grupos e as operações conforme a realidade da fazenda.'],
+    ['Usar modelo', 'Use uma estrutura pronta de operações e ajuste conforme necessário.'],
+    ['Importar XLSX', 'Importe o planejamento a partir de uma planilha.'],
+    ['Copiar plano existente', 'Reutilize o planejamento agronômico de outra fazenda ou safra (mesma cultura).'],
+  ];
+
+  function miolo() {
+    if (s.estado === 'novo' && s.item === 'planejamento') return `<div class="inicio-plan">
+      <h2>Como deseja iniciar o planejamento agronômico?</h2>
+      <p>Ao escolher, o sistema cria a versão 0.2 em construção com esse conteúdo. A versão 0.1 fica como registro inicial do plano.</p>
+      <div class="inicio-plan__grade">${INICIOS.map(([t, x]) => `<button class="inicio-plan__card" type="button" data-estado="cons">
+        <b>${t}</b><span>${x}</span></button>`).join('')}</div></div>`;
+    if (s.estado === 'novo') return `<div class="vazio-ctx">
+      <span class="vazio-ctx__icone">${svg('planejamento', '')}</span>
+      <h2>Versão 0.1: registro inicial do plano</h2>
+      <p>Ainda não há operações. Crie uma nova versão para começar o planejamento.</p>
+      ${s.item === 'planejamento' ? '' : '<button class="botao botao--primario" type="button">Criar nova versão</button>'}</div>`;
+    const nome = s.item === 'planejamento' ? `Aba ${s.aba}` : ITENS.find((i) => i.id === s.item).nome;
+    const modo = emConstrucao() ? 'editável' : 'bloqueado (consulta)';
+    return `<div class="miolo"><div class="cartao placeholder">
+      <b>${nome}</b> da versão ${aberta().num}: conteúdo atual da tela, ${modo}.
+      <p class="ilustra">Área ilustrativa. Aqui entram as tabelas de talhões, operações ou insumos.</p></div></div>`;
+  }
+
+  function modalPublicar() {
+    if (s.estado !== 'publicar') return '';
+    return `<div class="modal-fundo"><div class="modal modal--pequeno" role="dialog" aria-modal="true" aria-labelledby="t-pub">
+      <div class="modal__corpo">
+        <h2 class="modal__titulo" id="t-pub">Publicar versão 0.3?</h2>
+        <p class="modal__texto">A versão será registrada no histórico e não poderá mais ser editada. Para realizar novas alterações, será necessário criar uma nova versão.</p>
+      </div>
+      <div class="modal__rodape">
+        <button class="botao botao--secundario" type="button" data-estado="cons">Cancelar</button>
+        <button class="botao botao--primario" type="button" data-estado="cons">Publicar versão</button>
+      </div></div></div>`;
+  }
+
+  // Planos de exemplo da lista (Visão Geral): versão aberta pela seta = em construção, ou a última publicada
+  const PLANOS = [
+    { id: 1, fazenda: 'São José', cultura: 'Soja', area: '1.240 ha', custo: 'R$ 3,1 mi', receita: 'R$ 7,4 mi', versao: '0.3', status: 'cons', ultimaPub: '0.2', data: '13/10/2026', por: 'Julyane Fontenelli' },
+    { id: 2, fazenda: 'Santa Clara', cultura: 'Soja', area: '845 ha', custo: 'R$ 2,7 mi', receita: 'R$ 6,5 mi', versao: '0.2', status: 'pub', ultimaPub: '0.2', data: '12/10/2026', por: 'Maria Gonçalves' },
+    { id: 3, fazenda: 'São José', cultura: 'Milho', area: '0 ha', custo: '—', receita: '—', versao: '0.1', status: 'pub', ultimaPub: '0.1', data: '13/10/2026', por: 'Julyane Fontenelli' },
+  ];
+
+  function visaoGeral() {
+    if (s.estado === 'vazio') return `<div class="miolo"><div class="cartao placeholder">
+        <b>Visão Geral sem planos</b>: continua a Tela 01 (Primeiro uso), com o botão Criar Plano Safra.</div></div>`;
+    const seta = '<svg class="icone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+    const mais = '<svg class="icone" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>';
+    return `<header class="cabecalho"><h1 class="cabecalho__titulo">Visão Geral</h1></header>
+      <div class="miolo">
+        <div class="secao__topo"><h2 class="secao__titulo">Planos de Safra</h2>
+          <button class="botao botao--primario" type="button">+ Criar Plano Safra</button></div>
+        <div class="cartao tabela-rolagem"><table class="tabela">
+          <thead><tr><th class="lista-planos__menu"><span class="so-leitor">Ações</span></th><th>Safra</th><th>Empresa</th><th>Fazenda</th><th>Cultura</th>
+            <th class="tabela__numero">Área</th><th class="tabela__numero">Custo estimado</th><th class="tabela__numero">Receita projetada</th>
+            <th>Versão</th><th>Última atualização</th><th>Atualizado por</th><th></th></tr></thead>
+          <tbody>${PLANOS.map((p) => `<tr>
+            <td class="lista-planos__menu"><button class="botao-icone" type="button" data-menu-plano="${p.id}" title="Mais ações" aria-haspopup="menu">${mais}</button></td>
+            <td>26/27</td><td>Empresa A</td><td>${p.fazenda}</td><td>${p.cultura}</td>
+            <td class="tabela__numero">${p.area}</td><td class="tabela__numero">${p.custo}</td><td class="tabela__numero">${p.receita}</td>
+            <td><span class="status ${p.status === 'cons' ? 'status--construcao' : 'status--aprovado'}">Versão ${p.versao} · ${p.status === 'cons' ? 'Em construção' : 'Publicada'}</span></td>
+            <td>${p.data}</td><td>${p.por}</td>
+            <td class="tabela__acao"><a class="botao-icone" href="#" data-item="planejamento" title="Abrir a versão ${p.versao} (${p.status === 'cons' ? 'em construção' : 'publicada, em consulta'})">${seta}</a></td>
+          </tr>`).join('')}</tbody></table></div>
+        <p class="ilustra">Clique no ⋯ de cada linha para ver o menu. A seta abre a versão em construção ou, se não houver, a última publicada (em consulta).</p>
+      </div>`;
+  }
+
+  // Menu ⋯ da linha: Abrir · Criar nova versão · Histórico de versões · Exportar XLSX · Excluir plano
+  let menuLinha = null;
+  function fecharMenuLinha() { if (menuLinha) { menuLinha.remove(); menuLinha = null; } }
+  function abrirMenuLinha(botao) {
+    fecharMenuLinha();
+    const p = PLANOS.find((x) => x.id === Number(botao.dataset.menuPlano));
+    const travado = p.status === 'cons';
+    menuLinha = document.createElement('div');
+    menuLinha.className = 'menu-contexto';
+    menuLinha.setAttribute('role', 'menu');
+    menuLinha.innerHTML = `
+      <button class="menu-contexto__item" type="button" role="menuitem">Abrir</button>
+      <button class="menu-contexto__item" type="button" role="menuitem" ${travado ? 'aria-disabled="true"' : ''}>Criar nova versão${travado
+        ? `<span class="menu-contexto__motivo">A versão ${p.versao} já está em construção</span>`
+        : `<span class="menu-contexto__motivo">A partir da versão ${p.ultimaPub}, publicada</span>`}</button>
+      <button class="menu-contexto__item" type="button" role="menuitem">Histórico de versões</button>
+      <button class="menu-contexto__item" type="button" role="menuitem">Exportar XLSX</button>
+      <hr class="menu-contexto__sep">
+      <button class="menu-contexto__item menu-contexto__item--perigo" type="button" role="menuitem">Excluir plano</button>`;
+    document.body.appendChild(menuLinha);
+    const r = botao.getBoundingClientRect();
+    menuLinha.style.left = `${r.left}px`;
+    menuLinha.style.top = `${r.bottom + 4}px`;
+  }
+
+  function desenhar() {
+    document.getElementById('rasc-estados').innerHTML = '<span>Estado</span>' + ESTADOS.map((e) =>
+      `<button data-estado="${e.id}" aria-pressed="${e.id === s.estado}">${e.rotulo}</button>`).join('');
+    document.getElementById('rasc-explica').textContent = est().explica;
+    desenharMenu();
+    let html;
+    if (s.item === 'visao') html = visaoGeral();
+    else if (s.estado === 'vazio') html = vazio();
+    else html = `<div class="plano">${cabecalho()}<div class="plano__rolagem">${miolo()}</div></div>${modalPublicar()}`;
+    document.getElementById('conteudo').innerHTML = html;
+    document.documentElement.style.setProperty('--rasc-altura', document.getElementById('rasc-barra').offsetHeight + 'px');
+  }
+
+  document.addEventListener('click', (e) => {
+    const botaoMenu = e.target.closest('[data-menu-plano]');
+    if (botaoMenu) { e.preventDefault(); abrirMenuLinha(botaoMenu); return; }
+    if (!e.target.closest('.menu-contexto')) fecharMenuLinha();
+    const alvo = e.target.closest('[data-estado],[data-item],[data-aba],[data-acao],#menu-alternar');
+    if (!alvo) return;
+    e.preventDefault();
+    if (alvo.id === 'menu-alternar') { document.getElementById('menu').classList.toggle('menu--recolhido'); return; }
+    if (alvo.dataset.estado) s.estado = alvo.dataset.estado;
+    if (alvo.dataset.item) { s.item = alvo.dataset.item; if (popAberto()) s.estado = 'cons'; }
+    if (alvo.dataset.aba) s.aba = alvo.dataset.aba;
+    if (alvo.dataset.acao === 'trocar') s.estado = popAberto() ? 'cons' : 'trocar';
+    desenhar();
+  });
+  window.addEventListener('resize', desenhar);
+  desenhar();
+</script>
+</body>
+</html>

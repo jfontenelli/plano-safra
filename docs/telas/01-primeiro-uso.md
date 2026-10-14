@@ -6,13 +6,13 @@ Imagem: `referencias/01-primeiro-uso.png`
 Dar boas-vindas a quem ainda não tem nenhum plano e levar direto à criação do primeiro.
 
 ## Quando aparece
-- Ao clicar em "Plano de Safra" no menu, quando não existe nenhum plano cadastrado.
-- A partir do primeiro plano criado, não aparece mais: o menu passa a abrir a Tela 03.
+- Na Visão Geral, quando não existe nenhum plano cadastrado. (Planejamento e Calendário Agrícola, sem planos, mostram o mesmo texto com "Crie seu primeiro plano para visualizar…"; ver DECISOES 4.0.)
+- A partir do primeiro plano criado, não aparece mais: a Visão Geral passa a mostrar a Tela 03.
 
 ## Conteúdo
 - Ilustração.
 - Título: "Comece o planejamento da sua safra"
-- Texto: "O Plano de Safra organiza as necessidades de compra de insumos, gera o Calendário Agrícola e, após a aprovação, cria automaticamente as Ordens de Serviço."
+- Texto: "O Plano de Safra organiza as necessidades de compra de insumos, gera o Calendário Agrícola e, a partir da versão publicada, cria automaticamente as Ordens de Serviço."
 - Um único botão: "Criar Plano Safra".
 
 ## Navegação

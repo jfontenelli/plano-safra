@@ -2,14 +2,16 @@
  * Cálculos e formatação usados por várias telas.
  */
 window.Util = {
-  // Área do plano = soma das áreas dos talhões que recebem ao menos uma operação (ha)
-  areaPlano(plano) {
-    const noPlano = new Set();
-    (plano.grupos || []).forEach((g) => g.operacoes.forEach((op) =>
-      [...Object.keys(op.talhoes), ...Object.keys(op.plantio || {})].forEach((t) => noPlano.add(t))));
-    return (DADOS.talhoes[plano.fazenda] || [])
-      .filter((t) => noPlano.has(t.nome))
-      .reduce((soma, t) => soma + t.area, 0);
+  // Talhões incluídos no plano (escolhidos no modal Criar Plano). Sem a lista: todos os da fazenda.
+  talhoesPlano(plano) {
+    const todos = DADOS.talhoes[plano.fazenda] || [];
+    return plano.talhoes ? todos.filter((t) => plano.talhoes.includes(t.nome)) : todos;
+  },
+
+  // Área de cultivo = soma das áreas dos talhões incluídos no plano (ha); sem talhões, null ("Pendente")
+  areaCultivo(plano) {
+    const talhoes = Util.talhoesPlano(plano);
+    return talhoes.length ? talhoes.reduce((soma, t) => soma + t.area, 0) : null;
   },
 
   // Texto "0,40" ou "0.40" → 0.4; vazio ou inválido → null

@@ -54,7 +54,7 @@ window.Telas.operacoesPlano = (function () {
       <section class="estrutura">
         ${ctx.estado.avisoFechado ? '' : `
           <div class="estrutura__aviso" role="note">${Icones.info}
-            <p><strong>Revise as operações cadastradas.</strong> Cada operação vira uma Ordem de Serviço (OS) quando o plano for aprovado. Se estiver tudo certo, siga para o planejamento.</p>
+            <p><strong>Revise as operações cadastradas.</strong> Cada operação vira uma Ordem de Serviço (OS) a partir da versão publicada. Se estiver tudo certo, siga para o planejamento.</p>
             <button class="botao-icone estrutura__fechar" type="button" data-acao="est-fechar-aviso" aria-label="Fechar o aviso" title="Fechar">${Icones.fechar}</button>
           </div>`}
         <div class="tab-op__caixa">

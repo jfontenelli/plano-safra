@@ -1,0 +1,667 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Rascunho · Etapas do plano</title>
+  <!-- Rascunho para visualizar a etapa 1 (Operações do plano) e o Calendário Agrícola revisado.
+       Não faz parte do protótipo (index.html). -->
+  <link rel="stylesheet" href="../css/estilo.css">
+  <style>
+    body { height: auto; overflow: auto; background: var(--fundo); }
+
+    /* Barra do rascunho (fora do produto) */
+    .rasc-barra { position: sticky; top: 0; z-index: 5; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px;
+      padding: 10px 24px; background: #fff8db; border-bottom: 1px dashed #d9b400; font-size: 14px; }
+    .rasc-barra strong { font-size: 15px; }
+    .rasc-opcoes { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+    .rasc-opcoes button { height: 32px; padding: 0 14px; border: 1px solid #d9b400; border-radius: 999px; background: #fff; cursor: pointer; font: inherit; }
+    .rasc-opcoes button[aria-pressed="true"] { background: #3d3200; border-color: #3d3200; color: #fff; }
+    .rasc-nota { color: #6b5a00; }
+    .rasc-explica { margin: 0; padding: 10px 14px; border-left: 3px solid #d9b400; background: #fffbea; font-size: 13px; color: #4d4300; }
+
+    /* Cabeçalho do plano (cópia simplificada da Tela 04), com as etapas clicáveis */
+    .rasc-plano { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 10px;
+      padding: 14px 24px 0; background: var(--superficie); border-bottom: 1px solid var(--borda); }
+    .rasc-plano__linha { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 14px; }
+    .rasc-plano__linha b { color: var(--verde-700); font-size: 18px; }
+    .rasc-plano__status { padding: 3px 10px; border-radius: 999px; background: #eceeef; font-size: 13px; }
+    .rasc-etapas { display: flex; flex-wrap: wrap; gap: 0 26px; margin-top: 10px; }
+    .rasc-etapas button { padding: 8px 0 10px; border: 0; background: none; font: inherit; font-size: 14px; color: var(--texto-suave); cursor: pointer; }
+    .rasc-etapas button[aria-current="page"] { color: var(--verde-700); font-weight: 600; box-shadow: inset 0 -3px 0 var(--verde-600); }
+    .rasc-etapas button:disabled { cursor: default; }
+    .rasc-etapas .num { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; margin-right: 6px;
+      border-radius: 50%; background: #eceeef; font-size: 12px; font-weight: 600; }
+    .rasc-etapas button[aria-current="page"] .num { background: var(--verde-600); color: #fff; }
+
+    .rasc-pagina { display: flex; flex-direction: column; gap: 16px; padding: 16px 24px 32px; }
+    .linha-acoes { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+    .linha-acoes p { margin: 0; color: var(--texto-suave); font-size: 14px; max-width: 70ch; }
+
+    /* ===== Etapa 1: lista editável por grupo ===== */
+    .grupo-est { background: var(--superficie); border: 1px solid var(--borda); border-radius: var(--raio); overflow: hidden; }
+    .grupo-est__topo { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; padding: 12px 16px; border-bottom: 1px solid var(--borda); }
+    .grupo-est__nome { margin: 0; font-size: 16px; }
+    .grupo-est__tipo { font-size: 13px; color: var(--texto-suave); }
+    .grupo-est__topo .botao { margin-left: auto; }
+    .grupo-est .talhoes-rolagem, .cal-tabela.talhoes-rolagem { flex: none; min-height: 0; height: auto; }
+    .grupo-est__seta .icone { transition: transform .15s; }
+    .grupo-est__seta--recolhido .icone { transform: rotate(-90deg); }
+    .grupo-est__nome { cursor: text; border-radius: 6px; padding: 2px 4px; }
+    .grupo-est__nome:hover { background: #f4f7f5; }
+    .grupo-est__campo { width: 260px; height: 34px; font-weight: 600; }
+    .grupo-est__nota { margin-left: auto; font-size: 13px; color: var(--texto-suave); }
+    .est-ciclo { display: inline-block; min-width: 72px; color: var(--texto-suave); font-size: 13px; }
+    .aviso-revisar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; padding: 14px 16px; border: 1px solid #f0d98a; border-radius: var(--raio); background: #fff8e1; }
+    .aviso-revisar > .icone { width: 20px; height: 20px; color: #8a6a00; flex-shrink: 0; }
+    .aviso-revisar p { flex: 1; min-width: 260px; margin: 0; font-size: 14px; }
+    .aviso-revisar .botao { margin-left: auto; }
+    /* Etapa 1 em tabela única (layout da Tabela do Calendário): faixa por grupo, todas as operações abertas */
+    /* Tabela do tamanho do conteúdo: as colunas ficam juntas e a caixa encolhe (a sobra fica fora, à direita) */
+    .tab-op__caixa { width: fit-content; max-width: 100%; background: var(--superficie); border: 1px solid var(--borda); border-radius: var(--raio); overflow: auto; }
+    .tab-op { width: auto; border-collapse: collapse; font-size: 14px; }
+    .tab-op thead th { position: sticky; top: 0; z-index: 1; padding: 12px 16px; text-align: left; font-size: 13px; font-weight: 600;
+      color: var(--texto); background: #f7f8f7; border-bottom: 1px solid var(--borda); white-space: nowrap; }
+    .tab-op td { padding: 6px 16px; border-top: 1px solid var(--borda); vertical-align: middle; }
+    .tab-op__dap { width: 96px; text-align: center !important; }
+    .tab-op__acao { width: 52px; text-align: center; }
+    .tab-op__faixa th { padding: 0; background: #eef4ef; border-top: 1px solid var(--borda); text-align: left; font-weight: 600; }
+    .tab-op__faixa-linha { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; padding: 10px 16px; }
+    .tipo-ico { width: 18px; height: 18px; flex-shrink: 0; }
+    .tab-op__grupo-nome { padding: 2px 4px; border-radius: 6px; cursor: text; font-size: 15px; }
+    .tab-op__grupo-nome:hover { background: #dfeadf; }
+    .tab-op__campo-grupo { width: 260px; height: 32px; font-weight: 600; }
+    .tab-op__qtd { font-size: 13px; font-weight: 400; color: var(--texto-suave); }
+    .tab-op__acoes { display: flex; flex-wrap: wrap; gap: 4px 16px; margin-left: auto; padding-left: 24px; }
+    .tab-op__acao-grupo { font-size: 13px; font-weight: 500; }
+    .tab-op__acao-grupo .icone { width: 15px; height: 15px; }
+    .tab-op__perigo { color: var(--texto-suave); }
+    .tab-op__perigo:hover { color: #b42318; }
+    .tab-op__op { min-width: 280px; font-weight: 600; white-space: nowrap; }
+    .tab-op__fase { font-size: 15px; }
+    .tab-op__grupo { display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; color: var(--texto-suave); }
+    .tab-op__sel-grupo { width: 220px; height: 34px; }
+    .grupos-linha { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    .grupos-linha__rotulo { font-size: 13px; font-weight: 600; color: var(--texto-suave); margin-right: 4px; }
+    .grupo-chip { display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 6px 0 10px; border: 1px solid var(--borda);
+      border-radius: 999px; background: var(--superficie); font-size: 14px; }
+    .grupo-chip__nome { cursor: text; border-radius: 4px; padding: 0 2px; }
+    .grupo-chip__nome:hover { background: #eef2ef; }
+    .grupo-chip__qtd { min-width: 20px; padding: 0 6px; border-radius: 999px; background: #eceeef; font-size: 12px; text-align: center; }
+    .grupo-chip__excluir { width: 26px; height: 26px; }
+    .grupo-chip__excluir .icone { width: 14px; height: 14px; }
+    .grupo-chip__campo { width: 180px; height: 28px; }
+    .tab-op__nome { display: inline-block; padding: 2px 6px; margin-left: -6px; border-radius: 6px; cursor: text; }
+    .tab-op__nome:hover { background: #eef2ef; }
+    .tab-op__campo { width: 100%; min-width: 240px; height: 34px; }
+    .tab-op__num { width: 72px; height: 34px; text-align: right; font-variant-numeric: tabular-nums; }
+    .tab-op__dap .tab-op__num { text-align: center; }
+    .tab-op__fen { width: 130px; height: 34px; }
+    .tab-op__fixo { color: var(--texto-suave); }
+    .tab-op__prazo { display: inline-flex; align-items: center; gap: 6px; color: var(--texto-suave); font-size: 13px; white-space: nowrap; }
+    .tab-op__vazio { color: var(--texto-suave); }
+    .aviso-revisar { display: flex; align-items: center; gap: 10px; padding: 0 2px; border: 0; background: none; color: var(--texto-suave); font-size: 14px; }
+    .aviso-revisar > .icone { width: 16px; height: 16px; }
+    .aviso-revisar p { margin: 0; }
+    .aviso-revisar p strong { color: var(--texto); }
+    .est-tabela { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .est-tabela th { padding: 8px 12px; text-align: left; font-size: 13px; font-weight: 600; color: var(--texto-suave); background: #f7f8f7; white-space: nowrap; }
+    .est-tabela td { padding: 6px 12px; border-top: 1px solid var(--borda); vertical-align: middle; }
+    .est-tabela .campo__controle { height: 34px; }
+    .est-nome { width: 100%; min-width: 220px; }
+    .est-num { width: 72px; text-align: right; font-variant-numeric: tabular-nums; }
+    .est-fen { width: 140px; }
+    .est-prazo { display: inline-flex; align-items: center; gap: 6px; color: var(--texto-suave); font-size: 13px; }
+    .est-col-acao { width: 44px; text-align: center; }
+    .est-nova { display: inline-flex; align-items: center; gap: 6px; margin: 8px 12px 12px; padding: 0; border: 0; background: none;
+      color: var(--verde-700); font: inherit; font-size: 14px; cursor: pointer; }
+    .est-nova .icone { width: 16px; height: 16px; }
+    .est-vazio { padding: 12px 16px; color: var(--texto-suave); font-size: 14px; }
+
+    /* ===== Etapa 3: Calendário ===== */
+    .resumo { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; }
+    .resumo__item { display: flex; flex-direction: column; gap: 4px; padding: 14px 16px; background: var(--superficie);
+      border: 1px solid var(--borda); border-radius: var(--raio); }
+    .resumo__rotulo { font-size: 13px; color: var(--texto-suave); }
+    .resumo__valor { font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; }
+    .resumo__valor small { font-size: 14px; font-weight: 400; color: var(--texto-suave); }
+    .resumo__dica { font-size: 13px; color: var(--texto-suave); }
+    .progresso { height: 6px; border-radius: 3px; background: #e9ece9; overflow: hidden; }
+    .progresso span { display: block; height: 100%; background: var(--verde-600); }
+    .cal-fase__img { display: block; width: 120px; height: 80px; margin: 12px auto 4px; object-fit: contain; }
+    .cal-info { min-height: 0; }
+    .cal-fase__itens { overflow: visible; }
+    .situacao { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; font-size: 13px; }
+    .situacao::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--verde-600); }
+    .situacao--parcial::before { background: #c98a00; }
+    .situacao--nao::before { background: #b9c0bc; }
+    .pendentes { background: var(--superficie); border: 1px solid var(--borda); border-radius: var(--raio); }
+    .pendentes summary { display: flex; align-items: center; gap: 10px; padding: 12px 16px; cursor: pointer; font-size: 14px; }
+    .pendentes summary .icone { width: 18px; height: 18px; color: var(--texto-suave); }
+    .pendentes__grupos { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px 24px; padding: 4px 16px 16px; }
+    .pendentes__grupos h4 { display: flex; justify-content: space-between; margin: 0 0 6px; font-size: 13px; color: var(--texto-suave); font-weight: 600; }
+    .pendentes__grupos h4 button { padding: 0; border: 0; background: none; color: var(--verde-700); font: inherit; cursor: pointer; text-decoration: underline; }
+    .pendentes__grupos ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 4px; font-size: 14px; }
+    .pendentes__dap { color: var(--texto-suave); font-variant-numeric: tabular-nums; }
+    .cal-tabela__tabela td.tabela__numero { font-variant-numeric: tabular-nums; }
+
+    /* Etapa 2 (só um aviso: a tela é a de Operações do protótipo) */
+    .rasc-etapa2 { padding: 24px; background: var(--superficie); border: 1px dashed var(--borda); border-radius: var(--raio); color: var(--texto-suave); }
+  </style>
+</head>
+<body>
+  <div class="rasc-barra">
+    <strong>Rascunho das etapas</strong>
+    <div class="rasc-opcoes" role="group" aria-label="Situação do planejamento (para o Calendário)">
+      <span class="rasc-nota">Planejamento:</span>
+      <button type="button" data-plan="nada">Nada planejado</button>
+      <button type="button" data-plan="andamento">Em andamento</button>
+    </div>
+    <span class="rasc-nota">Fazenda São José · dados de exemplo · só para visualizar (não é o protótipo)</span>
+  </div>
+
+  <header class="rasc-plano">
+    <div>
+      <div class="rasc-plano__linha">
+        <b>Plano de Safra</b> › Safra 26/27 · Empresa A · Fazenda São José · Cultura Soja
+        <span class="rasc-plano__status">● Em construção</span>
+      </div>
+      <nav class="rasc-etapas" aria-label="Etapas do plano" id="etapas"></nav>
+    </div>
+  </header>
+
+  <main class="rasc-pagina" id="pagina"></main>
+
+  <script src="../js/dados-exemplo.js"></script>
+  <script src="../js/util.js"></script>
+  <script src="../js/icones.js"></script>
+  <script>
+  (function () {
+    const esc = Util.escapar;
+    const FAZENDA = 'São José';
+    const talhoes = DADOS.talhoes[FAZENDA];
+    const todos = talhoes.map((t) => t.nome);
+
+    // Imagens de fenologia: caminho completo e literal (o script do arquivo único embute só assim)
+    const IMAGENS = {
+      'pre': '../img/fenologia/PRE-PLANTIO.svg', 'plantio': '../img/fenologia/PLANTIO.svg',
+      'VE': '../img/fenologia/VE.svg', 'VC': '../img/fenologia/VC.svg',
+      'V1': '../img/fenologia/V1.svg', 'V2': '../img/fenologia/V2.svg', 'V3': '../img/fenologia/V3.svg',
+      'V4': '../img/fenologia/V4.svg', 'V5': '../img/fenologia/V5.svg', 'V6': '../img/fenologia/V6.svg',
+      'R1': '../img/fenologia/R1.svg', 'R2': '../img/fenologia/R2.svg', 'R3': '../img/fenologia/R3.svg',
+      'R4': '../img/fenologia/R4.svg', 'R5': '../img/fenologia/R5.svg', 'R6': '../img/fenologia/R6.svg',
+      'R7': '../img/fenologia/R7.svg', 'R8': '../img/fenologia/R8.svg',
+      'neutro': '../img/fenologia/NEUTRO.svg',
+      'colheita': '../img/fenologia/R8.svg' // provisório: falta uma imagem de colheita
+    };
+
+    // ----- Estrutura do plano (etapa 1): copiada do modelo e editável -----
+    let seq = 0;
+    const grupos = DADOS.modeloOperacoes.map((g) => ({ id: `g${++seq}`, nome: g.nome, tipo: g.tipo,
+      operacoes: g.operacoes.map((o) => ({ id: `o${++seq}`, nome: o.nome, dap: o.dap ?? null, fenologia: o.fenologia || '',
+        prazo: o.prazo ?? null, colheita: g.tipo === 'Colheita' })) }));
+    const prazoPadrao = (g) => (g.tipo === 'Sementes' ? 3 : g.tipo === 'Colheita' ? 10 : 2);
+    const todasOps = () => grupos.flatMap((g) => g.operacoes.map((o) => ({ g, o })));
+    const fenologiaFixa = (dap) => (dap === null || dap === '' ? null : dap < 0 ? 'Pré-plantio' : dap === 0 ? 'Plantio' : null);
+
+    // ----- Planejamento (etapa 2), simulado: por nome de operação -----
+    const T = (...n) => n.map((x) => `T${String(x).padStart(2, '0')}`);
+    const PLANEJAMENTOS = {
+      nada: { plantio: {}, recs: {} },
+      andamento: {
+        plantio: { T01: ['BMX Foco IPRO', '2026-09-22'], T02: ['BMX Foco IPRO', '2026-09-24'], T03: ['BMX Olimpo IPRO', '2026-09-28'],
+                   T04: ['BMX Olimpo IPRO', '2026-10-01'], T05: ['TMG 2383 IPRO', '2026-10-05'] },
+        recs: {
+          'Calagem': { talhoes: todos, produtos: [['Calcário dolomítico PRNT 85%', '2', 't/ha']] },
+          '1ª Dessecação: pré-plantio': { talhoes: todos, produtos: [['Roundup Original DI', '2,50', 'L/ha'], ['DMA 806 BR', '1,00', 'L/ha']] },
+          'Tratamento de sementes (TSI)': { talhoes: T(1, 2, 3, 4, 5), produtos: [['Standak Top', '200,00', 'mL/100 kg'], ['Masterfix L Soja', '200,00', 'mL/100 kg']] },
+          'Pré-emergente': { talhoes: T(1, 2, 3, 4, 5), produtos: [['Dual Gold', '1,50', 'L/ha']] }
+        }
+      }
+    };
+    const ui = { etapa: 'estrutura', plan: 'nada', visao: 'infografico', recolhidos: new Set(), renomeandoGrupo: null, renomeandoOp: null };
+    const plan = () => PLANEJAMENTOS[ui.plan];
+
+    // ----- Contas -----
+    const area = (nomes) => talhoes.filter((t) => nomes.includes(t.nome)).reduce((s, t) => s + t.area, 0);
+    const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    const diaMes = (s) => { const [, m, d] = s.split('-'); return `${d}/${m}`; };
+    const somaDias = (s, n) => { const [a, m, d] = s.split('-').map(Number); return iso(new Date(a, m - 1, d + n)); };
+    const ciclo = (v) => (DADOS.variedades.find((x) => x.nome === v) || {}).ciclo || null;
+
+    // Talhões planejados numa operação: Plantio = com variedade; Colheita = com plantio e ciclo; demais = com recomendação
+    function talhoesPlanejados(g, o) {
+      const p = plan();
+      if (g.tipo === 'Sementes') return Object.keys(p.plantio);
+      if (g.tipo === 'Colheita') return Object.keys(p.plantio).filter((t) => ciclo(p.plantio[t][0]));
+      return (p.recs[o.nome] || {}).talhoes || [];
+    }
+
+    // =================== Etapas ===================
+    const ETAPAS = [['estrutura', 'Operações'], ['planejamento', 'Planejamento'], ['calendario', 'Calendário Agrícola'],
+      ['suprimentos', 'Suprimentos'], ['aprovacao', 'Aprovação']];
+    function desenharEtapas() {
+      document.getElementById('etapas').innerHTML = ETAPAS.map(([id, nome], i) => `
+        <button type="button" data-etapa="${id}" ${ui.etapa === id ? 'aria-current="page"' : ''} ${i > 2 ? 'disabled' : ''}>
+          <span class="num">${i + 1}</span>${nome}</button>`).join('');
+    }
+
+    // =================== Etapa 1: Operações (tabela por fase da cultura) ===================
+    // Faixas na ordem em que as coisas acontecem. A fase vem do DAP (e o grupo Colheita fica em Colheita).
+    const FASES = [
+      { id: 'pre', nome: 'Pré-plantio', dapNovo: -1 },
+      { id: 'plantio', nome: 'Plantio', dapNovo: 0 },
+      { id: 'desenv', nome: 'Desenvolvimento', dapNovo: 1 },
+      { id: 'colheita', nome: 'Colheita', dapNovo: null }
+    ];
+    function faseDaOp(g, o) {
+      if (g.tipo === 'Colheita') return 'colheita';
+      if (g.tipo === 'Sementes') return 'plantio';
+      if (o.dap === null || o.dap === '') return 'desenv';
+      return o.dap < 0 ? 'pre' : o.dap === 0 ? 'plantio' : 'desenv';
+    }
+    const BROTO = '<svg viewBox="0 0 24 24" class="tipo-ico" style="color:#2e7d32"><path d="M12 21v-9M12 12c0-4 2.5-6.5 7-6.5 0 4.5-2.5 6.5-7 6.5Zm0 2c0-3.5-2.2-5.5-6.5-5.5 0 3.8 2.2 5.5 6.5 5.5Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+    // Ícone de cada tipo de grupo
+    const ICONE_TIPO = {
+      'Sementes': '<svg viewBox="0 0 24 24" class="tipo-ico" style="color:#d9822b"><ellipse cx="12" cy="12" rx="6" ry="8" transform="rotate(30 12 12)" fill="none" stroke="currentColor" stroke-width="2"/></svg>',
+      'Tratamento de sementes': '<svg viewBox="0 0 24 24" class="tipo-ico" style="color:#b0682f"><ellipse cx="12" cy="12" rx="6" ry="8" transform="rotate(30 12 12)" fill="currentColor"/><path d="M9 15c2-1 4-4 5-7" stroke="#fff" stroke-width="1.6" fill="none"/></svg>',
+      'Defensivos': '<svg viewBox="0 0 24 24" class="tipo-ico" style="color:#2a64a8"><path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>',
+      'Fertilidade': '<svg viewBox="0 0 24 24" class="tipo-ico" style="color:#3c8d2f"><path d="M5 19c0-8 5-13 14-14-1 9-6 14-14 14z" fill="currentColor"/><path d="M5 19l8-8" stroke="#fff" stroke-width="1.6"/></svg>',
+      'Colheita': '<svg viewBox="0 0 24 24" class="tipo-ico" style="color:#b8860b"><path d="M12 21V8M12 8c-3 0-4-2-4-4 3 0 4 2 4 4zm0 0c3 0 4-2 4-4-3 0-4 2-4 4zm0 5c-3 0-4-2-4-4 3 0 4 2 4 4zm0 0c3 0 4-2 4-4-3 0-4 2-4 4z" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>'
+    };
+    const fixoGrupo = (g) => g.tipo === 'Sementes' || g.tipo === 'Colheita';
+
+    function celulaNome(o) {
+      if (ui.renomeandoOp === o.id) {
+        return `<input class="campo__controle tab-op__campo" data-campo="nome-op" data-op="${o.id}" value="${esc(o.nome)}" aria-label="Nome da operação">`;
+      }
+      return `<span class="tab-op__nome" tabindex="0" data-renomear-op="${o.id}" title="Clique duas vezes para renomear">${esc(o.nome)}</span>`;
+    }
+
+    // Grupo na linha: Plantio e Colheita fixos; as demais escolhem entre os grupos que recebem operações
+    function celulaGrupo(g, o) {
+      if (fixoGrupo(g)) return `<span class="tab-op__grupo">${ICONE_TIPO[g.tipo] || ''}${esc(g.nome)}</span>`;
+      const opcoes = grupos.filter((x) => !fixoGrupo(x));
+      return `<span class="tab-op__grupo">${ICONE_TIPO[g.tipo] || ''}
+        <select class="campo__controle tab-op__sel-grupo" data-campo="grupo" data-op="${o.id}" aria-label="Grupo de operação de ${esc(o.nome)}">
+          ${opcoes.map((x) => `<option value="${x.id}" ${x === g ? 'selected' : ''}>${esc(x.nome)}</option>`).join('')}
+          <option value="__novo__">+ Novo grupo de operação</option>
+        </select></span>`;
+    }
+
+    function linhaOp(g, o) {
+      // Pré-plantio, Plantio e Colheita não têm fenologia (a fase já está na faixa): "—", sem escolher
+      const fase = faseDaOp(g, o);
+      const semFenologia = fase === 'pre' || fase === 'plantio' || fase === 'colheita';
+      const dap = g.tipo === 'Sementes' ? '<span class="tab-op__fixo" title="O plantio é sempre o DAP 0">0</span>'
+        : g.tipo === 'Colheita' ? '<span class="tab-op__fixo" title="Data de plantio + ciclo da variedade, talhão a talhão">Pelo ciclo</span>'
+          : `<input class="campo__controle tab-op__num" data-campo="dap" data-op="${o.id}" value="${o.dap ?? ''}" placeholder="—" inputmode="numeric" aria-label="DAP de ${esc(o.nome)}">`;
+      const fen = semFenologia ? '<span class="tab-op__fixo" title="Sem fenologia nesta fase">—</span>'
+        : `<select class="campo__controle tab-op__fen" data-campo="fenologia" data-op="${o.id}" aria-label="Fenologia de ${esc(o.nome)}">
+             <option value="">—</option>${DADOS.fenologia.map((f) => `<option ${f === o.fenologia ? 'selected' : ''}>${f}</option>`).join('')}</select>`;
+      return `
+        <tr>
+          <td class="tab-op__dap">${dap}</td>
+          <td>${fen}</td>
+          <td class="tab-op__op">${celulaNome(o)}</td>
+          <td>${celulaGrupo(g, o)}</td>
+          <td><span class="tab-op__prazo"><input class="campo__controle tab-op__num" data-campo="prazo" data-op="${o.id}" value="${o.prazo ?? prazoPadrao(g)}" inputmode="numeric"
+                aria-label="Previsão de conclusão de ${esc(o.nome)}, em dias"> dias</span></td>
+          <td class="tab-op__acao">${fixoGrupo(g) ? '' : `<button class="botao-icone" type="button" data-acao="excluir-op" data-op="${o.id}" title="Excluir operação" aria-label="Excluir ${esc(o.nome)}">${Icones.lixeira}</button>`}</td>
+        </tr>`;
+    }
+
+    // Linha dos grupos (acima da tabela): renomear com dois cliques, excluir grupo, novo grupo
+    function linhaGrupos() {
+      return `
+        <div class="grupos-linha" aria-label="Grupos de operação">
+          <span class="grupos-linha__rotulo">Grupos de operação</span>
+          ${grupos.map((g) => `
+            <span class="grupo-chip">${ICONE_TIPO[g.tipo] || ''}
+              ${ui.renomeandoGrupo === g.id
+                ? `<input class="campo__controle grupo-chip__campo" data-campo="nome-grupo" data-grupo="${g.id}" value="${esc(g.nome)}" aria-label="Nome do grupo">`
+                : `<span class="grupo-chip__nome" tabindex="0" data-renomear-grupo="${g.id}" title="Clique duas vezes para renomear">${esc(g.nome)}</span>`}
+              <span class="grupo-chip__qtd">${g.operacoes.length}</span>
+              ${fixoGrupo(g) ? '' : `<button class="botao-icone grupo-chip__excluir" type="button" data-acao="excluir-grupo" data-grupo="${g.id}" title="Excluir o grupo e as operações dele" aria-label="Excluir o grupo ${esc(g.nome)}">${Icones.fechar}</button>`}
+            </span>`).join('')}
+          <button class="link-acao grupos-linha__novo" type="button" data-acao="novo-grupo">${Icones.mais} Novo grupo</button>
+        </div>`;
+    }
+
+    function estrutura() {
+      const porFase = {};
+      FASES.forEach((f) => { porFase[f.id] = []; });
+      grupos.forEach((g) => g.operacoes.forEach((o) => porFase[faseDaOp(g, o)].push({ g, o })));
+      return `
+        <p class="rasc-explica">Rascunho: etapa Operações por fase da cultura (como a imagem do Calendário em tabela). A fase vem do DAP: mudar o DAP move a operação de faixa. Novo grupo: na lista de grupo da linha, "+ Novo grupo de operação".</p>
+        <div class="aviso-revisar" role="note">${Icones.info}
+          <p><strong>Revise as operações cadastradas.</strong> Cada operação vira uma Ordem de Serviço (OS) quando o plano for aprovado. Se estiver tudo certo, siga para o planejamento.</p>
+        </div>
+        <div class="tab-op__caixa">
+          <table class="tab-op">
+            <thead><tr><th class="tab-op__dap">DAP</th><th>Fenologia</th><th>Operação</th><th>Grupo de operação</th><th>Previsão de conclusão</th><th class="tab-op__acao"><span class="so-leitor">Excluir</span></th></tr></thead>
+            ${FASES.map((f) => {
+              const linhas = porFase[f.id].sort((a, b) => (a.o.dap ?? 9999) - (b.o.dap ?? 9999));
+              return `
+              <tbody>
+                <tr class="tab-op__faixa"><th colspan="6" scope="rowgroup"><div class="tab-op__faixa-linha">
+                  ${f.id === 'colheita' ? ICONE_TIPO.Colheita : BROTO}<span class="tab-op__fase">${f.nome}</span>
+                  <span class="tab-op__qtd">${linhas.length} ${linhas.length === 1 ? 'operação' : 'operações'}</span>
+                  ${f.id === 'colheita' ? '<span class="tab-op__qtd">· a data vem do plantio + ciclo da variedade</span>'
+                    : `<span class="tab-op__acoes"><button class="link-acao tab-op__acao-grupo" type="button" data-acao="nova-op-fase" data-fase="${f.id}">${Icones.mais} Adicionar operação</button></span>`}
+                </div></th></tr>
+                ${linhas.length ? linhas.map(({ g, o }) => linhaOp(g, o)).join('')
+                  : '<tr><td colspan="6" class="tab-op__vazio">Nenhuma operação nesta fase.</td></tr>'}
+              </tbody>`;
+            }).join('')}
+          </table>
+        </div>`;
+    }
+
+    // =================== Etapa 3: Calendário ===================
+    function resumo() {
+      const p = plan();
+      const comPlantio = Object.keys(p.plantio);
+      const datas = comPlantio.map((t) => p.plantio[t][1]).sort();
+      const colheitas = comPlantio.map((t) => { const c = ciclo(p.plantio[t][0]); return c ? somaDias(p.plantio[t][1], c) : null; }).filter(Boolean).sort();
+      const ops = todasOps();
+      const nPlan = ops.filter(({ g, o }) => talhoesPlanejados(g, o).length).length;
+      const total = area(todos);
+      const semPlantio = '<span class="resumo__dica">Plantio ainda não definido</span>';
+      return `
+        <section class="resumo" aria-label="Resumo do planejamento">
+          <div class="resumo__item"><span class="resumo__rotulo">Talhões da fazenda</span>
+            <span class="resumo__valor">${talhoes.length} <small>talhões · ${Util.area(total)}</small></span></div>
+          <div class="resumo__item"><span class="resumo__rotulo">Plantio definido</span>
+            <span class="resumo__valor">${comPlantio.length} <small>de ${talhoes.length} talhões · ${Util.area(area(comPlantio))}</small></span>
+            <div class="progresso" aria-hidden="true"><span style="width:${Math.round(area(comPlantio) / total * 100)}%"></span></div></div>
+          <div class="resumo__item"><span class="resumo__rotulo">Janela de plantio</span>
+            ${datas.length ? `<span class="resumo__valor">${diaMes(datas[0])} <small>a</small> ${diaMes(datas[datas.length - 1])}</span>` : `<span class="resumo__valor">—</span>${semPlantio}`}</div>
+          <div class="resumo__item"><span class="resumo__rotulo">Previsão de colheita</span>
+            ${colheitas.length ? `<span class="resumo__valor">${diaMes(colheitas[0])} <small>a</small> ${diaMes(colheitas[colheitas.length - 1])}</span>` : `<span class="resumo__valor">—</span>${semPlantio}`}</div>
+          <div class="resumo__item"><span class="resumo__rotulo">Operações planejadas</span>
+            <span class="resumo__valor">${nPlan} <small>de ${ops.length}</small></span>
+            <div class="progresso" aria-hidden="true"><span style="width:${ops.length ? Math.round(nPlan / ops.length * 100) : 0}%"></span></div></div>
+        </section>`;
+    }
+
+    function situacao(n) {
+      if (!n) return '<span class="situacao situacao--nao">Não planejada</span>';
+      return `<span class="situacao ${n < talhoes.length ? 'situacao--parcial' : ''}">Planejada · ${n} de ${talhoes.length} talhões</span>`;
+    }
+
+    // Itens do calendário: só operações planejadas, mais a colheita prevista pelo plantio
+    function itens() {
+      const p = plan();
+      const lista = todasOps().map(({ g, o }) => ({ g, o, ts: talhoesPlanejados(g, o) })).filter((x) => x.ts.length && x.g.tipo !== 'Colheita').map(({ g, o, ts }) => ({
+        grupo: g, nome: o.nome, dap: o.dap, fenologia: fenologiaFixa(o.dap) || o.fenologia, prazo: o.prazo ?? prazoPadrao(g), talhoes: ts,
+        produtos: (p.recs[o.nome] || {}).produtos || null,
+        sub: g.tipo === 'Sementes' ? `${new Set(ts.map((t) => p.plantio[t][0])).size} variedades` : ''
+      }));
+      lista.sort((a, b) => (a.dap ?? 9999) - (b.dap ?? 9999));
+      // Colheita (grupo Colheita): DAP pelo ciclo da variedade; fenologia Colheita; previsão de conclusão do grupo
+      const gColheita = grupos.find((g) => g.tipo === 'Colheita');
+      const oColheita = gColheita && gColheita.operacoes[0];
+      const comCiclo = Object.keys(p.plantio).filter((t) => ciclo(p.plantio[t][0]));
+      if (oColheita && comCiclo.length) {
+        const ciclos = comCiclo.map((t) => ciclo(p.plantio[t][0]));
+        lista.push({ colheita: true, grupo: gColheita, nome: oColheita.nome, dap: Math.min(...ciclos), dapMax: Math.max(...ciclos),
+          fenologia: 'Colheita', prazo: oColheita.prazo ?? 10, talhoes: comCiclo, sub: `${new Set(comCiclo.map((t) => p.plantio[t][0])).size} variedades` });
+      }
+      return lista;
+    }
+
+    function chaveFase(it) {
+      if (it.colheita) return 'colheita';
+      if (it.dap === null) return 'sem-dap';
+      if (it.dap < 0) return 'pre';
+      if (it.dap === 0) return 'plantio';
+      return it.fenologia ? `fen:${it.fenologia}` : `dap:${it.dap}`;
+    }
+    function visual(k) {
+      if (k === 'pre') return ['Pré-plantio', '#6f5b12', IMAGENS.pre];
+      if (k === 'plantio') return ['Plantio', '#2e7d32', IMAGENS.plantio];
+      if (k === 'colheita') return ['Colheita', '#23395d', IMAGENS.colheita];
+      if (k === 'sem-dap') return ['Sem DAP', '#6b7280', IMAGENS.neutro];
+      if (k.startsWith('fen:')) { const f = k.slice(4); return [f, /^V/.test(f) ? '#0f7f74' : '#2a64a8', IMAGENS[f] || IMAGENS.neutro]; }
+      return [`${k.slice(4)} DAP`, '#6b7280', IMAGENS.neutro];
+    }
+    const etiqueta = (g) => `<span class="cal-etiqueta cal-etiqueta--${Util.normalizar(g.tipo || 'outro').replace(/\s+/g, '-')}">${esc(g.nome)}</span>`;
+
+    function infografico(lista) {
+      const mapa = new Map();
+      lista.forEach((it) => {
+        const k = chaveFase(it);
+        if (!mapa.has(k)) mapa.set(k, { k, itens: [], daps: [] });
+        mapa.get(k).itens.push(it);
+        if (it.dap !== null) mapa.get(k).daps.push(it.dap, it.dapMax ?? it.dap);
+      });
+      const peso = (c) => (c.k === 'colheita' ? 1e6 : c.k === 'sem-dap' ? 2e6 : Math.min(...c.daps));
+      const cols = [...mapa.values()].sort((a, b) => peso(a) - peso(b) || DADOS.fenologia.indexOf(a.k.slice(4)) - DADOS.fenologia.indexOf(b.k.slice(4)));
+      return `
+        <div class="cal-info" role="list" aria-label="Calendário por fase da cultura">
+          ${cols.map((c, i) => {
+            const [titulo, cor, img] = visual(c.k);
+            const min = Math.min(...c.daps); const max = Math.max(...c.daps);
+            const faixa = c.k.startsWith('dap:') ? 'sem fenologia' : c.daps.length ? (min === max ? `${min} DAP` : `${min} a ${max} DAP`) : '';
+            const ts = new Set(c.itens.flatMap((it) => it.talhoes));
+            return `
+              ${i ? `<span class="cal-info__seta" aria-hidden="true">${Icones.proxima}</span>` : ''}
+              <section class="cal-fase" role="listitem">
+                <header class="cal-fase__titulo" style="background:${cor}"><span class="cal-fase__nome">${esc(titulo)}</span>${faixa ? `<span class="cal-fase__dap">(${faixa})</span>` : ''}</header>
+                <img class="cal-fase__img" src="${img}" alt="">
+                <div class="cal-fase__itens">${c.itens.map((it) => `
+                  <article class="cal-cartao">${etiqueta(it.grupo)}<h4 class="cal-cartao__nome">${esc(it.nome)}</h4>
+                    ${it.sub ? `<p class="cal-cartao__sub">${it.sub}</p>` : ''}
+                    ${it.produtos ? `<ul class="cal-cartao__produtos">${it.produtos.map(([n, d, u]) => `<li><span class="cal-cartao__produto">${esc(n)}</span><span class="cal-cartao__dose">${d} ${u}</span></li>`).join('')}</ul>` : ''}
+                  </article>`).join('')}</div>
+                <footer class="cal-fase__pe">${Icones.mapa}<span><strong>${Util.area(area([...ts]))}</strong> · ${ts.size} ${ts.size === 1 ? 'talhão' : 'talhões'}</span></footer>
+              </section>`;
+          }).join('')}
+        </div>`;
+    }
+
+    // Tabela: só leitura (o prazo é editado na etapa 1); situação em vez de "talhões x/y"
+    function tabela(lista) {
+      const produtos = [];
+      lista.forEach((it) => (it.produtos || []).forEach(([n]) => { if (!produtos.includes(n)) produtos.push(n); }));
+      return `
+        <div class="cal-tabela talhoes-rolagem" style="max-height:none">
+          <table class="tabela tabela--compacta tabela-talhoes cal-tabela__tabela">
+            <thead><tr><th class="tabela__numero">DAP</th><th>Fenologia</th><th>Grupo de operação</th><th>Operação</th><th>Previsão de conclusão</th>
+              <th>Situação</th><th class="tabela__numero">Área (ha)</th>${produtos.map((n) => `<th class="tabela__numero">${esc(n)}</th>`).join('')}</tr></thead>
+            <tbody>${lista.map((it) => `
+              <tr><td class="tabela__numero">${it.colheita && it.dapMax !== it.dap ? `${it.dap} a ${it.dapMax}` : it.dap ?? '—'}</td>
+                <td>${esc(it.fenologia || '—')}</td><td>${esc(it.grupo.nome)}</td><th scope="row" class="cal-tabela__op">${esc(it.nome)}</th>
+                <td>${it.prazo} dias</td><td>${situacao(it.talhoes.length)}</td>
+                <td class="tabela__numero">${Util.area(area(it.talhoes)).replace(' ha', '')}</td>
+                ${produtos.map((n) => { const a = (it.produtos || []).find(([x]) => x === n); return a ? `<td class="tabela__numero">${a[1]} ${a[2]}</td>` : '<td class="tabela__numero tabela__nao-recebe">—</td>'; }).join('')}
+              </tr>`).join('')}</tbody>
+          </table>
+        </div>`;
+    }
+
+    function pendentes() {
+      const sem = todasOps().filter(({ g, o }) => !talhoesPlanejados(g, o).length);
+      if (!sem.length) return '';
+      const porGrupo = grupos.map((g) => [g, sem.filter((x) => x.g === g)]).filter(([, l]) => l.length);
+      return `
+        <details class="pendentes" ${sem.length === todasOps().length ? 'open' : ''}>
+          <summary>${Icones.info}<span><strong>${sem.length} ${sem.length === 1 ? 'operação ainda não planejada' : 'operações ainda não planejadas'}</strong> · entram no calendário quando tiverem talhões planejados</span></summary>
+          <div class="pendentes__grupos">
+            ${porGrupo.map(([g, l]) => `
+              <div><h4><span>${esc(g.nome)}</span>${g.tipo === 'Colheita' ? '<span>vem do plantio</span>' : `<button type="button" data-etapa="planejamento" data-grupo="${g.id}">Planejar</button>`}</h4>
+                <ul>${l.map(({ o }) => `<li>${esc(o.nome)} <span class="pendentes__dap">· ${o.dap === null ? 'sem DAP' : `${o.dap} DAP`}</span></li>`).join('')}</ul></div>`).join('')}
+          </div>
+        </details>`;
+    }
+
+    function calendario() {
+      const lista = itens();
+      return `
+        <p class="rasc-explica">Etapa 3: conferência do que foi planejado. Resumo no topo; Infográfico e Tabela só com as operações que têm talhões planejados;
+          as outras ficam no aviso, com "Planejar" por grupo. Troque "Planejamento" na barra amarela para ver com e sem dados.</p>
+        ${resumo()}
+        <div class="calendario__barra">
+          <label class="calendario__filtro"><span class="calendario__filtro-rotulo">Talhão</span>
+            <select class="campo__controle" aria-label="Talhão"><option>Todos os talhões</option></select></label>
+          <div class="visoes calendario__visoes" role="group" aria-label="Visão do calendário">
+            ${[['infografico', Icones.grafico, 'Infográfico'], ['tabela', Icones.lista, 'Tabela']].map(([v, ic, r]) =>
+              `<button class="visoes__botao ${ui.visao === v ? 'visoes__botao--ativo' : ''}" type="button" data-visao="${v}" aria-pressed="${ui.visao === v}">${ic}${r}</button>`).join('')}
+          </div>
+        </div>
+        ${lista.length ? (ui.visao === 'tabela' ? tabela(lista) : infografico(lista)) : ''}
+        ${pendentes()}`;
+    }
+
+    function planejamento(grupoId) {
+      const g = grupos.find((x) => x.id === grupoId);
+      return `<div class="rasc-etapa2"><strong>Etapa 2 · Planejamento</strong>${g ? ` · guia <strong>${esc(g.nome)}</strong>` : ''}<br>
+        É a tela de Operações atual do protótipo (guias por grupo, talhão a talhão). Não foi copiada para este rascunho.</div>`;
+    }
+
+    // =================== Desenho e eventos ===================
+    // Grupo que fica sem nenhuma operação some do plano (menos Semente e Colheita, que são fixos)
+    function limparGruposVazios() {
+      for (let i = grupos.length - 1; i >= 0; i--) {
+        const g = grupos[i];
+        if (!g.operacoes.length && g.tipo !== 'Sementes' && g.tipo !== 'Colheita') grupos.splice(i, 1);
+      }
+    }
+
+    function desenhar(grupoId) {
+      limparGruposVazios();
+      desenharEtapas();
+      document.querySelectorAll('[data-plan]').forEach((b) => b.setAttribute('aria-pressed', b.dataset.plan === ui.plan));
+      document.getElementById('pagina').innerHTML = ui.etapa === 'estrutura' ? estrutura()
+        : ui.etapa === 'calendario' ? calendario() : planejamento(grupoId);
+    }
+    const acharOp = (id) => todasOps().find(({ o }) => o.id === id);
+
+    document.addEventListener('click', (ev) => {
+      const b = ev.target.closest('button');
+      if (!b) return;
+      if (b.dataset.plan) {
+        ui.plan = b.dataset.plan;
+        // Em andamento: o agrônomo já informou o DAP do TSI (o modelo vem sem DAP)
+        if (ui.plan === 'andamento') todasOps().forEach(({ o }) => { if (o.nome === 'Tratamento de sementes (TSI)' && o.dap === null) o.dap = -5; });
+        return desenhar();
+      }
+      if (b.dataset.etapa) { ui.etapa = b.dataset.etapa; window.scrollTo(0, 0); return desenhar(b.dataset.grupo); }
+      if (b.dataset.visao) { ui.visao = b.dataset.visao; return desenhar(); }
+      if (b.dataset.acao === 'excluir-op') { const x = acharOp(b.dataset.op); x.g.operacoes.splice(x.g.operacoes.indexOf(x.o), 1); return desenhar(); }
+      if (b.dataset.acao === 'nova-op') {
+        const g = grupos.find((x) => x.id === b.dataset.grupo);
+        g.operacoes.push({ id: `o${++seq}`, nome: 'Nova operação', dap: null, fenologia: '', prazo: null });
+        return renomearOp(`o${seq}`);
+      }
+      if (b.dataset.acao === 'recolher') {
+        const id = b.dataset.grupo;
+        if (ui.recolhidos.has(id)) ui.recolhidos.delete(id); else ui.recolhidos.add(id);
+        return desenhar();
+      }
+      if (b.dataset.acao === 'nova-op-fase') {
+        const fase = FASES.find((x) => x.id === b.dataset.fase);
+        const g = grupos.find((x) => !fixoGrupo(x));
+        if (!g) return;
+        g.operacoes.push({ id: `o${++seq}`, nome: 'Nova operação', dap: fase.dapNovo, fenologia: '', prazo: null });
+        return renomearOp(`o${seq}`);
+      }
+      if (b.dataset.acao === 'excluir-todas') {
+        const g = grupos.find((x) => x.id === b.dataset.grupo);
+        if (confirm(`Excluir as ${g.operacoes.length} operações de ${g.nome}? O grupo continua, vazio.`)) { g.operacoes = []; desenhar(); }
+        return;
+      }
+      if (b.dataset.acao === 'excluir-grupo') {
+        const g = grupos.find((x) => x.id === b.dataset.grupo);
+        if (confirm(`Excluir o grupo ${g.nome} e as operações dele?`)) { grupos.splice(grupos.indexOf(g), 1); desenhar(); }
+        return;
+      }
+      if (b.dataset.acao === 'novo-grupo') {
+        grupos.push({ id: `g${++seq}`, nome: 'Novo grupo', tipo: 'Defensivos', operacoes: [] });
+        return desenhar();
+      }
+    });
+
+    // Dois cliques no nome do grupo: renomear
+    function renomearGrupo(id) {
+      ui.renomeandoGrupo = id; desenhar();
+      const campo = document.querySelector('[data-campo="nome-grupo"]');
+      if (campo) { campo.focus(); campo.select(); }
+    }
+    function renomearOp(id) {
+      ui.renomeandoOp = id; desenhar();
+      const campo = document.querySelector('[data-campo="nome-op"]');
+      if (campo) { campo.focus(); campo.select(); }
+    }
+    document.addEventListener('dblclick', (ev) => {
+      const h = ev.target.closest('[data-renomear-grupo]');
+      if (h) renomearGrupo(h.dataset.renomearGrupo);
+      const o = ev.target.closest('[data-renomear-op]');
+      if (o) renomearOp(o.dataset.renomearOp);
+    });
+    document.addEventListener('keydown', (ev) => {
+      const h = ev.target.closest && ev.target.closest('[data-renomear-grupo]');
+      if (h && ev.key === 'F2') return renomearGrupo(h.dataset.renomearGrupo);
+      const o = ev.target.closest && ev.target.closest('[data-renomear-op]');
+      if (o && ev.key === 'F2') return renomearOp(o.dataset.renomearOp);
+      if (!['nome-grupo', 'nome-op'].includes(ev.target.dataset.campo)) return;
+      if (ev.key === 'Enter') ev.target.blur();
+      if (ev.key === 'Escape') { ui.renomeandoGrupo = null; ui.renomeandoOp = null; desenhar(); }
+    });
+
+    // Sair do campo do nome do grupo sem mudar nada também encerra a edição
+    document.addEventListener('focusout', (ev) => {
+      if (ev.target.dataset && ev.target.dataset.campo === 'nome-grupo' && ui.renomeandoGrupo) {
+        const g = grupos.find((x) => x.id === ev.target.dataset.grupo);
+        if (g && ev.target.value.trim()) g.nome = ev.target.value.trim();
+        ui.renomeandoGrupo = null;
+        setTimeout(desenhar);
+      }
+      if (ev.target.dataset && ev.target.dataset.campo === 'nome-op' && ui.renomeandoOp) {
+        const x = acharOp(ev.target.dataset.op);
+        if (x && ev.target.value.trim()) x.o.nome = ev.target.value.trim();
+        ui.renomeandoOp = null;
+        setTimeout(desenhar);
+      }
+    });
+
+    // Edição da estrutura: grava ao sair do campo (ou ao escolher a fenologia)
+    document.addEventListener('change', (ev) => {
+      const c = ev.target.dataset.campo;
+      if (c === 'nome-grupo') {
+        const g = grupos.find((x) => x.id === ev.target.dataset.grupo);
+        if (g && ev.target.value.trim()) g.nome = ev.target.value.trim();
+        ui.renomeandoGrupo = null;
+        return desenhar();
+      }
+      const x = c && acharOp(ev.target.dataset.op);
+      if (!x) return;
+      const v = ev.target.value.trim();
+      if (c === 'nome') x.o.nome = v || x.o.nome;
+      if (c === 'dap') { const n = Number(v.replace(',', '.')); x.o.dap = v === '' || Number.isNaN(n) ? null : Math.round(n); if (x.o.dap !== null && x.o.dap <= 0) x.o.fenologia = ''; }
+      if (c === 'fenologia') x.o.fenologia = v;
+      if (c === 'grupo' && v === '__novo__') {
+        const nome = (prompt('Nome do novo grupo de operação') || '').trim();
+        if (nome) {
+          const tipo = (prompt('Tipo (Defensivos, Fertilidade, Tratamento de sementes)', 'Defensivos') || 'Defensivos').trim();
+          const novo = { id: `g${++seq}`, nome, tipo, operacoes: [] };
+          grupos.splice(grupos.length - 1, 0, novo); // antes da Colheita
+          x.g.operacoes.splice(x.g.operacoes.indexOf(x.o), 1); novo.operacoes.push(x.o);
+        }
+        return desenhar();
+      }
+      if (c === 'grupo') {
+        const destino = grupos.find((g) => g.id === v);
+        if (destino && destino !== x.g) { x.g.operacoes.splice(x.g.operacoes.indexOf(x.o), 1); destino.operacoes.push(x.o); }
+      }
+      if (c === 'prazo') { const n = Math.round(Number(v)); if (n > 0) x.o.prazo = n; }
+      desenhar();
+    });
+
+    desenhar();
+  })();
+  </script>
+</body>
+</html>

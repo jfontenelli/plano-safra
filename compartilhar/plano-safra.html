@@ -799,13 +799,21 @@ select.campo__controle option { color: var(--texto); }
 }
 
 /* ===== Tela 03 · Filtros ===== */
-.filtros { padding: 20px 24px 8px; }
-
-.filtros__grade {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 0 20px;
-}
+/* Filtros num cartão baixo, sem título, compactos e lado a lado, com "Limpar filtros" à direita */
+.filtros { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px 16px; margin-bottom: -12px; padding: 14px 20px; }
+.filtros .campo { flex: 1 1 130px; max-width: 200px; margin-bottom: 0; }
+.filtros__limpar { margin: 0 0 0 auto; padding: 8px 0 8px 16px; border-left: 1px solid var(--borda); font-weight: 600; }
+/* Lista de planos: título e botão dentro do cartão da tabela */
+.lista-planos { overflow: hidden; }
+.lista-planos__topo { margin: 0; padding: 14px 20px; }
+.lista-planos__pendente { color: var(--texto-suave); }
+.lista-planos[hidden] { display: none; }
+/* Cabeçalho da Visão Geral com as guias embaixo do título (mesmo estilo das abas do plano) */
+.cabecalho--guias { flex-direction: column; align-items: flex-start; gap: 6px; min-height: 0; padding-bottom: 0; }
+.cabecalho--guias .etapa { padding-left: 2px; padding-right: 2px; border-top: 0; border-left: 0; border-right: 0; background: none; font: inherit; font-weight: 500; cursor: pointer; }
+.cabecalho--guias .etapa--ativa { font-weight: 600; }
+.filtros .campo__rotulo { margin-bottom: 4px; font-size: 13px; color: var(--texto-suave); }
+.filtros .campo__controle { height: 36px; font-size: 14px; }
 
 /* ===== Tabelas ===== */
 .tabela-rolagem { position: relative; overflow-x: auto; }
@@ -875,6 +883,9 @@ select.campo__controle option { color: var(--texto); }
 
 .status--construcao { background: #eceff1; color: #59636b; }
 .status--aprovado   { background: #e1f3e8; color: #17703f; }
+/* Plano criado e ainda não iniciado (só a 0.1, vazia): bolinha vazada */
+.status--nao-iniciado { background: var(--superficie); color: #59636b; box-shadow: inset 0 0 0 1px #cfd6d2; }
+.status--nao-iniciado::before { background: none; box-shadow: inset 0 0 0 1.5px currentColor; }
 
 /* ===== Link de voltar ===== */
 .link-voltar {
@@ -890,9 +901,6 @@ select.campo__controle option { color: var(--texto); }
 .link-voltar:hover { text-decoration: underline; }
 .link-voltar .icone { width: 16px; height: 16px; stroke-width: 2.2; }
 
-@media (max-width: 1100px) {
-  .filtros__grade { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
 
 /* ===== Peças comuns novas ===== */
 .botao--p { height: 34px; padding: 0 12px; font-size: 14px; }
@@ -1029,10 +1037,6 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
 .plano__ponto { margin: 0 4px; }
 .plano__contexto { font-size: 14px; color: var(--texto); }
 .plano__contexto .plano__ponto { color: var(--texto-suave); }
-/* Salvamento automático: sinal discreto depois do status */
-.salvo { display: inline-flex; align-items: center; gap: 4px; margin-left: 14px; font-size: 13px; color: var(--texto-suave); white-space: nowrap; }
-.salvo .icone { width: 14px; height: 14px; color: var(--verde-700); }
-.salvo--salvando { font-style: italic; }
 
 .etapas { display: flex; flex-wrap: wrap; gap: 0 28px; font-size: 14px; }
 
@@ -1940,7 +1944,11 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .plano__exportar .icone { width: 16px; height: 16px; }
 
 /* Lista de planos: ⋯ (menu do plano) no começo da linha; a seta de abrir fica no fim */
-.tabela th.lista-planos__menu, .tabela td.lista-planos__menu { width: 1%; padding-left: 8px; padding-right: 0; }
+.tabela th.lista-planos__menu, .tabela td.lista-planos__menu { width: 1%; padding-left: 0; padding-right: 8px; text-align: right; }
+/* Lista de planos: a linha inteira abre o plano */
+.lista-planos__linha { cursor: pointer; }
+.tabela tbody tr.lista-planos__linha:hover { background: var(--verde-100); }
+.lista-planos__linha:focus-visible { outline: 2px solid var(--verde-700); outline-offset: -2px; }
 
 /* Modal Criar plano: Importar XLSX */
 .importar { margin-top: 16px; display: flex; flex-direction: column; gap: 6px; }
@@ -2197,6 +2205,165 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .cal-piv__nao { background: #f0f2f1; color: #9aa49f; }
 .cal-piv__nada { padding: 24px !important; text-align: center; color: var(--texto-suave); }
 
+/* ===== Menu: Plano de Safra com quatro itens (DECISOES 4.0) ===== */
+.menu__grupo { display: flex; flex-direction: column; gap: 2px; }
+.menu__pai { font-weight: 600; color: #fff; }
+.menu__subitens {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0 0 8px 23px;
+  padding-left: 10px;
+  border-left: 1px solid rgba(255, 255, 255, .18);
+}
+.menu__sub { height: 40px; gap: 12px; padding: 0 10px; font-size: 14px; }
+.menu__sub .menu__icone { width: 19px; height: 19px; }
+.menu--recolhido .menu__subitens {
+  margin: 0 0 8px;
+  padding: 6px 0;
+  border-left: 0;
+  border-radius: var(--raio);
+  background: rgba(0, 0, 0, .14);
+}
+.menu--recolhido .menu__sub { justify-content: center; padding: 0; }
+
+.menu-contexto__separador { margin: 6px 4px; border: 0; border-top: 1px solid var(--borda); }
+
+/* ===== Cabeçalho do plano: versão, Trocar versão e botões da versão (DECISOES 4.1.1) ===== */
+.plano__linha--versao { align-self: stretch; justify-content: space-between; gap: 8px 16px; padding-top: 10px; }
+.plano__identificacao { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; min-width: 0; }
+.plano__barra { color: #b9c2bd; }
+.plano__versao { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 14px; font-weight: 700; }
+.plano__versao-info { font-size: 13px; font-weight: 400; color: var(--texto-suave); }
+.plano__acoes-versao { position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; padding: 4px 0; }
+.plano__acoes-versao .estado-salvo { margin-left: 6px; }
+
+.estado-salvo { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; color: var(--texto-suave); white-space: nowrap; }
+.estado-salvo--pendente { color: #b45f06; font-weight: 600; }
+.estado-salvo--ok { color: var(--verde-700); font-weight: 600; }
+.estado-salvo .icone { width: 15px; height: 15px; stroke-width: 2.2; }
+
+.versoes { position: relative; }
+.link-versoes {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 6px;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  color: var(--verde-700);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.link-versoes:hover, .link-versoes[aria-expanded="true"] { background: var(--verde-100); }
+.link-versoes:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 1px; }
+.link-versoes .icone { width: 15px; height: 15px; stroke-width: 2; }
+
+.versoes-lista {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 15;
+  width: 460px;
+  max-width: 80vw;
+  padding: 8px;
+  border: 1px solid var(--borda);
+  border-radius: 12px;
+  background: var(--superficie);
+  box-shadow: 0 10px 30px rgba(16, 24, 20, .16);
+}
+.versoes-lista__titulo {
+  margin: 4px 8px 8px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--texto-suave);
+}
+.versoes-item {
+  display: grid;
+  grid-template-columns: 44px 1fr auto;
+  align-items: center;
+  gap: 2px 10px;
+  width: 100%;
+  padding: 8px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  font: inherit;
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+}
+.versoes-item:hover, .versoes-item:focus-visible { background: #f4f7f5; outline: none; }
+.versoes-item--atual, .versoes-item--atual:hover { background: var(--verde-100); }
+.versoes-item__num { grid-row: span 2; font-size: 16px; font-weight: 700; color: var(--verde-700); }
+.versoes-item .status { grid-row: span 2; }
+.versoes-item__info { font-size: 13px; color: var(--texto-suave); }
+
+.versoes-alerta {
+  margin: 8px;
+  padding: 10px 12px;
+  border: 1px solid #f0d58a;
+  border-radius: 10px;
+  background: #fff8e6;
+  color: #6b4e00;
+  font-size: 14px;
+}
+.versoes-alerta strong { color: #4d3800; }
+.versoes-alerta__acoes { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; margin-top: 10px; }
+.versoes-alerta--solto {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 15;
+  width: 400px;
+  max-width: 80vw;
+  margin: 0;
+  box-shadow: 0 10px 30px rgba(16, 24, 20, .16);
+}
+
+/* Planejamento, Calendário e Suprimentos sem planos: convite para criar o primeiro */
+.sem-planos .em-construcao__texto { max-width: 60ch; margin-bottom: 20px; }
+
+/* ===== Tela 02 · Modal Criar Plano de Safra ===== */
+.modal--largo { max-width: 820px; }
+.cp-secao { margin: 4px 0 10px; font-size: 16px; font-weight: 700; }
+.cp-secao--linha { margin-top: 8px; padding-top: 18px; border-top: 1px solid var(--borda); }
+.cp-gerais { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0 16px; }
+.cp-fazendas { display: flex; flex-direction: column; gap: 12px; }
+.cp-fazenda { border: 1px solid var(--borda); border-radius: 10px; }
+.cp-fazenda__topo { display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 4px 8px 4px 16px;
+  border-bottom: 1px solid var(--borda); border-radius: 10px 10px 0 0; background: #f1f4f2; font-weight: 600; }
+.cp-fazenda__campos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 16px; padding: 14px 16px 0; }
+.cp-fazenda__dica { display: flex; align-items: center; gap: 6px; margin: -6px 16px 14px; font-size: 13px; color: var(--texto-suave); }
+.cp-fazenda__dica .icone { width: 15px; height: 15px; flex-shrink: 0; }
+.cp-area { display: flex; align-items: center; margin: 0; background: #f1f4f2; color: var(--texto-suave); }
+.cp-talhoes { position: relative; }
+.cp-talhoes__botao { display: flex; align-items: center; justify-content: space-between; gap: 8px; text-align: left; cursor: pointer; }
+.cp-talhoes__botao:disabled { background: #f1f4f2; color: var(--texto-suave); cursor: not-allowed; }
+.cp-talhoes__botao .icone { width: 16px; height: 16px; flex-shrink: 0; }
+.cp-talhoes__lista { position: absolute; z-index: 5; top: calc(100% - 12px); left: 0; right: 0; max-height: 240px; overflow: auto; padding: 6px 0;
+  border: 1px solid var(--borda); border-radius: 8px; background: var(--superficie); box-shadow: 0 8px 24px rgba(0, 0, 0, .12); }
+.cp-talhoes__item { display: flex; align-items: center; gap: 8px; padding: 6px 12px; font-size: 14px; cursor: pointer; }
+.cp-talhoes__item:hover { background: var(--verde-100); }
+.cp-talhoes__item input { width: 16px; height: 16px; accent-color: var(--verde-700); }
+.cp-talhoes__item--todos { border-bottom: 1px solid var(--borda); font-weight: 600; }
+.cp-talhoes__area { margin-left: auto; color: var(--texto-suave); }
+.cp-adicionar { margin: 14px 0 18px; }
+@media (max-width: 760px) {
+  .cp-gerais { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .cp-fazenda__campos { grid-template-columns: 1fr; }
+}
+
+/* ===== Modal "Como deseja iniciar o plano?" ===== */
+.inicios__grade--quatro { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.inicio-plano__copiar { max-width: 100%; }
+.inicio-plano__nota { margin: 0; font-size: 13px; color: var(--texto-suave); }
+
 </style>
 </head>
 <body>
@@ -2209,14 +2376,45 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
       </div>
 
       <nav class="menu__nav" aria-label="Menu principal">
-        <a class="menu__item" href="#/plano-safra" data-rota="plano-safra" title="Plano de Safra">
-          <svg class="menu__icone" viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M12 21v-9"/>
-            <path d="M12 12c0-4 2.5-6.5 7-6.5 0 4.5-2.5 6.5-7 6.5Z"/>
-            <path d="M12 14c0-3.5-2.2-5.5-6.5-5.5 0 3.8 2.2 5.5 6.5 5.5Z"/>
-          </svg>
-          <span class="menu__texto">Plano de Safra</span>
-        </a>
+        <!-- Plano de Safra: quatro itens (Visão Geral, Planejamento, Calendário Agrícola, Suprimentos) -->
+        <div class="menu__grupo">
+          <a class="menu__item menu__pai" href="#/plano-safra" title="Plano de Safra">
+            <svg class="menu__icone" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 21v-9"/>
+              <path d="M12 12c0-4 2.5-6.5 7-6.5 0 4.5-2.5 6.5-7 6.5Z"/>
+              <path d="M12 14c0-3.5-2.2-5.5-6.5-5.5 0 3.8 2.2 5.5 6.5 5.5Z"/>
+            </svg>
+            <span class="menu__texto">Plano de Safra</span>
+          </a>
+          <div class="menu__subitens">
+            <a class="menu__item menu__sub" href="#/plano-safra" data-rota="visao-geral" title="Visão Geral">
+              <svg class="menu__icone" viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/>
+                <rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>
+              </svg>
+              <span class="menu__texto">Visão Geral</span>
+            </a>
+            <a class="menu__item menu__sub" href="#/planejamento" data-rota="planejamento" title="Planejamento">
+              <svg class="menu__icone" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
+                <rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12l2 2 4-4"/><path d="M9 17h6"/>
+              </svg>
+              <span class="menu__texto">Planejamento</span>
+            </a>
+            <a class="menu__item menu__sub" href="#/calendario" data-rota="calendario" title="Calendário Agrícola">
+              <svg class="menu__icone" viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><path d="M8 14h2M14 14h2M8 17h2"/>
+              </svg>
+              <span class="menu__texto">Calendário Agrícola</span>
+            </a>
+            <a class="menu__item menu__sub" href="#/suprimentos" data-rota="suprimentos" title="Suprimentos">
+              <svg class="menu__icone" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M21 8 12 3 3 8v8l9 5 9-5Z"/><path d="M3 8l9 5 9-5M12 13v8"/>
+              </svg>
+              <span class="menu__texto">Suprimentos</span>
+            </a>
+          </div>
+        </div>
         <a class="menu__item" href="#/ordens-servico" data-rota="ordens-servico" title="Ordens de Serviço">
           <svg class="menu__icone" viewBox="0 0 24 24" aria-hidden="true">
             <rect x="5" y="4" width="14" height="17" rx="2"/>
@@ -2260,7 +2458,7 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
             </button>
             <button class="demo__opcao" type="button" role="menuitem" data-demo="exemplo">
               <span class="demo__opcao-titulo">Ver com planos de exemplo</span>
-              <span class="demo__opcao-texto">Plano de soja 26/27 em duas fazendas: um em construção e um aprovado.</span>
+              <span class="demo__opcao-texto">Plano de soja 26/27 em duas fazendas: um com versão em construção e um com a versão 0.2 publicada.</span>
             </button>
           </div>
         </div>
@@ -2293,6 +2491,9 @@ window.DADOS = {
   // Listas do modal "Criar Plano de Safra". Safras novas criadas no modal entram aqui.
   safras:   ['24/25', '25/26'],
   empresas: ['Empresa A', 'Empresa B', 'Empresa C'],
+  // Atividade produtiva. Por enquanto só Agricultura (soja); as outras aparecem como "Em breve"
+  atividades: ['Agricultura', 'Pecuária', 'Silvicultura'],
+  atividadesEmBreve: ['Pecuária', 'Silvicultura'],
   fazendas: ['São José', 'Boa Vista', 'Santa Clara', 'Primavera'],
   // Por enquanto o protótipo funciona só para soja (variedades, população, bags e TSI são de soja)
   culturas: ['Soja'],
@@ -2517,13 +2718,15 @@ window.DADOS = {
   planos: [],
 
   // Planos carregados pelo menu Demonstração → "Ver com planos de exemplo".
-  // O mesmo plano (modelo de operações) em duas fazendas: um em construção e um aprovado.
+  // O mesmo plano (modelo de operações) em duas fazendas: um com a versão 0.2 em construção e um com a 0.2 publicada.
   // "operacoes" detalha, por nome de operação do modelo: fenologia, produtos [nome, dose],
   // talhões que recebem e ajustes por talhão. Operações não listadas ficam sem recomendação e sem talhões.
   planosExemplo: [
     {
-      safra: '26/27', empresa: 'Empresa A', fazenda: 'São José', cultura: 'Soja', inicio: 'modelo',
-      status: 'Em construção',
+      safra: '26/27', empresa: 'Empresa A', atividade: 'Agricultura', fazenda: 'São José', cultura: 'Soja',
+      // Sem "talhoes": o plano inclui todos os talhões da fazenda
+      // Versões: 0.1 publicada (registro inicial) e 0.2 em construção
+      versoes: { criadaEm: '2026-09-30T09:12' },
       custo: null,   // aguardando orçamento
       receita: null, // aguardando premissas de produção
       atualizadoEm: '2026-09-30', atualizadoPor: 'João da Silva',
@@ -2531,8 +2734,9 @@ window.DADOS = {
       operacoes: {}
     },
     {
-      safra: '26/27', empresa: 'Empresa A', fazenda: 'Santa Clara', cultura: 'Soja', inicio: 'modelo',
-      status: 'Aprovado',
+      safra: '26/27', empresa: 'Empresa A', atividade: 'Agricultura', fazenda: 'Santa Clara', cultura: 'Soja',
+      // Versões: 0.1 publicada (registro inicial) e 0.2 publicada (sem versão em construção)
+      versoes: { criadaEm: '2026-09-18T08:40', publicadaEm: '2026-09-25T17:05' },
       // PROVISÓRIO: valores digitados até existirem as telas de orçamento e premissas.
       // Custo ≈ R$ 3.150/ha; receita ≈ 63 sc/ha × R$ 122/sc (845 ha).
       custo: 2661750,
@@ -2593,14 +2797,16 @@ window.DADOS = {
  * Cálculos e formatação usados por várias telas.
  */
 window.Util = {
-  // Área do plano = soma das áreas dos talhões que recebem ao menos uma operação (ha)
-  areaPlano(plano) {
-    const noPlano = new Set();
-    (plano.grupos || []).forEach((g) => g.operacoes.forEach((op) =>
-      [...Object.keys(op.talhoes), ...Object.keys(op.plantio || {})].forEach((t) => noPlano.add(t))));
-    return (DADOS.talhoes[plano.fazenda] || [])
-      .filter((t) => noPlano.has(t.nome))
-      .reduce((soma, t) => soma + t.area, 0);
+  // Talhões incluídos no plano (escolhidos no modal Criar Plano). Sem a lista: todos os da fazenda.
+  talhoesPlano(plano) {
+    const todos = DADOS.talhoes[plano.fazenda] || [];
+    return plano.talhoes ? todos.filter((t) => plano.talhoes.includes(t.nome)) : todos;
+  },
+
+  // Área de cultivo = soma das áreas dos talhões incluídos no plano (ha); sem talhões, null ("Pendente")
+  areaCultivo(plano) {
+    const talhoes = Util.talhoesPlano(plano);
+    return talhoes.length ? talhoes.reduce((soma, t) => soma + t.area, 0) : null;
   },
 
   // Texto "0,40" ou "0.40" → 0.4; vazio ou inválido → null
@@ -2674,6 +2880,7 @@ window.Icones = (function () {
     `<svg class="icone" viewBox="0 0 24 24" aria-hidden="true">${conteudo}</svg>`;
 
   return {
+    limpar: svg('<path d="M20 11a8 8 0 0 0-14.9-4M4 4v4h4"/><path d="M4 13a8 8 0 0 0 14.9 4M20 20v-4h-4"/>'),
     fechar: svg('<path d="M6 6l12 12M18 6L6 18"/>'),
     mais:   svg('<path d="M12 5v14M5 12h14"/>'),
     lista:  svg('<rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 9h1M12 9h4M8 12h1M12 12h4M8 15h1M12 15h4"/>'),
@@ -2891,6 +3098,20 @@ window.Planos = (function () {
     }));
   }
 
+  // Só os grupos fixos do modelo (Plantio e Colheita): o "Começar do zero" do início do plano
+  function gruposFixos() {
+    return gruposModelo().filter((g) => g.tipo === 'Sementes' || g.tipo === 'Colheita');
+  }
+
+  // "Copiar plano existente": grupos, operações e recomendações (produtos e doses padrão),
+  // sem talhões, áreas, plantio e germinação
+  function copiarSemTalhoes(grupos) {
+    return structuredClone(grupos).map((g) => ({
+      ...g,
+      operacoes: g.operacoes.map((op) => ({ ...op, talhoes: {}, ...(op.plantio ? { plantio: {}, germinacoes: {} } : {}) }))
+    }));
+  }
+
   // Modelo preenchido com o detalhe dos planos de exemplo (ver dados-exemplo.js).
   // Os produtos de cada operação viram a Receita 1, aplicada nos talhões listados.
   function montarExemplo(detalhes) {
@@ -3012,10 +3233,148 @@ window.Planos = (function () {
 
   return {
     novoId, novaLinha, linhaDoProduto, novaOperacao, novaReceita, novoAjuste, novoGrupo,
-    gruposModelo, montarExemplo, produtoDoCadastro,
+    gruposModelo, gruposFixos, copiarSemTalhoes, montarExemplo, produtoDoCadastro,
     linhaPreenchida, chaveLinha, composicao, receitaDoTalhao, talhoesDaReceita,
     linhasTalhao, doseTalhao, temAjuste, statusTalhao, resumo,
     colunasDose, linhaNoTalhao, unidadeDose, nomeLinha
+  };
+})();
+
+</script>
+  <script>
+/*
+ * Versões do plano (docs/DECISOES.md, 4.1.1).
+ *
+ * plano.versoes = [versao], da mais antiga para a mais nova
+ * versao        = { num: '0.1', status: 'construcao' | 'publicada', grupos (cópia do planejamento),
+ *                   criadaEm, criadaPor, origem ('0.1' | null),
+ *                   salvaEm, salvaPor (em construção), publicadaEm, publicadaPor }
+ * plano.versaoAberta = número da versão na tela.
+ * plano.grupos       = área de trabalho: o planejamento da versão aberta, que as telas leem e alteram.
+ *                      Na versão em construção, as mudanças só vão para a versão no "Salvar alterações".
+ * plano.pendente     = true quando há alterações não salvas na versão em construção.
+ *
+ * Versão publicada é imutável. Só pode haver uma versão em construção por plano.
+ */
+window.Versoes = (function () {
+  const copiar = (grupos) => structuredClone(grupos || []);
+
+  function agora() { return new Date(); }
+  function usuario() { return DADOS.usuario.nome; }
+
+  function lista(plano) { return plano.versoes || []; }
+  function buscar(plano, num) { return lista(plano).find((v) => v.num === num) || null; }
+  function aberta(plano) { return buscar(plano, plano.versaoAberta); }
+  function emConstrucao(plano) { return lista(plano).find((v) => v.status === 'construcao') || null; }
+  function ultimaPublicada(plano) {
+    return [...lista(plano)].reverse().find((v) => v.status === 'publicada') || null;
+  }
+  // A versão que a seta da Visão Geral abre: a em construção ou, se não houver, a última publicada
+  function deTrabalho(plano) { return emConstrucao(plano) || ultimaPublicada(plano); }
+  function somenteLeitura(plano) { const v = aberta(plano); return !v || v.status === 'publicada'; }
+
+  // Próximo número da sequência: 0.1, 0.2… (nunca reutiliza)
+  function proximoNumero(plano) {
+    const maior = lista(plano).reduce((m, v) => Math.max(m, Number(v.num.split('.')[1])), 0);
+    return `0.${maior + 1}`;
+  }
+
+  /*
+   * Ao criar o plano nasce a 0.1, publicada (registro inicial, sem operações).
+   * grupos: o conteúdo escolhido para começar (modelo ou arquivo); com conteúdo, nasce também a 0.2 em construção.
+   * datas: { criadaEm, publicadaEm, por } para os planos de exemplo.
+   */
+  function iniciar(plano, grupos, { quando = agora(), por = usuario() } = {}) {
+    plano.versoes = [{ num: '0.1', status: 'publicada', grupos: [], criadaEm: quando, criadaPor: por,
+                       origem: null, publicadaEm: quando, publicadaPor: por }];
+    plano.versaoAberta = '0.1';
+    plano.grupos = [];
+    plano.pendente = false;
+    if (grupos && grupos.length) {
+      plano.versoes.push({ num: '0.2', status: 'construcao', grupos: copiar(grupos), criadaEm: quando, criadaPor: por,
+                           origem: '0.1', salvaEm: quando, salvaPor: por });
+      abrir(plano, '0.2');
+    }
+  }
+
+  // Plano recém-criado: só a 0.1, vazia. O Planejamento mostra as opções de início (Telas.inicioPlano).
+  function aIniciar(plano) {
+    const l = lista(plano);
+    return l.length === 1 && !l[0].grupos.length;
+  }
+
+  // Opção de início escolhida: nasce a 0.2 em construção com esse conteúdo (pode ser vazio) e abre
+  function comecar(plano, grupos) {
+    const num = proximoNumero(plano);
+    plano.versoes.push({ num, status: 'construcao', grupos: copiar(grupos), criadaEm: agora(), criadaPor: usuario(),
+                         origem: '0.1', salvaEm: agora(), salvaPor: usuario() });
+    abrir(plano, num);
+    return num;
+  }
+
+  // Abre a versão na área de trabalho (descarta alterações não salvas: quem chama confirma antes)
+  function abrir(plano, num) {
+    const v = buscar(plano, num);
+    if (!v) return;
+    plano.versaoAberta = num;
+    plano.grupos = copiar(v.grupos);
+    plano.pendente = false;
+  }
+
+  function salvar(plano) {
+    const v = aberta(plano);
+    if (!v || v.status !== 'construcao') return;
+    v.grupos = copiar(plano.grupos);
+    v.salvaEm = agora();
+    v.salvaPor = usuario();
+    plano.pendente = false;
+  }
+
+  function publicar(plano) {
+    const v = aberta(plano);
+    if (!v || v.status !== 'construcao') return;
+    salvar(plano);
+    v.status = 'publicada';
+    v.publicadaEm = agora();
+    v.publicadaPor = usuario();
+  }
+
+  // Cria a próxima versão a partir de uma publicada e já abre. Com outra em construção, não cria nada.
+  function criarNova(plano, origemNum) {
+    const existente = emConstrucao(plano);
+    if (existente) return { jaExiste: existente.num };
+    const origem = buscar(plano, origemNum) || ultimaPublicada(plano);
+    const num = proximoNumero(plano);
+    plano.versoes.push({ num, status: 'construcao', grupos: copiar(origem.grupos), criadaEm: agora(), criadaPor: usuario(),
+                         origem: origem.num, salvaEm: agora(), salvaPor: usuario() });
+    abrir(plano, num);
+    return { num, origem: origem.num };
+  }
+
+  // Planejamento da versão (a aberta usa a área de trabalho)
+  function grupos(plano, v) {
+    return v.num === plano.versaoAberta ? plano.grupos : v.grupos;
+  }
+
+  // "13/10 às 14:20"
+  function quando(data) {
+    if (!data) return '';
+    const d = new Date(data);
+    return `${d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })} às ${d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
+  }
+
+  function rotuloStatus(v) { return v.status === 'construcao' ? 'Em construção' : 'Publicada'; }
+
+  // Linha de detalhe: "Publicada em 12/10 às 17:05 por Maria Gonçalves"
+  function detalhe(v) {
+    return v.status === 'publicada'
+      ? `Publicada em ${quando(v.publicadaEm)} por ${v.publicadaPor}`
+      : `Salva em ${quando(v.salvaEm)} por ${v.salvaPor}${v.origem ? ` · origem ${v.origem}` : ''}`;
+  }
+
+  return {
+    lista, buscar, aberta, emConstrucao, ultimaPublicada, deTrabalho, somenteLeitura, proximoNumero,
+    iniciar, aIniciar, comecar, abrir, salvar, publicar, criarNova, grupos, quando, rotuloStatus, detalhe
   };
 })();
 
@@ -3059,7 +3418,7 @@ window.ArquivoPlano = (function () {
       ['campo', 'valor'],
       ['formato', FORMATO], ['versao', VERSAO],
       ['safra', plano.safra], ['empresa', plano.empresa], ['fazenda', plano.fazenda], ['cultura', plano.cultura],
-      ['status', plano.status],
+      ['versao_plano', `${plano.versaoAberta} · ${Versoes.rotuloStatus(Versoes.aberta(plano))}`],
       ['exportado_em', Util.hojeISO()], ['exportado_por', DADOS.usuario.nome]
     ];
 
@@ -3152,17 +3511,17 @@ window.ArquivoPlano = (function () {
     });
   }
 
-  // Talhões do arquivo que não existem na fazenda escolhida (ficam de fora)
-  function talhoesFora(dados, fazenda) {
-    const daFazenda = new Set((DADOS.talhoes[fazenda] || []).map((t) => t.nome));
+  // Talhões do arquivo que não estão no plano (não existem na fazenda ou não foram incluídos): ficam de fora
+  function talhoesFora(dados, plano) {
+    const daFazenda = new Set(Util.talhoesPlano(plano).map((t) => t.nome));
     const doArquivo = new Set();
     ['cultura_variedade', ...ABAS_REC].forEach((n) => dados.abas[n].forEach((x) => x.talhao && doArquivo.add(String(x.talhao))));
     return [...doArquivo].filter((t) => !daFazenda.has(t)).sort();
   }
 
-  // Monta os grupos do plano a partir do arquivo lido, para a fazenda escolhida
-  function montarGrupos(dados, fazenda) {
-    const daFazenda = new Set((DADOS.talhoes[fazenda] || []).map((t) => t.nome));
+  // Monta os grupos do plano a partir do arquivo lido, só com os talhões do plano
+  function montarGrupos(dados, plano) {
+    const daFazenda = new Set(Util.talhoesPlano(plano).map((t) => t.nome));
     const grupos = [];
     const acharOp = (grupo, operacao) => {
       const g = grupos.find((x) => x.nome === grupo);
@@ -3281,22 +3640,54 @@ function blocoEmConstrucao(subtitulo) {
 </script>
   <script>
 /*
+ * Planejamento, Calendário Agrícola e Suprimentos sem nenhum plano cadastrado (docs/DECISOES.md, 4.0):
+ * convite para criar o primeiro plano.
+ */
+window.Telas = window.Telas || {};
+
+window.Telas.semPlanos = function (item) {
+  const TEXTO_PLANO = 'O Plano de Safra organiza as necessidades de compra de insumos, gera o Calendário Agrícola e, '
+    + 'a partir da versão publicada, cria automaticamente as Ordens de Serviço.';
+  const ITENS = {
+    planejamento: { titulo: 'Planejamento', alvo: 'o planejamento', texto: TEXTO_PLANO, icone: Icones.lista },
+    calendario:   { titulo: 'Calendário Agrícola', alvo: 'o Calendário Agrícola', texto: TEXTO_PLANO, icone: Icones.calendario },
+    suprimentos:  { titulo: 'Suprimentos', alvo: 'os Suprimentos',
+                    icone: '<svg viewBox="0 0 24 24"><path d="M21 8 12 3 3 8v8l9 5 9-5Z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg>',
+                    texto: 'O plano organiza a necessidade de insumos por safra, empresa, fazenda e cultura. Depois de criado, ele abre aqui automaticamente.' }
+  };
+  const i = ITENS[item];
+  return `
+    <header class="cabecalho">
+      <h1 class="cabecalho__titulo">${i.titulo}</h1>
+    </header>
+    <section class="em-construcao sem-planos">
+      <div class="em-construcao__icone" aria-hidden="true">${i.icone}</div>
+      <h2 class="em-construcao__titulo">Crie seu primeiro plano para visualizar ${i.alvo}</h2>
+      <p class="em-construcao__texto">${i.texto}</p>
+      <button class="botao botao--primario" type="button" data-acao="criar-plano">${Icones.mais} Criar Plano de Safra</button>
+    </section>
+  `;
+};
+
+</script>
+  <script>
+/*
  * Tela 01 — Primeiro uso (docs/telas/01-primeiro-uso.md)
- * Aparece no menu "Plano de Safra" quando ainda não existe nenhum plano.
+ * Aparece na Visão Geral (menu Plano de Safra) quando ainda não existe nenhum plano.
  */
 window.Telas = window.Telas || {};
 
 window.Telas.primeiroUso = function () {
   return `
     <header class="cabecalho">
-      <h1 class="cabecalho__titulo">Plano de Safra</h1>
+      <h1 class="cabecalho__titulo">Visão Geral</h1>
     </header>
     <section class="primeiro-uso">
       ${ilustracao()}
       <h2 class="primeiro-uso__titulo">Comece o planejamento da sua safra</h2>
       <p class="primeiro-uso__texto">
         O Plano de Safra organiza as necessidades de compra de insumos, gera o Calendário Agrícola
-        e, após a aprovação, cria automaticamente as Ordens de Serviço.
+        e, a partir da versão publicada, cria automaticamente as Ordens de Serviço.
       </p>
       <button class="botao botao--primario botao--grande" type="button" data-acao="criar-plano">
         <svg class="botao__icone" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
@@ -3331,159 +3722,198 @@ window.Telas.primeiroUso = function () {
   <script>
 /*
  * Tela 02 — Modal Criar Plano de Safra (docs/telas/02-modal-criar-plano.md)
- * Abre por cima da tela de origem. Ao continuar, chama aoCriar(plano).
+ * Abre por cima da tela de origem. Só identifica o plano: informações gerais (Safra, Empresa, Atividade, Cultura)
+ * e uma ou mais fazendas, cada uma com os talhões incluídos. Cria um plano por fazenda.
+ * Ao criar, chama aoCriar({ safra, empresa, atividade, cultura, fazendas: [{ fazenda, talhoes }] }).
+ * Como começar o plano (modelo, do zero, XLSX, copiar) fica no Planejamento (Telas.inicioPlano).
  */
 window.Telas = window.Telas || {};
 
 window.Telas.abrirModalCriarPlano = function ({ aoCriar }) {
-  const INICIOS = [
-    { valor: 'modelo',   titulo: 'Usar modelo',     icone: Icones.lista,
-      texto: 'Use uma estrutura pronta de operações e ajuste conforme necessário.' },
-    { valor: 'importar', titulo: 'Importar XLSX',   icone: Icones.planilha,
-      texto: 'Continue um plano exportado por este sistema (.xlsx).' },
-    { valor: 'clonar',   titulo: 'Clonar safra anterior', icone: Icones.copiar, emBreve: true,
-      texto: 'Utilize o plano de uma safra anterior como base para o novo planejamento.' }
-  ];
+  const esc = Util.escapar;
+  const NOVA_SAFRA = '__nova-safra__';
+  const GERAIS = ['safra', 'empresa', 'atividade', 'cultura'];
+
+  // Blocos de fazenda: { chave, fazenda, talhoes (nomes incluídos) }
+  let proximaChave = 1;
+  const blocos = [novoBloco()];
+  let tentouCriar = false;      // os avisos de obrigatório só aparecem depois de tentar criar
+  let talhoesAbertos = null;    // chave do bloco com a lista de talhões aberta
+
+  function novoBloco() { return { chave: proximaChave++, fazenda: '', talhoes: [] }; }
 
   const modal = Modal.abrir(`
     <form class="formulario" novalidate>
       <div class="modal__corpo">
         <button class="modal__fechar" type="button" aria-label="Fechar" data-fechar>${Icones.fechar}</button>
         <h2 class="modal__titulo" id="modal-titulo">Criar Plano de Safra</h2>
-        <p class="modal__subtitulo">Defina o contexto do novo planejamento.</p>
+        <p class="modal__subtitulo">Defina as informações gerais do plano e selecione as fazendas que farão parte da criação.</p>
 
-        <div class="campo">
-          <label class="campo__rotulo" for="cp-safra">Safra ${asterisco()}</label>
-          <select class="campo__controle" id="cp-safra" name="safra" required></select>
-          ${erroObrigatorio('safra')}
-        </div>
-
-        ${campoLista('empresa', 'Empresa', 'Selecione uma empresa', DADOS.empresas)}
-        ${campoLista('fazenda', 'Fazenda', 'Selecione uma fazenda', DADOS.fazendas)}
-        <p class="campo__erro" id="cp-erro-duplicado" role="alert" hidden></p>
-        ${campoLista('cultura', 'Cultura', 'Selecione uma cultura', DADOS.culturas)}
-
-        <fieldset class="inicios">
-          <legend class="inicios__pergunta">Como deseja iniciar o plano?</legend>
-          <div class="inicios__grade">
-            ${INICIOS.map(cardInicio).join('')}
+        <h3 class="cp-secao">Informações gerais</h3>
+        <div class="cp-gerais">
+          <div class="campo">
+            <label class="campo__rotulo" for="cp-safra">Safra ${asterisco()}</label>
+            <select class="campo__controle" id="cp-safra" name="safra" required></select>
+            ${erroObrigatorio('safra')}
           </div>
-        </fieldset>
-
-        <div class="importar" hidden>
-          <label class="campo__rotulo" for="cp-arquivo">Arquivo exportado pelo Plano de Safra (.xlsx) ${asterisco()}</label>
-          <input class="importar__arquivo" id="cp-arquivo" type="file" accept=".xlsx">
-          <p class="erro-campo" id="cp-erro-arquivo" role="alert" hidden></p>
-          <p class="importar__ok" id="cp-arquivo-ok" hidden></p>
-          <div class="importar__diferencas" id="cp-diferencas" role="alert" hidden></div>
+          ${campoLista('empresa', 'Empresa', 'Selecione', DADOS.empresas)}
+          ${campoLista('atividade', 'Atividade', 'Selecione', DADOS.atividades, DADOS.atividadesEmBreve, 'Agricultura')}
+          ${campoLista('cultura', 'Cultura', 'Selecione', DADOS.culturas)}
         </div>
+
+        <h3 class="cp-secao cp-secao--linha">Fazendas</h3>
+        <div class="cp-fazendas" id="cp-fazendas"></div>
+        <button class="botao botao--secundario cp-adicionar" type="button" data-acao="cp-adicionar">${Icones.mais} Adicionar fazenda</button>
       </div>
 
       <div class="modal__rodape">
-        <p class="modal__rodape-erro" id="cp-erro-continuar" role="alert" hidden>
-          Preencha os campos obrigatórios.</p>
+        <p class="modal__rodape-erro" id="cp-erro-criar" role="alert" hidden></p>
         <button class="botao botao--secundario" type="button" data-fechar>Cancelar</button>
-        <button class="botao botao--primario" type="submit" aria-disabled="true">Continuar para as operações</button>
+        <button class="botao botao--primario" type="submit" aria-disabled="true">Criar Plano de Safra</button>
       </div>
     </form>
-  `, { classe: 'modal--formulario' });
+  `, { classe: 'modal--formulario modal--largo' });
 
   const form = modal.elemento.querySelector('form');
   const selectSafra = form.elements.safra;
-  const NOVA_SAFRA = '__nova-safra__';
+  const caixaFazendas = form.querySelector('#cp-fazendas');
+  const botaoCriar = form.querySelector('[type="submit"]');
+  const erroCriar = form.querySelector('#cp-erro-criar');
   let safraAnterior = '';
-  const erroDuplicado = form.querySelector('#cp-erro-duplicado');
-  const botaoContinuar = form.querySelector('[type="submit"]');
-  const erroContinuar = form.querySelector('#cp-erro-continuar');
-  const OBRIGATORIOS = ['safra', 'empresa', 'fazenda', 'cultura'];
-  let tentouContinuar = false;  // os avisos de obrigatório só aparecem depois de tentar continuar
 
   preencherSafras();
+  desenharFazendas();
   selectSafra.focus();
 
-  // ----- Importar XLSX -----
-  // Os campos do modal são conferidos com os do arquivo; se forem diferentes, a pessoa escolhe quais usar.
-  const caixaImportar = form.querySelector('.importar');
-  const inputArquivo = form.querySelector('#cp-arquivo');
-  const erroArquivo = form.querySelector('#cp-erro-arquivo');
-  const okArquivo = form.querySelector('#cp-arquivo-ok');
-  const caixaDiferencas = form.querySelector('#cp-diferencas');
-  const CAMPOS = [['safra', 'Safra'], ['empresa', 'Empresa'], ['fazenda', 'Fazenda'], ['cultura', 'Cultura']];
-  let importado = null;      // arquivo lido: { contexto, germinacao, abas }
-  let manterModal = false;   // a pessoa escolheu "Manter os do modal"
-
-  function importando() { return form.elements.inicio.value === 'importar'; }
-
-  function mostrarImportar() {
-    caixaImportar.hidden = !importando();
-    conferirArquivo();
-  }
-
-  inputArquivo.addEventListener('change', async () => {
-    importado = null; manterModal = false;
-    erroArquivo.hidden = true; okArquivo.hidden = true; caixaDiferencas.hidden = true;
-    const arquivo = inputArquivo.files[0];
-    if (!arquivo) return;
-    const lido = await ArquivoPlano.ler(arquivo);
-    if (lido.erro) { erroArquivo.textContent = lido.erro; erroArquivo.hidden = false; return; }
-    importado = lido;
-    const c = lido.contexto;
-    okArquivo.textContent = `Planejamento da safra ${c.safra} · ${c.empresa} · Fazenda ${c.fazenda} · ${c.cultura}`;
-    okArquivo.hidden = false;
-    // Campos ainda vazios no modal recebem o valor do arquivo
-    CAMPOS.forEach(([campo]) => { if (!form.elements[campo].value) escolher(campo, c[campo]); });
-    conferirArquivo();
+  // ----- Fazendas -----
+  function desenharFazendas() {
+    caixaFazendas.innerHTML = blocos.map(blocoFazenda).join('');
     atualizar();
-  });
-
-  // Coloca o valor na lista (se não existir, entra nela) e escolhe
-  function escolher(campo, valor) {
-    if (!valor) return;
-    const select = form.elements[campo];
-    if (campo === 'safra') {
-      if (!DADOS.safras.includes(valor)) DADOS.safras.push(valor);
-      preencherSafras(valor);
-      return;
-    }
-    if (![...select.options].some((o) => o.value === valor)) select.add(new Option(valor, valor));
-    select.value = valor;
   }
 
-  function diferencas() {
-    if (!importado || !importando()) return [];
-    return CAMPOS.filter(([campo]) => form.elements[campo].value && form.elements[campo].value !== importado.contexto[campo]);
+  function blocoFazenda(b, i) {
+    const todos = DADOS.talhoes[b.fazenda] || [];
+    const incluidos = todos.filter((t) => b.talhoes.includes(t.nome));
+    const area = incluidos.reduce((s, t) => s + t.area, 0);
+    const resumo = !b.fazenda ? 'Escolha a fazenda'
+      : !incluidos.length ? 'Selecionar talhões'
+      : incluidos.length === todos.length ? `Todos os talhões (${todos.length})`
+      : `${incluidos.length} de ${todos.length} talhões`;
+    const aberto = talhoesAbertos === b.chave;
+    return `
+      <section class="cp-fazenda" data-bloco="${b.chave}" aria-label="Fazenda ${i + 1}">
+        <header class="cp-fazenda__topo">
+          <span>Fazenda ${i + 1}</span>
+          ${blocos.length > 1 ? `<button class="botao-icone" type="button" data-acao="cp-remover" title="Remover esta fazenda"
+                                        aria-label="Remover Fazenda ${i + 1}">${Icones.lixeira}</button>` : ''}
+        </header>
+        <div class="cp-fazenda__campos">
+          <div class="campo">
+            <label class="campo__rotulo" for="cp-fazenda-${b.chave}">Fazenda ${asterisco()}</label>
+            <select class="campo__controle" id="cp-fazenda-${b.chave}" data-campo="fazenda">
+              ${opcoes('Selecione', DADOS.fazendas, b.fazenda)}
+            </select>
+            <p class="erro-campo" data-erro-fazenda hidden></p>
+          </div>
+          <div class="campo cp-talhoes">
+            <span class="campo__rotulo" id="cp-talhoes-rot-${b.chave}">Talhões (opcional)</span>
+            <button class="campo__controle cp-talhoes__botao" type="button" data-acao="cp-talhoes"
+                    aria-haspopup="true" aria-expanded="${aberto}" aria-labelledby="cp-talhoes-rot-${b.chave}"
+                    ${b.fazenda ? '' : 'disabled'}><span>${resumo}</span>${Icones.abaixo}</button>
+            ${aberto ? listaTalhoes(b, todos) : ''}
+          </div>
+          <div class="campo">
+            <span class="campo__rotulo">Área de cultivo</span>
+            <p class="campo__controle cp-area" aria-live="polite">${incluidos.length ? Util.area(area) : 'Pendente'}</p>
+          </div>
+        </div>
+        ${b.fazenda && !incluidos.length ? `<p class="cp-fazenda__dica">${Icones.info} A área de cultivo será calculada automaticamente quando houver talhões selecionados.</p>` : ''}
+      </section>`;
   }
 
-  function conferirArquivo() {
-    const lista = manterModal ? [] : diferencas();
-    caixaDiferencas.hidden = !lista.length;
-    if (!lista.length) { caixaDiferencas.innerHTML = ''; return; }
-    const fora = form.elements.fazenda.value ? ArquivoPlano.talhoesFora(importado, form.elements.fazenda.value) : [];
-    const esc = Util.escapar;
-    caixaDiferencas.innerHTML = `
-      <p class="importar__titulo">${Icones.alerta} O arquivo é de outro plano</p>
-      <ul class="importar__lista">
-        ${lista.map(([campo, rotulo]) => `<li>${rotulo}: no modal <strong>${esc(form.elements[campo].value)}</strong> · no arquivo <strong>${esc(importado.contexto[campo])}</strong></li>`).join('')}
-      </ul>
-      ${fora.length ? `<p class="importar__aviso">Mantendo os do modal, ${fora.length} ${fora.length === 1 ? 'talhão do arquivo não existe' : 'talhões do arquivo não existem'} na Fazenda ${esc(form.elements.fazenda.value)} e ${fora.length === 1 ? 'fica' : 'ficam'} de fora (${fora.map(esc).join(', ')}).</p>` : ''}
-      <div class="importar__botoes">
-        <button class="botao botao--secundario botao--p" type="button" data-acao="usar-arquivo">Usar os do arquivo</button>
-        <button class="botao botao--secundario botao--p" type="button" data-acao="manter-modal">Manter os do modal</button>
+  // Lista de talhões com caixas de marcar; "Todos" marca ou desmarca tudo
+  function listaTalhoes(b, todos) {
+    const tudo = todos.length && todos.every((t) => b.talhoes.includes(t.nome));
+    return `
+      <div class="cp-talhoes__lista" role="group" aria-label="Talhões da Fazenda ${esc(b.fazenda)}">
+        <label class="cp-talhoes__item cp-talhoes__item--todos">
+          <input type="checkbox" data-talhao="__todos__" ${tudo ? 'checked' : ''}> Todos
+        </label>
+        ${todos.map((t) => `
+          <label class="cp-talhoes__item">
+            <input type="checkbox" data-talhao="${esc(t.nome)}" ${b.talhoes.includes(t.nome) ? 'checked' : ''}>
+            ${esc(t.nome)} <span class="cp-talhoes__area">${Util.area(t.area)}</span>
+          </label>`).join('')}
       </div>`;
+  }
+
+  function blocoDe(el) {
+    const sec = el.closest('[data-bloco]');
+    return sec ? blocos.find((b) => b.chave === Number(sec.dataset.bloco)) : null;
+  }
+
+  // Redesenha as fazendas e devolve o foco ao controle equivalente
+  function redesenhar(chave, seletor) {
+    desenharFazendas();
+    caixaFazendas.querySelector(`[data-bloco="${chave}"] ${seletor}`)?.focus();
   }
 
   form.addEventListener('click', (e) => {
     const acao = e.target.closest('[data-acao]')?.dataset.acao;
-    if (acao === 'usar-arquivo') {
-      CAMPOS.forEach(([campo]) => escolher(campo, importado.contexto[campo]));
-      conferirArquivo(); atualizar();
+    const b = blocoDe(e.target);
+    if (acao === 'cp-adicionar') {
+      const novo = novoBloco();
+      blocos.push(novo);
+      talhoesAbertos = null;
+      redesenhar(novo.chave, '[data-campo="fazenda"]');
+    } else if (acao === 'cp-remover') {
+      blocos.splice(blocos.indexOf(b), 1);
+      talhoesAbertos = null;
+      desenharFazendas();
+      form.querySelector('[data-acao="cp-adicionar"]').focus();
+    } else if (acao === 'cp-talhoes') {
+      talhoesAbertos = talhoesAbertos === b.chave ? null : b.chave;
+      redesenhar(b.chave, talhoesAbertos ? '.cp-talhoes__lista input' : '[data-acao="cp-talhoes"]');
     }
-    if (acao === 'manter-modal') { manterModal = true; conferirArquivo(); atualizar(); }
+  });
+
+  // Clicar fora da lista de talhões fecha a lista
+  modal.elemento.addEventListener('mousedown', (e) => {
+    if (talhoesAbertos && !e.target.closest('.cp-talhoes')) { talhoesAbertos = null; desenharFazendas(); }
+  });
+  // Esc na lista de talhões fecha só a lista (não o modal)
+  form.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && talhoesAbertos && e.target.closest('.cp-talhoes')) {
+      e.stopPropagation();
+      const chave = talhoesAbertos;
+      talhoesAbertos = null;
+      redesenhar(chave, '[data-acao="cp-talhoes"]');
+    }
+  });
+
+  form.addEventListener('change', (e) => {
+    const b = blocoDe(e.target);
+    if (b && e.target.dataset.campo === 'fazenda') {
+      // Fazenda escolhida: todos os talhões já vêm incluídos (a pessoa desmarca os que não quer)
+      b.fazenda = e.target.value;
+      b.talhoes = (DADOS.talhoes[b.fazenda] || []).map((t) => t.nome);
+      redesenhar(b.chave, '[data-campo="fazenda"]');
+      return;
+    }
+    if (b && e.target.dataset.talhao) {
+      const todos = (DADOS.talhoes[b.fazenda] || []).map((t) => t.nome);
+      const nome = e.target.dataset.talhao;
+      if (nome === '__todos__') b.talhoes = e.target.checked ? todos : [];
+      else b.talhoes = e.target.checked ? todos.filter((t) => t === nome || b.talhoes.includes(t)) : b.talhoes.filter((t) => t !== nome);
+      redesenhar(b.chave, `[data-talhao="${CSS.escape(nome)}"]`);
+      return;
+    }
+    atualizar();
   });
 
   // ----- Criar nova safra (última opção da lista de safras) -----
   function preencherSafras(selecionada = '') {
-    selectSafra.innerHTML = opcoes('Selecione uma safra', DADOS.safras, selecionada) +
+    selectSafra.innerHTML = opcoes('Selecione', DADOS.safras, selecionada) +
       `<option value="${NOVA_SAFRA}">+ Criar nova safra</option>`;
     safraAnterior = selecionada;
   }
@@ -3543,87 +3973,78 @@ window.Telas.abrirModalCriarPlano = function ({ aoCriar }) {
     input.focus();
   }
 
-  // ----- Validação: quatro campos preenchidos e um plano por safra e fazenda -----
-  function valores() {
+  // ----- Validação -----
+  // Informações gerais e a fazenda de cada bloco são obrigatórias; talhões, não.
+  // Um único plano por safra e fazenda: não pode repetir fazenda entre os blocos nem criar um plano que já existe.
+  function problemas() {
     const f = form.elements;
-    return {
-      safra: f.safra.value,
-      empresa: f.empresa.value,
-      fazenda: f.fazenda.value,
-      cultura: f.cultura.value,
-      inicio: f.inicio.value
-    };
+    const faltando = GERAIS.filter((nome) => !f[nome].value);
+    const porBloco = blocos.map((b, i) => {
+      if (!b.fazenda) return 'Preenchimento obrigatório';
+      if (blocos.findIndex((x) => x.fazenda === b.fazenda) < i) return `A Fazenda ${b.fazenda} já está em outro bloco.`;
+      if (f.safra.value && DADOS.planos.some((p) => p.safra === f.safra.value && p.fazenda === b.fazenda)) {
+        return `Já existe um plano da safra ${f.safra.value} para a Fazenda ${b.fazenda}.`;
+      }
+      return '';
+    });
+    return { faltando, porBloco };
   }
 
   function atualizar() {
-    const v = valores();
-    const duplicado = v.safra && v.fazenda &&
-      DADOS.planos.some((p) => p.safra === v.safra && p.fazenda === v.fazenda);
-
-    erroDuplicado.hidden = !duplicado;
-    erroDuplicado.textContent = duplicado
-      ? `Já existe um plano da safra ${v.safra} para a fazenda ${v.fazenda}.` // textContent: não precisa escapar
-      : '';
-    form.elements.fazenda.classList.toggle('campo__controle--erro', !!duplicado);
-
-    const faltando = OBRIGATORIOS.filter((nome) => !v[nome]);
+    const { faltando, porBloco } = problemas();
+    const bloqueado = faltando.length || porBloco.some(Boolean);
     // O botão parece desabilitado, mas continua clicável para explicar o que falta
-    botaoContinuar.setAttribute('aria-disabled', faltando.length || duplicado ? 'true' : 'false');
-    mostrarObrigatorios(tentouContinuar ? faltando : []);
-    return { faltando, duplicado };
-  }
-
-  // "Preenchimento obrigatório" abaixo de cada campo vazio e a mensagem ao lado dos botões
-  function mostrarObrigatorios(faltando) {
-    OBRIGATORIOS.forEach((nome) => {
-      const vazio = faltando.includes(nome);
+    botaoCriar.setAttribute('aria-disabled', bloqueado ? 'true' : 'false');
+    GERAIS.forEach((nome) => {
+      const vazio = tentouCriar && faltando.includes(nome);
       form.querySelector(`#cp-erro-${nome}`).hidden = !vazio;
       form.elements[nome].toggleAttribute('aria-invalid', vazio);
     });
-    erroContinuar.hidden = !faltando.length;
+    caixaFazendas.querySelectorAll('[data-bloco]').forEach((sec, i) => {
+      const msg = porBloco[i];
+      // Fazenda vazia só é cobrada depois de tentar criar; fazenda repetida ou plano existente, na hora
+      const mostrar = msg && (tentouCriar || msg !== 'Preenchimento obrigatório');
+      const erro = sec.querySelector('[data-erro-fazenda]');
+      erro.textContent = mostrar ? msg : ''; // textContent: não precisa escapar
+      erro.hidden = !mostrar;
+      sec.querySelector('[data-campo="fazenda"]').classList.toggle('campo__controle--erro', !!mostrar && msg !== 'Preenchimento obrigatório');
+    });
+    erroCriar.hidden = !(tentouCriar && bloqueado);
+    erroCriar.textContent = faltando.length || porBloco.includes('Preenchimento obrigatório')
+      ? 'Preencha os campos obrigatórios.' : 'Confira as fazendas.';
+    return { faltando, porBloco };
   }
 
-  form.addEventListener('change', (e) => {
-    if (e.target.name === 'inicio') mostrarImportar();
-    else if (e.target !== inputArquivo) { manterModal = false; conferirArquivo(); }
-    atualizar();
-  });
-
-  // ----- Continuar para as operações -----
+  // ----- Criar Plano de Safra -----
   form.addEventListener('submit', (e) => {
     e.preventDefault();
-    tentouContinuar = true;
-    const { faltando, duplicado } = atualizar();
+    tentouCriar = true;
+    const { faltando, porBloco } = atualizar();
     if (faltando.length) { form.elements[faltando[0]].focus(); return; }
-    if (duplicado) { form.elements.fazenda.focus(); return; }
-    if (importando()) {
-      // Importar: precisa do arquivo lido e, se houver diferença, da escolha da pessoa
-      if (!importado) {
-        if (erroArquivo.hidden) { erroArquivo.textContent = 'Escolha o arquivo exportado pelo Plano de Safra.'; erroArquivo.hidden = false; }
-        inputArquivo.focus(); return;
-      }
-      if (!caixaDiferencas.hidden) { caixaDiferencas.querySelector('button').focus(); return; }
-    }
-    const v = valores();
+    const i = porBloco.findIndex(Boolean);
+    if (i >= 0) { caixaFazendas.querySelectorAll('[data-campo="fazenda"]')[i].focus(); return; }
+    const f = form.elements;
     modal.fechar();
     aoCriar({
-      safra: v.safra,
-      empresa: v.empresa,
-      fazenda: v.fazenda,
-      cultura: v.cultura,
-      inicio: v.inicio,
-      ...(importando() ? { importado } : {})
+      safra: f.safra.value,
+      empresa: f.empresa.value,
+      atividade: f.atividade.value,
+      cultura: f.cultura.value,
+      fazendas: blocos.map((b) => ({ fazenda: b.fazenda, talhoes: [...b.talhoes] }))
     });
   });
 
   // ----- Pedaços de HTML -----
-  // Com uma opção só (ex.: cultura, por enquanto só Soja), ela já vem escolhida
-  function campoLista(nome, rotulo, textoVazio, itens) {
+  // Com uma opção só (ex.: cultura, por enquanto só Soja), ela já vem escolhida.
+  // emBreve: opções que aparecem desabilitadas, com "(Em breve)".
+  function campoLista(nome, rotulo, textoVazio, itens, emBreve = [], padrao = '') {
+    const disponiveis = itens.filter((x) => !emBreve.includes(x));
+    const escolhido = padrao || (disponiveis.length === 1 ? disponiveis[0] : '');
     return `
       <div class="campo">
         <label class="campo__rotulo" for="cp-${nome}">${rotulo} ${asterisco()}</label>
         <select class="campo__controle" id="cp-${nome}" name="${nome}" required>
-          ${opcoes(textoVazio, itens, itens.length === 1 ? itens[0] : '')}
+          ${opcoes(textoVazio, itens, escolhido, emBreve)}
         </select>
         ${erroObrigatorio(nome)}
       </div>
@@ -3638,84 +4059,112 @@ window.Telas.abrirModalCriarPlano = function ({ aoCriar }) {
     return `<p class="erro-campo" id="cp-erro-${nome}" hidden>Preenchimento obrigatório</p>`;
   }
 
-  function opcoes(textoVazio, itens, selecionado = '') {
+  function opcoes(textoVazio, itens, selecionado = '', emBreve = []) {
     return `<option value="" disabled ${selecionado ? '' : 'selected'}>${textoVazio}</option>` +
-      itens.map((item) =>
-        `<option value="${Util.escapar(item)}" ${item === selecionado ? 'selected' : ''}>${Util.escapar(item)}</option>`).join('');
-  }
-
-  function cardInicio(c) {
-    return `
-      <label class="card-inicio ${c.emBreve ? 'card-inicio--desabilitado' : ''}">
-        <input class="card-inicio__radio" type="radio" name="inicio" value="${c.valor}"
-               ${c.valor === 'modelo' ? 'checked' : ''} ${c.emBreve ? 'disabled' : ''}>
-        <span class="card-inicio__icone">${c.icone}</span>
-        <span class="card-inicio__textos">
-          <span class="card-inicio__titulo">
-            ${c.titulo}
-            ${c.emBreve ? '<span class="selo">Em breve</span>' : ''}
-          </span>
-          <span class="card-inicio__texto">${c.texto}</span>
-        </span>
-      </label>
-    `;
+      itens.map((item) => emBreve.includes(item)
+        ? `<option value="${esc(item)}" disabled>${esc(item)} (Em breve)</option>`
+        : `<option value="${esc(item)}" ${item === selecionado ? 'selected' : ''}>${esc(item)}</option>`).join('');
   }
 };
 
 </script>
   <script>
 /*
- * Tela 03 — Lista de planos (docs/telas/03-lista-planos.md)
- * Aparece no menu "Plano de Safra" quando existe ao menos um plano.
+ * Tela 03 — Visão Geral, lista de planos (docs/telas/03-lista-planos.md)
+ * Aparece no menu Plano de Safra › Visão Geral quando existe ao menos um plano.
+ * Duas guias com os mesmos filtros: Visão Geral (uma linha por plano, na versão mais recente)
+ * e Histórico de versões (uma linha por versão de cada plano).
  */
 window.Telas = window.Telas || {};
 
 window.Telas.listaPlanos = (function () {
   const esc = Util.escapar;
 
-  // Filtros: Safra começa na mais recente cadastrada; os demais em "Todas" ('')
+  // Filtros, na ordem das colunas. Safra começa na mais recente cadastrada; os demais em "Todas"/"Todos" ('')
+  const CAMPOS_FILTRO = ['safra', 'empresa', 'atividade', 'cultura', 'fazenda', 'status'];
+  const STATUS = [['nao-iniciado', 'Não iniciado'], ['construcao', 'Em construção'], ['publicada', 'Publicada']];
   let filtros = {};
+  const filtrosIniciais = () => ({ safra: Util.safraMaisRecente(presentes('safra', DADOS.safras)), empresa: '', atividade: '', cultura: '', fazenda: '', status: '' });
+
+  // Opções de cada filtro: só os valores que aparecem nos planos da lista (na ordem do cadastro)
+  const valorDe = (p, campo) => (campo !== 'status' ? p[campo] : Versoes.aIniciar(p) ? 'nao-iniciado' : Versoes.deTrabalho(p).status);
+  function presentes(campo, cadastro) {
+    const naLista = new Set(DADOS.planos.map((p) => valorDe(p, campo)));
+    // Status: também os das versões antigas (aparecem na guia Histórico de versões)
+    if (campo === 'status') DADOS.planos.forEach((p) => Versoes.lista(p).forEach((v) => naLista.add(statusVersao(p, v))));
+    return cadastro.filter((item) => naLista.has(Array.isArray(item) ? item[0] : item));
+  }
+
+  // Safra que a lista deve mostrar na próxima vez que for desenhada (ex.: a dos planos recém-criados)
+  let safraPedida = null;
+  function mostrarSafra(safra) { safraPedida = safra; }
+
+  // Guia aberta: 'planos' (Visão Geral) ou 'historico' (Histórico de versões). Mantém-se ao navegar.
+  const GUIAS = [['planos', 'Visão Geral'], ['historico', 'Histórico de versões']];
+  let guia = 'planos';
+  // Status de uma versão: a 0.1 de um plano ainda não iniciado aparece como "Não iniciado"
+  const statusVersao = (p, v) => (Versoes.aIniciar(p) ? 'nao-iniciado' : v.status);
 
   function desenhar() {
-    filtros = { safra: Util.safraMaisRecente(DADOS.safras), empresa: '', fazenda: '', cultura: '' };
+    filtros = filtrosIniciais();
+    if (safraPedida) { filtros.safra = safraPedida; safraPedida = null; }
 
     return `
-      <header class="cabecalho">
-        <h1 class="cabecalho__titulo">Plano de Safra</h1>
+      <header class="cabecalho cabecalho--guias">
+        <h1 class="cabecalho__titulo">Visão Geral</h1>
+        <nav class="etapas" aria-label="Guias da Visão Geral">
+          ${GUIAS.map(([id, nome]) => `
+            <button class="etapa ${id === guia ? 'etapa--ativa' : ''}" type="button" data-guia="${id}"
+                    ${id === guia ? 'aria-current="page"' : ''}>${nome}</button>`).join('')}
+        </nav>
       </header>
 
       <div class="pagina">
-        <section class="cartao filtros" aria-labelledby="titulo-filtros">
-          <h2 class="secao__titulo" id="titulo-filtros">Filtrar planos</h2>
-          <div class="filtros__grade">
-            ${filtro('safra', 'Safra', DADOS.safras)}
-            ${filtro('empresa', 'Empresa', DADOS.empresas)}
-            ${filtro('fazenda', 'Fazenda', DADOS.fazendas)}
-            ${filtro('cultura', 'Cultura', DADOS.culturas)}
-          </div>
+        <section class="cartao filtros" aria-label="Filtrar planos">
+          ${filtro('safra', 'Safra', presentes('safra', DADOS.safras))}
+          ${filtro('empresa', 'Empresa', presentes('empresa', DADOS.empresas))}
+          ${filtro('atividade', 'Atividade', presentes('atividade', DADOS.atividades))}
+          ${filtro('cultura', 'Cultura', presentes('cultura', DADOS.culturas))}
+          ${filtro('fazenda', 'Fazenda', presentes('fazenda', DADOS.fazendas))}
+          ${filtro('status', 'Status', presentes('status', STATUS), 'Todos')}
+          <button class="link-acao filtros__limpar" type="button" data-acao="lp-limpar">${Icones.limpar} Limpar filtros</button>
         </section>
 
-        <section aria-labelledby="titulo-planos">
-          <div class="secao__topo">
+        <section class="cartao lista-planos" aria-labelledby="titulo-planos" data-guia-painel="planos" ${guia === 'planos' ? '' : 'hidden'}>
+          <div class="secao__topo lista-planos__topo">
             <h2 class="secao__titulo" id="titulo-planos">Planos de Safra</h2>
             <button class="botao botao--primario" type="button" data-acao="criar-plano">
               ${Icones.mais} Criar Plano Safra
             </button>
           </div>
-          <div class="cartao tabela-rolagem">
+          <div class="tabela-rolagem">
             <table class="tabela">
               <thead>
                 <tr>
-                  <th class="lista-planos__menu"><span class="so-leitor">Mais ações</span></th>
-                  <th>Safra</th><th>Empresa</th><th>Fazenda</th><th>Cultura</th>
-                  <th class="tabela__numero">Área</th>
-                  <th class="tabela__numero">Custo estimado</th>
-                  <th class="tabela__numero">Receita projetada</th>
-                  <th>Status</th><th>Última atualização</th><th>Atualizado por</th>
-                  <th><span class="so-leitor">Abrir</span></th>
+                  <th>Safra</th><th>Empresa</th><th>Atividade</th><th>Cultura</th><th>Fazenda</th>
+                  <th class="tabela__numero">Área de cultivo</th>
+                  <th>Versão</th><th>Status</th><th>Última atualização</th><th>Atualizado por</th>
+                  <th class="lista-planos__menu">Ações</th>
                 </tr>
               </thead>
               <tbody id="lp-linhas"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="cartao lista-planos" aria-labelledby="titulo-historico" data-guia-painel="historico" ${guia === 'historico' ? '' : 'hidden'}>
+          <div class="secao__topo lista-planos__topo">
+            <h2 class="secao__titulo" id="titulo-historico">Histórico de versões</h2>
+          </div>
+          <div class="tabela-rolagem">
+            <table class="tabela">
+              <thead>
+                <tr>
+                  <th>Safra</th><th>Empresa</th><th>Atividade</th><th>Cultura</th><th>Fazenda</th>
+                  <th>Versão</th><th>Status</th><th>Última atualização</th><th>Atualizado por</th>
+                </tr>
+              </thead>
+              <tbody id="lp-historico"></tbody>
             </table>
           </div>
         </section>
@@ -3731,25 +4180,62 @@ window.Telas.listaPlanos = (function () {
         atualizar(conteudo);
       });
     });
+    // Limpar filtros: volta ao começo (Safra mais recente; os demais em Todas/Todos)
+    conteudo.querySelector('[data-acao="lp-limpar"]').addEventListener('click', () => {
+      filtros = filtrosIniciais();
+      conteudo.querySelectorAll('[data-filtro]').forEach((select) => { select.value = filtros[select.dataset.filtro]; });
+      atualizar(conteudo);
+    });
     atualizar(conteudo);
-    // Menu do plano: botão direito na linha ou o botão ⋯ no começo da linha (Excluir · Exportar · Abrir)
-    conteudo.addEventListener('contextmenu', (e) => {
+    // Guias: troca o painel sem desenhar a tela de novo (os filtros continuam)
+    conteudo.querySelector('.cabecalho--guias').addEventListener('click', (e) => {
+      const botao = e.target.closest('[data-guia]');
+      if (botao) trocarGuia(conteudo, botao.dataset.guia);
+    });
+    // Histórico: clicar na linha (ou Enter) abre aquela versão
+    const historico = conteudo.querySelector('[data-guia-painel="historico"]');
+    const abrirDaLinha = (tr) => abrirVersao(DADOS.planos.find((x) => x.id === Number(tr.dataset.plano)), tr.dataset.versao);
+    historico.addEventListener('click', (e) => {
+      const tr = e.target.closest('tr[data-versao]');
+      if (tr) abrirDaLinha(tr);
+    });
+    historico.addEventListener('keydown', (e) => {
+      const tr = e.target.closest('tr[data-versao]');
+      if (tr && e.target === tr && e.key === 'Enter') abrirDaLinha(tr);
+    });
+    // Um clique na linha (ou Enter nela) abre a versão de trabalho
+    // (em construção ou, sem ela, a última publicada). O ⋯ só abre o menu.
+    const abrirLinha = (tr) => abrirPlano(DADOS.planos.find((x) => x.id === Number(tr.dataset.plano)));
+    // Eventos no cartão da lista, que é refeito a cada vez que a tela aparece
+    // (no #conteudo, que é sempre o mesmo, eles se acumulariam e abririam duas vezes)
+    const lista = conteudo.querySelector('[data-guia-painel="planos"]');
+    lista.addEventListener('click', (e) => {
+      const tr = e.target.closest('tr[data-plano]');
+      if (tr && !e.target.closest('a, button')) abrirLinha(tr);
+    });
+    lista.addEventListener('keydown', (e) => {
+      const tr = e.target.closest('tr[data-plano]');
+      if (tr && e.target === tr && e.key === 'Enter') abrirLinha(tr);
+    });
+    // Menu do plano: botão direito na linha ou o botão ⋯ no fim da linha
+    lista.addEventListener('contextmenu', (e) => {
       const tr = e.target.closest('tr[data-plano]');
       if (!tr || e.target.closest('a, button')) return;
       e.preventDefault();
       abrirMenuPlano(Number(tr.dataset.plano), e.target, e.clientX, e.clientY);
     });
-    conteudo.addEventListener('click', (e) => {
+    lista.addEventListener('click', (e) => {
       const botao = e.target.closest('[data-menu-plano]');
       if (!botao) return;
       const caixa = botao.getBoundingClientRect();
-      abrirMenuPlano(Number(botao.dataset.menuPlano), botao, caixa.left, caixa.bottom + 4);
+      abrirMenuPlano(Number(botao.dataset.menuPlano), botao, caixa.right, caixa.bottom + 4, true);
     });
   }
 
   // ----- Menu do plano -----
   let menuAberto = null;
-  function abrirMenuPlano(id, ancora, x, y) {
+  // alinharDireita: o menu termina em x (usado pelo ⋯, que fica no fim da linha)
+  function abrirMenuPlano(id, ancora, x, y, alinharDireita = false) {
     fecharMenuPlano();
     const p = DADOS.planos.find((x) => x.id === id);
     if (!p) return;
@@ -3757,17 +4243,29 @@ window.Telas.listaPlanos = (function () {
     menu.className = 'menu-contexto';
     menu.setAttribute('role', 'menu');
     menu.setAttribute('aria-label', `Plano ${p.safra} · ${p.fazenda}`);
-    // Excluir só para plano em construção; no aprovado aparece desabilitado, com o motivo
-    const aprovado = p.status === 'Aprovado';
-    menu.innerHTML = [['excluir', 'Excluir'], ['exportar', 'Exportar (.xlsx)'], ['abrir', 'Abrir']]
-      .map(([item, rotulo]) => {
-        const bloqueado = item === 'excluir' && aprovado;
-        return `<button class="menu-contexto__item ${item === 'excluir' ? 'menu-contexto__item--perigo' : ''}" type="button" role="menuitem" data-item="${item}"
-                  ${bloqueado ? 'aria-disabled="true" title="Plano aprovado não pode ser excluído"' : ''}>${rotulo}${bloqueado
-                  ? '<span class="menu-contexto__motivo">Plano aprovado não pode ser excluído</span>' : ''}</button>`;
-      }).join('');
+    // Abrir · Criar nova versão · Histórico de versões · Exportar XLSX · (separador) · Excluir plano
+    // Criar nova versão: a partir da última publicada; desabilitado quando já há uma versão em construção.
+    // Excluir plano: permitido enquanto o plano não gerou OS (no protótipo ainda não há OS).
+    const construcao = Versoes.emConstrucao(p);
+    const publicada = Versoes.ultimaPublicada(p);
+    const item = (id, rotulo, { motivo = '', bloqueado = false, perigo = false } = {}) => `
+      <button class="menu-contexto__item ${perigo ? 'menu-contexto__item--perigo' : ''}" type="button" role="menuitem" data-item="${id}"
+              ${bloqueado ? `aria-disabled="true" title="${esc(motivo)}"` : ''}>${rotulo}${motivo
+              ? `<span class="menu-contexto__motivo">${esc(motivo)}</span>` : ''}</button>`;
+    menu.innerHTML = [
+      item('abrir', 'Abrir'),
+      item('nova-versao', 'Criar nova versão', Versoes.aIniciar(p)
+        ? { motivo: 'O plano ainda não foi iniciado', bloqueado: true }
+        : construcao ? { motivo: `A versão ${construcao.num} já está em construção`, bloqueado: true }
+        : { motivo: `A partir da versão ${publicada.num}, publicada` }),
+      item('historico', 'Histórico de versões'),
+      item('exportar', 'Exportar XLSX'),
+      '<hr class="menu-contexto__separador">',
+      item('excluir', 'Excluir plano', { perigo: true })
+    ].join('');
     document.body.appendChild(menu);
     const { width, height } = menu.getBoundingClientRect();
+    if (alinharDireita) x -= width;
     menu.style.left = `${Math.max(8, Math.min(x, window.innerWidth - width - 8))}px`;
     menu.style.top = `${y + height + 8 > window.innerHeight ? Math.max(8, y - height) : y}px`;
     const itens = [...menu.querySelectorAll('[data-item]')];
@@ -3776,8 +4274,11 @@ window.Telas.listaPlanos = (function () {
       const item = ev.target.closest('[data-item]');
       if (!item || item.getAttribute('aria-disabled') === 'true') return;
       fecharMenuPlano();
-      if (item.dataset.item === 'abrir') location.hash = `#/plano/${p.id}`;
-      else if (item.dataset.item === 'exportar') ArquivoPlano.exportar(p);
+      const acao = item.dataset.item;
+      if (acao === 'abrir') abrirPlano(p);
+      else if (acao === 'nova-versao') criarNovaVersao(p);
+      else if (acao === 'historico') verHistorico(p);
+      else if (acao === 'exportar') ArquivoPlano.exportar(p);
       else excluirPlano(p);
     });
     menu.addEventListener('keydown', (ev) => {
@@ -3791,7 +4292,78 @@ window.Telas.listaPlanos = (function () {
     itens[0].focus();
   }
 
-  // Excluir plano (só em construção): confirmação; sem nenhum plano, volta ao primeiro uso (Tela 01)
+  function trocarGuia(conteudo, nova) {
+    guia = nova;
+    conteudo.querySelectorAll('[data-guia]').forEach((b) => {
+      const ativa = b.dataset.guia === guia;
+      b.classList.toggle('etapa--ativa', ativa);
+      if (ativa) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
+    });
+    conteudo.querySelectorAll('[data-guia-painel]').forEach((painel) => { painel.hidden = painel.dataset.guiaPainel !== guia; });
+  }
+
+  // "Histórico de versões" do menu ⋯: a guia Histórico, com os filtros naquele plano
+  function verHistorico(p) {
+    const conteudo = document.getElementById('conteudo');
+    filtros = { safra: p.safra, empresa: p.empresa, atividade: p.atividade || '', cultura: p.cultura, fazenda: p.fazenda, status: '' };
+    conteudo.querySelectorAll('[data-filtro]').forEach((select) => { select.value = filtros[select.dataset.filtro]; });
+    atualizar(conteudo);
+    trocarGuia(conteudo, 'historico');
+  }
+
+  // Abrir uma versão pelo Histórico. Plano não iniciado: o modal de início.
+  // Com alterações não salvas em outra versão do plano, pergunta antes (como no "Trocar versão").
+  function abrirVersao(p, num) {
+    if (Versoes.aIniciar(p)) { abrirPlano(p); return; }
+    const ir = () => { Versoes.abrir(p, num); location.hash = `#/plano/${p.id}`; };
+    if (!p.pendente || num === p.versaoAberta) {
+      if (num === p.versaoAberta) location.hash = `#/plano/${p.id}`; else ir();
+      return;
+    }
+    const atual = p.versaoAberta;
+    Modal.confirmar({
+      titulo: 'Alterações não salvas',
+      texto: `Há alterações não salvas na versão ${esc(atual)}. Salvar antes de abrir a versão ${esc(num)}?`,
+      botoes: [{ rotulo: 'Cancelar' },
+        { rotulo: 'Abrir sem salvar', acao: ir },
+        { rotulo: 'Salvar e abrir', classe: 'primario', acao: () => { Versoes.salvar(p); ir(); } }]
+    });
+  }
+
+  // Abrir um plano. Ainda não iniciado (só a 0.1, vazia): primeiro o modal "Como deseja iniciar o plano?";
+  // ao começar, nasce a 0.2 em construção e o plano abre na aba Operações.
+  function abrirPlano(p) {
+    if (!Versoes.aIniciar(p)) {
+      prepararAbrir(p);
+      location.hash = `#/plano/${p.id}`;
+      return;
+    }
+    Telas.inicioPlano.abrir(p, {
+      aoComecar: (grupos, aviso) => {
+        Versoes.comecar(p, grupos);
+        // O aviso entra depois da troca de tela (a troca apaga o aviso anterior)
+        if (aviso) window.addEventListener('hashchange', () => Aviso.mostrar(aviso), { once: true });
+        location.hash = `#/plano/${p.id}/operacoes`;
+      }
+    });
+  }
+
+  // Abrir pela lista: vai para a versão de trabalho. Se ela já está aberta, nada muda
+  // (alterações não salvas da versão em construção continuam na área de trabalho).
+  function prepararAbrir(p) {
+    const trabalho = Versoes.deTrabalho(p);
+    if (trabalho && trabalho.num !== p.versaoAberta) Versoes.abrir(p, trabalho.num);
+  }
+
+  // Criar nova versão pela lista: a partir da última publicada, já aberta no Planejamento
+  function criarNovaVersao(p) {
+    const r = Versoes.criarNova(p, Versoes.ultimaPublicada(p).num);
+    if (r.jaExiste) return;
+    location.hash = `#/plano/${p.id}`;
+    Aviso.mostrar(`Versão ${r.num} criada a partir da ${r.origem}`);
+  }
+
+  // Excluir plano: confirmação; sem nenhum plano, volta ao primeiro uso (Tela 01)
   function excluirPlano(p) {
     Modal.confirmar({
       titulo: 'Excluir plano?',
@@ -3812,58 +4384,112 @@ window.Telas.listaPlanos = (function () {
     menuAberto = null;
   }
 
+  // Ordem da lista: Status (Não iniciado, Em construção, Publicada), depois Safra (mais recente primeiro),
+  // Fazenda e Cultura em ordem alfabética
+  const ORDEM_STATUS = STATUS.map(([valor]) => valor);
+  const porTexto = (a, b) => a.localeCompare(b, 'pt-BR');
+  function ordenar(a, b) {
+    return ORDEM_STATUS.indexOf(valorDe(a, 'status')) - ORDEM_STATUS.indexOf(valorDe(b, 'status'))
+      || porTexto(b.safra, a.safra) || porTexto(a.fazenda, b.fazenda) || porTexto(a.cultura, b.cultura);
+  }
+
   function planosFiltrados() {
-    return DADOS.planos.filter((p) =>
-      ['safra', 'empresa', 'fazenda', 'cultura'].every((campo) => !filtros[campo] || p[campo] === filtros[campo]));
+    // Status: o da versão que a linha abre (em construção ou, sem ela, a última publicada)
+    return DADOS.planos.filter((p) => CAMPOS_FILTRO.every((campo) => !filtros[campo] || valorDe(p, campo) === filtros[campo]))
+      .sort(ordenar);
   }
 
   function atualizar(conteudo) {
     const planos = planosFiltrados();
     conteudo.querySelector('#lp-linhas').innerHTML = planos.length
       ? planos.map(linha).join('')
-      : `<tr><td class="tabela__vazia" colspan="12">Nenhum plano encontrado com esses filtros.</td></tr>`;
+      : `<tr><td class="tabela__vazia" colspan="11">Nenhum plano encontrado com esses filtros.</td></tr>`;
+    const versoes = versoesFiltradas();
+    conteudo.querySelector('#lp-historico').innerHTML = versoes.length
+      ? versoes.map(linhaVersao).join('')
+      : `<tr><td class="tabela__vazia" colspan="9">Nenhuma versão encontrada com esses filtros.</td></tr>`;
+  }
+
+  // ----- Histórico de versões -----
+  // Uma linha por versão. Planos na ordem Safra (mais recente primeiro), Fazenda e Cultura; versões da mais nova
+  // para a mais antiga. O filtro Status vale para o status de cada versão.
+  function versoesFiltradas() {
+    const campos = CAMPOS_FILTRO.filter((c) => c !== 'status');
+    return DADOS.planos
+      .filter((p) => campos.every((campo) => !filtros[campo] || p[campo] === filtros[campo]))
+      .sort((a, b) => porTexto(b.safra, a.safra) || porTexto(a.fazenda, b.fazenda) || porTexto(a.cultura, b.cultura))
+      .flatMap((p) => [...Versoes.lista(p)].reverse().map((v) => ({ p, v })))
+      .filter(({ p, v }) => !filtros.status || statusVersao(p, v) === filtros.status);
+  }
+
+  // Última atualização da versão: em construção, o último "Salvar alterações"; publicada, a publicação
+  function linhaVersao({ p, v }) {
+    const status = statusVersao(p, v);
+    const quando = status === 'construcao' ? v.salvaEm : v.publicadaEm;
+    const quem = status === 'construcao' ? v.salvaPor : v.publicadaPor;
+    const rotulo = { 'nao-iniciado': 'Não iniciado', construcao: 'Em construção', publicada: 'Publicada' }[status];
+    const classe = { 'nao-iniciado': 'status--nao-iniciado', construcao: 'status--construcao', publicada: 'status--aprovado' }[status];
+    return `
+      <tr class="lista-planos__linha" data-plano="${p.id}" data-versao="${esc(v.num)}" tabindex="0"
+          title="Abrir a versão ${esc(v.num)}${status === 'publicada' ? ' (publicada, em consulta)' : ''}"
+          aria-label="Abrir plano ${esc(p.safra)} · ${esc(p.fazenda)}, versão ${esc(v.num)}">
+        <td>${esc(p.safra)}</td>
+        <td>${esc(p.empresa)}</td>
+        <td>${esc(p.atividade || '—')}</td>
+        <td>${esc(p.cultura)}</td>
+        <td>${esc(p.fazenda)}</td>
+        <td>${esc(v.num)}</td>
+        <td><span class="status ${classe}">${rotulo}</span></td>
+        <td>${quando ? new Date(quando).toLocaleDateString('pt-BR') : '—'}</td>
+        <td>${esc(quem || '—')}</td>
+      </tr>`;
   }
 
   // ----- Lista -----
   function linha(p) {
-    const aprovado = p.status === 'Aprovado';
+    const versao = Versoes.deTrabalho(p);
+    const publicada = versao.status === 'publicada';
+    const area = Util.areaCultivo(p);
     return `
-      <tr data-plano="${p.id}">
+      <tr class="lista-planos__linha" data-plano="${p.id}" tabindex="0"
+          title="Abrir a versão ${versao.num} (${publicada ? 'publicada, em consulta' : 'em construção'})"
+          aria-label="Abrir plano ${esc(p.safra)} · ${esc(p.fazenda)}, versão ${versao.num}">
+        <td>${esc(p.safra)}</td>
+        <td>${esc(p.empresa)}</td>
+        <td>${esc(p.atividade || '—')}</td>
+        <td>${esc(p.cultura)}</td>
+        <td>${esc(p.fazenda)}</td>
+        <td class="tabela__numero">${area === null ? '<span class="lista-planos__pendente">Pendente</span>' : Util.area(area)}</td>
+        <td>${versao.num}</td>
+        <td>${Versoes.aIniciar(p) ? '<span class="status status--nao-iniciado">Não iniciado</span>'
+          : `<span class="status ${publicada ? 'status--aprovado' : 'status--construcao'}">${Versoes.rotuloStatus(versao)}</span>`}</td>
+        <td>${Util.data(p.atualizadoEm)}</td>
+        <td>${esc(p.atualizadoPor)}</td>
         <td class="lista-planos__menu">
           <button class="botao-icone" type="button" data-menu-plano="${p.id}" title="Mais ações"
                   aria-haspopup="menu" aria-label="Mais ações do plano ${esc(p.safra)} · ${esc(p.fazenda)}">${Icones.mais_opcoes}</button>
-        </td>
-        <td>${esc(p.safra)}</td>
-        <td>${esc(p.empresa)}</td>
-        <td>${esc(p.fazenda)}</td>
-        <td>${esc(p.cultura)}</td>
-        <td class="tabela__numero">${Util.area(Util.areaPlano(p))}</td>
-        <td class="tabela__numero">${Util.reaisResumido(p.custo)}</td>
-        <td class="tabela__numero">${Util.reaisResumido(p.receita)}</td>
-        <td><span class="status ${aprovado ? 'status--aprovado' : 'status--construcao'}">${p.status}</span></td>
-        <td>${Util.data(p.atualizadoEm)}</td>
-        <td>${esc(p.atualizadoPor)}</td>
-        <td class="tabela__acao">
-          <a class="botao-icone" href="#/plano/${p.id}" title="Abrir plano"
-             aria-label="Abrir plano ${esc(p.safra)} · ${esc(p.fazenda)}">${Icones.seta}</a>
         </td>
       </tr>
     `;
   }
 
-  function filtro(nome, rotulo, itens) {
+  // itens: textos ou pares [valor, rótulo]
+  function filtro(nome, rotulo, itens, todos = 'Todas') {
     return `
       <div class="campo">
         <label class="campo__rotulo" for="lp-${nome}">${rotulo}</label>
         <select class="campo__controle" id="lp-${nome}" data-filtro="${nome}">
-          <option value="">Todas</option>
-          ${itens.map((item) => `<option value="${esc(item)}" ${item === filtros[nome] ? 'selected' : ''}>${esc(item)}</option>`).join('')}
+          <option value="">${todos}</option>
+          ${itens.map((item) => {
+            const [valor, texto] = Array.isArray(item) ? item : [item, item];
+            return `<option value="${esc(valor)}" ${valor === filtros[nome] ? 'selected' : ''}>${esc(texto)}</option>`;
+          }).join('')}
         </select>
       </div>
     `;
   }
 
-  return { desenhar, aoMostrar };
+  return { desenhar, aoMostrar, mostrarSafra, abrirPlano };
 })();
 
 </script>
@@ -4561,7 +5187,7 @@ window.Telas.operacoesPlano = (function () {
       <section class="estrutura">
         ${ctx.estado.avisoFechado ? '' : `
           <div class="estrutura__aviso" role="note">${Icones.info}
-            <p><strong>Revise as operações cadastradas.</strong> Cada operação vira uma Ordem de Serviço (OS) quando o plano for aprovado. Se estiver tudo certo, siga para o planejamento.</p>
+            <p><strong>Revise as operações cadastradas.</strong> Cada operação vira uma Ordem de Serviço (OS) a partir da versão publicada. Se estiver tudo certo, siga para o planejamento.</p>
             <button class="botao-icone estrutura__fechar" type="button" data-acao="est-fechar-aviso" aria-label="Fechar o aviso" title="Fechar">${Icones.fechar}</button>
           </div>`}
         <div class="tab-op__caixa">
@@ -4998,10 +5624,201 @@ window.Telas.operacoesPlano = (function () {
 </script>
   <script>
 /*
+ * Modal "Como deseja iniciar o plano?"
+ * Abre por cima da Visão Geral ao abrir um plano ainda não iniciado (só a versão 0.1, vazia: Versoes.aIniciar).
+ * Opções: Usar modelo · Começar do zero · Importar XLSX · Copiar plano existente.
+ * "Começar o planejamento" cria a 0.2 em construção com esse conteúdo (Versoes.comecar) e abre o plano na aba Operações.
+ * Cancelar ou X: fecha sem iniciar (o plano continua não iniciado).
+ */
+window.Telas = window.Telas || {};
+
+window.Telas.inicioPlano = (function () {
+  const esc = Util.escapar;
+
+  const OPCOES = [
+    { valor: 'modelo', titulo: 'Usar modelo', icone: Icones.lista,
+      texto: 'Use uma estrutura pronta de operações e ajuste conforme necessário.' },
+    { valor: 'importar', titulo: 'Importar XLSX', icone: Icones.planilha,
+      texto: 'Continue um plano exportado por este sistema (.xlsx).' },
+    { valor: 'copiar', titulo: 'Copiar plano existente', icone: Icones.copiar,
+      texto: 'Copie operações, produtos e doses de outro plano de safra da mesma cultura.' },
+    { valor: 'zero', titulo: 'Começar do zero', icone: Icones.mais,
+      texto: 'Cadastre suas operações.' }
+  ];
+  const CAMPOS = [['safra', 'Safra'], ['empresa', 'Empresa'], ['fazenda', 'Fazenda'], ['cultura', 'Cultura']];
+
+  // Estado da escolha, por plano (só enquanto a página está aberta)
+  const estados = {};
+  function estadoDe(plano) {
+    return estados[plano.id] = estados[plano.id] || { opcao: 'modelo', importado: null, erroArquivo: '', aceitou: false, copiarDe: '', tentou: false };
+  }
+
+  // Planos que podem ser copiados: mesma cultura, qualquer fazenda e safra, só os que têm versão publicada
+  // com operações. Usa sempre a última versão publicada.
+  function copiaveis(plano) {
+    return DADOS.planos.filter((p) => p !== plano && p.cultura === plano.cultura)
+      .map((p) => ({ p, v: Versoes.ultimaPublicada(p) }))
+      .filter(({ v }) => v && v.grupos.length);
+  }
+
+  function diferencas(plano, e) {
+    return e.importado ? CAMPOS.filter(([c]) => plano[c] !== e.importado.contexto[c]) : [];
+  }
+
+  // Conteúdo do corpo do modal (redesenhado a cada escolha)
+  function desenhar(plano) {
+    const e = estadoDe(plano);
+    return `
+        <fieldset class="inicios">
+          <legend class="so-leitor">Como deseja iniciar o plano?</legend>
+          <div class="inicios__grade inicios__grade--quatro">
+            ${OPCOES.map((o) => `
+              <label class="card-inicio">
+                <input class="card-inicio__radio" type="radio" name="ini-opcao" value="${o.valor}" ${o.valor === e.opcao ? 'checked' : ''}>
+                <span class="card-inicio__icone">${o.icone}</span>
+                <span class="card-inicio__textos">
+                  <span class="card-inicio__titulo">${o.titulo}</span>
+                  <span class="card-inicio__texto">${o.texto}</span>
+                </span>
+              </label>`).join('')}
+          </div>
+        </fieldset>
+        ${e.opcao === 'importar' ? detalheImportar(plano, e) : ''}
+        ${e.opcao === 'copiar' ? detalheCopiar(plano, e) : ''}`;
+  }
+
+  // Abre o modal. aoComecar(grupos, aviso): chamado com o conteúdo escolhido.
+  function abrir(plano, { aoComecar }) {
+    delete estados[plano.id]; // cada abertura começa do zero (Usar modelo marcado)
+    const modal = Modal.abrir(`
+      <div class="modal__corpo">
+        <button class="modal__fechar" type="button" aria-label="Fechar" data-fechar>${Icones.fechar}</button>
+        <h2 class="modal__titulo" id="modal-titulo">Como deseja iniciar o plano?</h2>
+        <p class="modal__subtitulo">${esc(plano.cultura)} · Safra ${esc(plano.safra)} · ${esc(plano.empresa)} · Fazenda ${esc(plano.fazenda)}.
+          O plano passa para a versão ${esc(Versoes.proximoNumero(plano))}, em construção, e abre na aba Operações para você ajustar.</p>
+        <div data-ini-corpo></div>
+      </div>
+      <div class="modal__rodape">
+        <button class="botao botao--secundario" type="button" data-fechar>Cancelar</button>
+        <button class="botao botao--primario" type="button" data-ini="comecar">Começar o planejamento</button>
+      </div>
+    `, { classe: 'modal--formulario modal--largo' });
+    const corpo = modal.elemento.querySelector('[data-ini-corpo]');
+    const redesenhar = () => { corpo.innerHTML = desenhar(plano); };
+    redesenhar();
+    ligar(modal.elemento, plano, {
+      redesenhar,
+      aoComecar: (grupos, aviso) => { modal.fechar(); aoComecar(grupos, aviso); }
+    });
+    corpo.querySelector('[name="ini-opcao"]:checked')?.focus();
+  }
+
+  // Importar: o arquivo é conferido com Safra, Empresa, Fazenda e Cultura do plano
+  function detalheImportar(plano, e) {
+    const dif = diferencas(plano, e);
+    const fora = e.importado ? ArquivoPlano.talhoesFora(e.importado, plano) : [];
+    const c = e.importado && e.importado.contexto;
+    return `
+      <div class="importar">
+        <label class="campo__rotulo" for="ini-arquivo">Arquivo exportado pelo Plano de Safra (.xlsx) <span class="obrigatorio" aria-hidden="true">*</span></label>
+        <input class="importar__arquivo" id="ini-arquivo" type="file" accept=".xlsx" data-ini="arquivo">
+        ${e.erroArquivo ? `<p class="erro-campo" role="alert">${esc(e.erroArquivo)}</p>` : ''}
+        ${c ? `<p class="importar__ok">Planejamento da safra ${esc(c.safra)} · ${esc(c.empresa)} · Fazenda ${esc(c.fazenda)} · ${esc(c.cultura)}</p>` : ''}
+        ${dif.length && !e.aceitou ? `
+          <div class="importar__diferencas" role="alert">
+            <p class="importar__titulo">${Icones.alerta} O arquivo é de outro plano</p>
+            <ul class="importar__lista">
+              ${dif.map(([campo, rotulo]) => `<li>${rotulo}: no plano <strong>${esc(plano[campo])}</strong> · no arquivo <strong>${esc(c[campo])}</strong></li>`).join('')}
+            </ul>
+            <div class="importar__botoes">
+              <button class="botao botao--secundario botao--p" type="button" data-ini="aceitar">Importar mesmo assim</button>
+            </div>
+          </div>` : ''}
+        ${c && fora.length ? `<p class="importar__aviso">${fora.length} ${fora.length === 1 ? 'talhão do arquivo não está' : 'talhões do arquivo não estão'} neste plano e ${fora.length === 1 ? 'fica' : 'ficam'} de fora (${fora.map(esc).join(', ')}).</p>` : ''}
+      </div>`;
+  }
+
+  function detalheCopiar(plano, e) {
+    const lista = copiaveis(plano);
+    return `
+      <div class="importar">
+        <label class="campo__rotulo" for="ini-copiar">Plano para copiar <span class="obrigatorio" aria-hidden="true">*</span></label>
+        ${lista.length ? `
+          <select class="campo__controle inicio-plano__copiar" id="ini-copiar" data-ini="copiar-de">
+            <option value="" disabled ${e.copiarDe ? '' : 'selected'}>Selecione um plano de ${esc(plano.cultura)}</option>
+            ${lista.map(({ p, v }) => `
+              <option value="${p.id}" ${String(p.id) === e.copiarDe ? 'selected' : ''}>
+                Safra ${esc(p.safra)} · ${esc(p.empresa)} · Fazenda ${esc(p.fazenda)} · versão ${esc(v.num)}
+              </option>`).join('')}
+          </select>
+          <p class="inicio-plano__nota">Copia a última versão publicada do plano escolhido: grupos de operação, operações, recomendações com produtos e doses padrão. Talhões, áreas e plantio não são copiados.</p>
+          ${e.tentou && !e.copiarDe ? '<p class="erro-campo" role="alert">Escolha o plano para copiar.</p>' : ''}`
+          : `<p class="inicio-plano__nota">Ainda não há plano de ${esc(plano.cultura)} publicado para copiar.</p>`}
+      </div>`;
+  }
+
+  // Liga os eventos. aoComecar(grupos, aviso) cria a versão; redesenhar() desenha a tela de novo.
+  function ligar(el, plano, { aoComecar, redesenhar }) {
+    const e = estadoDe(plano);
+    el.addEventListener('change', async (ev) => {
+      if (ev.target.name === 'ini-opcao') {
+        e.opcao = ev.target.value; e.tentou = false; redesenhar();
+        el.querySelector(`[name="ini-opcao"][value="${e.opcao}"]`)?.focus();
+      } else if (ev.target.dataset.ini === 'copiar-de') {
+        e.copiarDe = ev.target.value; redesenhar();
+      } else if (ev.target.dataset.ini === 'arquivo') {
+        const arquivo = ev.target.files[0];
+        Object.assign(e, { importado: null, erroArquivo: '', aceitou: false });
+        if (arquivo) {
+          const lido = await ArquivoPlano.ler(arquivo);
+          if (lido.erro) e.erroArquivo = lido.erro; else e.importado = lido;
+        }
+        redesenhar();
+      }
+    });
+    el.addEventListener('click', (ev) => {
+      const acao = ev.target.closest('[data-ini]')?.dataset.ini;
+      if (acao === 'aceitar') { e.aceitou = true; redesenhar(); }
+      if (acao === 'comecar') comecar(plano, e, el, { aoComecar, redesenhar });
+    });
+  }
+
+  function comecar(plano, e, el, { aoComecar, redesenhar }) {
+    e.tentou = true;
+    if (e.opcao === 'modelo') return fim(Planos.gruposModelo(), '');
+    if (e.opcao === 'zero') return fim(Planos.gruposFixos(), '');
+    if (e.opcao === 'importar') {
+      if (!e.importado) {
+        if (!e.erroArquivo) e.erroArquivo = 'Escolha o arquivo exportado pelo Plano de Safra.';
+        redesenhar(); el.querySelector('#ini-arquivo')?.focus(); return;
+      }
+      if (diferencas(plano, e).length && !e.aceitou) { el.querySelector('[data-ini="aceitar"]')?.focus(); return; }
+      const fora = ArquivoPlano.talhoesFora(e.importado, plano);
+      return fim(ArquivoPlano.montarGrupos(e.importado, plano),
+        `Planejamento importado${fora.length ? ` · ${fora.length} ${fora.length === 1 ? 'talhão ficou' : 'talhões ficaram'} de fora` : ''}`);
+    }
+    // Copiar plano existente
+    const origem = DADOS.planos.find((p) => String(p.id) === e.copiarDe);
+    if (!origem) { redesenhar(); el.querySelector('#ini-copiar')?.focus(); return; }
+    const v = Versoes.ultimaPublicada(origem);
+    fim(Planos.copiarSemTalhoes(v.grupos), `Copiado do plano da Fazenda ${esc(origem.fazenda)} (safra ${esc(origem.safra)}, versão ${esc(v.num)})`);
+
+    function fim(grupos, aviso) {
+      delete estados[plano.id];
+      aoComecar(grupos, aviso);
+    }
+  }
+
+  return { abrir };
+})();
+
+</script>
+  <script>
+/*
  * Tela 04 — Operações, grupo Defensivo (docs/telas/04.1-operacoes-defensivos.md)
  * Plano aberto: cabeçalho com contexto e etapas, lista de operações à esquerda,
  * detalhe da operação à direita e guias de grupo no rodapé.
- * Plano aprovado: somente leitura.
+ * Versão publicada: somente leitura (docs/DECISOES.md, 4.1.1).
  */
 window.Telas = window.Telas || {};
 
@@ -5010,9 +5827,7 @@ window.Telas.planoOperacoes = (function () {
   const ETAPAS = [
     { id: 'operacoes',   nome: 'Operações' },     // estrutura do plano (Tela 04.0)
     { id: 'planejamento', nome: 'Planejamento' }, // talhão a talhão, por grupo (esta tela)
-    { id: 'calendario',  nome: 'Calendário Agrícola' },
-    { id: 'suprimentos', nome: 'Suprimentos' },
-    { id: 'aprovacao',   nome: 'Aprovação' }
+    { id: 'calendario',  nome: 'Calendário Agrícola' }
   ];
   const UNIDADES = ['L', 'mL', 'kg', 'g', 't'];
   // TSI: a dose é por quantidade de semente (a unidade usada pelos clientes fica para os testes)
@@ -5031,8 +5846,8 @@ window.Telas.planoOperacoes = (function () {
   function aoMostrar(conteudo, p, etapaId) {
     plano = p;
     etapa = ETAPAS.some((e) => e.id === etapaId) ? etapaId : 'operacoes';
-    somenteLeitura = plano.status === 'Aprovado';
-    talhoesFazenda = DADOS.talhoes[plano.fazenda] || [];
+    somenteLeitura = Versoes.somenteLeitura(plano);
+    talhoesFazenda = Util.talhoesPlano(plano); // só os talhões incluídos no plano (modal Criar Plano)
     ui = estados[plano.id] = estados[plano.id] || {
       // Abre no primeiro grupo das guias (Semente vem antes de Defensivo)
       grupoId: (plano.grupos[0] || {}).id || null,
@@ -5061,7 +5876,12 @@ window.Telas.planoOperacoes = (function () {
       renomeandoNaLista: null, // operação com o nome em edição na lista (duplo clique, F2 ou botão direito)
       receitaPorOp: {},        // receita aberta em cada operação
       rascunho: null,          // cópia da receita aberta, editada até "Aplicar em N talhões": { receitaId, nome, produtos }
+      versoes: null,           // cabeçalho: lista do "Trocar versão" aberta ({ trocarPara: num } = aviso de alterações não salvas)
+      jaExiste: false,         // cabeçalho: aviso "Já existe uma versão em construção" (Criar nova versão)
+      salvoAgora: false,       // cabeçalho: "Alterações salvas" logo depois do Salvar alterações
     };
+    ui.versoes = null;
+    ui.jaExiste = false;
     if (!somenteLeitura) limparReceitasVazias();
     raiz = conteudo.querySelector('#plano-raiz');
     raiz.addEventListener('click', aoClicar);
@@ -5129,40 +5949,34 @@ window.Telas.planoOperacoes = (function () {
     return valor.toLocaleString('pt-BR', { maximumFractionDigits: 3 });
   }
 
-  // Toda alteração atualiza "Última atualização" e "Atualizado por" do plano
+  // Toda alteração atualiza "Última atualização" e "Atualizado por" do plano e marca alterações não salvas
   function alterou() {
     plano.atualizadoEm = Util.hojeISO();
     plano.atualizadoPor = DADOS.usuario.nome;
-    marcarSalvando();
+    if (!plano.pendente || ui.salvoAgora) {
+      plano.pendente = true;
+      ui.salvoAgora = false;
+      atualizarEstadoSalvo();
+    }
   }
 
-  // ----- Salvamento automático (sinal no cabeçalho) -----
-  // Sem botão Salvar: cada alteração mostra "Salvando…" por um instante e volta para "Salvo automaticamente".
-  // No protótipo é só o sinal (os dados ficam na memória do navegador).
-  let salvandoAte = 0;
+  // ----- Estado de salvamento (versão em construção) -----
+  // "Alterações não salvas" · "Alterações salvas" (logo depois de salvar) · "Salvo às 14:20"
   let temporizadorSalvo = null;
 
-  function marcarSalvando() {
-    plano.salvoEm = new Date();
-    salvandoAte = Date.now() + 900;
-    atualizarSinalSalvo();
-    clearTimeout(temporizadorSalvo);
-    temporizadorSalvo = setTimeout(atualizarSinalSalvo, 950);
+  function estadoSalvo() {
+    const v = Versoes.aberta(plano);
+    if (somenteLeitura || !v) return '';
+    if (plano.pendente) return '<span class="estado-salvo estado-salvo--pendente" data-salvo role="status">Alterações não salvas</span>';
+    if (ui.salvoAgora) return `<span class="estado-salvo estado-salvo--ok" data-salvo role="status">${Icones.certo} Alterações salvas</span>`;
+    const hora = new Date(v.salvaEm).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    return `<span class="estado-salvo" data-salvo role="status" title="${esc(Versoes.detalhe(v))}">Salvo às ${hora}</span>`;
   }
 
-  function sinalSalvo() {
-    if (somenteLeitura) return '';
-    const salvando = Date.now() < salvandoAte;
-    const hora = plano.salvoEm ? plano.salvoEm.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '';
-    const dica = hora ? `Todas as alterações foram salvas · hoje, ${hora}` : 'As alterações são salvas automaticamente';
-    return `<span class="salvo ${salvando ? 'salvo--salvando' : ''}" data-salvo title="${dica}" role="status" aria-live="polite">${salvando
-      ? 'Salvando…' : `${Icones.certo} Salvo automaticamente`}</span>`;
-  }
-
-  // Troca só o sinal (sem redesenhar a tela)
-  function atualizarSinalSalvo() {
+  // Troca só o texto (sem redesenhar a tela)
+  function atualizarEstadoSalvo() {
     const el = raiz && raiz.querySelector('[data-salvo]');
-    if (el) el.outerHTML = sinalSalvo();
+    if (el) el.outerHTML = estadoSalvo();
   }
 
   // Ao trocar de operação, grupo ou status: limpa a seleção da tabela e fecha o modal
@@ -5212,32 +6026,153 @@ window.Telas.planoOperacoes = (function () {
     raiz.querySelector(seletor)?.focus({ preventScroll: true });
   }
 
-  // O status no subtítulo alterna entre "Em construção" e "Aprovado" ao clicar (só no protótipo)
+  // Cabeçalho fixo: "Plano de Safra › contexto | Versão 0.2 [status] · Trocar versão" e, embaixo, as abas
+  // com Exportar e os botões da versão à direita (DECISOES 4.1.1)
   function cabecalho() {
     const contexto = [`Safra ${plano.safra}`, plano.empresa, `Fazenda ${plano.fazenda}`, `Cultura ${plano.cultura}`];
+    const v = Versoes.aberta(plano);
     return `
       <header class="plano__cabecalho">
-        <div class="plano__linha">
-        <a class="plano__titulo" href="#/plano-safra" title="Voltar para a Visão Geral">Plano de Safra</a>
-        <span class="plano__seta" aria-hidden="true">›</span>
-        <p class="plano__contexto">${contexto.map(esc).join('<span class="plano__ponto">·</span>')}
-          <span class="plano__ponto">·</span>
-          <span class="status ${somenteLeitura ? 'status--aprovado' : 'status--construcao'}">${esc(plano.status)}</span>
-          ${sinalSalvo()}</p>
+        <div class="plano__linha plano__linha--versao">
+          <div class="plano__identificacao">
+            <a class="plano__titulo" href="#/plano-safra" title="Voltar para a Visão Geral (para trocar de plano)">Plano de Safra</a>
+            <span class="plano__seta" aria-hidden="true">›</span>
+            <p class="plano__contexto">${contexto.map(esc).join('<span class="plano__ponto">·</span>')}</p>
+            <span class="plano__barra" aria-hidden="true">|</span>
+            <span class="plano__versao">Versão ${esc(v.num)}
+              <span class="status ${somenteLeitura ? 'status--aprovado' : 'status--construcao'}">${Versoes.rotuloStatus(v)}</span>
+              ${somenteLeitura ? `<span class="plano__versao-info">${esc(Versoes.detalhe(v))}</span>` : ''}</span>
+            <span class="versoes">
+              <button class="link-versoes" type="button" data-acao="ver-trocar" aria-haspopup="menu"
+                      aria-expanded="${!!ui.versoes}">${Icones.relogio} Trocar versão</button>
+              ${ui.versoes ? listaVersoes() : ''}
+            </span>
+          </div>
         </div>
         <div class="plano__linha-etapas">
-          <nav class="etapas" aria-label="Etapas do plano">
+          <nav class="etapas" aria-label="Abas do plano">
             ${ETAPAS.map((e) => `
               <a class="etapa ${e.id === etapa ? 'etapa--ativa' : ''}" href="#/plano/${plano.id}/${e.id}"
                  ${e.id === etapa ? 'aria-current="page"' : ''}>${e.nome}</a>`).join('')}
           </nav>
-          <button class="botao botao--secundario botao--p plano__exportar" type="button" data-acao="exportar-plano"
-                  title="Baixar o plano em planilha para guardar ou continuar depois">${Icones.baixar} Exportar (.xlsx)</button>
+          <div class="plano__acoes-versao">
+            <button class="botao botao--secundario botao--p plano__exportar" type="button" data-acao="exportar-plano"
+                    title="Baixar o plano em planilha para guardar ou continuar depois">${Icones.baixar} Exportar (.xlsx)</button>
+            ${acoesVersao()}
+          </div>
         </div>
       </header>
       ${somenteLeitura && etapa !== 'calendario' ? `
-        <p class="faixa-leitura">${Icones.cadeado} Plano aprovado: somente leitura. O plano aprovado não muda durante a safra.</p>` : ''}
+        <p class="faixa-leitura">${Icones.cadeado} Versão ${esc(v.num)} publicada: somente consulta. Para alterar, use Criar nova versão.</p>` : ''}
     `;
+  }
+
+  // Botões da versão: em construção, Salvar alterações (secundário) e Publicar versão (principal);
+  // publicada, Criar nova versão (com o aviso quando já existe outra em construção)
+  function acoesVersao() {
+    if (somenteLeitura) {
+      const construcao = Versoes.emConstrucao(plano);
+      return `
+        <button class="botao botao--primario botao--p" type="button" data-acao="ver-nova">Criar nova versão</button>
+        ${ui.jaExiste && construcao ? `
+          <div class="versoes-alerta versoes-alerta--solto" role="alert">
+            <strong>Já existe uma versão em construção (${esc(construcao.num)}).</strong> Só pode haver uma por plano.
+            Abra a ${esc(construcao.num)} para continuar o trabalho em andamento.
+            <div class="versoes-alerta__acoes">
+              <button class="botao botao--secundario botao--p" type="button" data-acao="ver-fechar-aviso">Cancelar</button>
+              <button class="botao botao--primario botao--p" type="button" data-acao="ver-abrir" data-versao="${esc(construcao.num)}">Abrir versão ${esc(construcao.num)}</button>
+            </div>
+          </div>` : ''}`;
+    }
+    return `
+      ${estadoSalvo()}
+      <button class="botao botao--secundario botao--p" type="button" data-acao="ver-salvar">Salvar alterações</button>
+      <button class="botao botao--primario botao--p" type="button" data-acao="ver-publicar">Publicar versão</button>`;
+  }
+
+  // "Trocar versão": versões do plano, da mais recente para a mais antiga
+  function listaVersoes() {
+    const destino = ui.versoes.trocarPara;
+    const atual = Versoes.aberta(plano);
+    return `
+      <div class="versoes-lista" role="menu" aria-label="Versões deste plano">
+        <p class="versoes-lista__titulo">Versões deste plano</p>
+        ${[...Versoes.lista(plano)].reverse().map((v) => `
+          <button class="versoes-item ${v.num === plano.versaoAberta ? 'versoes-item--atual' : ''}" type="button" role="menuitem"
+                  data-acao="ver-abrir" data-versao="${esc(v.num)}">
+            <span class="versoes-item__num">${esc(v.num)}</span>
+            <span><strong>${Versoes.rotuloStatus(v)}</strong>${v.num === plano.versaoAberta ? ' · aberta agora' : ''}</span>
+            <span class="status ${v.status === 'publicada' ? 'status--aprovado' : 'status--construcao'}">${v.status === 'publicada' ? 'Consulta' : 'Editável'}</span>
+            <span class="versoes-item__info">${esc(Versoes.detalhe(v))}</span>
+          </button>`).join('')}
+        ${destino ? `
+          <div class="versoes-alerta" role="alert">
+            <strong>Há alterações não salvas na versão ${esc(atual.num)}.</strong> Salvar antes de abrir a versão ${esc(destino)}?
+            <div class="versoes-alerta__acoes">
+              <button class="botao botao--secundario botao--p" type="button" data-acao="ver-fechar-aviso">Cancelar</button>
+              <button class="botao botao--secundario botao--p" type="button" data-acao="ver-abrir-sem-salvar">Abrir sem salvar</button>
+              <button class="botao botao--primario botao--p" type="button" data-acao="ver-salvar-e-abrir">Salvar e abrir</button>
+            </div>
+          </div>` : ''}
+      </div>`;
+  }
+
+  // Abre outra versão na área de trabalho e redesenha (seleções e rascunhos da versão anterior são descartados)
+  function abrirVersao(num) {
+    Versoes.abrir(plano, num);
+    somenteLeitura = Versoes.somenteLeitura(plano);
+    limparSelecao();
+    Object.assign(ui, { versoes: null, jaExiste: false, salvoAgora: false, rascunho: null, receitaPorOp: {},
+                        renomeandoOp: null, renomeandoGrupo: null, painelTalhao: null, preCadastro: null, validarOp: null });
+    if (!somenteLeitura) limparReceitasVazias();
+    desenharTudo();
+  }
+
+  // Ações do cabeçalho da versão (data-acao="ver-…")
+  function acaoVersao(acao, alvo) {
+    switch (acao) {
+      case 'ver-trocar':
+        ui.versoes = ui.versoes ? null : {}; ui.jaExiste = false; desenharTudo(); break;
+      case 'ver-abrir': {
+        const num = alvo.dataset.versao;
+        if (num === plano.versaoAberta) { ui.versoes = null; ui.jaExiste = false; desenharTudo(); break; }
+        if (plano.pendente) { ui.versoes = { trocarPara: num }; ui.jaExiste = false; desenharTudo(); break; }
+        abrirVersao(num); break;
+      }
+      case 'ver-fechar-aviso':
+        ui.versoes = null; ui.jaExiste = false; desenharTudo(); break;
+      case 'ver-abrir-sem-salvar':
+        abrirVersao(ui.versoes.trocarPara); break;
+      case 'ver-salvar-e-abrir':
+        Versoes.salvar(plano); abrirVersao(ui.versoes.trocarPara); break;
+      case 'ver-salvar':
+        Versoes.salvar(plano);
+        ui.salvoAgora = true;
+        atualizarEstadoSalvo();
+        clearTimeout(temporizadorSalvo);
+        temporizadorSalvo = setTimeout(() => { ui.salvoAgora = false; atualizarEstadoSalvo(); }, 4000);
+        break;
+      case 'ver-publicar': {
+        const num = plano.versaoAberta;
+        Modal.confirmar({
+          titulo: `Publicar versão ${esc(num)}?`,
+          texto: 'A versão será registrada no histórico e não poderá mais ser editada. Para realizar novas alterações, será necessário criar uma nova versão.',
+          botoes: [{ rotulo: 'Cancelar' }, { rotulo: 'Publicar versão', classe: 'primario', acao: () => {
+            Versoes.publicar(plano);
+            abrirVersao(num);
+            Aviso.mostrar(`Versão ${esc(num)} publicada`);
+          } }]
+        });
+        break;
+      }
+      case 'ver-nova': {
+        const r = Versoes.criarNova(plano, plano.versaoAberta);
+        if (r.jaExiste) { ui.jaExiste = true; ui.versoes = null; desenharTudo(); break; }
+        abrirVersao(r.num);
+        Aviso.mostrar(`Versão ${esc(r.num)} criada a partir da ${esc(r.origem)}`);
+        break;
+      }
+    }
   }
 
   // Calendário Agrícola (Tela 05): desenhado aqui dentro, com o mesmo cabeçalho do plano
@@ -7102,7 +8037,8 @@ window.Telas.planoOperacoes = (function () {
     const pontos = [];
     let soma = 0; let sLat = 0; let sLng = 0;
     fazendasDoMapa(op).forEach(({ fazenda, plantio, propria }) => {
-      poligonosFazenda(fazenda).forEach((pg) => {
+      // No plano aberto, só os talhões incluídos nele
+      poligonosFazenda(fazenda).filter((pg) => !propria || talhoesFazenda.some((t) => t.nome === pg.talhao)).forEach((pg) => {
         const p = plantio[pg.talhao];
         const v = p && p.variedade;
         const aberto = propria && ui.painelTalhao === pg.talhao;
@@ -7727,6 +8663,7 @@ window.Telas.planoOperacoes = (function () {
     const alvo = e.target.closest('[data-acao]');
     if (!alvo) return;
     const acao = alvo.dataset.acao;
+    if (acao.startsWith('ver-')) { acaoVersao(acao, alvo); return; }
     const op = opAtual();
     const grupo = grupoAtual();
 
@@ -8100,6 +9037,13 @@ window.Telas.planoOperacoes = (function () {
     if (e.key === 'Enter' && (el.dataset.campo === 'pt-data' || el.dataset.campo === 'pl-data')) { e.preventDefault(); el.blur(); return; }
     if (e.key === 'Escape' && ui.painelTalhao && el.closest('.painel-talhao')) { e.preventDefault(); fecharPainel(); }
   }
+
+  // Clique fora da lista "Trocar versão" ou do aviso de versão em construção: fecha
+  document.addEventListener('mousedown', (e) => {
+    if (!raiz || !raiz.isConnected || !(ui && (ui.versoes || ui.jaExiste))) return;
+    if (e.target.closest('.versoes, .versoes-alerta, [data-acao="ver-nova"]')) return;
+    ui.versoes = null; ui.jaExiste = false; desenharTudo();
+  });
 
   // Clique na opção do combobox: mousedown para escolher antes do campo perder o foco
   document.addEventListener('mousedown', (e) => {
@@ -8785,14 +9729,25 @@ window.Telas.planoOperacoes = (function () {
   // Rotas. "menu" diz qual item do menu fica destacado.
   // "desenhar" devolve o HTML da tela; "aoMostrar" (opcional) roda depois que ele está na página.
   const ROTAS = {
-    // Sem planos: Tela 01. Com planos: Tela 03.
-    'plano-safra':    { titulo: 'Plano de Safra', menu: 'plano-safra',
+    // Visão Geral. Sem planos: Tela 01. Com planos: Tela 03.
+    'plano-safra':    { titulo: 'Visão Geral', menu: 'visao-geral',
                         desenhar: () => temPlanos() ? Telas.listaPlanos.desenhar() : Telas.primeiroUso(),
                         aoMostrar: (conteudo) => { if (temPlanos()) Telas.listaPlanos.aoMostrar(conteudo); } },
-    // Plano aberto: #/plano/<id>/<etapa>. Abre em Operações (Tela 04.0); Planejamento = Tela 04; Calendário = Tela 05.
-    'plano':          { titulo: 'Plano de Safra', menu: 'plano-safra',
+    // Menu Planejamento: abre o plano mais recente (ver rotaAtual); sem planos, o convite para criar o primeiro
+    'planejamento':   { titulo: 'Planejamento', menu: 'planejamento',
+                        desenhar: () => Telas.semPlanos('planejamento') },
+    // Plano aberto: #/plano/<id>/<aba>. Abre em Operações (Tela 04.0); Planejamento = Tela 04; Calendário = Tela 05.
+    'plano':          { titulo: 'Planejamento', menu: 'planejamento',
                         desenhar: () => Telas.planoOperacoes.desenhar(),
-                        aoMostrar: (conteudo, id, etapa) => Telas.planoOperacoes.aoMostrar(conteudo, buscarPlano(id), etapa) },
+                        aoMostrar: (conteudo, id, etapa) => {
+                          estado.ultimoPlanoId = Number(id);
+                          Telas.planoOperacoes.aoMostrar(conteudo, buscarPlano(id), etapa);
+                        } },
+    // Calendário Agrícola e Suprimentos do menu: vários planos somados (a construir)
+    'calendario':     { titulo: 'Calendário Agrícola', menu: 'calendario',
+                        desenhar: () => temPlanos() ? Telas.emConstrucao('Calendário Agrícola') : Telas.semPlanos('calendario') },
+    'suprimentos':    { titulo: 'Suprimentos', menu: 'suprimentos',
+                        desenhar: () => temPlanos() ? Telas.emConstrucao('Suprimentos') : Telas.semPlanos('suprimentos') },
     'ordens-servico': { titulo: 'Ordens de Serviço', menu: 'ordens-servico',
                         desenhar: () => Telas.emConstrucao('Ordens de Serviço') },
     'cadastros':      { titulo: 'Cadastros', menu: 'cadastros',
@@ -8806,7 +9761,8 @@ window.Telas.planoOperacoes = (function () {
   // Estado da sessão (só em memória)
   const estado = {
     menuRecolhido: false, // menu começa expandido
-    proximoIdPlano: 1
+    proximoIdPlano: 1,
+    ultimoPlanoId: null   // último plano aberto (o menu Planejamento abre nele)
   };
 
   const menu = document.getElementById('menu');
@@ -8823,16 +9779,34 @@ window.Telas.planoOperacoes = (function () {
     return DADOS.planos.find((p) => String(p.id) === id);
   }
 
+  // Plano mais recente: o último aberto ou, se nenhum foi aberto, o atualizado por último
+  function planoMaisRecente() {
+    return buscarPlano(String(estado.ultimoPlanoId))
+      || [...DADOS.planos].sort((a, b) => a.atualizadoEm.localeCompare(b.atualizadoEm)).pop();
+  }
+
   function rotaAtual() {
-    const [nome, parametro, extra] = location.hash.replace(/^#\/?/, '').split('/');
+    let [nome, parametro, extra] = location.hash.replace(/^#\/?/, '').split('/');
     if (!ROTAS[nome]) return { nome: ROTA_INICIAL };
+    // Menu Planejamento com planos: abre o plano mais recente, na versão em que ele está
+    if (nome === 'planejamento' && temPlanos()) {
+      [nome, parametro, extra] = ['plano', String(planoMaisRecente().id), undefined];
+      history.replaceState(null, '', `#/plano/${parametro}`);
+    }
     // Plano que não existe mais (ex.: página recarregada) volta para a lista
     if (nome === 'plano' && !buscarPlano(parametro)) return { nome: ROTA_INICIAL };
+    // Plano ainda não iniciado (ex.: pelo menu Planejamento): Visão Geral, com o modal "Como deseja iniciar o plano?"
+    if (nome === 'plano' && Versoes.aIniciar(buscarPlano(parametro))) {
+      const plano = buscarPlano(parametro);
+      history.replaceState(null, '', `#/${ROTA_INICIAL}`);
+      Telas.listaPlanos.mostrarSafra(plano.safra);
+      return { nome: ROTA_INICIAL, iniciar: plano };
+    }
     return { nome, parametro, extra };
   }
 
   function mostrarTela() {
-    const { nome, parametro, extra } = rotaAtual();
+    const { nome, parametro, extra, iniciar } = rotaAtual();
     const rota = ROTAS[nome];
 
     document.querySelector('.aviso')?.remove();
@@ -8840,6 +9814,7 @@ window.Telas.planoOperacoes = (function () {
     if (rota.aoMostrar) rota.aoMostrar(conteudo, parametro, extra);
     conteudo.scrollTop = 0;
     document.title = `${rota.titulo} · UniSystem`;
+    if (iniciar) Telas.listaPlanos.abrirPlano(iniciar);
 
     document.querySelectorAll('.menu__item[data-rota]').forEach((item) => {
       const ativo = item.dataset.rota === rota.menu;
@@ -8869,29 +9844,36 @@ window.Telas.planoOperacoes = (function () {
     `;
   }
 
-  // Cria o plano com os dados do modal e abre a etapa Operações.
-  // Usar modelo: grupos e operações do modelo (na v1 não há "Plano em branco": o usuário ajusta o modelo na etapa Operações).
+  // Cria um plano por fazenda do modal (Safra + Empresa + Fazenda + Cultura identificam o plano) e volta para a
+  // Visão Geral, com o filtro na safra dos planos criados (uma linha por fazenda).
+  // Cada plano nasce só com a versão 0.1, vazia e publicada (DECISOES 4.1.1): ao abrir, o Planejamento mostra
+  // as opções de início (modelo, do zero, importar XLSX, copiar plano existente).
   // O primeiro plano criado (a partir do primeiro uso) entra na lista junto com os planos de exemplo.
-  // Importar XLSX: grupos, operações, plantio e recomendações vêm do arquivo exportado, na fazenda escolhida.
-  function criarPlano({ importado, ...contexto }) {
+  // talhoes: os talhões incluídos (pode ser vazio: Área de cultivo "Pendente").
+  function criarPlanos({ fazendas, ...contexto }) {
     if (!temPlanos()) carregarPlanosExemplo();
-    const plano = {
-      id: estado.proximoIdPlano++,
-      ...contexto,
-      grupos: importado ? ArquivoPlano.montarGrupos(importado, contexto.fazenda)
-        : contexto.inicio === 'modelo' ? Planos.gruposModelo() : [], // área 0 ha até aplicar em talhões
-      status: 'Em construção',
-      custo: null,
-      receita: null,
-      atualizadoEm: Util.hojeISO(),
-      atualizadoPor: DADOS.usuario.nome
-    };
-    DADOS.planos.push(plano);
-    location.hash = `#/plano/${plano.id}`;
-    if (importado) {
-      const fora = ArquivoPlano.talhoesFora(importado, plano.fazenda);
-      Aviso.mostrar(`Planejamento importado${fora.length ? ` · ${fora.length} ${fora.length === 1 ? 'talhão do arquivo não existe' : 'talhões do arquivo não existem'} na Fazenda ${Util.escapar(plano.fazenda)} e ${fora.length === 1 ? 'ficou' : 'ficaram'} de fora` : ''}`);
-    }
+    const criados = fazendas.map(({ fazenda, talhoes }) => {
+      const plano = {
+        id: estado.proximoIdPlano++,
+        ...contexto,
+        fazenda,
+        talhoes,
+        custo: null,
+        receita: null,
+        atualizadoEm: Util.hojeISO(),
+        atualizadoPor: DADOS.usuario.nome
+      };
+      Versoes.iniciar(plano, []);
+      DADOS.planos.push(plano);
+      return plano;
+    });
+    const nomes = criados.map((p) => Util.escapar(p.fazenda)).join(', ');
+    const aviso = () => Aviso.mostrar(criados.length === 1 ? `Plano criado: Fazenda ${nomes}. Clique na linha para começar.`
+      : `${criados.length} planos criados (${nomes}). Clique na linha de cada um para começar.`);
+    Telas.listaPlanos.mostrarSafra(contexto.safra);
+    // O aviso entra depois de desenhar a lista (mostrarTela apaga o aviso anterior)
+    if (location.hash === '#/plano-safra') { mostrarTela(); aviso(); }
+    else { window.addEventListener('hashchange', aviso, { once: true }); location.hash = '#/plano-safra'; }
   }
 
   // ----- Menu Demonstração -----
@@ -8909,9 +9891,17 @@ window.Telas.planoOperacoes = (function () {
 
   // Mantém as safras já cadastradas (inclusive a criada no modal) e inclui a dos exemplos
   function carregarPlanosExemplo() {
-    DADOS.planos = DADOS.planosExemplo.map(({ operacoes, ...p }) => {
+    DADOS.planos = DADOS.planosExemplo.map(({ operacoes, versoes, ...p }) => {
       if (!DADOS.safras.includes(p.safra)) DADOS.safras.push(p.safra);
-      return { ...p, grupos: Planos.montarExemplo(operacoes), id: estado.proximoIdPlano++ };
+      const plano = { ...p, id: estado.proximoIdPlano++ };
+      // Versões do exemplo: 0.1 publicada e 0.2 com o planejamento (em construção ou publicada)
+      const criada = new Date(versoes.criadaEm);
+      Versoes.iniciar(plano, Planos.montarExemplo(operacoes), { quando: criada, por: p.atualizadoPor });
+      if (versoes.publicadaEm) {
+        Versoes.publicar(plano);
+        Object.assign(Versoes.aberta(plano), { publicadaEm: new Date(versoes.publicadaEm), publicadaPor: p.atualizadoPor });
+      }
+      return plano;
     });
   }
 
@@ -8950,7 +9940,7 @@ window.Telas.planoOperacoes = (function () {
     const botao = e.target.closest('[data-acao]');
     if (!botao) return;
     if (botao.dataset.acao === 'criar-plano') {
-      Telas.abrirModalCriarPlano({ aoCriar: criarPlano });
+      Telas.abrirModalCriarPlano({ aoCriar: criarPlanos });
     }
   });
 
@@ -8958,6 +9948,8 @@ window.Telas.planoOperacoes = (function () {
 
   desenharUsuario();
   aplicarEstadoMenu();
+  // Ao abrir o protótipo, já vem com os planos de exemplo (Demonstração → "Começar do zero" volta ao primeiro uso)
+  carregarPlanosExemplo();
   mostrarTela();
 })();
 

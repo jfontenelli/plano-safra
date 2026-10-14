@@ -1,6 +1,6 @@
 # Plano de Safra: decisões
 
-Atualizado em 08/10/2026. Próximo passo: Calendário Agrícola revisado (só o que foi planejado, com resumo).
+Atualizado em 13/10/2026 (reunião com stakeholders: navegação, Visão Geral e versões; ver docs/reunioes/). Próximo passo: Visão Geral (lista de planos e histórico de versões).
 Imagem do fluxo: artifact "Fluxo do Plano de Safra" (claude.ai/artifact/4kzr4fg15grTw4YSHKmHf2).
 
 Este doc mostra só o estado atual. Decisão alterada é reescrita, não acumulada.
@@ -48,37 +48,75 @@ Agrônomo da fazenda e líder de operações podem ser a mesma pessoa, conforme 
 
 - Menu lateral verde com logo UniSystem: Plano de Safra, Ordens de Serviço, Cadastros; usuário no rodapé.
 - Menu começa expandido (ícone + nome) em todas as telas; o usuário recolhe (só ícones) e expande pela seta; a escolha se mantém ao navegar.
+- **Plano de Safra tem quatro itens no menu**, cada um com o seu ícone: **Visão Geral · Planejamento · Calendário Agrícola · Suprimentos**. O item selecionado tem destaque discreto em verde.
+  - **Visão Geral:** lista de planos (filtros, criar plano, versões). Ver 4.1.
+  - **Planejamento:** **um plano e uma versão por vez**, com as abas **Operações · Planejamento · Calendário Agrícola** no cabeçalho. Sem plano aberto, abre o **plano mais recente** (o último aberto ou atualizado), na versão em construção ou, se não houver, na última publicada. Para trocar de plano: "Plano de Safra" no cabeçalho ou Visão Geral.
+  - **Calendário Agrícola e Suprimentos:** **vários planos somados**, com os filtros da Visão Geral (Safra começa na mais recente; Empresa, Fazenda e Cultura em "Todas"). Sem abas. Usam a **última versão publicada de cada plano**, avisado num banner que pode ser fechado ("Calendário Agrícola e Suprimentos mostram a última versão publicada de cada plano. Alterações em versões em construção aparecem aqui depois de publicadas.") e numa etiqueta fixa ao lado dos filtros ("Últimas versões publicadas ⓘ", com o mesmo texto ao passar o mouse). Fechado, o banner não volta.
+  - A **aba Calendário Agrícola** do Planejamento mostra só o plano e a versão abertos. Por enquanto é a mesma tela do Calendário do menu; a visão somada será detalhada depois.
+- **Áreas somadas:** **Área territorial** (área física, cada talhão contado uma vez) e **Área produtiva** (soma das áreas dos planos, ou seja, das safras).
+- **Sem nenhum plano cadastrado**, Planejamento, Calendário Agrícola e Suprimentos mostram "Crie seu primeiro plano para visualizar…" e o botão "+ Criar Plano de Safra". Texto em Planejamento e Calendário: o mesmo da Tela 01. Em Suprimentos: "O plano organiza a necessidade de insumos por safra, empresa, fazenda e cultura. Depois de criado, ele abre aqui automaticamente."
 
-### 4.1 Tela inicial do Plano de Safra
+### 4.1 Visão Geral (tela inicial do Plano de Safra)
 
-- **Primeiro uso** (nenhum plano cadastrado): ilustração, título "Comece o planejamento da sua safra", texto "O Plano de Safra organiza as necessidades de compra de insumos, gera o Calendário Agrícola e, após a aprovação, cria automaticamente as Ordens de Serviço." e um único botão "Criar Plano Safra". A partir do primeiro plano, essa tela não aparece mais.
-- **Com planos**: filtros (Safra, Empresa, Fazenda, Cultura); lista de planos com o botão "Criar Plano Safra" à direita do título da lista. Sem indicadores (cards de Visão geral) no topo.
-- Filtro de safra começa na safra mais recente cadastrada (não em "Todas").
-- Colunas da lista: Safra, Empresa, Fazenda, Cultura, Área, Custo estimado, Receita projetada, Status, Última atualização, Atualizado por.
-- Status do plano: **Em construção** e **Aprovado**.
-- **Salvamento automático** do plano (sem botão Salvar), com o sinal "✓ Salvo automaticamente" no cabeçalho do plano. No protótipo é só o sinal.
-- Custo e receita ficam vazios até que as informações que os alimentam existam.
-- **Menu do plano** na lista (⋯ no começo da linha ou botão direito): Excluir · Exportar (.xlsx) · Abrir. **Só plano Em construção pode ser excluído** (o aprovado gerou OS e é a linha de base), com confirmação. "Copiar para outra fazenda" fica para quando o cliente pedir.
+- **Primeiro uso** (nenhum plano cadastrado): ilustração, título "Comece o planejamento da sua safra", texto "O Plano de Safra organiza as necessidades de compra de insumos, gera o Calendário Agrícola e, a partir da versão publicada, cria automaticamente as Ordens de Serviço." e um único botão "Criar Plano Safra". A partir do primeiro plano, essa tela não aparece mais.
+- O protótipo **abre já com os planos de exemplo**. Demonstração → "Começar do zero" volta ao primeiro uso.
+- **Com planos**: duas guias abaixo do título, **Visão Geral** e **Histórico de versões**, com os mesmos filtros. Sem indicadores (cards) no topo.
+- **Filtros** num cartão baixo, na ordem das colunas: Safra, Empresa, Atividade, Cultura, Fazenda, Status, e **Limpar filtros** à direita (Safra volta à mais recente; os demais a "Todas"/"Todos"). As opções de cada filtro são **só os valores que existem nos planos da lista** (ex.: Atividade só Agricultura).
+- Filtro de safra começa na safra mais recente que tem plano (não em "Todas"). Depois de criar planos, a lista abre na safra deles.
+- **Guia Visão Geral:** uma linha por plano, na versão mais recente. Título "Planos de Safra" e botão "Criar Plano Safra" dentro do cartão da lista.
+  - Colunas: Safra, Empresa, Atividade, Cultura, Fazenda, **Área de cultivo**, **Versão** (só o número), **Status**, Última atualização, Atualizado por, Ações (⋯).
+  - **Área de cultivo** = soma dos talhões incluídos no plano; sem talhões, "Pendente".
+  - **Status:** **Não iniciado** (plano criado, só com a 0.1 vazia), **Em construção** ou **Publicada**. Não há mais status "Aprovado".
+  - **Ordem:** Status (Não iniciado, Em construção, Publicada), depois Safra (mais recente primeiro), Fazenda e Cultura em ordem alfabética.
+  - Custo estimado e Receita projetada saíram da lista; voltam se os usuários pedirem.
+- **Guia Histórico de versões:** uma linha por versão de cada plano (da mais nova para a mais antiga). Colunas: Safra, Empresa, Atividade, Cultura, Fazenda, Versão, Status, Última atualização, Atualizado por (em construção: o último "Salvar alterações"; publicada: a publicação). Clicar na linha abre aquela versão (publicada em consulta; com alterações não salvas em outra versão, pergunta antes, como no "Trocar versão").
+- **Um clique na linha abre** o plano (sem seta), na versão em construção ou, se não houver, na última publicada (em consulta). **Plano não iniciado:** abre o modal "Como deseja iniciar o plano?" (4.1.1).
+- **Menu do plano** na lista (⋯ no fim da linha ou botão direito), nesta ordem: **Abrir · Criar nova versão · Histórico de versões · Exportar XLSX · (separador) · Excluir plano** (em vermelho).
+  - **Criar nova versão:** a partir da **última publicada**; já abre em edição. Com uma versão em construção no plano, aparece desabilitado com "A versão 0.3 já está em construção"; plano não iniciado, com "O plano ainda não foi iniciado". Criar a partir de uma versão mais antiga é feito no Histórico de versões.
+  - **Histórico de versões:** abre a guia Histórico de versões com os filtros naquele plano.
+  - **Excluir plano:** permitido enquanto **nenhuma OS** foi gerada a partir do plano; depois, desabilitado com "O plano já gerou Ordens de Serviço". Com confirmação.
+  - "Copiar para outra fazenda" fica para quando o cliente pedir.
+
+### 4.1.1 Versões do plano
+
+- Versões numeradas em sequência por plano (0.1, 0.2, 0.3…), com dois status: **Em construção** (editável) e **Publicada** (imutável, só consulta). Números nunca são reutilizados.
+- **Ao criar o plano**, nasce só a **versão 0.1, publicada**, com a identificação do plano, data, hora e responsável. Não nasce a 0.2.
+- **0.1 vazia (plano não iniciado):** ao abrir o plano (linha da lista, "Abrir" no ⋯ ou menu Planejamento), aparece por cima da Visão Geral o **modal "Como deseja iniciar o plano?"**, com quatro opções nesta ordem:
+  - **Usar modelo:** "Use uma estrutura pronta de operações e ajuste conforme necessário."
+  - **Importar XLSX:** "Continue um plano exportado por este sistema (.xlsx)." Safra, Empresa, Fazenda e Cultura do plano são conferidas com as do arquivo; se forem diferentes, aviso com "Importar mesmo assim". Talhões do arquivo que não estão no plano ficam de fora, com aviso.
+  - **Copiar plano existente:** "Copie operações, produtos e doses de outro plano de safra da mesma cultura." Lista só os planos da mesma cultura (qualquer fazenda e safra) **já publicados**; copia sempre a **última versão publicada**: grupos, operações e recomendações com produtos e doses padrão, **sem talhões, áreas, plantio e germinação**.
+  - **Começar do zero:** "Cadastre suas operações." Começa só com o Plantio e a Colheita (operações fixas).
+  - "Começar o planejamento" cria a **0.2 em construção** com esse conteúdo e abre a aba Operações; a 0.1 fica como registro inicial. Cancelar ou X: o plano continua não iniciado.
+- **Criar nova versão** (versão publicada): cria a próxima versão da sequência, copiando os dados da versão de origem, em construção, e abre em edição. Guarda a versão de origem (ex.: abrir a 0.1 com a 0.3 já publicada gera a 0.4, origem 0.1).
+- **Só uma versão em construção por plano.** Pedir nova versão com outra em construção: aviso "Já existe uma versão em construção (0.3)" e a opção de abri-la; nada é criado nem descartado.
+- **Salvar alterações** (versão em construção, botão secundário): grava, mantém o número e o status, registra data, hora e responsável; confirmação discreta "Alterações salvas". Nunca publica.
+- **Publicar versão** (versão em construção, botão principal verde): confirmação "Publicar versão 0.3?" · "A versão será registrada no histórico e não poderá mais ser editada. Para realizar novas alterações, será necessário criar uma nova versão." · Cancelar · Publicar versão. Publicada, a versão guarda uma fotografia imutável dos dados agronômicos e financeiros e fica em consulta. **Não cria a próxima versão sozinha.** Publicar nunca altera outra versão publicada.
+- **Versão publicada aberta:** tudo bloqueado, com status, data, hora e responsável da publicação e o botão **Criar nova versão**. Sem Salvar alterações e Publicar versão.
+- **Cabeçalho do plano** (fixo): "Plano de Safra › Safra 26/27 · Empresa A · Fazenda São José · Soja | Versão 0.3 [Em construção]" e o link **Trocar versão**, que lista as versões do plano (da mais recente para a mais antiga, com status, data e responsável) e leva ao histórico na Visão Geral. Trocar de versão com alterações não salvas: aviso com Cancelar · Abrir sem salvar · Salvar e abrir.
+- Publicar não é aprovação formal. Sem aprovação por enquanto.
 
 ### 4.2 Criar plano (modal "Criar Plano de Safra")
 
-- Subtítulo: "Defina o contexto do novo planejamento."
-- Campos, nesta ordem: Safra, Empresa, Fazenda, Cultura.
+- Subtítulo: "Defina as informações gerais do plano e selecione as fazendas que farão parte da criação."
+- **Informações gerais**, todas obrigatórias: Safra, Empresa, **Atividade**, Cultura.
 - Safra: escolhida numa lista; se não existir, "Criar nova safra" ali mesmo. A safra tem só o nome por enquanto.
-- Um único plano por safra e fazenda (a refinar).
+- **Atividade:** Agricultura, Pecuária ou Silvicultura. Por enquanto só Agricultura (já escolhida); as outras aparecem com "(Em breve)".
+- **Fazendas:** um bloco por fazenda ("Fazenda 1", "Fazenda 2"…), com **Fazenda** (obrigatória), **Talhões (opcional)** e **Área de cultivo** (calculada). "+ Adicionar fazenda" cria outro bloco; a lixeira remove (com mais de um).
+  - Ao escolher a fazenda, **todos os talhões vêm marcados** e a área já aparece; a pessoa desmarca os que não quer.
+  - Sem talhões, a área fica "Pendente", com a dica "A área de cultivo será calculada automaticamente quando houver talhões selecionados." Não trava a criação.
+  - **O plano mostra só os talhões incluídos** (Planejamento, mapa, Calendário, importação). Incluir talhões depois, dentro do plano: a detalhar.
+- **Um plano por fazenda:** com duas fazendas, nascem dois planos (uma linha cada na Visão Geral).
+- Um único plano por safra e fazenda (a refinar): não deixa repetir fazenda entre os blocos nem criar um que já existe.
 - Cultura é definida no nível da fazenda e pode ser alterada no talhão.
 - **Por enquanto o protótipo funciona só para soja**: a lista de culturas tem só Soja (já vem escolhida no modal). Variedades, população, bags e TSI são de soja.
-- "Como deseja iniciar o plano?":
-  - **Usar modelo** (pré-selecionado): "Use uma estrutura pronta de operações e ajuste conforme necessário." Lista de operações levantada com os clientes, pré-preenchida para ajustar. Serve também de plano de exemplo para o usuário ver como fica.
-  - **Sem "Plano em branco" na v1**: o plano sempre nasce do modelo (ou do arquivo importado); quem quiser outra estrutura exclui grupos ou operações e cria os seus na etapa Operações.
-  - **Importar XLSX**: "Continue um plano exportado por este sistema (.xlsx)." Na v1, só o arquivo exportado pelo protótipo. Safra, empresa, fazenda e cultura do modal são conferidas com as do arquivo; se forem diferentes, a pessoa escolhe "Usar os do arquivo" ou "Manter os do modal" (talhões que não existem na fazenda ficam de fora, com aviso).
-  - **Clonar safra anterior**: card visível e desabilitado com selo "Em breve", sem ação por enquanto.
-- Botões: Cancelar e "Continuar para o cadastro" (leva à etapa 1). "Continuar" fica desabilitado até os quatro campos estarem preenchidos.
+- **Continua sendo um modal**, aberto pelo "Criar Plano Safra" da Visão Geral, **só com a identificação do plano**. Safra/Safrinha: a detalhar.
+- **"Como deseja iniciar o plano?" saiu deste modal**: é outro modal, na primeira vez que o plano é aberto (4.1.1).
+- Botões: **Cancelar** e **Criar Plano de Safra** (parece desabilitado até os obrigatórios estarem preenchidos; clicado, mostra o que falta). Ao criar, **volta para a Visão Geral**, com o aviso "Plano criado… Clique na linha para começar." Os planos nascem só com a 0.1 e aparecem como "Não iniciado".
 
 ### 4.3 Etapas e regras do plano
 
 - Safra, Empresa e Fazenda ficam fixas no topo durante o plano.
-- Etapas do plano: **1 Operações → 2 Planejamento → 3 Calendário Agrícola → 4 Suprimentos → 5 Aprovação**. O plano abre em Operações.
+- Abas do plano (menu Planejamento): **Operações · Planejamento · Calendário Agrícola**. Suprimentos saiu das abas e é item do menu (4.0). Sem etapa de Aprovação por enquanto. O plano abre em Operações (não iniciado: antes, o modal de início; 4.1.1).
 - Dentro de Planejamento, sub-etapas por grupo de operação, na ordem do cadastro do cliente (sugestão em validação).
 - **Etapa Operações** (docs/telas/04.0-operacoes.md): revisa a estrutura do plano vinda do modelo (grupo de operação, operação, DAP, fenologia e previsão de conclusão). É opcional: quem não quiser mexer segue direto para o Planejamento. Sem resumo nem situação (isso fica no Calendário, depois de planejar).
 - O plano também tem produtividade esperada (na unidade da cultura) e preço esperado, opcionais, por cultura, valendo para aquela fazenda e safra. Alimentam a receita projetada. Local a refinar com usuários.
@@ -102,7 +140,7 @@ Agrônomo da fazenda e líder de operações podem ser a mesma pessoa, conforme 
 - Previsão de colheita = data de plantio + ciclo da variedade para a região da fazenda e a safra do plano. Sem ciclo cadastrado para a safra corrente, abre o pré-cadastro para informar o ciclo. Recalculada com a data real de plantio da OS.
 - Restrição de aplicação do produto (ex.: "somente terrestre") aparece só como informação ao lado do produto, vinda do cadastro. Forma de aplicação e vazão não são preenchidas no plano.
 - **Calendário Agrícola** (nome provisório): aba vizinha com todas as operações ordenadas por DAP/DAE, cresce durante o planejamento e mostra o status de cada item. Detalhe: docs/telas/05-calendario-agricola.md.
-  - Duas visões: **Tabela** (uma linha por operação com os produtos embaixo e uma coluna por talhão, com a dose de cada um; é a visão principal e a que abre primeiro) e **Infográfico** (uma coluna por fase da cultura: Pré-plantio, Plantio, fenologias, Colheita; complementar). Filtro por talhão. Mostra **só o que já foi planejado** (produto e dose; no Plantio, variedade), em construção e no aprovado, e vai se preenchendo conforme o planejamento. Sem nada planejado, o aviso "**Nenhuma operação planejada ainda.** As operações planejadas aparecem aqui com datas e doses por talhão."
+  - Duas visões: **Tabela** (uma linha por operação com os produtos embaixo e uma coluna por talhão, com a dose de cada um; é a visão principal e a que abre primeiro) e **Infográfico** (uma coluna por fase da cultura: Pré-plantio, Plantio, fenologias, Colheita; complementar). Filtro por talhão. Mostra **só o que já foi planejado** (produto e dose; no Plantio, variedade), na versão em construção e na publicada, e vai se preenchendo conforme o planejamento. Sem nada planejado, o aviso "**Nenhuma operação planejada ainda.** As operações planejadas aparecem aqui com datas e doses por talhão."
   - **Previsões em texto** abaixo dos filtros, nas duas visões: **Plantio estimado** e **Colheita estimada** (da primeira à última data dos talhões com plantio definido). O calendário ocupa a área logo abaixo das abas do plano.
   - **Prazo para encerramento da OS** (previsão de conclusão) é informado na **etapa Operações**, por operação, já preenchido com o padrão (5 dias calagem, gessagem, fosfatagem, 1ª dessecação e 1ª adubação potássica; 3 plantio; 2 as demais; 10 colheita). O Calendário não mostra nem edita.
   - A **colheita** entra no calendário pela previsão do plantio (data de plantio + ciclo da variedade).
@@ -140,17 +178,18 @@ Detalhe da tela: docs/telas/04.3-operacoes-fertilidade.md.
 
 - Necessidade de insumos calculada do plano; estoque vem do Compass (integração a definir); necessidade de compra = necessidade − estoque.
 - Orçamento (analista de compras): quantidade × preço de referência do histórico; manual sem histórico; comparação com safra anterior.
-- Aprovação pelo time corporativo transforma as operações em OS planejadas, travadas como linha de base. O plano aprovado não muda durante a safra.
+- **Sem aprovação por enquanto.** A **última versão publicada** é a referência para gerar as OS; versão em construção nunca gera OS. Se a última publicada não tiver operações válidas, não gera OS e informa o motivo. Cada OS guarda a versão do plano que a originou. Quando e como as OS são geradas: a detalhar.
+- Cada versão publicada guarda a fotografia do orçamento de suprimentos (produtos, quantidades, unidades, preços e data de referência, custos por grupo, total), sem recálculo quando os preços mudam.
 
 ## 6. Ordem de Serviço
 
 ### 6.1 Status
 
-**Operação em planejamento** → (aprovação) → **OS planejada** → **OS programada** → **Em execução** → **Fechada**
+**Operação em planejamento** → (versão publicada) → **OS planejada** → **OS programada** → **Em execução** → **Fechada**
 
 | Status | Quando | Com atraso quando |
 |---|---|---|
-| OS planejada | Após a aprovação | Chegou a data prevista e não foi programada |
+| OS planejada | Gerada a partir da última versão publicada | Chegou a data prevista e não foi programada |
 | OS programada | Os dois blocos da programação estão completos e a data de abertura é futura | — |
 | Em execução | Chegou a data de abertura (automático) | Passou data de abertura + prazo de conclusão sem fechar |
 | Fechada | OS fechada | Fechada após data de abertura + prazo de conclusão |

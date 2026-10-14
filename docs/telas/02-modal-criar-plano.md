@@ -1,27 +1,27 @@
 # Tela 02 — Modal Criar Plano de Safra
 
-Imagem: `referencias/02-modal-criar-plano.png`
+Imagem: `referencias/02-modal-criar-plano.png` (versão antiga, com "Como deseja iniciar"; os documentos valem).
 
 ## Objetivo
-Definir o contexto do novo plano (safra, empresa, fazenda, cultura) e como ele vai começar.
+Identificar os novos planos: informações gerais (safra, empresa, atividade, cultura) e as fazendas, cada uma com os seus talhões. Como cada plano vai começar é escolhido depois, no modal "Como deseja iniciar o plano?" (ver abaixo e DECISOES 4.1.1).
 
 ## Quando aparece
 - Por cima da Tela 01 ou da Tela 03, ao clicar em "Criar Plano Safra".
 
 ## Conteúdo
-- Título: "Criar Plano de Safra"; subtítulo: "Defina o contexto do novo planejamento."; botão X para fechar.
-- Campos, nesta ordem, todos obrigatórios: Safra, Empresa, Fazenda, Cultura.
-- Na lista de Safra, a última opção é "+ Criar nova safra".
-- Pergunta "Como deseja iniciar o plano?" com três cards (um selecionado por vez):
-
-| Card | Texto | Comportamento |
-|---|---|---|
-| Usar modelo (pré-selecionado) | Use uma estrutura pronta de operações e ajuste conforme necessário. | Carrega a lista de operações de exemplo. |
-| Importar XLSX | Continue um plano exportado por este sistema (.xlsx). | Na v1 aceita só o arquivo exportado pelo próprio protótipo. Ver as regras abaixo. |
-| Clonar safra anterior | Utilize o plano de uma safra anterior como base para o novo planejamento. | Desabilitado, com selo "Em breve". Sem ação. |
-
-- Na v1 **não há "Plano em branco"**: o plano sempre nasce do modelo (ou do arquivo importado), e quem quiser outra estrutura exclui grupos ou operações e cria os seus na etapa Operações (Tela 04.0).
-- Botões no rodapé: "Cancelar" e "Continuar para as operações".
+- Título: "Criar Plano de Safra"; subtítulo: "Defina as informações gerais do plano e selecione as fazendas que farão parte da criação."; botão X para fechar.
+- **Informações gerais**, lado a lado, todas obrigatórias: Safra, Empresa, Atividade, Cultura.
+  - Na lista de Safra, a última opção é "+ Criar nova safra".
+  - Atividade: Agricultura (já escolhida), Pecuária (Em breve), Silvicultura (Em breve).
+  - Cultura: só Soja por enquanto (já escolhida).
+- **Fazendas**: um bloco por fazenda, com o título "Fazenda 1", "Fazenda 2"… e três campos:
+  - **Fazenda** (obrigatória).
+  - **Talhões (opcional)**: lista com caixas de marcar ("Todos" e cada talhão com a área). O campo mostra "Todos os talhões (12)", "9 de 10 talhões" ou "Selecionar talhões".
+  - **Área de cultivo**: calculada (fundo cinza), soma dos talhões marcados; sem talhões, "Pendente".
+  - Sem talhões marcados, embaixo: "A área de cultivo será calculada automaticamente quando houver talhões selecionados."
+  - Com mais de um bloco, cada um tem a lixeira para remover.
+- Botão "+ Adicionar fazenda" abaixo dos blocos.
+- Rodapé: "Cancelar" e "Criar Plano de Safra".
 
 ## Regras
 - "Criar nova safra": abre uma **janela pequena por cima do formulário**, "**Nova safra**" (subtítulo "A safra nova entra na lista e fica selecionada."), com o campo **Safra*** ("Nome da safra (ex.: 26/27)", já com o cursor) e os botões **Cancelar** e **Confirmar** (desabilitado com o campo vazio). A safra tem só o nome.
@@ -29,18 +29,41 @@ Definir o contexto do novo plano (safra, empresa, fazenda, cultura) e como ele v
   - **Cancelar** ou **Esc**: fecha sem criar; a Safra volta ao que estava.
   - **Clicar fora** (no formulário de trás) não fecha nem deixa seguir para Empresa: o cursor volta ao campo e aparece, em âmbar, "Confirme ou cancele a nova safra."
   - Motivo: no teste com usuários, com o campo dentro do formulário e o botão Adicionar, as pessoas digitavam e seguiam sem adicionar, achando que estava salvo.
-- Um único plano por safra e fazenda: se a combinação já existir, não deixar criar outro.
-- "Continuar para as operações" fica desabilitado até os quatro campos estarem preenchidos.
-- Ao continuar, o plano é criado com: status "Em construção", área 0 ha, custo e receita vazios, última atualização = hoje, atualizado por = usuário logado.
-- Com uma opção só na lista (ex.: Cultura, por enquanto só Soja), ela já vem escolhida.
-- **Importar XLSX** (só o arquivo exportado pelo Plano de Safra):
-  - Ao escolher o card, aparece o campo "Arquivo exportado pelo Plano de Safra (.xlsx)" (obrigatório). Ao carregar, mostra de qual plano é ("Planejamento da safra 26/27 · Empresa A · Fazenda São José · Soja") e preenche os campos do modal que estiverem vazios.
-  - **O sistema confere Safra, Empresa, Fazenda e Cultura do modal com as do arquivo.** Se algum for diferente, quadro amarelo "O arquivo é de outro plano" com as diferenças ("Safra: no modal 26/27 · no arquivo 25/26") e os botões **Usar os do arquivo** (troca os campos do modal) e **Manter os do modal** (importa para a safra e a fazenda escolhidas, ex.: começar a 26/27 a partir da 25/26). Mudar um campo depois volta a conferir.
-  - Fazenda diferente: avisa quais talhões do arquivo não existem na fazenda e ficam de fora (o planejamento é por talhão; talhões com o mesmo nome recebem o que estava no arquivo).
-  - Arquivo que não é do sistema (sem a aba "plano"): "Este arquivo não foi exportado pelo Plano de Safra. Na v1, só dá para importar um planejamento exportado por este sistema."
-  - Continuar sem arquivo: "Escolha o arquivo exportado pelo Plano de Safra." Com diferença sem escolha, não continua.
-  - O plano importado abre com grupos, operações, plantio, TSI e recomendações (com as doses de cada talhão) e começa "Em construção". Aviso "Planejamento importado", com os talhões que ficaram de fora, se houver. Produto ou variedade que não está no cadastro entra como pré-cadastro.
+- Ao escolher a fazenda, **todos os talhões vêm marcados** e a área aparece na hora; a pessoa desmarca os que não quer. Trocar a fazenda marca de novo todos os talhões da nova.
+- Talhões não são obrigatórios: sem nenhum, a área fica "Pendente" e o plano pode ser criado.
+- **O plano mostra só os talhões incluídos** (Planejamento, mapa, Calendário, importação). Incluir talhões depois, dentro do plano: a detalhar.
+- **Um plano por fazenda**: com duas fazendas, nascem dois planos.
+- Um único plano por safra e fazenda: não deixa repetir a fazenda em dois blocos ("A Fazenda X já está em outro bloco.") nem criar um plano que já existe ("Já existe um plano da safra 26/27 para a Fazenda X."), avisos abaixo do campo Fazenda.
+- "Criar Plano de Safra" parece desabilitado até tudo estar certo; clicado, mostra "Preenchimento obrigatório" nos campos vazios e, ao lado dos botões, "Preencha os campos obrigatórios." ou "Confira as fazendas.".
+- Cada plano nasce só com a **versão 0.1, publicada e vazia** (DECISOES 4.1.1), área de cultivo dos talhões incluídos, última atualização = hoje, atualizado por = usuário logado. Na lista, aparece como **"Não iniciado"**.
+- Esc com a lista de talhões aberta fecha só a lista.
 
 ## Navegação
 - "Cancelar" ou X → fecha o modal e volta à tela de origem, sem criar nada.
-- "Continuar para as operações" → etapa Operações do plano (Tela 04.0).
+- "Criar Plano de Safra" → **volta para a Visão Geral** (Tela 03), com o filtro Safra na safra dos planos criados e o aviso "Plano criado: Fazenda X. Clique na linha para começar." (ou "2 planos criados (…). Clique na linha de cada um para começar.").
+
+---
+
+# Modal "Como deseja iniciar o plano?"
+
+## Quando aparece
+- Por cima da Visão Geral, ao abrir um plano **não iniciado** (só a 0.1, vazia): clique na linha, "Abrir" no ⋯ ou menu Planejamento.
+
+## Conteúdo
+- Título "Como deseja iniciar o plano?"; subtítulo com o plano ("Soja · Safra 26/27 · Empresa B · Fazenda Boa Vista.") e "O plano passa para a versão 0.2, em construção, e abre na aba Operações para você ajustar."
+- Quatro cards (um escolhido por vez; Usar modelo já vem marcado), em duas colunas, nesta ordem:
+
+| Card | Texto | Comportamento |
+|---|---|---|
+| Usar modelo | Use uma estrutura pronta de operações e ajuste conforme necessário. | Grupos e operações do modelo. |
+| Importar XLSX | Continue um plano exportado por este sistema (.xlsx). | Campo do arquivo (obrigatório). Ver as regras abaixo. |
+| Copiar plano existente | Copie operações, produtos e doses de outro plano de safra da mesma cultura. | Lista "Plano para copiar" (obrigatória). Ver as regras abaixo. |
+| Começar do zero | Cadastre suas operações. | Só as operações fixas: Plantio e Colheita. |
+
+- Rodapé: "Cancelar" e "Começar o planejamento".
+
+## Regras
+- **Importar XLSX** (só o arquivo exportado pelo Plano de Safra): ao carregar, mostra de qual plano é ("Planejamento da safra 26/27 · Empresa A · Fazenda São José · Soja"). Safra, Empresa, Fazenda e Cultura do plano são conferidas com as do arquivo; se forem diferentes, quadro amarelo "O arquivo é de outro plano" com as diferenças e o botão **Importar mesmo assim**. Talhões do arquivo que não estão no plano ficam de fora, com aviso. Arquivo que não é do sistema: "Este arquivo não foi exportado pelo Plano de Safra…". Sem arquivo: "Escolha o arquivo exportado pelo Plano de Safra."
+- **Copiar plano existente**: a lista mostra só os planos **da mesma cultura** (qualquer fazenda e safra) **já publicados**, como "Safra 26/27 · Empresa A · Fazenda Santa Clara · versão 0.2". Copia sempre a **última versão publicada**: grupos de operação, operações e recomendações com produtos e doses padrão. **Não copia** talhões, áreas, plantio, germinação nem doses próprias de talhão. Sem plano publicado: "Ainda não há plano de Soja publicado para copiar."
+- "Começar o planejamento" cria a **0.2 em construção** com o conteúdo escolhido e abre o plano na aba Operações (Tela 04.0), com aviso quando importado ou copiado ("Copiado do plano da Fazenda Santa Clara (safra 26/27, versão 0.2)").
+- Cancelar ou X: fecha; o plano continua não iniciado. Cada vez que o modal abre, começa em "Usar modelo".

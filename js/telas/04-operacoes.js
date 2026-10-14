@@ -2,7 +2,7 @@
  * Tela 04 — Operações, grupo Defensivo (docs/telas/04.1-operacoes-defensivos.md)
  * Plano aberto: cabeçalho com contexto e etapas, lista de operações à esquerda,
  * detalhe da operação à direita e guias de grupo no rodapé.
- * Plano aprovado: somente leitura.
+ * Versão publicada: somente leitura (docs/DECISOES.md, 4.1.1).
  */
 window.Telas = window.Telas || {};
 
@@ -11,9 +11,7 @@ window.Telas.planoOperacoes = (function () {
   const ETAPAS = [
     { id: 'operacoes',   nome: 'Operações' },     // estrutura do plano (Tela 04.0)
     { id: 'planejamento', nome: 'Planejamento' }, // talhão a talhão, por grupo (esta tela)
-    { id: 'calendario',  nome: 'Calendário Agrícola' },
-    { id: 'suprimentos', nome: 'Suprimentos' },
-    { id: 'aprovacao',   nome: 'Aprovação' }
+    { id: 'calendario',  nome: 'Calendário Agrícola' }
   ];
   const UNIDADES = ['L', 'mL', 'kg', 'g', 't'];
   // TSI: a dose é por quantidade de semente (a unidade usada pelos clientes fica para os testes)
@@ -32,8 +30,8 @@ window.Telas.planoOperacoes = (function () {
   function aoMostrar(conteudo, p, etapaId) {
     plano = p;
     etapa = ETAPAS.some((e) => e.id === etapaId) ? etapaId : 'operacoes';
-    somenteLeitura = plano.status === 'Aprovado';
-    talhoesFazenda = DADOS.talhoes[plano.fazenda] || [];
+    somenteLeitura = Versoes.somenteLeitura(plano);
+    talhoesFazenda = Util.talhoesPlano(plano); // só os talhões incluídos no plano (modal Criar Plano)
     ui = estados[plano.id] = estados[plano.id] || {
       // Abre no primeiro grupo das guias (Semente vem antes de Defensivo)
       grupoId: (plano.grupos[0] || {}).id || null,
@@ -62,7 +60,12 @@ window.Telas.planoOperacoes = (function () {
       renomeandoNaLista: null, // operação com o nome em edição na lista (duplo clique, F2 ou botão direito)
       receitaPorOp: {},        // receita aberta em cada operação
       rascunho: null,          // cópia da receita aberta, editada até "Aplicar em N talhões": { receitaId, nome, produtos }
+      versoes: null,           // cabeçalho: lista do "Trocar versão" aberta ({ trocarPara: num } = aviso de alterações não salvas)
+      jaExiste: false,         // cabeçalho: aviso "Já existe uma versão em construção" (Criar nova versão)
+      salvoAgora: false,       // cabeçalho: "Alterações salvas" logo depois do Salvar alterações
     };
+    ui.versoes = null;
+    ui.jaExiste = false;
     if (!somenteLeitura) limparReceitasVazias();
     raiz = conteudo.querySelector('#plano-raiz');
     raiz.addEventListener('click', aoClicar);
@@ -130,40 +133,34 @@ window.Telas.planoOperacoes = (function () {
     return valor.toLocaleString('pt-BR', { maximumFractionDigits: 3 });
   }
 
-  // Toda alteração atualiza "Última atualização" e "Atualizado por" do plano
+  // Toda alteração atualiza "Última atualização" e "Atualizado por" do plano e marca alterações não salvas
   function alterou() {
     plano.atualizadoEm = Util.hojeISO();
     plano.atualizadoPor = DADOS.usuario.nome;
-    marcarSalvando();
+    if (!plano.pendente || ui.salvoAgora) {
+      plano.pendente = true;
+      ui.salvoAgora = false;
+      atualizarEstadoSalvo();
+    }
   }
 
-  // ----- Salvamento automático (sinal no cabeçalho) -----
-  // Sem botão Salvar: cada alteração mostra "Salvando…" por um instante e volta para "Salvo automaticamente".
-  // No protótipo é só o sinal (os dados ficam na memória do navegador).
-  let salvandoAte = 0;
+  // ----- Estado de salvamento (versão em construção) -----
+  // "Alterações não salvas" · "Alterações salvas" (logo depois de salvar) · "Salvo às 14:20"
   let temporizadorSalvo = null;
 
-  function marcarSalvando() {
-    plano.salvoEm = new Date();
-    salvandoAte = Date.now() + 900;
-    atualizarSinalSalvo();
-    clearTimeout(temporizadorSalvo);
-    temporizadorSalvo = setTimeout(atualizarSinalSalvo, 950);
+  function estadoSalvo() {
+    const v = Versoes.aberta(plano);
+    if (somenteLeitura || !v) return '';
+    if (plano.pendente) return '<span class="estado-salvo estado-salvo--pendente" data-salvo role="status">Alterações não salvas</span>';
+    if (ui.salvoAgora) return `<span class="estado-salvo estado-salvo--ok" data-salvo role="status">${Icones.certo} Alterações salvas</span>`;
+    const hora = new Date(v.salvaEm).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    return `<span class="estado-salvo" data-salvo role="status" title="${esc(Versoes.detalhe(v))}">Salvo às ${hora}</span>`;
   }
 
-  function sinalSalvo() {
-    if (somenteLeitura) return '';
-    const salvando = Date.now() < salvandoAte;
-    const hora = plano.salvoEm ? plano.salvoEm.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '';
-    const dica = hora ? `Todas as alterações foram salvas · hoje, ${hora}` : 'As alterações são salvas automaticamente';
-    return `<span class="salvo ${salvando ? 'salvo--salvando' : ''}" data-salvo title="${dica}" role="status" aria-live="polite">${salvando
-      ? 'Salvando…' : `${Icones.certo} Salvo automaticamente`}</span>`;
-  }
-
-  // Troca só o sinal (sem redesenhar a tela)
-  function atualizarSinalSalvo() {
+  // Troca só o texto (sem redesenhar a tela)
+  function atualizarEstadoSalvo() {
     const el = raiz && raiz.querySelector('[data-salvo]');
-    if (el) el.outerHTML = sinalSalvo();
+    if (el) el.outerHTML = estadoSalvo();
   }
 
   // Ao trocar de operação, grupo ou status: limpa a seleção da tabela e fecha o modal
@@ -213,32 +210,153 @@ window.Telas.planoOperacoes = (function () {
     raiz.querySelector(seletor)?.focus({ preventScroll: true });
   }
 
-  // O status no subtítulo alterna entre "Em construção" e "Aprovado" ao clicar (só no protótipo)
+  // Cabeçalho fixo: "Plano de Safra › contexto | Versão 0.2 [status] · Trocar versão" e, embaixo, as abas
+  // com Exportar e os botões da versão à direita (DECISOES 4.1.1)
   function cabecalho() {
     const contexto = [`Safra ${plano.safra}`, plano.empresa, `Fazenda ${plano.fazenda}`, `Cultura ${plano.cultura}`];
+    const v = Versoes.aberta(plano);
     return `
       <header class="plano__cabecalho">
-        <div class="plano__linha">
-        <a class="plano__titulo" href="#/plano-safra" title="Voltar para a Visão Geral">Plano de Safra</a>
-        <span class="plano__seta" aria-hidden="true">›</span>
-        <p class="plano__contexto">${contexto.map(esc).join('<span class="plano__ponto">·</span>')}
-          <span class="plano__ponto">·</span>
-          <span class="status ${somenteLeitura ? 'status--aprovado' : 'status--construcao'}">${esc(plano.status)}</span>
-          ${sinalSalvo()}</p>
+        <div class="plano__linha plano__linha--versao">
+          <div class="plano__identificacao">
+            <a class="plano__titulo" href="#/plano-safra" title="Voltar para a Visão Geral (para trocar de plano)">Plano de Safra</a>
+            <span class="plano__seta" aria-hidden="true">›</span>
+            <p class="plano__contexto">${contexto.map(esc).join('<span class="plano__ponto">·</span>')}</p>
+            <span class="plano__barra" aria-hidden="true">|</span>
+            <span class="plano__versao">Versão ${esc(v.num)}
+              <span class="status ${somenteLeitura ? 'status--aprovado' : 'status--construcao'}">${Versoes.rotuloStatus(v)}</span>
+              ${somenteLeitura ? `<span class="plano__versao-info">${esc(Versoes.detalhe(v))}</span>` : ''}</span>
+            <span class="versoes">
+              <button class="link-versoes" type="button" data-acao="ver-trocar" aria-haspopup="menu"
+                      aria-expanded="${!!ui.versoes}">${Icones.relogio} Trocar versão</button>
+              ${ui.versoes ? listaVersoes() : ''}
+            </span>
+          </div>
         </div>
         <div class="plano__linha-etapas">
-          <nav class="etapas" aria-label="Etapas do plano">
+          <nav class="etapas" aria-label="Abas do plano">
             ${ETAPAS.map((e) => `
               <a class="etapa ${e.id === etapa ? 'etapa--ativa' : ''}" href="#/plano/${plano.id}/${e.id}"
                  ${e.id === etapa ? 'aria-current="page"' : ''}>${e.nome}</a>`).join('')}
           </nav>
-          <button class="botao botao--secundario botao--p plano__exportar" type="button" data-acao="exportar-plano"
-                  title="Baixar o plano em planilha para guardar ou continuar depois">${Icones.baixar} Exportar (.xlsx)</button>
+          <div class="plano__acoes-versao">
+            <button class="botao botao--secundario botao--p plano__exportar" type="button" data-acao="exportar-plano"
+                    title="Baixar o plano em planilha para guardar ou continuar depois">${Icones.baixar} Exportar (.xlsx)</button>
+            ${acoesVersao()}
+          </div>
         </div>
       </header>
       ${somenteLeitura && etapa !== 'calendario' ? `
-        <p class="faixa-leitura">${Icones.cadeado} Plano aprovado: somente leitura. O plano aprovado não muda durante a safra.</p>` : ''}
+        <p class="faixa-leitura">${Icones.cadeado} Versão ${esc(v.num)} publicada: somente consulta. Para alterar, use Criar nova versão.</p>` : ''}
     `;
+  }
+
+  // Botões da versão: em construção, Salvar alterações (secundário) e Publicar versão (principal);
+  // publicada, Criar nova versão (com o aviso quando já existe outra em construção)
+  function acoesVersao() {
+    if (somenteLeitura) {
+      const construcao = Versoes.emConstrucao(plano);
+      return `
+        <button class="botao botao--primario botao--p" type="button" data-acao="ver-nova">Criar nova versão</button>
+        ${ui.jaExiste && construcao ? `
+          <div class="versoes-alerta versoes-alerta--solto" role="alert">
+            <strong>Já existe uma versão em construção (${esc(construcao.num)}).</strong> Só pode haver uma por plano.
+            Abra a ${esc(construcao.num)} para continuar o trabalho em andamento.
+            <div class="versoes-alerta__acoes">
+              <button class="botao botao--secundario botao--p" type="button" data-acao="ver-fechar-aviso">Cancelar</button>
+              <button class="botao botao--primario botao--p" type="button" data-acao="ver-abrir" data-versao="${esc(construcao.num)}">Abrir versão ${esc(construcao.num)}</button>
+            </div>
+          </div>` : ''}`;
+    }
+    return `
+      ${estadoSalvo()}
+      <button class="botao botao--secundario botao--p" type="button" data-acao="ver-salvar">Salvar alterações</button>
+      <button class="botao botao--primario botao--p" type="button" data-acao="ver-publicar">Publicar versão</button>`;
+  }
+
+  // "Trocar versão": versões do plano, da mais recente para a mais antiga
+  function listaVersoes() {
+    const destino = ui.versoes.trocarPara;
+    const atual = Versoes.aberta(plano);
+    return `
+      <div class="versoes-lista" role="menu" aria-label="Versões deste plano">
+        <p class="versoes-lista__titulo">Versões deste plano</p>
+        ${[...Versoes.lista(plano)].reverse().map((v) => `
+          <button class="versoes-item ${v.num === plano.versaoAberta ? 'versoes-item--atual' : ''}" type="button" role="menuitem"
+                  data-acao="ver-abrir" data-versao="${esc(v.num)}">
+            <span class="versoes-item__num">${esc(v.num)}</span>
+            <span><strong>${Versoes.rotuloStatus(v)}</strong>${v.num === plano.versaoAberta ? ' · aberta agora' : ''}</span>
+            <span class="status ${v.status === 'publicada' ? 'status--aprovado' : 'status--construcao'}">${v.status === 'publicada' ? 'Consulta' : 'Editável'}</span>
+            <span class="versoes-item__info">${esc(Versoes.detalhe(v))}</span>
+          </button>`).join('')}
+        ${destino ? `
+          <div class="versoes-alerta" role="alert">
+            <strong>Há alterações não salvas na versão ${esc(atual.num)}.</strong> Salvar antes de abrir a versão ${esc(destino)}?
+            <div class="versoes-alerta__acoes">
+              <button class="botao botao--secundario botao--p" type="button" data-acao="ver-fechar-aviso">Cancelar</button>
+              <button class="botao botao--secundario botao--p" type="button" data-acao="ver-abrir-sem-salvar">Abrir sem salvar</button>
+              <button class="botao botao--primario botao--p" type="button" data-acao="ver-salvar-e-abrir">Salvar e abrir</button>
+            </div>
+          </div>` : ''}
+      </div>`;
+  }
+
+  // Abre outra versão na área de trabalho e redesenha (seleções e rascunhos da versão anterior são descartados)
+  function abrirVersao(num) {
+    Versoes.abrir(plano, num);
+    somenteLeitura = Versoes.somenteLeitura(plano);
+    limparSelecao();
+    Object.assign(ui, { versoes: null, jaExiste: false, salvoAgora: false, rascunho: null, receitaPorOp: {},
+                        renomeandoOp: null, renomeandoGrupo: null, painelTalhao: null, preCadastro: null, validarOp: null });
+    if (!somenteLeitura) limparReceitasVazias();
+    desenharTudo();
+  }
+
+  // Ações do cabeçalho da versão (data-acao="ver-…")
+  function acaoVersao(acao, alvo) {
+    switch (acao) {
+      case 'ver-trocar':
+        ui.versoes = ui.versoes ? null : {}; ui.jaExiste = false; desenharTudo(); break;
+      case 'ver-abrir': {
+        const num = alvo.dataset.versao;
+        if (num === plano.versaoAberta) { ui.versoes = null; ui.jaExiste = false; desenharTudo(); break; }
+        if (plano.pendente) { ui.versoes = { trocarPara: num }; ui.jaExiste = false; desenharTudo(); break; }
+        abrirVersao(num); break;
+      }
+      case 'ver-fechar-aviso':
+        ui.versoes = null; ui.jaExiste = false; desenharTudo(); break;
+      case 'ver-abrir-sem-salvar':
+        abrirVersao(ui.versoes.trocarPara); break;
+      case 'ver-salvar-e-abrir':
+        Versoes.salvar(plano); abrirVersao(ui.versoes.trocarPara); break;
+      case 'ver-salvar':
+        Versoes.salvar(plano);
+        ui.salvoAgora = true;
+        atualizarEstadoSalvo();
+        clearTimeout(temporizadorSalvo);
+        temporizadorSalvo = setTimeout(() => { ui.salvoAgora = false; atualizarEstadoSalvo(); }, 4000);
+        break;
+      case 'ver-publicar': {
+        const num = plano.versaoAberta;
+        Modal.confirmar({
+          titulo: `Publicar versão ${esc(num)}?`,
+          texto: 'A versão será registrada no histórico e não poderá mais ser editada. Para realizar novas alterações, será necessário criar uma nova versão.',
+          botoes: [{ rotulo: 'Cancelar' }, { rotulo: 'Publicar versão', classe: 'primario', acao: () => {
+            Versoes.publicar(plano);
+            abrirVersao(num);
+            Aviso.mostrar(`Versão ${esc(num)} publicada`);
+          } }]
+        });
+        break;
+      }
+      case 'ver-nova': {
+        const r = Versoes.criarNova(plano, plano.versaoAberta);
+        if (r.jaExiste) { ui.jaExiste = true; ui.versoes = null; desenharTudo(); break; }
+        abrirVersao(r.num);
+        Aviso.mostrar(`Versão ${esc(r.num)} criada a partir da ${esc(r.origem)}`);
+        break;
+      }
+    }
   }
 
   // Calendário Agrícola (Tela 05): desenhado aqui dentro, com o mesmo cabeçalho do plano
@@ -2103,7 +2221,8 @@ window.Telas.planoOperacoes = (function () {
     const pontos = [];
     let soma = 0; let sLat = 0; let sLng = 0;
     fazendasDoMapa(op).forEach(({ fazenda, plantio, propria }) => {
-      poligonosFazenda(fazenda).forEach((pg) => {
+      // No plano aberto, só os talhões incluídos nele
+      poligonosFazenda(fazenda).filter((pg) => !propria || talhoesFazenda.some((t) => t.nome === pg.talhao)).forEach((pg) => {
         const p = plantio[pg.talhao];
         const v = p && p.variedade;
         const aberto = propria && ui.painelTalhao === pg.talhao;
@@ -2728,6 +2847,7 @@ window.Telas.planoOperacoes = (function () {
     const alvo = e.target.closest('[data-acao]');
     if (!alvo) return;
     const acao = alvo.dataset.acao;
+    if (acao.startsWith('ver-')) { acaoVersao(acao, alvo); return; }
     const op = opAtual();
     const grupo = grupoAtual();
 
@@ -3101,6 +3221,13 @@ window.Telas.planoOperacoes = (function () {
     if (e.key === 'Enter' && (el.dataset.campo === 'pt-data' || el.dataset.campo === 'pl-data')) { e.preventDefault(); el.blur(); return; }
     if (e.key === 'Escape' && ui.painelTalhao && el.closest('.painel-talhao')) { e.preventDefault(); fecharPainel(); }
   }
+
+  // Clique fora da lista "Trocar versão" ou do aviso de versão em construção: fecha
+  document.addEventListener('mousedown', (e) => {
+    if (!raiz || !raiz.isConnected || !(ui && (ui.versoes || ui.jaExiste))) return;
+    if (e.target.closest('.versoes, .versoes-alerta, [data-acao="ver-nova"]')) return;
+    ui.versoes = null; ui.jaExiste = false; desenharTudo();
+  });
 
   // Clique na opção do combobox: mousedown para escolher antes do campo perder o foco
   document.addEventListener('mousedown', (e) => {

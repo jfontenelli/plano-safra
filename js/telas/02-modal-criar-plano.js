@@ -1,158 +1,197 @@
 /*
  * Tela 02 — Modal Criar Plano de Safra (docs/telas/02-modal-criar-plano.md)
- * Abre por cima da tela de origem. Ao continuar, chama aoCriar(plano).
+ * Abre por cima da tela de origem. Só identifica o plano: informações gerais (Safra, Empresa, Atividade, Cultura)
+ * e uma ou mais fazendas, cada uma com os talhões incluídos. Cria um plano por fazenda.
+ * Ao criar, chama aoCriar({ safra, empresa, atividade, cultura, fazendas: [{ fazenda, talhoes }] }).
+ * Como começar o plano (modelo, do zero, XLSX, copiar) fica no Planejamento (Telas.inicioPlano).
  */
 window.Telas = window.Telas || {};
 
 window.Telas.abrirModalCriarPlano = function ({ aoCriar }) {
-  const INICIOS = [
-    { valor: 'modelo',   titulo: 'Usar modelo',     icone: Icones.lista,
-      texto: 'Use uma estrutura pronta de operações e ajuste conforme necessário.' },
-    { valor: 'importar', titulo: 'Importar XLSX',   icone: Icones.planilha,
-      texto: 'Continue um plano exportado por este sistema (.xlsx).' },
-    { valor: 'clonar',   titulo: 'Clonar safra anterior', icone: Icones.copiar, emBreve: true,
-      texto: 'Utilize o plano de uma safra anterior como base para o novo planejamento.' }
-  ];
+  const esc = Util.escapar;
+  const NOVA_SAFRA = '__nova-safra__';
+  const GERAIS = ['safra', 'empresa', 'atividade', 'cultura'];
+
+  // Blocos de fazenda: { chave, fazenda, talhoes (nomes incluídos) }
+  let proximaChave = 1;
+  const blocos = [novoBloco()];
+  let tentouCriar = false;      // os avisos de obrigatório só aparecem depois de tentar criar
+  let talhoesAbertos = null;    // chave do bloco com a lista de talhões aberta
+
+  function novoBloco() { return { chave: proximaChave++, fazenda: '', talhoes: [] }; }
 
   const modal = Modal.abrir(`
     <form class="formulario" novalidate>
       <div class="modal__corpo">
         <button class="modal__fechar" type="button" aria-label="Fechar" data-fechar>${Icones.fechar}</button>
         <h2 class="modal__titulo" id="modal-titulo">Criar Plano de Safra</h2>
-        <p class="modal__subtitulo">Defina o contexto do novo planejamento.</p>
+        <p class="modal__subtitulo">Defina as informações gerais do plano e selecione as fazendas que farão parte da criação.</p>
 
-        <div class="campo">
-          <label class="campo__rotulo" for="cp-safra">Safra ${asterisco()}</label>
-          <select class="campo__controle" id="cp-safra" name="safra" required></select>
-          ${erroObrigatorio('safra')}
-        </div>
-
-        ${campoLista('empresa', 'Empresa', 'Selecione uma empresa', DADOS.empresas)}
-        ${campoLista('fazenda', 'Fazenda', 'Selecione uma fazenda', DADOS.fazendas)}
-        <p class="campo__erro" id="cp-erro-duplicado" role="alert" hidden></p>
-        ${campoLista('cultura', 'Cultura', 'Selecione uma cultura', DADOS.culturas)}
-
-        <fieldset class="inicios">
-          <legend class="inicios__pergunta">Como deseja iniciar o plano?</legend>
-          <div class="inicios__grade">
-            ${INICIOS.map(cardInicio).join('')}
+        <h3 class="cp-secao">Informações gerais</h3>
+        <div class="cp-gerais">
+          <div class="campo">
+            <label class="campo__rotulo" for="cp-safra">Safra ${asterisco()}</label>
+            <select class="campo__controle" id="cp-safra" name="safra" required></select>
+            ${erroObrigatorio('safra')}
           </div>
-        </fieldset>
-
-        <div class="importar" hidden>
-          <label class="campo__rotulo" for="cp-arquivo">Arquivo exportado pelo Plano de Safra (.xlsx) ${asterisco()}</label>
-          <input class="importar__arquivo" id="cp-arquivo" type="file" accept=".xlsx">
-          <p class="erro-campo" id="cp-erro-arquivo" role="alert" hidden></p>
-          <p class="importar__ok" id="cp-arquivo-ok" hidden></p>
-          <div class="importar__diferencas" id="cp-diferencas" role="alert" hidden></div>
+          ${campoLista('empresa', 'Empresa', 'Selecione', DADOS.empresas)}
+          ${campoLista('atividade', 'Atividade', 'Selecione', DADOS.atividades, DADOS.atividadesEmBreve, 'Agricultura')}
+          ${campoLista('cultura', 'Cultura', 'Selecione', DADOS.culturas)}
         </div>
+
+        <h3 class="cp-secao cp-secao--linha">Fazendas</h3>
+        <div class="cp-fazendas" id="cp-fazendas"></div>
+        <button class="botao botao--secundario cp-adicionar" type="button" data-acao="cp-adicionar">${Icones.mais} Adicionar fazenda</button>
       </div>
 
       <div class="modal__rodape">
-        <p class="modal__rodape-erro" id="cp-erro-continuar" role="alert" hidden>
-          Preencha os campos obrigatórios.</p>
+        <p class="modal__rodape-erro" id="cp-erro-criar" role="alert" hidden></p>
         <button class="botao botao--secundario" type="button" data-fechar>Cancelar</button>
-        <button class="botao botao--primario" type="submit" aria-disabled="true">Continuar para as operações</button>
+        <button class="botao botao--primario" type="submit" aria-disabled="true">Criar Plano de Safra</button>
       </div>
     </form>
-  `, { classe: 'modal--formulario' });
+  `, { classe: 'modal--formulario modal--largo' });
 
   const form = modal.elemento.querySelector('form');
   const selectSafra = form.elements.safra;
-  const NOVA_SAFRA = '__nova-safra__';
+  const caixaFazendas = form.querySelector('#cp-fazendas');
+  const botaoCriar = form.querySelector('[type="submit"]');
+  const erroCriar = form.querySelector('#cp-erro-criar');
   let safraAnterior = '';
-  const erroDuplicado = form.querySelector('#cp-erro-duplicado');
-  const botaoContinuar = form.querySelector('[type="submit"]');
-  const erroContinuar = form.querySelector('#cp-erro-continuar');
-  const OBRIGATORIOS = ['safra', 'empresa', 'fazenda', 'cultura'];
-  let tentouContinuar = false;  // os avisos de obrigatório só aparecem depois de tentar continuar
 
   preencherSafras();
+  desenharFazendas();
   selectSafra.focus();
 
-  // ----- Importar XLSX -----
-  // Os campos do modal são conferidos com os do arquivo; se forem diferentes, a pessoa escolhe quais usar.
-  const caixaImportar = form.querySelector('.importar');
-  const inputArquivo = form.querySelector('#cp-arquivo');
-  const erroArquivo = form.querySelector('#cp-erro-arquivo');
-  const okArquivo = form.querySelector('#cp-arquivo-ok');
-  const caixaDiferencas = form.querySelector('#cp-diferencas');
-  const CAMPOS = [['safra', 'Safra'], ['empresa', 'Empresa'], ['fazenda', 'Fazenda'], ['cultura', 'Cultura']];
-  let importado = null;      // arquivo lido: { contexto, germinacao, abas }
-  let manterModal = false;   // a pessoa escolheu "Manter os do modal"
-
-  function importando() { return form.elements.inicio.value === 'importar'; }
-
-  function mostrarImportar() {
-    caixaImportar.hidden = !importando();
-    conferirArquivo();
-  }
-
-  inputArquivo.addEventListener('change', async () => {
-    importado = null; manterModal = false;
-    erroArquivo.hidden = true; okArquivo.hidden = true; caixaDiferencas.hidden = true;
-    const arquivo = inputArquivo.files[0];
-    if (!arquivo) return;
-    const lido = await ArquivoPlano.ler(arquivo);
-    if (lido.erro) { erroArquivo.textContent = lido.erro; erroArquivo.hidden = false; return; }
-    importado = lido;
-    const c = lido.contexto;
-    okArquivo.textContent = `Planejamento da safra ${c.safra} · ${c.empresa} · Fazenda ${c.fazenda} · ${c.cultura}`;
-    okArquivo.hidden = false;
-    // Campos ainda vazios no modal recebem o valor do arquivo
-    CAMPOS.forEach(([campo]) => { if (!form.elements[campo].value) escolher(campo, c[campo]); });
-    conferirArquivo();
+  // ----- Fazendas -----
+  function desenharFazendas() {
+    caixaFazendas.innerHTML = blocos.map(blocoFazenda).join('');
     atualizar();
-  });
-
-  // Coloca o valor na lista (se não existir, entra nela) e escolhe
-  function escolher(campo, valor) {
-    if (!valor) return;
-    const select = form.elements[campo];
-    if (campo === 'safra') {
-      if (!DADOS.safras.includes(valor)) DADOS.safras.push(valor);
-      preencherSafras(valor);
-      return;
-    }
-    if (![...select.options].some((o) => o.value === valor)) select.add(new Option(valor, valor));
-    select.value = valor;
   }
 
-  function diferencas() {
-    if (!importado || !importando()) return [];
-    return CAMPOS.filter(([campo]) => form.elements[campo].value && form.elements[campo].value !== importado.contexto[campo]);
+  function blocoFazenda(b, i) {
+    const todos = DADOS.talhoes[b.fazenda] || [];
+    const incluidos = todos.filter((t) => b.talhoes.includes(t.nome));
+    const area = incluidos.reduce((s, t) => s + t.area, 0);
+    const resumo = !b.fazenda ? 'Escolha a fazenda'
+      : !incluidos.length ? 'Selecionar talhões'
+      : incluidos.length === todos.length ? `Todos os talhões (${todos.length})`
+      : `${incluidos.length} de ${todos.length} talhões`;
+    const aberto = talhoesAbertos === b.chave;
+    return `
+      <section class="cp-fazenda" data-bloco="${b.chave}" aria-label="Fazenda ${i + 1}">
+        <header class="cp-fazenda__topo">
+          <span>Fazenda ${i + 1}</span>
+          ${blocos.length > 1 ? `<button class="botao-icone" type="button" data-acao="cp-remover" title="Remover esta fazenda"
+                                        aria-label="Remover Fazenda ${i + 1}">${Icones.lixeira}</button>` : ''}
+        </header>
+        <div class="cp-fazenda__campos">
+          <div class="campo">
+            <label class="campo__rotulo" for="cp-fazenda-${b.chave}">Fazenda ${asterisco()}</label>
+            <select class="campo__controle" id="cp-fazenda-${b.chave}" data-campo="fazenda">
+              ${opcoes('Selecione', DADOS.fazendas, b.fazenda)}
+            </select>
+            <p class="erro-campo" data-erro-fazenda hidden></p>
+          </div>
+          <div class="campo cp-talhoes">
+            <span class="campo__rotulo" id="cp-talhoes-rot-${b.chave}">Talhões (opcional)</span>
+            <button class="campo__controle cp-talhoes__botao" type="button" data-acao="cp-talhoes"
+                    aria-haspopup="true" aria-expanded="${aberto}" aria-labelledby="cp-talhoes-rot-${b.chave}"
+                    ${b.fazenda ? '' : 'disabled'}><span>${resumo}</span>${Icones.abaixo}</button>
+            ${aberto ? listaTalhoes(b, todos) : ''}
+          </div>
+          <div class="campo">
+            <span class="campo__rotulo">Área de cultivo</span>
+            <p class="campo__controle cp-area" aria-live="polite">${incluidos.length ? Util.area(area) : 'Pendente'}</p>
+          </div>
+        </div>
+        ${b.fazenda && !incluidos.length ? `<p class="cp-fazenda__dica">${Icones.info} A área de cultivo será calculada automaticamente quando houver talhões selecionados.</p>` : ''}
+      </section>`;
   }
 
-  function conferirArquivo() {
-    const lista = manterModal ? [] : diferencas();
-    caixaDiferencas.hidden = !lista.length;
-    if (!lista.length) { caixaDiferencas.innerHTML = ''; return; }
-    const fora = form.elements.fazenda.value ? ArquivoPlano.talhoesFora(importado, form.elements.fazenda.value) : [];
-    const esc = Util.escapar;
-    caixaDiferencas.innerHTML = `
-      <p class="importar__titulo">${Icones.alerta} O arquivo é de outro plano</p>
-      <ul class="importar__lista">
-        ${lista.map(([campo, rotulo]) => `<li>${rotulo}: no modal <strong>${esc(form.elements[campo].value)}</strong> · no arquivo <strong>${esc(importado.contexto[campo])}</strong></li>`).join('')}
-      </ul>
-      ${fora.length ? `<p class="importar__aviso">Mantendo os do modal, ${fora.length} ${fora.length === 1 ? 'talhão do arquivo não existe' : 'talhões do arquivo não existem'} na Fazenda ${esc(form.elements.fazenda.value)} e ${fora.length === 1 ? 'fica' : 'ficam'} de fora (${fora.map(esc).join(', ')}).</p>` : ''}
-      <div class="importar__botoes">
-        <button class="botao botao--secundario botao--p" type="button" data-acao="usar-arquivo">Usar os do arquivo</button>
-        <button class="botao botao--secundario botao--p" type="button" data-acao="manter-modal">Manter os do modal</button>
+  // Lista de talhões com caixas de marcar; "Todos" marca ou desmarca tudo
+  function listaTalhoes(b, todos) {
+    const tudo = todos.length && todos.every((t) => b.talhoes.includes(t.nome));
+    return `
+      <div class="cp-talhoes__lista" role="group" aria-label="Talhões da Fazenda ${esc(b.fazenda)}">
+        <label class="cp-talhoes__item cp-talhoes__item--todos">
+          <input type="checkbox" data-talhao="__todos__" ${tudo ? 'checked' : ''}> Todos
+        </label>
+        ${todos.map((t) => `
+          <label class="cp-talhoes__item">
+            <input type="checkbox" data-talhao="${esc(t.nome)}" ${b.talhoes.includes(t.nome) ? 'checked' : ''}>
+            ${esc(t.nome)} <span class="cp-talhoes__area">${Util.area(t.area)}</span>
+          </label>`).join('')}
       </div>`;
+  }
+
+  function blocoDe(el) {
+    const sec = el.closest('[data-bloco]');
+    return sec ? blocos.find((b) => b.chave === Number(sec.dataset.bloco)) : null;
+  }
+
+  // Redesenha as fazendas e devolve o foco ao controle equivalente
+  function redesenhar(chave, seletor) {
+    desenharFazendas();
+    caixaFazendas.querySelector(`[data-bloco="${chave}"] ${seletor}`)?.focus();
   }
 
   form.addEventListener('click', (e) => {
     const acao = e.target.closest('[data-acao]')?.dataset.acao;
-    if (acao === 'usar-arquivo') {
-      CAMPOS.forEach(([campo]) => escolher(campo, importado.contexto[campo]));
-      conferirArquivo(); atualizar();
+    const b = blocoDe(e.target);
+    if (acao === 'cp-adicionar') {
+      const novo = novoBloco();
+      blocos.push(novo);
+      talhoesAbertos = null;
+      redesenhar(novo.chave, '[data-campo="fazenda"]');
+    } else if (acao === 'cp-remover') {
+      blocos.splice(blocos.indexOf(b), 1);
+      talhoesAbertos = null;
+      desenharFazendas();
+      form.querySelector('[data-acao="cp-adicionar"]').focus();
+    } else if (acao === 'cp-talhoes') {
+      talhoesAbertos = talhoesAbertos === b.chave ? null : b.chave;
+      redesenhar(b.chave, talhoesAbertos ? '.cp-talhoes__lista input' : '[data-acao="cp-talhoes"]');
     }
-    if (acao === 'manter-modal') { manterModal = true; conferirArquivo(); atualizar(); }
+  });
+
+  // Clicar fora da lista de talhões fecha a lista
+  modal.elemento.addEventListener('mousedown', (e) => {
+    if (talhoesAbertos && !e.target.closest('.cp-talhoes')) { talhoesAbertos = null; desenharFazendas(); }
+  });
+  // Esc na lista de talhões fecha só a lista (não o modal)
+  form.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && talhoesAbertos && e.target.closest('.cp-talhoes')) {
+      e.stopPropagation();
+      const chave = talhoesAbertos;
+      talhoesAbertos = null;
+      redesenhar(chave, '[data-acao="cp-talhoes"]');
+    }
+  });
+
+  form.addEventListener('change', (e) => {
+    const b = blocoDe(e.target);
+    if (b && e.target.dataset.campo === 'fazenda') {
+      // Fazenda escolhida: todos os talhões já vêm incluídos (a pessoa desmarca os que não quer)
+      b.fazenda = e.target.value;
+      b.talhoes = (DADOS.talhoes[b.fazenda] || []).map((t) => t.nome);
+      redesenhar(b.chave, '[data-campo="fazenda"]');
+      return;
+    }
+    if (b && e.target.dataset.talhao) {
+      const todos = (DADOS.talhoes[b.fazenda] || []).map((t) => t.nome);
+      const nome = e.target.dataset.talhao;
+      if (nome === '__todos__') b.talhoes = e.target.checked ? todos : [];
+      else b.talhoes = e.target.checked ? todos.filter((t) => t === nome || b.talhoes.includes(t)) : b.talhoes.filter((t) => t !== nome);
+      redesenhar(b.chave, `[data-talhao="${CSS.escape(nome)}"]`);
+      return;
+    }
+    atualizar();
   });
 
   // ----- Criar nova safra (última opção da lista de safras) -----
   function preencherSafras(selecionada = '') {
-    selectSafra.innerHTML = opcoes('Selecione uma safra', DADOS.safras, selecionada) +
+    selectSafra.innerHTML = opcoes('Selecione', DADOS.safras, selecionada) +
       `<option value="${NOVA_SAFRA}">+ Criar nova safra</option>`;
     safraAnterior = selecionada;
   }
@@ -212,87 +251,78 @@ window.Telas.abrirModalCriarPlano = function ({ aoCriar }) {
     input.focus();
   }
 
-  // ----- Validação: quatro campos preenchidos e um plano por safra e fazenda -----
-  function valores() {
+  // ----- Validação -----
+  // Informações gerais e a fazenda de cada bloco são obrigatórias; talhões, não.
+  // Um único plano por safra e fazenda: não pode repetir fazenda entre os blocos nem criar um plano que já existe.
+  function problemas() {
     const f = form.elements;
-    return {
-      safra: f.safra.value,
-      empresa: f.empresa.value,
-      fazenda: f.fazenda.value,
-      cultura: f.cultura.value,
-      inicio: f.inicio.value
-    };
+    const faltando = GERAIS.filter((nome) => !f[nome].value);
+    const porBloco = blocos.map((b, i) => {
+      if (!b.fazenda) return 'Preenchimento obrigatório';
+      if (blocos.findIndex((x) => x.fazenda === b.fazenda) < i) return `A Fazenda ${b.fazenda} já está em outro bloco.`;
+      if (f.safra.value && DADOS.planos.some((p) => p.safra === f.safra.value && p.fazenda === b.fazenda)) {
+        return `Já existe um plano da safra ${f.safra.value} para a Fazenda ${b.fazenda}.`;
+      }
+      return '';
+    });
+    return { faltando, porBloco };
   }
 
   function atualizar() {
-    const v = valores();
-    const duplicado = v.safra && v.fazenda &&
-      DADOS.planos.some((p) => p.safra === v.safra && p.fazenda === v.fazenda);
-
-    erroDuplicado.hidden = !duplicado;
-    erroDuplicado.textContent = duplicado
-      ? `Já existe um plano da safra ${v.safra} para a fazenda ${v.fazenda}.` // textContent: não precisa escapar
-      : '';
-    form.elements.fazenda.classList.toggle('campo__controle--erro', !!duplicado);
-
-    const faltando = OBRIGATORIOS.filter((nome) => !v[nome]);
+    const { faltando, porBloco } = problemas();
+    const bloqueado = faltando.length || porBloco.some(Boolean);
     // O botão parece desabilitado, mas continua clicável para explicar o que falta
-    botaoContinuar.setAttribute('aria-disabled', faltando.length || duplicado ? 'true' : 'false');
-    mostrarObrigatorios(tentouContinuar ? faltando : []);
-    return { faltando, duplicado };
-  }
-
-  // "Preenchimento obrigatório" abaixo de cada campo vazio e a mensagem ao lado dos botões
-  function mostrarObrigatorios(faltando) {
-    OBRIGATORIOS.forEach((nome) => {
-      const vazio = faltando.includes(nome);
+    botaoCriar.setAttribute('aria-disabled', bloqueado ? 'true' : 'false');
+    GERAIS.forEach((nome) => {
+      const vazio = tentouCriar && faltando.includes(nome);
       form.querySelector(`#cp-erro-${nome}`).hidden = !vazio;
       form.elements[nome].toggleAttribute('aria-invalid', vazio);
     });
-    erroContinuar.hidden = !faltando.length;
+    caixaFazendas.querySelectorAll('[data-bloco]').forEach((sec, i) => {
+      const msg = porBloco[i];
+      // Fazenda vazia só é cobrada depois de tentar criar; fazenda repetida ou plano existente, na hora
+      const mostrar = msg && (tentouCriar || msg !== 'Preenchimento obrigatório');
+      const erro = sec.querySelector('[data-erro-fazenda]');
+      erro.textContent = mostrar ? msg : ''; // textContent: não precisa escapar
+      erro.hidden = !mostrar;
+      sec.querySelector('[data-campo="fazenda"]').classList.toggle('campo__controle--erro', !!mostrar && msg !== 'Preenchimento obrigatório');
+    });
+    erroCriar.hidden = !(tentouCriar && bloqueado);
+    erroCriar.textContent = faltando.length || porBloco.includes('Preenchimento obrigatório')
+      ? 'Preencha os campos obrigatórios.' : 'Confira as fazendas.';
+    return { faltando, porBloco };
   }
 
-  form.addEventListener('change', (e) => {
-    if (e.target.name === 'inicio') mostrarImportar();
-    else if (e.target !== inputArquivo) { manterModal = false; conferirArquivo(); }
-    atualizar();
-  });
-
-  // ----- Continuar para as operações -----
+  // ----- Criar Plano de Safra -----
   form.addEventListener('submit', (e) => {
     e.preventDefault();
-    tentouContinuar = true;
-    const { faltando, duplicado } = atualizar();
+    tentouCriar = true;
+    const { faltando, porBloco } = atualizar();
     if (faltando.length) { form.elements[faltando[0]].focus(); return; }
-    if (duplicado) { form.elements.fazenda.focus(); return; }
-    if (importando()) {
-      // Importar: precisa do arquivo lido e, se houver diferença, da escolha da pessoa
-      if (!importado) {
-        if (erroArquivo.hidden) { erroArquivo.textContent = 'Escolha o arquivo exportado pelo Plano de Safra.'; erroArquivo.hidden = false; }
-        inputArquivo.focus(); return;
-      }
-      if (!caixaDiferencas.hidden) { caixaDiferencas.querySelector('button').focus(); return; }
-    }
-    const v = valores();
+    const i = porBloco.findIndex(Boolean);
+    if (i >= 0) { caixaFazendas.querySelectorAll('[data-campo="fazenda"]')[i].focus(); return; }
+    const f = form.elements;
     modal.fechar();
     aoCriar({
-      safra: v.safra,
-      empresa: v.empresa,
-      fazenda: v.fazenda,
-      cultura: v.cultura,
-      inicio: v.inicio,
-      ...(importando() ? { importado } : {})
+      safra: f.safra.value,
+      empresa: f.empresa.value,
+      atividade: f.atividade.value,
+      cultura: f.cultura.value,
+      fazendas: blocos.map((b) => ({ fazenda: b.fazenda, talhoes: [...b.talhoes] }))
     });
   });
 
   // ----- Pedaços de HTML -----
-  // Com uma opção só (ex.: cultura, por enquanto só Soja), ela já vem escolhida
-  function campoLista(nome, rotulo, textoVazio, itens) {
+  // Com uma opção só (ex.: cultura, por enquanto só Soja), ela já vem escolhida.
+  // emBreve: opções que aparecem desabilitadas, com "(Em breve)".
+  function campoLista(nome, rotulo, textoVazio, itens, emBreve = [], padrao = '') {
+    const disponiveis = itens.filter((x) => !emBreve.includes(x));
+    const escolhido = padrao || (disponiveis.length === 1 ? disponiveis[0] : '');
     return `
       <div class="campo">
         <label class="campo__rotulo" for="cp-${nome}">${rotulo} ${asterisco()}</label>
         <select class="campo__controle" id="cp-${nome}" name="${nome}" required>
-          ${opcoes(textoVazio, itens, itens.length === 1 ? itens[0] : '')}
+          ${opcoes(textoVazio, itens, escolhido, emBreve)}
         </select>
         ${erroObrigatorio(nome)}
       </div>
@@ -307,26 +337,10 @@ window.Telas.abrirModalCriarPlano = function ({ aoCriar }) {
     return `<p class="erro-campo" id="cp-erro-${nome}" hidden>Preenchimento obrigatório</p>`;
   }
 
-  function opcoes(textoVazio, itens, selecionado = '') {
+  function opcoes(textoVazio, itens, selecionado = '', emBreve = []) {
     return `<option value="" disabled ${selecionado ? '' : 'selected'}>${textoVazio}</option>` +
-      itens.map((item) =>
-        `<option value="${Util.escapar(item)}" ${item === selecionado ? 'selected' : ''}>${Util.escapar(item)}</option>`).join('');
-  }
-
-  function cardInicio(c) {
-    return `
-      <label class="card-inicio ${c.emBreve ? 'card-inicio--desabilitado' : ''}">
-        <input class="card-inicio__radio" type="radio" name="inicio" value="${c.valor}"
-               ${c.valor === 'modelo' ? 'checked' : ''} ${c.emBreve ? 'disabled' : ''}>
-        <span class="card-inicio__icone">${c.icone}</span>
-        <span class="card-inicio__textos">
-          <span class="card-inicio__titulo">
-            ${c.titulo}
-            ${c.emBreve ? '<span class="selo">Em breve</span>' : ''}
-          </span>
-          <span class="card-inicio__texto">${c.texto}</span>
-        </span>
-      </label>
-    `;
+      itens.map((item) => emBreve.includes(item)
+        ? `<option value="${esc(item)}" disabled>${esc(item)} (Em breve)</option>`
+        : `<option value="${esc(item)}" ${item === selecionado ? 'selected' : ''}>${esc(item)}</option>`).join('');
   }
 };

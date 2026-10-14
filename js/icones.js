@@ -6,6 +6,7 @@ window.Icones = (function () {
     `<svg class="icone" viewBox="0 0 24 24" aria-hidden="true">${conteudo}</svg>`;
 
   return {
+    limpar: svg('<path d="M20 11a8 8 0 0 0-14.9-4M4 4v4h4"/><path d="M4 13a8 8 0 0 0 14.9 4M20 20v-4h-4"/>'),
     fechar: svg('<path d="M6 6l12 12M18 6L6 18"/>'),
     mais:   svg('<path d="M12 5v14M5 12h14"/>'),
     lista:  svg('<rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 9h1M12 9h4M8 12h1M12 12h4M8 15h1M12 15h4"/>'),
