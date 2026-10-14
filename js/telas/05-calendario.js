@@ -1,8 +1,8 @@
 /*
  * Tela 05 — Calendário Agrícola (docs/telas/05-calendario-agricola.md)
  * Etapa do plano que junta todos os grupos (Semente, Defensivo, Fertilidade…) em ordem de DAP.
- * Duas visões: Infográfico (uma coluna por fase da cultura) e Tabela (uma linha por operação,
- * uma coluna por produto). Filtro por talhão. Na Tabela se informa o prazo para encerramento da OS.
+ * Na aba Resumo do plano. Três visões: Programação (uma linha por operação, uma coluna por talhão),
+ * Ciclo Produtivo (uma coluna por fase da cultura) e Calendário (mês, semana ou dia). Filtros por grupo e talhão.
  * Desenhada dentro da Tela 04 (mesmo cabeçalho do plano); a Tela 04 repassa os eventos para cá.
  */
 window.Telas = window.Telas || {};
@@ -181,10 +181,21 @@ window.Telas.calendario = (function () {
         <div class="estrutura__aviso calendario__vazio" role="note">${Icones.info}
           <p><strong>Nenhuma operação planejada ainda.</strong> As operações planejadas aparecem aqui com datas e doses por talhão.</p>
         </div>`;
-    // O calendário ocupa a área logo abaixo das abas: filtros e Infográfico/Tabela na barra; previsões em texto embaixo
+    // O Resumo ocupa a área logo abaixo das abas. Em cima, as visões em guias (Programação · Ciclo Produtivo · Calendário)
+    // e, no Calendário, Mês/Semana/Dia e o período. Embaixo, os filtros (no Calendário, a legenda filtra os grupos).
+    const noCalendario = estado.visao === 'calendario' && planejados.length;
     return `
       <section class="calendario">
         <div class="calendario__barra">
+          <div class="resumo-guias" role="tablist" aria-label="Visão do Resumo">
+            ${[['tabela', Icones.lista, 'Programação'], ['infografico', Icones.grafico, 'Ciclo Produtivo'], ['calendario', Icones.calendario, 'Calendário']].map(([v, icone, rotulo]) => `
+              <button class="resumo-guias__guia ${estado.visao === v ? 'resumo-guias__guia--ativa' : ''}" type="button" role="tab" data-acao="cal-visao"
+                      data-visao="${v}" aria-selected="${estado.visao === v}">${icone}${rotulo}</button>`).join('')}
+          </div>
+          ${noCalendario ? navCalendario(estado) : ''}
+        </div>
+        <div class="calendario__corpo ${noCalendario ? 'calendario__corpo--cal' : ''}">
+        ${noCalendario || !planejados.length ? '' : `
           <div class="calendario__filtros">
             <div class="calendario__filtro">
               <span class="calendario__filtro-rotulo">Grupo de operação</span>
@@ -194,20 +205,14 @@ window.Telas.calendario = (function () {
               <span class="calendario__filtro-rotulo">Talhão</span>
               ${filtroCaixa(estado, 'talhao', opcoesTalhao(talhoes), ['Todos os talhões', 'Nenhum talhão', 'talhões'], 'Talhões')}
             </div>
-          </div>
-          <div class="visoes calendario__visoes" role="group" aria-label="Visão do calendário">
-            ${[['tabela', Icones.lista, 'Tabela'], ['infografico', Icones.grafico, 'Infográfico']].map(([v, icone, rotulo]) => `
-              <button class="visoes__botao ${estado.visao === v ? 'visoes__botao--ativo' : ''}" type="button" data-acao="cal-visao"
-                      data-visao="${v}" aria-pressed="${estado.visao === v}">${icone}${rotulo}</button>`).join('')}
-          </div>
+          </div>`}
+        ${!planejados.length ? vazio : estado.visao === 'tabela' ? tabela(ctx, lista)
+          : estado.visao === 'calendario' ? calendarioMes(ctx, lista) : infografico(ctx, lista)}
         </div>
-        ${resumo(ctx)}
-        ${!planejados.length ? vazio : estado.visao === 'tabela' ? tabela(ctx, lista) : infografico(ctx, lista)}
       </section>`;
   }
 
-  // ----- Cards de resumo (topo do Infográfico e da Tabela) -----
-  // Previsão de plantio e de colheita, dos talhões com plantio definido (variedade e data)
+  // ----- Datas -----
   const MESES_CURTOS = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
   function partes(iso) { const [a, m, d] = iso.split('-').map(Number); return { a, m, d }; }
   function somaDias(iso, n) {
@@ -232,23 +237,6 @@ window.Telas.calendario = (function () {
   function previsaoColheita(p) {
     const v = p && p.variedade ? variedade(p.variedade) : null;
     return p && p.data && v && v.ciclo ? somaDias(p.data, v.ciclo) : null;
-  }
-
-  function resumo(ctx) {
-    const { plano, talhoes } = ctx;
-    const op = plantioDo(plano);
-    const pl = (op && op.plantio) || {};
-    const comPlantio = talhoes.filter((t) => pl[t.nome] && pl[t.nome].variedade && pl[t.nome].data);
-    const datas = comPlantio.map((t) => pl[t.nome].data);
-    const colheitas = comPlantio.map((t) => previsaoColheita(pl[t.nome])).filter(Boolean);
-    const item = (rotulo, valor, dica) => `
-      <span class="previsoes__item"><strong>${rotulo}:</strong> ${valor ? `<span class="previsoes__data">${valor}</span>` : `<span class="previsoes__data">—</span> <span class="previsoes__dica">(${dica})</span>`}</span>`;
-    return `
-      <p class="previsoes" aria-label="Previsões do plano">${Icones.calendario}
-        ${item('Plantio estimado', datas.length ? intervalo(datas) : '', 'defina o plantio na guia Semente')}
-        <span class="previsoes__ponto" aria-hidden="true">·</span>
-        ${item('Colheita estimada', colheitas.length ? intervalo(colheitas) : '', datas.length ? 'variedade sem ciclo' : 'defina o plantio na guia Semente')}
-      </p>`;
   }
 
   function etiqueta(grupo) {
@@ -468,6 +456,264 @@ window.Telas.calendario = (function () {
     const v = estado[chave];
     return v === undefined || v === 'todos' || (Array.isArray(v) && v.includes(valor));
   }
+  // ----- Calendário (terceira visão do Resumo): Mês · Semana · Dia -----
+  // Cada operação entra no dia em que começa em cada talhão (data de plantio + DAP; Plantio: a data de plantio;
+  // Colheita: plantio + ciclo da variedade), juntando os talhões que começam no mesmo dia. Vai até o fim da
+  // previsão de conclusão (início + dias − 1). Talhão sem data de plantio: a operação não tem data e não aparece.
+  const MESES = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+  const DIAS_SEMANA = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
+  const DIAS_CURTOS = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
+  const isoDe = (dt) => `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
+  const dataDe = (iso) => { const { a, m, d } = partes(iso); return new Date(a, m - 1, d); };
+  const hojeIso = () => isoDe(new Date());
+
+  function eventos(ctx, lista) {
+    const pl = (plantioDo(ctx.plano) || {}).plantio || {};
+    const area = (nomes) => ctx.talhoes.filter((t) => nomes.includes(t.nome)).reduce((s, t) => s + t.area, 0);
+    const saida = [];
+    lista.forEach((it) => {
+      const porDia = new Map();
+      it.talhoes.forEach((t) => {
+        const p = pl[t];
+        let inicio = null;
+        if (it.colheita) inicio = previsaoColheita(p);
+        else if (p && p.data && it.dap !== null && it.dap !== undefined && it.dap !== '') inicio = somaDias(p.data, Number(it.dap));
+        if (!inicio) return;
+        if (!porDia.has(inicio)) porDia.set(inicio, []);
+        porDia.get(inicio).push(t);
+      });
+      porDia.forEach((talhoes, inicio) => {
+        saida.push({ it, inicio, fim: somaDias(inicio, Math.max(1, it.prazo || 1) - 1), talhoes, area: area(talhoes),
+          nome: it.colheita ? 'Colheita' : it.op.nome || 'Sem operação', tipo: Util.normalizar(it.grupo.tipo || 'outro').replace(/\s+/g, '-') });
+      });
+    });
+    return saida.sort((a, b) => a.inicio.localeCompare(b.inicio) || lista.indexOf(a.it) - lista.indexOf(b.it));
+  }
+
+  // Período mostrado: o mês, a semana (domingo a sábado) ou o dia da data de referência
+  function periodo(escala, ref) {
+    const d = dataDe(ref);
+    if (escala === 'dia') return { de: ref, ate: ref };
+    if (escala === 'semana') { const ini = new Date(d.getFullYear(), d.getMonth(), d.getDate() - d.getDay()); return { de: isoDe(ini), ate: somaDias(isoDe(ini), 6) }; }
+    return { de: isoDe(new Date(d.getFullYear(), d.getMonth(), 1)), ate: isoDe(new Date(d.getFullYear(), d.getMonth() + 1, 0)) };
+  }
+
+  function tituloPeriodo(escala, ref) {
+    const d = dataDe(ref);
+    if (escala === 'dia') return `${d.getDate()} de ${MESES[d.getMonth()]} de ${d.getFullYear()}`;
+    if (escala === 'semana') {
+      const { de, ate } = periodo('semana', ref);
+      const a = dataDe(de); const b = dataDe(ate);
+      const mesA = MESES_CURTOS[a.getMonth()]; const mesB = MESES_CURTOS[b.getMonth()];
+      return a.getMonth() === b.getMonth() ? `${a.getDate()} – ${b.getDate()} ${mesB} ${b.getFullYear()}`
+        : `${a.getDate()} ${mesA} – ${b.getDate()} ${mesB} ${b.getFullYear()}`;
+    }
+    const mes = MESES[d.getMonth()];
+    return `${mes[0].toUpperCase()}${mes.slice(1)} de ${d.getFullYear()}`;
+  }
+
+  // "05 – 09 out 2026"; um dia só: "06 out 2026"
+  function faixaDias(ev) {
+    const a = dataDe(ev.inicio); const b = dataDe(ev.fim);
+    const dd = (x) => String(x.getDate()).padStart(2, '0');
+    if (ev.inicio === ev.fim) return `${dd(a)} ${MESES_CURTOS[a.getMonth()]} ${a.getFullYear()}`;
+    return a.getMonth() === b.getMonth() ? `${dd(a)} – ${dd(b)} ${MESES_CURTOS[b.getMonth()]} ${b.getFullYear()}`
+      : `${dd(a)} ${MESES_CURTOS[a.getMonth()]} – ${dd(b)} ${MESES_CURTOS[b.getMonth()]} ${b.getFullYear()}`;
+  }
+
+  const plural = (n, um, varios) => `${n} ${n === 1 ? um : varios}`;
+
+  // ----- Grade do mês e da semana: em cada dia, uma etiqueta por operação em andamento nele (do início ao fim da
+  // previsão de conclusão), sem emendar os dias. Cabem quantas a altura do dia permitir; o resto vira "+N mais".
+  // Mês: etiquetas finas, só com o nome. Semana: etiquetas maiores (nome em até 2 linhas e a área).
+  function semana(dias, evs, { de, ate, mes, aberto, limite }) {
+    return `
+      <div class="cal-semana">
+        ${dias.map((iso) => {
+          const fora = !!mes && (iso < de || iso > ate);
+          const hoje = iso === hojeIso();
+          const lista = doDia(evs, iso);
+          const cabem = lista.length > limite ? Math.max(1, limite - 1) : lista.length; // com "+N mais", ele ocupa um lugar
+          return `
+            <div class="cal-dia ${fora ? 'cal-dia--fora' : ''} ${hoje ? 'cal-dia--hoje' : ''} ${iso === aberto ? 'cal-dia--aberto' : ''}"
+                 data-acao="cal-dia" data-dia="${iso}" role="gridcell" aria-label="${esc(tituloPeriodo('dia', iso))}${hoje ? ' (hoje)' : ''}">
+              <span class="cal-dia__topo"><span class="cal-dia__num">${dataDe(iso).getDate()}</span>${hoje ? '<span class="cal-hoje">Hoje</span>' : ''}</span>
+              ${lista.slice(0, cabem).map((ev) => `
+                <button class="cal-ev cal-ev--${ev.tipo}" type="button" data-acao="cal-dia" data-dia="${iso}"
+                        title="${esc(`${ev.nome} · ${faixaDias(ev)} · ${Util.area(ev.area)} · ${plural(ev.talhoes.length, 'talhão', 'talhões')}`)}">
+                  <span class="cal-ev__nome"><span class="cal-ponto cal-ponto--${ev.tipo}"></span><span class="cal-ev__texto">${esc(ev.nome)}</span></span>
+                  <span class="cal-ev__area">${Util.area(ev.area)}</span>
+                </button>`).join('')}
+              ${lista.length > cabem ? `<button class="cal-dia__mais" type="button" data-acao="cal-dia" data-dia="${iso}">+${lista.length - cabem} mais</button>` : ''}
+            </div>`;
+        }).join('')}
+      </div>`;
+  }
+
+  // Quantas etiquetas cabem em cada dia, pela altura livre da grade na tela (medida na grade já desenhada; na
+  // primeira vez, estimada pela altura da janela). Mês: etiqueta de 18 px; semana: 54 px. Mínimo de 2.
+  function etiquetasQueCabem(semanas, alturaEtiqueta) {
+    const grade = document.querySelector('.cal-grade');
+    const altura = (grade ? grade.clientHeight : window.innerHeight - 200) - 26;
+    return Math.max(2, Math.floor((altura / semanas - 30) / alturaEtiqueta));
+  }
+
+  // Operações em andamento no dia (do início ao fim da previsão de conclusão). A mesma operação em talhões que
+  // começam em dias diferentes aparece uma vez só no dia, somando a área e os talhões.
+  function doDia(evs, iso) {
+    const porOp = new Map();
+    evs.filter((ev) => ev.inicio <= iso && iso <= ev.fim).forEach((ev) => {
+      const j = porOp.get(ev.it);
+      if (!j) { porOp.set(ev.it, { ...ev, talhoes: [...ev.talhoes] }); return; }
+      j.talhoes.push(...ev.talhoes); j.area += ev.area;
+      if (ev.inicio < j.inicio) j.inicio = ev.inicio;
+      if (ev.fim > j.fim) j.fim = ev.fim;
+    });
+    return [...porOp.values()];
+  }
+
+  // Operações do dia: só o nome, a área e os talhões (sem os detalhes da operação)
+  function listaDia(evs, iso) {
+    const lista = doDia(evs, iso);
+    return `
+      <h3 class="cal-painel__subtitulo">Operações do dia (${lista.length})</h3>
+      ${lista.length ? `<ul class="cal-lista">${lista.map((ev) => `
+        <li class="cal-lista__item" title="${esc(`${faixaDias(ev)} · ${ev.talhoes.join(', ')}`)}">
+          <span class="cal-ponto cal-ponto--${ev.tipo}"></span>
+          <span><strong class="cal-lista__nome">${esc(ev.nome)}</strong>
+            <span class="cal-lista__info">${Util.area(ev.area)} · ${plural(ev.talhoes.length, 'talhão', 'talhões')}</span></span>
+        </li>`).join('')}</ul>` : '<p class="cal-painel__vazio">Nenhuma operação neste dia.</p>'}`;
+  }
+
+  function painelDia(evs, iso) {
+    const d = dataDe(iso);
+    return `
+      <aside class="cal-painel" aria-label="Operações de ${esc(tituloPeriodo('dia', iso))}">
+        <header class="cal-painel__cab">
+          <div><h2 class="cal-painel__titulo">${tituloPeriodo('dia', iso)}</h2><p class="cal-painel__semana">${DIAS_SEMANA[d.getDay()]}${iso === hojeIso() ? ' · Hoje' : ''}</p></div>
+          <button class="botao-icone" type="button" data-acao="cal-dia-fechar" aria-label="Fechar" title="Fechar">${Icones.fechar}</button>
+        </header>
+        ${listaDia(evs, iso)}
+      </aside>`;
+  }
+
+  function calendarioMes(ctx, lista) {
+    const est = ctx.estado;
+    const escala = est.escala || 'mes';
+    const ref = est.dataRef || hojeIso();
+    const todos = eventos(ctx, lista);
+    const { de, ate } = periodo(escala, ref);
+    const doPeriodo = todos.filter((ev) => ev.inicio >= de && ev.inicio <= ate);
+    const semData = lista.filter((it) => !todos.some((ev) => ev.it === it)).length;
+    const aberto = escala === 'dia' ? '' : est.diaAberto || '';
+    let corpo;
+    if (escala === 'dia') {
+      const d = dataDe(ref);
+      corpo = `
+        <div class="cal-dia-unico ${ref === hojeIso() ? 'cal-dia--hoje' : ''}">
+          <p class="cal-painel__semana">${DIAS_SEMANA[d.getDay()]}${ref === hojeIso() ? ' <span class="cal-hoje">Hoje</span>' : ''}</p>
+          ${listaDia(todos, ref)}
+        </div>`;
+    } else {
+      const ini = periodo('semana', de).de;
+      const fim = periodo('semana', ate).ate;
+      const dias = [];
+      for (let x = ini; x <= fim; x = somaDias(x, 1)) dias.push(x);
+      corpo = `
+        <div class="cal-grade ${escala === 'semana' ? 'cal-grade--semana' : 'cal-grade--mes'}" role="grid" style="--semanas: ${dias.length / 7}">
+          <div class="cal-grade__cabs">${DIAS_CURTOS.map((n) => `<div class="cal-grade__cab" role="columnheader">${n}</div>`).join('')}</div>
+          ${Array.from({ length: dias.length / 7 }, (_, w) => semana(dias.slice(w * 7, w * 7 + 7), todos,
+            { de, ate, mes: escala === 'mes', aberto, limite: escala === 'mes' ? etiquetasQueCabem(dias.length / 7, 21) : etiquetasQueCabem(1, 58) })).join('')}
+        </div>`;
+    }
+    return `
+      <div class="cal-mes ${aberto ? 'cal-mes--com-painel' : ''}">
+        <div class="cal-mes__principal">
+          <div class="cal-mes__filtros">
+            ${legendaFiltro(ctx)}
+            <div class="calendario__filtro">
+              <span class="calendario__filtro-rotulo">Talhão</span>
+              ${filtroCaixa(est, 'talhao', opcoesTalhao(ctx.talhoes), ['Todos os talhões', 'Nenhum talhão', 'talhões'], 'Talhões')}
+            </div>
+          </div>
+          ${semData ? `<p class="calendario__pendentes">${Icones.info}<span>${plural(semData, 'operação planejada fica', 'operações planejadas ficam')} fora do calendário: sem data de plantio nos talhões dela.</span></p>` : ''}
+          ${corpo}
+          ${rodapeArea(escala, ref, escala === 'dia' ? doDia(todos, ref) : doPeriodo)}
+        </div>
+        ${aberto ? painelDia(todos, aberto) : ''}
+      </div>`;
+  }
+
+  // Rodapé: área operacional do período mostrado (mês, semana ou dia), com os filtros de grupo e talhão.
+  // Mês e semana: as operações que começam no período; dia: as em andamento no dia (as da lista).
+  function rodapeArea(escala, ref, evs) {
+    const area = evs.reduce((s, ev) => s + ev.area, 0);
+    const nome = escala === 'mes' ? tituloPeriodo('mes', ref).toLowerCase() : escala === 'semana' ? `a semana de ${tituloPeriodo('semana', ref)}` : tituloPeriodo('dia', ref);
+    return `
+      <p class="cal-rodape">${Icones.mapa}<span>Área operacional ${escala === 'mes' ? 'em' : escala === 'semana' ? 'n' : 'em'}${escala === 'semana' ? '' : ' '}${esc(nome)}:</span>
+        <strong>${Util.area(area)}</strong><span class="cal-rodape__ops">· ${plural(new Set(evs.map((ev) => ev.it)).size, 'operação', 'operações')}</span></p>`;
+  }
+
+  // À direita da barra (só no Calendário): Hoje · ‹ › · o período (mês, semana ou dia) e a escala numa lista
+  // suspensa (Mês, Semana, Dia; começa em Mês), como nas agendas do Google e do Outlook
+  function navCalendario(est) {
+    const escala = est.escala || 'mes';
+    const ref = est.dataRef || hojeIso();
+    return `
+      <div class="cal-nav">
+        <button class="botao botao--secundario botao--p cal-nav__hoje" type="button" data-acao="cal-hoje" title="Ir para hoje">Hoje</button>
+        <button class="botao-icone cal-nav__seta" type="button" data-acao="cal-nav" data-passo="-1" aria-label="Anterior" title="Anterior">${Icones.anterior}</button>
+        <button class="botao-icone cal-nav__seta" type="button" data-acao="cal-nav" data-passo="1" aria-label="Próximo" title="Próximo">${Icones.proxima}</button>
+        <span class="cal-nav__titulo" aria-live="polite">${tituloPeriodo(escala, ref)}</span>
+        <select class="campo__controle cal-nav__escala" data-campo="cal-escala" aria-label="Escala do calendário">
+          ${[['mes', 'Mês'], ['semana', 'Semana'], ['dia', 'Dia']].map(([v, rot]) => `<option value="${v}" ${escala === v ? 'selected' : ''}>${rot}</option>`).join('')}
+        </select>
+      </div>`;
+  }
+
+  // Legenda que filtra (Calendário): um botão por grupo, com a cor dele. Com todos ligados, clicar num grupo mostra
+  // só ele; depois, cada clique liga ou desliga o grupo; desligar o último volta a todos. Mais de 6 grupos: os
+  // primeiros 5 à vista e os outros em "+ N grupos de operação".
+  const LEGENDA_VISIVEIS = 6;
+  function tipoDoGrupo(plano, valor) {
+    if (valor === 'colheita') return 'colheita';
+    const g = plano.grupos.find((x) => x.id === valor);
+    return Util.normalizar((g && g.tipo) || 'outro').replace(/\s+/g, '-');
+  }
+  function legendaFiltro(ctx) {
+    const { plano, estado } = ctx;
+    const opcoes = opcoesGrupo(plano);
+    const todos = opcoes.every((o) => marcado(estado, 'grupo', o.valor));
+    const botao = (o) => {
+      const ligado = marcado(estado, 'grupo', o.valor);
+      return `
+        <button class="cal-leg ${ligado ? '' : 'cal-leg--desligado'}" type="button" data-acao="cal-leg" data-grupo="${esc(o.valor)}" aria-pressed="${ligado && !todos}"
+                title="${todos ? `Mostrar só ${esc(o.nome)}` : ligado ? `Esconder ${esc(o.nome)}` : `Mostrar ${esc(o.nome)}`}">
+          <span class="cal-ponto cal-ponto--${tipoDoGrupo(plano, o.valor)}"></span>${esc(o.nome)}</button>`;
+    };
+    const muitos = opcoes.length > LEGENDA_VISIVEIS;
+    const vistos = muitos ? opcoes.slice(0, LEGENDA_VISIVEIS - 1) : opcoes;
+    const resto = muitos ? opcoes.slice(LEGENDA_VISIVEIS - 1) : [];
+    return `
+      <div class="cal-legenda" role="group" aria-label="Filtrar por grupo de operação">
+        ${vistos.map(botao).join('')}
+        ${resto.length ? `
+          <details class="cal-legenda__mais" ${estado.legendaAberta ? 'open' : ''}>
+            <summary class="cal-leg cal-leg--mais">${Icones.mais} ${resto.length} ${resto.length === 1 ? 'grupo' : 'grupos'} de operação</summary>
+            <div class="cal-legenda__painel">${resto.map(botao).join('')}</div>
+          </details>` : ''}
+        ${todos ? '' : '<button class="link-acao cal-legenda__todos" type="button" data-acao="cal-leg-todos">Mostrar todos</button>'}
+      </div>`;
+  }
+
+  // Anda um mês, uma semana ou um dia
+  function andar(est, passo) {
+    const escala = est.escala || 'mes';
+    const d = dataDe(est.dataRef || hojeIso());
+    if (escala === 'mes') est.dataRef = isoDe(new Date(d.getFullYear(), d.getMonth() + passo, 1));
+    else est.dataRef = somaDias(isoDe(d), passo * (escala === 'semana' ? 7 : 1));
+  }
+
   function talhaoMarcado(estado, nome) { return marcado(estado, 'talhao', nome); }
   // Grupo de um item do calendário: o id do grupo; a colheita, "colheita"
   function chaveGrupo(it) { return it.colheita ? 'colheita' : it.grupo.id; }
@@ -533,6 +779,10 @@ window.Telas.calendario = (function () {
       if (!caixa.contains(e.target)) { caixa.open = false; if (ctx.estado.filtroAberto === caixa.dataset.filtro) ctx.estado.filtroAberto = null; }
     });
     const est = ctx.estado;
+    // Clique fora do "+ N grupos de operação" aberto: fecha
+    const mais = document.querySelector('.cal-legenda__mais[open]');
+    if (mais && !mais.contains(e.target)) { mais.open = false; est.legendaAberta = false; }
+    if (e.target.closest('.cal-leg--mais')) est.legendaAberta = !e.target.closest('details').open;
     let col = e.target.closest('[data-acao^="cal-col-"]');
     // O menu da coluna só abre pelo botão direito (ou fecha pelo Esc); o clique esquerdo no cabeçalho não faz nada
     if (col && col.dataset.acao === 'cal-col-menu' && !menuPeloDireito) col = null;
@@ -559,6 +809,32 @@ window.Telas.calendario = (function () {
       ctx.estado.filtroAberto = caixa.open ? null : caixa.dataset.filtro;
       return false;
     }
+    const leg = e.target.closest('[data-acao="cal-leg"], [data-acao="cal-leg-todos"]');
+    if (leg) {
+      const valores = opcoesGrupo(ctx.plano).map((o) => o.valor);
+      let marcados = valores.filter((v) => marcado(est, 'grupo', v));
+      const v = leg.dataset.grupo;
+      if (leg.dataset.acao === 'cal-leg-todos') marcados = [...valores];
+      else if (marcados.length === valores.length) marcados = [v];
+      else if (marcados.includes(v)) marcados = marcados.filter((x) => x !== v);
+      else marcados.push(v);
+      est.grupo = !marcados.length || marcados.length === valores.length ? 'todos' : marcados;
+      est.legendaAberta = !!leg.closest('.cal-legenda__mais');
+      redesenhar(leg.dataset.acao === 'cal-leg' ? `[data-acao="cal-leg"][data-grupo="${CSS.escape(v)}"]` : '.cal-leg');
+      return true;
+    }
+    const cal = e.target.closest('[data-acao="cal-hoje"], [data-acao="cal-nav"], [data-acao="cal-dia"], [data-acao="cal-dia-fechar"]');
+    if (cal) {
+      const acao = cal.dataset.acao;
+      // Hoje: vai para hoje, seleciona o dia e abre o painel com as operações dele (na visão Dia, a lista já é a do dia)
+      if (acao === 'cal-hoje') { est.dataRef = hojeIso(); est.diaAberto = (est.escala || 'mes') === 'dia' ? null : hojeIso(); }
+      else if (acao === 'cal-nav') { andar(est, Number(cal.dataset.passo)); est.diaAberto = null; }
+      else if (acao === 'cal-dia') est.diaAberto = est.diaAberto === cal.dataset.dia && cal.classList.contains('cal-dia') ? null : cal.dataset.dia;
+      else est.diaAberto = null;
+      redesenhar((acao === 'cal-dia' || acao === 'cal-hoje') && est.diaAberto ? '.cal-painel [data-acao="cal-dia-fechar"]'
+        : acao === 'cal-dia-fechar' ? '' : `[data-acao="${acao}"]${acao === 'cal-nav' ? `[data-passo="${cal.dataset.passo}"]` : ''}`);
+      return true;
+    }
     const alvo = e.target.closest('[data-acao="cal-visao"]');
     if (!alvo) return false;
     ctx.estado.visao = alvo.dataset.visao;
@@ -568,8 +844,17 @@ window.Telas.calendario = (function () {
 
   // Previsão de conclusão: editada na etapa Operações (aqui não se edita)
   function aoMudar(e, ctx, { redesenhar }) {
-    if (e.target.dataset.campo !== 'cal-filtro') return false;
     const est = ctx.estado;
+    // Escala (Mês, Semana, Dia): vai para o dia aberto no painel ou, se hoje estiver no período mostrado, para hoje
+    if (e.target.dataset.campo === 'cal-escala') {
+      const { de, ate } = periodo(est.escala || 'mes', est.dataRef || hojeIso());
+      if (est.diaAberto) est.dataRef = est.diaAberto;
+      else if (hojeIso() >= de && hojeIso() <= ate) est.dataRef = hojeIso();
+      est.escala = e.target.value; est.diaAberto = null;
+      redesenhar('[data-campo="cal-escala"]');
+      return true;
+    }
+    if (e.target.dataset.campo !== 'cal-filtro') return false;
     const chave = e.target.dataset.filtro;
     const valores = (chave === 'talhao' ? opcoesTalhao(ctx.talhoes) : opcoesGrupo(ctx.plano)).map((o) => o.valor);
     let marcados = valores.filter((v) => marcado(est, chave, v));

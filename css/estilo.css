@@ -1983,14 +1983,77 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .cal-filtro__area { margin-left: auto; padding-left: 16px; color: #6b7280; font-size: 13px; }
 .calendario__visoes .visoes__botao { height: 38px; }
 .calendario { padding-top: 10px; gap: 10px; }
-.previsoes { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; margin: -2px 0 0; font-size: 14px; color: var(--texto-suave); }
-.previsoes .icone { width: 16px; height: 16px; color: var(--verde-600); }
-.previsoes strong { color: var(--texto); font-weight: 700; }
-.previsoes__data { color: var(--texto); font-variant-numeric: tabular-nums; }
-.previsoes__dica { font-size: 13px; }
-.previsoes__ponto { color: #b5bdb8; }
 .calendario__visoes .visoes__botao--ativo { background: var(--verde-100); color: var(--verde-800); box-shadow: inset 0 0 0 1px var(--verde-600); }
 .calendario__vazio { margin: 24px 0; color: var(--texto-suave); }
+
+/* ===== Resumo · Calendário (mês, semana, dia) ===== */
+.cal-mes { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; align-items: start; }
+.cal-mes--com-painel { grid-template-columns: minmax(0, 1fr) 300px; }
+.cal-mes__principal { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.cal-mes__filtros { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 24px; }
+/* Visões do Resumo em guias (Programação · Ciclo Produtivo · Calendário) */
+.resumo-guias { display: flex; border: 1px solid var(--borda); border-radius: var(--raio); overflow: hidden; background: var(--superficie); }
+.resumo-guias__guia { display: inline-flex; align-items: center; gap: 10px; height: 44px; padding: 0 24px; border: 0; border-left: 1px solid var(--borda); background: none; font: inherit; font-size: 14px; color: var(--texto); cursor: pointer; }
+.resumo-guias__guia:first-child { border-left: 0; }
+.resumo-guias__guia .icone { width: 18px; height: 18px; }
+.resumo-guias__guia--ativa { background: var(--verde-100); color: var(--verde-800); font-weight: 600; box-shadow: inset 0 -2px 0 var(--verde-700); }
+.resumo-guias__guia:focus-visible { outline: 2px solid var(--verde-600); outline-offset: -2px; }
+/* Legenda que filtra o Calendário */
+.cal-legenda { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; }
+.cal-leg { display: inline-flex; align-items: center; gap: 8px; height: 32px; padding: 0 10px; border: 1px solid transparent; border-radius: 999px; background: none; font: inherit; font-size: 14px; color: var(--texto); cursor: pointer; list-style: none; }
+.cal-leg::-webkit-details-marker { display: none; }
+.cal-leg:hover { background: #f1f4f2; }
+.cal-leg[aria-pressed="true"] { border-color: #cfd6d2; background: var(--superficie); font-weight: 600; }
+.cal-leg--desligado { color: #9aa49f; }
+.cal-leg--desligado .cal-ponto { background: none; box-shadow: inset 0 0 0 2px #c3cbc6; }
+.cal-leg--mais { color: var(--verde-700); font-weight: 600; }
+.cal-leg--mais .icone { width: 14px; height: 14px; }
+.cal-legenda__mais { position: relative; }
+.cal-legenda__painel { position: absolute; z-index: 6; top: calc(100% + 4px); left: 0; display: flex; flex-direction: column; align-items: stretch; min-width: 220px; padding: 6px; background: var(--superficie); border: 1px solid var(--borda); border-radius: var(--raio); box-shadow: 0 8px 24px rgba(0,0,0,.12); }
+.cal-legenda__painel .cal-leg { border-radius: 6px; justify-content: flex-start; }
+.cal-legenda__todos { margin-left: 6px; font-size: 13px; }
+.cal-nav { display: flex; align-items: center; gap: 8px; }
+.cal-nav__seta { width: 36px; height: 36px; border: 1px solid var(--borda); border-radius: 8px; background: var(--superficie); }
+.cal-nav__titulo { min-width: 190px; margin: 0 8px 0 4px; font-size: 18px; font-weight: 700; }
+.cal-ponto { display: inline-block; width: 10px; height: 10px; flex-shrink: 0; border-radius: 50%; background: var(--c, #3b74d6); }
+.cal-ponto--sementes, .cal-ev--sementes { --c: #1f9d55; --f: #e3f4ea; }
+.cal-ponto--tratamento-de-sementes, .cal-ev--tratamento-de-sementes { --c: #8a4b2a; --f: #f3e7df; }
+.cal-ponto--defensivos, .cal-ev--defensivos { --c: #e8772e; --f: #fdeee3; }
+.cal-ponto--fertilidade, .cal-ev--fertilidade { --c: #8e44ad; --f: #f2e6f7; }
+.cal-ponto--colheita, .cal-ev--colheita { --c: #d4a017; --f: #fbf3dc; }
+.cal-ponto--outro, .cal-ev--outro { --c: #3b74d6; --f: #e6eefb; }
+.cal-grade { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); background: var(--superficie); border: 1px solid var(--borda); border-radius: var(--raio); overflow: hidden; }
+.cal-grade__cab { padding: 8px; border-bottom: 1px solid var(--borda); background: #f7f8f7; text-align: center; font-size: 12px; font-weight: 700; letter-spacing: .04em; color: var(--texto-suave); }
+.cal-dia { display: flex; flex-direction: column; gap: 4px; min-height: 104px; padding: 6px; border-right: 1px solid var(--borda); border-bottom: 1px solid var(--borda); cursor: pointer; min-width: 0; }
+.cal-dia:nth-child(7n) { border-right: 0; }
+.cal-dia:hover { background: #fafcfa; }
+.cal-grade--semana .cal-dia { min-height: 360px; }
+.cal-dia--fora { background: #f7f8f7; }
+.cal-dia--fora .cal-dia__num { color: #a8b0ab; }
+.cal-dia--aberto { box-shadow: inset 0 0 0 2px var(--verde-600); }
+.cal-dia__topo { display: flex; align-items: center; gap: 6px; }
+.cal-dia__num { font-size: 13px; font-weight: 700; }
+.cal-dia--hoje .cal-dia__num { display: inline-flex; align-items: center; justify-content: center; min-width: 24px; height: 24px; border-radius: 50%; background: var(--verde-700); color: #fff; }
+.cal-hoje { padding: 1px 8px; border-radius: 999px; background: var(--verde-700); color: #fff; font-size: 11px; font-weight: 700; letter-spacing: .02em; }
+.cal-ev { display: flex; flex-direction: column; align-items: flex-start; gap: 1px; width: 100%; padding: 4px 6px; border: 0; border-radius: 6px; background: var(--f); font: inherit; text-align: left; cursor: pointer; min-width: 0; }
+.cal-ev:hover { filter: brightness(.97); }
+.cal-ev__nome { display: flex; align-items: center; gap: 6px; max-width: 100%; font-size: 12px; font-weight: 600; color: var(--texto); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cal-ev__area { padding-left: 16px; font-size: 11px; color: var(--texto-suave); }
+.cal-dia__mais { align-self: flex-start; padding: 0 4px; border: 0; background: none; font: inherit; font-size: 12px; font-weight: 600; color: var(--verde-700); cursor: pointer; }
+.cal-painel { position: sticky; top: 0; align-self: stretch; display: flex; flex-direction: column; gap: 10px; min-height: 100%; margin: -10px -24px -16px 0; padding: 16px 20px; background: var(--superficie); border-left: 1px solid var(--borda); }
+.cal-painel__cab { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.cal-painel__titulo { margin: 0; font-size: 17px; }
+.cal-painel__semana { margin: 2px 0 0; font-size: 13px; color: var(--texto-suave); }
+.cal-painel__subtitulo { margin: 4px 0 0; font-size: 14px; }
+.cal-painel__vazio { margin: 0; font-size: 13px; color: var(--texto-suave); }
+.cal-lista { margin: 0; padding: 0; list-style: none; border: 1px solid var(--borda); border-radius: 8px; }
+.cal-lista__item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-top: 1px solid var(--borda); }
+.cal-lista__item:first-child { border-top: 0; }
+.cal-lista__item .cal-ponto { margin-top: 5px; }
+.cal-lista__nome { display: block; font-size: 14px; }
+.cal-lista__info { display: block; margin-top: 2px; font-size: 13px; color: var(--texto-suave); }
+.cal-dia-unico { display: flex; flex-direction: column; gap: 10px; max-width: 640px; padding: 16px; background: var(--superficie); border: 1px solid var(--borda); border-radius: var(--raio); }
+@media (max-width: 1100px) { .cal-mes--com-painel { grid-template-columns: minmax(0, 1fr); } .cal-painel { position: static; } }
 
 /* Infográfico: uma coluna por fase, rolagem horizontal */
 .cal-info { display: flex; align-items: stretch; overflow-x: auto; padding-bottom: 8px; }
@@ -2411,3 +2474,89 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .lote__excluir { border-color: #c0392b; color: #b03a2e; }
 .lote__excluir:hover { background: #fdf0ee; }
 .lote__lista { margin: 10px 0 0; padding-left: 20px; color: var(--texto-suave); line-height: 1.6; }
+.cal-mes__filtros .calendario__filtro .campo__controle { min-width: 180px; }
+
+.cal-rodape { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 0; font-size: 14px; color: var(--texto-suave); }
+.cal-rodape .icone { width: 16px; height: 16px; color: var(--verde-600); }
+.cal-rodape strong { color: var(--texto); font-size: 15px; }
+
+/* ===== Resumo integrado à tela (uma superfície só, como no Excel/agenda): barra das guias com linha embaixo,
+   conteúdo no mesmo fundo branco; no Calendário, o painel do dia é uma coluna presa à direita ===== */
+.calendario { padding: 0; gap: 0; background: var(--superficie); }
+.calendario__barra { padding: 12px 24px; border-bottom: 1px solid var(--borda); }
+.calendario__corpo { flex: 1; display: flex; flex-direction: column; gap: 12px; min-height: 0; padding: 14px 24px 16px; }
+.calendario__corpo--cal { padding: 0; }
+.calendario__corpo--cal .cal-mes { flex: 1; gap: 0; align-items: stretch; }
+.cal-mes__principal { padding: 14px 24px 16px; }
+.cal-painel { position: static; margin: 0; min-height: 0; padding: 16px 20px; border-left: 1px solid var(--borda); background: #fbfcfb; }
+.cal-grade { border-radius: 8px; }
+.calendario .cal-piv { box-shadow: none; }
+.calendario .resumo-guias { border-radius: 8px; }
+
+/* Mês inteiro na tela, sem rolar: a grade ocupa a altura livre e as semanas dividem essa altura;
+   em cada dia, até 3 operações (só o nome) e "+N mais" (o resto fica no painel do dia) */
+.calendario__corpo--cal, .calendario__corpo--cal .cal-mes { min-height: 0; }
+.calendario__corpo--cal .cal-mes__principal { min-height: 0; }
+.cal-grade--mes { flex: 1; min-height: 420px; grid-template-rows: auto repeat(var(--semanas), minmax(0, 1fr)); }
+.cal-grade--mes .cal-dia { min-height: 0; overflow: hidden; gap: 3px; padding: 4px 6px; }
+.cal-grade--mes .cal-ev { padding: 2px 6px; }
+.cal-grade--mes .cal-ev__area { line-height: 1.2; }
+.cal-dia__topo { min-height: 22px; }
+/* Mês: só o nome da operação, numa linha (corta se não couber; a área fica ao passar o mouse e no painel do dia) */
+.cal-grade--mes .cal-ev { flex-direction: row; padding: 3px 6px; }
+.cal-grade--mes .cal-ev__area { display: none; }
+/* Barra do Calendário: Hoje · ‹ › · período · escala (lista); Talhão sempre à direita na linha da legenda */
+.cal-nav__hoje { height: 36px; }
+.cal-nav__seta { border: 0; background: none; }
+.cal-nav__seta:hover { background: #eef2ef; }
+.cal-nav__escala { width: auto; min-width: 120px; height: 36px; }
+.cal-mes__filtros .calendario__filtro:last-child { margin-left: auto; }
+
+/* ===== Grade do mês e da semana: etiquetas separadas em cada dia (sem emendar) ===== */
+.cal-grade { display: flex; flex-direction: column; }
+.cal-grade__cabs { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); }
+.cal-semana { flex: 1; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); min-height: 0; border-top: 1px solid var(--borda); overflow: hidden; }
+.cal-semana .cal-dia { min-height: 0; overflow: hidden; gap: 3px; padding: 4px 6px; border-bottom: 0; border-right: 1px solid var(--borda); }
+.cal-semana .cal-dia:nth-child(7) { border-right: 0; }
+.cal-semana .cal-ev { flex-shrink: 0; min-width: 0; }
+.cal-ev__texto { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.cal-semana .cal-dia__mais { flex-shrink: 0; font-size: 11px; line-height: 16px; padding: 0 2px; }
+/* Mês: etiquetas finas (18 px, letra 11), só com o nome numa linha */
+.cal-grade--mes .cal-ev { flex-direction: row; align-items: center; height: 18px; padding: 0 6px; }
+.cal-grade--mes .cal-ev__nome { gap: 5px; font-size: 11px; }
+.cal-grade--mes .cal-ev .cal-ponto { width: 8px; height: 8px; }
+.cal-grade--mes .cal-ev__area { display: none; }
+/* Semana: etiquetas maiores, que usam o espaço da tela (nome em até 2 linhas e a área) */
+.cal-grade--semana { flex: 1; min-height: 420px; }
+.cal-grade--semana .cal-dia { min-height: 0; }
+.cal-grade--semana .cal-ev { height: 46px; padding: 5px 8px; justify-content: flex-start; gap: 2px; }
+.cal-grade--semana .cal-ev__nome { align-items: flex-start; white-space: normal; font-size: 12px; line-height: 1.3; }
+.cal-grade--semana .cal-ev .cal-ponto { margin-top: 4px; }
+.cal-grade--semana .cal-ev__texto { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; white-space: normal; }
+.cal-grade--semana .cal-ev__area { padding-left: 16px; font-size: 11px; }
+/* Semana e Dia: etiquetas mais legíveis (sem ocupar a tela toda); o Mês continua com as etiquetas finas */
+.cal-grade--semana .cal-ev { height: 54px; padding: 6px 10px; gap: 3px; }
+.cal-grade--semana .cal-ev__nome { font-size: 13px; }
+.cal-grade--semana .cal-ev__area { padding-left: 18px; font-size: 12px; }
+.cal-dia-unico .cal-lista__item { padding: 12px 16px; }
+.cal-dia-unico .cal-lista__nome { font-size: 15px; }
+.cal-dia-unico .cal-lista__info { font-size: 14px; }
+/* Cabeçalho e rodapé do Resumo mais enxutos (mais espaço para o calendário) */
+.calendario__barra { padding: 6px 24px; }
+.resumo-guias__guia { height: 34px; padding: 0 16px; gap: 8px; font-size: 13px; }
+.resumo-guias__guia .icone { width: 16px; height: 16px; }
+.cal-nav { gap: 4px; }
+.cal-nav__hoje, .cal-nav__escala { height: 32px; }
+.cal-nav__seta { width: 32px; height: 32px; }
+.cal-nav__titulo { min-width: 170px; font-size: 16px; }
+.cal-mes__principal { gap: 8px; padding: 8px 24px 8px; }
+.cal-mes__filtros { gap: 6px 20px; }
+.cal-leg { height: 26px; font-size: 13px; }
+.cal-mes__filtros .calendario__filtro-rotulo { font-size: 13px; }
+.cal-mes__filtros .cal-filtro__botao { height: 32px; min-height: 32px; padding-top: 0; padding-bottom: 0; font-size: 13px; }
+.cal-grade__cab { padding: 5px 8px; font-size: 11px; }
+.cal-rodape { font-size: 12px; }
+.cal-rodape strong { font-size: 13px; }
+.cal-rodape .icone { width: 14px; height: 14px; }
+.calendario__corpo { padding-top: 10px; }
+.cal-mes__filtros .campo__controle.cal-filtro__botao { height: 32px; min-height: 32px; }

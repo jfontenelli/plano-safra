@@ -22,7 +22,7 @@ Regras de negócio ficam em `docs/DECISOES.md`.
 | 04.2 | Planejamento (grupo Semente) | telas/04.2-operacoes-sementes.md | quadro de design (telas A e B) | Construída: Plantio (variedade, data e população; Tabela, Mapa e Previsão de colheita) |
 | 04.3 | Planejamento (grupo Fertilidade) | telas/04.3-operacoes-fertilidade.md | — (layout da Tela 04.1) | Construída: operações do modelo, matéria-prima e cadastro (produtos de cliente a conferir) |
 | 04.4 | Planejamento (grupo Tratamento de semente) | telas/04.4-operacoes-tratamento-sementes.md | — (layout da Tela 04.1) | Construída: TSI (saiu do grupo Semente), DAP −5 sugerido |
-| 05 | Calendário Agrícola (aba Resumo do plano) | telas/05-calendario-agricola.md | referencias/05-calendario-agricola.png | Construída: Infográfico por fase e Tabela com prazo para encerramento da OS |
+| 05 | Calendário Agrícola (aba Resumo do plano) | telas/05-calendario-agricola.md | referencias/05-calendario-agricola.png, referencias/05.3-resumo-calendario.png | Construída: Programação (tabela), Ciclo Produtivo (por fase) e Calendário (mês, semana, dia; legenda que filtra; painel do dia; área operacional) |
 | 06 | Suprimentos | telas/06-suprimentos.md | referencias/suprimentos.png | A definir: falta fechar o cálculo do TSI |
 
 | — | Calendário Agrícola e Suprimentos do menu (vários planos somados) | DECISOES 4.0 | — | A definir |
