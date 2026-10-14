@@ -195,6 +195,8 @@ window.Telas.planoOperacoes = (function () {
     if (talhoes) talhoes.scrollTop = talhoesAntes;
     const foco = raiz.querySelector('[data-foco-inicial]');
     if (foco) { foco.focus({ preventScroll: true }); foco.select?.(); }
+    // Caixa "marcar todas" com só algumas marcadas: estado intermediário (só dá para ligar por script)
+    raiz.querySelectorAll('[data-intermediario]').forEach((c) => { c.indeterminate = true; });
     montarMapa();
   }
 

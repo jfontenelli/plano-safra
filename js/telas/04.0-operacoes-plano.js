@@ -1,7 +1,8 @@
 /*
  * Tela 04.0 — Operações do plano (docs/telas/04.0-operacoes.md)
- * Etapa 1 do plano: as operações vindas do modelo, numa tabela por fase da cultura (Pré-plantio, Plantio,
- * Manejo da cultura, Colheita), para revisar antes do planejamento talhão a talhão. A fase vem do DAP.
+ * Etapa 1 do plano: as operações vindas do modelo, numa tabela só, na ordem em que acontecem (pré-plantio, plantio,
+ * manejo da cultura e colheita, sem faixa com o nome da fase), para revisar antes do planejamento talhão a talhão.
+ * A fase vem do DAP e define a ordem e a fenologia.
  * Desenhada dentro da Tela 04 (mesmo cabeçalho do plano); a Tela 04 repassa os eventos para cá.
  */
 window.Telas = window.Telas || {};
@@ -9,13 +10,8 @@ window.Telas = window.Telas || {};
 window.Telas.operacoesPlano = (function () {
   const esc = Util.escapar;
 
-  // Faixas na ordem em que as coisas acontecem; dapNovo = DAP sugerido para a operação adicionada na faixa
-  const FASES = [
-    { id: 'pre', nome: 'Pré-plantio', dapNovo: -1 },
-    { id: 'plantio', nome: 'Plantio', dapNovo: 0 },
-    { id: 'desenv', nome: 'Manejo da cultura', dapNovo: 1 },
-    { id: 'colheita', nome: 'Colheita', dapNovo: null }
-  ];
+  // Fases na ordem em que as coisas acontecem (só ordenam a tabela; não aparecem como faixa)
+  const FASES = ['pre', 'plantio', 'desenv', 'colheita'];
 
   // Plantio (grupo Sementes) e Colheita: operação fixa (não troca de grupo, não se exclui)
   const fixo = (g) => g.tipo === 'Sementes' || g.tipo === 'Colheita';
@@ -41,7 +37,6 @@ window.Telas.operacoesPlano = (function () {
     'Fertilidade': '<svg viewBox="0 0 24 24" class="tab-op__ico" style="color:#3c8d2f" aria-hidden="true"><path d="M5 19c0-8 5-13 14-14-1 9-6 14-14 14z" fill="currentColor"/><path d="M5 19l8-8" stroke="#fff" stroke-width="1.6"/></svg>',
     'Colheita': '<svg viewBox="0 0 24 24" class="tab-op__ico" style="color:#b8860b" aria-hidden="true"><path d="M12 21V8M12 8c-3 0-4-2-4-4 3 0 4 2 4 4zm0 0c3 0 4-2 4-4-3 0-4 2-4 4zm0 5c-3 0-4-2-4-4 3 0 4 2 4 4zm0 0c3 0 4-2 4-4-3 0-4 2-4 4z" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>'
   };
-  const iconeFase = (id) => (id === 'colheita' ? ICONE_TIPO.Colheita : Icones.broto);
 
   // ----- Desenho -----
   function desenhar(ctx) {
@@ -50,12 +45,16 @@ window.Telas.operacoesPlano = (function () {
     const comOperacao = plano.grupos.filter((g) => g.operacoes.length);
     if (ctx.estado.filtroGrupo && !comOperacao.some((g) => g.id === ctx.estado.filtroGrupo)) ctx.estado.filtroGrupo = '';
     const filtro = ctx.estado.filtroGrupo || '';
-    const porFase = {};
-    FASES.forEach((f) => { porFase[f.id] = []; });
-    plano.grupos.filter((g) => !filtro || g.id === filtro)
-      .forEach((g) => g.operacoes.forEach((op) => porFase[faseDe(g, op)].push({ g, op })));
+    // Uma lista só: pela fase (pré-plantio, plantio, manejo, colheita) e, dentro dela, pelo DAP
+    const linhas = emOrdem(plano.grupos.filter((g) => !filtro || g.id === filtro)
+      .flatMap((g) => g.operacoes.map((op) => ({ g, op, fase: faseDe(g, op) }))));
     const ler = ctx.somenteLeitura;
-    // Com filtro, as fases sem operação daquele grupo não aparecem
+    // Modo Editar (botão à direita do filtro): mostra as caixas de marcar e a barra de ações em lote.
+    // Plantio e Colheita (fixas) não têm caixa. Só operações à vista (filtro) podem estar marcadas.
+    const editando = !ler && !!ctx.estado.editando;
+    const visiveis = linhas.filter(({ g }) => !fixo(g)).map(({ op }) => op.id);
+    ctx.estado.marcadas = new Set([...(ctx.estado.marcadas || [])].filter((id) => visiveis.includes(id)));
+    const marcadas = ctx.estado.marcadas;
     return `
       <section class="estrutura">
         ${ctx.estado.avisoFechado ? '' : `
@@ -70,51 +69,102 @@ window.Telas.operacoesPlano = (function () {
           ${comOperacao.map((g) => `
             <button class="filtro-grupos__botao ${g.id === filtro ? 'filtro-grupos__botao--ativo' : ''}" type="button" data-acao="est-filtro"
                     data-grupo="${g.id}" aria-pressed="${g.id === filtro}">${semGrupo(g) ? Icones.alerta : ICONE_TIPO[g.tipo] || ''}${esc(semGrupo(g) ? 'Sem grupo de operação' : g.nome)}</button>`).join('')}
+          ${ler ? '' : `
+            <button class="botao botao--secundario botao--p filtro-grupos__editar" type="button" data-acao="est-editar" aria-pressed="${editando}"
+                    title="${editando ? 'Esconder as caixas de marcar' : 'Marcar várias operações para mover de grupo ou excluir'}">
+              ${editando ? `${Icones.certo} Concluir` : `${Icones.lapis} Editar`}</button>`}
         </div>
         <div class="tab-op__caixa">
           <table class="tab-op">
             <colgroup>
-              <col class="tab-op__c-fase"><col class="tab-op__c-dap"><col class="tab-op__c-fen"><col class="tab-op__c-op"><col class="tab-op__c-grupo"><col class="tab-op__c-prazo">
+              ${editando ? '<col class="tab-op__c-marcar">' : ''}<col class="tab-op__c-dap"><col class="tab-op__c-fen"><col class="tab-op__c-op"><col class="tab-op__c-grupo"><col class="tab-op__c-prazo">
               ${ler ? '' : '<col class="tab-op__c-acao">'}
             </colgroup>
             <thead><tr>
-              <th class="tab-op__fase-cab"><span class="so-leitor">Fase</span></th>
+              ${editando ? `<th class="tab-op__marcar">${caixaTodas(visiveis, marcadas)}</th>` : ''}
               <th class="tab-op__dap">DAP</th><th>Fenologia</th><th>Operação</th><th>Grupo de operação</th><th>Previsão de conclusão</th>
               ${ler ? '' : '<th class="tab-op__acao"><span class="so-leitor">Ações</span></th>'}
             </tr></thead>
-            ${FASES.filter((f) => !filtro || porFase[f.id].length).map((f) => faixa(f, porFase[f.id], ctx)).join('')}
+            <tbody>${linhas.map(({ g, op, fase }) => linha(g, op, fase, ctx)).join('')}</tbody>
           </table>
         </div>
-        ${ler ? '' : '<p class="tab-op__dica">Botão direito numa linha (ou ⋯ no fim dela): Inserir · Excluir · Limpar conteúdo.</p>'}
+        ${ler ? '' : '<p class="tab-op__dica">+ no fim da linha: insere uma linha logo abaixo. Botão direito numa linha (ou ⋯): Inserir · Excluir · Limpar conteúdo.</p>'}
+        ${editando ? barraLote(ctx, marcadas) : ''}
       </section>`;
   }
 
-  // Cada fase: a faixa vertical à esquerda (nome deitado, na cor da fase, como no Calendário) ocupa todas as linhas da fase
-  function faixa(f, itens, ctx) {
-    const colunas = ctx.somenteLeitura ? 5 : 6;
-    const n = itens.length;
-    const linhas = [...itens].sort((a, b) => (a.op.dap ?? Infinity) - (b.op.dap ?? Infinity));
-    const fase = `
-      <th class="tab-op__fase-v tab-op__fase-v--${f.id}" rowspan="${Math.max(n, 1)}" scope="rowgroup"
-          title="${f.nome}: ${n} ${n === 1 ? 'operação' : 'operações'}${f.id === 'colheita' ? ' · a data vem do plantio + ciclo da variedade' : ''}">
-        <div class="tab-op__fase-v-conteudo"><span class="tab-op__fase-v-nome">${f.nome}</span></div>
-      </th>`;
-    if (!n) {
-      return `
-        <tbody class="tab-op__grupo-fase">
-          <tr data-est-fase-vazia="${f.id}">${fase}
-            <td colspan="${colunas}" class="tab-op__vazio">Nenhuma operação nesta fase.${ctx.somenteLeitura ? ''
-              : ` <button class="link-acao" type="button" data-acao="est-nova-op" data-fase="${f.id}">${Icones.mais} Inserir operação</button>`}</td>
-          </tr>
-        </tbody>`;
-    }
-    return `
-      <tbody class="tab-op__grupo-fase">
-        ${linhas.map(({ g, op }, i) => linha(g, op, f.id, ctx, i === 0 ? fase : '')).join('')}
-      </tbody>`;
+  // Ordem da tabela: fase e DAP. A linha criada pelo "+" (ou Inserir) fica logo abaixo da linha em que se clicou,
+  // enquanto tiver o mesmo DAP dela (op.abaixoDe); a mais nova fica mais perto da linha clicada.
+  function emOrdem(itens) {
+    itens.sort((a, b) => FASES.indexOf(a.fase) - FASES.indexOf(b.fase) || (a.op.dap ?? Infinity) - (b.op.dap ?? Infinity));
+    const porId = new Map(itens.map((x) => [x.op.id, x]));
+    const abaixo = {};
+    const base = [];
+    itens.forEach((x) => {
+      const ref = x.op.abaixoDe && porId.get(x.op.abaixoDe);
+      if (ref && ref.fase === x.fase && (ref.op.dap ?? null) === (x.op.dap ?? null)) (abaixo[ref.op.id] = abaixo[ref.op.id] || []).unshift(x);
+      else base.push(x);
+    });
+    const saida = [];
+    const colocar = (x) => { saida.push(x); (abaixo[x.op.id] || []).forEach(colocar); };
+    base.forEach(colocar);
+    return saida;
   }
 
-  function linha(g, op, fase, ctx, celulaFase) {
+  // Caixa do cabeçalho: marca ou desmarca todas as operações à vista (estado intermediário com só algumas)
+  function caixaTodas(visiveis, marcadas) {
+    const n = marcadas.size;
+    const todas = visiveis.length > 0 && n === visiveis.length;
+    return `<input class="tab-op__caixa-marcar" type="checkbox" data-acao="est-marcar-todas" ${todas ? 'checked' : ''}
+                   ${n && !todas ? 'data-intermediario' : ''} ${visiveis.length ? '' : 'disabled'}
+                   aria-label="${todas ? 'Desmarcar todas' : 'Marcar todas as operações à vista'}">`;
+  }
+
+  // Barra de ações em lote (modo Editar), presa embaixo da tela
+  function barraLote(ctx, marcadas) {
+    const n = marcadas.size;
+    if (!n) {
+      return `
+        <div class="lote lote--vazio" role="status">
+          <p class="lote__texto">${Icones.info} Marque operações na tabela para mover de grupo ou excluir em lote</p>
+          <div class="lote__acoes">
+            <button class="botao botao--secundario botao--p" type="button" disabled>Mover para grupo ${Icones.abaixo}</button>
+            <button class="botao botao--secundario botao--p" type="button" disabled>${Icones.lixeira} Excluir</button>
+          </div>
+        </div>`;
+    }
+    const aberto = ctx.estado.moverAberto;
+    // Mover para grupo: escolhe o grupo na lista e confirma com Aplicar (Novo grupo já move ao criar o grupo)
+    const destino = aberto ? ctx.estado.moverDestino : '';
+    return `
+      <div class="lote" role="status">
+        <p class="lote__texto"><strong>${n} ${n === 1 ? 'operação selecionada' : 'operações selecionadas'}</strong>
+          <button class="link-acao lote__desmarcar" type="button" data-acao="est-desmarcar">Desmarcar</button></p>
+        <div class="lote__acoes">
+          <span class="lote__mover">
+            <button class="botao botao--secundario botao--p" type="button" data-acao="est-mover-abrir" aria-haspopup="menu"
+                    aria-expanded="${!!aberto}">Mover para grupo ${Icones.abaixo}</button>
+            ${aberto ? `
+              <div class="lote__menu" role="menu" aria-label="Mover para grupo">
+                <p class="lote__menu-titulo">Mover ${n} para</p>
+                ${gruposEscolhiveis(ctx.plano).map((x) => `
+                  <button class="menu-contexto__item lote__opcao ${x.id === destino ? 'lote__opcao--escolhida' : ''}" type="button" role="menuitemradio"
+                          aria-checked="${x.id === destino}" data-acao="est-mover-escolher" data-grupo="${x.id}">
+                    <span class="lote__radio" aria-hidden="true"></span>${ICONE_TIPO[x.tipo] || ''}${esc(x.nome)}</button>`).join('')}
+                <hr class="menu-contexto__separador">
+                <button class="menu-contexto__item lote__novo" type="button" role="menuitem" data-acao="est-mover" data-grupo="__novo__">${Icones.mais} Novo grupo de operação</button>
+                <div class="lote__menu-rodape">
+                  <button class="botao botao--secundario botao--p" type="button" data-acao="est-mover-cancelar">Cancelar</button>
+                  <button class="botao botao--primario botao--p" type="button" data-acao="est-mover-aplicar" ${destino ? '' : 'disabled'}>Aplicar</button>
+                </div>
+              </div>` : ''}
+          </span>
+          <button class="botao botao--secundario botao--p lote__excluir" type="button" data-acao="est-excluir-lote">${Icones.lixeira} Excluir</button>
+        </div>
+      </div>`;
+  }
+
+  function linha(g, op, fase, ctx) {
     const { somenteLeitura, estado, plano } = ctx;
     const nomeTexto = op.nome || 'Sem operação';
     // DAP: Plantio sempre 0; Colheita pelo ciclo da variedade; demais editáveis
@@ -162,15 +212,21 @@ window.Telas.operacoesPlano = (function () {
              data-op="${op.id}" value="${prazo}" aria-label="Previsão de conclusão de ${esc(nomeTexto)}, em dias"> dias</span>`;
     // Ações da linha: botão direito na linha ou "⋯" (aparece ao passar o mouse; a Colheita não tem menu)
     const temMenu = !somenteLeitura && g.tipo !== 'Colheita';
+    const editando = !somenteLeitura && !!estado.editando;
+    const marcada = editando && estado.marcadas && estado.marcadas.has(op.id);
     return `
-      <tr ${temMenu ? `data-est-linha="${op.id}"` : ''}>
-        ${celulaFase}
+      <tr ${temMenu ? `data-est-linha="${op.id}"` : ''} ${marcada ? 'class="tab-op__linha--marcada"' : ''}>
+        ${editando ? `<td class="tab-op__marcar">${fixo(g) ? '' : `
+          <input class="tab-op__caixa-marcar" type="checkbox" data-acao="est-marcar" data-op="${op.id}" ${marcada ? 'checked' : ''}
+                 aria-label="Marcar ${esc(nomeTexto)}">`}</td>` : ''}
         <td class="tab-op__dap">${dap}</td>
         <td>${fenologia}</td>
         <td class="tab-op__op">${nome}</td>
         <td>${grupo}</td>
         <td>${previsao}</td>
         ${somenteLeitura ? '' : `<td class="tab-op__acao">${temMenu ? `
+          <button class="botao-icone tab-op__inserir" type="button" data-acao="est-inserir" data-op="${op.id}"
+                  title="Inserir uma linha abaixo" aria-label="Inserir uma linha abaixo de ${esc(nomeTexto)}">${Icones.mais}</button>
           <button class="botao-icone tab-op__mais" type="button" data-acao="est-menu" data-op="${op.id}"
                   title="Inserir, excluir ou limpar a linha" aria-label="Ações da linha ${esc(nomeTexto)}">⋯</button>` : ''}</td>`}
       </tr>`;
@@ -185,17 +241,15 @@ window.Telas.operacoesPlano = (function () {
     return null;
   }
 
-  // Grupo que fica sem nenhuma operação some do plano (e das guias do Planejamento); Semente e Colheita ficam.
-  // Devolve a posição do grupo removido (para o Desfazer), ou -1.
+  // Grupo que fica sem nenhuma operação continua no plano (para receber operações novas). Só o "Sem grupo",
+  // que não é um grupo de verdade, some quando fica vazio. Devolve a posição do removido (para o Desfazer), ou -1.
   function removerSeVazio(plano, g) {
-    if (g.operacoes.length || fixo(g)) return -1;
+    if (g.operacoes.length || !semGrupo(g)) return -1;
     const i = plano.grupos.indexOf(g);
     plano.grupos.splice(i, 1);
     return i;
   }
 
-  // Adicionar operação na faixa: entra no primeiro grupo que recebe operações (troca na coluna Grupo),
-  // com o DAP da fase, e já abre o nome para editar
   // "Sem grupo" do plano (cria antes da Colheita, se ainda não existe)
   function semGrupoDoPlano(plano) {
     let sg = plano.grupos.find(semGrupo);
@@ -208,20 +262,16 @@ window.Telas.operacoesPlano = (function () {
   }
 
   // Linha nova (Inserir): sem nome e sem grupo, como uma linha limpa; já abre o nome para digitar
-  function criarLinha(dap, ctx, acoes) {
+  function criarLinha(dap, ctx, acoes, abaixoDe) {
     ctx.estado.filtroGrupo = ''; // a linha nova nasce sem grupo: volta a Todos para ela aparecer
     const op = Planos.novaOperacao('', dap);
+    if (abaixoDe) op.abaixoDe = abaixoDe;
     semGrupoDoPlano(ctx.plano).operacoes.push(op);
     ctx.estado.renomeandoOp = op.id;
     acoes.alterou(); acoes.redesenhar(null);
   }
 
-  // Inserir numa fase vazia: com o DAP da fase
-  function novaOperacao(fase, ctx, acoes) {
-    criarLinha(FASES.find((x) => x.id === fase).dapNovo, ctx, acoes);
-  }
-
-  // Excluir operação: com talhões planejados, confirma com o impacto; depois, Desfazer (volta o grupo, se tinha sumido)
+  // Excluir operação: sempre confirma (com talhões planejados, diz o impacto); depois, Desfazer. O grupo fica, mesmo vazio.
   function excluirOperacao(id, ctx, acoes) {
     const { plano } = ctx;
     const achado = acharOp(plano, id);
@@ -232,22 +282,82 @@ window.Telas.operacoesPlano = (function () {
       g.operacoes.splice(i, 1);
       const ig = removerSeVazio(plano, g);
       acoes.alterou(); acoes.redesenhar(null);
-      Aviso.mostrar(`${esc(op.nome)} excluída${ig >= 0 ? ` (o grupo ${esc(g.nome)} ficou vazio e saiu do plano)` : ''}`, { acao: 'Desfazer', aoAgir: () => {
+      Aviso.mostrar(`${esc(op.nome || 'Linha')} excluída`, { acao: 'Desfazer', aoAgir: () => {
         if (ig >= 0) plano.grupos.splice(ig, 0, g);
         g.operacoes.splice(i, 0, op);
         acoes.alterou(); acoes.redesenhar(null);
       } });
     };
     const talhoes = Object.keys(op.talhoes || {}).length + Object.keys(op.plantio || {}).length;
-    if (!talhoes) { remover(); return; }
     Modal.confirmar({
-      titulo: `Excluir ${esc(op.nome)}?`,
-      texto: `Ela já está planejada em ${talhoes} ${talhoes === 1 ? 'talhão' : 'talhões'}; esse planejamento também será apagado.`,
+      titulo: `Excluir ${esc(op.nome || 'a linha sem nome')}?`,
+      texto: talhoes ? `Ela já está planejada em ${talhoes} ${talhoes === 1 ? 'talhão' : 'talhões'}; esse planejamento também será apagado.`
+        : 'A operação sai do plano.',
       botoes: [{ rotulo: 'Cancelar' }, { rotulo: 'Excluir operação', classe: 'perigo', acao: remover }]
     });
   }
 
-  // Trocar o grupo da operação (ou criar um grupo novo para ela); o grupo de origem que ficar vazio some
+  // ----- Ações em lote (modo Editar) -----
+  // Fotografia dos grupos e das operações, para o Desfazer do lote
+  function fotografar(plano) {
+    const grupos = plano.grupos.map((g) => ({ g, ops: [...g.operacoes] }));
+    return () => {
+      plano.grupos.splice(0, plano.grupos.length, ...grupos.map((x) => x.g));
+      grupos.forEach((x) => x.g.operacoes.splice(0, x.g.operacoes.length, ...x.ops));
+    };
+  }
+
+  const plural = (n, um, varios) => `${n} ${n === 1 ? um : varios}`;
+
+  // Mover as marcadas para um grupo (ou para um grupo novo); os grupos que ficarem vazios continuam. Depois, Desfazer.
+  function moverLote(destinoId, ctx, acoes) {
+    const { plano, estado } = ctx;
+    estado.moverAberto = false;
+    const mover = (destino) => {
+      const voltar = fotografar(plano);
+      const ids = [...estado.marcadas];
+      ids.forEach((id) => { const a = acharOp(plano, id); if (a) moverParaGrupo(a.op, a.g, destino, ctx, { alterou: () => {} }); });
+      estado.marcadas = new Set(); estado.editando = false; // feito o lote, sai do modo Editar (sem precisar de Concluir)
+      acoes.alterou(); acoes.redesenhar(null);
+      Aviso.mostrar(`${plural(ids.length, 'operação movida', 'operações movidas')} para ${esc(destino.nome)}`, { acao: 'Desfazer', aoAgir: () => {
+        voltar(); estado.editando = true; estado.marcadas = new Set(ids); acoes.alterou(); acoes.redesenhar(null);
+      } });
+    };
+    if (destinoId === '__novo__') { acoes.redesenhar(null); acoes.novoGrupo(mover); return; }
+    mover(plano.grupos.find((x) => x.id === destinoId));
+  }
+
+  // Excluir as marcadas: sempre confirma, com a lista (e o aviso das planejadas em talhões); depois, Desfazer.
+  // Os grupos ficam, mesmo vazios.
+  function excluirLote(ctx, acoes) {
+    const { plano, estado } = ctx;
+    estado.moverAberto = false;
+    const achados = [...estado.marcadas].map((id) => acharOp(plano, id)).filter(Boolean);
+    const n = achados.length;
+    const planejada = (op) => Object.keys(op.talhoes || {}).length + Object.keys(op.plantio || {}).length > 0;
+    const comTalhoes = achados.filter(({ op }) => planejada(op));
+    const excluir = () => {
+      const voltar = fotografar(plano);
+      const ids = achados.map(({ op }) => op.id);
+      achados.forEach(({ g, op }) => { g.operacoes.splice(g.operacoes.indexOf(op), 1); });
+      [...new Set(achados.map(({ g }) => g))].forEach((g) => removerSeVazio(plano, g));
+      estado.marcadas = new Set(); estado.editando = false;
+      acoes.alterou(); acoes.redesenhar(null);
+      Aviso.mostrar(plural(n, 'operação excluída', 'operações excluídas'), { acao: 'Desfazer', aoAgir: () => {
+        voltar(); estado.editando = true; estado.marcadas = new Set(ids); acoes.alterou(); acoes.redesenhar(null);
+      } });
+    };
+    Modal.confirmar({
+      titulo: `Excluir ${plural(n, 'operação', 'operações')}?`,
+      texto: `${!comTalhoes.length ? (n === 1 ? 'A operação sai do plano.' : 'As operações abaixo saem do plano.')
+        : `${comTalhoes.length === 1 ? (n === 1 ? 'Ela já está planejada' : '1 delas já está planejada')
+          : `${comTalhoes.length} delas já estão planejadas`} em talhões; esse planejamento também será apagado.`}
+        <ul class="lote__lista">${achados.map(({ op }) => `<li>${esc(op.nome || 'Sem operação')}${planejada(op) ? ' · <strong>planejada em talhões</strong>' : ''}</li>`).join('')}</ul>`,
+      botoes: [{ rotulo: 'Cancelar' }, { rotulo: n === 1 ? 'Excluir operação' : 'Excluir operações', classe: 'perigo', acao: excluir }]
+    });
+  }
+
+  // Trocar o grupo da operação (ou criar um grupo novo para ela); o grupo de origem continua, mesmo vazio
   function moverParaGrupo(op, origem, destino, ctx, acoes) {
     if (destino === origem) return;
     origem.operacoes.splice(origem.operacoes.indexOf(op), 1);
@@ -322,9 +432,9 @@ window.Telas.operacoesPlano = (function () {
   }
 
   // ----- Menu da linha: Inserir · Excluir · Limpar conteúdo -----
-  // Inserir: linha nova logo abaixo, na mesma fase e com o mesmo DAP (Plantio: DAP 0), sem nome e sem grupo, já com o nome aberto
+  // Inserir: linha nova com o mesmo DAP (fica na mesma fase) (Plantio: DAP 0), sem nome e sem grupo, já com o nome aberto
   function inserirAbaixo(op, g, ctx, acoes) {
-    criarLinha(g && g.tipo !== 'Sementes' ? op.dap : 0, ctx, acoes);
+    criarLinha(g && g.tipo !== 'Sementes' ? op.dap : 0, ctx, acoes, op.id);
   }
 
   // Limpar conteúdo: a linha fica toda em branco no mesmo lugar (inclusive o DAP; ela fica na fase em que estava):
@@ -344,8 +454,6 @@ window.Telas.operacoesPlano = (function () {
         g.operacoes.splice(antes.i, 1);
         sg.operacoes.push(op);
       }
-      const ig = semGrupo(g) ? -1 : plano.grupos.indexOf(g);
-      if (ig >= 0 && !g.operacoes.length && !fixo(g)) plano.grupos.splice(ig, 1);
       acoes.alterou(); acoes.redesenhar(null);
       Aviso.mostrar('Linha limpa', { acao: 'Desfazer', aoAgir: () => {
         Object.assign(op, { nome: antes.nome, dap: antes.dap, faseSemDap: antes.faseSemDap, fenologia: antes.fenologia, prazo: antes.prazo, receitas: antes.receitas, talhoes: antes.talhoes });
@@ -383,14 +491,8 @@ window.Telas.operacoesPlano = (function () {
   function aoMenuContexto(e, ctx, acoes) {
     if (ctx.somenteLeitura) return false;
     const tr = e.target.closest('tr[data-est-linha]');
-    const vazia = e.target.closest('tr[data-est-fase-vazia]');
-    if (!tr && !vazia) return false;
+    if (!tr) return false;
     e.preventDefault();
-    if (vazia) {
-      acoes.menu(vazia, e.clientX || vazia.getBoundingClientRect().left, e.clientY || vazia.getBoundingClientRect().bottom,
-        'Fase vazia', { inserir: () => novaOperacao(vazia.dataset.estFaseVazia, ctx, acoes) });
-      return true;
-    }
     const caixa = tr.getBoundingClientRect();
     abrirMenuLinha(tr, e.clientX || caixa.left + 24, e.clientY || caixa.bottom, tr.dataset.estLinha, ctx, acoes);
     return true;
@@ -402,8 +504,36 @@ window.Telas.operacoesPlano = (function () {
     if (!alvo) return false;
     // O aviso do topo é só um aviso: fechado, não volta para este plano enquanto a página estiver aberta
     if (alvo.dataset.acao === 'est-fechar-aviso') { ctx.estado.avisoFechado = true; acoes.redesenhar(null); }
-    if (alvo.dataset.acao === 'est-filtro') { ctx.estado.filtroGrupo = alvo.dataset.grupo; acoes.redesenhar(null); }
-    if (alvo.dataset.acao === 'est-nova-op') novaOperacao(alvo.dataset.fase, ctx, acoes);
+    if (alvo.dataset.acao === 'est-filtro') { ctx.estado.filtroGrupo = alvo.dataset.grupo; ctx.estado.moverAberto = false; acoes.redesenhar(null); }
+    if (alvo.dataset.acao === 'est-editar') {
+      ctx.estado.editando = !ctx.estado.editando;
+      ctx.estado.marcadas = new Set();
+      ctx.estado.moverAberto = false;
+      acoes.redesenhar('[data-acao="est-editar"]');
+    }
+    if (alvo.dataset.acao === 'est-marcar') {
+      const m = ctx.estado.marcadas;
+      if (m.has(alvo.dataset.op)) m.delete(alvo.dataset.op); else m.add(alvo.dataset.op);
+      ctx.estado.moverAberto = false;
+      acoes.redesenhar(`[data-acao="est-marcar"][data-op="${alvo.dataset.op}"]`);
+    }
+    if (alvo.dataset.acao === 'est-marcar-todas') {
+      const caixas = [...document.querySelectorAll('[data-acao="est-marcar"]')].map((c) => c.dataset.op);
+      ctx.estado.marcadas = alvo.checked ? new Set(caixas) : new Set();
+      ctx.estado.moverAberto = false;
+      acoes.redesenhar('[data-acao="est-marcar-todas"]');
+    }
+    if (alvo.dataset.acao === 'est-desmarcar') { ctx.estado.marcadas = new Set(); ctx.estado.moverAberto = false; acoes.redesenhar(null); }
+    if (alvo.dataset.acao === 'est-mover-abrir') { ctx.estado.moverAberto = !ctx.estado.moverAberto; ctx.estado.moverDestino = ''; acoes.redesenhar(null); }
+    if (alvo.dataset.acao === 'est-mover-escolher') { ctx.estado.moverDestino = alvo.dataset.grupo; acoes.redesenhar('[data-acao="est-mover-aplicar"]'); }
+    if (alvo.dataset.acao === 'est-mover-cancelar') { ctx.estado.moverAberto = false; acoes.redesenhar('[data-acao="est-mover-abrir"]'); }
+    if (alvo.dataset.acao === 'est-mover-aplicar' && ctx.estado.moverDestino) moverLote(ctx.estado.moverDestino, ctx, acoes);
+    if (alvo.dataset.acao === 'est-mover') moverLote(alvo.dataset.grupo, ctx, acoes);
+    if (alvo.dataset.acao === 'est-excluir-lote') excluirLote(ctx, acoes);
+    if (alvo.dataset.acao === 'est-inserir') {
+      const a = acharOp(ctx.plano, alvo.dataset.op);
+      if (a) inserirAbaixo(a.op, a.g, ctx, acoes);
+    }
     if (alvo.dataset.acao === 'est-excluir-op') excluirOperacao(alvo.dataset.op, ctx, acoes);
     if (alvo.dataset.acao === 'est-menu') {
       const caixa = alvo.getBoundingClientRect();
@@ -489,6 +619,7 @@ window.Telas.operacoesPlano = (function () {
       }
       op.dap = n === null ? null : Math.round(n);
       if (op.dap !== null) delete op.faseSemDap; // com DAP, a fase volta a vir dele
+      delete op.abaixoDe; // DAP novo: a linha vai para o lugar dela pelo DAP
       if (op.dap !== null && op.dap <= 0) op.fenologia = ''; // pré-plantio e plantio: sem fenologia
     } else if (campo === 'est-fenologia') {
       op.fenologia = e.target.value;
