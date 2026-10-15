@@ -2587,7 +2587,7 @@ window.Telas.planoOperacoes = (function () {
     if (!n) return;
     Modal.confirmar({
       titulo: `Excluir o plantio de ${n} ${n === 1 ? 'talhão' : 'talhões'}?`,
-      texto: `Variedade, data de plantio, população, germinação e TSI ${n === 1 ? 'desse talhão serão apagadas' : 'desses talhões serão apagadas'}. Essa ação não pode ser desfeita.`,
+      texto: `Variedade, data de plantio, população e germinação ${n === 1 ? 'desse talhão serão apagadas' : 'desses talhões serão apagadas'}. Essa ação não pode ser desfeita.`,
       botoes: [{ rotulo: 'Cancelar' }, { rotulo: 'Excluir plantio', classe: 'perigo', acao: () => {
         alvo.forEach((t) => { delete op.plantio[t]; if (op.germinacoes) delete op.germinacoes[t]; });
         // Sem variedade, o talhão sai também do TSI (grupo Tratamento de semente); TSI sem talhão deixa de existir

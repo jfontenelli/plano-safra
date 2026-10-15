@@ -167,21 +167,6 @@ window.DADOS = {
     { fertilidade: true, classe: 'Micronutriente', produto: 'Nutre Fer',                    principioAtivo: 'Ferro',               unidade: 'L' },
     { fertilidade: true, classe: 'Micronutriente', produto: 'Nutre Cobre',                  principioAtivo: 'Cobre',               unidade: 'L' },
     { fertilidade: true, classe: 'Micronutriente', produto: 'Nutre Zinco',                  principioAtivo: 'Zinco',               unidade: 'L' },
-    // Tratamento de sementes industrial (TSI), soja. tsi: true = só aparece no grupo Tratamento de semente.
-    // classe = grupo do produto no TSI. Dose por 100 kg de sementes, dentro da faixa de bula dos
-    // produtos (Agrofit/MAPA e bulas dos fabricantes); "Co + Mo", pó secante e grafite são genéricos.
-    // Valores ilustrativos para o protótipo: conferir com o agrônomo antes de usar.
-    { tsi: true, classe: 'Inseticida',   produto: 'Standak Top',         principioAtivo: 'Fipronil + Piraclostrobina + Tiofanato-metílico', unidade: 'mL/100 kg' },
-    { tsi: true, classe: 'Inseticida',   produto: 'Cruiser 350 FS',      principioAtivo: 'Tiametoxam',                     unidade: 'mL/100 kg' },
-    { tsi: true, classe: 'Inseticida',   produto: 'CropStar',            principioAtivo: 'Imidacloprido + Tiodicarbe',     unidade: 'mL/100 kg' },
-    { tsi: true, classe: 'Fungicida',    produto: 'Maxim Advanced',      principioAtivo: 'Azoxistrobina + Fludioxonil + Metalaxil-M', unidade: 'mL/100 kg' },
-    { tsi: true, classe: 'Fungicida',    produto: 'Vitavax-Thiram 200 SC', principioAtivo: 'Carboxina + Tiram',            unidade: 'mL/100 kg' },
-    { tsi: true, classe: 'Nematicida',   produto: 'Avicta 500 FS',       principioAtivo: 'Abamectina',                     unidade: 'mL/100 kg' },
-    { tsi: true, classe: 'Inoculante',   produto: 'Masterfix L Soja',    principioAtivo: 'Bradyrhizobium japonicum',       unidade: 'mL/100 kg' },
-    { tsi: true, classe: 'Fertilizante', produto: 'Co + Mo',             principioAtivo: 'Cobalto + Molibdênio',           unidade: 'mL/100 kg' },
-    { tsi: true, classe: 'Polímero',     produto: 'Disco AG Red L-280',  principioAtivo: '',                               unidade: 'mL/100 kg' },
-    { tsi: true, classe: 'Pó secante',   produto: 'Talco agrícola',      principioAtivo: '',                               unidade: 'g/100 kg' },
-    { tsi: true, classe: 'Grafite',      produto: 'Grafite em pó',       principioAtivo: '',                               unidade: 'g/100 kg' },
     { classe: 'Fungicida',  produto: 'Fox Xpro',            principioAtivo: 'Bixafen + Protioconazol + Trifloxistrobina', unidade: 'L' },
     { classe: 'Fungicida',  produto: 'Fox',                 principioAtivo: 'Trifloxistrobina + Protioconazol',           unidade: 'L' },
     { classe: 'Fungicida',  produto: 'Priori Xtra',         principioAtivo: 'Azoxistrobina + Ciproconazol',               unidade: 'L' },
@@ -213,8 +198,8 @@ window.DADOS = {
   fenologia: ['VE', 'VC', 'V1', 'V2', 'V3', 'V4', 'V5', 'V6', 'R1', 'R2', 'R3', 'R4', 'R5', 'R6', 'R7', 'R8'],
 
   // Tipos de grupo de operação (definem as informações mínimas pedidas no grupo)
-  // Fertilidade junta corretivos e fertilizantes; Tratamento de sementes = TSI (só talhão com variedade)
-  tiposGrupo: ['Sementes', 'Tratamento de sementes', 'Defensivos', 'Fertilidade', 'Colheita'],
+  // Fertilidade junta corretivos e fertilizantes. O Tratamento de sementes (TSI) saiu por enquanto: rascunhos/tsi/
+  tiposGrupo: ['Sementes', 'Defensivos', 'Fertilidade', 'Colheita'],
 
   // Modelo de operações (levantado com clientes). Usado pelo "Usar modelo" e pelos planos de exemplo.
   // prazo: prazo para encerramento da OS, em dias (DECISOES 4.3: preparo, calcário, fósforo, 1ª dessecação e
@@ -228,10 +213,6 @@ window.DADOS = {
   modeloOperacoes: [
     { nome: 'Semente', tipo: 'Sementes', operacoes: [
       { nome: 'Plantio', dap: 0, prazo: 3 }
-    ] },
-    // TSI: DAP −5 como sugestão (tratamento feito alguns dias antes do plantio; fenologia Pré-plantio)
-    { nome: 'Tratamento de semente', tipo: 'Tratamento de sementes', operacoes: [
-      { nome: 'Tratamento de sementes (TSI)', dap: -5 }
     ] },
     // Fenologia pré-preenchida (DAP positivo), pela literatura para soja no MT (cultivares de 104 a 118 dias):
     // herbicida pós-emergente em V2 e V4 (glifosato até V4); fungicida preventivo da ferrugem a partir de R1, com
@@ -323,13 +304,6 @@ window.DADOS = {
             ajustes: { T07: { doses: { 'KCl 00-00-60': 160 } } } },
           'Adubação de plantio': op([['MAP 11-52-00', 180]]),
           '2ª Adubação potássica': { fenologia: 'V4', produtos: [['KCl 00-00-60', 80]], talhoes: ['T05', 'T06', 'T07', 'T08'] },
-          // TSI 1 nos talhões sem histórico de nematoide; TSI 2 com nematicida (T06 a T08)
-          'Tratamento de sementes (TSI)': { tsi: [
-            { produtos: [['Standak Top', 200], ['Masterfix L Soja', 200], ['Co + Mo', 100], ['Disco AG Red L-280', 100]],
-              talhoes: ['T01', 'T02', 'T03', 'T04', 'T05'] },
-            { produtos: [['Maxim Advanced', 100], ['Cruiser 350 FS', 200], ['Avicta 500 FS', 100], ['Masterfix L Soja', 200], ['Disco AG Red L-280', 100]],
-              talhoes: ['T06', 'T07', 'T08'] }
-          ] },
           'Plantio': { germinacao: 95, plantio: [
             { talhao: 'T01', variedade: 'BMX Foco IPRO',   data: '2026-09-22', populacao: 300 },
             { talhao: 'T02', variedade: 'BMX Foco IPRO',   data: '2026-09-22', populacao: 300 },

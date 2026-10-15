@@ -68,7 +68,7 @@ Agrônomo da fazenda e líder de operações podem ser a mesma pessoa, conforme 
 - **Guia Planos de Safra** (detalhe na Tela 03):
   - **Planejamento das Fazendas**: Sem plano, Em construção (inclui Não iniciado) e Publicado, em "X de N" com barra e %.
   - **Quem entra na conta:** cada fazenda conta uma vez por safra e uma vez por safrinha. Cada safra ou safrinha **cadastrada** no ano agrícola, mesmo sem plano, faz entrar **todas as fazendas de todas as empresas**; quem não tem plano nela aparece como **Sem plano**. Fazendas de cada empresa: nos dados de exemplo.
-  - **Tabela Planos de Safra** (botão "+ Criar Plano Safra" no topo): uma linha por fazenda e safra; colunas Empresa, Fazenda, Safra, Cultura, Área (ha), Sementes, TSI, Fertilidade, Defensivos, Status, Ações. Ordena por qualquer coluna (seta no título; vazios no fim).
+  - **Tabela Planos de Safra** (botão "+ Criar Plano Safra" no topo): uma linha por fazenda e safra; colunas Empresa, Fazenda, Safra, Cultura, Área (ha), Sementes, Fertilidade, Defensivos, Status, Ações. Ordena por qualquer coluna (seta no título; vazios no fim).
   - **% de cada grupo, por área:** em cada operação, a área dos talhões com recomendação completa (no Sementes, variedade e data) ÷ área de cultivo; o grupo é a média das operações. A Colheita não entra (vem do plantio).
   - Linha **Sem plano**: o ⋯ tem **Criar plano**, que abre o modal com safra, empresa e fazenda preenchidas.
   - Saíram: o gráfico de área planejada por empresa, o % concluído e a lista antiga (Atividade, Última atualização e Atualizado por ficam no Histórico). Custo estimado e Receita projetada voltam se os usuários pedirem.
@@ -128,12 +128,12 @@ Agrônomo da fazenda e líder de operações podem ser a mesma pessoa, conforme 
 - **Etapa Operações** (docs/telas/04.0-operacoes.md): revisa a estrutura do plano vinda do modelo (grupo de operação, operação, DAP, fenologia e previsão de conclusão). É opcional: quem não quiser mexer segue direto para o Planejamento. Sem resumo nem situação (isso fica no Calendário, depois de planejar).
 - O plano também tem produtividade esperada (na unidade da cultura) e preço esperado, opcionais, por cultura, valendo para aquela fazenda e safra. Alimentam a receita projetada. Local a refinar com usuários.
 - Previsão de cumprimento no modelo: preparo, calcário, fósforo, 1ª dessecação e 1ª metade do K = 5 dias (levantado com clientes); demais: plantio 3, defensivos 2, corretivo/fertilizante 2; colheita 10 (valor de exemplo).
-- Modelo de operações no protótipo: **Semente · Tratamento de semente · Defensivo · Fertilidade · Colheita** (Preparo do solo, levantado com clientes, fica fora por enquanto). As duas dessecações pré-plantio são do grupo Defensivos.
+- Modelo de operações no protótipo: **Semente · Defensivo · Fertilidade · Colheita** (Tratamento de semente: fora do protótipo por enquanto (15/10/2026); guardado em rascunhos/tsi/ (marca no git `tsi-15-10-2026`)) (Preparo do solo, levantado com clientes, fica fora por enquanto). As duas dessecações pré-plantio são do grupo Defensivos.
 - **Grupo Colheita:** DAP pelo ciclo da variedade (data de plantio + ciclo, talhão a talhão), sem fenologia e previsão de conclusão editável. Não aparece nas guias do Planejamento.
 - **Grupo sem operação continua no plano** (e nas guias do Planejamento): ao excluir ou mover todas as operações de um grupo, ele fica, para receber operações novas. Só "Sem grupo" some quando fica vazio. Para tirar um grupo, use "Excluir grupo".
 - **Excluir um grupo mantém as operações**: elas ficam "Sem grupo" até o usuário escolher o grupo de cada uma (na etapa Operações); sem grupo, a operação não aparece no Planejamento. Vale na etapa Operações e no Planejamento (botão direito na guia).
-- **Plantio:** DAP 0 fixo. **TSI:** DAP −5 sugerido no modelo (Pré-plantio).
-- **Tipos de grupo: Sementes, Tratamento de sementes, Defensivos, Fertilidade e Colheita.** O grupo **Fertilidade** junta corretivos e fertilizantes (inclusive adubação foliar). O grupo **Tratamento de sementes** tem o TSI. No protótipo, as guias do Planejamento são Semente · Tratamento de semente · Defensivo · Fertilidade.
+- **Plantio:** DAP 0 fixo.
+- **Tipos de grupo: Sementes, Defensivos, Fertilidade e Colheita.** O grupo **Fertilidade** junta corretivos e fertilizantes (inclusive adubação foliar). No protótipo, as guias do Planejamento são Semente · Defensivo · Fertilidade. O tipo **Tratamento de sementes** (TSI) está fora do protótipo por enquanto (15/10/2026); guardado em rascunhos/tsi/ (marca no git `tsi-15-10-2026`).
 - O menu Cadastros não é prioridade agora.
 - Etapa Planejamento refina talhão a talhão: cada talhão tem o seu planejamento, e o agrônomo pode aplicar ou copiar para vários talhões de uma vez.
 - Programação, execução e gestão da OS ficam em outro item do menu lateral (Ordens de Serviço).
@@ -156,7 +156,7 @@ Agrônomo da fazenda e líder de operações podem ser a mesma pessoa, conforme 
 
 Detalhe da tela: docs/telas/04.2-operacoes-sementes.md.
 
-- Planejamento do plantio, por talhão: **variedade, data de plantio e população de plantas**, numa tabela só. O **tratamento de sementes (TSI)** fica num grupo próprio, logo depois (4.4.1).
+- Planejamento do plantio, por talhão: **variedade, data de plantio e população de plantas**, numa tabela só. O **tratamento de sementes (TSI)** está fora do protótipo por enquanto (15/10/2026); guardado em rascunhos/tsi/ (marca no git `tsi-15-10-2026`) (4.4.1).
 - **Data de plantio planejada por dia** (data exata por talhão). A janela de plantio recomendada da variedade é só referência: data fora dela gera alerta, sem bloquear.
 - A previsão de colheita (4.3) é agregada por **decêndio**, em hectares, para o agrônomo ver se a colheita fica concentrada e decidir trocar variedade ou data. Capacidade de colheita fica fora da v1.
 - **Mapa de variedades da fazenda**: os talhões pintados pela variedade, com a área total de cada variedade, para visualizar e rotacionar as variedades. O plano é por fazenda, então o mapa é por fazenda (sem visão por empresa). Clicar no talhão abre a definição da variedade.
@@ -166,12 +166,8 @@ Detalhe da tela: docs/telas/04.2-operacoes-sementes.md.
 - **Sementes = população planejada × área ÷ germinação. Bags = sementes ÷ 5.000.000** (1 bag de soja = 5 milhões de sementes).
 ### 4.4.1 Tratamento de sementes (grupo Tratamento de semente)
 
-Detalhe da tela: docs/telas/04.4-operacoes-tratamento-sementes.md.
+**Fora do protótipo por enquanto** (decidido em 15/10/2026). As regras, o detalhe da tela (antigo docs/telas/04.4) e onde paramos estão em `rascunhos/tsi/README.md`; o protótipo como estava, na marca do git `tsi-15-10-2026`. Ponto a decidir ao retomar: como calcular a quantidade de TSI (dose por 100 kg de semente; falta o peso da semente, ex.: PMS por variedade).
 
-- Grupo do tipo **Tratamento de sementes**, guia **Tratamento de semente**, logo depois da guia Semente. Operação **Tratamento de sementes (TSI)**, com DAP no cabeçalho (como no Defensivo), sem fenologia; o modelo sugere **DAP −5**.
-- **Tratamento de sementes industrial (TSI)**: receita com nome (TSI 1, TSI 2…), só para talhão com variedade, no padrão da recomendação agronômica (composição de produtos = identidade; dose pode variar por talhão), aplicada **por talhão** (pode mudar após os testes). Composta por grupos de produto: fertilizante, fungicida, inseticida, nematicida, inoculante, polímero, pó secante e grafite.
-- Unidade da dose de TSI vem do cadastro do produto; a unidade usada pelos clientes (por 100 kg de sementes, por bag ou por hectare) e a entrada do PMS no plano serão definidas nos testes. Sem cálculo de quantidade de TSI no plano por enquanto.
-- Excluir o plantio de um talhão (sem variedade) tira o talhão também do TSI.
 ### 4.5 Fertilidade (corretivos e fertilizantes)
 
 Detalhe da tela: docs/telas/04.3-operacoes-fertilidade.md.

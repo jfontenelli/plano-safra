@@ -1,0 +1,867 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Orçamento de Insumos · design</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script src="dados-design.js"></script>
+<script src="dash-local.js"></script>
+<style>
+:root { --color-fg: #1a1f1c; --color-fg-muted: #5f6b64; --color-panel: #ffffff; --color-border-line: #e3e7e4; --color-bad: #c0392b;
+  --cds-border: #e3e7e4; --cds-radius: 8px; --cds-shadow-popover: 0 6px 20px rgba(16,24,20,.14); --cds-surface-popover: #ffffff;
+  --cds-text-secondary: #5f6b64; --cds-pad-xs: 6px; --cds-pad-sm: 10px; --cds-dur-slow: .3s; --cds-font-size-caption: 13px;
+  --font-anthropic-sans: "Segoe UI", system-ui, sans-serif; }
+html, body { margin: 0; background: #f6f7f6; }
+/* no claude.ai a área do dashboard é um container; aqui também, para as regras @container funcionarem */
+#dash-root { container-type: inline-size; }
+</style>
+</head>
+<body>
+<!-- Página do Claude Design (15/10/2026). Mudanças: o dash-local.js substitui o ambiente do claude.ai; #dash-root como container; corrigida a frase de resumo (mostrava [object HTMLElement]); filtros lado a lado (a grade com auto-fit + auto não vale em CSS e empilhava os filtros). -->
+<div id="dash-root">
+<style>
+#dash-root { --dash-gutter: 0; }
+.su {
+  --su-g: #13603f; --su-g2: #187a4f; --su-nav: #0e4a31; --su-nav2: #0a3a26; --su-y: #f5c400;
+  --su-acc: color-mix(in srgb, #13603f 72%, var(--color-fg));
+  --su-tint: color-mix(in srgb, #13603f 9%, var(--color-panel));
+  --su-tint2: color-mix(in srgb, #13603f 16%, var(--color-panel));
+  --su-amber: color-mix(in srgb, #c98a00 80%, var(--color-fg));
+  --su-amber-t: color-mix(in srgb, #f5c400 18%, var(--color-panel));
+  --su-bad-t: color-mix(in srgb, #c0392b 12%, var(--color-panel));
+  --su-line: var(--color-border-line);
+  --su-r: 10px;
+  container-type: inline-size;
+  font-family: "Segoe UI", system-ui, var(--font-anthropic-sans), sans-serif;
+  font-size: 15px; color: var(--color-fg);
+  display: grid; grid-template-columns: 1fr; min-height: 100%;
+}
+.su * { box-sizing: border-box; }
+.su .num, .su td.n, .su th.n { font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+
+/* menu lateral */
+.su-nav { display: none; background: linear-gradient(180deg, var(--su-nav), var(--su-nav2)); color: #e9f3ee; padding: 22px 14px; font-size: 15px; }
+.su-brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 20px; color: #fff; padding: 0 8px 26px; }
+.su-brand svg { flex: none; }
+.su-nav ul { list-style: none; margin: 0; padding: 0; }
+.su-nav li { padding: 10px 12px; border-radius: 8px; display: flex; align-items: center; gap: 10px; color: #d7e8df; }
+.su-nav .grp { color: #fff; font-weight: 600; }
+.su-nav .sub { margin-left: 22px; border-left: 1px solid rgba(255,255,255,.18); padding-left: 10px; }
+.su-nav .sub li { padding: 9px 12px; }
+.su-nav .on { background: var(--su-g2); color: #fff; font-weight: 600; box-shadow: inset 3px 0 0 var(--su-y); }
+.su-nav .foot { margin-top: 40px; border-top: 1px solid rgba(255,255,255,.15); padding-top: 14px; }
+.su-nav .avatar { width: 30px; height: 30px; border-radius: 50%; background: rgba(255,255,255,.18); display: grid; place-items: center; font-weight: 700; color: #fff; }
+@container (min-width: 1100px) {
+  .su { grid-template-columns: 248px 1fr; }
+  .su-nav { display: block; }
+}
+
+.su-main { min-width: 0; padding: 22px clamp(14px, 3cqw, 36px) 40px; }
+.su-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 16px; }
+.su-head h1 { margin: 0; font-size: 30px; font-weight: 700; letter-spacing: -.01em; }
+.su-tag { position: relative; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--su-acc); background: var(--su-tint); border-radius: 999px; padding: 3px 10px; cursor: default; outline: none; }
+.su-tag .tip { position: absolute; left: 0; top: calc(100% + 6px); width: min(320px, 80cqw); background: var(--cds-surface-popover); border: 1px solid var(--cds-border); border-radius: var(--cds-radius); box-shadow: var(--cds-shadow-popover); padding: 8px 10px; color: var(--color-fg); font-size: 13px; line-height: 1.4; display: none; z-index: 5; }
+.su-tag:hover .tip, .su-tag:focus .tip { display: block; }
+.su-take { margin: 6px 0 0; color: var(--color-fg-muted); font-size: 15px; line-height: 1.45; max-width: 75ch; min-height: 1.45em; }
+.su-take b { color: var(--color-fg); font-weight: 600; }
+
+/* superfície única */
+.su-surface { margin-top: 18px; background: var(--color-panel); border: 1px solid var(--su-line); border-radius: var(--su-r); }
+.su-sec { padding: 18px 20px; border-top: 1px solid var(--su-line); }
+.su-sec:first-child { border-top: 0; }
+.su-sec h2 { margin: 0; font-size: 17px; font-weight: 600; }
+.su-sec .note { margin: 3px 0 0; color: var(--color-fg-muted); font-size: 13px; }
+
+/* filtros e parâmetros */
+.su-filters { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; align-items: end; }
+.su-field { display: grid; gap: 5px; font-size: 13px; color: var(--color-fg-muted); font-weight: 600; min-width: 0; }
+.su select, .su input[type=text], .su input[type=search] {
+  font: inherit; font-size: 15px; color: var(--color-fg); background: var(--color-panel);
+  border: 1px solid var(--su-line); border-radius: 8px; padding: 8px 10px; min-width: 0; width: 100%;
+}
+.su select:focus, .su input:focus { outline: 2px solid color-mix(in srgb, var(--su-g) 45%, transparent); outline-offset: 1px; }
+.su-clear { font: inherit; font-weight: 600; color: var(--su-acc); background: none; border: 0; padding: 9px 4px; cursor: pointer; white-space: nowrap; }
+.su-clear:hover { text-decoration: underline; }
+.su-params { display: flex; flex-wrap: wrap; gap: 12px 28px; align-items: flex-end; background: var(--su-tint); }
+.su-params .lbl { font-size: 13px; font-weight: 600; color: var(--su-acc); width: 100%; display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+.su-params .lbl span { font-weight: 400; color: var(--color-fg-muted); }
+.su-pgroup { display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap; }
+.su-pgroup .cname { font-weight: 600; font-size: 14px; padding: 0 2px 9px 0; min-width: 44px; }
+.su-pin { display: grid; gap: 4px; font-size: 12px; color: var(--color-fg-muted); }
+.su-pin .box { display: flex; align-items: center; border: 1px solid var(--su-line); border-radius: 8px; background: var(--color-panel); }
+.su-pin .box input { border: 0 !important; width: 74px !important; text-align: right; padding: 7px 4px 7px 8px !important; background: transparent !important; }
+.su-pin .box .u { padding: 0 9px 0 2px; color: var(--color-fg-muted); font-size: 13px; white-space: nowrap; }
+.su-pin .box select { border: 0; border-left: 1px solid var(--su-line); border-radius: 0 8px 8px 0; width: auto; padding: 7px 6px; font-size: 13px; background: transparent; }
+.su-sep { width: 1px; align-self: stretch; background: var(--su-line); }
+
+/* resumo */
+.su-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr)); gap: 0; padding: 0; }
+.su-kpi { padding: 16px 20px; border-left: 1px solid var(--su-line); min-height: 128px; }
+.su-kpi:first-child { border-left: 0; }
+.su-kpi .k { font-size: 13px; font-weight: 600; color: var(--color-fg-muted); }
+.su-kpi .v { font-size: 27px; font-weight: 700; margin-top: 6px; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.su-kpi .v small { font-size: 15px; font-weight: 600; color: var(--color-fg-muted); }
+.su-kpi .s { font-size: 13px; color: var(--color-fg-muted); margin-top: 6px; line-height: 1.4; }
+.su-kpi .s b { color: var(--color-fg); font-weight: 600; }
+.su-kpi.buy .v { color: var(--su-amber); }
+.su-sc { display: grid; gap: 6px; margin-top: 6px; }
+.su-sc .row { display: flex; align-items: baseline; gap: 8px; }
+.su-sc .row .c { font-size: 13px; color: var(--color-fg-muted); width: 44px; }
+.su-sc .row .x { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.su-sc .row .p { font-size: 12px; color: var(--color-fg-muted); }
+.su-meter { height: 6px; background: var(--su-line); border-radius: 3px; margin-top: 8px; overflow: hidden; display: flex; }
+.su-meter i { display: block; height: 100%; }
+
+/* onde está o dinheiro */
+.su-where { display: grid; grid-template-columns: 1fr; gap: 0; padding: 0; }
+.su-where > div { padding: 18px 20px; min-width: 0; }
+.su-where > div + div { border-top: 1px solid var(--su-line); }
+@container (min-width: 980px) {
+  .su-where { grid-template-columns: 1.35fr 1fr; }
+  .su-where > div + div { border-top: 0; border-left: 1px solid var(--su-line); }
+}
+.su-strip { display: flex; height: 12px; border-radius: 6px; overflow: hidden; margin: 14px 0 8px; gap: 2px; }
+.su-strip i { display: block; height: 100%; }
+.su-legend { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 13px; color: var(--color-fg-muted); margin-bottom: 8px; }
+.su-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.su-legend i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+
+table.su-t { width: 100%; border-collapse: collapse; font-size: 14px; }
+.su-t th { text-align: left; font-size: 12.5px; font-weight: 600; color: var(--color-fg-muted); padding: 8px 10px; border-bottom: 1px solid var(--su-line); white-space: nowrap; background: var(--color-panel); position: sticky; top: 0; z-index: 1; }
+.su-t td { padding: 9px 10px; border-bottom: 1px solid color-mix(in srgb, var(--su-line) 70%, transparent); vertical-align: middle; }
+.su-t th button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; display: inline-flex; gap: 4px; align-items: center; }
+.su-t th button:hover { color: var(--color-fg); }
+.su-t th .ar { opacity: .35; font-size: 10px; }
+.su-t th[aria-sort] .ar { opacity: 1; color: var(--su-acc); }
+.su-t tr.g td { background: var(--su-tint); font-weight: 600; cursor: pointer; border-bottom: 1px solid var(--su-line); }
+.su-t tr.g:hover td { background: var(--su-tint2); }
+.su-t tr.e td { background: color-mix(in srgb, var(--color-fg) 4%, var(--color-panel)); font-weight: 700; font-size: 13px; color: var(--color-fg-muted); letter-spacing: .02em; }
+.su-t tr.r { cursor: pointer; }
+.su-t tr.r:hover td { background: color-mix(in srgb, var(--color-fg) 3.5%, transparent); }
+.su-t tr.r.sel td { background: var(--su-tint2); }
+.su-t tr.r td:first-child { padding-left: 34px; }
+.su-t .caret { display: inline-block; width: 18px; color: var(--su-acc); transition: transform .15s; }
+.su-t tr.open .caret { transform: rotate(90deg); }
+.su-t .muted { color: var(--color-fg-muted); font-weight: 400; font-size: 12.5px; }
+.su-t .cnt { color: var(--color-fg-muted); font-weight: 400; margin-left: 6px; font-size: 13px; }
+.su-t .sw { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 8px; vertical-align: 0; }
+.su-share { display: flex; align-items: center; gap: 8px; justify-content: flex-end; }
+.su-share .bar { width: 70px; height: 6px; border-radius: 3px; background: var(--su-line); overflow: hidden; }
+.su-share .bar i { display: block; height: 100%; border-radius: 3px; }
+
+.su-farms { display: grid; gap: 12px; margin-top: 14px; position: relative; }
+.su-farm { display: grid; grid-template-columns: minmax(110px, 34%) 1fr; gap: 10px; align-items: center; cursor: pointer; border-radius: 6px; padding: 2px 0; }
+.su-farm .nm { font-size: 14px; font-weight: 600; line-height: 1.2; }
+.su-farm .nm small { display: block; font-weight: 400; color: var(--color-fg-muted); font-size: 12px; }
+.su-farm .tr { position: relative; height: 26px; }
+.su-farm .tr i { position: absolute; left: 0; top: 4px; height: 18px; border-radius: 4px; background: var(--su-g); opacity: .85; }
+.su-farm.dim .tr i { opacity: .25; }
+.su-farm:hover .tr i { opacity: 1; }
+.su-farm .tr span { position: absolute; top: 4px; font-size: 13px; font-variant-numeric: tabular-nums; white-space: nowrap; line-height: 18px; }
+.su-farm .tr span b { font-weight: 600; }
+.su-avg { font-size: 12px; color: var(--color-fg-muted); margin-top: 10px; }
+.su-tip { position: absolute; pointer-events: none; background: var(--cds-surface-popover); border: 1px solid var(--cds-border); border-radius: var(--cds-radius); box-shadow: var(--cds-shadow-popover); padding: var(--cds-pad-xs) var(--cds-pad-sm); font-size: 12.5px; line-height: 1.5; z-index: 6; display: none; min-width: 180px; }
+.su-tip .h { color: var(--cds-text-secondary); }
+.su-tip .ln { display: flex; justify-content: space-between; gap: 14px; font-variant-numeric: tabular-nums; }
+
+/* detalhe */
+.su-tabs { display: flex; gap: 6px; border-bottom: 1px solid var(--su-line); padding: 0 20px; }
+.su-tabs button { font: inherit; font-weight: 600; font-size: 15px; color: var(--color-fg-muted); background: none; border: 0; padding: 14px 6px 11px; margin-right: 14px; border-bottom: 3px solid transparent; cursor: pointer; }
+.su-tabs button[aria-selected=true] { color: var(--su-acc); border-bottom-color: var(--su-g); }
+.su-tools { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: center; padding: 14px 20px 10px; }
+.su-tools input[type=search] { max-width: 320px; }
+.su-chip { font: inherit; font-size: 13px; font-weight: 600; border: 1px solid var(--su-line); background: var(--color-panel); color: var(--color-fg); border-radius: 999px; padding: 6px 12px; cursor: pointer; }
+.su-chip[aria-pressed=true] { background: var(--su-amber-t); border-color: color-mix(in srgb, #c98a00 45%, transparent); color: var(--su-amber); }
+.su-tools .grow { flex: 1; }
+.su-tools .link { font: inherit; font-size: 13px; color: var(--su-acc); background: none; border: 0; cursor: pointer; font-weight: 600; }
+.su-tools .info { font-size: 13px; color: var(--color-fg-muted); }
+.su-dgrid { display: grid; grid-template-columns: 1fr; }
+.su-dgrid.with { grid-template-columns: 1fr; }
+@container (min-width: 1180px) { .su-dgrid.with { grid-template-columns: minmax(0, 1fr) 400px; } }
+.su-scroll { max-height: 640px; overflow: auto; border-top: 1px solid var(--su-line); }
+.su-st { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 600; border-radius: 999px; padding: 2px 9px; white-space: nowrap; }
+.su-st.ok { background: var(--su-tint2); color: var(--su-acc); }
+.su-st.part { background: var(--su-amber-t); color: var(--su-amber); }
+.su-st.zero { background: var(--su-bad-t); color: var(--color-bad); }
+.su-buy { color: var(--su-amber); font-weight: 600; }
+.su-cmp { display: flex; align-items: center; gap: 8px; justify-content: flex-end; }
+.su-cmp .trk { position: relative; width: 90px; height: 8px; background: var(--su-line); border-radius: 4px; }
+.su-cmp .trk i { position: absolute; left: 0; top: 0; height: 100%; border-radius: 4px; background: var(--su-g); opacity: .75; }
+.su-cmp .trk i.hi { background: var(--su-amber); opacity: 1; }
+.su-cmp .trk b { position: absolute; top: -3px; width: 2px; height: 14px; background: var(--color-fg); }
+.su-cmp .d { font-size: 12px; width: 48px; text-align: right; color: var(--color-fg-muted); }
+.su-cmp .d.hi { color: var(--su-amber); font-weight: 600; }
+.su-empty { padding: 28px 20px; color: var(--color-fg-muted); text-align: center; }
+.su-more td { text-align: center; }
+.su-more button { font: inherit; font-size: 13px; color: var(--su-acc); font-weight: 600; background: none; border: 0; cursor: pointer; }
+
+.su-panel { border-top: 1px solid var(--su-line); padding: 18px 20px; min-width: 0; }
+@container (min-width: 1180px) { .su-panel { border-top: 1px solid var(--su-line); border-left: 1px solid var(--su-line); } }
+.su-panel .ph { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; }
+.su-panel h3 { margin: 0; font-size: 19px; font-weight: 700; }
+.su-panel .sub { color: var(--color-fg-muted); font-size: 13px; margin-top: 3px; }
+.su-panel .x { font: inherit; font-size: 20px; line-height: 1; background: none; border: 0; color: var(--color-fg-muted); cursor: pointer; padding: 2px 6px; border-radius: 6px; }
+.su-panel .x:hover { background: var(--su-tint); }
+.su-pstats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 16px; margin: 16px 0; padding: 12px 0; border-top: 1px solid var(--su-line); border-bottom: 1px solid var(--su-line); }
+.su-pstats .k { font-size: 12px; color: var(--color-fg-muted); }
+.su-pstats .v { font-size: 18px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.su-panel table.su-t th { position: static; }
+.su-panel .pg td { background: var(--su-tint); font-weight: 600; font-size: 13px; }
+.su-panel .pnote { font-size: 12.5px; color: var(--color-fg-muted); margin-top: 12px; line-height: 1.45; }
+
+.su .hide-n { display: none; }
+@container (min-width: 760px) { .su .hide-n { display: table-cell; } }
+.su .dash-skeleton { min-height: 1.2em; }
+.su [data-dash-source-state=refreshing] { opacity: .5; transition: opacity var(--cds-dur-slow); }
+.su-fail { display: flex; align-items: center; justify-content: center; gap: 8px; color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); padding: 24px; }
+.su-fail::before { content: ""; width: .375rem; height: .375rem; border-radius: 50%; background: var(--color-bad); }
+</style>
+
+<div class="su">
+  <aside class="su-nav" aria-label="Menu">
+    <div class="su-brand">
+      <svg width="34" height="30" viewBox="0 0 34 30" aria-hidden="true"><rect x="2" y="9" width="24" height="17" rx="3" fill="#e9f3ee"/><rect x="6" y="5" width="24" height="17" rx="3" fill="none" stroke="#e9f3ee" stroke-width="2"/><path d="M26 2 L32 0 L31 8 Z" fill="#f5c400"/></svg>
+      UniSystem
+    </div>
+    <ul>
+      <li class="grp">🌱 Plano de Safra</li>
+      <li><ul class="sub">
+        <li>Visão Geral</li>
+        <li>Planejamento</li>
+        <li>Calendário Agrícola</li>
+        <li class="on">Suprimentos</li>
+      </ul></li>
+      <li>Ordens de Serviço</li>
+      <li>Cadastros</li>
+    </ul>
+    <ul class="foot">
+      <li>Demonstração</li>
+      <li><span class="avatar">U</span> <b>Unisystem</b></li>
+    </ul>
+  </aside>
+
+  <div class="su-main">
+    <header class="su-head" id="topo">
+      <h1>Suprimentos</h1>
+      <span class="su-tag" tabindex="0">Últimas versões publicadas <span aria-hidden="true">ⓘ</span>
+        <span class="tip" role="tooltip">Suprimentos mostra a última versão publicada de cada plano. Alterações em versões em construção aparecem aqui depois de publicadas.</span>
+      </span>
+    </header>
+    <p class="su-take dash-skeleton" id="resumo-frase" data-source="linhas talhoes estoque"></p>
+
+    <div class="su-surface">
+      <section class="su-sec" id="filtros">
+        <div class="su-filters">
+          <label class="su-field">Ano Agrícola<select id="f-ano" data-source="talhoes"></select></label>
+          <label class="su-field">Safra<select id="f-safra">
+            <option value="todas">Todas</option><option value="Safra">Safra</option><option value="Safrinha">Safrinha</option>
+          </select></label>
+          <label class="su-field">Empresa<select id="f-empresa" data-source="talhoes"></select></label>
+          <label class="su-field">Fazenda<select id="f-fazenda" data-source="talhoes"></select></label>
+          <label class="su-field">Cultura<select id="f-cultura" data-source="talhoes"></select></label>
+          <button class="su-clear" id="f-limpar" type="button">↻ Limpar filtros</button>
+        </div>
+      </section>
+
+      <section class="su-sec su-params" id="parametros">
+        <div class="lbl">Parâmetros do orçamento <span>Mude um valor e todos os números se recalculam.</span></div>
+        <div class="su-pgroup">
+          <label class="su-pin">PTAX<span class="box"><input type="text" inputmode="decimal" id="p-ptax" aria-label="PTAX"><span class="u">R$/US$</span></span></label>
+        </div>
+        <div class="su-sep"></div>
+        <div id="p-culturas" style="display:contents"></div>
+      </section>
+
+      <section class="su-sec su-kpis" id="resumo" data-source="linhas talhoes estoque">
+        <div class="su-kpi"><div class="k">Valor total</div><div class="v dash-skeleton" id="k-total"></div><div class="s" id="k-total-s"></div></div>
+        <div class="su-kpi"><div class="k">Custo por hectare</div><div class="v dash-skeleton" id="k-ha"></div><div class="s" id="k-ha-s"></div></div>
+        <div class="su-kpi"><div class="k">Custo em sacas por hectare</div><div class="su-sc dash-skeleton" id="k-sc"></div></div>
+        <div class="su-kpi buy"><div class="k">Falta comprar</div><div class="v dash-skeleton" id="k-buy"></div><div class="s" id="k-buy-s"></div><div class="su-meter" id="k-buy-m"></div></div>
+        <div class="su-kpi"><div class="k">Área considerada</div><div class="v dash-skeleton" id="k-area"></div><div class="s" id="k-area-s"></div></div>
+      </section>
+
+      <section class="su-sec su-where" id="composicao">
+        <div id="tipos" data-source="linhas">
+          <h2>Custo por tipo de insumo</h2>
+          <p class="note">Valores em R$ (US$ convertido pela PTAX). Clique num grupo para ver os subgrupos.</p>
+          <div class="su-strip" id="tipos-strip"></div>
+          <div class="su-legend" id="tipos-leg"></div>
+          <table class="su-t" id="tipos-t">
+            <thead><tr><th>Grupo / subgrupo</th><th class="n">R$/ha</th><th class="n">Valor total (R$)</th><th class="n hide-n">US$/ha</th><th class="n hide-n">Em US$</th><th class="n">% do total</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div id="fazendas" data-source="linhas talhoes">
+          <h2>Custo por fazenda</h2>
+          <p class="note">Custo por hectare (R$/ha) e valor total. Clique numa fazenda para filtrar.</p>
+          <div class="su-farms" id="farms"><div class="su-tip" id="farm-tip"></div></div>
+          <div class="su-avg" id="farms-avg"></div>
+        </div>
+      </section>
+
+      <section class="su-sec" id="detalhe" style="padding:0">
+        <div class="su-tabs" role="tablist">
+          <button role="tab" id="tab-produto" aria-selected="true">Por produto</button>
+          <button role="tab" id="tab-talhao" aria-selected="false">Por talhão</button>
+        </div>
+        <div class="su-tools">
+          <input type="search" id="q" placeholder="Buscar produto, fornecedor ou subgrupo" aria-label="Buscar">
+          <button class="su-chip" id="only-buy" aria-pressed="false" type="button">Só o que falta comprar</button>
+          <span class="grow"></span>
+          <span class="info" id="tool-info"></span>
+          <button class="link" id="exp-all" type="button">Abrir tudo</button>
+          <button class="link" id="col-all" type="button">Recolher tudo</button>
+        </div>
+        <div class="su-dgrid" id="dgrid">
+          <div class="su-scroll" id="dscroll" data-source="linhas talhoes estoque">
+            <table class="su-t" id="dt"><thead></thead><tbody></tbody></table>
+          </div>
+          <aside class="su-panel" id="panel" hidden></aside>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  // ---------- cálculo base: cada aplicação com produto, plano e valor na moeda do produto ----------
+  dash.calc('linhas', {
+    inputs: ['aplicacoes', 'produtos', 'talhoes'],
+    title: 'Aplicações com custo',
+    description: 'Cada produto aplicado em cada talhão, com a quantidade (dose × área) e o valor total na moeda do produto (quantidade × valor unitário).',
+    fn: (aplicacoes, produtos, talhoes) => {
+      const prod = new Map(produtos.map((p) => [p.produto, p]));
+      const plano = new Map(talhoes.map((t) => [t.fazenda + '|' + t.talhao + '|' + t.safra, t]));
+      return aplicacoes.map((a) => {
+        const p = prod.get(a.produto) || {};
+        const t = plano.get(a.fazenda + '|' + a.talhao + '|' + a.safra) || {};
+        const qtd = Number(a.quantidade);
+        const vu = Number(p.valor_unitario);
+        return {
+          empresa: t.empresa, fazenda: a.fazenda, talhao: a.talhao, safra: a.safra, cultura: t.cultura,
+          area_ha: Number(t.area_ha), produto: a.produto, grupo: p.grupo, subgrupo: p.subgrupo,
+          fornecedor: p.fornecedor, unidade: p.unidade, moeda: p.moeda, dose: Number(a.dose),
+          quantidade: qtd, valor_unitario: vu, valor_total: qtd * vu,
+        };
+      });
+    },
+  });
+
+  // ---------- utilidades ----------
+  const $ = (s) => document.querySelector(s);
+  const el = (tag, attrs = {}, ...kids) => {
+    const e = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs)) {
+      if (v == null || v === false) continue;
+      if (k === 'class') e.className = v;
+      else if (k === 'style') e.style.cssText = v;
+      else if (k.startsWith('on')) e.addEventListener(k.slice(2), v);
+      else e.setAttribute(k, v === true ? '' : v);
+    }
+    for (const c of kids.flat()) if (c != null && c !== false) e.append(c instanceof Node ? c : document.createTextNode(String(c)));
+    return e;
+  };
+  const NF = {};
+  const nf = (d) => (NF[d] ||= new Intl.NumberFormat('pt-BR', { minimumFractionDigits: d, maximumFractionDigits: d }));
+  const money = (v, m = 'R$', d = 0) => `${m} ${nf(d).format(v)}`;
+  const compact = (v, m = 'R$') => {
+    const a = Math.abs(v);
+    if (a >= 1e6) return `${m} ${nf(2).format(v / 1e6)} mi`;
+    if (a >= 1e4) return `${m} ${nf(0).format(v / 1e3)} mil`;
+    return money(v, m);
+  };
+  const pct = (v, d = 0) => `${nf(d).format(v * 100)}%`;
+  const qtyDec = (v) => (Math.abs(v) >= 1000 ? 0 : Math.abs(v) >= 10 ? 1 : 2);
+  const qty = (v, u) => `${nf(qtyDec(v)).format(v)} ${u}`;
+  const unitPrice = (v, m, u) => `${money(v, m, 2)}/${u}`;
+  const parseNum = (s) => { const n = Number(String(s).trim().replace(/\./g, '').replace(',', '.')); return Number.isFinite(n) ? n : null; };
+  const showNum = (n, d) => (n == null ? '' : nf(d).format(n));
+  const tipoSafra = (s) => (String(s).startsWith('Safrinha') ? 'Safrinha' : 'Safra');
+  // ano agrícola = ano de início da safra; a safrinha AA/AA pertence ao ano anterior
+  const anoAgricola = (s) => { const m = String(s).match(/(\d{2})\/(\d{2})/); if (!m) return null; const a = 2000 + Number(m[1]); return tipoSafra(s) === 'Safrinha' ? a - 1 : a; };
+  const GRUPOS = ['Sementes', 'TSI', 'Fertilidade', 'Defensivos'];
+  const GNAME = { Sementes: 'Sementes', TSI: 'Tratamento de sementes (TSI)', Fertilidade: 'Fertilidade', Defensivos: 'Defensivos' };
+  const gcolor = (g) => dash.colors[Math.max(0, GRUPOS.indexOf(g)) % dash.colors.length];
+
+  // ---------- estado da tela ----------
+  const S = {
+    tab: 'produto', q: '', onlyBuy: false, sel: null,
+    openG: new Set(), openP: new Set(['Fertilidade']), openF: new Set(),
+    sortP: { key: 'totalBRL', dir: -1 }, sortT: { key: 'talhao', dir: 1 }, limit: {},
+  };
+
+  // ---------- filtros ----------
+  const fAno = $('#f-ano'), fSafra = $('#f-safra'), fEmp = $('#f-empresa'), fFaz = $('#f-fazenda'), fCul = $('#f-cultura');
+  fAno.addEventListener('change', () => dash.setParams({ ano: fAno.value }));
+  fSafra.addEventListener('change', () => dash.setParams({ safra: fSafra.value }));
+  fEmp.addEventListener('change', () => dash.setParams({ empresa: fEmp.value || null, fazenda: null }));
+  fFaz.addEventListener('change', () => dash.setParams({ fazenda: fFaz.value || null }));
+  fCul.addEventListener('change', () => dash.setParams({ cultura: fCul.value || null }));
+  $('#f-limpar').addEventListener('click', () => dash.setParams({ safra: 'todas', empresa: null, fazenda: null, cultura: null }));
+  const fillSelect = (sel, items, value, allLabel) => {
+    const opts = (allLabel ? [new Option(allLabel, '')] : []).concat(items.map((v) => new Option(v, v)));
+    const sig = opts.map((o) => o.value).join('|');
+    if (sel.dataset.sig !== sig) { sel.replaceChildren(...opts); sel.dataset.sig = sig; }
+    sel.value = value ?? '';
+  };
+
+  // ---------- parâmetros ----------
+  const pPtax = $('#p-ptax');
+  pPtax.addEventListener('change', () => { const n = parseNum(pPtax.value); if (n && n > 0) dash.setParams({ ptax: n }); else pPtax.value = showNum(dash.params().ptax, 2); });
+  const UN = { Soja: 'sc/ha', Milho: 'sc/ha' };
+  const cultParams = (c, prm) => ({
+    prod: Number(prm['prod_' + c] ?? (c === 'Milho' ? 110 : 63)),
+    preco: Number(prm['preco_' + c] ?? (c === 'Milho' ? 55 : 122)),
+    moeda: prm['moeda_' + c] ?? 'R$',
+  });
+  const drawCultParams = (cults, prm) => {
+    const box = $('#p-culturas');
+    const sig = cults.join('|');
+    if (box.dataset.sig !== sig) {
+      box.dataset.sig = sig;
+      box.replaceChildren(...cults.map((c) => {
+        const iProd = el('input', { type: 'text', inputmode: 'decimal', 'aria-label': `Produtividade esperada ${c}`, 'data-p': 'prod_' + c });
+        const iPreco = el('input', { type: 'text', inputmode: 'decimal', 'aria-label': `Preço de venda ${c}`, 'data-p': 'preco_' + c });
+        const sMoeda = el('select', { 'aria-label': `Moeda do preço ${c}`, 'data-p': 'moeda_' + c }, new Option('R$/sc', 'R$'), new Option('US$/sc', 'US$'));
+        iProd.addEventListener('change', () => { const n = parseNum(iProd.value); if (n && n > 0) dash.setParams({ ['prod_' + c]: n }); });
+        iPreco.addEventListener('change', () => { const n = parseNum(iPreco.value); if (n && n > 0) dash.setParams({ ['preco_' + c]: n }); });
+        sMoeda.addEventListener('change', () => dash.setParams({ ['moeda_' + c]: sMoeda.value }));
+        return el('div', { class: 'su-pgroup' },
+          el('div', { class: 'cname' }, c),
+          el('label', { class: 'su-pin' }, 'Produtividade esperada', el('span', { class: 'box' }, iProd, el('span', { class: 'u' }, UN[c] || 'sc/ha'))),
+          el('label', { class: 'su-pin' }, 'Preço de venda', el('span', { class: 'box' }, iPreco, sMoeda)));
+      }));
+    }
+    for (const c of cults) {
+      const cp = cultParams(c, prm);
+      const iProd = box.querySelector(`[data-p="prod_${c}"]`), iPreco = box.querySelector(`[data-p="preco_${c}"]`), sM = box.querySelector(`[data-p="moeda_${c}"]`);
+      if (iProd !== document.activeElement) iProd.value = showNum(cp.prod, Number.isInteger(cp.prod) ? 0 : 1);
+      if (iPreco !== document.activeElement) iPreco.value = showNum(cp.preco, 2);
+      sM.value = cp.moeda;
+    }
+  };
+
+  // ---------- guias e ferramentas ----------
+  const tabP = $('#tab-produto'), tabT = $('#tab-talhao'), q = $('#q'), onlyBuy = $('#only-buy');
+  const setTab = (t) => { S.tab = t; S.sel = null; S.q = ''; q.value = ''; dash.setLink(t === 'produto' ? 'por-produto' : 'por-talhao'); redraw(); };
+  tabP.addEventListener('click', () => setTab('produto'));
+  tabT.addEventListener('click', () => setTab('talhao'));
+  q.addEventListener('input', () => { S.q = q.value.trim().toLowerCase(); drawDetail(); });
+  onlyBuy.addEventListener('click', () => { S.onlyBuy = !S.onlyBuy; drawDetail(); });
+  $('#exp-all').addEventListener('click', () => { const M = S.M; if (!M) return; if (S.tab === 'produto') GRUPOS.forEach((g) => S.openP.add(g)); else M.farms.forEach((f) => S.openF.add(f.fazenda)); drawDetail(); });
+  $('#col-all').addEventListener('click', () => { if (S.tab === 'produto') S.openP.clear(); else S.openF.clear(); drawDetail(); });
+
+  // ---------- modelo: tudo que depende de filtros e parâmetros ----------
+  function build(linhas, talhoes, estoque, prm) {
+    const ptax = Number(prm.ptax) || 5.4;
+    const brl = (v, m) => (m === 'US$' ? v * ptax : v);
+    const keep = (r) => String(anoAgricola(r.safra)) === String(prm.ano)
+      && (prm.safra === 'todas' || !prm.safra || tipoSafra(r.safra) === prm.safra)
+      && (!prm.empresa || r.empresa === prm.empresa)
+      && (!prm.fazenda || r.fazenda === prm.fazenda)
+      && (!prm.cultura || r.cultura === prm.cultura);
+    const L = linhas.filter(keep).map((r) => ({ ...r, brl: brl(r.valor_total, r.moeda) }));
+    const T = talhoes.filter(keep).map((t) => ({ ...t, area_ha: Number(t.area_ha) }));
+
+    // área física: cada talhão conta uma vez, mesmo com safra e safrinha
+    const fis = new Map();
+    for (const t of T) fis.set(t.fazenda + '|' + t.talhao, t.area_ha);
+    const area = d3.sum([...fis.values()]);
+    const total = d3.sum(L, (r) => r.brl);
+
+    // por cultura
+    const cults = [...new Set(T.map((t) => t.cultura))].sort((a, b) => (a === 'Soja' ? -1 : b === 'Soja' ? 1 : a.localeCompare(b)));
+    const porCultura = cults.map((c) => {
+      const cp = cultParams(c, prm);
+      const a = d3.sum(T.filter((t) => t.cultura === c), (t) => t.area_ha);
+      const v = d3.sum(L.filter((r) => r.cultura === c), (r) => r.brl);
+      const precoBRL = cp.moeda === 'US$' ? cp.preco * ptax : cp.preco;
+      const scha = a && precoBRL ? v / a / precoBRL : 0;
+      return { cultura: c, area: a, brl: v, scha, prod: cp.prod, share: cp.prod ? scha / cp.prod : 0 };
+    });
+
+    // compra: necessidade − estoque, fazenda a fazenda, nunca negativo
+    const est = new Map(estoque.map((e) => [e.fazenda + '|' + e.produto, Number(e.estoque)]));
+    const need = d3.rollup(L, (v) => d3.sum(v, (r) => r.quantidade), (r) => r.produto, (r) => r.fazenda);
+    const meta = new Map();
+    for (const r of L) if (!meta.has(r.produto)) meta.set(r.produto, r);
+    const produtos = [...need].map(([p, byF]) => {
+      const m = meta.get(p);
+      const fazendas = [...byF].map(([f, n]) => {
+        const e = est.get(f + '|' + p) || 0;
+        return { fazenda: f, need: n, est: e, buy: Math.max(0, n - e) };
+      }).sort((a, b) => b.need - a.need);
+      const n = d3.sum(fazendas, (x) => x.need), e = d3.sum(fazendas, (x) => x.est), b = d3.sum(fazendas, (x) => x.buy);
+      const usado = d3.sum(fazendas, (x) => Math.min(x.need, x.est));
+      return {
+        produto: p, grupo: m.grupo, subgrupo: m.subgrupo, fornecedor: m.fornecedor, unidade: m.unidade, moeda: m.moeda,
+        vu: m.valor_unitario, need: n, est: e, buy: b, cov: n ? usado / n : 0,
+        total: n * m.valor_unitario, totalBRL: brl(n * m.valor_unitario, m.moeda), buyBRL: brl(b * m.valor_unitario, m.moeda),
+        fazendas, talhoes: new Set(L.filter((r) => r.produto === p).map((r) => r.fazenda + '|' + r.talhao)).size,
+      };
+    });
+    const buyBRL = d3.sum(produtos, (p) => p.buyBRL);
+
+    // por grupo e subgrupo
+    const tipos = GRUPOS.map((g) => {
+      const rows = L.filter((r) => r.grupo === g);
+      const v = d3.sum(rows, (r) => r.brl);
+      const usd = d3.sum(rows.filter((r) => r.moeda === 'US$'), (r) => r.brl);
+      const subs = d3.rollups(rows, (vv) => ({ brl: d3.sum(vv, (r) => r.brl), usd: d3.sum(vv.filter((r) => r.moeda === 'US$'), (r) => r.brl) }), (r) => r.subgrupo)
+        .map(([s, o]) => ({ subgrupo: s, ...o })).sort((a, b) => b.brl - a.brl);
+      return { grupo: g, brl: v, usd, subs, buy: d3.sum(produtos.filter((p) => p.grupo === g), (p) => p.buyBRL) };
+    }).filter((t) => t.brl > 0);
+
+    // por fazenda e por talhão (plano)
+    const planos = new Map();
+    for (const t of T) planos.set(t.fazenda + '|' + t.talhao + '|' + t.safra, { ...t, key: t.fazenda + '|' + t.talhao + '|' + t.safra, brl: 0, linhas: [] });
+    for (const r of L) { const p = planos.get(r.fazenda + '|' + r.talhao + '|' + r.safra); if (p) { p.brl += r.brl; p.linhas.push(r); } }
+    const media = new Map(); // média R$/ha da fazenda na mesma cultura
+    for (const [k, v] of d3.rollup([...planos.values()], (vv) => d3.sum(vv, (p) => p.brl) / d3.sum(vv, (p) => p.area_ha), (p) => p.fazenda, (p) => p.cultura)) for (const [c, m] of v) media.set(k + '|' + c, m);
+    for (const p of planos.values()) { p.ha = p.area_ha ? p.brl / p.area_ha : 0; p.avg = media.get(p.fazenda + '|' + p.cultura) || 0; p.dev = p.avg ? p.ha / p.avg - 1 : 0; }
+    const farms = d3.groups([...planos.values()], (p) => p.fazenda).map(([f, ps]) => {
+      const fa = new Map(ps.map((p) => [p.talhao, p.area_ha]));
+      const a = d3.sum([...fa.values()]);
+      const v = d3.sum(ps, (p) => p.brl);
+      return { fazenda: f, empresa: ps[0].empresa, area: a, brl: v, ha: a ? v / a : 0, nTal: fa.size, planos: ps, cults: [...new Set(ps.map((p) => p.cultura))],
+        buy: d3.sum(produtos, (p) => d3.sum(p.fazendas.filter((x) => x.fazenda === f), (x) => x.buy * p.vu * (p.moeda === 'US$' ? ptax : 1))) };
+    }).sort((a, b) => a.empresa.localeCompare(b.empresa) || a.fazenda.localeCompare(b.fazenda));
+
+    return { ptax, L, T, area, total, porCultura, produtos, buyBRL, tipos, farms, planos: [...planos.values()], cults, nTal: fis.size };
+  }
+
+  // ---------- desenho ----------
+  const setSk = (ids, on) => ids.forEach((id) => { const e = document.getElementById(id); if (e) e.classList.toggle('dash-skeleton', on); });
+  const SK = ['resumo-frase', 'k-total', 'k-ha', 'k-sc', 'k-buy', 'k-area'];
+
+  function drawKpis(M) {
+    $('#k-total').textContent = compact(M.total);
+    $('#k-total').title = money(M.total);
+    $('#k-total-s').replaceChildren('≈ ', el('b', {}, compact(M.total / M.ptax, 'US$')), ` pela PTAX ${nf(2).format(M.ptax)}`);
+    const ha = M.area ? M.total / M.area : 0;
+    $('#k-ha').replaceChildren(nf(0).format(ha), ' ', el('small', {}, 'R$/ha'));
+    const both = new Set(M.T.map((t) => tipoSafra(t.safra))).size > 1;
+    $('#k-ha-s').replaceChildren(el('b', {}, `US$ ${nf(0).format(ha / M.ptax)}/ha`), both ? ' · safra + safrinha sobre a área física' : '');
+    $('#k-sc').replaceChildren(...(M.porCultura.length ? M.porCultura.map((c) => el('div', {},
+      el('div', { class: 'row' }, el('span', { class: 'c' }, c.cultura), el('span', { class: 'x' }, nf(1).format(c.scha)), el('span', { class: 'p' }, 'sc/ha')),
+      el('div', { class: 'p', style: 'font-size:12px;color:var(--color-fg-muted);margin-left:52px' }, `${pct(c.share)} de ${nf(0).format(c.prod)} sc/ha esperadas`))) : ['—']));
+    $('#k-buy').textContent = compact(M.buyBRL);
+    $('#k-buy').title = money(M.buyBRL);
+    const covered = M.total ? 1 - M.buyBRL / M.total : 0;
+    $('#k-buy-s').replaceChildren(el('b', {}, pct(M.total ? M.buyBRL / M.total : 0)), ' do orçamento · ', el('b', {}, pct(covered)), ' coberto por estoque');
+    $('#k-buy-m').replaceChildren(el('i', { style: `width:${covered * 100}%;background:var(--su-g)` }), el('i', { style: `width:${(1 - covered) * 100}%;background:#e0a800` }));
+    $('#k-area').replaceChildren(nf(0).format(M.area), ' ', el('small', {}, 'ha'));
+    const nf2 = M.farms.length;
+    $('#k-area-s').replaceChildren(el('b', {}, `${M.nTal} talhões`), ` em ${nf2} fazenda${nf2 === 1 ? '' : 's'} · ${M.planos.length} planos`);
+    // frase de resumo
+    const topBuy = [...M.tipos].sort((a, b) => b.buy - a.buy)[0];
+    const fr = $('#resumo-frase');
+    if (!M.L.length) { fr.textContent = 'Nenhum plano publicado com esses filtros.'; return; }
+    fr.replaceChildren('Orçamento de ', el('b', {}, compact(M.total)), ` para ${nf(0).format(M.area)} ha. Falta comprar `, el('b', {}, compact(M.buyBRL)),
+      ` (${pct(M.total ? M.buyBRL / M.total : 0)})`, ...(topBuy && topBuy.buy > 0 ? [', a maior parte em ', el('b', {}, GNAME[topBuy.grupo].toLowerCase()), '.'] : ['.']));
+  }
+
+  function drawTipos(M) {
+    const strip = $('#tipos-strip'), leg = $('#tipos-leg'), tb = $('#tipos-t tbody');
+    strip.replaceChildren(...M.tipos.map((t) => el('i', { style: `width:${(t.brl / M.total) * 100}%;background:${gcolor(t.grupo)}`, title: `${GNAME[t.grupo]}: ${pct(t.brl / M.total)}` })));
+    leg.replaceChildren(...M.tipos.map((t) => el('span', {}, el('i', { style: `background:${gcolor(t.grupo)}` }), `${GNAME[t.grupo]} ${pct(t.brl / M.total)}`)));
+    const rows = [];
+    const share = (v, c) => el('div', { class: 'su-share' }, el('span', {}, pct(M.total ? v / M.total : 0, 1)), el('span', { class: 'bar' }, el('i', { style: `width:${M.total ? (v / M.total) * 100 : 0}%;background:${c}` })));
+    for (const t of M.tipos) {
+      const open = S.openG.has(t.grupo);
+      rows.push(el('tr', { class: 'g' + (open ? ' open' : ''), tabindex: 0, 'aria-expanded': String(open), onclick: () => { open ? S.openG.delete(t.grupo) : S.openG.add(t.grupo); drawTipos(M); } },
+        el('td', {}, el('span', { class: 'caret' }, '›'), el('span', { class: 'sw', style: `background:${gcolor(t.grupo)}` }), GNAME[t.grupo]),
+        el('td', { class: 'n' }, nf(0).format(t.brl / M.area)),
+        el('td', { class: 'n' }, nf(0).format(t.brl)),
+        el('td', { class: 'n hide-n' }, nf(0).format(t.brl / M.area / M.ptax)),
+        el('td', { class: 'n hide-n' }, pct(t.brl ? t.usd / t.brl : 0)),
+        el('td', { class: 'n' }, share(t.brl, gcolor(t.grupo)))));
+      if (open) for (const s of t.subs) rows.push(el('tr', {},
+        el('td', { style: 'padding-left:46px' }, s.subgrupo),
+        el('td', { class: 'n' }, nf(0).format(s.brl / M.area)),
+        el('td', { class: 'n' }, nf(0).format(s.brl)),
+        el('td', { class: 'n hide-n' }, nf(0).format(s.brl / M.area / M.ptax)),
+        el('td', { class: 'n hide-n' }, pct(s.brl ? s.usd / s.brl : 0)),
+        el('td', { class: 'n' }, share(s.brl, gcolor(t.grupo)))));
+    }
+    rows.push(el('tr', { class: 'e' }, el('td', {}, 'Total'), el('td', { class: 'n' }, nf(0).format(M.area ? M.total / M.area : 0)), el('td', { class: 'n' }, nf(0).format(M.total)),
+      el('td', { class: 'n hide-n' }, nf(0).format(M.area ? M.total / M.area / M.ptax : 0)), el('td', { class: 'n hide-n' }, pct(M.total ? d3.sum(M.tipos, (t) => t.usd) / M.total : 0)), el('td', { class: 'n' }, '100%')));
+    tb.replaceChildren(...rows);
+  }
+
+  function drawFarms(M) {
+    const box = $('#farms'), tip = $('#farm-tip');
+    const max = d3.max(M.farms, (f) => f.ha) || 1;
+    const prm = dash.params();
+    const items = M.farms.map((f) => {
+      const w = (f.ha / max) * 62;
+      const row = el('div', { class: 'su-farm' + (prm.fazenda && prm.fazenda !== f.fazenda ? ' dim' : ''), tabindex: 0, role: 'button', 'aria-label': `Filtrar ${f.fazenda}` },
+        el('div', { class: 'nm' }, f.fazenda.replace('Fazenda ', ''), el('small', {}, `${f.empresa} · ${nf(0).format(f.area)} ha`)),
+        el('div', { class: 'tr' }, el('i', { style: `width:${w}%` }), el('span', { style: `left:calc(${w}% + 8px)` }, el('b', {}, `${nf(0).format(f.ha)} R$/ha`), ` · ${compact(f.brl)}`)));
+      const pick = () => dash.setParams({ fazenda: prm.fazenda === f.fazenda ? null : f.fazenda });
+      row.addEventListener('click', pick);
+      row.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(); } });
+      row.addEventListener('mousemove', (e) => {
+        const b = box.getBoundingClientRect();
+        tip.replaceChildren(el('div', { class: 'h' }, `${f.fazenda} · ${f.empresa}`),
+          el('div', { class: 'ln' }, el('span', {}, 'Área'), el('span', {}, `${nf(0).format(f.area)} ha · ${f.nTal} talhões`)),
+          el('div', { class: 'ln' }, el('span', {}, 'Custo total'), el('span', {}, money(f.brl))),
+          el('div', { class: 'ln' }, el('span', {}, 'Custo por ha'), el('span', {}, `${money(f.ha)}/ha`)),
+          el('div', { class: 'ln' }, el('span', {}, 'Falta comprar'), el('span', {}, money(f.buy))));
+        tip.style.display = 'block';
+        const x = Math.min(e.clientX - b.left + 14, b.width - tip.offsetWidth - 4);
+        tip.style.left = Math.max(0, x) + 'px';
+        tip.style.top = (e.clientY - b.top + 14) + 'px';
+      });
+      row.addEventListener('mouseleave', () => { tip.style.display = 'none'; });
+      return row;
+    });
+    box.replaceChildren(tip, ...items);
+    $('#farms-avg').textContent = M.farms.length > 1 ? `Média do grupo: ${money(M.area ? M.total / M.area : 0)}/ha. Fazendas com mais safrinha têm custo por hectare maior, porque somam dois planos na mesma área.` : '';
+  }
+
+  // ----- tabela por produto -----
+  const thSort = (label, key, st, cls, onSort) => {
+    const th = el('th', { class: cls || null, 'aria-sort': st.key === key ? (st.dir > 0 ? 'ascending' : 'descending') : null },
+      el('button', { type: 'button', onclick: () => { if (st.key === key) st.dir *= -1; else { st.key = key; st.dir = typeof key === 'string' && ['produto', 'subgrupo', 'talhao', 'cultura'].includes(key) ? 1 : -1; } onSort(); } },
+        label, el('span', { class: 'ar' }, st.key === key ? (st.dir > 0 ? '▲' : '▼') : '↕')));
+    return th;
+  };
+  const statusChip = (p) => (p.buy <= 1e-9 ? el('span', { class: 'su-st ok' }, '✓ Coberto') : p.est > 0 ? el('span', { class: 'su-st part' }, `Parcial · ${pct(p.cov)}`) : el('span', { class: 'su-st zero' }, 'Sem estoque'));
+
+  function drawProdutos(M) {
+    const thead = $('#dt thead'), tb = $('#dt tbody');
+    const st = S.sortP;
+    thead.replaceChildren(el('tr', {},
+      thSort('Produto', 'produto', st, null, drawDetail),
+      thSort('Subgrupo', 'subgrupo', st, 'hide-n', drawDetail),
+      thSort('Necessidade', 'need', st, 'n', drawDetail),
+      thSort('Valor unit.', 'vu', st, 'n hide-n', drawDetail),
+      thSort('Valor total', 'totalBRL', st, 'n', drawDetail),
+      thSort('Estoque', 'est', st, 'n hide-n', drawDetail),
+      thSort('A comprar', 'buyBRL', st, 'n', drawDetail),
+      el('th', { class: 'n' }, 'Situação')));
+    const qq = S.q;
+    let list = M.produtos.filter((p) => (!S.onlyBuy || p.buy > 1e-9) && (!qq || `${p.produto} ${p.fornecedor} ${p.subgrupo}`.toLowerCase().includes(qq)));
+    const cmp = (a, b) => { const x = a[st.key], y = b[st.key]; return (typeof x === 'string' ? x.localeCompare(y, 'pt-BR') : x - y) * st.dir; };
+    const rows = [];
+    let shown = 0;
+    for (const g of GRUPOS) {
+      const ps = list.filter((p) => p.grupo === g).sort(cmp);
+      if (!ps.length) continue;
+      const open = S.openP.has(g) || !!qq;
+      const tot = d3.sum(ps, (p) => p.totalBRL), buy = d3.sum(ps, (p) => p.buyBRL), nb = ps.filter((p) => p.buy > 1e-9).length;
+      const toggle = () => { S.openP.has(g) ? S.openP.delete(g) : S.openP.add(g); drawDetail(); };
+      rows.push(el('tr', { class: 'g' + (open ? ' open' : ''), tabindex: 0, 'aria-expanded': String(open), onclick: toggle, onkeydown: (e) => { if (e.key === 'Enter') toggle(); } },
+        el('td', { colspan: 2 }, el('span', { class: 'caret' }, '›'), el('span', { class: 'sw', style: `background:${gcolor(g)}` }), GNAME[g], el('span', { class: 'cnt' }, `${ps.length} produtos`)),
+        el('td', { class: 'n' }, ''),
+        el('td', { class: 'n hide-n' }, ''),
+        el('td', { class: 'n' }, money(tot)),
+        el('td', { class: 'n hide-n' }, ''),
+        el('td', { class: 'n su-buy' }, buy > 0 ? money(buy) : '—'),
+        el('td', { class: 'n' }, el('span', { class: 'muted' }, nb ? `${nb} a comprar` : 'tudo coberto'))));
+      if (!open) continue;
+      const lim = S.limit[g] || 25;
+      for (const p of ps.slice(0, lim)) {
+        shown++;
+        const sel = S.sel && S.sel.kind === 'produto' && S.sel.id === p.produto;
+        const pick = () => { S.sel = sel ? null : { kind: 'produto', id: p.produto }; drawDetail(); };
+        rows.push(el('tr', { class: 'r' + (sel ? ' sel' : ''), tabindex: 0, onclick: pick, onkeydown: (e) => { if (e.key === 'Enter') pick(); } },
+          el('td', {}, p.produto, el('div', { class: 'muted' }, p.fornecedor)),
+          el('td', { class: 'hide-n' }, p.subgrupo),
+          el('td', { class: 'n' }, qty(p.need, p.unidade)),
+          el('td', { class: 'n hide-n' }, unitPrice(p.vu, p.moeda, p.unidade)),
+          el('td', { class: 'n' }, money(p.total, p.moeda), p.moeda === 'US$' ? el('div', { class: 'muted' }, compact(p.totalBRL)) : null),
+          el('td', { class: 'n hide-n' }, p.est ? qty(p.est, p.unidade) : '—'),
+          el('td', { class: 'n' }, p.buy > 1e-9 ? [el('span', { class: 'su-buy' }, qty(p.buy, p.unidade)), el('div', { class: 'muted' }, compact(p.buyBRL))] : '—'),
+          el('td', { class: 'n' }, statusChip(p))));
+      }
+      if (ps.length > lim) rows.push(el('tr', { class: 'su-more' }, el('td', { colspan: 8 }, el('button', { type: 'button', onclick: () => { S.limit[g] = lim + 50; drawDetail(); } }, `Mostrar mais ${Math.min(50, ps.length - lim)} de ${ps.length - lim}`))));
+    }
+    if (!rows.length) rows.push(el('tr', {}, el('td', { colspan: 8, class: 'su-empty' }, S.onlyBuy ? 'Nada a comprar com esses filtros.' : 'Nenhum produto encontrado.')));
+    tb.replaceChildren(...rows);
+    $('#tool-info').textContent = `${list.length} de ${M.produtos.length} produtos`;
+  }
+
+  // ----- tabela por talhão -----
+  function drawTalhoes(M) {
+    const thead = $('#dt thead'), tb = $('#dt tbody');
+    const st = S.sortT;
+    thead.replaceChildren(el('tr', {},
+      thSort('Fazenda / talhão', 'talhao', st, null, drawDetail),
+      thSort('Cultura', 'cultura', st, null, drawDetail),
+      thSort('Área (ha)', 'area_ha', st, 'n', drawDetail),
+      thSort('Custo por ha (R$)', 'ha', st, 'n', drawDetail),
+      el('th', { class: 'n hide-n', title: 'Comparado com a média da fazenda na mesma cultura' }, 'vs média da fazenda'),
+      thSort('Custo total (R$)', 'brl', st, 'n', drawDetail)));
+    const qq = S.q;
+    const cmp = (a, b) => { const x = a[st.key], y = b[st.key]; return (typeof x === 'string' ? x.localeCompare(y, 'pt-BR') : x - y) * st.dir || a.talhao.localeCompare(b.talhao); };
+    const rows = [];
+    let nShown = 0;
+    const empresas = d3.groups(M.farms, (f) => f.empresa);
+    for (const [emp, fs] of empresas) {
+      const visF = fs.map((f) => ({ f, ps: f.planos.filter((p) => !qq || `${p.talhao} ${p.fazenda} ${p.empresa} ${p.cultura}`.toLowerCase().includes(qq)) })).filter((x) => x.ps.length);
+      if (!visF.length) continue;
+      if (empresas.length > 1) {
+        const a = d3.sum(fs, (f) => f.area), v = d3.sum(fs, (f) => f.brl);
+        rows.push(el('tr', { class: 'e' }, el('td', { colspan: 2 }, `${emp.toUpperCase()} · ${fs.length} fazenda${fs.length > 1 ? 's' : ''}`), el('td', { class: 'n' }, nf(0).format(a)), el('td', { class: 'n' }, nf(0).format(a ? v / a : 0)), el('td', { class: 'n hide-n' }, ''), el('td', { class: 'n' }, nf(0).format(v))));
+      }
+      for (const { f, ps } of visF) {
+        const open = S.openF.has(f.fazenda) || !!qq;
+        const toggle = () => { S.openF.has(f.fazenda) ? S.openF.delete(f.fazenda) : S.openF.add(f.fazenda); drawDetail(); };
+        rows.push(el('tr', { class: 'g' + (open ? ' open' : ''), tabindex: 0, 'aria-expanded': String(open), onclick: toggle, onkeydown: (e) => { if (e.key === 'Enter') toggle(); } },
+          el('td', {}, el('span', { class: 'caret' }, '›'), f.fazenda, el('span', { class: 'cnt' }, `${f.nTal} talhões`)),
+          el('td', {}, el('span', { class: 'muted' }, f.cults.join(' + '))),
+          el('td', { class: 'n' }, nf(0).format(f.area)),
+          el('td', { class: 'n' }, nf(0).format(f.ha)),
+          el('td', { class: 'n hide-n' }, ''),
+          el('td', { class: 'n' }, nf(0).format(f.brl))));
+        if (!open) continue;
+        const sorted = [...ps].sort(cmp);
+        const lim = S.limit[f.fazenda] || 40;
+        for (const p of sorted.slice(0, lim)) {
+          nShown++;
+          const sel = S.sel && S.sel.kind === 'talhao' && S.sel.id === p.key;
+          const pick = () => { S.sel = sel ? null : { kind: 'talhao', id: p.key }; drawDetail(); };
+          const hi = p.dev > 0.1;
+          const maxH = Math.max(p.ha, p.avg) * 1.25 || 1;
+          rows.push(el('tr', { class: 'r' + (sel ? ' sel' : ''), tabindex: 0, onclick: pick, onkeydown: (e) => { if (e.key === 'Enter') pick(); } },
+            el('td', {}, p.talhao),
+            el('td', {}, p.cultura, el('div', { class: 'muted' }, p.safra)),
+            el('td', { class: 'n' }, nf(1).format(p.area_ha)),
+            el('td', { class: 'n' }, nf(0).format(p.ha)),
+            el('td', { class: 'n hide-n' }, el('div', { class: 'su-cmp' },
+              el('span', { class: 'trk', title: `Média da fazenda (${p.cultura}): ${money(p.avg)}/ha` }, el('i', { class: hi ? 'hi' : null, style: `width:${(p.ha / maxH) * 100}%` }), el('b', { style: `left:${(p.avg / maxH) * 100}%` })),
+              el('span', { class: 'd' + (hi ? ' hi' : '') }, `${p.dev >= 0 ? '+' : '−'}${nf(0).format(Math.abs(p.dev) * 100)}%`))),
+            el('td', { class: 'n' }, nf(0).format(p.brl))));
+        }
+        if (sorted.length > lim) rows.push(el('tr', { class: 'su-more' }, el('td', { colspan: 6 }, el('button', { type: 'button', onclick: () => { S.limit[f.fazenda] = lim + 60; drawDetail(); } }, `Mostrar mais ${Math.min(60, sorted.length - lim)} de ${sorted.length - lim}`))));
+      }
+    }
+    if (!rows.length) rows.push(el('tr', {}, el('td', { colspan: 6, class: 'su-empty' }, 'Nenhum talhão encontrado.')));
+    tb.replaceChildren(...rows);
+    $('#tool-info').textContent = `${M.planos.length} planos de talhão · acima de +10% da média em amarelo`;
+  }
+
+  // ----- painel lateral -----
+  function drawPanel(M) {
+    const panel = $('#panel'), grid = $('#dgrid');
+    const close = el('button', { class: 'x', type: 'button', 'aria-label': 'Fechar', onclick: () => { S.sel = null; drawDetail(); } }, '×');
+    let content = null;
+    if (S.sel && S.sel.kind === 'produto' && S.tab === 'produto') {
+      const p = M.produtos.find((x) => x.produto === S.sel.id);
+      if (p) content = [
+        el('div', { class: 'ph' }, el('div', {}, el('h3', {}, p.produto), el('div', { class: 'sub' }, `${p.fornecedor} · ${p.subgrupo} · ${unitPrice(p.vu, p.moeda, p.unidade)}`)), close),
+        el('div', { class: 'su-pstats' },
+          el('div', {}, el('div', { class: 'k' }, 'Necessidade'), el('div', { class: 'v' }, qty(p.need, p.unidade))),
+          el('div', {}, el('div', { class: 'k' }, 'Estoque'), el('div', { class: 'v' }, qty(p.est, p.unidade))),
+          el('div', {}, el('div', { class: 'k' }, 'A comprar'), el('div', { class: 'v su-buy' }, qty(p.buy, p.unidade))),
+          el('div', {}, el('div', { class: 'k' }, 'Valor a comprar'), el('div', { class: 'v' }, money(p.buyBRL)), p.moeda === 'US$' ? el('div', { class: 'k' }, money(p.buy * p.vu, 'US$')) : null)),
+        el('table', { class: 'su-t' },
+          el('thead', {}, el('tr', {}, el('th', {}, 'Fazenda'), el('th', { class: 'n' }, 'Necessidade'), el('th', { class: 'n' }, 'Estoque'), el('th', { class: 'n' }, 'A comprar'))),
+          el('tbody', {}, p.fazendas.map((x) => el('tr', {},
+            el('td', {}, x.fazenda.replace('Fazenda ', '')),
+            el('td', { class: 'n' }, nf(qtyDec(x.need)).format(x.need)),
+            el('td', { class: 'n' }, x.est ? nf(qtyDec(x.est)).format(x.est) : '—'),
+            el('td', { class: 'n' }, x.buy > 1e-9 ? el('span', { class: 'su-buy' }, nf(qtyDec(x.buy)).format(x.buy)) : '—'))))),
+        el('p', { class: 'pnote' }, `Quantidades em ${p.unidade}. Usado em ${p.talhoes} talhões. O estoque é por fazenda: a sobra de uma fazenda não cobre a falta de outra.`),
+      ];
+    } else if (S.sel && S.sel.kind === 'talhao' && S.tab === 'talhao') {
+      const p = M.planos.find((x) => x.key === S.sel.id);
+      if (p) {
+        const byG = d3.groups(p.linhas, (r) => r.grupo).sort((a, b) => GRUPOS.indexOf(a[0]) - GRUPOS.indexOf(b[0]));
+        const body = [];
+        for (const [g, rs] of byG) {
+          body.push(el('tr', { class: 'pg' }, el('td', { colspan: 3 }, el('span', { class: 'sw', style: `display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:7px;background:${gcolor(g)}` }), GNAME[g]), el('td', { class: 'n' }, money(d3.sum(rs, (r) => r.brl)))));
+          for (const r of [...rs].sort((a, b) => b.brl - a.brl)) body.push(el('tr', {},
+            el('td', {}, r.produto),
+            el('td', { class: 'n' }, `${nf(r.dose < 1 ? 2 : r.dose < 10 ? 1 : 0).format(r.dose)} ${r.unidade}/ha`),
+            el('td', { class: 'n' }, qty(r.quantidade, r.unidade)),
+            el('td', { class: 'n' }, money(r.brl))));
+        }
+        content = [
+          el('div', { class: 'ph' }, el('div', {}, el('h3', {}, `${p.talhao} · ${p.cultura}`), el('div', { class: 'sub' }, `${p.fazenda} · ${p.empresa} · ${p.safra}`)), close),
+          el('div', { class: 'su-pstats' },
+            el('div', {}, el('div', { class: 'k' }, 'Área'), el('div', { class: 'v' }, `${nf(1).format(p.area_ha)} ha`)),
+            el('div', {}, el('div', { class: 'k' }, 'Custo total'), el('div', { class: 'v' }, money(p.brl))),
+            el('div', {}, el('div', { class: 'k' }, 'Custo por ha'), el('div', { class: 'v' }, `${money(p.ha)}/ha`)),
+            el('div', {}, el('div', { class: 'k' }, 'vs média da fazenda'), el('div', { class: 'v' + (p.dev > 0.1 ? ' su-buy' : '') }, `${p.dev >= 0 ? '+' : '−'}${nf(0).format(Math.abs(p.dev) * 100)}%`))),
+          el('table', { class: 'su-t' },
+            el('thead', {}, el('tr', {}, el('th', {}, 'Produto'), el('th', { class: 'n' }, 'Dose'), el('th', { class: 'n' }, 'Quantidade'), el('th', { class: 'n' }, 'Custo (R$)'))),
+            el('tbody', {}, body)),
+          el('p', { class: 'pnote' }, 'Produtos em US$ convertidos pela PTAX informada.'),
+        ];
+      }
+    }
+    panel.hidden = !content;
+    grid.classList.toggle('with', !!content);
+    if (content) panel.replaceChildren(...content);
+  }
+
+  function drawDetail() {
+    const M = S.M;
+    tabP.setAttribute('aria-selected', String(S.tab === 'produto'));
+    tabT.setAttribute('aria-selected', String(S.tab === 'talhao'));
+    onlyBuy.hidden = S.tab !== 'produto';
+    onlyBuy.setAttribute('aria-pressed', String(S.onlyBuy));
+    q.placeholder = S.tab === 'produto' ? 'Buscar produto, fornecedor ou subgrupo' : 'Buscar talhão, fazenda ou cultura';
+    if (!M) return;
+    if (S.tab === 'produto') drawProdutos(M); else drawTalhoes(M);
+    drawPanel(M);
+  }
+
+  function redraw() {
+    const prm = dash.params();
+    const dl = dash.data('linhas'), dt = dash.data('talhoes'), de = dash.data('estoque');
+    // filtros (opções vêm dos talhões)
+    if (dt.status === 'ok') {
+      const T = dt.data;
+      const anos = [...new Set(T.map((t) => anoAgricola(t.safra)))].filter(Boolean).sort().map(String);
+      fillSelect(fAno, anos, String(prm.ano ?? anos[anos.length - 1]));
+      const Ta = T.filter((t) => String(anoAgricola(t.safra)) === String(prm.ano));
+      fillSelect(fEmp, [...new Set(Ta.map((t) => t.empresa))].sort(), prm.empresa, 'Todas');
+      fillSelect(fFaz, [...new Set(Ta.filter((t) => !prm.empresa || t.empresa === prm.empresa).map((t) => t.fazenda))].sort(), prm.fazenda, 'Todas');
+      fillSelect(fCul, [...new Set(Ta.map((t) => t.cultura))].sort(), prm.cultura, 'Todas');
+    }
+    fSafra.value = prm.safra || 'todas';
+    if (pPtax !== document.activeElement) pPtax.value = showNum(Number(prm.ptax), 2);
+
+    const sts = [dl.status, dt.status, de.status];
+    if (sts.some((s) => s !== 'ok')) {
+      S.M = null;
+      const failed = sts.includes('error');
+      setSk(SK, !failed);
+      ['k-total-s', 'k-ha-s', 'k-buy-s', 'k-area-s', 'k-buy-m', 'tipos-strip', 'tipos-leg', 'farms-avg'].forEach((id) => $('#' + id).replaceChildren());
+      SK.forEach((id) => $('#' + id).replaceChildren());
+      $('#tipos-t tbody').replaceChildren();
+      $('#farms').replaceChildren($('#farm-tip') || el('div', { class: 'su-tip', id: 'farm-tip' }));
+      $('#dt thead').replaceChildren();
+      $('#dt tbody').replaceChildren(el('tr', {}, el('td', { class: failed ? 'su-fail' : 'dash-skeleton', style: 'height:120px' }, failed ? 'Failed to load' : '')));
+      if (failed) $('#resumo-frase').replaceChildren(el('span', { class: 'su-fail', style: 'justify-content:flex-start;padding:0' }, 'Failed to load'));
+      $('#panel').hidden = true;
+      return;
+    }
+    setSk(SK, false);
+    const M = build(dl.data, dt.data, de.data, prm);
+    S.M = M;
+    drawCultParams(M.cults.length ? M.cults : [...new Set(dt.data.map((t) => t.cultura))].sort(), prm);
+    drawKpis(M);
+    drawTipos(M);
+    drawFarms(M);
+    drawDetail();
+  }
+
+  dash.onData(redraw);
+
+  // link direto para uma guia
+  const h = location.hash.slice(1);
+  if (h === 'por-talhao') { S.tab = 'talhao'; }
+  if (h === 'por-produto' || h === 'por-talhao') setTimeout(() => document.getElementById('detalhe')?.scrollIntoView(), 300);
+})();
+</script>
+
+</div>
+</body>
+</html>

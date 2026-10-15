@@ -146,6 +146,8 @@ window.ArquivoPlano = (function () {
       return g ? g.operacoes.find((o) => o.nome === operacao) : null;
     };
     dados.abas.operacoes.forEach((x) => {
+      // Tratamento de sementes (TSI) saiu do protótipo por enquanto (rascunhos/tsi/): arquivo antigo com TSI entra sem ele
+      if (x.tipo_grupo === 'Tratamento de sementes') return;
       let g = grupos.find((y) => y.nome === x.grupo_operacao);
       if (!g) { g = Planos.novoGrupo(String(x.grupo_operacao), String(x.tipo_grupo || '')); grupos.push(g); }
       if (x.operacao === '') return;

@@ -26,7 +26,7 @@ window.Telas.painelPlanos = (function () {
     return [...new Set(safras().map((s) => Util.anoAgricola(s)).filter(Boolean).map(String))].sort();
   }
   // Grupos de operação do Detalhamento (a Colheita vem do plantio e não entra)
-  const GRUPOS = [['Sementes', 'Sementes'], ['Tratamento de sementes', 'TSI'], ['Fertilidade', 'Fertilidade'], ['Defensivos', 'Defensivos']];
+  const GRUPOS = [['Sementes', 'Sementes'], ['Fertilidade', 'Fertilidade'], ['Defensivos', 'Defensivos']];
   const media = (xs) => xs.reduce((s, x) => s + x, 0) / xs.length;
   const pct = (n) => `${Math.round(n)}%`;
   const ha = (n) => Math.round(n).toLocaleString('pt-BR');
@@ -121,7 +121,7 @@ window.Telas.painelPlanos = (function () {
     raiz.querySelector('[data-pn="kpis"]').innerHTML = kpis(ls);
     raiz.querySelector('[data-pn="cabecalho"]').innerHTML = cabecalho();
     raiz.querySelector('[data-pn="linhas"]').innerHTML = ls.length ? ordenadas(ls).map(linha).join('')
-      : '<tr><td class="tabela__vazia" colspan="12">Nenhuma fazenda com esses filtros.</td></tr>';
+      : '<tr><td class="tabela__vazia" colspan="10">Nenhuma fazenda com esses filtros.</td></tr>';
   }
 
   // ----- Ordenar por coluna -----
