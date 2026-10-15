@@ -184,6 +184,7 @@ window.Telas.calendario = (function () {
     // O Resumo ocupa a área logo abaixo das abas. Em cima, as visões em guias (Programação · Ciclo Produtivo · Calendário)
     // e, no Calendário, Mês/Semana/Dia e o período. Embaixo, os filtros (no Calendário, a legenda filtra os grupos).
     const noCalendario = estado.visao === 'calendario' && planejados.length;
+    if (noCalendario && !estado.dataRef) estado.dataRef = dataInicial(ctx, planejados);
     return `
       <section class="calendario">
         <div class="calendario__barra">
@@ -466,6 +467,20 @@ window.Telas.calendario = (function () {
   const isoDe = (dt) => `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
   const dataDe = (iso) => { const { a, m, d } = partes(iso); return new Date(a, m - 1, d); };
   const hojeIso = () => isoDe(new Date());
+
+  // Onde o Calendário abre: em hoje, se hoje estiver entre a primeira operação do plano (a que começa antes, em
+  // qualquer grupo, mesmo os escondidos na legenda) e a última colheita prevista (sem previsão de colheita, o fim da
+  // última operação); senão, no mês da primeira operação. Sem operação com data: hoje.
+  function dataInicial(ctx, planejados) {
+    const evs = eventos(ctx, planejados);
+    const hoje = hojeIso();
+    if (!evs.length) return hoje;
+    const inicio = evs[0].inicio;
+    const pl = (plantioDo(ctx.plano) || {}).plantio || {};
+    const colheitas = ctx.talhoes.map((t) => previsaoColheita(pl[t.nome])).filter(Boolean);
+    const fim = (colheitas.length ? colheitas : evs.map((ev) => ev.fim)).sort().pop();
+    return hoje >= inicio && hoje <= fim ? hoje : inicio;
+  }
 
   function eventos(ctx, lista) {
     const pl = (plantioDo(ctx.plano) || {}).plantio || {};
