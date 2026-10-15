@@ -11,6 +11,18 @@ window.DADOS = {
 
   // Listas do modal "Criar Plano de Safra". Safras novas criadas no modal entram aqui.
   safras:   ['24/25', '25/26'],
+  // Cadastro de safras (como no sistema). A safra começa em 01/09 de um ano e termina em 31/08 do ano seguinte;
+  // o Ano Agrícola ("Ano Saldo" no sistema) é o ano do início e junta as safras e safrinhas daquele ano.
+  // Safrinha ("27/27": plantio e colheita no mesmo ano) entra no ano agrícola anterior, junto com a safra 26/27,
+  // e tem as mesmas datas dela. Safra criada no modal (só com o nome) segue a mesma regra (Util.cadastroSafra).
+  // dolar: moeda padrão da safra; valor: cotação padrão (vazio = não informado)
+  cadastroSafras: [
+    { codigo: 9,  nome: '24/25', descricao: '2024/2025', apelido: '2024', inicio: '2024-09-01', fim: '2025-08-31', anoAgricola: 2024, codigoIntegracao: '', dolar: 'DOLAR', valor: null },
+    { codigo: 10, nome: '25/26', descricao: '2025/2026', apelido: '2025', inicio: '2025-09-01', fim: '2026-08-31', anoAgricola: 2025, codigoIntegracao: '', dolar: 'DOLAR', valor: null },
+    { codigo: 11, nome: '26/27', descricao: '2026/2027', apelido: '2026', inicio: '2026-09-01', fim: '2027-08-31', anoAgricola: 2026, codigoIntegracao: '', dolar: 'DOLAR', valor: null },
+    { codigo: 13, nome: '27/27', descricao: '2027/2027', apelido: '2027', inicio: '2026-09-01', fim: '2027-08-31', anoAgricola: 2026, codigoIntegracao: '', dolar: 'DOLAR', valor: null },
+    { codigo: 14, nome: '27/28', descricao: '2027/2028', apelido: '2027', inicio: '2027-09-01', fim: '2028-08-31', anoAgricola: 2027, codigoIntegracao: '', dolar: 'DOLAR', valor: null }
+  ],
   empresas: ['Empresa A', 'Empresa B', 'Empresa C'],
   // Atividade produtiva. Por enquanto só Agricultura (soja); as outras aparecem como "Em breve"
   atividades: ['Agricultura', 'Pecuária', 'Silvicultura'],
@@ -18,8 +30,8 @@ window.DADOS = {
   fazendas: ['São José', 'Boa Vista', 'Santa Clara', 'Primavera'],
   // Por enquanto o protótipo funciona só para soja (variedades, população, bags e TSI são de soja)
   culturas: ['Soja'],
-  // Culturas que aparecem nos planos (os de exemplo têm milho e algodão safrinha), para os filtros
-  culturasPlanos: ['Soja', 'Milho', 'Algodão'],
+  // Culturas que aparecem nos planos (os de exemplo têm milho safrinha), para os filtros
+  culturasPlanos: ['Soja', 'Milho'],
 
   // Talhões por fazenda (área em ha). A tela de Operações mostra todos os talhões da fazenda.
   talhoes: {
@@ -72,14 +84,7 @@ window.DADOS = {
     { cultura: 'Milho', nome: 'DKB 360 PRO3',  ciclo: 125, populacao: [60, 68], janela: ['01-01', '03-05'] },
     { cultura: 'Milho', nome: 'AG 8700 PRO3',  ciclo: 130, populacao: [60, 66], janela: ['01-01', '03-01'] },
     { cultura: 'Milho', nome: 'P3707VYH',      ciclo: 128, populacao: [62, 70], janela: ['01-01', '03-05'] },
-    { cultura: 'Milho', nome: 'FS 575 PWU',    ciclo: 132, populacao: [58, 65], janela: ['01-01', '02-28'] },
-    // Algodão 2ª safra no MT: plantio de janeiro a meados de fevereiro, logo depois da soja precoce; colheita de
-    // julho a setembro. Cultivares de 160 a 180 dias; 8 a 10 plantas por metro (≈ 90 a 110 mil plantas/ha).
-    // Valores aproximados para o protótipo (Imea, Ampa, IMAmt e catálogos das empresas): conferir.
-    { cultura: 'Algodão', nome: 'TMG 44 B2RF',   ciclo: 165, populacao: [90, 110], janela: ['01-05', '02-15'] },
-    { cultura: 'Algodão', nome: 'FM 985 GLTP',   ciclo: 175, populacao: [90, 105], janela: ['01-05', '02-10'] },
-    { cultura: 'Algodão', nome: 'IMA 5801 B2RF', ciclo: 170, populacao: [90, 110], janela: ['01-05', '02-15'] },
-    { cultura: 'Algodão', nome: 'DP 1746 B2RF',  ciclo: 170, populacao: [85, 105], janela: ['01-05', '02-10'] }
+    { cultura: 'Milho', nome: 'FS 575 PWU',    ciclo: 132, populacao: [58, 65], janela: ['01-01', '02-28'] }
   ],
 
   // Histórico por talhão (últimas 3 safras de soja): [safra, variedade, produtividade (sc/ha), chuva no ciclo (mm)].
@@ -192,12 +197,10 @@ window.DADOS = {
     { classe: 'Herbicida',  produto: 'Spider',              principioAtivo: 'Diclosulam',                                 unidade: 'g' },
     { classe: 'Herbicida',  produto: 'Select 240 EC',       principioAtivo: 'Cletodim',                                   unidade: 'L' },
     { classe: 'Herbicida',  produto: 'DMA 806 BR',          principioAtivo: '2,4-D',                                      unidade: 'L' },
-    // Milho e algodão (exemplos para os planos de safrinha; conferir registro e dose na bula)
+    // Milho (exemplos para o plano de safrinha; conferir registro e dose na bula)
     { fertilidade: true, classe: 'Nitrogenado', produto: 'Ureia 45%',      principioAtivo: 'Ureia',               garantia: 'N 45%', unidade: 'kg' },
     { classe: 'Herbicida',  produto: 'Primóleo',            principioAtivo: 'Atrazina',                                   unidade: 'L' },
-    { classe: 'Herbicida',  produto: 'Callisto',            principioAtivo: 'Mesotriona',                                 unidade: 'L' },
-    { classe: 'Regulador',  produto: 'Pix HC',              principioAtivo: 'Cloreto de mepiquate',                       unidade: 'L' },
-    { classe: 'Desfolhante', produto: 'Dropp Ultra',        principioAtivo: 'Tidiazurom + Diurom',                        unidade: 'L' }
+    { classe: 'Herbicida',  produto: 'Callisto',            principioAtivo: 'Mesotriona',                                 unidade: 'L' }
   ],
 
   // Estádios fenológicos da soja (exemplo; depois virão do menu Cadastros)
@@ -260,7 +263,7 @@ window.DADOS = {
     ] }
   ],
 
-  // Modelos de operações das outras culturas (só para os planos de exemplo de safrinha, por enquanto).
+  // Modelos de operações das outras culturas (só para o plano de exemplo de safrinha, por enquanto).
   // DAP pela prática no médio-norte do MT; sem fenologia (o cadastro de estádios é o da soja).
   modelosCultura: {
     // Milho safrinha: as sementes já vêm tratadas (sem grupo TSI). Cigarrinha (Dalbulus maidis) no começo do
@@ -280,28 +283,6 @@ window.DADOS = {
         { nome: 'Cobertura nitrogenada', dap: 25 }
       ] },
       { nome: 'Colheita', tipo: 'Colheita', operacoes: [{ nome: 'Colheita', prazo: 10 }] }
-    ],
-    // Algodão 2ª safra: sementes tratadas na origem. Pré-emergente no plantio, regulador de crescimento em duas
-    // aplicações, controle de pragas e de ramulária, e desfolhante para a colheita (≈ 150 DAP).
-    'Algodão': [
-      { nome: 'Semente', tipo: 'Sementes', operacoes: [{ nome: 'Plantio', dap: 0, prazo: 3 }] },
-      { nome: 'Defensivo', tipo: 'Defensivos', operacoes: [
-        { nome: 'Herbicida pré-emergente', dap: 0 },
-        { nome: 'Herbicida pós-emergente', dap: 25 },
-        { nome: '1ª Regulador de crescimento', dap: 40 },
-        { nome: 'Inseticida', dap: 45 },
-        { nome: '2ª Regulador de crescimento', dap: 60 },
-        { nome: '1ª Fungicida: ramulária', dap: 70 },
-        { nome: '2ª Fungicida: ramulária', dap: 90 },
-        { nome: 'Desfolhante', dap: 150 }
-      ] },
-      { nome: 'Fertilidade', tipo: 'Fertilidade', operacoes: [
-        { nome: 'Adubação de plantio', dap: 0 },
-        { nome: 'Cobertura nitrogenada', dap: 30 },
-        { nome: 'Cobertura potássica', dap: 30 },
-        { nome: 'Boro foliar', dap: 50 }
-      ] },
-      { nome: 'Colheita', tipo: 'Colheita', operacoes: [{ nome: 'Colheita', prazo: 15 }] }
     ]
   },
 
@@ -309,21 +290,10 @@ window.DADOS = {
   planos: [],
 
   // Planos carregados pelo menu Demonstração → "Ver com planos de exemplo".
-  // O mesmo plano (modelo de operações) em duas fazendas: um com a versão 0.2 em construção e um com a 0.2 publicada.
-  // "operacoes" detalha, por nome de operação do modelo: fenologia, produtos [nome, dose],
+  // Só planos publicados: a soja e o milho safrinha da Santa Clara. O plano em construção o usuário cria e monta
+  // ele mesmo (Criar Plano Safra). "operacoes" detalha, por nome de operação do modelo: fenologia, produtos [nome, dose],
   // talhões que recebem e ajustes por talhão. Operações não listadas ficam sem recomendação e sem talhões.
   planosExemplo: [
-    {
-      safra: '26/27', empresa: 'Empresa A', atividade: 'Agricultura', fazenda: 'São José', cultura: 'Soja',
-      // Sem "talhoes": o plano inclui todos os talhões da fazenda
-      // Versões: 0.1 publicada (registro inicial) e 0.2 em construção
-      versoes: { criadaEm: '2026-09-30T09:12' },
-      custo: null,   // aguardando orçamento
-      receita: null, // aguardando premissas de produção
-      atualizadoEm: '2026-09-30', atualizadoPor: 'João da Silva',
-      // Em construção: todas as operações começam sem recomendação, para o teste montar do zero
-      operacoes: {}
-    },
     {
       safra: '26/27', empresa: 'Empresa A', atividade: 'Agricultura', fazenda: 'Santa Clara', cultura: 'Soja',
       // Versões: 0.1 publicada (registro inicial) e 0.2 publicada (sem versão em construção)
@@ -381,8 +351,8 @@ window.DADOS = {
     },
     {
       // Milho safrinha na Santa Clara, depois da soja: cada talhão é plantado 3 dias depois da colheita prevista
-      // da soja nele (plantio da soja + ciclo da variedade)
-      safra: '26/27', empresa: 'Empresa A', atividade: 'Agricultura', fazenda: 'Santa Clara', cultura: 'Milho', ciclo: 'Safrinha',
+      // da soja nele (plantio da soja + ciclo da variedade). Safrinha 27/27, no ano agrícola 2026 (o da soja 26/27)
+      safra: '27/27', empresa: 'Empresa A', atividade: 'Agricultura', fazenda: 'Santa Clara', cultura: 'Milho', ciclo: 'Safrinha',
       modelo: 'Milho',
       versoes: { criadaEm: '2026-09-28T10:20', publicadaEm: '2026-10-06T16:40' },
       custo: null, receita: null,
@@ -409,44 +379,6 @@ window.DADOS = {
           'Herbicida pós-emergente': op([['Primóleo', 3.0], ['Callisto', 0.3]]),
           'Inseticida: lagarta-do-cartucho': op([['Premio', 0.10]]),
           'Fungicida': op([['Priori Xtra', 0.30]])
-        };
-      })()
-    },
-    {
-      // Algodão 2ª safra na Boa Vista (Empresa B): plantio de meados de janeiro a 10 de fevereiro
-      safra: '26/27', empresa: 'Empresa B', atividade: 'Agricultura', fazenda: 'Boa Vista', cultura: 'Algodão', ciclo: 'Safrinha',
-      modelo: 'Algodão',
-      versoes: { criadaEm: '2026-09-29T14:00', publicadaEm: '2026-10-08T11:15' },
-      custo: null, receita: null,
-      atualizadoEm: '2026-10-08', atualizadoPor: 'Carlos Souza',
-      operacoes: (function () {
-        const todos = ['T01', 'T02', 'T03', 'T04', 'T05', 'T06', 'T07', 'T08', 'T09', 'T10'];
-        const op = (produtos) => ({ produtos, talhoes: todos });
-        return {
-          'Plantio': { germinacao: 85, plantio: [
-            { talhao: 'T01', variedade: 'TMG 44 B2RF',   data: '2027-01-12', populacao: 100 },
-            { talhao: 'T02', variedade: 'TMG 44 B2RF',   data: '2027-01-12', populacao: 100 },
-            { talhao: 'T03', variedade: 'FM 985 GLTP',   data: '2027-01-16', populacao: 95 },
-            { talhao: 'T04', variedade: 'FM 985 GLTP',   data: '2027-01-18', populacao: 95 },
-            { talhao: 'T05', variedade: 'IMA 5801 B2RF', data: '2027-01-22', populacao: 100 },
-            { talhao: 'T06', variedade: 'IMA 5801 B2RF', data: '2027-01-25', populacao: 100 },
-            { talhao: 'T07', variedade: 'DP 1746 B2RF',  data: '2027-01-29', populacao: 95 },
-            { talhao: 'T08', variedade: 'DP 1746 B2RF',  data: '2027-02-02', populacao: 95 },
-            { talhao: 'T09', variedade: 'TMG 44 B2RF',   data: '2027-02-06', populacao: 100 },
-            { talhao: 'T10', variedade: 'TMG 44 B2RF',   data: '2027-02-10', populacao: 100 }
-          ] },
-          'Adubação de plantio': op([['Formulado 02-20-18', 350]]),
-          'Cobertura nitrogenada': op([['Ureia 45%', 150]]),
-          'Cobertura potássica': op([['KCl 00-00-60', 120]]),
-          'Boro foliar': op([['Nutre Boro', 1.0]]),
-          'Herbicida pré-emergente': op([['Dual Gold', 1.5]]),
-          'Herbicida pós-emergente': op([['Roundup Original DI', 2.0]]),
-          '1ª Regulador de crescimento': op([['Pix HC', 0.20]]),
-          'Inseticida': op([['Engeo Pleno', 0.25]]),
-          '2ª Regulador de crescimento': op([['Pix HC', 0.30]]),
-          '1ª Fungicida: ramulária': op([['Priori Xtra', 0.30]]),
-          '2ª Fungicida: ramulária': op([['Priori Xtra', 0.30]]),
-          'Desfolhante': op([['Dropp Ultra', 0.20]])
         };
       })()
     }

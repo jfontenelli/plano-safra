@@ -25,7 +25,7 @@ Regras de negócio ficam em `docs/DECISOES.md`.
 | 05 | Calendário Agrícola (aba Resumo do plano) | telas/05-calendario-agricola.md | referencias/05-calendario-agricola.png, referencias/05.3-resumo-calendario.png | Construída: Programação (tabela), Ciclo Produtivo (por fase) e Calendário (mês, semana, dia; legenda que filtra; painel do dia; área operacional) |
 | 06 | Suprimentos | telas/06-suprimentos.md | referencias/suprimentos.png | A definir: falta fechar o cálculo do TSI |
 
-| — | Calendário Agrícola do menu (vários planos somados) | DECISOES 4.0 | canvas de discovery (Claude Design) | Construída: filtros Safra, Empresa, Fazenda e Cultura; linhas por empresa · fazenda · cultura · safra/safrinha, com uma barra do ciclo da cultura (primeiro plantio à última colheita prevista) na cor da cultura; linha do tempo de julho ao mês da última colheita; Hoje pontilhado; última versão publicada de cada plano |
+| — | Calendário Agrícola do menu (vários planos somados) | DECISOES 4.0 | canvas de discovery (Claude Design) | Construída: filtros Ano Agrícola, Empresa, Fazenda e Cultura; linhas por empresa · fazenda · cultura · safra/safrinha, com uma barra do ciclo da cultura (primeiro plantio à última colheita prevista) na cor da cultura; linha do tempo do ano agrícola (setembro a agosto, até o mês da última colheita); Hoje pontilhado; última versão publicada de cada plano |
 | — | Suprimentos do menu (vários planos somados) | DECISOES 4.0 | — | A definir |
 
 Situação: A definir → Pronta para construir → Construída.

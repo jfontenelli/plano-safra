@@ -40,7 +40,7 @@ Identificar os novos planos: informações gerais (safra, empresa, atividade, cu
 
 ## Navegação
 - "Cancelar" ou X → fecha o modal e volta à tela de origem, sem criar nada.
-- "Criar Plano de Safra" → **volta para a Visão Geral** (Tela 03), com o filtro Safra na safra dos planos criados e o aviso "Plano criado: Fazenda X. Clique na linha para começar." (ou "2 planos criados (…). Clique na linha de cada um para começar.").
+- "Criar Plano de Safra" → **volta para a Visão Geral** (Tela 03), com o filtro Ano Agrícola no da safra dos planos criados e o aviso "Plano criado: Fazenda X. Clique na linha para começar." (ou "2 planos criados (…). Clique na linha de cada um para começar.").
 
 ---
 

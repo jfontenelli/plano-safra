@@ -9,14 +9,16 @@ window.Telas = window.Telas || {};
 window.Telas.listaPlanos = (function () {
   const esc = Util.escapar;
 
-  // Filtros, na ordem das colunas. Safra começa na mais recente cadastrada; os demais em "Todas"/"Todos" ('')
-  const CAMPOS_FILTRO = ['safra', 'empresa', 'atividade', 'cultura', 'fazenda', 'status'];
+  // Filtros, na ordem das colunas. Ano Agrícola (junta as safras e safrinhas do ano) começa no de hoje, ou no mais
+  // recente com planos; os demais em "Todas"/"Todos" ('')
+  const CAMPOS_FILTRO = ['anoAgricola', 'empresa', 'atividade', 'cultura', 'fazenda', 'status'];
   const STATUS = [['nao-iniciado', 'Não iniciado'], ['construcao', 'Em construção'], ['publicada', 'Publicada']];
   let filtros = {};
-  const filtrosIniciais = () => ({ safra: Util.safraMaisRecente(presentes('safra', DADOS.safras)), empresa: '', atividade: '', cultura: '', fazenda: '', status: '' });
+  const filtrosIniciais = () => ({ anoAgricola: Util.anoAgricolaInicial(Util.anosAgricolas(DADOS.planos)), empresa: '', atividade: '', cultura: '', fazenda: '', status: '' });
 
   // Opções de cada filtro: só os valores que aparecem nos planos da lista (na ordem do cadastro)
-  const valorDe = (p, campo) => (campo !== 'status' ? p[campo] : Versoes.aIniciar(p) ? 'nao-iniciado' : Versoes.deTrabalho(p).status);
+  const valorDe = (p, campo) => (campo === 'anoAgricola' ? String(Util.anoAgricola(p.safra))
+    : campo !== 'status' ? p[campo] : Versoes.aIniciar(p) ? 'nao-iniciado' : Versoes.deTrabalho(p).status);
   function presentes(campo, cadastro) {
     const naLista = new Set(DADOS.planos.map((p) => valorDe(p, campo)));
     // Status: também os das versões antigas (aparecem na guia Histórico de versões)
@@ -24,7 +26,8 @@ window.Telas.listaPlanos = (function () {
     return cadastro.filter((item) => naLista.has(Array.isArray(item) ? item[0] : item));
   }
 
-  // Safra que a lista deve mostrar na próxima vez que for desenhada (ex.: a dos planos recém-criados)
+  // Safra que a lista deve mostrar na próxima vez que for desenhada (ex.: a dos planos recém-criados): o filtro
+  // vai para o ano agrícola dela
   let safraPedida = null;
   function mostrarSafra(safra) { safraPedida = safra; }
 
@@ -36,7 +39,7 @@ window.Telas.listaPlanos = (function () {
 
   function desenhar() {
     filtros = filtrosIniciais();
-    if (safraPedida) { filtros.safra = safraPedida; safraPedida = null; }
+    if (safraPedida) { filtros.anoAgricola = String(Util.anoAgricola(safraPedida)); safraPedida = null; }
 
     return `
       <header class="cabecalho cabecalho--guias">
@@ -50,7 +53,7 @@ window.Telas.listaPlanos = (function () {
 
       <div class="pagina">
         <section class="cartao filtros" aria-label="Filtrar planos">
-          ${filtro('safra', 'Safra', presentes('safra', DADOS.safras))}
+          ${filtro('anoAgricola', 'Ano Agrícola', Util.anosAgricolas(DADOS.planos))}
           ${filtro('empresa', 'Empresa', presentes('empresa', DADOS.empresas))}
           ${filtro('atividade', 'Atividade', presentes('atividade', DADOS.atividades))}
           ${filtro('cultura', 'Cultura', presentes('cultura', DADOS.culturasPlanos))}
@@ -72,7 +75,7 @@ window.Telas.listaPlanos = (function () {
                 <tr>
                   <th>Safra</th><th>Empresa</th><th>Atividade</th><th>Cultura</th><th>Fazenda</th>
                   <th class="tabela__numero">Área de cultivo</th>
-                  <th>Versão</th><th>Status</th><th>Última atualização</th><th>Atualizado por</th>
+                  <th>Status</th><th>Última atualização</th><th>Atualizado por</th>
                   <th class="lista-planos__menu">Ações</th>
                 </tr>
               </thead>
@@ -109,7 +112,7 @@ window.Telas.listaPlanos = (function () {
         atualizar(conteudo);
       });
     });
-    // Limpar filtros: volta ao começo (Safra mais recente; os demais em Todas/Todos)
+    // Limpar filtros: volta ao começo (Ano Agrícola de hoje; os demais em Todas/Todos)
     conteudo.querySelector('[data-acao="lp-limpar"]').addEventListener('click', () => {
       filtros = filtrosIniciais();
       conteudo.querySelectorAll('[data-filtro]').forEach((select) => { select.value = filtros[select.dataset.filtro]; });
@@ -234,7 +237,7 @@ window.Telas.listaPlanos = (function () {
   // "Histórico de versões" do menu ⋯: a guia Histórico, com os filtros naquele plano
   function verHistorico(p) {
     const conteudo = document.getElementById('conteudo');
-    filtros = { safra: p.safra, empresa: p.empresa, atividade: p.atividade || '', cultura: p.cultura, fazenda: p.fazenda, status: '' };
+    filtros = { anoAgricola: valorDe(p, 'anoAgricola'), empresa: p.empresa, atividade: p.atividade || '', cultura: p.cultura, fazenda: p.fazenda, status: '' };
     conteudo.querySelectorAll('[data-filtro]').forEach((select) => { select.value = filtros[select.dataset.filtro]; });
     atualizar(conteudo);
     trocarGuia(conteudo, 'historico');
@@ -320,7 +323,7 @@ window.Telas.listaPlanos = (function () {
     const planos = planosFiltrados();
     conteudo.querySelector('#lp-linhas').innerHTML = planos.length
       ? planos.map(linha).join('')
-      : `<tr><td class="tabela__vazia" colspan="11">Nenhum plano encontrado com esses filtros.</td></tr>`;
+      : `<tr><td class="tabela__vazia" colspan="10">Nenhum plano encontrado com esses filtros.</td></tr>`;
     const versoes = versoesFiltradas();
     conteudo.querySelector('#lp-historico').innerHTML = versoes.length
       ? versoes.map(linhaVersao).join('')
@@ -333,7 +336,7 @@ window.Telas.listaPlanos = (function () {
   function versoesFiltradas() {
     const campos = CAMPOS_FILTRO.filter((c) => c !== 'status');
     return DADOS.planos
-      .filter((p) => campos.every((campo) => !filtros[campo] || p[campo] === filtros[campo]))
+      .filter((p) => campos.every((campo) => !filtros[campo] || valorDe(p, campo) === filtros[campo]))
       .sort((a, b) => porTexto(b.safra, a.safra) || porTexto(a.fazenda, b.fazenda) || porTexto(a.cultura, b.cultura))
       .flatMap((p) => [...Versoes.lista(p)].reverse().map((v) => ({ p, v })))
       .filter(({ p, v }) => !filtros.status || statusVersao(p, v) === filtros.status);
@@ -377,7 +380,6 @@ window.Telas.listaPlanos = (function () {
         <td>${esc(p.cultura)}</td>
         <td>${esc(p.fazenda)}</td>
         <td class="tabela__numero">${area === null ? '<span class="lista-planos__pendente">Pendente</span>' : Util.area(area)}</td>
-        <td>${versao.num}</td>
         <td>${Versoes.aIniciar(p) ? '<span class="status status--nao-iniciado">Não iniciado</span>'
           : `<span class="status ${publicada ? 'status--aprovado' : 'status--construcao'}">${Versoes.rotuloStatus(versao)}</span>`}</td>
         <td>${Util.data(p.atualizadoEm)}</td>

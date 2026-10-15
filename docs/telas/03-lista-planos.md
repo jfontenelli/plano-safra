@@ -8,21 +8,21 @@ Ver os planos existentes, filtrar e abrir ou criar um plano.
 
 ## Quando aparece
 - Ao clicar em "Visão Geral" (dentro de Plano de Safra) no menu, quando existe ao menos um plano.
-- Ao abrir o protótipo: ele já vem com os planos de exemplo.
+- Ao abrir o protótipo: ele já vem com os planos de exemplo, só publicados (soja 26/27 e milho safrinha 27/27 da Santa Clara). O plano em construção, o usuário cria e monta ele mesmo.
 
 ## Conteúdo
 - Título "Visão Geral" e, embaixo, duas guias (mesmo estilo das abas do plano): **Visão Geral** e **Histórico de versões**.
-- **Filtros** num cartão baixo, sem título, compactos e lado a lado, na ordem das colunas: Safra, Empresa, Atividade, Cultura, Fazenda, Status; **Limpar filtros** à direita. Valem para as duas guias.
-- **Guia Visão Geral — Planos de Safra:** título e botão "Criar Plano Safra" dentro do cartão da lista; colunas Safra, Empresa, Atividade, Cultura, Fazenda, **Área de cultivo**, **Versão** (só o número), **Status**, Última atualização, Atualizado por e **Ações** (botão ⋯). Sem seta: a linha inteira abre o plano.
+- **Filtros** num cartão baixo, sem título, compactos e lado a lado, na ordem das colunas: **Ano Agrícola**, Empresa, Atividade, Cultura, Fazenda, Status; **Limpar filtros** à direita. Valem para as duas guias.
+- **Guia Visão Geral — Planos de Safra:** título e botão "Criar Plano Safra" dentro do cartão da lista; colunas Safra, Empresa, Atividade, Cultura, Fazenda, **Área de cultivo**, **Status**, Última atualização, Atualizado por e **Ações** (botão ⋯). Sem a coluna Versão (fica no Histórico de versões). Sem seta: a linha inteira abre o plano.
 - **Guia Histórico de versões:** uma linha por versão de cada plano; colunas Safra, Empresa, Atividade, Cultura, Fazenda, Versão, Status, Última atualização, Atualizado por.
 
 ## Regras
 - Opções de cada filtro: **só os valores que existem nos planos da lista** (ex.: Atividade só Agricultura). Status: Não iniciado, Em construção, Publicada.
-- Filtro de Safra começa na safra mais recente que tem plano (não em "Todas"). Os demais começam em "Todas"/"Todos". Depois de criar planos, abre na safra deles.
-- **Limpar filtros**: Safra volta à mais recente; os demais a "Todas"/"Todos".
+- Filtro **Ano Agrícola** (DECISOES 1, cadastro de safras): escolher 2026 traz as safras e safrinhas daquele ano (26/27 e 27/27). Começa no ano agrícola de hoje (01/09 a 31/08), se ele tiver planos; senão, no mais recente com planos (não em "Todas"). Os demais começam em "Todas"/"Todos". Depois de criar planos, abre no ano agrícola da safra deles.
+- **Limpar filtros**: Ano Agrícola volta ao de hoje; os demais a "Todas"/"Todos".
 - Os filtros atualizam a lista; trocar de guia mantém os filtros. A guia escolhida se mantém ao navegar.
 - **Área de cultivo**: soma dos talhões incluídos no plano (modal Criar Plano); sem talhões, "Pendente".
-- **Versão**: o número da versão que a linha abre (a mais recente). **Status**: **Não iniciado** (etiqueta branca, bolinha vazada; plano só com a 0.1 vazia), **Em construção** (cinza) ou **Publicada** (verde). Não há mais "Aprovado".
+- A versão que a linha abre (a mais recente) aparece ao passar o mouse na linha. **Status**: **Não iniciado** (etiqueta branca, bolinha vazada; plano só com a 0.1 vazia), **Em construção** (cinza) ou **Publicada** (verde). Não há mais "Aprovado".
 - **Ordem da lista**: Status (Não iniciado, Em construção, Publicada), depois Safra (mais recente primeiro), Fazenda e Cultura em ordem alfabética.
 - Custo estimado e Receita projetada saíram da lista; voltam se os usuários pedirem.
 - **Um clique na linha abre** o plano, na versão em construção ou, se não houver, na última publicada (em consulta). **Plano não iniciado**: abre o modal "Como deseja iniciar o plano?" (Tela 02). Ao passar o mouse, a linha fica verde-clara e o cursor vira a mãozinha. Pelo teclado: Tab chega na linha e Enter abre. Clicar no ⋯ só abre o menu.

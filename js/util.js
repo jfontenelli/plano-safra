@@ -37,9 +37,32 @@ window.Util = {
     return String(texto).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
   },
 
-  // "24/25" < "25/26" < "26/27": a ordem do texto já é a ordem das safras
-  safraMaisRecente(safras) {
-    return [...safras].sort().pop() || '';
+  // Cadastro da safra pelo nome ("26/27"). Safra sem cadastro (criada no modal, só com o nome): pela regra,
+  // de 01/09 do primeiro ano a 31/08 do seguinte, e o Ano Agrícola é o primeiro ano. Safrinha ("27/27", os dois
+  // anos iguais): no ano agrícola anterior (2026), com as datas dele
+  cadastroSafra(nome) {
+    const c = (DADOS.cadastroSafras || []).find((s) => s.nome === nome);
+    if (c) return c;
+    const [a, b] = String(nome).split('/').map((x) => 2000 + Number(x));
+    if (!Number.isFinite(a)) return { nome, anoAgricola: null };
+    const ano = a === b ? a - 1 : a;
+    return { nome, descricao: a === b ? `${a}/${a}` : `${a}/${a + 1}`, apelido: String(a), inicio: `${ano}-09-01`, fim: `${ano + 1}-08-31`, anoAgricola: ano };
+  },
+
+  anoAgricola(safra) {
+    return Util.cadastroSafra(safra).anoAgricola;
+  },
+
+  // Anos agrícolas dos planos, do mais antigo ao mais recente, em texto ("2026"), como nos filtros
+  anosAgricolas(planos) {
+    return [...new Set(planos.map((p) => Util.anoAgricola(p.safra)).filter(Boolean).map(String))].sort();
+  },
+
+  // Ano agrícola que os filtros mostram ao abrir: o de hoje (01/09 a 31/08) se tiver planos; senão, o mais recente
+  anoAgricolaInicial(anos) {
+    const hoje = new Date();
+    const atual = hoje.getMonth() >= 8 ? hoje.getFullYear() : hoje.getFullYear() - 1;
+    return anos.includes(String(atual)) ? String(atual) : anos[anos.length - 1] ?? '';
   },
 
   // 2430 → "2.430 ha"

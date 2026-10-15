@@ -1,7 +1,7 @@
 /*
- * Calendário Agrícola do menu (DECISOES 4.0): vários planos somados, na safra escolhida.
+ * Calendário Agrícola do menu (DECISOES 4.0): vários planos somados, no ano agrícola escolhido (safras e safrinhas).
  * Uma linha por plano (empresa · fazenda · cultura · safra/safrinha), agrupada por empresa, com uma barra do ciclo
- * da cultura na linha do tempo da safra (julho a junho): do primeiro plantio à última colheita prevista.
+ * da cultura na linha do tempo do ano agrícola (setembro a agosto): do primeiro plantio à última colheita prevista.
  * Usa a última versão publicada de cada plano (DECISOES 4.0).
  */
 window.Telas = window.Telas || {};
@@ -15,23 +15,24 @@ window.Telas.calendarioAgricola = (function () {
   let filtros = {};
   // Safra/Safrinha do plano: ainda não é escolhida ao criar o plano (DECISOES 4.2: a detalhar); por enquanto, Safra
   const cicloDe = (p) => p.ciclo || 'Safra';
-  const valorDe = (p, campo) => p[campo];
+  const valorDe = (p, campo) => (campo === 'anoAgricola' ? String(Util.anoAgricola(p.safra)) : p[campo]);
   function presentes(campo, cadastro) {
     const naLista = new Set(DADOS.planos.map((p) => valorDe(p, campo)));
     return cadastro.filter((item) => naLista.has(item));
   }
-  const filtrosIniciais = () => ({ safra: Util.safraMaisRecente(presentes('safra', DADOS.safras)), empresa: '', fazenda: '', cultura: '' });
+  // Ano Agrícola: junta as safras e safrinhas do ano; começa no de hoje, ou no mais recente com planos
+  const filtrosIniciais = () => ({ anoAgricola: Util.anoAgricolaInicial(Util.anosAgricolas(DADOS.planos)), empresa: '', fazenda: '', cultura: '' });
 
   // ----- Datas -----
   const dataDe = (iso) => { const [a, m, d] = iso.split('-').map(Number); return new Date(a, m - 1, d); };
   const somaDias = (iso, n) => { const d = dataDe(iso); d.setDate(d.getDate() + n); return d; };
   const ddmm = (d) => `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`;
-  // Safra "26/27": de 1º de julho de 2026 a 30 de junho de 2027; se alguma colheita passar de junho (ex.: algodão
-  // de 2ª safra, colhido de julho a setembro), a linha do tempo vai até o fim do mês dessa colheita
-  function janela(safra, ultimaData) {
-    const ano = 2000 + Number(String(safra).split('/')[0]);
-    const ini = new Date(ano, 6, 1);
-    let fim = new Date(ano + 1, 6, 1);
+  // Ano agrícola 2026: como a safra, de 1º de setembro de 2026 a 31 de agosto de 2027; se alguma colheita passar
+  // de agosto, a linha do tempo vai até o fim do mês dessa colheita
+  function janela(anoAgricola, ultimaData) {
+    const ano = Number(anoAgricola);
+    const ini = new Date(ano, 8, 1);
+    let fim = new Date(ano + 1, 8, 1);
     if (ultimaData && ultimaData >= fim) fim = new Date(ultimaData.getFullYear(), ultimaData.getMonth() + 1, 1);
     const meses = [];
     for (let d = new Date(ini); d < fim; d.setMonth(d.getMonth() + 1)) meses.push(NOMES_MESES[d.getMonth()]);
@@ -69,23 +70,23 @@ window.Telas.calendarioAgricola = (function () {
       <header class="cabecalho">
         <div>
           <h1 class="cabecalho__titulo">Calendário Agrícola</h1>
-          <p class="cabecalho__subtitulo">O ciclo de cada cultura, do plantio à colheita, em todas as empresas e fazendas da safra.</p>
+          <p class="cabecalho__subtitulo">O ciclo de cada cultura, do plantio à colheita, em todas as empresas e fazendas do ano agrícola.</p>
         </div>
         <span class="cag-etiqueta" title="Mostra a última versão publicada de cada plano. Alterações em versões em construção aparecem aqui depois de publicadas.">${Icones.info} Últimas versões publicadas</span>
       </header>
       <div class="pagina">
         <section class="cartao filtros" aria-label="Filtrar o calendário">
-          ${filtro('safra', 'Safra', presentes('safra', DADOS.safras), null)}
+          ${filtro('anoAgricola', 'Ano Agrícola', Util.anosAgricolas(DADOS.planos), null)}
           ${filtro('empresa', 'Empresa', presentes('empresa', DADOS.empresas))}
           ${filtro('fazenda', 'Fazenda', presentes('fazenda', DADOS.fazendas))}
           ${filtro('cultura', 'Cultura', presentes('cultura', DADOS.culturasPlanos))}
           <button class="link-acao filtros__limpar" type="button" data-acao="cag-limpar">${Icones.limpar} Limpar filtros</button>
         </section>
-        <section class="cag" aria-label="Linha do tempo da safra" data-cag></section>
+        <section class="cag" aria-label="Linha do tempo do ano agrícola" data-cag></section>
       </div>`;
   }
 
-  // todos = null: sem a opção "Todas" (a Safra é sempre uma só)
+  // todos = null: sem a opção "Todas" (o Ano Agrícola é sempre um só)
   function filtro(nome, rotulo, itens, todos = 'Todas') {
     return `
       <div class="campo">
@@ -98,10 +99,10 @@ window.Telas.calendarioAgricola = (function () {
   }
 
   function linhaDoTempo() {
-    const planos = DADOS.planos.filter((p) => ['safra', 'empresa', 'fazenda', 'cultura'].every((c) => !filtros[c] || valorDe(p, c) === filtros[c]));
+    const planos = DADOS.planos.filter((p) => ['anoAgricola', 'empresa', 'fazenda', 'cultura'].every((c) => !filtros[c] || valorDe(p, c) === filtros[c]));
     if (!planos.length) return '<p class="cag__vazio">Nenhum plano com esses filtros.</p>';
     const fins = planos.map((p) => { const c = cicloDoPlano(p); return c.colheitaFim || c.plantioFim; }).filter(Boolean);
-    const j = janela(filtros.safra, fins.length ? new Date(Math.max(...fins)) : null);
+    const j = janela(filtros.anoAgricola, fins.length ? new Date(Math.max(...fins)) : null);
     const grade = `grid-template-columns: repeat(${j.meses.length}, minmax(0, 1fr))`;
     const fundo = `background-size: calc(100% / ${j.meses.length}) 100%`;
     const hoje = new Date();
