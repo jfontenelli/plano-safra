@@ -2397,7 +2397,8 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .cp-talhoes__botao { display: flex; align-items: center; justify-content: space-between; gap: 8px; text-align: left; cursor: pointer; }
 .cp-talhoes__botao:disabled { background: #f1f4f2; color: var(--texto-suave); cursor: not-allowed; }
 .cp-talhoes__botao .icone { width: 16px; height: 16px; flex-shrink: 0; }
-.cp-talhoes__lista { position: absolute; z-index: 5; top: calc(100% - 12px); left: 0; right: 0; max-height: 240px; overflow: auto; padding: 6px 0;
+/* Posição fixa, calculada no JS (posicionarLista), para a lista não ser cortada pela rolagem do modal */
+.cp-talhoes__lista { position: fixed; z-index: 1000; max-height: 320px; overflow: auto; padding: 6px 0;
   border: 1px solid var(--borda); border-radius: 8px; background: var(--superficie); box-shadow: 0 8px 24px rgba(0, 0, 0, .12); }
 .cp-talhoes__item { display: flex; align-items: center; gap: 8px; padding: 6px 12px; font-size: 14px; cursor: pointer; }
 .cp-talhoes__item:hover { background: var(--verde-100); }
@@ -2597,3 +2598,38 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .cag__sem { position: relative; z-index: 1; align-self: flex-start; margin-left: 10px; padding: 2px 6px; background: var(--superficie); font-size: 13px; font-style: italic; color: #6B7A72; }
 .cag__pendente { color: var(--texto-suave); }
 .cag__vazio, .cag__nota { margin: 0; font-size: 13px; color: var(--texto-suave); }
+
+/* ===== Tela 03 · Guia Painel ===== */
+.painel { display: flex; flex-direction: column; gap: 20px; }
+.painel[hidden], .filtros .campo[hidden] { display: none; }
+.painel-secao { padding: 18px 20px 20px; }
+.painel-secao__titulo { display: flex; align-items: center; gap: 8px; font-size: 18px; font-weight: 700; }
+.painel-secao__subtitulo { margin: 4px 0 0; font-size: 14px; color: var(--texto-suave); }
+.painel-info { display: inline-flex; color: #1f6fd1; cursor: help; }
+.painel-info .icone { width: 17px; height: 17px; }
+
+/* Planejamento das Fazendas: três números com barra */
+.painel-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px; margin-top: 16px; }
+.painel-kpi { display: flex; align-items: center; gap: 18px; padding: 18px 20px; border: 1px solid var(--borda); border-radius: var(--raio); }
+.painel-kpi__icone { display: grid; place-items: center; width: 56px; height: 56px; border-radius: 50%; }
+.painel-kpi__icone .icone { width: 26px; height: 26px; }
+.painel-kpi__corpo { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 0; }
+.painel-kpi__rotulo { font-size: 14px; font-weight: 600; }
+.painel-kpi__numero { font-size: 26px; font-weight: 700; line-height: 1.15; font-variant-numeric: tabular-nums; }
+.painel-kpi__barra { display: block; height: 8px; margin-top: 4px; border-radius: 4px; background: #e8edf0; overflow: hidden; }
+.painel-kpi__barra > span { display: block; height: 100%; border-radius: 4px; }
+.painel-kpi__texto { font-size: 13px; color: var(--texto-suave); }
+.painel-kpi--sem .painel-kpi__icone { background: #e3eefb; color: #1f6fd1; }
+.painel-kpi--sem .painel-kpi__barra > span { background: #1f6fd1; }
+.painel-kpi--construcao .painel-kpi__icone { background: #fdf0dc; color: #d9850b; }
+.painel-kpi--construcao .painel-kpi__barra > span { background: #ee9b1d; }
+.painel-kpi--publicada .painel-kpi__icone { background: #def2e6; color: var(--verde-600); }
+.painel-kpi--publicada .painel-kpi__barra > span { background: var(--verde-600); }
+
+/* Planos de Safra do Painel: barrinhas de % por grupo */
+.painel-tabela th, .painel-tabela td { padding-left: 8px; padding-right: 8px; }
+.painel-tabela td { padding-top: 10px; padding-bottom: 10px; }
+.painel-tabela__vazio { color: #9aa5a0; }
+.painel-progresso { display: inline-flex; align-items: center; gap: 8px; font-variant-numeric: tabular-nums; }
+.painel-progresso__barra { display: block; width: 40px; height: 8px; border-radius: 4px; background: #e8edf0; overflow: hidden; }
+.painel-progresso__barra > span { display: block; height: 100%; border-radius: 4px; background: var(--verde-600); }

@@ -1,7 +1,7 @@
 /*
  * Tela 03 — Visão Geral, lista de planos (docs/telas/03-lista-planos.md)
  * Aparece no menu Plano de Safra › Visão Geral quando existe ao menos um plano.
- * Duas guias com os mesmos filtros: Visão Geral (uma linha por plano, na versão mais recente)
+ * Duas guias com os mesmos filtros: Planos de Safra (o Painel: Telas.painelPlanos, uma linha por fazenda e safra)
  * e Histórico de versões (uma linha por versão de cada plano).
  */
 window.Telas = window.Telas || {};
@@ -9,31 +9,39 @@ window.Telas = window.Telas || {};
 window.Telas.listaPlanos = (function () {
   const esc = Util.escapar;
 
-  // Filtros, na ordem das colunas. Ano Agrícola (junta as safras e safrinhas do ano) começa no de hoje, ou no mais
-  // recente com planos; os demais em "Todas"/"Todos" ('')
-  const CAMPOS_FILTRO = ['anoAgricola', 'empresa', 'atividade', 'cultura', 'fazenda', 'status'];
+  // Filtros, os mesmos nas duas guias (Status só no Histórico). Ano Agrícola (junta as safras e
+  // safrinhas do ano) começa no de hoje, ou no mais recente com planos; os demais em "Todas"/"Todos" ('').
+  // ciclo: Safra ou Safrinha (o filtro "Safra")
+  const CAMPOS_FILTRO = ['anoAgricola', 'atividade', 'ciclo', 'empresa', 'fazenda', 'cultura', 'status'];
+  const CICLOS = ['Safra', 'Safrinha'];
   const STATUS = [['nao-iniciado', 'Não iniciado'], ['construcao', 'Em construção'], ['publicada', 'Publicada']];
   let filtros = {};
-  const filtrosIniciais = () => ({ anoAgricola: Util.anoAgricolaInicial(Util.anosAgricolas(DADOS.planos)), empresa: '', atividade: '', cultura: '', fazenda: '', status: '' });
+  const filtrosIniciais = () => ({ anoAgricola: Util.anoAgricolaInicial(Telas.painelPlanos.anos()), atividade: '', ciclo: '', empresa: '', fazenda: '', cultura: '', status: '' });
 
   // Opções de cada filtro: só os valores que aparecem nos planos da lista (na ordem do cadastro)
   const valorDe = (p, campo) => (campo === 'anoAgricola' ? String(Util.anoAgricola(p.safra))
+    : campo === 'ciclo' ? Telas.painelPlanos.cicloDe(p)
     : campo !== 'status' ? p[campo] : Versoes.aIniciar(p) ? 'nao-iniciado' : Versoes.deTrabalho(p).status);
   function presentes(campo, cadastro) {
     const naLista = new Set(DADOS.planos.map((p) => valorDe(p, campo)));
+    // Empresa e Fazenda: também as fazendas de cada empresa, que aparecem no Painel ainda sem plano
+    const extras = Telas.painelPlanos.empresasEFazendas();
+    if (campo === 'empresa') extras.empresas.forEach((e) => naLista.add(e));
+    if (campo === 'fazenda') extras.fazendas.forEach((f) => naLista.add(f));
     // Status: também os das versões antigas (aparecem na guia Histórico de versões)
     if (campo === 'status') DADOS.planos.forEach((p) => Versoes.lista(p).forEach((v) => naLista.add(statusVersao(p, v))));
     return cadastro.filter((item) => naLista.has(Array.isArray(item) ? item[0] : item));
   }
 
   // Safra que a lista deve mostrar na próxima vez que for desenhada (ex.: a dos planos recém-criados): o filtro
-  // vai para o ano agrícola dela
+  // vai para o ano agrícola dela, na guia Planos de Safra
   let safraPedida = null;
-  function mostrarSafra(safra) { safraPedida = safra; }
+  function mostrarSafra(safra) { safraPedida = safra; guia = 'painel'; }
 
-  // Guia aberta: 'planos' (Visão Geral) ou 'historico' (Histórico de versões). Mantém-se ao navegar.
-  const GUIAS = [['planos', 'Visão Geral'], ['historico', 'Histórico de versões']];
-  let guia = 'planos';
+  // Guia aberta: 'painel' (Planos de Safra) ou 'historico' (Histórico de versões).
+  // Abre em Planos de Safra; a guia escolhida se mantém ao navegar.
+  const GUIAS = [['painel', 'Planos de Safra'], ['historico', 'Histórico de versões']];
+  let guia = 'painel';
   // Status de uma versão: a 0.1 de um plano ainda não iniciado aparece como "Não iniciado"
   const statusVersao = (p, v) => (Versoes.aIniciar(p) ? 'nao-iniciado' : v.status);
 
@@ -53,36 +61,17 @@ window.Telas.listaPlanos = (function () {
 
       <div class="pagina">
         <section class="cartao filtros" aria-label="Filtrar planos">
-          ${filtro('anoAgricola', 'Ano Agrícola', Util.anosAgricolas(DADOS.planos))}
+          ${filtro('anoAgricola', 'Ano Agrícola', Telas.painelPlanos.anos())}
+          ${filtro('atividade', 'Atividade produtiva', presentes('atividade', DADOS.atividades))}
+          ${filtro('ciclo', 'Safra', presentes('ciclo', CICLOS))}
           ${filtro('empresa', 'Empresa', presentes('empresa', DADOS.empresas))}
-          ${filtro('atividade', 'Atividade', presentes('atividade', DADOS.atividades))}
-          ${filtro('cultura', 'Cultura', presentes('cultura', DADOS.culturasPlanos))}
           ${filtro('fazenda', 'Fazenda', presentes('fazenda', DADOS.fazendas))}
+          ${filtro('cultura', 'Cultura', presentes('cultura', DADOS.culturasPlanos))}
           ${filtro('status', 'Status', presentes('status', STATUS), 'Todos')}
           <button class="link-acao filtros__limpar" type="button" data-acao="lp-limpar">${Icones.limpar} Limpar filtros</button>
         </section>
 
-        <section class="cartao lista-planos" aria-labelledby="titulo-planos" data-guia-painel="planos" ${guia === 'planos' ? '' : 'hidden'}>
-          <div class="secao__topo lista-planos__topo">
-            <h2 class="secao__titulo" id="titulo-planos">Planos de Safra</h2>
-            <button class="botao botao--primario" type="button" data-acao="criar-plano">
-              ${Icones.mais} Criar Plano Safra
-            </button>
-          </div>
-          <div class="tabela-rolagem">
-            <table class="tabela">
-              <thead>
-                <tr>
-                  <th>Safra</th><th>Empresa</th><th>Atividade</th><th>Cultura</th><th>Fazenda</th>
-                  <th class="tabela__numero">Área de cultivo</th>
-                  <th>Status</th><th>Última atualização</th><th>Atualizado por</th>
-                  <th class="lista-planos__menu">Ações</th>
-                </tr>
-              </thead>
-              <tbody id="lp-linhas"></tbody>
-            </table>
-          </div>
-        </section>
+        ${Telas.painelPlanos.desenhar()}
 
         <section class="cartao lista-planos" aria-labelledby="titulo-historico" data-guia-painel="historico" ${guia === 'historico' ? '' : 'hidden'}>
           <div class="secao__topo lista-planos__topo">
@@ -119,6 +108,8 @@ window.Telas.listaPlanos = (function () {
       atualizar(conteudo);
     });
     atualizar(conteudo);
+    trocarGuia(conteudo, guia);
+    Telas.painelPlanos.ligar(conteudo, { abrirPlano, abrirMenuPlano, abrirMenuSemPlano });
     // Guias: troca o painel sem desenhar a tela de novo (os filtros continuam)
     conteudo.querySelector('.cabecalho--guias').addEventListener('click', (e) => {
       const botao = e.target.closest('[data-guia]');
@@ -135,37 +126,22 @@ window.Telas.listaPlanos = (function () {
       const tr = e.target.closest('tr[data-versao]');
       if (tr && e.target === tr && e.key === 'Enter') abrirDaLinha(tr);
     });
-    // Um clique na linha (ou Enter nela) abre a versão de trabalho
-    // (em construção ou, sem ela, a última publicada). O ⋯ só abre o menu.
-    const abrirLinha = (tr) => abrirPlano(DADOS.planos.find((x) => x.id === Number(tr.dataset.plano)));
-    // Eventos no cartão da lista, que é refeito a cada vez que a tela aparece
-    // (no #conteudo, que é sempre o mesmo, eles se acumulariam e abririam duas vezes)
-    const lista = conteudo.querySelector('[data-guia-painel="planos"]');
-    lista.addEventListener('click', (e) => {
-      const tr = e.target.closest('tr[data-plano]');
-      if (tr && !e.target.closest('a, button')) abrirLinha(tr);
-    });
-    lista.addEventListener('keydown', (e) => {
-      const tr = e.target.closest('tr[data-plano]');
-      if (tr && e.target === tr && e.key === 'Enter') abrirLinha(tr);
-    });
-    // Menu do plano: botão direito na linha ou o botão ⋯ no fim da linha
-    lista.addEventListener('contextmenu', (e) => {
-      const tr = e.target.closest('tr[data-plano]');
-      if (!tr || e.target.closest('a, button')) return;
-      e.preventDefault();
-      abrirMenuPlano(Number(tr.dataset.plano), e.target, e.clientX, e.clientY);
-    });
-    lista.addEventListener('click', (e) => {
-      const botao = e.target.closest('[data-menu-plano]');
-      if (!botao) return;
-      const caixa = botao.getBoundingClientRect();
-      abrirMenuPlano(Number(botao.dataset.menuPlano), botao, caixa.right, caixa.bottom + 4, true);
-    });
   }
 
   // ----- Menu do plano -----
   let menuAberto = null;
+
+  // Painel, fazenda sem plano: o ⋯ tem só "Criar plano", que abre o modal com safra, empresa e fazenda preenchidas
+  function abrirMenuSemPlano({ safra, empresa, fazenda }, ancora, x, y) {
+    fecharMenuPlano();
+    const menu = document.createElement('div');
+    menu.className = 'menu-contexto';
+    menu.setAttribute('role', 'menu');
+    menu.setAttribute('aria-label', `Fazenda ${fazenda} sem plano`);
+    menu.innerHTML = '<button class="menu-contexto__item" type="button" role="menuitem" data-item="criar">Criar plano</button>';
+    mostrarMenu(menu, ancora, x, y, true, () => Telas.criarPlano({ safra, empresa, fazenda }));
+  }
+
   // alinharDireita: o menu termina em x (usado pelo ⋯, que fica no fim da linha)
   function abrirMenuPlano(id, ancora, x, y, alinharDireita = false) {
     fecharMenuPlano();
@@ -195,6 +171,17 @@ window.Telas.listaPlanos = (function () {
       '<hr class="menu-contexto__separador">',
       item('excluir', 'Excluir plano', { perigo: true })
     ].join('');
+    mostrarMenu(menu, ancora, x, y, alinharDireita, (acao) => {
+      if (acao === 'abrir') abrirPlano(p);
+      else if (acao === 'nova-versao') criarNovaVersao(p);
+      else if (acao === 'historico') verHistorico(p);
+      else if (acao === 'exportar') ArquivoPlano.exportar(p);
+      else excluirPlano(p);
+    });
+  }
+
+  // Põe o menu na tela (perto de x, y), com teclado e clique fora; aoEscolher recebe o data-item escolhido
+  function mostrarMenu(menu, ancora, x, y, alinharDireita, aoEscolher) {
     document.body.appendChild(menu);
     const { width, height } = menu.getBoundingClientRect();
     if (alinharDireita) x -= width;
@@ -206,12 +193,7 @@ window.Telas.listaPlanos = (function () {
       const item = ev.target.closest('[data-item]');
       if (!item || item.getAttribute('aria-disabled') === 'true') return;
       fecharMenuPlano();
-      const acao = item.dataset.item;
-      if (acao === 'abrir') abrirPlano(p);
-      else if (acao === 'nova-versao') criarNovaVersao(p);
-      else if (acao === 'historico') verHistorico(p);
-      else if (acao === 'exportar') ArquivoPlano.exportar(p);
-      else excluirPlano(p);
+      aoEscolher(item.dataset.item);
     });
     menu.addEventListener('keydown', (ev) => {
       const i = itens.indexOf(document.activeElement);
@@ -232,12 +214,15 @@ window.Telas.listaPlanos = (function () {
       if (ativa) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
     });
     conteudo.querySelectorAll('[data-guia-painel]').forEach((painel) => { painel.hidden = painel.dataset.guiaPainel !== guia; });
+    // Status não vale para o Painel (os números já separam por status)
+    const status = conteudo.querySelector('[data-filtro="status"]');
+    if (status) status.closest('.campo').hidden = guia === 'painel';
   }
 
   // "Histórico de versões" do menu ⋯: a guia Histórico, com os filtros naquele plano
   function verHistorico(p) {
     const conteudo = document.getElementById('conteudo');
-    filtros = { anoAgricola: valorDe(p, 'anoAgricola'), empresa: p.empresa, atividade: p.atividade || '', cultura: p.cultura, fazenda: p.fazenda, status: '' };
+    filtros = { anoAgricola: valorDe(p, 'anoAgricola'), atividade: p.atividade || '', ciclo: valorDe(p, 'ciclo'), empresa: p.empresa, fazenda: p.fazenda, cultura: p.cultura, status: '' };
     conteudo.querySelectorAll('[data-filtro]').forEach((select) => { select.value = filtros[select.dataset.filtro]; });
     atualizar(conteudo);
     trocarGuia(conteudo, 'historico');
@@ -304,30 +289,14 @@ window.Telas.listaPlanos = (function () {
     menuAberto = null;
   }
 
-  // Ordem da lista: Status (Não iniciado, Em construção, Publicada), depois Safra (mais recente primeiro),
-  // Fazenda e Cultura em ordem alfabética
-  const ORDEM_STATUS = STATUS.map(([valor]) => valor);
   const porTexto = (a, b) => a.localeCompare(b, 'pt-BR');
-  function ordenar(a, b) {
-    return ORDEM_STATUS.indexOf(valorDe(a, 'status')) - ORDEM_STATUS.indexOf(valorDe(b, 'status'))
-      || porTexto(b.safra, a.safra) || porTexto(a.fazenda, b.fazenda) || porTexto(a.cultura, b.cultura);
-  }
-
-  function planosFiltrados() {
-    // Status: o da versão que a linha abre (em construção ou, sem ela, a última publicada)
-    return DADOS.planos.filter((p) => CAMPOS_FILTRO.every((campo) => !filtros[campo] || valorDe(p, campo) === filtros[campo]))
-      .sort(ordenar);
-  }
 
   function atualizar(conteudo) {
-    const planos = planosFiltrados();
-    conteudo.querySelector('#lp-linhas').innerHTML = planos.length
-      ? planos.map(linha).join('')
-      : `<tr><td class="tabela__vazia" colspan="10">Nenhum plano encontrado com esses filtros.</td></tr>`;
     const versoes = versoesFiltradas();
     conteudo.querySelector('#lp-historico').innerHTML = versoes.length
       ? versoes.map(linhaVersao).join('')
       : `<tr><td class="tabela__vazia" colspan="9">Nenhuma versão encontrada com esses filtros.</td></tr>`;
+    Telas.painelPlanos.atualizar(conteudo, filtros);
   }
 
   // ----- Histórico de versões -----
@@ -363,33 +332,6 @@ window.Telas.listaPlanos = (function () {
         <td>${quando ? new Date(quando).toLocaleDateString('pt-BR') : '—'}</td>
         <td>${esc(quem || '—')}</td>
       </tr>`;
-  }
-
-  // ----- Lista -----
-  function linha(p) {
-    const versao = Versoes.deTrabalho(p);
-    const publicada = versao.status === 'publicada';
-    const area = Util.areaCultivo(p, versao);
-    return `
-      <tr class="lista-planos__linha" data-plano="${p.id}" tabindex="0"
-          title="Abrir a versão ${versao.num} (${publicada ? 'publicada, em consulta' : 'em construção'})"
-          aria-label="Abrir plano ${esc(p.safra)} · ${esc(p.fazenda)}, versão ${versao.num}">
-        <td>${esc(p.safra)}</td>
-        <td>${esc(p.empresa)}</td>
-        <td>${esc(p.atividade || '—')}</td>
-        <td>${esc(p.cultura)}</td>
-        <td>${esc(p.fazenda)}</td>
-        <td class="tabela__numero">${area === null ? '<span class="lista-planos__pendente">Pendente</span>' : Util.area(area)}</td>
-        <td>${Versoes.aIniciar(p) ? '<span class="status status--nao-iniciado">Não iniciado</span>'
-          : `<span class="status ${publicada ? 'status--aprovado' : 'status--construcao'}">${Versoes.rotuloStatus(versao)}</span>`}</td>
-        <td>${Util.data(p.atualizadoEm)}</td>
-        <td>${esc(p.atualizadoPor)}</td>
-        <td class="lista-planos__menu">
-          <button class="botao-icone" type="button" data-menu-plano="${p.id}" title="Mais ações"
-                  aria-haspopup="menu" aria-label="Mais ações do plano ${esc(p.safra)} · ${esc(p.fazenda)}">${Icones.mais_opcoes}</button>
-        </td>
-      </tr>
-    `;
   }
 
   // itens: textos ou pares [valor, rótulo]

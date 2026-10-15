@@ -62,18 +62,19 @@ Agrônomo da fazenda e líder de operações podem ser a mesma pessoa, conforme 
 
 - **Primeiro uso** (nenhum plano cadastrado): ilustração, título "Comece o planejamento da sua safra", texto "O Plano de Safra organiza as necessidades de compra de insumos, gera o Calendário Agrícola e, a partir da versão publicada, cria automaticamente as Ordens de Serviço." e um único botão "Criar Plano Safra". A partir do primeiro plano, essa tela não aparece mais.
 - O protótipo **abre já com os planos de exemplo**, só publicados (soja 26/27 e milho safrinha 27/27 da Santa Clara): o plano em construção, o usuário cria e monta ele mesmo. Demonstração → "Começar do zero" volta ao primeiro uso.
-- **Com planos**: duas guias abaixo do título, **Visão Geral** e **Histórico de versões**, com os mesmos filtros. Sem indicadores (cards) no topo.
-- **Filtros** num cartão baixo, na ordem das colunas: **Ano Agrícola**, Empresa, Atividade, Cultura, Fazenda, Status, e **Limpar filtros** à direita (Ano Agrícola volta ao de hoje; os demais a "Todas"/"Todos"). As opções de cada filtro são **só os valores que existem nos planos da lista** (ex.: Atividade só Agricultura).
-- Filtro **Ano Agrícola** no lugar de Safra: escolher 2026 traz as safras e safrinhas daquele ano (26/27 e 27/27). Começa no ano agrícola de hoje (01/09 a 31/08), se ele tiver planos; senão, no mais recente com planos (não em "Todas"). Depois de criar planos, a lista abre no ano agrícola da safra deles.
-- **Guia Visão Geral:** uma linha por plano, na versão mais recente. Título "Planos de Safra" e botão "Criar Plano Safra" dentro do cartão da lista.
-  - Colunas: Safra, Empresa, Atividade, Cultura, Fazenda, **Área de cultivo**, **Status**, Última atualização, Atualizado por, Ações (⋯). Sem a coluna Versão (fica no Histórico de versões); a versão que a linha abre aparece ao passar o mouse.
-  - **Área de cultivo** = soma dos talhões incluídos no plano; sem talhões, "Pendente".
-  - **Status:** **Não iniciado** (plano criado, só com a 0.1 vazia), **Em construção** ou **Publicada**. Não há mais status "Aprovado".
-  - **Ordem:** Status (Não iniciado, Em construção, Publicada), depois Safra (mais recente primeiro), Fazenda e Cultura em ordem alfabética.
-  - Custo estimado e Receita projetada saíram da lista; voltam se os usuários pedirem.
+- **Com planos**: duas guias abaixo do título, **Planos de Safra** (abre nela) e **Histórico de versões**, com os mesmos filtros.
+- **Filtros** num cartão baixo: **Ano Agrícola**, **Atividade produtiva**, **Safra** (Safra ou Safrinha), Empresa, Fazenda, Cultura e, só no Histórico, Status; **Limpar filtros** à direita (Ano Agrícola volta ao de hoje; os demais a "Todas"/"Todos").
+- Filtro **Ano Agrícola** no lugar de Safra: escolher 2026 traz as safras e safrinhas daquele ano (26/27 e 27/27). Opções: os anos das safras cadastradas e dos planos. Começa no ano agrícola de hoje (01/09 a 31/08); senão, no mais recente. Depois de criar planos, abre no ano agrícola da safra deles.
+- **Guia Planos de Safra** (detalhe na Tela 03):
+  - **Planejamento das Fazendas**: Sem plano, Em construção (inclui Não iniciado) e Publicado, em "X de N" com barra e %.
+  - **Quem entra na conta:** cada fazenda conta uma vez por safra e uma vez por safrinha. Cada safra ou safrinha **cadastrada** no ano agrícola, mesmo sem plano, faz entrar **todas as fazendas de todas as empresas**; quem não tem plano nela aparece como **Sem plano**. Fazendas de cada empresa: nos dados de exemplo.
+  - **Tabela Planos de Safra** (botão "+ Criar Plano Safra" no topo): uma linha por fazenda e safra; colunas Empresa, Fazenda, Safra, Cultura, Área (ha), Sementes, TSI, Fertilidade, Defensivos, Status, Ações. Ordena por qualquer coluna (seta no título; vazios no fim).
+  - **% de cada grupo, por área:** em cada operação, a área dos talhões com recomendação completa (no Sementes, variedade e data) ÷ área de cultivo; o grupo é a média das operações. A Colheita não entra (vem do plantio).
+  - Linha **Sem plano**: o ⋯ tem **Criar plano**, que abre o modal com safra, empresa e fazenda preenchidas.
+  - Saíram: o gráfico de área planejada por empresa, o % concluído e a lista antiga (Atividade, Última atualização e Atualizado por ficam no Histórico). Custo estimado e Receita projetada voltam se os usuários pedirem.
 - **Guia Histórico de versões:** uma linha por versão de cada plano (da mais nova para a mais antiga). Colunas: Safra, Empresa, Atividade, Cultura, Fazenda, Versão, Status, Última atualização, Atualizado por (em construção: a última alteração salva; publicada: a publicação). Clicar na linha abre aquela versão (publicada em consulta).
 - **Um clique na linha abre** o plano (sem seta), na versão em construção ou, se não houver, na última publicada (em consulta). **Plano não iniciado:** abre o modal "Como deseja iniciar o plano?" (4.1.1).
-- **Menu do plano** na lista (⋯ no fim da linha ou botão direito), nesta ordem: **Abrir · Criar nova versão · Histórico de versões · Exportar XLSX · (separador) · Excluir plano** (em vermelho).
+- **Menu do plano** na tabela Planos de Safra (⋯ no fim da linha ou botão direito), nesta ordem: **Abrir · Criar nova versão · Histórico de versões · Exportar XLSX · (separador) · Excluir plano** (em vermelho).
   - **Criar nova versão:** a partir da **última publicada**; já abre em edição. Com uma versão em construção no plano, aparece desabilitado com "A versão 0.3 já está em construção"; plano não iniciado, com "O plano ainda não foi iniciado". Criar a partir de uma versão mais antiga é feito no Histórico de versões.
   - **Histórico de versões:** abre a guia Histórico de versões com os filtros naquele plano.
   - **Excluir plano:** permitido enquanto **nenhuma OS** foi gerada a partir do plano; depois, desabilitado com "O plano já gerou Ordens de Serviço". Com confirmação.

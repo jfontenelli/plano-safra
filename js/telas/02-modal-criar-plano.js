@@ -3,11 +3,12 @@
  * Abre por cima da tela de origem. Só identifica o plano: informações gerais (Safra, Empresa, Atividade, Cultura)
  * e uma ou mais fazendas, cada uma com os talhões incluídos. Cria um plano por fazenda.
  * Ao criar, chama aoCriar({ safra, empresa, atividade, cultura, fazendas: [{ fazenda, talhoes }] }).
+ * inicial: { safra, empresa, fazenda } já escolhidos ao abrir (a fazenda com todos os talhões).
  * Como começar o plano (modelo, do zero, XLSX, copiar) fica no Planejamento (Telas.inicioPlano).
  */
 window.Telas = window.Telas || {};
 
-window.Telas.abrirModalCriarPlano = function ({ aoCriar }) {
+window.Telas.abrirModalCriarPlano = function ({ aoCriar, inicial = {} }) {
   const esc = Util.escapar;
   const NOVA_SAFRA = '__nova-safra__';
   const GERAIS = ['safra', 'empresa', 'atividade', 'cultura'];
@@ -15,6 +16,7 @@ window.Telas.abrirModalCriarPlano = function ({ aoCriar }) {
   // Blocos de fazenda: { chave, fazenda, talhoes (nomes incluídos) }
   let proximaChave = 1;
   const blocos = [novoBloco()];
+  if (inicial.fazenda) Object.assign(blocos[0], { fazenda: inicial.fazenda, talhoes: (DADOS.talhoes[inicial.fazenda] || []).map((t) => t.nome) });
   let tentouCriar = false;      // os avisos de obrigatório só aparecem depois de tentar criar
   let talhoesAbertos = null;    // chave do bloco com a lista de talhões aberta
 
@@ -34,7 +36,7 @@ window.Telas.abrirModalCriarPlano = function ({ aoCriar }) {
             <select class="campo__controle" id="cp-safra" name="safra" required></select>
             ${erroObrigatorio('safra')}
           </div>
-          ${campoLista('empresa', 'Empresa', 'Selecione', DADOS.empresas)}
+          ${campoLista('empresa', 'Empresa', 'Selecione', DADOS.empresas, [], inicial.empresa)}
           ${campoLista('atividade', 'Atividade', 'Selecione', DADOS.atividades, DADOS.atividadesEmBreve, 'Agricultura')}
           ${campoLista('cultura', 'Cultura', 'Selecione', DADOS.culturas)}
         </div>
@@ -59,15 +61,37 @@ window.Telas.abrirModalCriarPlano = function ({ aoCriar }) {
   const erroCriar = form.querySelector('#cp-erro-criar');
   let safraAnterior = '';
 
-  preencherSafras();
+  preencherSafras(inicial.safra && DADOS.safras.includes(inicial.safra) ? inicial.safra : '');
   desenharFazendas();
   selectSafra.focus();
 
   // ----- Fazendas -----
   function desenharFazendas() {
     caixaFazendas.innerHTML = blocos.map(blocoFazenda).join('');
+    posicionarLista();
     atualizar();
   }
+
+  // A lista de talhões fica por cima do modal (posição fixa), para não ser cortada pela rolagem do formulário:
+  // abaixo do botão, ou acima quando falta espaço embaixo; a altura cabe na tela
+  function posicionarLista() {
+    const lista = caixaFazendas.querySelector('.cp-talhoes__lista');
+    if (!lista || !lista.isConnected) return;
+    const botao = lista.previousElementSibling.getBoundingClientRect();
+    const margem = 12;
+    const abaixo = window.innerHeight - botao.bottom - margem;
+    const acima = botao.top - margem;
+    const altura = Math.min(320, lista.scrollHeight);
+    const emCima = abaixo < altura && acima > abaixo;
+    lista.style.left = `${botao.left}px`;
+    lista.style.width = `${botao.width}px`;
+    lista.style.maxHeight = `${Math.max(120, Math.min(320, emCima ? acima : abaixo))}px`;
+    lista.style.top = emCima ? '' : `${botao.bottom + 4}px`;
+    lista.style.bottom = emCima ? `${window.innerHeight - botao.top + 4}px` : '';
+  }
+  // Rolou o formulário ou mudou o tamanho da janela: a lista acompanha o botão
+  modal.elemento.querySelector('.modal__corpo').addEventListener('scroll', posicionarLista);
+  window.addEventListener('resize', posicionarLista);
 
   function blocoFazenda(b, i) {
     const todos = DADOS.talhoes[b.fazenda] || [];

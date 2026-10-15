@@ -28,6 +28,12 @@ window.DADOS = {
   atividades: ['Agricultura', 'Pecuária', 'Silvicultura'],
   atividadesEmBreve: ['Pecuária', 'Silvicultura'],
   fazendas: ['São José', 'Boa Vista', 'Santa Clara', 'Primavera'],
+  // Fazendas de cada empresa (exemplo, para o Painel da Visão Geral: "Sem plano" e área total). Ajuste à vontade.
+  fazendasPorEmpresa: {
+    'Empresa A': ['São José', 'Santa Clara'],
+    'Empresa B': ['Boa Vista'],
+    'Empresa C': ['Primavera']
+  },
   // Por enquanto o protótipo funciona só para soja (variedades, população, bags e TSI são de soja)
   culturas: ['Soja'],
   // Culturas que aparecem nos planos (os de exemplo têm milho safrinha), para os filtros

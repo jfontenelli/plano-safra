@@ -219,10 +219,11 @@
   conteudo.addEventListener('click', (e) => {
     const botao = e.target.closest('[data-acao]');
     if (!botao) return;
-    if (botao.dataset.acao === 'criar-plano') {
-      Telas.abrirModalCriarPlano({ aoCriar: criarPlanos });
-    }
+    if (botao.dataset.acao === 'criar-plano') Telas.criarPlano();
   });
+
+  // Abre o modal Criar Plano; inicial: { safra, empresa, fazenda } já preenchidos (ex.: Painel, fazenda sem plano)
+  Telas.criarPlano = (inicial = {}) => Telas.abrirModalCriarPlano({ aoCriar: criarPlanos, inicial });
 
   window.addEventListener('hashchange', mostrarTela);
 
