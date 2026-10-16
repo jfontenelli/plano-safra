@@ -25,7 +25,7 @@ Regras de negócio ficam em `docs/DECISOES.md`.
 | 05 | Calendário Agrícola (aba Resumo do plano) | telas/05-calendario-agricola.md | referencias/05-calendario-agricola.png, referencias/05.3-resumo-calendario.png | Construída: Programação (tabela), Ciclo Produtivo (por fase) e Calendário (mês, semana, dia; legenda que filtra; painel do dia; área operacional) |
 | 06 | Orçamento de Insumos (menu Orçamento, vários planos somados) | telas/06-orcamento.md | referencias/suprimentos.png | Construída: moeda de exibição R$/US$; filtros com várias escolhas; estimativas de comercialização (Editar parâmetros); Resumo do orçamento; Orçamento por tipo de insumo; Detalhamento Por produto e Por talhão com busca, ordenação, paginação e Exportar XLSX; cabeçalho congelado (alfinete) |
 
-| — | Calendário Agrícola do menu (vários planos somados) | DECISOES 4.0 | canvas de discovery (Claude Design) | Construída: filtros Ano Agrícola, Empresa, Fazenda e Cultura; linhas por empresa · fazenda · cultura · safra/safrinha, com uma barra do ciclo da cultura (primeiro plantio à última colheita prevista) na cor da cultura; linha do tempo do ano agrícola (setembro a agosto, até o mês da última colheita); Hoje pontilhado; última versão publicada de cada plano |
+| — | Calendário Agrícola do menu (vários planos somados) | DECISOES 4.0 | canvas de design (Claude Design, 16/10) | Construída: Empresa › Fazenda › Safra/Safrinha (abre com as fazendas fechadas); cada operação é uma barra transparente numa faixa por grupo de operação; sucessão de culturas na fazenda; filtros Ano Agrícola, Empresa, Fazenda, Cultura e Período (Ano, Semestre, Trimestre, Mês, com setas); Hoje pontilhado; última versão publicada de cada plano |
 
 Situação: A definir → Pronta para construir → Construída.
 
