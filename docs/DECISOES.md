@@ -169,7 +169,7 @@ Detalhe da tela: docs/telas/04.2-operacoes-sementes.md.
 - Escolha da variedade com apoio do histórico do talhão: produtividade das 3 últimas safras da cultura e chuva acumulada no ciclo de cada uma.
 - **Germinação por talhão** (%): na v1, estimada no plano (a semente ainda não foi comprada; não há lote). Informada por talhão, com atalho para aplicar o mesmo valor em todos os talhões.
 - População de plantas: recomendada (cadastro da variedade, referência, mostrada só no preenchimento) e planejada (agrônomo). Talhão sem variedade também pode receber população (liberado para os testes; travar de novo se confundir).
-- **Sementes = população planejada × área ÷ germinação. Bags = sementes ÷ 5.000.000** (1 bag de soja = 5 milhões de sementes).
+- **Sementes = população planejada × área ÷ germinação.** Embalagem pelo padrão de mercado da cultura: **soja em bags (1 bag = 5 milhões de sementes)**, **milho em sacos (1 saco = 60 mil sementes)**. A mesma no Plantio, no Exportar e no Orçamento.
 ### 4.4.1 Tratamento de sementes (grupo Tratamento de semente)
 
 **Fora do protótipo por enquanto** (decidido em 15/10/2026). As regras, o detalhe da tela (antigo docs/telas/04.4) e onde paramos estão em `rascunhos/tsi/README.md`; o protótipo como estava, na marca do git `tsi-15-10-2026`. Ponto a decidir ao retomar: como calcular a quantidade de TSI (dose por 100 kg de semente; falta o peso da semente, ex.: PMS por variedade).

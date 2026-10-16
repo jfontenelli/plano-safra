@@ -219,8 +219,7 @@ window.Telas.planoOperacoes = (function () {
             <p class="plano__contexto">${contexto.map(esc).join('<span class="plano__ponto">·</span>')}</p>
             <span class="plano__barra" aria-hidden="true">|</span>
             <span class="plano__versao">Versão ${esc(v.num)}
-              <span class="status ${somenteLeitura ? 'status--aprovado' : 'status--construcao'}">${Versoes.rotuloStatus(v)}</span>
-              ${somenteLeitura ? `<span class="plano__versao-info">${esc(Versoes.detalhe(v))}</span>` : ''}</span>
+              <span class="status ${somenteLeitura ? 'status--aprovado' : 'status--construcao'}">${Versoes.rotuloStatus(v)}</span></span>
           </div>
         </div>
         <div class="plano__linha-etapas">
@@ -1732,7 +1731,8 @@ window.Telas.planoOperacoes = (function () {
       valor: (op, t) => germinacaoDe(op, t.nome), texto: (op, t) => { const n = germinacaoDe(op, t.nome); return n ? numeroTexto(n) : ''; } },
     { id: 'sementes', rotulo: 'Total de sementes', numero: true,
       valor: (op, t) => sementesDe(op, t), texto: (op, t) => { const n = sementesDe(op, t); return n ? milhoes(n) : ''; } },
-    { id: 'bags', rotulo: 'Bags', numero: true,
+    // Embalagem da cultura do plano: soja em bags, milho em sacos (quanto vale cada uma, ao passar o mouse no título)
+    { id: 'bags', get rotulo() { return embalagem().coluna; }, get dica() { return embalagem().dica; }, numero: true,
       valor: (op, t) => sementesDe(op, t), texto: (op, t) => { const n = sementesDe(op, t); return n ? bags(n) : ''; } }
   ];
   const colunaPlantio = (id) => COLUNAS_PLANTIO.find((c) => c.id === id);
@@ -1781,14 +1781,15 @@ window.Telas.planoOperacoes = (function () {
   // Título de coluna: ordena só pelas setas (1º clique crescente, 2º decrescente).
   // "Produtividade histórica": o nome abre o painel no primeiro talhão da tabela.
   // O rótulo pode ter quebra de linha (<br>); "depois" entra ao lado da seta (ex.: o filtro de variedade).
-  function tituloOrdenavel(coluna, rotulo, classe = '', depois = '') {
+  // dica: texto ao passar o mouse no nome da coluna (ex.: "1 bag = 5 milhões de sementes")
+  function tituloOrdenavel(coluna, rotulo, classe = '', depois = '', dica = '') {
     const ordem = ui.ordemSemente;
     const texto = rotulo.replace(/<br>/g, ' ');
     const ativa = ordem && ordem.coluna === coluna;
     const sentido = ativa ? ordem.sentido : null;
     const nome = coluna === 'produtividade'
       ? `<button class="titulo-abrir" type="button" data-acao="abrir-primeiro" title="Abrir o painel no primeiro talhão da tabela">${rotulo}</button>`
-      : `<span>${rotulo}</span>`;
+      : `<span${dica ? ` title="${esc(dica)}" class="titulo-dica"` : ''}>${rotulo}</span>`;
     return `
       <th class="${classe}" ${ativa ? `aria-sort="${sentido === 'asc' ? 'ascending' : 'descending'}"` : ''}>
         <span class="titulo-coluna">${nome}
@@ -1933,7 +1934,7 @@ window.Telas.planoOperacoes = (function () {
     const linhas = visiveis.map((t) => linhaPlantio(op, t, marcar)).join('');
     const titulo = (id) => {
       const c = colunaPlantio(id);
-      return tituloOrdenavel(id, c.sub ? `${c.rotulo} ${c.sub}` : c.rotulo, classeColuna(c));
+      return tituloOrdenavel(id, c.sub ? `${c.rotulo} ${c.sub}` : c.rotulo, classeColuna(c), '', c.dica || '');
     };
     return `
       <div class="populacao-area">
@@ -2603,8 +2604,13 @@ window.Telas.planoOperacoes = (function () {
   }
 
   // ----- População de plantas e sementes -----
-  // Total de sementes = população planejada × área ÷ germinação; bags = sementes ÷ 5 milhões (soja)
-  const SEMENTES_POR_BAG = 5000000;
+  // Total de sementes = população planejada × área ÷ germinação; embalagens = sementes ÷ sementes da embalagem da cultura
+  // (DADOS.embalagemSemente: soja em bag, 1 bag = 5 milhões de sementes; milho em saco, 1 saco = 60 mil; sem cadastro, bag)
+  function embalagem() {
+    const e = DADOS.embalagemSemente[plano && plano.cultura] || DADOS.embalagemSemente.Soja;
+    const saco = e.nome === 'saco';
+    return { sementes: e.sementes, coluna: saco ? 'Sacos' : 'Bags', dica: saco ? '1 saco = 60 mil sementes' : '1 bag = 5 milhões de sementes' };
+  }
 
   // ----- Edição na célula da tabela do Plantio -----
   // Data na célula: "dd/mm" (o ano vem da safra: julho a dezembro no 1º ano, janeiro a junho no 2º) ou "dd/mm/aaaa"
@@ -2719,7 +2725,7 @@ window.Telas.planoOperacoes = (function () {
     return n.toLocaleString('pt-BR', { maximumFractionDigits: 1 });
   }
   const milhoes = (sementes) => `${umaCasa(sementes / 1e6)} mi`;
-  const bags = (sementes) => umaCasa(sementes / SEMENTES_POR_BAG);
+  const bags = (sementes) => umaCasa(sementes / embalagem().sementes);
 
   function faixaPopulacao(v) {
     return v && v.populacao ? `${v.populacao[0]} – ${v.populacao[1]}` : null;
