@@ -2665,6 +2665,14 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 /* Títulos com seta de ordenar: o texto quebra em duas linhas (para a tabela caber sem rolar) e a seta fica colada nele */
 .orc-tabela .titulo-coluna > span { display: inline-block; max-width: 110px; white-space: normal; }
 .orc-tabela .titulo-ordenar { flex: none; }
+/* Detalhamento: colunas de número do tamanho do conteúdo (a sobra vai para o Produto) e títulos centralizados na
+   largura e na altura, também quando quebram em duas linhas */
+[data-orc-tabela-detalhe] .orc-tabela th { vertical-align: middle; }
+[data-orc-tabela-detalhe] .orc-tabela th.tabela__numero { min-width: 124px; text-align: center !important; }
+[data-orc-tabela-detalhe] .orc-tabela td.orc-tabela__grupo { min-width: 150px; }
+[data-orc-tabela-detalhe] .orc-tabela th.tabela__numero .titulo-coluna { justify-content: center; text-align: center; }
+[data-orc-tabela-detalhe] .orc-tabela th.tabela__numero, [data-orc-tabela-detalhe] .orc-tabela td.tabela__numero,
+[data-orc-tabela-detalhe] .orc-tabela td.orc-tabela__grupo, [data-orc-tabela-detalhe] .orc-tabela td.orc-tabela__unidade { width: 1%; }
 .orc-pendente { color: #b26a00; font-size: 13px; }
 
 /* Custo por tipo de insumo: barra cinza até 100% e verde UniSystem até o % */
@@ -7140,7 +7148,7 @@ window.Telas.orcamento = (function () {
             <td class="tabela__numero">${quantidade(l.necessidade)}</td>
             <td class="tabela__numero">${l.estoque ? quantidade(l.estoque) : '—'}</td>
             <td class="tabela__numero">${quantidade(l.comprar)}</td>
-            <td>${esc(l.unidade)}</td>
+            <td class="orc-tabela__unidade">${esc(l.unidade)}</td>
             <td class="tabela__numero">${l.unitario === null ? '<span class="orc-pendente">Sem preço</span>' : unitario(l.unitario)}</td>
             <td class="tabela__numero">${dinheiro(l.custo)}</td></tr>`).join('') : vazio(8)}</tbody>
         </table></div>${paginacao(ls.length)}`;

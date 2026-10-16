@@ -457,7 +457,7 @@ window.Telas.orcamento = (function () {
             <td class="tabela__numero">${quantidade(l.necessidade)}</td>
             <td class="tabela__numero">${l.estoque ? quantidade(l.estoque) : '—'}</td>
             <td class="tabela__numero">${quantidade(l.comprar)}</td>
-            <td>${esc(l.unidade)}</td>
+            <td class="orc-tabela__unidade">${esc(l.unidade)}</td>
             <td class="tabela__numero">${l.unitario === null ? '<span class="orc-pendente">Sem preço</span>' : unitario(l.unitario)}</td>
             <td class="tabela__numero">${dinheiro(l.custo)}</td></tr>`).join('') : vazio(8)}</tbody>
         </table></div>${paginacao(ls.length)}`;
