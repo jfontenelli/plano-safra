@@ -13,7 +13,7 @@ Regras de negócio ficam em `docs/DECISOES.md`.
 
 | Nº | Tela | Arquivo | Imagem | Situação |
 |---|---|---|---|---|
-| — | Menu e contexto do plano | DECISOES 4.0 e 4.1.1 | rascunhos/navegacao-contexto.html | Construída: menu com Visão Geral · Planejamento · Calendário Agrícola · Suprimentos; cabeçalho fixo com versão, "✓ Salvamento automático", Publicar versão / Criar nova versão e Mais ações (Editar talhões, Exportar, Trocar versão); abas Operações · Planejamento · Resumo; talhões por versão |
+| — | Menu e contexto do plano | DECISOES 4.0 e 4.1.1 | rascunhos/navegacao-contexto.html | Construída: menu com Visão Geral · Planejamento · Calendário Agrícola · Orçamento; cabeçalho fixo com versão, "✓ Salvamento automático", Publicar versão / Criar nova versão e Mais ações (Editar talhões, Exportar, Trocar versão); abas Operações · Planejamento · Resumo; talhões por versão |
 | 01 | Primeiro uso | telas/01-primeiro-uso.md | referencias/01-primeiro-uso.png | Construída |
 | 02 | Modal Criar Plano de Safra e modal "Como deseja iniciar o plano?" | telas/02-modal-criar-plano.md | referencias/02-modal-criar-plano.png (antiga) | Construída: informações gerais com Atividade, várias fazendas (um plano por fazenda) com talhões e área de cultivo; início em modal ao abrir o plano (modelo, XLSX, copiar plano publicado, do zero) |
 | 03 | Visão Geral (Planos de Safra e Histórico de versões) | telas/03-lista-planos.md | referencias/03-lista-planos.png, rascunhos/navegacao-contexto.html | Construída: guias Planos de Safra e Histórico de versões; filtros Ano Agrícola, Atividade produtiva, Safra, Empresa, Fazenda, Cultura (Status no Histórico); Planejamento das Fazendas (Sem plano, Em construção, Publicado; todas as fazendas em cada safra/safrinha cadastrada); tabela só com os planos (Em construção e Publicado) com % por área de Sementes, Fertilidade e Defensivos, ordenação por coluna e menu ⋯ (comparação de versões: a detalhar) |
@@ -23,10 +23,9 @@ Regras de negócio ficam em `docs/DECISOES.md`.
 | 04.3 | Planejamento (grupo Fertilidade) | telas/04.3-operacoes-fertilidade.md | — (layout da Tela 04.1) | Construída: operações do modelo, matéria-prima e cadastro (produtos de cliente a conferir) |
 | 04.4 | Planejamento (grupo Tratamento de semente) | rascunhos/tsi/04.4-operacoes-tratamento-sementes.md | — (layout da Tela 04.1) | Pausada: fora do protótipo por enquanto (15/10/2026); guardado em rascunhos/tsi/ (marca no git `tsi-15-10-2026`); retomar por rascunhos/tsi/README.md |
 | 05 | Calendário Agrícola (aba Resumo do plano) | telas/05-calendario-agricola.md | referencias/05-calendario-agricola.png, referencias/05.3-resumo-calendario.png | Construída: Programação (tabela), Ciclo Produtivo (por fase) e Calendário (mês, semana, dia; legenda que filtra; painel do dia; área operacional) |
-| 06 | Suprimentos | telas/06-suprimentos.md | referencias/suprimentos.png | A definir: falta fechar o cálculo do TSI |
+| 06 | Orçamento de Insumos (menu Orçamento, vários planos somados) | telas/06-orcamento.md | referencias/suprimentos.png | Construída: moeda de exibição R$/US$; filtros com várias escolhas; estimativas de comercialização (Editar parâmetros); Resumo do orçamento; Orçamento por tipo de insumo; Detalhamento Por produto e Por talhão com busca, ordenação, paginação e Exportar XLSX; cabeçalho congelado (alfinete) |
 
 | — | Calendário Agrícola do menu (vários planos somados) | DECISOES 4.0 | canvas de discovery (Claude Design) | Construída: filtros Ano Agrícola, Empresa, Fazenda e Cultura; linhas por empresa · fazenda · cultura · safra/safrinha, com uma barra do ciclo da cultura (primeiro plantio à última colheita prevista) na cor da cultura; linha do tempo do ano agrícola (setembro a agosto, até o mês da última colheita); Hoje pontilhado; última versão publicada de cada plano |
-| — | Suprimentos do menu (vários planos somados) | DECISOES 4.0 | — | A definir |
 
 Situação: A definir → Pronta para construir → Construída.
 
@@ -48,7 +47,7 @@ Menu "Plano de Safra"
  ├─ Planejamento (um plano e uma versão; sem plano aberto, o mais recente)
  │   └─ abas: 04.0 Operações → 04.1–04.4 Planejamento → 05 Calendário Agrícola
  ├─ Calendário Agrícola (vários planos, última versão publicada de cada)
- └─ Suprimentos (vários planos, última versão publicada de cada)
+ └─ Orçamento (vários planos, última versão publicada de cada)
 ```
 
 ## Próximas telas do plano (ainda não desenhadas)

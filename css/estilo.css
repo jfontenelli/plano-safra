@@ -2570,6 +2570,126 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .cabecalho__subtitulo { margin: 4px 0 0; font-size: 14px; color: var(--texto-suave); }
 .cag-etiqueta { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 999px; background: #EEF4F0; font-size: 13px; color: #2F4A3D; white-space: nowrap; }
 .cag-etiqueta .icone { width: 15px; height: 15px; }
+
+/* ===== Orçamento de Insumos ===== */
+/* Título e a etiqueta "Últimas versões publicadas"; à direita, a moeda de exibição */
+.orc-topo { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.orc-moeda { display: inline-flex; align-items: center; gap: 0; }
+.orc-moeda__rotulo { display: inline-flex; align-items: center; gap: 4px; margin-right: 10px; font-size: 13px; color: var(--texto-suave); }
+.orc-moeda__rotulo .icone { width: 14px; height: 14px; }
+.orc-moeda__opcao { min-width: 52px; height: 32px; padding: 0 12px; border: 1px solid var(--borda); background: var(--superficie);
+  font: inherit; font-size: 14px; font-weight: 600; color: var(--texto); cursor: pointer; }
+.orc-moeda__opcao:first-of-type { border-radius: 8px 0 0 8px; }
+.orc-moeda__opcao:last-of-type { border-radius: 0 8px 8px 0; border-left: 0; }
+.orc-moeda__opcao--ativa { border-color: var(--verde-700); background: var(--verde-700); color: #fff; }
+/* Cabeçalho baixo: menos altura para o conteúdo */
+.orc-cabecalho { min-height: 0; padding-top: 10px; padding-bottom: 10px; }
+.orc-cabecalho .cabecalho__titulo { font-size: 22px; }
+
+/* Filtros de várias escolhas: botão como a lista suspensa e caixas de marcar por baixo */
+.orc-multi { position: relative; }
+.orc-multi__botao { display: flex; align-items: center; padding-right: 38px; text-align: left; cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235f6b64' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 12px center; background-size: 18px; }
+.orc-multi__botao span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.orc-multi__lista { position: absolute; top: 100%; left: 0; z-index: 30; min-width: 100%; max-height: 360px; overflow-y: auto;
+  margin-top: 4px; padding: 6px 0; border: 1px solid var(--borda); border-radius: 8px; background: var(--superficie); box-shadow: 0 8px 24px rgba(16, 24, 20, .12); }
+.orc-multi__lista[hidden] { display: none; }
+.orc-multi__item { display: flex; align-items: center; gap: 8px; padding: 6px 12px; font-size: 14px; white-space: nowrap; cursor: pointer; }
+.orc-multi__item:hover { background: var(--fundo); }
+.orc-multi__item input { width: 16px; height: 16px; accent-color: var(--verde-700); }
+.orc-multi__item--todos { border-bottom: 1px solid var(--borda); margin-bottom: 4px; padding-bottom: 8px; font-weight: 600; }
+
+/* Paginação do detalhamento */
+.orc-paginacao { display: flex; align-items: center; justify-content: flex-end; gap: 12px; padding: 10px 0 0; font-size: 14px; color: var(--texto-suave); }
+.orc-paginacao__por { display: inline-flex; align-items: center; gap: 8px; margin-right: auto; }
+.orc-paginacao__por .campo__controle { width: 76px; height: 32px; padding-left: 10px; font-size: 14px; background-position: right 8px center; }
+.orc-paginacao .botao-icone:disabled { opacity: .35; cursor: default; }
+
+/* Cabeçalho, filtros e estimativas fixos no topo ao rolar (fundo da página por trás, para o conteúdo passar por baixo) */
+.orc-fixo { position: sticky; top: 0; z-index: 20; background: var(--fundo); box-shadow: 0 6px 10px -8px rgba(16, 24, 20, .25); }
+.orc-fixo--solto { position: static; box-shadow: none; }
+/* Alfinete: verde e preenchido quando congelado; cinza, só o contorno, quando solto */
+.orc-congelar { margin-left: 12px; color: var(--texto-suave); }
+.orc-congelar--ativo { color: var(--verde-700); }
+.orc-congelar--ativo .icone path:last-child { fill: currentColor; }
+.orc-fixo__barra { display: flex; flex-direction: column; gap: 12px; padding: 14px 40px 12px; }
+/* Menos espaço entre o cabeçalho, os filtros e as seções */
+.orc-pagina { gap: 16px; padding-top: 4px; }
+.orc-fixo .filtros { margin-bottom: 0; flex-wrap: nowrap; gap: 10px; }
+.orc-fixo .filtros .campo { flex: 1 1 0; min-width: 0; max-width: 170px; }
+.orc-fixo .filtros__limpar { flex: none; padding-left: 12px; }
+.orc-corpo { display: flex; flex-direction: column; gap: 16px; }
+.orc-vazio { padding: 32px 20px; text-align: center; color: var(--texto-suave); }
+.orc-botao-compacto { height: 32px; padding: 0 12px; font-size: 14px; }
+
+/* Estimativas de comercialização numa linha só */
+.orc-estimativas { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 28px; padding: 10px 20px; font-size: 14px; }
+.orc-estimativas__titulo { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; font-size: 15px; }
+.orc-estimativas__titulo .icone { width: 20px; height: 20px; color: var(--verde-600); }
+.orc-estimativas__item strong { font-weight: 600; }
+.orc-estimativas__editar { margin-left: auto; }
+
+/* Seções: título e conteúdo */
+.orc-secao { padding: 14px 20px 16px; }
+.orc-secao__titulo { margin: 0 0 12px; font-size: 17px; font-weight: 700; }
+.orc-secao .tabela-rolagem { margin: 0 -20px; }
+.orc-tipo-tabela { margin-bottom: -16px !important; }
+
+/* Resumo de custos: cards sem rodapé */
+.orc-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(165px, 1fr)); gap: 10px; }
+.orc-card { display: flex; align-items: center; gap: 10px; padding: 12px; min-width: 0; border: 1px solid var(--borda); border-radius: var(--raio); }
+.orc-card__icone { display: grid; place-items: center; flex: none; width: 36px; height: 36px; border-radius: 50%; background: var(--verde-100); color: var(--verde-700); }
+.orc-card__icone .icone { width: 18px; height: 18px; }
+.orc-card__corpo { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+.orc-card__rotulo { font-size: 13px; color: var(--texto-suave); }
+.orc-card__numero { font-size: 18px; font-weight: 700; line-height: 1.2; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.orc-card__linha { display: flex; justify-content: space-between; gap: 12px; font-size: 14px; font-variant-numeric: tabular-nums; }
+.orc-card__linha strong { font-size: 15px; white-space: nowrap; }
+
+/* Tabelas do orçamento: linhas baixas */
+.orc-tabela th { padding: 8px 10px; font-size: 13px; white-space: normal; vertical-align: bottom; }
+.orc-tabela td { padding: 7px 10px; }
+.orc-tabela__grupo { font-weight: 600; }
+/* Títulos com seta de ordenar: o texto quebra em duas linhas (para a tabela caber sem rolar) e a seta fica colada nele */
+.orc-tabela .titulo-coluna > span { display: inline-block; max-width: 110px; white-space: normal; }
+.orc-tabela .titulo-ordenar { flex: none; }
+.orc-pendente { color: #b26a00; font-size: 13px; }
+
+/* Custo por tipo de insumo: barra cinza até 100% e verde UniSystem até o % */
+.orc-tipo__barra-col { width: 38%; min-width: 160px; }
+.orc-barra { display: block; height: 10px; border-radius: 5px; background: #e8ece9; overflow: hidden; }
+.orc-barra > span { display: block; height: 100%; border-radius: 5px; background: var(--verde-600); }
+
+/* Detalhamento: título, guias, busca e Exportar XLSX numa linha */
+.orc-detalhe__topo { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 20px; margin-bottom: 12px; }
+.orc-detalhe__topo .orc-secao__titulo { margin: 0; }
+.orc-guias { display: inline-flex; gap: 16px; }
+.orc-guia { padding: 4px 2px; border: 0; border-bottom: 2px solid transparent; background: none; font: inherit; font-size: 14px; font-weight: 500; color: var(--texto-suave); cursor: pointer; }
+.orc-guia--ativa { border-bottom-color: var(--verde-700); font-weight: 600; color: var(--verde-700); }
+.orc-busca { position: relative; display: inline-flex; align-items: center; margin-left: auto; }
+.orc-busca .icone { position: absolute; left: 10px; width: 16px; height: 16px; color: var(--texto-suave); }
+.orc-busca .campo__controle { width: 280px; height: 34px; padding-left: 34px; font-size: 14px; }
+/* Exportar XLSX: contorno e texto verdes, seta para baixo */
+.orc-exportar { height: 34px; padding: 0 14px; border: 1px solid var(--verde-700); background: var(--superficie); color: var(--verde-700); font-size: 14px; }
+.orc-exportar:hover { background: var(--verde-100); }
+
+/* Modal Estimativas de comercialização: PTAX e a tabela por cultura */
+.orc-ptax { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+.orc-ptax__rotulo { font-weight: 600; font-size: 14px; }
+.orc-ptax__texto { font-size: 13px; color: var(--texto-suave); }
+.orc-parametros__topo { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 6px; }
+.orc-parametros__titulo { margin: 0; font-size: 15px; }
+.orc-valor, .orc-preco { display: inline-flex; align-items: center; gap: 6px; }
+.orc-valor__moeda { font-size: 14px; color: var(--texto-suave); }
+.orc-valor__campo { width: 96px; height: 32px; padding: 0 10px; text-align: right; font-size: 14px; }
+.orc-preco__moeda { width: 80px; height: 32px; padding-left: 10px; font-size: 14px; background-position: right 8px center; }
+.orc-unidade { min-width: 36px; font-size: 13px; color: var(--texto-suave); }
+.orc-culturas th { padding: 6px 12px; font-size: 13px; }
+.orc-culturas td { padding: 4px 12px; vertical-align: middle; }
+.orc-culturas__cultura { width: 150px; height: 32px; padding-left: 10px; font-size: 14px; background-position: right 8px center; }
+.orc-culturas__acoes { width: 48px; text-align: right; }
+.orc-culturas .botao-icone { width: 30px; height: 30px; }
 .cag { display: flex; flex-direction: column; gap: 10px; }
 .cag__legenda { display: flex; flex-wrap: wrap; gap: 6px 20px; font-size: 13px; color: #33443B; }
 .cag__legenda > span { display: inline-flex; align-items: center; gap: 6px; }

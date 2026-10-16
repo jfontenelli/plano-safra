@@ -49,14 +49,15 @@ Agrônomo da fazenda e líder de operações podem ser a mesma pessoa, conforme 
 
 - Menu lateral verde com logo UniSystem: Plano de Safra, Ordens de Serviço, Cadastros; usuário no rodapé.
 - Menu começa expandido (ícone + nome) em todas as telas; o usuário recolhe (só ícones) e expande pela seta; a escolha se mantém ao navegar.
-- **Plano de Safra tem quatro itens no menu**, cada um com o seu ícone: **Visão Geral · Planejamento · Calendário Agrícola · Suprimentos**. O item selecionado tem destaque discreto em verde.
+- **Plano de Safra tem quatro itens no menu**, cada um com o seu ícone: **Visão Geral · Planejamento · Calendário Agrícola · Orçamento** (antes Suprimentos). O item selecionado tem destaque discreto em verde.
   - **Visão Geral:** lista de planos (filtros, criar plano, versões). Ver 4.1.
   - **Planejamento:** **um plano e uma versão por vez**, com as abas **Operações · Planejamento · Resumo** no cabeçalho. Sem plano aberto, abre o **plano mais recente** (o último aberto ou atualizado), na versão em construção ou, se não houver, na última publicada. Para trocar de plano: "Plano de Safra" no cabeçalho ou Visão Geral.
   - **Calendário Agrícola do menu** (construído): uma linha por plano (empresa · fazenda · cultura · safra/safrinha), agrupada por empresa (fazendas e área no cabeçalho do grupo; na fazenda, a safra antes da safrinha), com **uma barra só: o ciclo da cultura**, do primeiro plantio à última colheita prevista (plantio + ciclo da variedade), na cor da cultura (soja verde, milho amarelo). Linha do tempo do ano agrícola, de setembro a agosto (como a safra), estendida até o mês da última colheita se ela passar de agosto. **Hoje** em linha cinza pontilhada. Filtros Ano Agrícola (sem "Todos"; junta as safras e safrinhas do ano), Empresa, Fazenda e Cultura (sem filtro Safra/Safrinha). Plano sem plantio na versão publicada: "Plantio ainda não definido na versão publicada". Safra/Safrinha vem do plano (campo ainda não pedido no Criar plano; sem ele, Safra). Planos de exemplo: soja 26/27 e milho safrinha 27/27 da Santa Clara (ano agrícola 2026), com épocas e produtos do médio-norte do MT (aproximados, a conferir); o algodão saiu por enquanto.
-  - **Calendário Agrícola e Suprimentos:** **vários planos somados**, com os filtros da Visão Geral (Ano Agrícola começa no de hoje; Empresa, Fazenda e Cultura em "Todas"). Sem abas. Usam a **última versão publicada de cada plano**, avisado num banner que pode ser fechado ("Calendário Agrícola e Suprimentos mostram a última versão publicada de cada plano. Alterações em versões em construção aparecem aqui depois de publicadas.") e numa etiqueta fixa ao lado dos filtros ("Últimas versões publicadas ⓘ", com o mesmo texto ao passar o mouse). Fechado, o banner não volta.
+  - **Calendário Agrícola e Orçamento:** **vários planos somados**, com filtros (Ano Agrícola começa no de hoje; os demais em "Todas"). Sem abas. Usam a **última versão publicada de cada plano**, avisado numa etiqueta fixa ao lado do título ("Últimas versões publicadas ⓘ": "Mostra a última versão publicada de cada plano. Alterações em versões em construção aparecem aqui depois de publicadas.").
+  - **Orçamento de Insumos** (construído; detalhe na Tela 06): moeda de exibição R$ | US$ (pela PTAX); filtros Ano Agrícola (uma escolha) e, com várias escolhas, Safra, Empresa, Fazenda, Talhão, Cultura e Insumos; estimativas de comercialização (PTAX e, por cultura, preço e produtividade esperados) por Ano Agrícola; Resumo do orçamento, Orçamento por tipo de insumo e Detalhamento (Por produto · Por talhão). Cabeçalho, filtros e estimativas congelados no topo (alfinete descongela).
   - A **aba Resumo** do Planejamento (o Calendário Agrícola do plano, com esse nome dentro do plano) mostra só o plano e a versão abertos. Por enquanto é a mesma tela do Calendário do menu; a visão somada será detalhada depois.
 - **Áreas somadas:** **Área territorial** (área física, cada talhão contado uma vez) e **Área produtiva** (soma das áreas dos planos, ou seja, das safras).
-- **Sem nenhum plano cadastrado**, Planejamento, Calendário Agrícola e Suprimentos mostram "Crie seu primeiro plano para visualizar…" e o botão "+ Criar Plano de Safra". Texto em Planejamento e Calendário: o mesmo da Tela 01. Em Suprimentos: "O plano organiza a necessidade de insumos por safra, empresa, fazenda e cultura. Depois de criado, ele abre aqui automaticamente."
+- **Sem nenhum plano cadastrado**, Planejamento, Calendário Agrícola e Orçamento mostram "Crie seu primeiro plano para visualizar…" e o botão "+ Criar Plano de Safra". Texto em Planejamento e Calendário: o mesmo da Tela 01. No Orçamento: "O plano organiza a necessidade de insumos por safra, empresa, fazenda e cultura. Depois de criado, ele abre aqui automaticamente."
 
 ### 4.1 Visão Geral (tela inicial do Plano de Safra)
 
@@ -122,7 +123,7 @@ Agrônomo da fazenda e líder de operações podem ser a mesma pessoa, conforme 
 ### 4.3 Etapas e regras do plano
 
 - Safra, Empresa e Fazenda ficam fixas no topo durante o plano.
-- Abas do plano (menu Planejamento): **Operações · Planejamento · Resumo** (Resumo = o Calendário Agrícola do plano). Suprimentos saiu das abas e é item do menu (4.0). Sem etapa de Aprovação por enquanto. O plano abre em Operações (não iniciado: antes, o modal de início; 4.1.1).
+- Abas do plano (menu Planejamento): **Operações · Planejamento · Resumo** (Resumo = o Calendário Agrícola do plano). O Orçamento (antes Suprimentos) saiu das abas e é item do menu (4.0). Sem etapa de Aprovação por enquanto. O plano abre em Operações (não iniciado: antes, o modal de início; 4.1.1).
 - Dentro de Planejamento, sub-etapas por grupo de operação, na ordem do cadastro do cliente (sugestão em validação).
 - **Etapa Operações** (docs/telas/04.0-operacoes.md): revisa a estrutura do plano vinda do modelo (grupo de operação, operação, DAP, fenologia e previsão de conclusão). É opcional: quem não quiser mexer segue direto para o Planejamento. Sem resumo nem situação (isso fica no Calendário, depois de planejar).
 - O plano também tem produtividade esperada (na unidade da cultura) e preço esperado, opcionais, por cultura, valendo para aquela fazenda e safra. Alimentam a receita projetada. Local a refinar com usuários.
@@ -179,7 +180,14 @@ Detalhe da tela: docs/telas/04.3-operacoes-fertilidade.md.
 ## 5. Orçamento e aprovação
 
 - Necessidade de insumos calculada do plano; estoque vem do Compass (integração a definir); necessidade de compra = necessidade − estoque.
-- Orçamento (analista de compras): quantidade × preço de referência do histórico; manual sem histórico; comparação com safra anterior.
+- Orçamento (analista de compras): quantidade × preço de referência do histórico; manual sem histórico; comparação com safra anterior (fora do protótipo por enquanto).
+- **Orçamento de Insumos no protótipo** (Tela 06):
+  - Grupos de insumo: **Fertilizantes · Defensivos · Sementes · Corretivos · Tratamento de semente · Adjuvantes · Biológicos · Óleo**, pela classe do produto no cadastro.
+  - Cada insumo tem moeda própria (R$ ou US$); a **PTAX de referência** converte o que está em US$. Sementes por embalagem da cultura: soja em bag de 5 milhões de sementes, milho em saco de 60 mil.
+  - **A comprar = necessidade − estoque, fazenda a fazenda** (nunca negativo). Estoque por fazenda.
+  - Custo em sacas = custo/ha ÷ preço da saca (ou @) em reais, **só com uma cultura**; receita estimada = área × produtividade × preço, somada num card só.
+  - Valores sem casa decimal; o que arredondaria para zero mostra 0,1 (custo unitário com centavos).
+  - Custos operacionais e adicionais: fora por enquanto.
 - **Sem aprovação por enquanto.** A **última versão publicada** é a referência para gerar as OS; versão em construção nunca gera OS. Se a última publicada não tiver operações válidas, não gera OS e informa o motivo. Cada OS guarda a versão do plano que a originou. Quando e como as OS são geradas: a detalhar.
 - Cada versão publicada guarda a fotografia do orçamento de suprimentos (produtos, quantidades, unidades, preços e data de referência, custos por grupo, total), sem recálculo quando os preços mudam.
 

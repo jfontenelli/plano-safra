@@ -2580,6 +2580,126 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .cabecalho__subtitulo { margin: 4px 0 0; font-size: 14px; color: var(--texto-suave); }
 .cag-etiqueta { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 999px; background: #EEF4F0; font-size: 13px; color: #2F4A3D; white-space: nowrap; }
 .cag-etiqueta .icone { width: 15px; height: 15px; }
+
+/* ===== Orçamento de Insumos ===== */
+/* Título e a etiqueta "Últimas versões publicadas"; à direita, a moeda de exibição */
+.orc-topo { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.orc-moeda { display: inline-flex; align-items: center; gap: 0; }
+.orc-moeda__rotulo { display: inline-flex; align-items: center; gap: 4px; margin-right: 10px; font-size: 13px; color: var(--texto-suave); }
+.orc-moeda__rotulo .icone { width: 14px; height: 14px; }
+.orc-moeda__opcao { min-width: 52px; height: 32px; padding: 0 12px; border: 1px solid var(--borda); background: var(--superficie);
+  font: inherit; font-size: 14px; font-weight: 600; color: var(--texto); cursor: pointer; }
+.orc-moeda__opcao:first-of-type { border-radius: 8px 0 0 8px; }
+.orc-moeda__opcao:last-of-type { border-radius: 0 8px 8px 0; border-left: 0; }
+.orc-moeda__opcao--ativa { border-color: var(--verde-700); background: var(--verde-700); color: #fff; }
+/* Cabeçalho baixo: menos altura para o conteúdo */
+.orc-cabecalho { min-height: 0; padding-top: 10px; padding-bottom: 10px; }
+.orc-cabecalho .cabecalho__titulo { font-size: 22px; }
+
+/* Filtros de várias escolhas: botão como a lista suspensa e caixas de marcar por baixo */
+.orc-multi { position: relative; }
+.orc-multi__botao { display: flex; align-items: center; padding-right: 38px; text-align: left; cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235f6b64' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 12px center; background-size: 18px; }
+.orc-multi__botao span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.orc-multi__lista { position: absolute; top: 100%; left: 0; z-index: 30; min-width: 100%; max-height: 360px; overflow-y: auto;
+  margin-top: 4px; padding: 6px 0; border: 1px solid var(--borda); border-radius: 8px; background: var(--superficie); box-shadow: 0 8px 24px rgba(16, 24, 20, .12); }
+.orc-multi__lista[hidden] { display: none; }
+.orc-multi__item { display: flex; align-items: center; gap: 8px; padding: 6px 12px; font-size: 14px; white-space: nowrap; cursor: pointer; }
+.orc-multi__item:hover { background: var(--fundo); }
+.orc-multi__item input { width: 16px; height: 16px; accent-color: var(--verde-700); }
+.orc-multi__item--todos { border-bottom: 1px solid var(--borda); margin-bottom: 4px; padding-bottom: 8px; font-weight: 600; }
+
+/* Paginação do detalhamento */
+.orc-paginacao { display: flex; align-items: center; justify-content: flex-end; gap: 12px; padding: 10px 0 0; font-size: 14px; color: var(--texto-suave); }
+.orc-paginacao__por { display: inline-flex; align-items: center; gap: 8px; margin-right: auto; }
+.orc-paginacao__por .campo__controle { width: 76px; height: 32px; padding-left: 10px; font-size: 14px; background-position: right 8px center; }
+.orc-paginacao .botao-icone:disabled { opacity: .35; cursor: default; }
+
+/* Cabeçalho, filtros e estimativas fixos no topo ao rolar (fundo da página por trás, para o conteúdo passar por baixo) */
+.orc-fixo { position: sticky; top: 0; z-index: 20; background: var(--fundo); box-shadow: 0 6px 10px -8px rgba(16, 24, 20, .25); }
+.orc-fixo--solto { position: static; box-shadow: none; }
+/* Alfinete: verde e preenchido quando congelado; cinza, só o contorno, quando solto */
+.orc-congelar { margin-left: 12px; color: var(--texto-suave); }
+.orc-congelar--ativo { color: var(--verde-700); }
+.orc-congelar--ativo .icone path:last-child { fill: currentColor; }
+.orc-fixo__barra { display: flex; flex-direction: column; gap: 12px; padding: 14px 40px 12px; }
+/* Menos espaço entre o cabeçalho, os filtros e as seções */
+.orc-pagina { gap: 16px; padding-top: 4px; }
+.orc-fixo .filtros { margin-bottom: 0; flex-wrap: nowrap; gap: 10px; }
+.orc-fixo .filtros .campo { flex: 1 1 0; min-width: 0; max-width: 170px; }
+.orc-fixo .filtros__limpar { flex: none; padding-left: 12px; }
+.orc-corpo { display: flex; flex-direction: column; gap: 16px; }
+.orc-vazio { padding: 32px 20px; text-align: center; color: var(--texto-suave); }
+.orc-botao-compacto { height: 32px; padding: 0 12px; font-size: 14px; }
+
+/* Estimativas de comercialização numa linha só */
+.orc-estimativas { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 28px; padding: 10px 20px; font-size: 14px; }
+.orc-estimativas__titulo { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; font-size: 15px; }
+.orc-estimativas__titulo .icone { width: 20px; height: 20px; color: var(--verde-600); }
+.orc-estimativas__item strong { font-weight: 600; }
+.orc-estimativas__editar { margin-left: auto; }
+
+/* Seções: título e conteúdo */
+.orc-secao { padding: 14px 20px 16px; }
+.orc-secao__titulo { margin: 0 0 12px; font-size: 17px; font-weight: 700; }
+.orc-secao .tabela-rolagem { margin: 0 -20px; }
+.orc-tipo-tabela { margin-bottom: -16px !important; }
+
+/* Resumo de custos: cards sem rodapé */
+.orc-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(165px, 1fr)); gap: 10px; }
+.orc-card { display: flex; align-items: center; gap: 10px; padding: 12px; min-width: 0; border: 1px solid var(--borda); border-radius: var(--raio); }
+.orc-card__icone { display: grid; place-items: center; flex: none; width: 36px; height: 36px; border-radius: 50%; background: var(--verde-100); color: var(--verde-700); }
+.orc-card__icone .icone { width: 18px; height: 18px; }
+.orc-card__corpo { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+.orc-card__rotulo { font-size: 13px; color: var(--texto-suave); }
+.orc-card__numero { font-size: 18px; font-weight: 700; line-height: 1.2; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.orc-card__linha { display: flex; justify-content: space-between; gap: 12px; font-size: 14px; font-variant-numeric: tabular-nums; }
+.orc-card__linha strong { font-size: 15px; white-space: nowrap; }
+
+/* Tabelas do orçamento: linhas baixas */
+.orc-tabela th { padding: 8px 10px; font-size: 13px; white-space: normal; vertical-align: bottom; }
+.orc-tabela td { padding: 7px 10px; }
+.orc-tabela__grupo { font-weight: 600; }
+/* Títulos com seta de ordenar: o texto quebra em duas linhas (para a tabela caber sem rolar) e a seta fica colada nele */
+.orc-tabela .titulo-coluna > span { display: inline-block; max-width: 110px; white-space: normal; }
+.orc-tabela .titulo-ordenar { flex: none; }
+.orc-pendente { color: #b26a00; font-size: 13px; }
+
+/* Custo por tipo de insumo: barra cinza até 100% e verde UniSystem até o % */
+.orc-tipo__barra-col { width: 38%; min-width: 160px; }
+.orc-barra { display: block; height: 10px; border-radius: 5px; background: #e8ece9; overflow: hidden; }
+.orc-barra > span { display: block; height: 100%; border-radius: 5px; background: var(--verde-600); }
+
+/* Detalhamento: título, guias, busca e Exportar XLSX numa linha */
+.orc-detalhe__topo { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 20px; margin-bottom: 12px; }
+.orc-detalhe__topo .orc-secao__titulo { margin: 0; }
+.orc-guias { display: inline-flex; gap: 16px; }
+.orc-guia { padding: 4px 2px; border: 0; border-bottom: 2px solid transparent; background: none; font: inherit; font-size: 14px; font-weight: 500; color: var(--texto-suave); cursor: pointer; }
+.orc-guia--ativa { border-bottom-color: var(--verde-700); font-weight: 600; color: var(--verde-700); }
+.orc-busca { position: relative; display: inline-flex; align-items: center; margin-left: auto; }
+.orc-busca .icone { position: absolute; left: 10px; width: 16px; height: 16px; color: var(--texto-suave); }
+.orc-busca .campo__controle { width: 280px; height: 34px; padding-left: 34px; font-size: 14px; }
+/* Exportar XLSX: contorno e texto verdes, seta para baixo */
+.orc-exportar { height: 34px; padding: 0 14px; border: 1px solid var(--verde-700); background: var(--superficie); color: var(--verde-700); font-size: 14px; }
+.orc-exportar:hover { background: var(--verde-100); }
+
+/* Modal Estimativas de comercialização: PTAX e a tabela por cultura */
+.orc-ptax { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+.orc-ptax__rotulo { font-weight: 600; font-size: 14px; }
+.orc-ptax__texto { font-size: 13px; color: var(--texto-suave); }
+.orc-parametros__topo { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 6px; }
+.orc-parametros__titulo { margin: 0; font-size: 15px; }
+.orc-valor, .orc-preco { display: inline-flex; align-items: center; gap: 6px; }
+.orc-valor__moeda { font-size: 14px; color: var(--texto-suave); }
+.orc-valor__campo { width: 96px; height: 32px; padding: 0 10px; text-align: right; font-size: 14px; }
+.orc-preco__moeda { width: 80px; height: 32px; padding-left: 10px; font-size: 14px; background-position: right 8px center; }
+.orc-unidade { min-width: 36px; font-size: 13px; color: var(--texto-suave); }
+.orc-culturas th { padding: 6px 12px; font-size: 13px; }
+.orc-culturas td { padding: 4px 12px; vertical-align: middle; }
+.orc-culturas__cultura { width: 150px; height: 32px; padding-left: 10px; font-size: 14px; background-position: right 8px center; }
+.orc-culturas__acoes { width: 48px; text-align: right; }
+.orc-culturas .botao-icone { width: 30px; height: 30px; }
 .cag { display: flex; flex-direction: column; gap: 10px; }
 .cag__legenda { display: flex; flex-wrap: wrap; gap: 6px 20px; font-size: 13px; color: #33443B; }
 .cag__legenda > span { display: inline-flex; align-items: center; gap: 6px; }
@@ -2656,7 +2776,7 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
       </div>
 
       <nav class="menu__nav" aria-label="Menu principal">
-        <!-- Plano de Safra: quatro itens (Visão Geral, Planejamento, Calendário Agrícola, Suprimentos) -->
+        <!-- Plano de Safra: quatro itens (Visão Geral, Planejamento, Calendário Agrícola, Orçamento) -->
         <div class="menu__grupo">
           <a class="menu__item menu__pai" href="#/plano-safra" title="Plano de Safra">
             <svg class="menu__icone" viewBox="0 0 24 24" aria-hidden="true">
@@ -2687,11 +2807,11 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
               </svg>
               <span class="menu__texto">Calendário Agrícola</span>
             </a>
-            <a class="menu__item menu__sub" href="#/suprimentos" data-rota="suprimentos" title="Suprimentos">
+            <a class="menu__item menu__sub" href="#/orcamento" data-rota="orcamento" title="Orçamento">
               <svg class="menu__icone" viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M21 8 12 3 3 8v8l9 5 9-5Z"/><path d="M3 8l9 5 9-5M12 13v8"/>
               </svg>
-              <span class="menu__texto">Suprimentos</span>
+              <span class="menu__texto">Orçamento</span>
             </a>
           </div>
         </div>
@@ -2798,6 +2918,15 @@ window.DADOS = {
   // Culturas que aparecem nos planos (os de exemplo têm milho safrinha), para os filtros
   culturasPlanos: ['Soja', 'Milho'],
 
+  // Orçamento de Insumos: PTAX de referência (R$ por US$ 1,00) e a estimativa de comercialização por cultura.
+  // A unidade de venda vem da cultura (soja e milho em saca, algodão em arroba). Valores iniciais de exemplo.
+  ptaxReferencia: 5.2,
+  comercializacao: {
+    'Soja':    { unidade: 'sc', moeda: 'US$', preco: 23, produtividade: 65 },
+    'Milho':   { unidade: 'sc', moeda: 'R$', preco: 55, produtividade: 110 },
+    'Algodão': { unidade: '@' }
+  },
+
   // Talhões por fazenda (área em ha). A tela de Operações mostra todos os talhões da fazenda.
   talhoes: {
     'São José': [
@@ -2889,7 +3018,9 @@ window.DADOS = {
     'Santa Clara': { origem: [-12.6420, -55.7480], giro: -4, profundidade: 1100, inclinacao: -0.08,
                      linhas: [['T01', 'T02', 'T03', 'T04'], ['T05', 'T06', 'T07', 'T08']] },
     'Boa Vista':   { origem: [-12.4980, -55.6920], giro: 3,  profundidade: 1050, inclinacao: 0.06,
-                     linhas: [['T01', 'T02', 'T03', 'T04', 'T05'], ['T06', 'T07', 'T08', 'T09', 'T10']] }
+                     linhas: [['T01', 'T02', 'T03', 'T04', 'T05'], ['T06', 'T07', 'T08', 'T09', 'T10']] },
+    'Primavera':   { origem: [-12.7150, -55.8120], giro: -6, profundidade: 1150, inclinacao: 0.05,
+                     linhas: [['T01', 'T02', 'T03'], ['T04', 'T05', 'T06']] }
   },
 
   // Cadastro de defensivos (exemplo). Pré-cadastros feitos na tela de Operações entram aqui.
@@ -2950,8 +3081,98 @@ window.DADOS = {
     // Milho (exemplos para o plano de safrinha; conferir registro e dose na bula)
     { fertilidade: true, classe: 'Nitrogenado', produto: 'Ureia 45%',      principioAtivo: 'Ureia',               garantia: 'N 45%', unidade: 'kg' },
     { classe: 'Herbicida',  produto: 'Primóleo',            principioAtivo: 'Atrazina',                                   unidade: 'L' },
-    { classe: 'Herbicida',  produto: 'Callisto',            principioAtivo: 'Mesotriona',                                 unidade: 'L' }
+    { classe: 'Herbicida',  produto: 'Callisto',            principioAtivo: 'Mesotriona',                                 unidade: 'L' },
+    // Tratamento de semente (on farm), biológicos, adjuvantes e óleos: para o Orçamento ter todos os grupos de insumo.
+    // Doses por hectare (TS: ≈ 60 kg de semente de soja por ha). Exemplos; conferir registro e dose na bula.
+    { classe: 'Tratamento de semente', produto: 'Standak Top',      principioAtivo: 'Fipronil + Piraclostrobina + Tiofanato-metílico', unidade: 'L' },
+    { classe: 'Tratamento de semente', produto: 'Cruiser 350 FS',   principioAtivo: 'Tiametoxam',                     unidade: 'L' },
+    { classe: 'Biológico',  produto: 'Masterfix L Soja',    principioAtivo: 'Bradyrhizobium japonicum (inoculante)',      unidade: 'L' },
+    { classe: 'Biológico',  produto: 'Trichodermil SC',     principioAtivo: 'Trichoderma harzianum',                      unidade: 'L' },
+    { classe: 'Biológico',  produto: 'Dipel WG',            principioAtivo: 'Bacillus thuringiensis',                     unidade: 'kg' },
+    { classe: 'Adjuvante',  produto: 'Agral',               principioAtivo: 'Nonilfenol etoxilado (espalhante adesivo)',  unidade: 'L' },
+    { classe: 'Adjuvante',  produto: 'LI 700',              principioAtivo: 'Lecitina + ácido propiônico (acidificante)', unidade: 'L' },
+    { classe: 'Óleo',       produto: 'Assist',              principioAtivo: 'Óleo mineral',                               unidade: 'L' },
+    { classe: 'Óleo',       produto: 'Áureo',               principioAtivo: 'Óleo vegetal (éster metílico de soja)',      unidade: 'L' }
   ],
+
+  // ----- Orçamento de Insumos -----
+  // Grupos de insumo (filtro Insumos e Custo por tipo de insumo), pela classe do produto. Fertilidade sem classe: Fertilizantes.
+  gruposInsumo: ['Fertilizantes', 'Defensivos', 'Sementes', 'Corretivos', 'Tratamento de semente', 'Adjuvantes', 'Biológicos', 'Óleo'],
+  grupoInsumoPorClasse: {
+    'Corretivo': 'Corretivos', 'Condicionador': 'Corretivos',
+    'Fosfatado': 'Fertilizantes', 'Potássico': 'Fertilizantes', 'Formulado NPK': 'Fertilizantes',
+    'Micronutriente': 'Fertilizantes', 'Nitrogenado': 'Fertilizantes',
+    'Herbicida': 'Defensivos', 'Fungicida': 'Defensivos', 'Inseticida': 'Defensivos',
+    'Tratamento de semente': 'Tratamento de semente', 'Biológico': 'Biológicos', 'Adjuvante': 'Adjuvantes', 'Óleo': 'Óleo'
+  },
+
+  // Valor unitário de cada insumo (base histórica de compras: aqui, estimativas para o médio-norte do MT, safra 26/27,
+  // produto posto na fazenda). [moeda, valor por unidade do cadastro]. Como no cliente: importados em US$ (fertilizantes,
+  // fungicidas, inseticidas), nacionais em R$. Referências consultadas em 16/10/2026 (valores aproximados, a conferir):
+  //  - Fertilizantes CFR Brasil (Itaú BBA, out/26): ureia US$ 470/t, MAP US$ 830/t, KCl US$ 355/t; + frete e margem até o MT
+  //  - Calcário dolomítico R$ 254/t e gesso R$ 273/t em SP (FAESP, mai/26); no MT, perto das jazidas, menos
+  //  - Glifosato: mediana R$ 25,80/L na safra 26/27 (Agrolink); Fox Xpro ≈ R$ 260/L em anúncios
+  //  - Custeio da soja MT 26/27 ≈ R$ 4.320/ha, fertilizantes e corretivos ≈ R$ 2.070/ha (Imea): os planos ficam nessa faixa
+  precosInsumos: {
+    // Corretivos
+    'Calcário dolomítico PRNT 85%': ['R$', 185], 'Calcário calcítico PRNT 85%': ['R$', 195],
+    'Calcário dolomítico filler': ['R$', 240], 'Gesso agrícola': ['R$', 290],
+    // Fertilizantes (US$ por kg)
+    'MAP 11-52-00': ['US$', 0.92], 'Superfosfato simples 18%': ['US$', 0.34], 'Superfosfato triplo 41%': ['US$', 0.74],
+    'KCl 00-00-60': ['US$', 0.43], 'Formulado 02-20-18': ['US$', 0.63], 'Formulado 00-20-20': ['US$', 0.56],
+    'Adubo 00-23-00': ['US$', 0.48], 'Ureia 45%': ['US$', 0.55], 'FTE BR-12': ['R$', 6.8],
+    // Fertilizantes foliares (R$ por L ou kg)
+    'Complex Dualbor': ['R$', 48], 'Midas +63S + 3B': ['R$', 4.2], 'Support': ['R$', 62], 'Borosol K': ['R$', 44],
+    'Vigora': ['R$', 85], 'Compat Copper': ['R$', 70], 'Compat Pro': ['R$', 58], 'Nutre Boro': ['R$', 39], 'Tonus': ['R$', 66],
+    'Nutre Fer': ['R$', 42], 'Nutre Cobre': ['R$', 47], 'Nutre Zinco': ['R$', 41],
+    // Fungicidas (US$)
+    'Fox Xpro': ['US$', 50], 'Fox': ['US$', 34], 'Priori Xtra': ['US$', 38], 'Aproach Prima': ['US$', 35],
+    'Elatus': ['US$', 118], 'Cypress': ['US$', 29], 'Unizeb Gold': ['R$', 36],
+    // Inseticidas (US$)
+    'Engeo Pleno': ['US$', 46], 'Ampligo': ['US$', 68], 'Premio': ['US$', 145], 'Connect': ['US$', 17], 'Orthene 750 BR': ['R$', 92],
+    // Herbicidas (R$; g = por grama)
+    'Roundup Original DI': ['R$', 26], 'Roundup WG': ['R$', 44], 'Zapp QI 620': ['R$', 30], 'Finale': ['R$', 47],
+    'Heat': ['R$', 1.15], 'Dual Gold': ['R$', 72], 'Spider': ['R$', 3.9], 'Select 240 EC': ['R$', 60],
+    'DMA 806 BR': ['R$', 31], 'Primóleo': ['R$', 27], 'Callisto': ['R$', 285],
+    // Tratamento de semente, biológicos, adjuvantes e óleos
+    'Standak Top': ['US$', 92], 'Cruiser 350 FS': ['US$', 68],
+    'Masterfix L Soja': ['R$', 48], 'Trichodermil SC': ['R$', 75], 'Dipel WG': ['R$', 155],
+    'Agral': ['R$', 29], 'LI 700': ['R$', 54], 'Assist': ['R$', 14], 'Áureo': ['R$', 23]
+  },
+
+  // Sementes: embalagem de compra por cultura e valor por embalagem de cada variedade (R$).
+  // Soja em bag de 5 milhões de sementes; milho em saco de 60 mil sementes. Estimativas para 26/27, a conferir:
+  // soja ≈ R$ 450/ha e milho safrinha ≈ R$ 1.300/ha de semente, nas populações dos planos.
+  embalagemSemente: {
+    'Soja': { nome: 'bag', sementes: 5000000, texto: 'bag (5 milhões de sementes)' },
+    'Milho': { nome: 'saco', sementes: 60000, texto: 'saco (60 mil sementes)' }
+  },
+  precosSementes: {
+    'BMX Foco IPRO': 7400, 'NS 7709 IPRO': 7100, 'BMX Olimpo IPRO': 7600, 'TMG 2383 IPRO': 6800,
+    'M 8372 IPRO': 7300, 'TMG 7063 IPRO': 6500,
+    'DKB 360 PRO3': 1180, 'AG 8700 PRO3': 1090, 'P3707VYH': 1240, 'FS 575 PWU': 980
+  },
+
+  // Estoque de cada insumo em cada fazenda, na unidade do cadastro (sementes: na embalagem). A comprar = necessidade
+  // − estoque, fazenda a fazenda (nunca negativo). Exemplo: sobra da safra passada e compras antecipadas.
+  estoqueInsumos: {
+    'Santa Clara': {
+      'Calcário dolomítico PRNT 85%': 900, 'KCl 00-00-60': 60000, 'MAP 11-52-00': 80000, 'Ureia 45%': 40000,
+      'Roundup Original DI': 2400, 'Finale': 800, 'Fox Xpro': 120, 'Engeo Pleno': 150, 'Priori Xtra': 260,
+      'Connect': 400, 'Assist': 300, 'Masterfix L Soja': 250,
+      'BMX Foco IPRO': 4, 'TMG 2383 IPRO': 6, 'DKB 360 PRO3': 120
+    },
+    'Boa Vista': {
+      'Calcário calcítico PRNT 85%': 400, 'Formulado 02-20-18': 150000, 'Zapp QI 620': 1500, 'Roundup WG': 600,
+      'Unizeb Gold': 900, 'Agral': 60, 'Áureo': 200, 'Standak Top': 40,
+      'NS 7709 IPRO': 10, 'AG 8700 PRO3': 200
+    },
+    'Primavera': {
+      'Gesso agrícola': 500, 'Formulado 00-20-20': 90000, 'Roundup Original DI': 1200, 'DMA 806 BR': 300,
+      'Select 240 EC': 150, 'Cypress': 100, 'Borosol K': 300,
+      'BMX Olimpo IPRO': 8
+    }
+  },
 
   // Estádios fenológicos da soja (exemplo; depois virão do menu Cadastros)
   fenologia: ['VE', 'VC', 'V1', 'V2', 'V3', 'V4', 'V5', 'V6', 'R1', 'R2', 'R3', 'R4', 'R5', 'R6', 'R7', 'R8'],
@@ -3036,7 +3257,8 @@ window.DADOS = {
   planos: [],
 
   // Planos carregados pelo menu Demonstração → "Ver com planos de exemplo".
-  // Só planos publicados: a soja e o milho safrinha da Santa Clara. O plano em construção o usuário cria e monta
+  // Só planos publicados: soja 26/27 da Santa Clara, da Boa Vista e da Primavera; milho safrinha 27/27 da Santa Clara
+  // e da Boa Vista (São José fica sem plano nas duas, Primavera sem safrinha). O plano em construção o usuário cria e monta
   // ele mesmo (Criar Plano Safra). "operacoes" detalha, por nome de operação do modelo: fenologia, produtos [nome, dose],
   // talhões que recebem e ajustes por talhão. Operações não listadas ficam sem recomendação e sem talhões.
   planosExemplo: [
@@ -3080,8 +3302,10 @@ window.DADOS = {
           '1ª Pós-emergente': op([['Roundup Original DI', 2.0]], 'V2'),
           '2ª Pós-emergente':
             op([['Select 240 EC', 0.45], ['Engeo Pleno', 0.20], ['Unizeb Gold', 1.5]], 'V4'),
-          '1ª Fungicida': op([['Fox Xpro', 0.40], ['Engeo Pleno', 0.20]], 'R1'),
-          '2ª Fungicida': op([['Priori Xtra', 0.30], ['Ampligo', 0.15]], 'R3'),
+          // Tratamento de semente on farm e inoculação (operação extra no grupo Defensivo, no dia do plantio)
+          'Tratamento de sementes': { grupo: 'Defensivo', dap: 0, produtos: [['Standak Top', 0.12], ['Masterfix L Soja', 0.30]], talhoes: todos },
+          '1ª Fungicida': op([['Fox Xpro', 0.40], ['Engeo Pleno', 0.20], ['Áureo', 0.25]], 'R1'),
+          '2ª Fungicida': op([['Priori Xtra', 0.30], ['Ampligo', 0.15], ['Assist', 0.50]], 'R3'),
           '3ª Fungicida': op([['Elatus', 0.20], ['Connect', 1.0]], 'R4'),
           '4ª Fungicida': op([['Cypress', 0.30], ['Premio', 0.05]], 'R5'),
           'Desfolha': op([['Finale', 2.0]], 'R7')
@@ -3118,6 +3342,117 @@ window.DADOS = {
           'Herbicida pós-emergente': op([['Primóleo', 3.0], ['Callisto', 0.3]]),
           'Inseticida: lagarta-do-cartucho': op([['Premio', 0.10]]),
           'Fungicida': op([['Priori Xtra', 0.30]])
+        };
+      })()
+    },
+    {
+      // Soja 26/27 da Boa Vista (Empresa B): solo mais arenoso, calcário só em metade dos talhões, formulado no plantio
+      safra: '26/27', empresa: 'Empresa B', atividade: 'Agricultura', fazenda: 'Boa Vista', cultura: 'Soja',
+      versoes: { criadaEm: '2026-09-10T09:15', publicadaEm: '2026-09-22T15:30' },
+      custo: null, receita: null,
+      atualizadoEm: '2026-09-22', atualizadoPor: 'Carlos Menezes',
+      operacoes: (function () {
+        const todos = ['T01', 'T02', 'T03', 'T04', 'T05', 'T06', 'T07', 'T08', 'T09', 'T10'];
+        const op = (produtos, fenologia = '') => ({ fenologia, produtos, talhoes: todos });
+        return {
+          'Calagem': { produtos: [['Calcário calcítico PRNT 85%', 1.5]], talhoes: ['T01', 'T02', 'T03', 'T04', 'T05'] },
+          '1ª Adubação potássica': op([['KCl 00-00-60', 150]]),
+          'Adubação de plantio': op([['Formulado 02-20-18', 350]]),
+          '1ª Adubação foliar': op([['Nutre Boro', 1.0], ['Compat Copper', 0.3]], 'V4'),
+          'Plantio': { germinacao: 92, plantio: [
+            { talhao: 'T01', variedade: 'NS 7709 IPRO',    data: '2026-09-20', populacao: 280 },
+            { talhao: 'T02', variedade: 'NS 7709 IPRO',    data: '2026-09-21', populacao: 280 },
+            { talhao: 'T03', variedade: 'BMX Olimpo IPRO', data: '2026-09-26', populacao: 250 },
+            { talhao: 'T04', variedade: 'BMX Olimpo IPRO', data: '2026-09-27', populacao: 250 },
+            { talhao: 'T05', variedade: 'TMG 2383 IPRO',   data: '2026-10-02', populacao: 220 },
+            { talhao: 'T06', variedade: 'TMG 2383 IPRO',   data: '2026-10-03', populacao: 220 },
+            { talhao: 'T07', variedade: 'BMX Foco IPRO',   data: '2026-09-24', populacao: 300 },
+            { talhao: 'T08', variedade: 'M 8372 IPRO',     data: '2026-10-08', populacao: 230 },
+            { talhao: 'T09', variedade: 'M 8372 IPRO',     data: '2026-10-09', populacao: 230 },
+            { talhao: 'T10', variedade: 'BMX Foco IPRO',   data: '2026-09-25', populacao: 300 }
+          ] },
+          'Tratamento de sementes': { grupo: 'Defensivo', dap: 0, produtos: [['Standak Top', 0.12], ['Masterfix L Soja', 0.30], ['Trichodermil SC', 0.50]], talhoes: todos },
+          '1ª Dessecação: pré-plantio': op([['Zapp QI 620', 2.5], ['Heat', 35], ['LI 700', 0.15]]),
+          '2ª Dessecação: pré-plantio': op([['Finale', 2.0]]),
+          'Pré-emergente': op([['Spider', 30]]),
+          '1ª Pós-emergente': op([['Roundup WG', 1.5]], 'V2'),
+          '2ª Pós-emergente': op([['Roundup Original DI', 2.0], ['Engeo Pleno', 0.20]], 'V4'),
+          '1ª Fungicida': op([['Fox Xpro', 0.50], ['Áureo', 0.25]], 'R1'),
+          '2ª Fungicida': op([['Priori Xtra', 0.30], ['Unizeb Gold', 1.5], ['Assist', 0.50]], 'R3'),
+          '3ª Fungicida': op([['Elatus', 0.20], ['Premio', 0.05], ['Áureo', 0.25]], 'R4'),
+          '4ª Fungicida': op([['Cypress', 0.30], ['Unizeb Gold', 1.5]], 'R5'),
+          'Desfolha': op([['Finale', 2.0]], 'R7')
+        };
+      })()
+    },
+    {
+      // Soja 26/27 da Primavera (Empresa C): calagem e gessagem em toda a área, 00-20-20 no plantio
+      safra: '26/27', empresa: 'Empresa C', atividade: 'Agricultura', fazenda: 'Primavera', cultura: 'Soja',
+      versoes: { criadaEm: '2026-09-05T14:00', publicadaEm: '2026-09-19T11:20' },
+      custo: null, receita: null,
+      atualizadoEm: '2026-09-19', atualizadoPor: 'Ana Ribeiro',
+      operacoes: (function () {
+        const todos = ['T01', 'T02', 'T03', 'T04', 'T05', 'T06'];
+        const op = (produtos, fenologia = '') => ({ fenologia, produtos, talhoes: todos });
+        return {
+          'Calagem': op([['Calcário dolomítico PRNT 85%', 2.5]]),
+          'Gessagem': op([['Gesso agrícola', 2.0]]),
+          'Adubação de plantio': op([['Formulado 00-20-20', 400]]),
+          '1ª Adubação foliar': op([['Borosol K', 1.0]], 'V4'),
+          '2ª Adubação foliar': op([['Nutre Zinco', 0.5], ['Nutre Fer', 0.5]], 'R3'),
+          'Plantio': { germinacao: 94, plantio: [
+            { talhao: 'T01', variedade: 'BMX Olimpo IPRO', data: '2026-09-23', populacao: 250 },
+            { talhao: 'T02', variedade: 'BMX Olimpo IPRO', data: '2026-09-24', populacao: 250 },
+            { talhao: 'T03', variedade: 'NS 7709 IPRO',    data: '2026-09-28', populacao: 270 },
+            { talhao: 'T04', variedade: 'TMG 2383 IPRO',   data: '2026-10-04', populacao: 220 },
+            { talhao: 'T05', variedade: 'NS 7709 IPRO',    data: '2026-09-29', populacao: 270 },
+            { talhao: 'T06', variedade: 'M 8372 IPRO',     data: '2026-10-07', populacao: 230 }
+          ] },
+          'Tratamento de sementes': { grupo: 'Defensivo', dap: 0, produtos: [['Standak Top', 0.12], ['Masterfix L Soja', 0.30]], talhoes: todos },
+          '1ª Dessecação: pré-plantio': op([['Roundup Original DI', 3.0], ['DMA 806 BR', 1.0], ['Agral', 0.10]]),
+          '2ª Dessecação: pré-plantio': op([['Finale', 2.0]]),
+          'Pré-emergente': op([['Dual Gold', 1.2]]),
+          '1ª Pós-emergente': op([['Roundup Original DI', 2.0]], 'V2'),
+          '2ª Pós-emergente': op([['Select 240 EC', 0.45], ['Assist', 0.50]], 'V4'),
+          '1ª Fungicida': op([['Aproach Prima', 0.30], ['Assist', 0.50]], 'R1'),
+          '2ª Fungicida': op([['Fox', 0.40], ['Unizeb Gold', 1.5]], 'R3'),
+          '3ª Fungicida': op([['Elatus', 0.20], ['Connect', 1.0]], 'R4'),
+          '4ª Fungicida': op([['Cypress', 0.30], ['Ampligo', 0.15]], 'R5'),
+          'Desfolha': op([['Finale', 2.0]], 'R7')
+        };
+      })()
+    },
+    {
+      // Milho safrinha 27/27 da Boa Vista, depois da soja (plantio de janeiro a fevereiro)
+      safra: '27/27', empresa: 'Empresa B', atividade: 'Agricultura', fazenda: 'Boa Vista', cultura: 'Milho', ciclo: 'Safrinha',
+      modelo: 'Milho',
+      versoes: { criadaEm: '2026-09-29T08:50', publicadaEm: '2026-10-08T10:10' },
+      custo: null, receita: null,
+      atualizadoEm: '2026-10-08', atualizadoPor: 'Carlos Menezes',
+      operacoes: (function () {
+        const todos = ['T01', 'T02', 'T03', 'T04', 'T05', 'T06', 'T07', 'T08', 'T09', 'T10'];
+        const op = (produtos) => ({ produtos, talhoes: todos });
+        return {
+          'Plantio': { germinacao: 95, plantio: [
+            { talhao: 'T01', variedade: 'AG 8700 PRO3', data: '2027-01-08', populacao: 62 },
+            { talhao: 'T02', variedade: 'AG 8700 PRO3', data: '2027-01-09', populacao: 62 },
+            { talhao: 'T07', variedade: 'DKB 360 PRO3', data: '2027-01-12', populacao: 64 },
+            { talhao: 'T10', variedade: 'DKB 360 PRO3', data: '2027-01-13', populacao: 64 },
+            { talhao: 'T03', variedade: 'P3707VYH',     data: '2027-01-18', populacao: 66 },
+            { talhao: 'T04', variedade: 'P3707VYH',     data: '2027-01-19', populacao: 66 },
+            { talhao: 'T05', variedade: 'AG 8700 PRO3', data: '2027-01-25', populacao: 62 },
+            { talhao: 'T06', variedade: 'AG 8700 PRO3', data: '2027-01-26', populacao: 62 },
+            { talhao: 'T08', variedade: 'FS 575 PWU',   data: '2027-02-03', populacao: 60 },
+            { talhao: 'T09', variedade: 'FS 575 PWU',   data: '2027-02-05', populacao: 60 }
+          ] },
+          'Adubação de plantio': op([['Formulado 02-20-18', 250]]),
+          'Adubação potássica': op([['KCl 00-00-60', 70]]),
+          'Cobertura nitrogenada': op([['Ureia 45%', 180]]),
+          '1ª Inseticida: cigarrinha': op([['Engeo Pleno', 0.25], ['Agral', 0.05]]),
+          '2ª Inseticida: cigarrinha': op([['Connect', 1.0]]),
+          'Herbicida pós-emergente': op([['Primóleo', 3.0], ['Callisto', 0.3], ['Assist', 0.50]]),
+          'Inseticida: lagarta-do-cartucho': op([['Dipel WG', 0.50], ['Premio', 0.10]]),
+          'Fungicida': op([['Priori Xtra', 0.30], ['Áureo', 0.25]])
         };
       })()
     }
@@ -3276,6 +3611,7 @@ window.Icones = (function () {
     acima: svg('<path d="M8 14l4-4 4 4"/>'),
     funil: svg('<path d="M4 5h16l-6 8v5l-4 2v-7Z"/>'),
     baixar: svg('<path d="M12 4v11M7 10l5 5 5-5"/><path d="M5 19h14"/>'),
+    alfinete: svg('<path d="M12 17v5"/><path d="M9 4h6l-1 6 3 3v2H7v-2l3-3Z"/>'),
     mais_opcoes: svg('<circle cx="5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/>')
   };
 })();
@@ -3479,8 +3815,16 @@ window.Planos = (function () {
 
   // Modelo preenchido com o detalhe dos planos de exemplo (ver dados-exemplo.js).
   // Os produtos de cada operação viram a Receita 1, aplicada nos talhões listados.
+  // Operação do exemplo que o modelo não tem (com "grupo", o nome do grupo): entra no grupo, na ordem do DAP.
   function montarExemplo(detalhes, modelo) {
     const grupos = gruposModelo(modelo);
+    Object.entries(detalhes).forEach(([nome, d]) => {
+      const g = d.grupo && grupos.find((x) => x.nome === d.grupo);
+      if (!g || g.operacoes.some((op) => op.nome === nome)) return;
+      const op = { ...novaOperacao(nome, d.dap ?? null, d.prazo ?? null), fenologia: '' };
+      const i = g.operacoes.findIndex((o) => o.dap !== null && o.dap > (d.dap ?? 0));
+      g.operacoes.splice(i < 0 ? g.operacoes.length : i, 0, op);
+    });
     grupos.forEach((g) => g.operacoes.forEach((op) => {
       const d = detalhes[op.nome];
       if (!d) return;
@@ -4026,7 +4370,7 @@ function blocoEmConstrucao(subtitulo) {
 </script>
   <script>
 /*
- * Planejamento, Calendário Agrícola e Suprimentos sem nenhum plano cadastrado (docs/DECISOES.md, 4.0):
+ * Planejamento, Calendário Agrícola e Orçamento sem nenhum plano cadastrado (docs/DECISOES.md, 4.0):
  * convite para criar o primeiro plano.
  */
 window.Telas = window.Telas || {};
@@ -4037,7 +4381,7 @@ window.Telas.semPlanos = function (item) {
   const ITENS = {
     planejamento: { titulo: 'Planejamento', alvo: 'o planejamento', texto: TEXTO_PLANO, icone: Icones.lista },
     calendario:   { titulo: 'Calendário Agrícola', alvo: 'o Calendário Agrícola', texto: TEXTO_PLANO, icone: Icones.calendario },
-    suprimentos:  { titulo: 'Suprimentos', alvo: 'os Suprimentos',
+    orcamento:    { titulo: 'Orçamento de Insumos', alvo: 'o Orçamento de Insumos',
                     icone: '<svg viewBox="0 0 24 24"><path d="M21 8 12 3 3 8v8l9 5 9-5Z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg>',
                     texto: 'O plano organiza a necessidade de insumos por safra, empresa, fazenda e cultura. Depois de criado, ele abre aqui automaticamente.' }
   };
@@ -6208,6 +6552,719 @@ window.Telas.calendarioAgricola = (function () {
       filtros = filtrosIniciais();
       conteudo.querySelectorAll('[data-filtro]').forEach((select) => { select.value = filtros[select.dataset.filtro]; });
       atualizar();
+    });
+    atualizar();
+  }
+
+  return { desenhar, aoMostrar };
+})();
+
+</script>
+  <script>
+/*
+ * Orçamento de Insumos do menu (antes Suprimentos; decisões em rascunhos/orcamento/README.md).
+ * Todos os planos somados, na última versão publicada de cada um, no Ano Agrícola escolhido.
+ *  - Moeda de exibição (R$ | US$): tudo é mostrado na moeda escolhida, convertido pela PTAX de referência.
+ *  - Filtros: Ano Agrícola, Safra (Safra/Safrinha), Empresa, Fazenda, Talhão, Cultura e Insumos (grupo de insumo).
+ *  - Estimativas de comercialização (Editar parâmetros): PTAX e, por cultura, preço e produtividade esperados.
+ *  - Resumo do orçamento, Orçamento por tipo de insumo e Detalhamento do orçamento (Por produto · Por talhão).
+ * Cálculo: necessidade = dose × área do talhão (sementes: população × área ÷ germinação, na embalagem da cultura);
+ * custo = necessidade × valor unitário (DADOS.precosInsumos e precosSementes); a comprar = necessidade − estoque,
+ * fazenda a fazenda, nunca negativo (DADOS.estoqueInsumos).
+ */
+window.Telas = window.Telas || {};
+
+window.Telas.orcamento = (function () {
+  const esc = Util.escapar;
+  const CICLOS = ['Safra', 'Safrinha'];
+
+  // Estado da sessão (só em memória): mantido ao navegar entre telas
+  let moeda = 'R$';
+  let filtros = {};
+  let guiaDetalhe = 'produto';
+  let busca = '';
+  // Paginação do detalhamento: a pessoa escolhe quantos itens por página (começa em 10)
+  const POR_PAGINA = [10, 20, 50, 100];
+  let porPagina = 10;
+  let pagina = 1;
+  let multiAberto = null; // filtro de várias escolhas com a lista aberta
+  // Ordenação do detalhamento, por guia: { coluna, sentido: 'asc' | 'desc' } (null = ordem padrão)
+  const ordem = { produto: null, talhao: null };
+  let congelado = true;   // cabeçalho, filtros e estimativas fixos no topo ao rolar (o alfinete descongela)
+  // Parâmetros de cada Ano Agrícola: { ptax, linhas: [{ cultura, moeda, preco, produtividade }] }
+  const parametros = {};
+
+  const cicloDe = (p) => p.ciclo || 'Safra';
+  const publicados = () => DADOS.planos.filter((p) => Versoes.ultimaPublicada(p));
+  // Ano Agrícola: uma escolha só (os parâmetros são do ano). Os outros: várias escolhas (vazio = todos)
+  const filtrosIniciais = () => ({ anoAgricola: Util.anoAgricolaInicial(Util.anosAgricolas(publicados())),
+    ciclo: [], empresa: [], fazenda: [], talhao: [], cultura: [], insumo: [] });
+  const passa = (campo, valor) => !filtros[campo].length || filtros[campo].includes(valor);
+
+  // ----- Filtros -----
+  // Planos do ano agrícola; com "ate", também os filtros de cima até aquele campo (as opções dependem dos de cima)
+  const CAMPOS = ['ciclo', 'empresa', 'fazenda', 'cultura'];
+  function planosFiltrados(ate) {
+    const usados = ate ? CAMPOS.slice(0, CAMPOS.indexOf(ate)) : CAMPOS;
+    const valor = (p, c) => (c === 'ciclo' ? cicloDe(p) : p[c]);
+    return publicados().filter((p) => String(Util.anoAgricola(p.safra)) === filtros.anoAgricola
+      && usados.every((c) => passa(c, valor(p, c))));
+  }
+  const talhoesDe = (p) => Util.talhoesPlano(p, Versoes.ultimaPublicada(p));
+  function opcoes(campo) {
+    if (campo === 'anoAgricola') return Util.anosAgricolas(publicados());
+    if (campo === 'insumo') return DADOS.gruposInsumo;
+    if (campo === 'talhao') {
+      const nomes = new Set(planosFiltrados().flatMap((p) => talhoesDe(p).map((t) => t.nome)));
+      return [...nomes].sort((a, b) => a.localeCompare(b, 'pt-BR', { numeric: true }));
+    }
+    const naLista = new Set(planosFiltrados(campo).map((p) => (campo === 'ciclo' ? cicloDe(p) : p[campo])));
+    const cadastro = { ciclo: CICLOS, empresa: DADOS.empresas, fazenda: DADOS.fazendas, cultura: DADOS.culturasPlanos }[campo];
+    return cadastro.filter((item) => naLista.has(item));
+  }
+
+  // ----- Parâmetros (PTAX e estimativa de comercialização), por Ano Agrícola -----
+  const unidadeDe = (cultura) => (DADOS.comercializacao[cultura] || {}).unidade || 'sc';
+  function parametrosDoAno() {
+    const ano = filtros.anoAgricola;
+    const par = parametros[ano] = parametros[ano] || { ptax: DADOS.ptaxReferencia, linhas: [] };
+    // As culturas dos planos publicados do ano entram sozinhas, com os valores de exemplo
+    const doAno = publicados().filter((p) => String(Util.anoAgricola(p.safra)) === ano);
+    DADOS.culturasPlanos.filter((c) => doAno.some((p) => p.cultura === c)).forEach((cultura) => {
+      if (par.linhas.some((l) => l.cultura === cultura)) return;
+      const ex = DADOS.comercializacao[cultura] || {};
+      par.linhas.push({ cultura, moeda: ex.moeda || 'R$', preco: ex.preco ?? null, produtividade: ex.produtividade ?? null, doPlano: true });
+    });
+    return par;
+  }
+  const ptax = () => parametrosDoAno().ptax || 0;
+  // R$ → moeda de exibição (e o contrário para valores em US$)
+  const emReais = (valor, m) => (m === 'US$' ? valor * ptax() : valor);
+  const exibir = (reais) => (moeda === 'US$' ? (ptax() ? reais / ptax() : 0) : reais);
+  // Preço da cultura (por saca ou arroba), em R$
+  function precoCultura(cultura) {
+    const l = parametrosDoAno().linhas.find((x) => x.cultura === cultura);
+    return l && l.preco ? emReais(l.preco, l.moeda) : null;
+  }
+
+  // ----- Cálculo: uma linha por talhão × produto -----
+  const cadastroDe = (nome) => DADOS.defensivos.find((d) => d.produto === nome) || {};
+  const grupoDe = (cad) => DADOS.grupoInsumoPorClasse[cad.classe] || (cad.fertilidade ? 'Fertilizantes' : 'Defensivos');
+
+  function consumo() {
+    const itens = [];
+    planosFiltrados().forEach((p) => {
+      const v = Versoes.ultimaPublicada(p);
+      const talhoes = talhoesDe(p).filter((t) => passa('talhao', t.nome));
+      Versoes.grupos(p, v).forEach((g) => g.operacoes.forEach((op) => talhoes.forEach((t) => {
+        const base = { plano: p, talhao: t.nome, area: t.area };
+        // Sementes: população × área ÷ germinação, na embalagem da cultura (bag ou saco)
+        const pl = op.plantio && op.plantio[t.nome];
+        if (pl && pl.variedade && pl.populacao) {
+          const germ = ((op.germinacoes || {})[t.nome] || 100) / 100;
+          const emb = DADOS.embalagemSemente[p.cultura] || DADOS.embalagemSemente.Soja;
+          const preco = DADOS.precosSementes[pl.variedade];
+          itens.push({ ...base, produto: pl.variedade, grupo: 'Sementes', unidade: emb.texto,
+            quantidade: pl.populacao * 1000 * t.area / germ / emb.sementes, moedaPreco: 'R$', preco: preco ?? null });
+        }
+        const ajuste = op.talhoes && op.talhoes[t.nome];
+        if (!ajuste) return;
+        Planos.linhasTalhao(op, ajuste).forEach((linha) => {
+          const cad = cadastroDe(linha.produto);
+          const [moedaPreco, preco] = DADOS.precosInsumos[linha.produto] || ['R$', null];
+          itens.push({ ...base, produto: linha.produto, grupo: grupoDe(cad), unidade: linha.unidade || cad.unidade || '',
+            quantidade: Planos.doseTalhao(op, ajuste, linha) * t.area, moedaPreco, preco });
+        });
+      })));
+    });
+    return itens
+      .filter((i) => passa('insumo', i.grupo))
+      .map((i) => ({ ...i, custo: i.preco === null ? 0 : emReais(i.quantidade * i.preco, i.moedaPreco) }));
+  }
+
+  // Área de cada plano no filtro (talhões incluídos; com Talhão, só ele), por cultura
+  function areas() {
+    const porCultura = {};
+    let total = 0;
+    planosFiltrados().forEach((p) => {
+      const a = talhoesDe(p).filter((t) => passa('talhao', t.nome)).reduce((s, t) => s + t.area, 0);
+      total += a;
+      porCultura[p.cultura] = (porCultura[p.cultura] || 0) + a;
+    });
+    return { total, porCultura };
+  }
+  const soma = (xs, f) => xs.reduce((s, x) => s + f(x), 0);
+
+  // ----- Formatação -----
+  const fmt = (n, casas = 0) => n.toLocaleString('pt-BR', { minimumFractionDigits: casas, maximumFractionDigits: casas });
+  // Valores do dashboard arredondados, sem casa decimal; o que tem valor mas arredondaria para zero mostra 0,1
+  const arred = (n) => (n > 0 && Math.round(n) === 0 ? fmt(0.1, 1) : fmt(n));
+  const dinheiro = (reais) => `${moeda} ${arred(exibir(reais))}`;
+  // Custo unitário: com centavos (arredondado, R$ 4,78/kg viraria R$ 5)
+  const unitario = (reais) => `${moeda} ${fmt(exibir(reais), 2)}`;
+  const quantidade = arred;
+  const numero = (texto) => { const n = Number(String(texto).replace(/\./g, '').replace(',', '.')); return String(texto).trim() === '' || Number.isNaN(n) ? null : n; };
+  const decimal = (n, casas) => (n === null || n === undefined ? '' : fmt(n, casas));
+  // Custo por hectare em sacas (ou arrobas) da cultura: custo/ha ÷ preço da saca
+  function emSacas(custo, area, cultura) {
+    const preco = precoCultura(cultura);
+    return area && preco ? custo / area / preco : null;
+  }
+  const textoSacas = (n, cultura) => (n === null ? '—' : `${arred(n)} ${unidadeDe(cultura)}/ha`);
+
+  // ----- Desenho -----
+  function desenhar() {
+    if (!filtros.anoAgricola || !Util.anosAgricolas(publicados()).includes(filtros.anoAgricola)) filtros = filtrosIniciais();
+    // Cabeçalho, filtros e estimativas ficam fixos no topo enquanto a página rola
+    return `
+      <div class="orc-fixo ${congelado ? '' : 'orc-fixo--solto'}">
+      <header class="cabecalho orc-cabecalho">
+        <div class="orc-topo">
+          <h1 class="cabecalho__titulo">Orçamento de Insumos</h1>
+          <span class="cag-etiqueta" title="Mostra a última versão publicada de cada plano. Alterações em versões em construção aparecem aqui depois de publicadas.">${Icones.info} Últimas versões publicadas</span>
+        </div>
+        <div class="orc-moeda" role="group" aria-label="Moeda de exibição">
+          <span class="orc-moeda__rotulo" title="Os valores em outra moeda são convertidos pela PTAX de referência">Moeda de exibição ${Icones.info}</span>
+          ${['R$', 'US$'].map((m) => `<button class="orc-moeda__opcao ${m === moeda ? 'orc-moeda__opcao--ativa' : ''}" type="button"
+              data-orc-moeda="${m}" aria-pressed="${m === moeda}">${m}</button>`).join('')}
+          ${botaoCongelar()}
+        </div>
+      </header>
+      <div class="orc-fixo__barra">
+        <section class="cartao filtros" aria-label="Filtrar o orçamento" data-orc-filtros></section>
+        <section class="cartao orc-estimativas" aria-label="Estimativas de comercialização" data-orc-estimativas></section>
+      </div>
+      </div>
+      <div class="pagina orc-pagina">
+        <div class="orc-corpo" data-orc-corpo></div>
+      </div>`;
+  }
+
+  function botaoCongelar() {
+    const texto = congelado ? 'Descongelar cabeçalho' : 'Congelar cabeçalho';
+    return `<button class="botao-icone orc-congelar ${congelado ? 'orc-congelar--ativo' : ''}" type="button" data-acao="orc-congelar"
+        title="${texto}" aria-label="${texto}" aria-pressed="${congelado}">${Icones.alfinete}</button>`;
+  }
+
+  function desenharFiltros() {
+    const anos = opcoes('anoAgricola');
+    return `
+      <div class="campo">
+        <label class="campo__rotulo" for="orc-anoAgricola">Ano Agrícola</label>
+        <select class="campo__controle" id="orc-anoAgricola" data-filtro="anoAgricola">
+          ${anos.map((a) => `<option value="${esc(a)}" ${a === filtros.anoAgricola ? 'selected' : ''}>${esc(a)}</option>`).join('')}
+        </select>
+      </div>
+      ${multi('ciclo', 'Safra', 'Todas', 'selecionadas')}
+      ${multi('empresa', 'Empresa', 'Todas', 'selecionadas')}
+      ${multi('fazenda', 'Fazenda', 'Todas', 'selecionadas')}
+      ${multi('talhao', 'Talhão', 'Todos', 'selecionados')}
+      ${multi('cultura', 'Cultura', 'Todas', 'selecionadas')}
+      ${multi('insumo', 'Insumos', 'Todos', 'selecionados')}
+      <button class="link-acao filtros__limpar" type="button" data-acao="orc-limpar">${Icones.limpar} Limpar filtros</button>`;
+  }
+
+  // Filtro de várias escolhas: botão com o resumo ("Todas", o nome ou "2 selecionadas") e lista com caixas de marcar
+  function multi(nome, rotulo, todos, plural) {
+    const itens = opcoes(nome);
+    filtros[nome] = filtros[nome].filter((v) => itens.includes(v)); // a opção saiu (mudou um filtro de cima)
+    const marcados = filtros[nome];
+    const texto = !marcados.length ? todos : marcados.length === 1 ? marcados[0] : `${marcados.length} ${plural}`;
+    const aberto = multiAberto === nome;
+    return `
+      <div class="campo orc-multi" data-multi="${nome}">
+        <span class="campo__rotulo" id="orc-${nome}-rotulo">${rotulo}</span>
+        <button class="campo__controle orc-multi__botao" type="button" data-multi-botao="${nome}" aria-haspopup="true"
+                aria-expanded="${aberto}" aria-labelledby="orc-${nome}-rotulo orc-${nome}-texto">
+          <span id="orc-${nome}-texto">${esc(texto)}</span></button>
+        <div class="orc-multi__lista" ${aberto ? '' : 'hidden'} role="group" aria-labelledby="orc-${nome}-rotulo">
+          <label class="orc-multi__item orc-multi__item--todos"><input type="checkbox" data-multi-todos="${nome}" ${marcados.length ? '' : 'checked'}> ${todos}</label>
+          ${itens.map((item) => `<label class="orc-multi__item"><input type="checkbox" data-multi-item="${nome}" value="${esc(item)}"
+              ${marcados.includes(item) ? 'checked' : ''}> ${esc(item)}</label>`).join('')}
+        </div>
+      </div>`;
+  }
+
+  // Estimativas de comercialização numa linha: PTAX e, por cultura, preço e produtividade; Editar parâmetros abre o modal
+  function desenharEstimativas() {
+    const par = parametrosDoAno();
+    const culturas = par.linhas.filter((l) => l.cultura).map((l) => {
+      const u = unidadeDe(l.cultura);
+      const preco = l.preco === null ? 'preço a informar' : `${l.moeda} ${fmt(l.preco, 2)}/${u}`;
+      const prod = l.produtividade === null ? 'produtividade a informar' : `${fmt(l.produtividade)} ${u}/ha`;
+      return `<span class="orc-estimativas__item"><strong>${esc(l.cultura)}:</strong> ${preco} · ${prod}</span>`;
+    }).join('');
+    return `
+      <span class="orc-estimativas__titulo">${Icones.broto} Estimativas de comercialização</span>
+      <span class="orc-estimativas__item"><strong>PTAX:</strong> R$ ${par.ptax ? fmt(par.ptax, 2) : '—'}/US$</span>
+      ${culturas}
+      <button class="botao botao--secundario orc-botao-compacto orc-estimativas__editar" type="button" data-acao="orc-parametros">${Icones.lapis} Editar parâmetros</button>`;
+  }
+
+  function desenharCorpo() {
+    if (!planosFiltrados().length) return '<section class="cartao orc-vazio">Nenhum plano publicado com esses filtros.</section>';
+    const itens = consumo();
+    const { total: area, porCultura } = areas();
+    const custo = soma(itens, (i) => i.custo);
+    const culturas = Object.keys(porCultura);
+    return `
+      ${resumo(itens, area, custo, culturas, porCultura)}
+      ${porTipo(itens, area, custo, culturas, porCultura)}
+      ${detalhamento(itens)}`;
+  }
+
+  // ----- Resumo do orçamento: 4 cards e a receita estimada de cada cultura -----
+  // Custo em sacas: só com uma cultura no filtro. Receita estimada: um card só, somando as culturas
+  // (área de cada cultura × produtividade esperada × preço esperado)
+  function resumo(itens, area, custo, culturas, porCultura) {
+    const unica = culturas.length === 1 ? culturas[0] : null;
+    const sacas = unica ? card('sacas', `Custo em sacas · ${esc(unica)}`, textoSacas(emSacas(custo, area, unica), unica), Icones.broto) : '';
+    const receitas = culturas.map((c) => {
+      const l = parametrosDoAno().linhas.find((x) => x.cultura === c);
+      const preco = precoCultura(c);
+      return l && l.produtividade && preco ? porCultura[c] * l.produtividade * preco : null;
+    }).filter((v) => v !== null);
+    return `
+      <section class="cartao orc-secao" aria-labelledby="orc-titulo-resumo">
+        <h2 class="orc-secao__titulo" id="orc-titulo-resumo">Resumo do orçamento</h2>
+        <div class="orc-cards">
+          ${card('area', 'Área produtiva', `${fmt(area)} ha`, Icones.talhoes)}
+          ${card('custo', 'Custo total', dinheiro(custo), Icones.moedas)}
+          ${card('hectare', 'Custo por hectare', area ? dinheiro(custo / area) : '—', Icones.grafico)}
+          ${sacas}
+          ${card('receita', 'Receita estimada', receitas.length ? dinheiro(soma(receitas, (v) => v)) : '—', Icones.grafico)}
+        </div>
+      </section>`;
+  }
+  function card(chave, rotulo, valor, icone) {
+    return `
+      <div class="orc-card orc-card--${chave}"><span class="orc-card__icone" aria-hidden="true">${icone}</span>
+        <div class="orc-card__corpo"><span class="orc-card__rotulo">${rotulo}</span><strong class="orc-card__numero">${valor}</strong></div></div>`;
+  }
+
+  // ----- Orçamento por tipo de insumo: barra cinza até 100% e verde até o % do custo; sacas por cultura -----
+  function porTipo(itens, area, custo, culturas, porCultura) {
+    const grupos = DADOS.gruposInsumo.filter((g) => passa('insumo', g))
+      .map((g) => ({ g, itens: itens.filter((i) => i.grupo === g) }))
+      .map((x) => ({ ...x, custo: soma(x.itens, (i) => i.custo) }))
+      .sort((a, b) => b.custo - a.custo);
+    return `
+      <section class="cartao orc-secao" aria-labelledby="orc-titulo-tipo">
+        <h2 class="orc-secao__titulo" id="orc-titulo-tipo">Orçamento por tipo de insumo</h2>
+        <div class="tabela-rolagem orc-tipo-tabela">
+          <table class="tabela orc-tabela">
+            <thead><tr><th>Tipo de insumo</th><th class="orc-tipo__barra-col"><span class="so-leitor">Participação</span></th><th class="tabela__numero">%</th>
+              <th class="tabela__numero">Custo total</th><th class="tabela__numero">${moeda}/ha</th>
+              ${culturas.map((c) => `<th class="tabela__numero">${esc(c)} ${unidadeDe(c)}/ha</th>`).join('')}</tr></thead>
+            <tbody>${grupos.map(({ g, itens: doGrupo, custo: cg }) => {
+              const p = custo ? cg / custo * 100 : 0;
+              return `<tr>
+                <td>${esc(g)}</td>
+                <td class="orc-tipo__barra-col"><span class="orc-barra" aria-hidden="true"><span style="width: ${p.toFixed(1)}%"></span></span></td>
+                <td class="tabela__numero">${arred(p)}%</td>
+                <td class="tabela__numero">${dinheiro(cg)}</td>
+                <td class="tabela__numero">${area ? dinheiro(cg / area) : '—'}</td>
+                ${culturas.map((c) => {
+                  const n = emSacas(soma(doGrupo.filter((i) => i.plano.cultura === c), (i) => i.custo), porCultura[c], c);
+                  return `<td class="tabela__numero">${n === null ? '—' : arred(n)}</td>`;
+                }).join('')}
+              </tr>`;
+            }).join('')}</tbody>
+          </table>
+        </div>
+      </section>`;
+  }
+
+  // ----- Detalhamento do orçamento: Por produto · Por talhão -----
+  function linhasPorProduto(itens) {
+    const mapa = new Map();
+    itens.forEach((i) => {
+      const x = mapa.get(i.produto) || { grupo: i.grupo, produto: i.produto, unidade: i.unidade, moedaPreco: i.moedaPreco,
+        preco: i.preco, necessidade: 0, custo: 0, porFazenda: {} };
+      x.necessidade += i.quantidade;
+      x.custo += i.custo;
+      x.porFazenda[i.plano.fazenda] = (x.porFazenda[i.plano.fazenda] || 0) + i.quantidade;
+      mapa.set(i.produto, x);
+    });
+    // Estoque e a comprar fazenda a fazenda (a comprar nunca negativo)
+    const estoqueDe = (f, produto) => (DADOS.estoqueInsumos[f] || {})[produto] || 0;
+    return [...mapa.values()].map((x) => {
+      const fazendas = Object.entries(x.porFazenda);
+      return { ...x, estoque: soma(fazendas, ([f]) => estoqueDe(f, x.produto)),
+        comprar: soma(fazendas, ([f, n]) => Math.max(0, n - estoqueDe(f, x.produto))),
+        unitario: x.preco === null ? null : emReais(x.preco, x.moedaPreco) };
+    }).sort((a, b) => DADOS.gruposInsumo.indexOf(a.grupo) - DADOS.gruposInsumo.indexOf(b.grupo) || b.custo - a.custo);
+  }
+
+  function linhasPorTalhao(itens) {
+    const mapa = new Map();
+    itens.forEach((i) => {
+      const chave = `${i.plano.id}|${i.talhao}`;
+      const x = mapa.get(chave) || { plano: i.plano, talhao: i.talhao, area: i.area, custo: 0 };
+      x.custo += i.custo;
+      mapa.set(chave, x);
+    });
+    return [...mapa.values()].sort((a, b) => DADOS.empresas.indexOf(a.plano.empresa) - DADOS.empresas.indexOf(b.plano.empresa)
+      || a.plano.fazenda.localeCompare(b.plano.fazenda, 'pt-BR') || (cicloDe(a.plano) === 'Safrinha') - (cicloDe(b.plano) === 'Safrinha')
+      || a.talhao.localeCompare(b.talhao, 'pt-BR', { numeric: true }));
+  }
+
+  const contem = (textos) => !busca || textos.some((t) => String(t).toLocaleLowerCase('pt-BR').includes(busca.toLocaleLowerCase('pt-BR')));
+  const doProduto = (itens) => linhasPorProduto(itens).filter((l) => contem([l.produto, l.grupo]));
+  const doTalhao = (itens) => linhasPorTalhao(itens).filter((l) => contem([l.plano.fazenda, l.talhao, l.plano.cultura, l.plano.empresa]));
+
+  function detalhamento(itens) {
+    const guias = [['produto', 'Por produto'], ['talhao', 'Por talhão']];
+    return `
+      <section class="cartao orc-secao orc-detalhe" aria-labelledby="orc-titulo-detalhe">
+        <div class="orc-detalhe__topo">
+          <h2 class="orc-secao__titulo" id="orc-titulo-detalhe">Detalhamento do orçamento</h2>
+          <nav class="orc-guias" aria-label="Detalhar por">
+            ${guias.map(([id, nome]) => `<button class="orc-guia ${id === guiaDetalhe ? 'orc-guia--ativa' : ''}" type="button"
+                data-orc-guia="${id}" aria-pressed="${id === guiaDetalhe}">${nome}</button>`).join('')}
+          </nav>
+          <label class="orc-busca">${Icones.busca}<span class="so-leitor">Buscar</span>
+            <input class="campo__controle" type="search" data-orc-busca value="${esc(busca)}"
+                   placeholder="${guiaDetalhe === 'produto' ? 'Buscar produto ou grupo de insumo' : 'Buscar fazenda, talhão ou cultura'}"></label>
+          <button class="botao orc-exportar" type="button" data-acao="orc-exportar">${Icones.baixar} Exportar XLSX</button>
+        </div>
+        <div data-orc-tabela-detalhe>${tabelaDetalhe(itens)}</div>
+      </section>`;
+  }
+
+  // Só as linhas da página; ajusta a página se ela passou do fim (ex.: depois de buscar)
+  function daPagina(ls) {
+    const paginas = Math.max(1, Math.ceil(ls.length / porPagina));
+    pagina = Math.min(Math.max(1, pagina), paginas);
+    return ls.slice((pagina - 1) * porPagina, pagina * porPagina);
+  }
+  function paginacao(total) {
+    const paginas = Math.max(1, Math.ceil(total / porPagina));
+    const de = total ? (pagina - 1) * porPagina + 1 : 0;
+    const ate = Math.min(pagina * porPagina, total);
+    return `
+      <div class="orc-paginacao">
+        <label class="orc-paginacao__por">Itens por página
+          <select class="campo__controle" data-orc-por-pagina>
+            ${POR_PAGINA.map((n) => `<option ${n === porPagina ? 'selected' : ''}>${n}</option>`).join('')}
+          </select></label>
+        <span class="orc-paginacao__texto">${fmt(de)}–${fmt(ate)} de ${fmt(total)}</span>
+        <button class="botao-icone" type="button" data-orc-pagina="${pagina - 1}" ${pagina <= 1 ? 'disabled' : ''} aria-label="Página anterior">${Icones.anterior}</button>
+        <span class="orc-paginacao__texto">Página ${pagina} de ${paginas}</span>
+        <button class="botao-icone" type="button" data-orc-pagina="${pagina + 1}" ${pagina >= paginas ? 'disabled' : ''} aria-label="Próxima página">${Icones.proxima}</button>
+      </div>`;
+  }
+
+  // Colunas de cada guia: [id, título, valor para ordenar (null = vazio, vai para o fim), número?]
+  const COLUNAS = {
+    produto: [
+      ['grupo', 'Grupo de insumo', (l) => l.grupo],
+      ['produto', 'Produto', (l) => l.produto],
+      ['necessidade', 'Necessidade de consumo', (l) => l.necessidade, true],
+      ['estoque', 'Volume em estoque', (l) => l.estoque || null, true],
+      ['comprar', 'Volume a ser comprado', (l) => l.comprar, true],
+      ['unidade', 'Unidade', (l) => l.unidade],
+      ['unitario', 'Custo unitário', (l) => l.unitario, true],
+      ['custo', 'Custo total', (l) => l.custo, true]
+    ],
+    talhao: [
+      ['safra', 'Safra', (l) => `${l.plano.safra} ${cicloDe(l.plano)}`],
+      ['empresa', 'Empresa', (l) => l.plano.empresa],
+      ['fazenda', 'Fazenda', (l) => l.plano.fazenda],
+      ['cultura', 'Cultura', (l) => l.plano.cultura],
+      ['talhao', 'Talhão', (l) => l.talhao],
+      ['area', 'Hectares', (l) => l.area, true],
+      ['custo', 'Custo total', (l) => l.custo, true],
+      ['porHa', `${moeda}/ha`, (l) => l.custo / l.area, true],
+      ['sacas', 'Custo em sacas', (l) => emSacas(l.custo, l.area, l.plano.cultura), true]
+    ]
+  };
+  // 1º clique crescente, 2º decrescente; vazios sempre no fim
+  function ordenadas(ls) {
+    const o = ordem[guiaDetalhe];
+    if (!o) return ls;
+    const valor = COLUNAS[guiaDetalhe].find(([c]) => c === o.coluna)[2];
+    const sinal = o.sentido === 'asc' ? 1 : -1;
+    return [...ls].sort((a, b) => {
+      const va = valor(a); const vb = valor(b);
+      if (va === null || va === undefined) return vb === null || vb === undefined ? 0 : 1;
+      if (vb === null || vb === undefined) return -1;
+      return sinal * (typeof va === 'number' ? va - vb : String(va).localeCompare(String(vb), 'pt-BR', { numeric: true }));
+    });
+  }
+  function cabecalhoDetalhe() {
+    const o = ordem[guiaDetalhe];
+    return `<tr>${COLUNAS[guiaDetalhe].map(([coluna, rotulo, , num]) => {
+      const ativa = o && o.coluna === coluna;
+      const sentido = ativa ? o.sentido : null;
+      return `
+        <th class="${num ? 'tabela__numero' : ''}" ${ativa ? `aria-sort="${sentido === 'asc' ? 'ascending' : 'descending'}"` : ''}>
+          <span class="titulo-coluna"><span>${rotulo}</span>
+            <button class="titulo-ordenar ${ativa ? 'titulo-ordenar--ativo' : ''} ${sentido === 'desc' ? 'titulo-ordenar--desc' : ''}" type="button"
+                    data-orc-ordenar="${coluna}" title="Ordenar por ${rotulo.toLowerCase()}"
+                    aria-label="Ordenar por ${rotulo.toLowerCase()}${ativa ? (sentido === 'asc' ? ', crescente' : ', decrescente') : ''}">${ativa ? Icones.acima : Icones.ordenar}</button>
+          </span>
+        </th>`;
+    }).join('')}</tr>`;
+  }
+
+  function tabelaDetalhe(itens) {
+    const vazio = (n) => `<tr><td class="tabela__vazia" colspan="${n}">Nada encontrado.</td></tr>`;
+    if (guiaDetalhe === 'produto') {
+      const ls = ordenadas(doProduto(itens));
+      return `
+        <div class="tabela-rolagem"><table class="tabela orc-tabela">
+          <thead>${cabecalhoDetalhe()}</thead>
+          <tbody>${ls.length ? daPagina(ls).map((l) => `<tr>
+            <td class="orc-tabela__grupo">${esc(l.grupo)}</td><td>${esc(l.produto)}</td>
+            <td class="tabela__numero">${quantidade(l.necessidade)}</td>
+            <td class="tabela__numero">${l.estoque ? quantidade(l.estoque) : '—'}</td>
+            <td class="tabela__numero">${quantidade(l.comprar)}</td>
+            <td>${esc(l.unidade)}</td>
+            <td class="tabela__numero">${l.unitario === null ? '<span class="orc-pendente">Sem preço</span>' : unitario(l.unitario)}</td>
+            <td class="tabela__numero">${dinheiro(l.custo)}</td></tr>`).join('') : vazio(8)}</tbody>
+        </table></div>${paginacao(ls.length)}`;
+    }
+    const ls = ordenadas(doTalhao(itens));
+    return `
+      <div class="tabela-rolagem"><table class="tabela orc-tabela">
+        <thead>${cabecalhoDetalhe()}</thead>
+        <tbody>${ls.length ? daPagina(ls).map((l) => `<tr>
+          <td>${esc(cicloDe(l.plano))} ${esc(l.plano.safra)}</td><td>${esc(l.plano.empresa)}</td><td>${esc(l.plano.fazenda)}</td>
+          <td>${esc(l.plano.cultura)}</td><td>${esc(l.talhao)}</td><td class="tabela__numero">${fmt(l.area)}</td>
+          <td class="tabela__numero">${dinheiro(l.custo)}</td><td class="tabela__numero">${dinheiro(l.custo / l.area)}</td>
+          <td class="tabela__numero">${textoSacas(emSacas(l.custo, l.area, l.plano.cultura), l.plano.cultura)}</td></tr>`).join('') : vazio(9)}</tbody>
+      </table></div>${paginacao(ls.length)}`;
+  }
+
+  // Exportar XLSX: a guia aberta do detalhamento, com os filtros e a busca, na moeda de exibição
+  function exportar() {
+    const itens = consumo();
+    const m = moeda;
+    const dois = (n) => +n.toFixed(2);
+    const linhas = guiaDetalhe === 'produto'
+      ? [['Grupo de insumo', 'Produto', 'Necessidade de consumo', 'Volume em estoque', 'Volume a ser comprado', 'Unidade', `Custo unitário (${m})`, `Custo total (${m})`],
+        ...ordenadas(doProduto(itens)).map((l) => [l.grupo, l.produto, dois(l.necessidade), dois(l.estoque), dois(l.comprar), l.unidade,
+          l.unitario === null ? '' : dois(exibir(l.unitario)), dois(exibir(l.custo))])]
+      : [['Safra', 'Empresa', 'Fazenda', 'Cultura', 'Talhão', 'Hectares', `Custo total (${m})`, `${m}/ha`, 'Custo em sacas (por ha)'],
+        ...ordenadas(doTalhao(itens)).map((l) => {
+          const s = emSacas(l.custo, l.area, l.plano.cultura);
+          return [`${cicloDe(l.plano)} ${l.plano.safra}`, l.plano.empresa, l.plano.fazenda, l.plano.cultura, l.talhao, l.area,
+            dois(exibir(l.custo)), dois(exibir(l.custo / l.area)), s === null ? '' : +s.toFixed(1)];
+        })];
+    const livro = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(livro, XLSX.utils.aoa_to_sheet(linhas), guiaDetalhe === 'produto' ? 'por_produto' : 'por_talhao');
+    XLSX.writeFile(livro, `orcamento-insumos-${filtros.anoAgricola}-${guiaDetalhe === 'produto' ? 'por-produto' : 'por-talhao'}.xlsx`);
+  }
+
+  // ----- Modal Editar parâmetros: PTAX e estimativa de comercialização por cultura (Aplicar guarda) -----
+  function abrirParametros(aoAplicar) {
+    const rascunho = structuredClone(parametrosDoAno());
+    const modal = Modal.abrir(`
+      <div class="modal__corpo">
+        <button class="modal__fechar" type="button" aria-label="Fechar" data-fechar>${Icones.fechar}</button>
+        <h2 class="modal__titulo" id="modal-titulo">Estimativas de comercialização</h2>
+        <p class="modal__subtitulo">Ano Agrícola ${esc(filtros.anoAgricola)}. Usadas no custo em sacas e na receita estimada.</p>
+        <div data-orc-par></div>
+      </div>
+      <div class="modal__rodape">
+        <button class="botao botao--secundario" type="button" data-fechar>Cancelar</button>
+        <button class="botao botao--primario" type="button" data-acao="orc-aplicar">Aplicar</button>
+      </div>`, { classe: 'modal--formulario modal--largo' });
+    const caixa = modal.elemento.querySelector('[data-orc-par]');
+    const redesenhar = (foco) => {
+      caixa.innerHTML = conteudoParametros(rascunho);
+      if (foco) caixa.querySelector(foco)?.focus();
+    };
+    caixa.addEventListener('change', (e) => {
+      if (e.target.matches('[data-orc-ptax]')) { rascunho.ptax = numero(e.target.value); e.target.value = decimal(rascunho.ptax, 2); return; }
+      const campo = e.target.dataset.orcCampo;
+      if (!campo) return;
+      const l = rascunho.linhas[Number(e.target.dataset.i)];
+      if (campo === 'preco' || campo === 'produtividade') { l[campo] = numero(e.target.value); e.target.value = decimal(l[campo], campo === 'preco' ? 2 : 0); return; }
+      l[campo] = e.target.value;
+      if (campo === 'cultura') redesenhar(`[data-orc-campo="moeda"][data-i="${e.target.dataset.i}"]`); // muda a unidade
+    });
+    caixa.addEventListener('click', (e) => {
+      if (e.target.closest('[data-acao="orc-adicionar"]')) {
+        rascunho.linhas.push({ cultura: '', moeda: 'R$', preco: null, produtividade: null });
+        redesenhar(`[data-orc-campo="cultura"][data-i="${rascunho.linhas.length - 1}"]`);
+        return;
+      }
+      const remover = e.target.closest('[data-orc-remover]');
+      if (remover) { rascunho.linhas.splice(Number(remover.dataset.orcRemover), 1); redesenhar('[data-acao="orc-adicionar"]'); }
+    });
+    modal.elemento.querySelector('[data-acao="orc-aplicar"]').addEventListener('click', () => {
+      rascunho.linhas = rascunho.linhas.filter((l) => l.cultura);
+      parametros[filtros.anoAgricola] = rascunho;
+      modal.fechar();
+      aoAplicar();
+    });
+    redesenhar('#orc-ptax');
+  }
+
+  function conteudoParametros(par) {
+    const livres = Object.keys(DADOS.comercializacao).filter((c) => !par.linhas.some((l) => l.cultura === c));
+    return `
+      <div class="orc-ptax" title="Converte para R$ os valores em US$ (insumos e preço de venda)">
+        <label class="orc-ptax__rotulo" for="orc-ptax">PTAX de referência</label>
+        <span class="orc-valor"><span class="orc-valor__moeda">R$</span>
+          <input class="campo__controle orc-valor__campo" id="orc-ptax" inputmode="decimal" data-orc-ptax value="${decimal(par.ptax, 2)}"></span>
+        <span class="orc-ptax__texto">por US$ 1,00</span>
+      </div>
+      <div class="orc-parametros__topo">
+        <h3 class="orc-parametros__titulo">Por cultura</h3>
+        <button class="botao botao--secundario orc-botao-compacto" type="button" data-acao="orc-adicionar"
+                ${livres.length ? '' : 'disabled title="Todas as culturas já estão na lista"'}>${Icones.mais} Adicionar cultura</button>
+      </div>
+      <table class="tabela orc-culturas">
+        <thead><tr><th>Cultura</th><th>Preço esperado</th><th>Produtividade esperada</th><th class="orc-culturas__acoes"><span class="so-leitor">Ações</span></th></tr></thead>
+        <tbody>${par.linhas.map((l, i) => linhaCultura(l, i, livres)).join('')}</tbody>
+      </table>`;
+  }
+
+  function linhaCultura(l, i, livres) {
+    const u = l.cultura ? unidadeDe(l.cultura) : 'sc';
+    // Cultura adicionada: escolhe na lista (as que ainda não estão); a dos planos é fixa
+    const cultura = l.doPlano ? esc(l.cultura) : `
+      <select class="campo__controle orc-culturas__cultura" data-orc-campo="cultura" data-i="${i}" aria-label="Cultura" required>
+        <option value="">Selecione</option>
+        ${[l.cultura, ...livres].filter(Boolean).map((c) => `<option ${c === l.cultura ? 'selected' : ''}>${esc(c)}</option>`).join('')}
+      </select>`;
+    return `
+      <tr>
+        <td>${cultura}</td>
+        <td><span class="orc-preco">
+          <select class="campo__controle orc-preco__moeda" data-orc-campo="moeda" data-i="${i}" aria-label="Moeda do preço">
+            ${['R$', 'US$'].map((m) => `<option ${m === l.moeda ? 'selected' : ''}>${m}</option>`).join('')}
+          </select>
+          <input class="campo__controle orc-valor__campo" inputmode="decimal" data-orc-campo="preco" data-i="${i}" aria-label="Preço esperado" value="${decimal(l.preco, 2)}">
+          <span class="orc-unidade">/${u}</span></span></td>
+        <td><span class="orc-preco">
+          <input class="campo__controle orc-valor__campo" inputmode="decimal" data-orc-campo="produtividade" data-i="${i}" aria-label="Produtividade esperada" value="${decimal(l.produtividade, 0)}">
+          <span class="orc-unidade">${u}/ha</span></span></td>
+        <td class="orc-culturas__acoes">${l.doPlano ? '' : `<button class="botao-icone" type="button" data-orc-remover="${i}" title="Remover cultura" aria-label="Remover cultura">${Icones.lixeira}</button>`}</td>
+      </tr>`;
+  }
+
+  // ----- Eventos -----
+  function aoMostrar(conteudo) {
+    const caixaFiltros = conteudo.querySelector('[data-orc-filtros]');
+    const estimativas = conteudo.querySelector('[data-orc-estimativas]');
+    const corpo = conteudo.querySelector('[data-orc-corpo]');
+    const atualizarCorpo = () => { estimativas.innerHTML = desenharEstimativas(); corpo.innerHTML = desenharCorpo(); };
+    // foco: seletor do elemento que volta a ter o foco depois de redesenhar
+    const atualizar = (foco) => {
+      pagina = 1;
+      caixaFiltros.innerHTML = desenharFiltros();
+      if (foco) caixaFiltros.querySelector(foco)?.focus();
+      atualizarCorpo();
+    };
+    caixaFiltros.addEventListener('change', (e) => {
+      const select = e.target.closest('[data-filtro]');
+      if (select) { filtros.anoAgricola = select.value; atualizar('[data-filtro="anoAgricola"]'); return; }
+      // Várias escolhas: a lista continua aberta para marcar mais (as opções de baixo dependem das de cima)
+      const todos = e.target.closest('[data-multi-todos]');
+      const item = e.target.closest('[data-multi-item]');
+      if (todos) { filtros[todos.dataset.multiTodos] = []; atualizar(`[data-multi-todos="${todos.dataset.multiTodos}"]`); }
+      if (item) {
+        const nome = item.dataset.multiItem;
+        filtros[nome] = item.checked ? [...filtros[nome], item.value] : filtros[nome].filter((v) => v !== item.value);
+        atualizar(`[data-multi-item="${nome}"][value="${CSS.escape(item.value)}"]`);
+      }
+    });
+    caixaFiltros.addEventListener('click', (e) => {
+      const botao = e.target.closest('[data-multi-botao]');
+      if (botao) {
+        const nome = botao.dataset.multiBotao;
+        multiAberto = multiAberto === nome ? null : nome;
+        caixaFiltros.innerHTML = desenharFiltros();
+        caixaFiltros.querySelector(multiAberto ? `[data-multi="${nome}"] input` : `[data-multi-botao="${nome}"]`)?.focus();
+        return;
+      }
+      if (!e.target.closest('[data-acao="orc-limpar"]')) return;
+      filtros = filtrosIniciais();
+      multiAberto = null;
+      atualizar();
+    });
+    // Fecha a lista ao clicar fora dela ou com Esc
+    const fecharMulti = (focar) => {
+      if (!multiAberto) return;
+      const nome = multiAberto;
+      multiAberto = null;
+      caixaFiltros.innerHTML = desenharFiltros();
+      if (focar) caixaFiltros.querySelector(`[data-multi-botao="${nome}"]`)?.focus();
+    };
+    document.addEventListener('mousedown', function fora(e) {
+      if (!document.body.contains(caixaFiltros)) { document.removeEventListener('mousedown', fora); return; }
+      if (multiAberto && !e.target.closest('.orc-multi')) fecharMulti(false);
+    });
+    caixaFiltros.addEventListener('keydown', (e) => { if (e.key === 'Escape') fecharMulti(true); });
+    conteudo.querySelector('.orc-moeda').addEventListener('click', (e) => {
+      const alfinete = e.target.closest('[data-acao="orc-congelar"]');
+      if (alfinete) {
+        congelado = !congelado;
+        conteudo.querySelector('.orc-fixo').classList.toggle('orc-fixo--solto', !congelado);
+        alfinete.outerHTML = botaoCongelar();
+        conteudo.querySelector('[data-acao="orc-congelar"]').focus();
+        return;
+      }
+      const b = e.target.closest('[data-orc-moeda]');
+      if (!b || b.dataset.orcMoeda === moeda) return;
+      moeda = b.dataset.orcMoeda;
+      conteudo.querySelectorAll('[data-orc-moeda]').forEach((x) => {
+        const ativa = x.dataset.orcMoeda === moeda;
+        x.classList.toggle('orc-moeda__opcao--ativa', ativa);
+        x.setAttribute('aria-pressed', ativa);
+      });
+      atualizarCorpo();
+    });
+    estimativas.addEventListener('click', (e) => {
+      if (e.target.closest('[data-acao="orc-parametros"]')) abrirParametros(atualizarCorpo);
+    });
+    corpo.addEventListener('click', (e) => {
+      const guia = e.target.closest('[data-orc-guia]');
+      if (guia && guia.dataset.orcGuia !== guiaDetalhe) {
+        guiaDetalhe = guia.dataset.orcGuia;
+        busca = '';
+        pagina = 1;
+        atualizarCorpo();
+        corpo.querySelector(`[data-orc-guia="${guiaDetalhe}"]`).focus();
+        return;
+      }
+      if (e.target.closest('[data-acao="orc-exportar"]')) exportar();
+      const seta = e.target.closest('[data-orc-ordenar]');
+      if (seta) {
+        const c = seta.dataset.orcOrdenar;
+        const o = ordem[guiaDetalhe];
+        ordem[guiaDetalhe] = { coluna: c, sentido: o && o.coluna === c && o.sentido === 'asc' ? 'desc' : 'asc' };
+        pagina = 1;
+        redesenharTabela(`[data-orc-ordenar="${c}"]`);
+        return;
+      }
+      const ir = e.target.closest('[data-orc-pagina]');
+      if (ir && !ir.disabled) {
+        pagina = Number(ir.dataset.orcPagina);
+        redesenharTabela(`[aria-label="${ir.getAttribute('aria-label')}"]:not(:disabled)`);
+        corpo.querySelector('[data-orc-tabela-detalhe]').scrollIntoView({ block: 'nearest' });
+      }
+    });
+    const redesenharTabela = (foco) => {
+      corpo.querySelector('[data-orc-tabela-detalhe]').innerHTML = tabelaDetalhe(consumo());
+      if (foco) corpo.querySelector(foco)?.focus();
+    };
+    corpo.addEventListener('change', (e) => {
+      if (!e.target.matches('[data-orc-por-pagina]')) return;
+      porPagina = Number(e.target.value);
+      pagina = 1;
+      redesenharTabela('[data-orc-por-pagina]');
+    });
+    // Busca: redesenha só a tabela, para não perder o foco do campo
+    corpo.addEventListener('input', (e) => {
+      if (!e.target.matches('[data-orc-busca]')) return;
+      busca = e.target.value;
+      pagina = 1;
+      redesenharTabela();
     });
     atualizar();
   }
@@ -11067,9 +12124,10 @@ window.Telas.planoOperacoes = (function () {
     'calendario':     { titulo: 'Calendário Agrícola', menu: 'calendario',
                         desenhar: () => temPlanos() ? Telas.calendarioAgricola.desenhar() : Telas.semPlanos('calendario'),
                         aoMostrar: (conteudo) => { if (temPlanos()) Telas.calendarioAgricola.aoMostrar(conteudo); } },
-    // Suprimentos do menu: vários planos somados (a construir)
-    'suprimentos':    { titulo: 'Suprimentos', menu: 'suprimentos',
-                        desenhar: () => temPlanos() ? Telas.emConstrucao('Suprimentos') : Telas.semPlanos('suprimentos') },
+    // Orçamento de Insumos do menu (antes Suprimentos): vários planos somados, guias Safra e Safrinha
+    'orcamento':      { titulo: 'Orçamento de Insumos', menu: 'orcamento',
+                        desenhar: () => temPlanos() ? Telas.orcamento.desenhar() : Telas.semPlanos('orcamento'),
+                        aoMostrar: (conteudo) => { if (temPlanos()) Telas.orcamento.aoMostrar(conteudo); } },
     'ordens-servico': { titulo: 'Ordens de Serviço', menu: 'ordens-servico',
                         desenhar: () => Telas.emConstrucao('Ordens de Serviço') },
     'cadastros':      { titulo: 'Cadastros', menu: 'cadastros',

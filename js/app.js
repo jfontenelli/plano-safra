@@ -25,9 +25,10 @@
     'calendario':     { titulo: 'Calendário Agrícola', menu: 'calendario',
                         desenhar: () => temPlanos() ? Telas.calendarioAgricola.desenhar() : Telas.semPlanos('calendario'),
                         aoMostrar: (conteudo) => { if (temPlanos()) Telas.calendarioAgricola.aoMostrar(conteudo); } },
-    // Suprimentos do menu: vários planos somados (a construir)
-    'suprimentos':    { titulo: 'Suprimentos', menu: 'suprimentos',
-                        desenhar: () => temPlanos() ? Telas.emConstrucao('Suprimentos') : Telas.semPlanos('suprimentos') },
+    // Orçamento de Insumos do menu (antes Suprimentos): vários planos somados, guias Safra e Safrinha
+    'orcamento':      { titulo: 'Orçamento de Insumos', menu: 'orcamento',
+                        desenhar: () => temPlanos() ? Telas.orcamento.desenhar() : Telas.semPlanos('orcamento'),
+                        aoMostrar: (conteudo) => { if (temPlanos()) Telas.orcamento.aoMostrar(conteudo); } },
     'ordens-servico': { titulo: 'Ordens de Serviço', menu: 'ordens-servico',
                         desenhar: () => Telas.emConstrucao('Ordens de Serviço') },
     'cadastros':      { titulo: 'Cadastros', menu: 'cadastros',

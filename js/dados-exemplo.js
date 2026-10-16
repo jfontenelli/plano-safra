@@ -39,6 +39,15 @@ window.DADOS = {
   // Culturas que aparecem nos planos (os de exemplo têm milho safrinha), para os filtros
   culturasPlanos: ['Soja', 'Milho'],
 
+  // Orçamento de Insumos: PTAX de referência (R$ por US$ 1,00) e a estimativa de comercialização por cultura.
+  // A unidade de venda vem da cultura (soja e milho em saca, algodão em arroba). Valores iniciais de exemplo.
+  ptaxReferencia: 5.2,
+  comercializacao: {
+    'Soja':    { unidade: 'sc', moeda: 'US$', preco: 23, produtividade: 65 },
+    'Milho':   { unidade: 'sc', moeda: 'R$', preco: 55, produtividade: 110 },
+    'Algodão': { unidade: '@' }
+  },
+
   // Talhões por fazenda (área em ha). A tela de Operações mostra todos os talhões da fazenda.
   talhoes: {
     'São José': [
@@ -130,7 +139,9 @@ window.DADOS = {
     'Santa Clara': { origem: [-12.6420, -55.7480], giro: -4, profundidade: 1100, inclinacao: -0.08,
                      linhas: [['T01', 'T02', 'T03', 'T04'], ['T05', 'T06', 'T07', 'T08']] },
     'Boa Vista':   { origem: [-12.4980, -55.6920], giro: 3,  profundidade: 1050, inclinacao: 0.06,
-                     linhas: [['T01', 'T02', 'T03', 'T04', 'T05'], ['T06', 'T07', 'T08', 'T09', 'T10']] }
+                     linhas: [['T01', 'T02', 'T03', 'T04', 'T05'], ['T06', 'T07', 'T08', 'T09', 'T10']] },
+    'Primavera':   { origem: [-12.7150, -55.8120], giro: -6, profundidade: 1150, inclinacao: 0.05,
+                     linhas: [['T01', 'T02', 'T03'], ['T04', 'T05', 'T06']] }
   },
 
   // Cadastro de defensivos (exemplo). Pré-cadastros feitos na tela de Operações entram aqui.
@@ -191,8 +202,98 @@ window.DADOS = {
     // Milho (exemplos para o plano de safrinha; conferir registro e dose na bula)
     { fertilidade: true, classe: 'Nitrogenado', produto: 'Ureia 45%',      principioAtivo: 'Ureia',               garantia: 'N 45%', unidade: 'kg' },
     { classe: 'Herbicida',  produto: 'Primóleo',            principioAtivo: 'Atrazina',                                   unidade: 'L' },
-    { classe: 'Herbicida',  produto: 'Callisto',            principioAtivo: 'Mesotriona',                                 unidade: 'L' }
+    { classe: 'Herbicida',  produto: 'Callisto',            principioAtivo: 'Mesotriona',                                 unidade: 'L' },
+    // Tratamento de semente (on farm), biológicos, adjuvantes e óleos: para o Orçamento ter todos os grupos de insumo.
+    // Doses por hectare (TS: ≈ 60 kg de semente de soja por ha). Exemplos; conferir registro e dose na bula.
+    { classe: 'Tratamento de semente', produto: 'Standak Top',      principioAtivo: 'Fipronil + Piraclostrobina + Tiofanato-metílico', unidade: 'L' },
+    { classe: 'Tratamento de semente', produto: 'Cruiser 350 FS',   principioAtivo: 'Tiametoxam',                     unidade: 'L' },
+    { classe: 'Biológico',  produto: 'Masterfix L Soja',    principioAtivo: 'Bradyrhizobium japonicum (inoculante)',      unidade: 'L' },
+    { classe: 'Biológico',  produto: 'Trichodermil SC',     principioAtivo: 'Trichoderma harzianum',                      unidade: 'L' },
+    { classe: 'Biológico',  produto: 'Dipel WG',            principioAtivo: 'Bacillus thuringiensis',                     unidade: 'kg' },
+    { classe: 'Adjuvante',  produto: 'Agral',               principioAtivo: 'Nonilfenol etoxilado (espalhante adesivo)',  unidade: 'L' },
+    { classe: 'Adjuvante',  produto: 'LI 700',              principioAtivo: 'Lecitina + ácido propiônico (acidificante)', unidade: 'L' },
+    { classe: 'Óleo',       produto: 'Assist',              principioAtivo: 'Óleo mineral',                               unidade: 'L' },
+    { classe: 'Óleo',       produto: 'Áureo',               principioAtivo: 'Óleo vegetal (éster metílico de soja)',      unidade: 'L' }
   ],
+
+  // ----- Orçamento de Insumos -----
+  // Grupos de insumo (filtro Insumos e Custo por tipo de insumo), pela classe do produto. Fertilidade sem classe: Fertilizantes.
+  gruposInsumo: ['Fertilizantes', 'Defensivos', 'Sementes', 'Corretivos', 'Tratamento de semente', 'Adjuvantes', 'Biológicos', 'Óleo'],
+  grupoInsumoPorClasse: {
+    'Corretivo': 'Corretivos', 'Condicionador': 'Corretivos',
+    'Fosfatado': 'Fertilizantes', 'Potássico': 'Fertilizantes', 'Formulado NPK': 'Fertilizantes',
+    'Micronutriente': 'Fertilizantes', 'Nitrogenado': 'Fertilizantes',
+    'Herbicida': 'Defensivos', 'Fungicida': 'Defensivos', 'Inseticida': 'Defensivos',
+    'Tratamento de semente': 'Tratamento de semente', 'Biológico': 'Biológicos', 'Adjuvante': 'Adjuvantes', 'Óleo': 'Óleo'
+  },
+
+  // Valor unitário de cada insumo (base histórica de compras: aqui, estimativas para o médio-norte do MT, safra 26/27,
+  // produto posto na fazenda). [moeda, valor por unidade do cadastro]. Como no cliente: importados em US$ (fertilizantes,
+  // fungicidas, inseticidas), nacionais em R$. Referências consultadas em 16/10/2026 (valores aproximados, a conferir):
+  //  - Fertilizantes CFR Brasil (Itaú BBA, out/26): ureia US$ 470/t, MAP US$ 830/t, KCl US$ 355/t; + frete e margem até o MT
+  //  - Calcário dolomítico R$ 254/t e gesso R$ 273/t em SP (FAESP, mai/26); no MT, perto das jazidas, menos
+  //  - Glifosato: mediana R$ 25,80/L na safra 26/27 (Agrolink); Fox Xpro ≈ R$ 260/L em anúncios
+  //  - Custeio da soja MT 26/27 ≈ R$ 4.320/ha, fertilizantes e corretivos ≈ R$ 2.070/ha (Imea): os planos ficam nessa faixa
+  precosInsumos: {
+    // Corretivos
+    'Calcário dolomítico PRNT 85%': ['R$', 185], 'Calcário calcítico PRNT 85%': ['R$', 195],
+    'Calcário dolomítico filler': ['R$', 240], 'Gesso agrícola': ['R$', 290],
+    // Fertilizantes (US$ por kg)
+    'MAP 11-52-00': ['US$', 0.92], 'Superfosfato simples 18%': ['US$', 0.34], 'Superfosfato triplo 41%': ['US$', 0.74],
+    'KCl 00-00-60': ['US$', 0.43], 'Formulado 02-20-18': ['US$', 0.63], 'Formulado 00-20-20': ['US$', 0.56],
+    'Adubo 00-23-00': ['US$', 0.48], 'Ureia 45%': ['US$', 0.55], 'FTE BR-12': ['R$', 6.8],
+    // Fertilizantes foliares (R$ por L ou kg)
+    'Complex Dualbor': ['R$', 48], 'Midas +63S + 3B': ['R$', 4.2], 'Support': ['R$', 62], 'Borosol K': ['R$', 44],
+    'Vigora': ['R$', 85], 'Compat Copper': ['R$', 70], 'Compat Pro': ['R$', 58], 'Nutre Boro': ['R$', 39], 'Tonus': ['R$', 66],
+    'Nutre Fer': ['R$', 42], 'Nutre Cobre': ['R$', 47], 'Nutre Zinco': ['R$', 41],
+    // Fungicidas (US$)
+    'Fox Xpro': ['US$', 50], 'Fox': ['US$', 34], 'Priori Xtra': ['US$', 38], 'Aproach Prima': ['US$', 35],
+    'Elatus': ['US$', 118], 'Cypress': ['US$', 29], 'Unizeb Gold': ['R$', 36],
+    // Inseticidas (US$)
+    'Engeo Pleno': ['US$', 46], 'Ampligo': ['US$', 68], 'Premio': ['US$', 145], 'Connect': ['US$', 17], 'Orthene 750 BR': ['R$', 92],
+    // Herbicidas (R$; g = por grama)
+    'Roundup Original DI': ['R$', 26], 'Roundup WG': ['R$', 44], 'Zapp QI 620': ['R$', 30], 'Finale': ['R$', 47],
+    'Heat': ['R$', 1.15], 'Dual Gold': ['R$', 72], 'Spider': ['R$', 3.9], 'Select 240 EC': ['R$', 60],
+    'DMA 806 BR': ['R$', 31], 'Primóleo': ['R$', 27], 'Callisto': ['R$', 285],
+    // Tratamento de semente, biológicos, adjuvantes e óleos
+    'Standak Top': ['US$', 92], 'Cruiser 350 FS': ['US$', 68],
+    'Masterfix L Soja': ['R$', 48], 'Trichodermil SC': ['R$', 75], 'Dipel WG': ['R$', 155],
+    'Agral': ['R$', 29], 'LI 700': ['R$', 54], 'Assist': ['R$', 14], 'Áureo': ['R$', 23]
+  },
+
+  // Sementes: embalagem de compra por cultura e valor por embalagem de cada variedade (R$).
+  // Soja em bag de 5 milhões de sementes; milho em saco de 60 mil sementes. Estimativas para 26/27, a conferir:
+  // soja ≈ R$ 450/ha e milho safrinha ≈ R$ 1.300/ha de semente, nas populações dos planos.
+  embalagemSemente: {
+    'Soja': { nome: 'bag', sementes: 5000000, texto: 'bag (5 milhões de sementes)' },
+    'Milho': { nome: 'saco', sementes: 60000, texto: 'saco (60 mil sementes)' }
+  },
+  precosSementes: {
+    'BMX Foco IPRO': 7400, 'NS 7709 IPRO': 7100, 'BMX Olimpo IPRO': 7600, 'TMG 2383 IPRO': 6800,
+    'M 8372 IPRO': 7300, 'TMG 7063 IPRO': 6500,
+    'DKB 360 PRO3': 1180, 'AG 8700 PRO3': 1090, 'P3707VYH': 1240, 'FS 575 PWU': 980
+  },
+
+  // Estoque de cada insumo em cada fazenda, na unidade do cadastro (sementes: na embalagem). A comprar = necessidade
+  // − estoque, fazenda a fazenda (nunca negativo). Exemplo: sobra da safra passada e compras antecipadas.
+  estoqueInsumos: {
+    'Santa Clara': {
+      'Calcário dolomítico PRNT 85%': 900, 'KCl 00-00-60': 60000, 'MAP 11-52-00': 80000, 'Ureia 45%': 40000,
+      'Roundup Original DI': 2400, 'Finale': 800, 'Fox Xpro': 120, 'Engeo Pleno': 150, 'Priori Xtra': 260,
+      'Connect': 400, 'Assist': 300, 'Masterfix L Soja': 250,
+      'BMX Foco IPRO': 4, 'TMG 2383 IPRO': 6, 'DKB 360 PRO3': 120
+    },
+    'Boa Vista': {
+      'Calcário calcítico PRNT 85%': 400, 'Formulado 02-20-18': 150000, 'Zapp QI 620': 1500, 'Roundup WG': 600,
+      'Unizeb Gold': 900, 'Agral': 60, 'Áureo': 200, 'Standak Top': 40,
+      'NS 7709 IPRO': 10, 'AG 8700 PRO3': 200
+    },
+    'Primavera': {
+      'Gesso agrícola': 500, 'Formulado 00-20-20': 90000, 'Roundup Original DI': 1200, 'DMA 806 BR': 300,
+      'Select 240 EC': 150, 'Cypress': 100, 'Borosol K': 300,
+      'BMX Olimpo IPRO': 8
+    }
+  },
 
   // Estádios fenológicos da soja (exemplo; depois virão do menu Cadastros)
   fenologia: ['VE', 'VC', 'V1', 'V2', 'V3', 'V4', 'V5', 'V6', 'R1', 'R2', 'R3', 'R4', 'R5', 'R6', 'R7', 'R8'],
@@ -277,7 +378,8 @@ window.DADOS = {
   planos: [],
 
   // Planos carregados pelo menu Demonstração → "Ver com planos de exemplo".
-  // Só planos publicados: a soja e o milho safrinha da Santa Clara. O plano em construção o usuário cria e monta
+  // Só planos publicados: soja 26/27 da Santa Clara, da Boa Vista e da Primavera; milho safrinha 27/27 da Santa Clara
+  // e da Boa Vista (São José fica sem plano nas duas, Primavera sem safrinha). O plano em construção o usuário cria e monta
   // ele mesmo (Criar Plano Safra). "operacoes" detalha, por nome de operação do modelo: fenologia, produtos [nome, dose],
   // talhões que recebem e ajustes por talhão. Operações não listadas ficam sem recomendação e sem talhões.
   planosExemplo: [
@@ -321,8 +423,10 @@ window.DADOS = {
           '1ª Pós-emergente': op([['Roundup Original DI', 2.0]], 'V2'),
           '2ª Pós-emergente':
             op([['Select 240 EC', 0.45], ['Engeo Pleno', 0.20], ['Unizeb Gold', 1.5]], 'V4'),
-          '1ª Fungicida': op([['Fox Xpro', 0.40], ['Engeo Pleno', 0.20]], 'R1'),
-          '2ª Fungicida': op([['Priori Xtra', 0.30], ['Ampligo', 0.15]], 'R3'),
+          // Tratamento de semente on farm e inoculação (operação extra no grupo Defensivo, no dia do plantio)
+          'Tratamento de sementes': { grupo: 'Defensivo', dap: 0, produtos: [['Standak Top', 0.12], ['Masterfix L Soja', 0.30]], talhoes: todos },
+          '1ª Fungicida': op([['Fox Xpro', 0.40], ['Engeo Pleno', 0.20], ['Áureo', 0.25]], 'R1'),
+          '2ª Fungicida': op([['Priori Xtra', 0.30], ['Ampligo', 0.15], ['Assist', 0.50]], 'R3'),
           '3ª Fungicida': op([['Elatus', 0.20], ['Connect', 1.0]], 'R4'),
           '4ª Fungicida': op([['Cypress', 0.30], ['Premio', 0.05]], 'R5'),
           'Desfolha': op([['Finale', 2.0]], 'R7')
@@ -359,6 +463,117 @@ window.DADOS = {
           'Herbicida pós-emergente': op([['Primóleo', 3.0], ['Callisto', 0.3]]),
           'Inseticida: lagarta-do-cartucho': op([['Premio', 0.10]]),
           'Fungicida': op([['Priori Xtra', 0.30]])
+        };
+      })()
+    },
+    {
+      // Soja 26/27 da Boa Vista (Empresa B): solo mais arenoso, calcário só em metade dos talhões, formulado no plantio
+      safra: '26/27', empresa: 'Empresa B', atividade: 'Agricultura', fazenda: 'Boa Vista', cultura: 'Soja',
+      versoes: { criadaEm: '2026-09-10T09:15', publicadaEm: '2026-09-22T15:30' },
+      custo: null, receita: null,
+      atualizadoEm: '2026-09-22', atualizadoPor: 'Carlos Menezes',
+      operacoes: (function () {
+        const todos = ['T01', 'T02', 'T03', 'T04', 'T05', 'T06', 'T07', 'T08', 'T09', 'T10'];
+        const op = (produtos, fenologia = '') => ({ fenologia, produtos, talhoes: todos });
+        return {
+          'Calagem': { produtos: [['Calcário calcítico PRNT 85%', 1.5]], talhoes: ['T01', 'T02', 'T03', 'T04', 'T05'] },
+          '1ª Adubação potássica': op([['KCl 00-00-60', 150]]),
+          'Adubação de plantio': op([['Formulado 02-20-18', 350]]),
+          '1ª Adubação foliar': op([['Nutre Boro', 1.0], ['Compat Copper', 0.3]], 'V4'),
+          'Plantio': { germinacao: 92, plantio: [
+            { talhao: 'T01', variedade: 'NS 7709 IPRO',    data: '2026-09-20', populacao: 280 },
+            { talhao: 'T02', variedade: 'NS 7709 IPRO',    data: '2026-09-21', populacao: 280 },
+            { talhao: 'T03', variedade: 'BMX Olimpo IPRO', data: '2026-09-26', populacao: 250 },
+            { talhao: 'T04', variedade: 'BMX Olimpo IPRO', data: '2026-09-27', populacao: 250 },
+            { talhao: 'T05', variedade: 'TMG 2383 IPRO',   data: '2026-10-02', populacao: 220 },
+            { talhao: 'T06', variedade: 'TMG 2383 IPRO',   data: '2026-10-03', populacao: 220 },
+            { talhao: 'T07', variedade: 'BMX Foco IPRO',   data: '2026-09-24', populacao: 300 },
+            { talhao: 'T08', variedade: 'M 8372 IPRO',     data: '2026-10-08', populacao: 230 },
+            { talhao: 'T09', variedade: 'M 8372 IPRO',     data: '2026-10-09', populacao: 230 },
+            { talhao: 'T10', variedade: 'BMX Foco IPRO',   data: '2026-09-25', populacao: 300 }
+          ] },
+          'Tratamento de sementes': { grupo: 'Defensivo', dap: 0, produtos: [['Standak Top', 0.12], ['Masterfix L Soja', 0.30], ['Trichodermil SC', 0.50]], talhoes: todos },
+          '1ª Dessecação: pré-plantio': op([['Zapp QI 620', 2.5], ['Heat', 35], ['LI 700', 0.15]]),
+          '2ª Dessecação: pré-plantio': op([['Finale', 2.0]]),
+          'Pré-emergente': op([['Spider', 30]]),
+          '1ª Pós-emergente': op([['Roundup WG', 1.5]], 'V2'),
+          '2ª Pós-emergente': op([['Roundup Original DI', 2.0], ['Engeo Pleno', 0.20]], 'V4'),
+          '1ª Fungicida': op([['Fox Xpro', 0.50], ['Áureo', 0.25]], 'R1'),
+          '2ª Fungicida': op([['Priori Xtra', 0.30], ['Unizeb Gold', 1.5], ['Assist', 0.50]], 'R3'),
+          '3ª Fungicida': op([['Elatus', 0.20], ['Premio', 0.05], ['Áureo', 0.25]], 'R4'),
+          '4ª Fungicida': op([['Cypress', 0.30], ['Unizeb Gold', 1.5]], 'R5'),
+          'Desfolha': op([['Finale', 2.0]], 'R7')
+        };
+      })()
+    },
+    {
+      // Soja 26/27 da Primavera (Empresa C): calagem e gessagem em toda a área, 00-20-20 no plantio
+      safra: '26/27', empresa: 'Empresa C', atividade: 'Agricultura', fazenda: 'Primavera', cultura: 'Soja',
+      versoes: { criadaEm: '2026-09-05T14:00', publicadaEm: '2026-09-19T11:20' },
+      custo: null, receita: null,
+      atualizadoEm: '2026-09-19', atualizadoPor: 'Ana Ribeiro',
+      operacoes: (function () {
+        const todos = ['T01', 'T02', 'T03', 'T04', 'T05', 'T06'];
+        const op = (produtos, fenologia = '') => ({ fenologia, produtos, talhoes: todos });
+        return {
+          'Calagem': op([['Calcário dolomítico PRNT 85%', 2.5]]),
+          'Gessagem': op([['Gesso agrícola', 2.0]]),
+          'Adubação de plantio': op([['Formulado 00-20-20', 400]]),
+          '1ª Adubação foliar': op([['Borosol K', 1.0]], 'V4'),
+          '2ª Adubação foliar': op([['Nutre Zinco', 0.5], ['Nutre Fer', 0.5]], 'R3'),
+          'Plantio': { germinacao: 94, plantio: [
+            { talhao: 'T01', variedade: 'BMX Olimpo IPRO', data: '2026-09-23', populacao: 250 },
+            { talhao: 'T02', variedade: 'BMX Olimpo IPRO', data: '2026-09-24', populacao: 250 },
+            { talhao: 'T03', variedade: 'NS 7709 IPRO',    data: '2026-09-28', populacao: 270 },
+            { talhao: 'T04', variedade: 'TMG 2383 IPRO',   data: '2026-10-04', populacao: 220 },
+            { talhao: 'T05', variedade: 'NS 7709 IPRO',    data: '2026-09-29', populacao: 270 },
+            { talhao: 'T06', variedade: 'M 8372 IPRO',     data: '2026-10-07', populacao: 230 }
+          ] },
+          'Tratamento de sementes': { grupo: 'Defensivo', dap: 0, produtos: [['Standak Top', 0.12], ['Masterfix L Soja', 0.30]], talhoes: todos },
+          '1ª Dessecação: pré-plantio': op([['Roundup Original DI', 3.0], ['DMA 806 BR', 1.0], ['Agral', 0.10]]),
+          '2ª Dessecação: pré-plantio': op([['Finale', 2.0]]),
+          'Pré-emergente': op([['Dual Gold', 1.2]]),
+          '1ª Pós-emergente': op([['Roundup Original DI', 2.0]], 'V2'),
+          '2ª Pós-emergente': op([['Select 240 EC', 0.45], ['Assist', 0.50]], 'V4'),
+          '1ª Fungicida': op([['Aproach Prima', 0.30], ['Assist', 0.50]], 'R1'),
+          '2ª Fungicida': op([['Fox', 0.40], ['Unizeb Gold', 1.5]], 'R3'),
+          '3ª Fungicida': op([['Elatus', 0.20], ['Connect', 1.0]], 'R4'),
+          '4ª Fungicida': op([['Cypress', 0.30], ['Ampligo', 0.15]], 'R5'),
+          'Desfolha': op([['Finale', 2.0]], 'R7')
+        };
+      })()
+    },
+    {
+      // Milho safrinha 27/27 da Boa Vista, depois da soja (plantio de janeiro a fevereiro)
+      safra: '27/27', empresa: 'Empresa B', atividade: 'Agricultura', fazenda: 'Boa Vista', cultura: 'Milho', ciclo: 'Safrinha',
+      modelo: 'Milho',
+      versoes: { criadaEm: '2026-09-29T08:50', publicadaEm: '2026-10-08T10:10' },
+      custo: null, receita: null,
+      atualizadoEm: '2026-10-08', atualizadoPor: 'Carlos Menezes',
+      operacoes: (function () {
+        const todos = ['T01', 'T02', 'T03', 'T04', 'T05', 'T06', 'T07', 'T08', 'T09', 'T10'];
+        const op = (produtos) => ({ produtos, talhoes: todos });
+        return {
+          'Plantio': { germinacao: 95, plantio: [
+            { talhao: 'T01', variedade: 'AG 8700 PRO3', data: '2027-01-08', populacao: 62 },
+            { talhao: 'T02', variedade: 'AG 8700 PRO3', data: '2027-01-09', populacao: 62 },
+            { talhao: 'T07', variedade: 'DKB 360 PRO3', data: '2027-01-12', populacao: 64 },
+            { talhao: 'T10', variedade: 'DKB 360 PRO3', data: '2027-01-13', populacao: 64 },
+            { talhao: 'T03', variedade: 'P3707VYH',     data: '2027-01-18', populacao: 66 },
+            { talhao: 'T04', variedade: 'P3707VYH',     data: '2027-01-19', populacao: 66 },
+            { talhao: 'T05', variedade: 'AG 8700 PRO3', data: '2027-01-25', populacao: 62 },
+            { talhao: 'T06', variedade: 'AG 8700 PRO3', data: '2027-01-26', populacao: 62 },
+            { talhao: 'T08', variedade: 'FS 575 PWU',   data: '2027-02-03', populacao: 60 },
+            { talhao: 'T09', variedade: 'FS 575 PWU',   data: '2027-02-05', populacao: 60 }
+          ] },
+          'Adubação de plantio': op([['Formulado 02-20-18', 250]]),
+          'Adubação potássica': op([['KCl 00-00-60', 70]]),
+          'Cobertura nitrogenada': op([['Ureia 45%', 180]]),
+          '1ª Inseticida: cigarrinha': op([['Engeo Pleno', 0.25], ['Agral', 0.05]]),
+          '2ª Inseticida: cigarrinha': op([['Connect', 1.0]]),
+          'Herbicida pós-emergente': op([['Primóleo', 3.0], ['Callisto', 0.3], ['Assist', 0.50]]),
+          'Inseticida: lagarta-do-cartucho': op([['Dipel WG', 0.50], ['Premio', 0.10]]),
+          'Fungicida': op([['Priori Xtra', 0.30], ['Áureo', 0.25]])
         };
       })()
     }

@@ -1,5 +1,5 @@
 /*
- * Planejamento, Calendário Agrícola e Suprimentos sem nenhum plano cadastrado (docs/DECISOES.md, 4.0):
+ * Planejamento, Calendário Agrícola e Orçamento sem nenhum plano cadastrado (docs/DECISOES.md, 4.0):
  * convite para criar o primeiro plano.
  */
 window.Telas = window.Telas || {};
@@ -10,7 +10,7 @@ window.Telas.semPlanos = function (item) {
   const ITENS = {
     planejamento: { titulo: 'Planejamento', alvo: 'o planejamento', texto: TEXTO_PLANO, icone: Icones.lista },
     calendario:   { titulo: 'Calendário Agrícola', alvo: 'o Calendário Agrícola', texto: TEXTO_PLANO, icone: Icones.calendario },
-    suprimentos:  { titulo: 'Suprimentos', alvo: 'os Suprimentos',
+    orcamento:    { titulo: 'Orçamento de Insumos', alvo: 'o Orçamento de Insumos',
                     icone: '<svg viewBox="0 0 24 24"><path d="M21 8 12 3 3 8v8l9 5 9-5Z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg>',
                     texto: 'O plano organiza a necessidade de insumos por safra, empresa, fazenda e cultura. Depois de criado, ele abre aqui automaticamente.' }
   };

@@ -1,6 +1,8 @@
 # Orçamento de Insumos (antes "Suprimentos") — rascunho para retomar
 
-Situação em 15/10/2026: **decisões fechadas, implementação pausada**. Nada disto está no protótipo ainda (o menu continua "Suprimentos", com a página provisória). `docs/telas/06-suprimentos.md` descreve a versão antiga (uma fazenda, dentro do plano) e precisa ser reescrito quando retomarmos.
+**Atualização em 16/10/2026: construído** (`js/telas/orcamento.js`; doc atual em `docs/telas/06-orcamento.md`, que vale sobre este rascunho). Na construção, algumas decisões de 15/10 mudaram: saíram as guias Safra/Safrinha (voltou o filtro Safra), entraram a moeda de exibição R$/US$, os 4 cards da referência (Custo em sacas só com uma cultura) e a receita estimada num card só, e os grupos de insumo da referência. Este rascunho fica como histórico.
+
+Situação em 15/10/2026: decisões fechadas, implementação pausada.
 
 ## O que tem nesta pasta
 

@@ -89,8 +89,16 @@ window.Planos = (function () {
 
   // Modelo preenchido com o detalhe dos planos de exemplo (ver dados-exemplo.js).
   // Os produtos de cada operação viram a Receita 1, aplicada nos talhões listados.
+  // Operação do exemplo que o modelo não tem (com "grupo", o nome do grupo): entra no grupo, na ordem do DAP.
   function montarExemplo(detalhes, modelo) {
     const grupos = gruposModelo(modelo);
+    Object.entries(detalhes).forEach(([nome, d]) => {
+      const g = d.grupo && grupos.find((x) => x.nome === d.grupo);
+      if (!g || g.operacoes.some((op) => op.nome === nome)) return;
+      const op = { ...novaOperacao(nome, d.dap ?? null, d.prazo ?? null), fenologia: '' };
+      const i = g.operacoes.findIndex((o) => o.dap !== null && o.dap > (d.dap ?? 0));
+      g.operacoes.splice(i < 0 ? g.operacoes.length : i, 0, op);
+    });
     grupos.forEach((g) => g.operacoes.forEach((op) => {
       const d = detalhes[op.nome];
       if (!d) return;
