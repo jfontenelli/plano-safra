@@ -1,7 +1,8 @@
 /*
  * Calendário Agrícola do menu (DECISOES 4.0): vários planos somados, no ano agrícola escolhido (safras e safrinhas).
- * Uma linha por plano (empresa · fazenda · cultura · safra/safrinha), agrupada por empresa, com uma barra do ciclo
- * da cultura na linha do tempo do ano agrícola (setembro a agosto): do primeiro plantio à última colheita prevista.
+ * Empresa › Fazenda › Safra/Safrinha (empresa e fazenda se recolhem pela seta); cada operação é uma barra transparente,
+ * do primeiro ao último talhão, numa faixa por grupo de operação. A linha da fazenda junta a safra e a safrinha.
+ * Filtro Período: Ano, Semestre, Trimestre ou Mês, com setas para andar no tempo.
  * Usa a última versão publicada de cada plano (DECISOES 4.0).
  */
 window.Telas = window.Telas || {};
@@ -9,10 +10,22 @@ window.Telas = window.Telas || {};
 window.Telas.calendarioAgricola = (function () {
   const esc = Util.escapar;
   const NOMES_MESES = ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'];
-  // Cor de cada cultura na linha do tempo (outras: cinza)
-  const COR = { Soja: '#1E7A4C', Milho: '#D9A21B', 'Algodão': '#3F6FB0' };
+  const MESES_LONGO = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+  // Cor de cada grupo de operação, pelo tipo (as mesmas do Calendário do plano); uma faixa por grupo, nesta ordem
+  const COR_GRUPO = { Sementes: '#1f9d55', Fertilidade: '#8e44ad', Defensivos: '#e8772e', Colheita: '#d4a017' };
+  const ORDEM_GRUPO = ['Sementes', 'Fertilidade', 'Defensivos', 'Colheita'];
+  const PERIODOS = [['ano', 'Ano', 0], ['semestre', 'Semestre', 6], ['trimestre', 'Trimestre', 3], ['mes', 'Mês', 1]];
+  const rgba = (hex, a) => `rgba(${parseInt(hex.slice(1, 3), 16)}, ${parseInt(hex.slice(3, 5), 16)}, ${parseInt(hex.slice(5, 7), 16)}, ${a})`;
 
   let filtros = {};
+  // Período (ano, semestre, trimestre, mês), o mês em que ele começa (ano × 12 + mês; null = o padrão), as empresas
+  // recolhidas ('e:Empresa A') e as fazendas abertas ('f:Empresa A|Santa Clara'). Abre com as empresas abertas e as
+  // fazendas fechadas (safra e safrinha aparecem ao abrir a fazenda). Tudo se mantém ao navegar.
+  let periodo = 'ano';
+  let inicioPeriodo = null;
+  const recolhidos = new Set();
+  const fazendasAbertas = new Set();
+
   // Safra/Safrinha do plano: ainda não é escolhida ao criar o plano (DECISOES 4.2: a detalhar); por enquanto, Safra
   const cicloDe = (p) => p.ciclo || 'Safra';
   const valorDe = (p, campo) => (campo === 'anoAgricola' ? String(Util.anoAgricola(p.safra)) : p[campo]);
@@ -22,45 +35,84 @@ window.Telas.calendarioAgricola = (function () {
   }
   // Ano Agrícola: junta as safras e safrinhas do ano; começa no de hoje, ou no mais recente com planos
   const filtrosIniciais = () => ({ anoAgricola: Util.anoAgricolaInicial(Util.anosAgricolas(DADOS.planos)), empresa: '', fazenda: '', cultura: '' });
+  const planosFiltrados = () => DADOS.planos.filter((p) => ['anoAgricola', 'empresa', 'fazenda', 'cultura'].every((c) => !filtros[c] || valorDe(p, c) === filtros[c]));
 
   // ----- Datas -----
   const dataDe = (iso) => { const [a, m, d] = iso.split('-').map(Number); return new Date(a, m - 1, d); };
   const somaDias = (iso, n) => { const d = dataDe(iso); d.setDate(d.getDate() + n); return d; };
   const ddmm = (d) => `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`;
-  // Ano agrícola 2026: como a safra, de 1º de setembro de 2026 a 31 de agosto de 2027; se alguma colheita passar
-  // de agosto, a linha do tempo vai até o fim do mês dessa colheita
-  function janela(anoAgricola, ultimaData) {
-    const ano = Number(anoAgricola);
-    const ini = new Date(ano, 8, 1);
-    let fim = new Date(ano + 1, 8, 1);
-    if (ultimaData && ultimaData >= fim) fim = new Date(ultimaData.getFullYear(), ultimaData.getMonth() + 1, 1);
-    const meses = [];
-    for (let d = new Date(ini); d < fim; d.setMonth(d.getMonth() + 1)) meses.push(NOMES_MESES[d.getMonth()]);
-    return { ini, fim, meses };
-  }
   const pct = (d, { ini, fim }) => Math.min(100, Math.max(0, (d - ini) / (fim - ini) * 100));
+  const mesIndice = (d) => d.getFullYear() * 12 + d.getMonth();
+  const dataDoMes = (mi) => new Date(Math.floor(mi / 12), mi % 12, 1);
+  const mesCurto = (mi) => `${NOMES_MESES[mi % 12].toLowerCase()}/${Math.floor(mi / 12)}`;
 
-  // Ciclo da cultura no plano (última versão publicada): primeiro plantio e última colheita prevista
-  // (plantio + ciclo da variedade), nos talhões incluídos com data de plantio
-  function cicloDoPlano(p) {
+  // Operações do plano (última versão publicada), uma por operação: começa no primeiro talhão (data de plantio + DAP;
+  // Plantio: a data de plantio; Colheita: plantio + ciclo da variedade) e vai até o fim da previsão de conclusão
+  // no último talhão. Entram os talhões incluídos com data de plantio e com a operação planejada.
+  function operacoesDoPlano(p) {
     const v = Versoes.ultimaPublicada(p);
-    if (!v) return { versao: null };
+    if (!v) return [];
     const grupos = Versoes.grupos(p, v);
-    const talhoes = Util.talhoesPlano(p, v).map((t) => t.nome);
-    const op = (grupos.find((g) => g.tipo === 'Sementes') || { operacoes: [] }).operacoes[0];
-    const pl = (op && op.plantio) || {};
-    const plantios = []; const colheitas = [];
-    talhoes.forEach((t) => {
-      const x = pl[t];
-      if (!x || !x.data) return;
-      plantios.push(dataDe(x.data));
-      const variedade = DADOS.variedades.find((vv) => vv.nome === x.variedade);
-      if (variedade && variedade.ciclo) colheitas.push(somaDias(x.data, variedade.ciclo));
+    const talhoes = Util.talhoesPlano(p, v);
+    const pl = ((grupos.find((g) => g.tipo === 'Sementes') || { operacoes: [] }).operacoes[0] || {}).plantio || {};
+    const lista = [];
+    grupos.forEach((g) => g.operacoes.forEach((op) => {
+      let ini = null; let fim = null; let area = 0;
+      talhoes.forEach((t) => {
+        const x = pl[t.nome];
+        if (!x || !x.data) return;
+        let dap = op.dap;
+        if (g.tipo === 'Colheita') { const va = DADOS.variedades.find((vv) => vv.nome === x.variedade); dap = va && va.ciclo; }
+        else if (g.tipo !== 'Sementes') {
+          const ajuste = op.talhoes && op.talhoes[t.nome];
+          if (!ajuste || !Planos.linhasTalhao(op, ajuste).length) return;
+        }
+        if (dap === null || dap === undefined) return;
+        const prazo = op.prazo || (g.tipo === 'Colheita' ? 10 : g.tipo === 'Sementes' ? 3 : 2);
+        const a = somaDias(x.data, dap); const b = somaDias(x.data, dap + prazo - 1);
+        if (!ini || a < ini) ini = a;
+        if (!fim || b > fim) fim = b;
+        area += t.area;
+      });
+      if (ini) lista.push({ nome: op.nome, grupo: g.nome, tipo: g.tipo, cultura: p.cultura, ini, fim, area });
+    }));
+    return lista.sort((a, b) => a.ini - b.ini);
+  }
+
+  // Janela do período. Ano: do mês da primeira operação ao da última. Semestre e trimestre começam em setembro do
+  // ano agrícola; mês, no de hoje (se estiver no intervalo; senão, setembro). As setas andam um período por vez.
+  function janelaPeriodo(primeiro, ultimo) {
+    const tam = periodo === 'ano' ? ultimo - primeiro + 1 : PERIODOS.find(([id]) => id === periodo)[2];
+    const hoje = mesIndice(new Date());
+    const padrao = periodo === 'ano' ? primeiro
+      : periodo === 'mes' && hoje >= primeiro && hoje <= ultimo ? hoje : Number(filtros.anoAgricola) * 12 + 8;
+    const ini = periodo === 'ano' ? primeiro : (inicioPeriodo ?? padrao);
+    return { iniMi: ini, tam, ini: dataDoMes(ini), fim: dataDoMes(ini + tam), primeiro, ultimo };
+  }
+  const janelaDe = (todas) => janelaPeriodo(mesIndice(new Date(Math.min(...todas.map((o) => o.ini)))),
+    mesIndice(new Date(Math.max(...todas.map((o) => o.fim)))));
+
+  // Barras de uma lista de operações: uma faixa por grupo (na ordem da legenda), transparentes (sobreposição mais forte)
+  function barras(lista, j) {
+    return lista.filter((o) => o.fim >= j.ini && o.ini < j.fim).map((o) => {
+      const fimMais = new Date(o.fim); fimMais.setDate(fimMais.getDate() + 1);
+      const esq = pct(o.ini, j); const dir = pct(fimMais, j);
+      const faixa = Math.max(0, ORDEM_GRUPO.indexOf(o.tipo));
+      const dica = `${o.nome} · ${o.grupo} · ${o.cultura} · ${ddmm(o.ini)} a ${ddmm(o.fim)}${o.area ? ` · ${Util.area(o.area)}` : ''}`;
+      return `<span class="cag__faixa" style="left: ${esq.toFixed(2)}%; width: ${Math.max(0.4, dir - esq).toFixed(2)}%; top: ${6 + faixa * 10}px; background: ${rgba(COR_GRUPO[o.tipo] || '#7B8A82', 0.4)}"
+                   title="${esc(dica)}" role="img" aria-label="${esc(dica)}"></span>`;
+    }).join('');
+  }
+  // Junta as operações de vários planos (a linha da fazenda): a mesma operação da mesma cultura vai do primeiro ao último dia
+  function juntar(listas) {
+    const mapa = new Map();
+    listas.flat().forEach((o) => {
+      const k = `${o.tipo}|${o.nome}|${o.cultura}`;
+      const x = mapa.get(k);
+      if (!x) mapa.set(k, { ...o });
+      else { if (o.ini < x.ini) x.ini = o.ini; if (o.fim > x.fim) x.fim = o.fim; x.area = null; }
     });
-    if (!plantios.length) return { versao: v };
-    const min = (xs) => new Date(Math.min(...xs)); const max = (xs) => new Date(Math.max(...xs));
-    return { versao: v, plantioIni: min(plantios), plantioFim: max(plantios),
-      colheitaIni: colheitas.length ? min(colheitas) : null, colheitaFim: colheitas.length ? max(colheitas) : null };
+    return [...mapa.values()];
   }
 
   // ----- Desenho -----
@@ -70,7 +122,7 @@ window.Telas.calendarioAgricola = (function () {
       <header class="cabecalho">
         <div>
           <h1 class="cabecalho__titulo">Calendário Agrícola</h1>
-          <p class="cabecalho__subtitulo">O ciclo de cada cultura, do plantio à colheita, em todas as empresas e fazendas do ano agrícola.</p>
+          <p class="cabecalho__subtitulo">As operações de cada fazenda, por safra e safrinha, na cor do grupo de operação, em todas as empresas do ano agrícola.</p>
         </div>
         <span class="cag-etiqueta" title="Mostra a última versão publicada de cada plano. Alterações em versões em construção aparecem aqui depois de publicadas.">${Icones.info} Últimas versões publicadas</span>
       </header>
@@ -80,9 +132,15 @@ window.Telas.calendarioAgricola = (function () {
           ${filtro('empresa', 'Empresa', presentes('empresa', DADOS.empresas))}
           ${filtro('fazenda', 'Fazenda', presentes('fazenda', DADOS.fazendas))}
           ${filtro('cultura', 'Cultura', presentes('cultura', DADOS.culturasPlanos))}
+          <div class="campo">
+            <label class="campo__rotulo" for="cag-periodo">Período</label>
+            <select class="campo__controle" id="cag-periodo" data-cag-periodo>
+              ${PERIODOS.map(([id, nome]) => `<option value="${id}" ${id === periodo ? 'selected' : ''}>${nome}</option>`).join('')}
+            </select>
+          </div>
           <button class="link-acao filtros__limpar" type="button" data-acao="cag-limpar">${Icones.limpar} Limpar filtros</button>
         </section>
-        <section class="cag" aria-label="Linha do tempo do ano agrícola" data-cag></section>
+        <section class="cag" aria-label="Operações do ano agrícola" data-cag></section>
       </div>`;
   }
 
@@ -99,76 +157,123 @@ window.Telas.calendarioAgricola = (function () {
   }
 
   function linhaDoTempo() {
-    const planos = DADOS.planos.filter((p) => ['anoAgricola', 'empresa', 'fazenda', 'cultura'].every((c) => !filtros[c] || valorDe(p, c) === filtros[c]));
+    const planos = planosFiltrados();
     if (!planos.length) return '<p class="cag__vazio">Nenhum plano com esses filtros.</p>';
-    const fins = planos.map((p) => { const c = cicloDoPlano(p); return c.colheitaFim || c.plantioFim; }).filter(Boolean);
-    const j = janela(filtros.anoAgricola, fins.length ? new Date(Math.max(...fins)) : null);
-    const grade = `grid-template-columns: repeat(${j.meses.length}, minmax(0, 1fr))`;
-    const fundo = `background-size: calc(100% / ${j.meses.length}) 100%`;
+    const ops = new Map(planos.map((p) => [p, operacoesDoPlano(p)]));
+    const todas = [...ops.values()].flat();
+    if (!todas.length) return '<p class="cag__vazio">Nenhuma operação com data nos planos publicados com esses filtros.</p>';
+    const j = janelaDe(todas);
+    // Colunas: os meses; no período Mês, os dias
+    const colunas = periodo === 'mes'
+      ? Array.from({ length: Math.round((j.fim - j.ini) / 86400000) }, (_, i) => String(i + 1))
+      : Array.from({ length: j.tam }, (_, i) => NOMES_MESES[(j.iniMi + i) % 12]);
+    const grade = `grid-template-columns: repeat(${colunas.length}, minmax(0, 1fr))`;
+    const fundo = `background-size: calc(100% / ${colunas.length}) 100%`;
     const hoje = new Date();
-    const hojeNaSafra = hoje >= j.ini && hoje < j.fim;
-    const marcaHoje = hojeNaSafra ? `<span class="cag__hoje" style="left: ${pct(hoje, j).toFixed(2)}%" aria-hidden="true"></span>` : '';
-    // Agrupado por empresa (na ordem do cadastro); dentro, por fazenda, a safra antes da safrinha, e por cultura
-    const empresas = DADOS.empresas.filter((e) => planos.some((p) => p.empresa === e));
-    const culturas = [...new Set(planos.map((p) => p.cultura))];
+    const marcaHoje = hoje >= j.ini && hoje < j.fim ? `<span class="cag__hoje" style="left: ${pct(hoje, j).toFixed(2)}%" aria-hidden="true"></span>` : '';
+    const rotulo = periodo === 'ano' ? `Ano agrícola ${esc(filtros.anoAgricola)}`
+      : periodo === 'mes' ? `${MESES_LONGO[j.iniMi % 12]} de ${Math.floor(j.iniMi / 12)}` : `${mesCurto(j.iniMi)} – ${mesCurto(j.iniMi + j.tam - 1)}`;
+    const navegavel = periodo !== 'ano';
+    const grupos = ORDEM_GRUPO.map((tipo) => todas.find((o) => o.tipo === tipo)).filter(Boolean);
+    const seta = (aberto) => `<span class="cag__seta ${aberto ? '' : 'cag__seta--fechada'}" aria-hidden="true">${Icones.abaixo}</span>`;
+    const areaDe = (lista) => lista.reduce((s, p) => s + (Util.areaCultivo(p, Versoes.ultimaPublicada(p)) || 0), 0);
+
+    // Agrupado por empresa (na ordem do cadastro); dentro, por fazenda, e a safra antes da safrinha
+    const linhas = [];
+    DADOS.empresas.filter((e) => planos.some((p) => p.empresa === e)).forEach((e) => {
+      const daEmpresa = planos.filter((p) => p.empresa === e);
+      const ce = `e:${e}`; const abertaE = !recolhidos.has(ce);
+      linhas.push(`
+        <div class="cag__linha cag__linha--empresa" role="row">
+          <span role="cell"><button class="cag__abrir" type="button" data-cag-recolher="${esc(ce)}" aria-expanded="${abertaE}">${seta(abertaE)}<strong>${esc(e)}</strong></button></span>
+          <span role="cell"></span><span role="cell" class="cag__num"><strong>${Util.area(areaDe(daEmpresa))}</strong></span>
+          <span role="cell" class="cag__tempo cag__tempo--vazio" style="${fundo}">${marcaHoje}</span>
+        </div>`);
+      if (!abertaE) return;
+      [...new Set(daEmpresa.map((p) => p.fazenda))].sort((a, b) => a.localeCompare(b, 'pt-BR')).forEach((f) => {
+        const daFazenda = daEmpresa.filter((p) => p.fazenda === f)
+          .sort((a, b) => (cicloDe(a) === 'Safrinha') - (cicloDe(b) === 'Safrinha') || a.cultura.localeCompare(b.cultura));
+        const cf = `f:${e}|${f}`; const abertaF = fazendasAbertas.has(cf);
+        // Área da fazenda: a dos talhões (uma vez só), a maior entre a safra e a safrinha
+        const areaF = Math.max(...daFazenda.map((p) => Util.areaCultivo(p, Versoes.ultimaPublicada(p)) || 0));
+        linhas.push(`
+          <div class="cag__linha cag__linha--fazenda" role="row">
+            <span role="cell"><button class="cag__abrir" type="button" data-cag-recolher="${esc(cf)}" aria-expanded="${abertaF}">${seta(abertaF)}<strong>${esc(f)}</strong></button></span>
+            <span role="cell">${[...new Set(daFazenda.map((p) => p.cultura))].map(esc).join(' → ')}</span>
+            <span role="cell" class="cag__num"><strong>${Util.area(areaF)}</strong></span>
+            <span role="cell" class="cag__tempo cag__tempo--faixas" style="${fundo}">${barras(juntar(daFazenda.map((p) => ops.get(p))), j)}${marcaHoje}</span>
+          </div>`);
+        if (!abertaF) return;
+        daFazenda.forEach((p) => {
+          const v = Versoes.ultimaPublicada(p);
+          const area = Util.areaCultivo(p, v);
+          const lista = ops.get(p);
+          linhas.push(`
+            <div class="cag__linha cag__linha--safra" role="row">
+              <span role="cell">${esc(cicloDe(p))} ${esc(p.safra)}</span>
+              <span role="cell">${esc(p.cultura)}</span>
+              <span role="cell" class="cag__num">${area ? Util.area(area) : '<span class="cag__pendente">Pendente</span>'}</span>
+              <span role="cell" class="cag__tempo cag__tempo--faixas" style="${fundo}">${lista.length ? barras(lista, j)
+                : `<span class="cag__sem">${v ? 'Nenhuma operação com data na versão publicada' : 'Plano ainda sem versão publicada'}</span>`}${marcaHoje}</span>
+            </div>`);
+        });
+      });
+    });
+
     return `
-      <div class="cag__legenda">
-        ${culturas.map((c) => `<span><span class="cag__cor" style="background: ${COR[c] || '#7B8A82'}" aria-hidden="true"></span>${esc(c)}</span>`).join('')}
-        ${hojeNaSafra ? '<span><span class="cag__cor cag__cor--hoje" aria-hidden="true"></span>Hoje</span>' : ''}
-      </div>
-      <div class="cag__rolagem">
-        <div class="cag__tabela" role="table" aria-label="Ciclo das culturas por empresa e fazenda">
-          <div class="cag__linha cag__linha--cab" role="row">
-            <span role="columnheader">Fazenda</span><span role="columnheader">Cultura · safra</span>
-            <span role="columnheader" class="cag__num">Área</span>
-            <span role="columnheader" class="cag__meses" style="${grade}">${j.meses.map((m) => `<span>${m}</span>`).join('')}</span>
-          </div>
-          ${empresas.map((e) => {
-            const doGrupo = planos.filter((p) => p.empresa === e)
-              .sort((a, b) => a.fazenda.localeCompare(b.fazenda) || (cicloDe(a) === 'Safrinha') - (cicloDe(b) === 'Safrinha') || a.cultura.localeCompare(b.cultura));
-            const ciclos = doGrupo.map((p) => ({ p, c: cicloDoPlano(p) }));
-            const area = ciclos.reduce((s, { p, c }) => s + (Util.areaCultivo(p, c.versao) || 0), 0);
-            const fazendas = new Set(doGrupo.map((p) => p.fazenda)).size;
-            return `
-              <div class="cag__empresa" role="row"><strong role="cell">${esc(e)}</strong>
-                <span role="cell">${fazendas} ${fazendas === 1 ? 'fazenda' : 'fazendas'} · ${Util.area(area)}</span></div>
-              ${ciclos.map(({ p, c }) => linha(p, c, j, marcaHoje, fundo)).join('')}`;
-          }).join('')}
+      <div class="cag__barra-topo">
+        <div class="cag__legenda">
+          ${grupos.map((o) => `<span><span class="cag__cor" style="background: ${rgba(COR_GRUPO[o.tipo], 0.55)}" aria-hidden="true"></span>${esc(o.grupo)}</span>`).join('')}
+          ${marcaHoje ? '<span><span class="cag__cor cag__cor--hoje" aria-hidden="true"></span>Hoje</span>' : ''}
+        </div>
+        <div class="cag__navegar">
+          ${navegavel ? `<button class="botao-icone" type="button" data-cag-mover="-1" aria-label="Período anterior" ${j.iniMi <= j.primeiro ? 'disabled' : ''}>${Icones.anterior}</button>` : ''}
+          <strong>${rotulo}</strong>
+          ${navegavel ? `<button class="botao-icone" type="button" data-cag-mover="1" aria-label="Próximo período" ${j.iniMi + j.tam > j.ultimo ? 'disabled' : ''}>${Icones.proxima}</button>` : ''}
         </div>
       </div>
-      <p class="cag__nota">Cada barra é o ciclo da cultura: do primeiro plantio à última colheita prevista (plantio + ciclo da variedade). Passe o mouse para ver as datas.</p>`;
-  }
-
-  function linha(p, c, j, marcaHoje, fundo) {
-    const area = Util.areaCultivo(p, c.versao);
-    let barra;
-    if (!c.plantioIni) {
-      barra = `<span class="cag__sem">${c.versao && !Versoes.aIniciar(p) ? 'Plantio ainda não definido na versão publicada' : 'Plano ainda sem versão publicada com operações'}</span>`;
-    } else {
-      const fim = c.colheitaFim || c.plantioFim;
-      const esq = pct(c.plantioIni, j); const dir = pct(fim, j);
-      const dica = `${p.cultura} · ${cicloDe(p)}: plantio de ${ddmm(c.plantioIni)} a ${ddmm(c.plantioFim)}`
-        + (c.colheitaIni ? ` · colheita prevista de ${ddmm(c.colheitaIni)} a ${ddmm(c.colheitaFim)}` : ' · colheita sem previsão (variedade sem ciclo)')
-        + (area ? ` · ${Util.area(area)}` : '');
-      barra = `<span class="cag__barra" style="left: ${esq.toFixed(2)}%; width: ${Math.max(0.6, dir - esq).toFixed(2)}%; background: ${COR[p.cultura] || '#7B8A82'}"
-                     title="${esc(dica)}" role="img" aria-label="${esc(dica)}"></span>`;
-    }
-    return `
-      <div class="cag__linha" role="row">
-        <span role="cell"><strong>${esc(p.fazenda)}</strong><small>${c.versao ? `versão ${esc(c.versao.num)} publicada` : 'sem versão publicada'}</small></span>
-        <span role="cell">${esc(p.cultura)}<small class="cag__ciclo cag__ciclo--${cicloDe(p) === 'Safrinha' ? 'safrinha' : 'safra'}">${esc(cicloDe(p))}</small></span>
-        <span role="cell" class="cag__num">${area ? Util.area(area) : '<span class="cag__pendente">Pendente</span>'}</span>
-        <span role="cell" class="cag__tempo" style="${fundo}">${barra}${marcaHoje}</span>
+      <div class="cag__rolagem">
+        <div class="cag__tabela" role="table" aria-label="Operações por empresa, fazenda e safra">
+          <div class="cag__linha cag__linha--cab" role="row">
+            <span role="columnheader">Fazenda / Safra</span><span role="columnheader">Cultura</span>
+            <span role="columnheader" class="cag__num">Área</span>
+            <span role="columnheader" class="cag__meses ${periodo === 'mes' ? 'cag__meses--dias' : ''}" style="${grade}">${colunas.map((m) => `<span>${m}</span>`).join('')}</span>
+          </div>
+          ${linhas.join('')}
+        </div>
       </div>`;
   }
 
   function aoMostrar(conteudo) {
-    const atualizar = () => { conteudo.querySelector('[data-cag]').innerHTML = linhaDoTempo(); };
+    const caixa = conteudo.querySelector('[data-cag]');
+    const atualizar = () => { caixa.innerHTML = linhaDoTempo(); };
+    conteudo.querySelector('[data-cag-periodo]').addEventListener('change', (e) => { periodo = e.target.value; inicioPeriodo = null; atualizar(); });
+    // Recolher/abrir empresa e fazenda; setas do período
+    caixa.addEventListener('click', (e) => {
+      const r = e.target.closest('[data-cag-recolher]');
+      if (r) {
+        const k = r.dataset.cagRecolher;
+        const conjunto = k.startsWith('f:') ? fazendasAbertas : recolhidos;
+        if (conjunto.has(k)) conjunto.delete(k); else conjunto.add(k);
+        atualizar();
+        caixa.querySelector(`[data-cag-recolher="${CSS.escape(k)}"]`)?.focus();
+        return;
+      }
+      const m = e.target.closest('[data-cag-mover]');
+      if (m && !m.disabled) {
+        const atual = janelaDe(planosFiltrados().flatMap((p) => operacoesDoPlano(p)));
+        inicioPeriodo = atual.iniMi + Number(m.dataset.cagMover) * atual.tam;
+        atualizar();
+        caixa.querySelector(`[data-cag-mover="${m.dataset.cagMover}"]:not(:disabled)`)?.focus();
+      }
+    });
     conteudo.querySelectorAll('[data-filtro]').forEach((select) => {
       select.addEventListener('change', () => { filtros[select.dataset.filtro] = select.value; atualizar(); });
     });
     conteudo.querySelector('[data-acao="cag-limpar"]').addEventListener('click', () => {
       filtros = filtrosIniciais();
+      periodo = 'ano'; inicioPeriodo = null;
+      conteudo.querySelector('[data-cag-periodo]').value = periodo;
       conteudo.querySelectorAll('[data-filtro]').forEach((select) => { select.value = filtros[select.dataset.filtro]; });
       atualizar();
     });
