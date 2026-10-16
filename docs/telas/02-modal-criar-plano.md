@@ -13,7 +13,7 @@ Identificar os novos planos: informações gerais (safra, empresa, atividade, cu
 - **Informações gerais**, lado a lado, todas obrigatórias: Safra, Empresa, Atividade, Cultura.
   - Na lista de Safra, a última opção é "+ Criar nova safra".
   - Atividade: Agricultura (já escolhida), Pecuária (Em breve), Silvicultura (Em breve).
-  - Cultura: só Soja por enquanto (já escolhida).
+  - Cultura: Soja e Milho (nenhuma vem escolhida).
 - **Fazendas**: um bloco por fazenda, com o título "Fazenda 1", "Fazenda 2"… e três campos:
   - **Fazenda** (obrigatória).
   - **Talhões (opcional)**: lista com caixas de marcar ("Todos" e cada talhão com a área). O campo mostra "Todos os talhões (12)", "9 de 10 talhões" ou "Selecionar talhões".
@@ -40,7 +40,6 @@ Identificar os novos planos: informações gerais (safra, empresa, atividade, cu
 
 ## Navegação
 - "Cancelar" ou X → fecha o modal e volta à tela de origem, sem criar nada.
-- Aberto pelo "Criar plano" de uma linha Sem plano da Visão Geral: já vem com a safra, a empresa e a fazenda (com todos os talhões).
 - A lista de talhões abre por cima do modal (abaixo do campo ou, sem espaço, acima) e não é cortada pela rolagem do formulário.
 - "Criar Plano de Safra" → **volta para a Visão Geral** (Tela 03, guia Planos de Safra), com o filtro Ano Agrícola no da safra dos planos criados e o aviso "Plano criado: Fazenda X. Clique na linha para começar." (ou "2 planos criados (…). Clique na linha de cada um para começar.").
 
@@ -57,10 +56,10 @@ Identificar os novos planos: informações gerais (safra, empresa, atividade, cu
 
 | Card | Texto | Comportamento |
 |---|---|---|
-| Usar modelo | Use uma estrutura pronta de operações e ajuste conforme necessário. | Grupos e operações do modelo. |
+| Usar modelo | Use uma estrutura pronta de operações e ajuste conforme necessário. | Grupos e operações do modelo da cultura do plano (Soja ou Milho). |
 | Importar XLSX | Continue um plano exportado por este sistema (.xlsx). | Campo do arquivo (obrigatório). Ver as regras abaixo. |
 | Copiar plano existente | Copie operações, produtos e doses de outro plano de safra da mesma cultura. | Lista "Plano para copiar" (obrigatória). Ver as regras abaixo. |
-| Começar do zero | Cadastre suas operações. | Só as operações fixas: Plantio e Colheita. |
+| Começar do zero | Cadastre suas operações. | Só as operações fixas: Plantio e Colheita (do modelo da cultura do plano). |
 
 - Rodapé: "Cancelar" e "Começar o planejamento".
 

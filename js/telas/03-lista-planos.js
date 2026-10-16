@@ -109,7 +109,7 @@ window.Telas.listaPlanos = (function () {
     });
     atualizar(conteudo);
     trocarGuia(conteudo, guia);
-    Telas.painelPlanos.ligar(conteudo, { abrirPlano, abrirMenuPlano, abrirMenuSemPlano });
+    Telas.painelPlanos.ligar(conteudo, { abrirPlano, abrirMenuPlano });
     // Guias: troca o painel sem desenhar a tela de novo (os filtros continuam)
     conteudo.querySelector('.cabecalho--guias').addEventListener('click', (e) => {
       const botao = e.target.closest('[data-guia]');
@@ -130,17 +130,6 @@ window.Telas.listaPlanos = (function () {
 
   // ----- Menu do plano -----
   let menuAberto = null;
-
-  // Painel, fazenda sem plano: o ⋯ tem só "Criar plano", que abre o modal com safra, empresa e fazenda preenchidas
-  function abrirMenuSemPlano({ safra, empresa, fazenda }, ancora, x, y) {
-    fecharMenuPlano();
-    const menu = document.createElement('div');
-    menu.className = 'menu-contexto';
-    menu.setAttribute('role', 'menu');
-    menu.setAttribute('aria-label', `Fazenda ${fazenda} sem plano`);
-    menu.innerHTML = '<button class="menu-contexto__item" type="button" role="menuitem" data-item="criar">Criar plano</button>';
-    mostrarMenu(menu, ancora, x, y, true, () => Telas.criarPlano({ safra, empresa, fazenda }));
-  }
 
   // alinharDireita: o menu termina em x (usado pelo ⋯, que fica no fim da linha)
   function abrirMenuPlano(id, ancora, x, y, alinharDireita = false) {

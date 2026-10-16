@@ -1,7 +1,8 @@
 /*
  * Tela 03 — Visão Geral, guia Planos de Safra (docs/telas/03-lista-planos.md)
  * Acompanha o planejamento no ano agrícola escolhido, com os mesmos filtros das outras guias:
- * Planejamento das Fazendas (Sem plano, Em construção, Publicado) e Planos de Safra (uma linha por fazenda e safra).
+ * Planejamento das Fazendas (Sem plano, Em construção, Publicado) e Planos de Safra (uma linha por plano, Em construção
+ * ou Publicado; a fazenda sem plano só conta nos quadros).
  *
  * Quem entra na conta (uma linha por fazenda e safra):
  *  - Cada safra ou safrinha cadastrada (DADOS.cadastroSafras e as criadas no modal, em DADOS.safras), mesmo sem
@@ -120,8 +121,10 @@ window.Telas.painelPlanos = (function () {
     const ls = linhas(filtros);
     raiz.querySelector('[data-pn="kpis"]').innerHTML = kpis(ls);
     raiz.querySelector('[data-pn="cabecalho"]').innerHTML = cabecalho();
-    raiz.querySelector('[data-pn="linhas"]').innerHTML = ls.length ? ordenadas(ls).map(linha).join('')
-      : '<tr><td class="tabela__vazia" colspan="10">Nenhuma fazenda com esses filtros.</td></tr>';
+    // A tabela mostra só os planos (Em construção, incluindo Não iniciado, e Publicado); a fazenda sem plano só conta nos quadros
+    const planos = ls.filter((l) => l.plano);
+    raiz.querySelector('[data-pn="linhas"]').innerHTML = planos.length ? ordenadas(planos).map(linha).join('')
+      : '<tr><td class="tabela__vazia" colspan="10">Nenhum plano com esses filtros.</td></tr>';
   }
 
   // ----- Ordenar por coluna -----
@@ -129,7 +132,7 @@ window.Telas.painelPlanos = (function () {
   // padrão (empresa, fazenda, safra antes da safrinha, cultura). Vazios ("—") ficam sempre no fim.
   let ordem = null; // { coluna, sentido: 'asc' | 'desc' }
   let ultimo = null; // { conteudo, filtros } do último desenho, para redesenhar ao ordenar
-  const ORDEM_STATUS = ['sem', 'nao-iniciado', 'construcao', 'publicada'];
+  const ORDEM_STATUS = ['nao-iniciado', 'construcao', 'publicada'];
   const COLUNAS = [
     ['empresa', 'Empresa', (l) => l.empresa],
     ['fazenda', 'Fazenda', (l) => l.fazenda],
@@ -193,7 +196,6 @@ window.Telas.painelPlanos = (function () {
 
   // ----- Planos de Safra -----
   const STATUS = {
-    sem: ['Sem plano', 'status--sem'],
     'nao-iniciado': ['Não iniciado', 'status--nao-iniciado'],
     construcao: ['Em construção', 'status--construcao'],
     publicada: ['Publicado', 'status--aprovado']
@@ -207,26 +209,24 @@ window.Telas.painelPlanos = (function () {
   function linha(l) {
     const [rotulo, classe] = STATUS[l.status];
     const p = l.plano;
-    const dados = p ? `class="lista-planos__linha" data-plano="${p.id}" tabindex="0" title="Abrir o plano"
-        aria-label="Abrir plano ${esc(p.safra)} · ${esc(p.fazenda)} · ${esc(p.cultura)}"`
-      : `data-sem-plano data-empresa="${esc(l.empresa)}" data-fazenda="${esc(l.fazenda)}" data-safra="${esc(l.safra)}"`;
     return `
-      <tr ${dados}>
+      <tr class="lista-planos__linha" data-plano="${p.id}" tabindex="0" title="Abrir o plano"
+          aria-label="Abrir plano ${esc(p.safra)} · ${esc(p.fazenda)} · ${esc(p.cultura)}">
         <td>${esc(l.empresa)}</td>
         <td>${esc(l.fazenda)}</td>
         <td>${esc(l.ciclo)} ${esc(l.safra)}</td>
-        <td>${p ? esc(p.cultura) : '<span class="painel-tabela__vazio">—</span>'}</td>
+        <td>${esc(p.cultura)}</td>
         <td class="tabela__numero">${l.area ? ha(l.area) : '<span class="painel-tabela__vazio">—</span>'}</td>
         ${l.grupos.map(celulaGrupo).join('')}
         <td><span class="status ${classe}">${rotulo}</span></td>
         <td class="lista-planos__menu">
-          <button class="botao-icone" type="button" ${p ? `data-menu-plano="${p.id}"` : 'data-menu-sem-plano'} title="Mais ações"
+          <button class="botao-icone" type="button" data-menu-plano="${p.id}" title="Mais ações"
                   aria-haspopup="menu" aria-label="Mais ações · ${esc(l.fazenda)}, ${esc(l.ciclo)} ${esc(l.safra)}">${Icones.mais_opcoes}</button>
         </td>
       </tr>`;
   }
 
-  // Eventos da guia. acoes: { abrirPlano(p), abrirMenuPlano(id, ancora, x, y, alinharDireita), abrirMenuSemPlano(dados, ancora, x, y) }
+  // Eventos da guia. acoes: { abrirPlano(p), abrirMenuPlano(id, ancora, x, y, alinharDireita) }
   function ligar(conteudo, acoes) {
     const raiz = conteudo.querySelector('[data-guia-painel="painel"]');
     raiz.addEventListener('click', (e) => {
@@ -239,11 +239,9 @@ window.Telas.painelPlanos = (function () {
         return;
       }
       const menuPlano = e.target.closest('[data-menu-plano]');
-      const menuSem = e.target.closest('[data-menu-sem-plano]');
-      if (menuPlano || menuSem) {
-        const caixa = (menuPlano || menuSem).getBoundingClientRect();
-        if (menuPlano) acoes.abrirMenuPlano(Number(menuPlano.dataset.menuPlano), menuPlano, caixa.right, caixa.bottom + 4, true);
-        else acoes.abrirMenuSemPlano({ ...menuSem.closest('tr').dataset }, menuSem, caixa.right, caixa.bottom + 4);
+      if (menuPlano) {
+        const caixa = menuPlano.getBoundingClientRect();
+        acoes.abrirMenuPlano(Number(menuPlano.dataset.menuPlano), menuPlano, caixa.right, caixa.bottom + 4, true);
         return;
       }
       const tr = e.target.closest('tr[data-plano]');

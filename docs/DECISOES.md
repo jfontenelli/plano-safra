@@ -67,10 +67,9 @@ Agrônomo da fazenda e líder de operações podem ser a mesma pessoa, conforme 
 - Filtro **Ano Agrícola** no lugar de Safra: escolher 2026 traz as safras e safrinhas daquele ano (26/27 e 27/27). Opções: os anos das safras cadastradas e dos planos. Começa no ano agrícola de hoje (01/09 a 31/08); senão, no mais recente. Depois de criar planos, abre no ano agrícola da safra deles.
 - **Guia Planos de Safra** (detalhe na Tela 03):
   - **Planejamento das Fazendas**: Sem plano, Em construção (inclui Não iniciado) e Publicado, em "X de N" com barra e %.
-  - **Quem entra na conta:** cada fazenda conta uma vez por safra e uma vez por safrinha. Cada safra ou safrinha **cadastrada** no ano agrícola, mesmo sem plano, faz entrar **todas as fazendas de todas as empresas**; quem não tem plano nela aparece como **Sem plano**. Fazendas de cada empresa: nos dados de exemplo.
-  - **Tabela Planos de Safra** (botão "+ Criar Plano Safra" no topo): uma linha por fazenda e safra; colunas Empresa, Fazenda, Safra, Cultura, Área (ha), Sementes, Fertilidade, Defensivos, Status, Ações. Ordena por qualquer coluna (seta no título; vazios no fim).
+  - **Quem entra na conta:** cada fazenda conta uma vez por safra e uma vez por safrinha. Cada safra ou safrinha **cadastrada** no ano agrícola, mesmo sem plano, faz entrar **todas as fazendas de todas as empresas**; quem não tem plano nela conta como **Sem plano** (só nos quadros). Fazendas de cada empresa: nos dados de exemplo.
+  - **Tabela Planos de Safra** (botão "+ Criar Plano Safra" no topo): **só os planos**, Em construção (inclui Não iniciado) e Publicado, uma linha por plano (fazenda e safra); a fazenda sem plano não aparece na tabela; colunas Empresa, Fazenda, Safra, Cultura, Área (ha), Sementes, Fertilidade, Defensivos, Status, Ações. Ordena por qualquer coluna (seta no título; vazios no fim).
   - **% de cada grupo, por área:** em cada operação, a área dos talhões com recomendação completa (no Sementes, variedade e data) ÷ área de cultivo; o grupo é a média das operações. A Colheita não entra (vem do plantio).
-  - Linha **Sem plano**: o ⋯ tem **Criar plano**, que abre o modal com safra, empresa e fazenda preenchidas.
   - Saíram: o gráfico de área planejada por empresa, o % concluído e a lista antiga (Atividade, Última atualização e Atualizado por ficam no Histórico). Custo estimado e Receita projetada voltam se os usuários pedirem.
 - **Guia Histórico de versões:** uma linha por versão de cada plano (da mais nova para a mais antiga). Colunas: Safra, Empresa, Atividade, Cultura, Fazenda, Versão, Status, Última atualização, Atualizado por (em construção: a última alteração salva; publicada: a publicação). Clicar na linha abre aquela versão (publicada em consulta).
 - **Um clique na linha abre** o plano (sem seta), na versão em construção ou, se não houver, na última publicada (em consulta). **Plano não iniciado:** abre o modal "Como deseja iniciar o plano?" (4.1.1).
@@ -85,10 +84,10 @@ Agrônomo da fazenda e líder de operações podem ser a mesma pessoa, conforme 
 - Versões numeradas em sequência por plano (0.1, 0.2, 0.3…), com dois status: **Em construção** (editável) e **Publicada** (imutável, só consulta). Números nunca são reutilizados.
 - **Ao criar o plano**, nasce só a **versão 0.1, publicada**, com a identificação do plano, data, hora e responsável. Não nasce a 0.2.
 - **0.1 vazia (plano não iniciado):** ao abrir o plano (linha da lista, "Abrir" no ⋯ ou menu Planejamento), aparece por cima da Visão Geral o **modal "Como deseja iniciar o plano?"**, com quatro opções nesta ordem:
-  - **Usar modelo:** "Use uma estrutura pronta de operações e ajuste conforme necessário."
+  - **Usar modelo:** "Use uma estrutura pronta de operações e ajuste conforme necessário." Usa o modelo da cultura do plano (Soja ou Milho).
   - **Importar XLSX:** "Continue um plano exportado por este sistema (.xlsx)." Safra, Empresa, Fazenda e Cultura do plano são conferidas com as do arquivo; se forem diferentes, aviso com "Importar mesmo assim". Talhões do arquivo que não estão no plano ficam de fora, com aviso.
   - **Copiar plano existente:** "Copie operações, produtos e doses de outro plano de safra da mesma cultura." Lista só os planos da mesma cultura (qualquer fazenda e safra) **já publicados**; copia sempre a **última versão publicada**: grupos, operações e recomendações com produtos e doses padrão, **sem talhões, áreas, plantio e germinação**.
-  - **Começar do zero:** "Cadastre suas operações." Começa só com o Plantio e a Colheita (operações fixas).
+  - **Começar do zero:** "Cadastre suas operações." Começa só com o Plantio e a Colheita (operações fixas), do modelo da cultura do plano.
   - "Começar o planejamento" cria a **0.2 em construção** com esse conteúdo e abre a aba Operações; a 0.1 fica como registro inicial. Cancelar ou X: o plano continua não iniciado.
 - **Criar nova versão** (versão publicada): cria a próxima versão da sequência, copiando os dados da versão de origem, em construção, e abre em edição. Guarda a versão de origem (ex.: abrir a 0.1 com a 0.3 já publicada gera a 0.4, origem 0.1).
 - **Só uma versão em construção por plano.** Pedir nova versão com outra em construção: aviso "Já existe uma versão em construção (0.3)" e a opção de abri-la; nada é criado nem descartado.
@@ -115,7 +114,7 @@ Agrônomo da fazenda e líder de operações podem ser a mesma pessoa, conforme 
 - **Um plano por fazenda:** com duas fazendas, nascem dois planos (uma linha cada na Visão Geral).
 - Um único plano por safra e fazenda (a refinar): não deixa repetir fazenda entre os blocos nem criar um que já existe.
 - Cultura é definida no nível da fazenda e pode ser alterada no talhão.
-- **Por enquanto o protótipo funciona só para soja**: a lista de culturas tem só Soja (já vem escolhida no modal). Variedades, população, bags e TSI são de soja.
+- **Culturas no protótipo: Soja e Milho.** A lista de culturas do modal tem as duas (nenhuma vem escolhida). O plano de Milho começa pelo **modelo de milho** (o mesmo do plano de exemplo de milho safrinha, sem fenologia, porque o cadastro de estádios é o da soja); o de Soja, pelo modelo da soja.
 - **Continua sendo um modal**, aberto pelo "Criar Plano Safra" da Visão Geral, **só com a identificação do plano**. Safra/Safrinha: a detalhar.
 - **"Como deseja iniciar o plano?" saiu deste modal**: é outro modal, na primeira vez que o plano é aberto (4.1.1).
 - Botões: **Cancelar** e **Criar Plano de Safra** (parece desabilitado até os obrigatórios estarem preenchidos; clicado, mostra o que falta). Ao criar, **volta para a Visão Geral**, com o aviso "Plano criado… Clique na linha para começar." Os planos nascem só com a 0.1 e aparecem como "Não iniciado".

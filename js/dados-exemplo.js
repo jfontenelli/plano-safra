@@ -34,8 +34,8 @@ window.DADOS = {
     'Empresa B': ['Boa Vista'],
     'Empresa C': ['Primavera']
   },
-  // Por enquanto o protótipo funciona só para soja (variedades, população, bags e TSI são de soja)
-  culturas: ['Soja'],
+  // Culturas que o Criar Plano oferece
+  culturas: ['Soja', 'Milho'],
   // Culturas que aparecem nos planos (os de exemplo têm milho safrinha), para os filtros
   culturasPlanos: ['Soja', 'Milho'],
 

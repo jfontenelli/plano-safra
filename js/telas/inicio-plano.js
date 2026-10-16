@@ -160,8 +160,10 @@ window.Telas.inicioPlano = (function () {
 
   function comecar(plano, e, el, { aoComecar, redesenhar }) {
     e.tentou = true;
-    if (e.opcao === 'modelo') return fim(Planos.gruposModelo(), '');
-    if (e.opcao === 'zero') return fim(Planos.gruposFixos(), '');
+    // Usar modelo e Começar do zero: pelo modelo da cultura do plano (milho tem o seu)
+    const modelo = Planos.modeloDaCultura(plano.cultura);
+    if (e.opcao === 'modelo') return fim(Planos.gruposModelo(modelo), '');
+    if (e.opcao === 'zero') return fim(Planos.gruposFixos(modelo), '');
     if (e.opcao === 'importar') {
       if (!e.importado) {
         if (!e.erroArquivo) e.erroArquivo = 'Escolha o arquivo exportado pelo Plano de Safra.';

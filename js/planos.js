@@ -68,9 +68,14 @@ window.Planos = (function () {
     }));
   }
 
+  // Modelo de operações da cultura do plano (o de milho, em DADOS.modelosCultura); sem modelo próprio, o da soja
+  function modeloDaCultura(cultura) {
+    return (DADOS.modelosCultura || {})[cultura] || DADOS.modeloOperacoes;
+  }
+
   // Só os grupos fixos do modelo (Plantio e Colheita): o "Começar do zero" do início do plano
-  function gruposFixos() {
-    return gruposModelo().filter((g) => g.tipo === 'Sementes' || g.tipo === 'Colheita');
+  function gruposFixos(modelo) {
+    return gruposModelo(modelo).filter((g) => g.tipo === 'Sementes' || g.tipo === 'Colheita');
   }
 
   // "Copiar plano existente": grupos, operações e recomendações (produtos e doses padrão),
@@ -203,7 +208,7 @@ window.Planos = (function () {
 
   return {
     novoId, novaLinha, linhaDoProduto, novaOperacao, novaReceita, novoAjuste, novoGrupo,
-    gruposModelo, gruposFixos, copiarSemTalhoes, montarExemplo, produtoDoCadastro,
+    gruposModelo, modeloDaCultura, gruposFixos, copiarSemTalhoes, montarExemplo, produtoDoCadastro,
     linhaPreenchida, chaveLinha, composicao, receitaDoTalhao, talhoesDaReceita,
     linhasTalhao, doseTalhao, temAjuste, statusTalhao, resumo,
     colunasDose, linhaNoTalhao, unidadeDose, nomeLinha
