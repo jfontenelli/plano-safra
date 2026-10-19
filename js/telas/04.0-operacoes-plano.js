@@ -31,11 +31,11 @@ window.Telas.operacoesPlano = (function () {
 
   // Ícone de cada tipo de grupo (na coluna Grupo de operação)
   const ICONE_TIPO = {
-    'Sementes': '<svg viewBox="0 0 24 24" class="tab-op__ico" style="color:#d9822b" aria-hidden="true"><ellipse cx="12" cy="12" rx="6" ry="8" transform="rotate(30 12 12)" fill="none" stroke="currentColor" stroke-width="2"/></svg>',
+    'Sementes': '<svg viewBox="0 0 24 24" class="tab-op__ico" style="color:var(--cor-sementes)" aria-hidden="true"><ellipse cx="12" cy="12" rx="6" ry="8" transform="rotate(30 12 12)" fill="none" stroke="currentColor" stroke-width="2"/></svg>',
     'Tratamento de sementes': '<svg viewBox="0 0 24 24" class="tab-op__ico" style="color:#b0682f" aria-hidden="true"><ellipse cx="12" cy="12" rx="6" ry="8" transform="rotate(30 12 12)" fill="currentColor"/><path d="M9 15c2-1 4-4 5-7" stroke="#fff" stroke-width="1.6" fill="none"/></svg>',
-    'Defensivos': '<svg viewBox="0 0 24 24" class="tab-op__ico" style="color:#2a64a8" aria-hidden="true"><path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>',
-    'Fertilidade': '<svg viewBox="0 0 24 24" class="tab-op__ico" style="color:#3c8d2f" aria-hidden="true"><path d="M5 19c0-8 5-13 14-14-1 9-6 14-14 14z" fill="currentColor"/><path d="M5 19l8-8" stroke="#fff" stroke-width="1.6"/></svg>',
-    'Colheita': '<svg viewBox="0 0 24 24" class="tab-op__ico" style="color:#b8860b" aria-hidden="true"><path d="M12 21V8M12 8c-3 0-4-2-4-4 3 0 4 2 4 4zm0 0c3 0 4-2 4-4-3 0-4 2-4 4zm0 5c-3 0-4-2-4-4 3 0 4 2 4 4zm0 0c3 0 4-2 4-4-3 0-4 2-4 4z" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>'
+    'Defensivos': '<svg viewBox="0 0 24 24" class="tab-op__ico" style="color:var(--cor-defensivos)" aria-hidden="true"><path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>',
+    'Fertilidade': '<svg viewBox="0 0 24 24" class="tab-op__ico" style="color:var(--cor-fertilidade)" aria-hidden="true"><path d="M5 19c0-8 5-13 14-14-1 9-6 14-14 14z" fill="currentColor"/><path d="M5 19l8-8" stroke="#fff" stroke-width="1.6"/></svg>',
+    'Colheita': '<svg viewBox="0 0 24 24" class="tab-op__ico" style="color:var(--cor-colheita)" aria-hidden="true"><path d="M12 21V8M12 8c-3 0-4-2-4-4 3 0 4 2 4 4zm0 0c3 0 4-2 4-4-3 0-4 2-4 4zm0 5c-3 0-4-2-4-4 3 0 4 2 4 4zm0 0c3 0 4-2 4-4-3 0-4 2-4 4z" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>'
   };
 
   // ----- Desenho -----
@@ -57,7 +57,7 @@ window.Telas.operacoesPlano = (function () {
     const marcadas = ctx.estado.marcadas;
     return `
       <section class="estrutura">
-        ${ctx.estado.avisoFechado ? '' : `
+        ${ler || ctx.estado.avisoFechado ? '' : `
           <div class="estrutura__aviso" role="note">${Icones.info}
             <p><strong>Revise as operações cadastradas.</strong> Cada operação vira uma Ordem de Serviço (OS) a partir da versão publicada. Se estiver tudo certo, siga para o planejamento.</p>
             <button class="botao-icone estrutura__fechar" type="button" data-acao="est-fechar-aviso" aria-label="Fechar o aviso" title="Fechar">${Icones.fechar}</button>

@@ -19,6 +19,7 @@ window.DADOS = {
   cadastroSafras: [
     { codigo: 9,  nome: '24/25', descricao: '2024/2025', apelido: '2024', inicio: '2024-09-01', fim: '2025-08-31', anoAgricola: 2024, codigoIntegracao: '', dolar: 'DOLAR', valor: null },
     { codigo: 10, nome: '25/26', descricao: '2025/2026', apelido: '2025', inicio: '2025-09-01', fim: '2026-08-31', anoAgricola: 2025, codigoIntegracao: '', dolar: 'DOLAR', valor: null },
+    { codigo: 12, nome: '26/26', descricao: '2026/2026', apelido: '2026', inicio: '2025-09-01', fim: '2026-08-31', anoAgricola: 2025, codigoIntegracao: '', dolar: 'DOLAR', valor: null },
     { codigo: 11, nome: '26/27', descricao: '2026/2027', apelido: '2026', inicio: '2026-09-01', fim: '2027-08-31', anoAgricola: 2026, codigoIntegracao: '', dolar: 'DOLAR', valor: null },
     { codigo: 13, nome: '27/27', descricao: '2027/2027', apelido: '2027', inicio: '2026-09-01', fim: '2027-08-31', anoAgricola: 2026, codigoIntegracao: '', dolar: 'DOLAR', valor: null },
     { codigo: 14, nome: '27/28', descricao: '2027/2028', apelido: '2027', inicio: '2027-09-01', fim: '2028-08-31', anoAgricola: 2027, codigoIntegracao: '', dolar: 'DOLAR', valor: null }
@@ -379,7 +380,8 @@ window.DADOS = {
 
   // Planos carregados pelo menu Demonstração → "Ver com planos de exemplo".
   // Só planos publicados: soja 26/27 da Santa Clara, da Boa Vista e da Primavera; milho safrinha 27/27 da Santa Clara
-  // e da Boa Vista (São José fica sem plano nas duas, Primavera sem safrinha). O plano em construção o usuário cria e monta
+  // e da Boa Vista (São José fica sem plano nas duas, Primavera sem safrinha). A Santa Clara também tem o ano agrícola
+  // 2025 (soja 25/26 e milho safrinha 26/26, no fim do arquivo). O plano em construção o usuário cria e monta
   // ele mesmo (Criar Plano Safra). "operacoes" detalha, por nome de operação do modelo: fenologia, produtos [nome, dose],
   // talhões que recebem e ajustes por talhão. Operações não listadas ficam sem recomendação e sem talhões.
   planosExemplo: [
@@ -579,3 +581,17 @@ window.DADOS = {
     }
   ]
 };
+
+// Ano agrícola 2025 da Santa Clara (o Calendário Agrícola anda entre os anos): soja 25/26 e milho safrinha 26/26,
+// cópias dos planos de 2026 com as datas um ano antes
+(function () {
+  const umAnoAntes = (iso) => iso.replace(/^\d{4}/, (a) => String(Number(a) - 1));
+  const copia = (p, safra) => ({
+    ...p, safra,
+    versoes: { criadaEm: umAnoAntes(p.versoes.criadaEm), publicadaEm: umAnoAntes(p.versoes.publicadaEm) },
+    atualizadoEm: umAnoAntes(p.atualizadoEm),
+    operacoes: { ...p.operacoes, Plantio: { ...p.operacoes.Plantio, plantio: p.operacoes.Plantio.plantio.map((x) => ({ ...x, data: umAnoAntes(x.data) })) } }
+  });
+  const [soja, milho] = DADOS.planosExemplo;
+  DADOS.planosExemplo.push(copia(soja, '25/26'), copia(milho, '26/26'));
+})();

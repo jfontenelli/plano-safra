@@ -11,11 +11,12 @@ Acompanhar o planejamento das fazendas no ano agrícola, filtrar e abrir ou cria
 - Ao abrir o protótipo: ele já vem com os planos de exemplo, só publicados (soja 26/27 e milho safrinha 27/27 da Santa Clara). O plano em construção, o usuário cria e monta ele mesmo.
 
 ## Conteúdo
-- Título "Visão Geral" e, embaixo, duas guias (mesmo estilo das abas do plano): **Planos de Safra** (abre nela) e **Histórico de versões**.
-- **Filtros** num cartão baixo, sem título, compactos e lado a lado: **Ano Agrícola**, **Atividade produtiva**, **Safra** (Safra ou Safrinha), Empresa, Fazenda, Cultura e, só no Histórico, Status; **Limpar filtros** à direita. Valem para as duas guias.
+- Título "Visão Geral" com o caminho "Plano de Safra › Visão Geral" embaixo e, abaixo, duas guias (mesmo estilo das abas do plano, com a barra verde grossa na selecionada): **Planos de Safra** (abre nela) e **Histórico de versões**. **+ Criar Plano Safra** fica na linha das guias, à direita.
+- No modo escuro, o topo tem a foto do campo (`img/fundo-plano-safra.jpg`) por trás do título; no claro, não.
+- **Filtros** num cartão baixo, acima dos quadros, sem título, compactos e lado a lado: **Ano Agrícola**, **Atividade produtiva**, **Safra** (Safra ou Safrinha), Empresa, Fazenda, Cultura e, só no Histórico, Status; **Limpar filtros** à direita. Valem para as duas guias.
 - **Guia Planos de Safra:**
-  - **Planejamento das Fazendas** (ⓘ com a regra de contagem; subtítulo "Situação dos planos de safra no contexto selecionado."): três quadros, **Sem plano** (azul), **Em construção** (laranja) e **Publicado** (verde), cada um com ícone, "X de N", barra e "N% das fazendas".
-  - **Planos de Safra**: título e botão "+ Criar Plano Safra" no topo do cartão; tabela **só com os planos** (Em construção, incluindo Não iniciado, e Publicado), uma linha por plano (fazenda e safra). A fazenda sem plano não aparece na tabela, só conta nos quadros. Colunas: Empresa, Fazenda, Safra ("Safra 26/27" ou "Safrinha 27/27"), Cultura, Área (ha), **Sementes**, **Fertilidade**, **Defensivos** (barrinha e %), Status e Ações (⋯).
+  - **Planejamento das Fazendas**: três quadros compactos, sem título de seção: **Sem plano** (informativo), **Em construção** (aviso neutro) e **Publicado** (verde), cada um com ícone, ⓘ com a regra de contagem, "X de N", barra e "N% das fazendas" (o % em negrito).
+  - **Planos de Safra**: título com ícone no topo do cartão; tabela **só com os planos** (Em construção, incluindo Não iniciado, e Publicado), uma linha por plano (fazenda e safra). A fazenda sem plano não aparece na tabela, só conta nos quadros. Colunas: Empresa, Fazenda, Safra ("Safra 26/27" ou "Safrinha 27/27"), Cultura, Área (ha), **Sementes**, **Fertilidade**, **Defensivos** (barrinha e %), Status e Ações (⋯).
 - **Guia Histórico de versões:** uma linha por versão de cada plano; colunas Safra, Empresa, Atividade, Cultura, Fazenda, Versão, Status, Última atualização, Atualizado por.
 
 ## Regras

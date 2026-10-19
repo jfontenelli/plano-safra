@@ -14,6 +14,21 @@
   --borda:        #e3e7e4;
   --texto:        #1a1f1c;
   --texto-suave:  #5f6b64;
+  --texto-fraco:  #8a948f;
+  --superficie-2: #f5f7f6;   /* cabeçalhos de tabela, faixas, campos calculados */
+  --superficie-3: #e8edf0;   /* trilhos de barra, fundos neutros */
+  --borda-forte:  #cfd6d2;   /* campos */
+  --aviso-fundo:  #fff6d6;
+  --aviso-borda:  #f2de9b;
+  --aviso-texto:  #7a5600;
+  --erro:         #b03a2e;
+  --erro-fundo:   #fdf0ee;
+  --info:         #1f6fd1;
+  --info-fundo:   #e7effa;
+  --cor-sementes:    #1f9d55;
+  --cor-fertilidade: #8e44ad;
+  --cor-defensivos:  #e8772e;
+  --cor-colheita:    #d4a017;
 
   /* Medidas */
   --menu-largura: 248px;
@@ -201,10 +216,22 @@ svg { flex-shrink: 0; }
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 6px 0;
+  width: 100%;
+  margin-top: 12px;
+  padding: 6px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
   white-space: nowrap;
   overflow: hidden;
+  cursor: pointer;
 }
+
+.menu__usuario:hover,
+.menu__usuario[aria-expanded="true"] { background: rgba(255, 255, 255, .12); color: #fff; }
 
 .menu__avatar {
   display: grid;
@@ -228,7 +255,6 @@ svg { flex-shrink: 0; }
 
 .menu--recolhido .menu__topo,
 .menu--recolhido .menu__item,
-.menu--recolhido .demo__botao,
 .menu--recolhido .menu__usuario { justify-content: center; }
 
 .menu--recolhido .menu__item { padding: 0; }
@@ -483,7 +509,7 @@ svg { flex-shrink: 0; }
   width: 100%;
   height: 42px;
   padding: 0 12px;
-  border: 1px solid #cfd6d2;
+  border: 1px solid var(--borda-forte);
   border-radius: 8px;
   background: var(--superficie);
   font: inherit;
@@ -501,10 +527,10 @@ select.campo__controle {
 }
 
 /* texto cinza enquanto nada foi escolhido */
-select.campo__controle:invalid { color: #8a948f; }
+select.campo__controle:invalid { color: var(--texto-fraco); }
 select.campo__controle option { color: var(--texto); }
 
-.campo__controle:hover { border-color: #b4beb8; }
+.campo__controle:hover { border-color: var(--borda-forte); }
 
 .campo__controle:focus {
   outline: none;
@@ -516,20 +542,20 @@ select.campo__controle option { color: var(--texto); }
 .campo__controle--erro:hover { border-color: #c0392b; }
 
 /* Asterisco de campo obrigatório, depois do nome do campo */
-.obrigatorio { color: #b03a2e; font-weight: 700; }
+.obrigatorio { color: var(--erro); font-weight: 700; }
 
 /* Mensagem ao lado dos botões do rodapé do modal (ex.: o que falta para continuar) */
 .modal__rodape-erro {
   align-self: center;
   margin: 0 auto 0 0;
   font-size: 14px;
-  color: #b03a2e;
+  color: var(--erro);
 }
 
 .campo__erro {
   margin: -8px 0 16px;
   font-size: 14px;
-  color: #b03a2e;
+  color: var(--erro);
 }
 
 .link-acao {
@@ -575,7 +601,7 @@ select.campo__controle option { color: var(--texto); }
   align-items: flex-start;
   gap: 12px;
   padding: 16px;
-  border: 1px solid #cfd6d2; /* mesma borda dos campos */
+  border: 1px solid var(--borda-forte); /* mesma borda dos campos */
   border-radius: var(--raio);
   background: var(--superficie);
   cursor: pointer;
@@ -583,7 +609,7 @@ select.campo__controle option { color: var(--texto); }
 }
 
 /* a seleção aparece só no rádio; o cartão não muda de cor */
-.card-inicio:hover { border-color: #9aa59f; }
+.card-inicio:hover { border-color: var(--borda-forte); }
 
 .card-inicio:has(:focus-visible) {
   outline: 2px solid var(--verde-600);
@@ -596,7 +622,7 @@ select.campo__controle option { color: var(--texto); }
   margin: 2px 0 0;
   flex-shrink: 0;
   appearance: none;
-  border: 2px solid #b4beb8;
+  border: 2px solid var(--borda-forte);
   border-radius: 50%;
   background: var(--superficie);
   cursor: inherit;
@@ -641,7 +667,7 @@ select.campo__controle option { color: var(--texto); }
   background: var(--fundo);
   cursor: not-allowed;
 }
-.card-inicio--desabilitado:hover { border-color: #cfd6d2; }
+.card-inicio--desabilitado:hover { border-color: var(--borda-forte); }
 .card-inicio--desabilitado .card-inicio__titulo,
 .card-inicio--desabilitado .card-inicio__icone { color: var(--texto-suave); }
 
@@ -680,27 +706,16 @@ select.campo__controle option { color: var(--texto); }
   cursor: not-allowed;
 }
 
-/* ===== Menu Demonstração (rodapé do menu lateral) ===== */
-.demo { position: relative; }
+/* ===== Menu do usuário (rodapé do menu lateral): Configurações e Sair ===== */
+.usuario { position: relative; }
 
-.demo__botao {
-  width: 100%;
-  border: 0;
-  background: transparent;
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-}
-
-.demo__botao[aria-expanded="true"] { background: rgba(255, 255, 255, .12); color: #fff; }
-
-.demo__opcoes {
+.usuario__opcoes {
   position: absolute;
   left: 0;
   bottom: calc(100% + 8px);
   z-index: 5;
-  width: 290px;
-  padding: 8px;
+  width: 220px;
+  padding: 6px;
   border-radius: 12px;
   background: var(--superficie);
   color: var(--texto);
@@ -708,26 +723,17 @@ select.campo__controle option { color: var(--texto); }
 }
 
 /* menu recolhido: as opções abrem ao lado */
-.menu--recolhido .demo__opcoes {
+.menu--recolhido .usuario__opcoes {
   left: calc(100% + 12px);
   bottom: 0;
 }
 
-.demo__opcoes[hidden] { display: none; }
+.usuario__opcoes[hidden] { display: none; }
 
-.demo__titulo {
-  margin: 4px 10px 6px;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: .04em;
-  text-transform: uppercase;
-  color: var(--texto-suave);
-}
-
-.demo__opcao {
+.usuario__opcao {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  align-items: center;
+  gap: 10px;
   width: 100%;
   padding: 10px;
   border: 0;
@@ -739,11 +745,26 @@ select.campo__controle option { color: var(--texto); }
   cursor: pointer;
 }
 
-.demo__opcao:hover,
-.demo__opcao:focus-visible { background: var(--verde-100); outline: none; }
+/* Sair separado de Configurações por uma linha */
+.usuario__opcao + .usuario__opcao {
+  margin-top: 6px;
+  border-top: 1px solid var(--borda);
+  border-radius: 0 0 8px 8px;
+}
 
-.demo__opcao-titulo { font-weight: 600; }
-.demo__opcao-texto { font-size: 13px; line-height: 1.4; color: var(--texto-suave); }
+.usuario__opcao svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.usuario__opcao:hover,
+.usuario__opcao:focus-visible { background: var(--verde-100); outline: none; }
 
 /* ===== Página com seções (Tela 03 em diante) ===== */
 .pagina {
@@ -801,7 +822,19 @@ select.campo__controle option { color: var(--texto); }
 /* Cabeçalho da Visão Geral com as guias embaixo do título (mesmo estilo das abas do plano) */
 .cabecalho--guias { flex-direction: column; align-items: flex-start; gap: 6px; min-height: 0; padding-bottom: 0; }
 .cabecalho--guias .etapa { padding-left: 2px; padding-right: 2px; border-top: 0; border-left: 0; border-right: 0; background: none; font: inherit; font-weight: 500; cursor: pointer; }
-.cabecalho--guias .etapa--ativa { font-weight: 600; }
+.cabecalho--guias .etapa--ativa { font-weight: 700; }
+/* Visão Geral: título e caminho; guias e o botão Criar Plano Safra na mesma linha */
+.vg-cabecalho { position: relative; isolation: isolate; gap: 8px; padding-top: 22px; }
+/* Camada com a foto do campo (o caminho fica no HTML, para o arquivo único embutir a imagem) e o degradê por cima */
+.vg-cabecalho__fundo { display: none; position: absolute; inset: 0; z-index: -1; background-size: cover; background-position: center 62%; }
+.vg-cabecalho__fundo::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(11, 23, 32, .30) 0%, rgba(11, 23, 32, .72) 55%, #0B1720 100%); }
+.vg-cabecalho__titulo { display: flex; flex-direction: column; gap: 4px; }
+.caminho { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--texto-suave); }
+.caminho__atual { color: var(--texto); }
+.vg-cabecalho__guias { align-self: stretch; display: flex; align-items: flex-end; justify-content: space-between; gap: 8px 16px; flex-wrap: wrap; }
+.vg-cabecalho__guias .botao { margin-bottom: 8px; }
+.lista-planos__titulo { display: inline-flex; align-items: center; gap: 10px; }
+.lista-planos__titulo .icone { width: 22px; height: 22px; color: var(--verde-600); }
 .filtros .campo__rotulo { margin-bottom: 4px; font-size: 13px; color: var(--texto-suave); }
 .filtros .campo__controle { height: 36px; font-size: 14px; }
 
@@ -818,7 +851,7 @@ select.campo__controle option { color: var(--texto); }
 
 .tabela th {
   padding: 14px 12px;
-  background: #f1f4f2;
+  background: var(--superficie-2);
   font-weight: 600;
   text-align: left;
   color: var(--texto);
@@ -829,7 +862,7 @@ select.campo__controle option { color: var(--texto); }
   border-top: 1px solid var(--borda);
 }
 
-.tabela tbody tr:hover { background: #f8faf9; }
+.tabela tbody tr:hover { background: var(--superficie-2); }
 
 .tabela__numero { text-align: right !important; font-variant-numeric: tabular-nums; }
 /* Título de coluna com explicação ao passar o mouse (ex.: "1 bag = 5 milhões de sementes") */
@@ -873,10 +906,10 @@ select.campo__controle option { color: var(--texto); }
   background: currentColor;
 }
 
-.status--construcao { background: #eceff1; color: #59636b; }
-.status--aprovado   { background: #e1f3e8; color: #17703f; }
+.status--construcao { background: var(--superficie-3); color: var(--texto-suave); }
+.status--aprovado   { background: var(--verde-100); color: #17703f; }
 /* Plano criado e ainda não iniciado (só a 0.1, vazia): bolinha vazada */
-.status--nao-iniciado { background: var(--superficie); color: #59636b; box-shadow: inset 0 0 0 1px #cfd6d2; }
+.status--nao-iniciado { background: var(--superficie); color: var(--texto-suave); box-shadow: inset 0 0 0 1px #cfd6d2; }
 .status--nao-iniciado::before { background: none; box-shadow: inset 0 0 0 1.5px currentColor; }
 
 /* ===== Link de voltar ===== */
@@ -903,10 +936,10 @@ select.campo__controle option { color: var(--texto); }
 .botao--perigo-leve {
   background: var(--superficie);
   border-color: #e6c3be;
-  color: #a83226;
+  color: var(--erro);
 }
 .botao--perigo-leve:hover,
-.botao--perigo-leve[aria-pressed="true"] { background: #fbeceb; }
+.botao--perigo-leve[aria-pressed="true"] { background: var(--erro-fundo); }
 
 .botao-icone {
   border: 0;
@@ -941,8 +974,8 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
   margin-left: 6px;
   padding: 0 7px;
   border-radius: 999px;
-  background: #fff3d6;
-  color: #8a5a00;
+  background: var(--aviso-fundo);
+  color: var(--aviso-texto);
   font-size: 11px;
   font-weight: 600;
   vertical-align: middle;
@@ -950,7 +983,7 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
 }
 
 .status--pendente { background: #fdf0e1; color: #b45f06; }
-.status--sem      { background: #f1f3f4; color: #8a949c; }
+.status--sem      { background: var(--superficie-2); color: var(--texto-fraco); }
 
 .aviso {
   position: fixed;
@@ -1011,7 +1044,7 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
 .plano__titulo {
   font-size: 17px;
   font-weight: 700;
-  color: var(--verde-700);
+  color: var(--texto);
   text-decoration: none;
 }
 .plano__seta { font-size: 20px; line-height: 1; color: var(--texto-suave); }
@@ -1028,22 +1061,24 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
 }
 .plano__ponto { margin: 0 4px; }
 .plano__contexto { font-size: 14px; color: var(--texto); }
-.plano__contexto .plano__ponto { color: var(--texto-suave); }
+.plano__contexto .plano__ponto { margin: 0 6px; color: var(--texto-suave); }
 
 .etapas { display: flex; flex-wrap: wrap; gap: 0 28px; font-size: 14px; }
 
 .etapa {
+  position: relative;
   display: flex;
   align-items: center;
-  padding: 8px 2px 9px;
-  border-bottom: 3px solid transparent;
+  padding: 8px 2px 12px;
+  border-bottom: 0;
   color: var(--texto-suave);
   font-weight: 500;
   text-decoration: none;
   white-space: nowrap;
 }
 .etapa:hover { color: var(--texto); }
-.etapa--ativa { color: var(--verde-700); border-bottom-color: var(--verde-700); font-weight: 600; }
+.etapa--ativa { color: var(--texto); font-weight: 700; }
+.etapa--ativa::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 4px; border-radius: 4px; background: var(--verde-700); }
 
 .faixa-leitura {
   display: flex;
@@ -1053,12 +1088,16 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
   margin: 12px 40px 0;
   padding: 8px 14px;
   border-radius: 10px;
-  background: #e1f3e8;
-  color: #17703f;
+  border: 1px solid color-mix(in srgb, var(--info) 30%, transparent);
+  background: var(--info-fundo);
+  color: var(--texto);
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 400;
 }
-.faixa-leitura .icone { width: 18px; height: 18px; }
+.faixa-leitura .icone { flex: none; width: 18px; height: 18px; color: var(--info); }
+.faixa-leitura strong { font-weight: 700; }
+.faixa-leitura__fechar { margin-left: auto; width: 28px; height: 28px; }
+.faixa-leitura__fechar .icone { width: 16px; height: 16px; color: var(--texto-suave); }
 
 .ops {
   flex: 1;
@@ -1156,7 +1195,7 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
   border-radius: 8px;
   border-left: 3px solid transparent;
 }
-.ops-item:hover { background: #f4f7f5; }
+.ops-item:hover { background: var(--superficie-2); }
 .ops-item--ativo, .ops-item--ativo:hover { background: var(--verde-100); border-left-color: var(--verde-700); }
 .ops-item input { margin: 4px 4px 4px 8px; }
 
@@ -1190,7 +1229,7 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
 
 /* Renomear na lista: duplo clique, F2 ou botão direito → Renomear */
 .botao-icone[aria-disabled="true"],
-.botao-icone[aria-disabled="true"]:hover { background: none; color: #9aa5a0; cursor: not-allowed; }
+.botao-icone[aria-disabled="true"]:hover { background: none; color: var(--texto-fraco); cursor: not-allowed; }
 .ops-lista__nova:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 2px; }
 .ops-item__nome:focus-visible { outline: 2px solid var(--verde-600); outline-offset: -2px; border-radius: 6px; }
 
@@ -1274,7 +1313,7 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
   font-weight: 700;
 }
 .op-cabecalho__nome--editavel { cursor: text; border-radius: 6px; }
-.op-cabecalho__nome--editavel:hover { background: #f4f7f5; }
+.op-cabecalho__nome--editavel:hover { background: var(--superficie-2); }
 .op-cabecalho__nome--editavel:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 2px; }
 
 .op-cabecalho__dap-texto { align-self: center; color: var(--texto-suave); }
@@ -1296,7 +1335,7 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
 .op-navegar:hover { background: var(--verde-100); }
 .op-navegar .icone { width: 18px; height: 18px; }
 .op-navegar:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 2px; }
-.op-cabecalho__fenologia:disabled { background-color: var(--fundo); color: #9aa5a0; cursor: not-allowed; }
+.op-cabecalho__fenologia:disabled { background-color: var(--fundo); color: var(--texto-fraco); cursor: not-allowed; }
 
 /* --- Recomendação --- */
 
@@ -1325,14 +1364,14 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
   color: #fff;
   cursor: not-allowed;
 }
-.tabela-rec .campo--dose:disabled { background: #f3f5f6; cursor: not-allowed; }
+.tabela-rec .campo--dose:disabled { background: var(--superficie-2); cursor: not-allowed; }
 
 .erro-campo {
   margin: 4px 0 0;
   font-size: 12px;
   font-weight: 500;
   line-height: 1.3;
-  color: #b03a2e;
+  color: var(--erro);
   text-align: left;
   white-space: normal;
 }
@@ -1392,7 +1431,7 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
 .combo__nada { padding: 8px 10px; font-size: 14px; color: var(--texto-suave); }
 
 /* Pré-cadastro na própria linha: bloco amarelo claro com borda à esquerda, campos alinhados às colunas */
-.tabela-rec__pre td { background: #fffaeb; }
+.tabela-rec__pre td { background: var(--aviso-fundo); }
 .tabela-rec__pre td:first-child { box-shadow: inset 4px 0 0 #f2de9b; }
 .tabela-rec .tabela-rec__pre--titulo td { padding-bottom: 0; }
 .tabela-rec .tabela-rec__pre--acoes td { border-top: 0; padding-top: 0; }
@@ -1417,7 +1456,7 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
   margin: 3px 0 0 auto;
   padding: 0 7px;
   border-radius: 999px;
-  background: #eef1ef;
+  background: var(--superficie-2);
   color: var(--texto-suave);
   font-size: 11px;
   font-weight: 600;
@@ -1425,7 +1464,7 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
   text-transform: none;
   white-space: nowrap;
 }
-.etiqueta-tipo--fungicida  { background: #e7effa; color: #2a5a9b; }
+.etiqueta-tipo--fungicida  { background: var(--info-fundo); color: #2a5a9b; }
 .etiqueta-tipo--inseticida { background: #fbe9e7; color: #a3412f; }
 .etiqueta-tipo--herbicida  { background: #f1ecf8; color: #6a4a9a; }
 /* Em células alinhadas à esquerda (tabela da recomendação) */
@@ -1471,7 +1510,7 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
   white-space: nowrap;
   cursor: pointer;
 }
-.guia:hover { background: #f4f7f5; color: var(--texto); }
+.guia:hover { background: var(--superficie-2); color: var(--texto); }
 .guia--ativa, .guia--ativa:hover { background: var(--verde-100); color: var(--verde-700); border-bottom-color: var(--verde-700); font-weight: 600; }
 .guia--alvo { box-shadow: inset 3px 0 0 var(--amarelo); }
 .guia--mais { padding: 0 16px; }
@@ -1522,7 +1561,7 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
 .filtro-talhoes {
   height: 34px;
   padding: 0 14px;
-  border: 1px solid #cfd6d2;
+  border: 1px solid var(--borda-forte);
   border-radius: 999px;
   background: var(--superficie);
   font: inherit;
@@ -1530,7 +1569,7 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
   color: var(--texto);
   cursor: pointer;
 }
-.filtro-talhoes:hover { border-color: #9aa59f; }
+.filtro-talhoes:hover { border-color: var(--borda-forte); }
 /* Filtro selecionado: preenchido em verde */
 /* Selecionada: verde-claro com borda verde (o verde sólido fica para as abas e o botão principal) */
 .filtro-talhoes--ativo,
@@ -1564,16 +1603,16 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
   background: var(--superficie);
 }
 /* Orientação em amarelo (âmbar escuro sobre amarelo claro): não se confunde com o verde da guia ativa */
-.barra-definir--vazia { padding: 10px 14px; border: 1px solid #f2de9b; border-radius: 8px; background: #fff6d6; }
-.barra-definir__texto { display: flex; align-items: center; gap: 8px; margin-right: auto; font-size: 14px; font-weight: 600; color: #7a5600; }
+.barra-definir--vazia { padding: 10px 14px; border: 1px solid var(--aviso-borda); border-radius: 8px; background: var(--aviso-fundo); }
+.barra-definir__texto { display: flex; align-items: center; gap: 8px; margin-right: auto; font-size: 14px; font-weight: 600; color: var(--aviso-texto); }
 .barra-definir__texto .icone { width: 18px; height: 18px; flex-shrink: 0; }
 .barra-definir__selecao { margin-right: auto; font-size: 14px; color: var(--texto-suave); }
 .barra-definir__selecao strong { color: var(--texto); }
 /* Limpar: botão com borda, ao lado do Definir recomendação e do mesmo tamanho */
-.barra-definir__limpar { border-color: #cfd6d2; }
+.barra-definir__limpar { border-color: var(--borda-forte); }
 /* Excluir recomendação: à direita, antes de Limpar e Definir recomendação, já com fundo vermelho sutil */
 .barra-definir__excluir,
-.barra-definir__excluir:hover { background: #fbeceb; }
+.barra-definir__excluir:hover { background: var(--erro-fundo); }
 .barra-definir__excluir:hover { border-color: #d9a39b; }
 .barra-definir__excluir .icone { width: 16px; height: 16px; }
 .barra-definir__excluir:focus-visible { outline: 2px solid #b03a2e; outline-offset: 2px; }
@@ -1612,10 +1651,10 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
 /* Recomendações aplicadas: etiqueta nos filtros, bolinha no talhão e quadro com os produtos */
 .rec-ponto { display: inline-block; width: 9px; height: 9px; margin-right: 7px; border-radius: 50%; vertical-align: 1px; flex-shrink: 0; }
 .filtro-talhoes { display: inline-flex; align-items: center; }
-.tabela__nao-recebe { color: #b9c0c5; }
+.tabela__nao-recebe { color: var(--texto-fraco); }
 .tabela-talhoes thead .etiqueta-tipo { margin-left: auto; }
 
-.quadro-rec { padding: 10px 14px; border: 1px solid var(--borda); border-radius: 8px; background: #f8faf9; }
+.quadro-rec { padding: 10px 14px; border: 1px solid var(--borda); border-radius: 8px; background: var(--superficie-2); }
 .quadro-rec__topo { display: flex; align-items: center; gap: 10px; }
 .quadro-rec__titulo { flex: 1; min-width: 0; margin: 0; font-size: 14px; color: var(--texto-suave); }
 .quadro-rec__titulo strong { color: var(--texto); }
@@ -1635,28 +1674,28 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
 /* Passos do plantio: Variedade · População de plantas · TSI */
 .passos { display: flex; flex-wrap: wrap; gap: 8px; }
 .passo {
-  height: 38px; padding: 0 18px; border: 1px solid #cfd6d2; border-radius: 8px;
+  height: 38px; padding: 0 18px; border: 1px solid var(--borda-forte); border-radius: 8px;
   background: var(--superficie); color: var(--texto); font: inherit; font-size: 14px; cursor: pointer;
 }
-.passo:hover { border-color: #b4beb8; }
+.passo:hover { border-color: var(--borda-forte); }
 .passo--ativo, .passo--ativo:hover { border-color: var(--verde-700); background: var(--verde-700); color: #fff; font-weight: 600; }
 .passo:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 2px; }
 
-.visoes { display: flex; border: 1px solid #cfd6d2; border-radius: 8px; overflow: hidden; }
-.visoes__botao { height: 32px; padding: 0 14px; border: 0; border-left: 1px solid #cfd6d2; background: var(--superficie); font: inherit; font-size: 13px; color: var(--texto); cursor: pointer; }
+.visoes { display: flex; border: 1px solid var(--borda-forte); border-radius: 8px; overflow: hidden; }
+.visoes__botao { height: 32px; padding: 0 14px; border: 0; border-left: 1px solid var(--borda-forte); background: var(--superficie); font: inherit; font-size: 13px; color: var(--texto); cursor: pointer; }
 .visoes__botao:first-child { border-left: 0; }
 .visoes__botao--ativo { background: var(--verde-700); color: #fff; font-weight: 600; }
-.visoes__botao:disabled { color: #9aa49f; cursor: not-allowed; }
+.visoes__botao:disabled { color: var(--texto-fraco); cursor: not-allowed; }
 .visoes__botao:focus-visible { outline: 2px solid var(--verde-600); outline-offset: -2px; }
 
 /* Tabela do passo Variedade */
 .tabela-variedade tr.linha--aberta > * { background: var(--verde-100); }
 .tabela-variedade tr.linha--aberta > :first-child { box-shadow: inset 3px 0 0 var(--verde-700); }
 .tabela__ciclo { color: var(--texto-suave); }
-.texto-alerta { color: #8a5a00; font-weight: 600; }
-.aviso-janela { display: inline-flex; vertical-align: -2px; color: #8a5a00; }
+.texto-alerta { color: var(--aviso-texto); font-weight: 600; }
+.aviso-janela { display: inline-flex; vertical-align: -2px; color: var(--aviso-texto); }
 .aviso-janela .icone { width: 14px; height: 14px; }
-.aviso-janela-texto { display: flex; align-items: center; gap: 4px; margin: 4px 0 0; font-size: 12px; font-weight: 600; color: #8a5a00; }
+.aviso-janela-texto { display: flex; align-items: center; gap: 4px; margin: 4px 0 0; font-size: 12px; font-weight: 600; color: var(--aviso-texto); }
 .aviso-janela-texto .icone { width: 14px; height: 14px; }
 
 /* Produtividade histórica no Plantio: nome da coluna e valores com contorno verde na largura da coluna,
@@ -1684,7 +1723,7 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
 /* Ampliar/reduzir o painel: fundo branco e setas na cor verde */
 .painel-talhao__tamanho { background: var(--superficie); color: var(--verde-700); }
 .painel-talhao__tamanho:hover { background: var(--verde-100); }
-.painel-talhao__seta:disabled { border-color: var(--borda); color: #b9c0c5; cursor: not-allowed; }
+.painel-talhao__seta:disabled { border-color: var(--borda); color: var(--texto-fraco); cursor: not-allowed; }
 .painel-talhao__rolagem { flex: 1; min-height: 0; overflow: auto; display: flex; flex-direction: column; gap: 10px; padding-top: 10px; }
 .painel-talhao__sem-historico { margin: 0; font-size: 14px; color: var(--texto-suave); }
 .painel-talhao__campos { display: flex; flex-direction: column; gap: 10px; padding-top: 10px; border-top: 1px solid var(--borda); }
@@ -1693,7 +1732,7 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
 .plantio__datas .campo { margin: 0; }
 .plantio__orientacao { margin: 0 0 4px; }
 .painel-talhao__previsao { display: flex; align-items: center; height: 42px; margin: 0; padding: 0 12px; border-radius: 8px; background: var(--fundo); font-weight: 700; }
-.painel-talhao__pre { padding: 10px 12px; border: 1px solid #f2de9b; border-radius: 8px; background: #fffaeb; display: flex; flex-direction: column; gap: 8px; }
+.painel-talhao__pre { padding: 10px 12px; border: 1px solid var(--aviso-borda); border-radius: 8px; background: var(--aviso-fundo); display: flex; flex-direction: column; gap: 8px; }
 .painel-talhao__pre .pre-cadastro__titulo { margin: 0; }
 .painel-talhao__pre-botoes { display: flex; justify-content: flex-end; gap: 8px; }
 
@@ -1701,7 +1740,7 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
 /* Ocupa a altura livre do painel e encolhe primeiro (mínimo de 150 px), para os campos (até a Germinação)
    caberem sem rolar; só a área do gráfico estica */
 .grafico-historico { flex: 1; min-height: 150px; margin: 0; display: flex; flex-direction: column; gap: 6px; }
-.grafico-historico__area { flex: 1; width: 100%; min-height: 70px; overflow: visible; border-bottom: 1px solid #cfd6d2; }
+.grafico-historico__area { flex: 1; width: 100%; min-height: 70px; overflow: visible; border-bottom: 1px solid var(--borda-forte); }
 .grafico-historico__eixo { display: grid; text-align: center; font-size: 11px; color: var(--texto-suave); line-height: 1.35; }
 .grafico-historico__eixo strong { display: block; color: var(--texto); font-weight: 600; }
 .grafico-historico__titulo { font-size: 13px; font-weight: 700; }
@@ -1714,14 +1753,14 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
 .colheita__grafico { margin: 0; padding: 12px 16px 6px; border: 1px solid var(--borda); border-radius: 8px; flex-shrink: 0; }
 .colheita__titulo { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
 .colheita__grafico svg { display: block; width: 100%; max-height: 260px; }
-.colheita__vazia { display: flex; align-items: center; gap: 8px; margin: 0; padding: 10px 14px; border: 1px solid #f2de9b; border-radius: 8px; background: #fff6d6; font-size: 14px; font-weight: 600; color: #7a5600; }
+.colheita__vazia { display: flex; align-items: center; gap: 8px; margin: 0; padding: 10px 14px; border: 1px solid var(--aviso-borda); border-radius: 8px; background: var(--aviso-fundo); font-size: 14px; font-weight: 600; color: var(--aviso-texto); }
 .colheita__vazia .icone { width: 18px; height: 18px; flex-shrink: 0; }
 .tabela-colheita tbody th { font-weight: 600; text-align: left; }
 .colheita__sem th, .colheita__sem td { color: var(--texto-suave); }
 
 /* Modal "Definir variedade e plantio" (talhões marcados) */
 .definir--estreito { max-width: 620px; }
-.plantio__pre { padding: 10px 12px; border: 1px solid #f2de9b; border-radius: 8px; background: #fffaeb; }
+.plantio__pre { padding: 10px 12px; border: 1px solid var(--aviso-borda); border-radius: 8px; background: var(--aviso-fundo); }
 .plantio__pre .pre-cadastro__titulo { margin: 0 0 8px; }
 .plantio__pre-linha { display: flex; flex-wrap: wrap; gap: 8px; }
 .plantio__pre-linha .campo__controle { flex: 1 1 180px; height: 34px; }
@@ -1731,7 +1770,7 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
   .painel-talhao { width: auto; }
 }
 /* Produto ou princípio ativo repetido (nesta ou em outra recomendação): aviso em vermelho */
-.aviso-repetido { display: flex; align-items: flex-start; gap: 4px; margin: 4px 0 0; font-size: 12px; font-weight: 600; line-height: 1.3; color: #b03a2e; }
+.aviso-repetido { display: flex; align-items: flex-start; gap: 4px; margin: 4px 0 0; font-size: 12px; font-weight: 600; line-height: 1.3; color: var(--erro); }
 .aviso-repetido .icone { width: 14px; height: 14px; flex-shrink: 0; margin-top: 1px; }
 /* Excluir fica à esquerda, longe do Salvar */
 .definir__excluir { margin-right: auto; }
@@ -1746,7 +1785,7 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
 /* Copiar operação: lista das operações do grupo que podem receber a cópia */
 .copiar-para { display: flex; flex-direction: column; gap: 6px; max-height: 360px; overflow: auto; margin: 0; padding: 0; border: 0; }
 .copiar-para__item { display: grid; grid-template-columns: auto 1fr auto; column-gap: 10px; align-items: center; padding: 10px 12px; border: 1px solid var(--borda); border-radius: 8px; cursor: pointer; }
-.copiar-para__item:hover { border-color: #b4beb8; }
+.copiar-para__item:hover { border-color: var(--borda-forte); }
 .copiar-para__item:has(input:checked) { border-color: var(--verde-600); background: var(--verde-100); }
 .copiar-para__item input { margin: 0; accent-color: var(--verde-600); }
 .copiar-para__nome { font-weight: 600; font-size: 14px; }
@@ -1767,10 +1806,10 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
   display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; padding: 0;
   border: 0; border-radius: 6px; background: none; color: inherit; cursor: pointer;
 }
-.titulo-ordenar:hover { background: #e3e7e4; }
+.titulo-ordenar:hover { background: var(--superficie-3); }
 .titulo-abrir { padding: 0; border: 0; background: none; font: inherit; font-weight: inherit; color: var(--verde-700); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
 .titulo-abrir:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 2px; border-radius: 4px; }
-.titulo-ordenar .icone { width: 14px; height: 14px; color: #9aa49f; }
+.titulo-ordenar .icone { width: 14px; height: 14px; color: var(--texto-fraco); }
 .titulo-ordenar--ativo .icone { color: var(--verde-700); }
 .titulo-ordenar--desc .icone { transform: rotate(180deg); }
 .titulo-ordenar:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 2px; border-radius: 4px; }
@@ -1778,11 +1817,11 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 /* Dica acima da tabela (some depois do primeiro uso) */
 .dica-plantio {
   flex-shrink: 0; display: flex; align-items: center; gap: 10px; margin: 0; padding: 4px 6px 4px 14px;
-  border: 1px solid #f2de9b; border-radius: 8px; background: #fff6d6; font-size: 14px; font-weight: 600; color: #7a5600;
+  border: 1px solid var(--aviso-borda); border-radius: 8px; background: var(--aviso-fundo); font-size: 14px; font-weight: 600; color: var(--aviso-texto);
 }
 .dica-plantio .icone { width: 18px; height: 18px; flex-shrink: 0; }
 .dica-plantio p { flex: 1; margin: 0; }
-.dica-plantio__fechar { color: #7a5600; }
+.dica-plantio__fechar { color: var(--aviso-texto); }
 .dica-plantio__fechar:hover { background: #fbe9a8; }
 
 /* Barra de ação do Plantio: sempre visível; sem talhão marcado, faixa amarela com a orientação */
@@ -1793,8 +1832,8 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .barra-acao__selecao { flex: 1; margin: 0; font-size: 14px; color: var(--texto-suave); }
 .barra-acao__selecao strong { font-size: 15px; color: var(--texto); }
 .barra-acao__definir .icone { width: 18px; height: 18px; }
-.barra-acao--vazia { background: #fff6d6; box-shadow: inset 0 0 0 1px #f2de9b; }
-.barra-acao--vazia .barra-acao__selecao { display: flex; align-items: center; gap: 8px; font-weight: 600; color: #7a5600; }
+.barra-acao--vazia { background: var(--aviso-fundo); box-shadow: inset 0 0 0 1px #f2de9b; }
+.barra-acao--vazia .barra-acao__selecao { display: flex; align-items: center; gap: 8px; font-weight: 600; color: var(--aviso-texto); }
 .barra-acao--vazia .barra-acao__selecao .icone { width: 18px; height: 18px; flex-shrink: 0; }
 
 /* Painel: germinação e, ao lado, "Aplicar em todos os talhões" (o campo com a largura da Data de plantio) */
@@ -1807,13 +1846,13 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .botao--contorno { border: 1px solid var(--borda); background: var(--superficie); color: var(--verde-700); font-weight: 600; }
 .botao--contorno:hover:not(:disabled) { border-color: var(--verde-600); background: var(--verde-100); }
 .botao--contorno .icone { width: 18px; height: 18px; }
-.botao--contorno:disabled { color: #9aa49f; cursor: not-allowed; }
+.botao--contorno:disabled { color: var(--texto-fraco); cursor: not-allowed; }
 
 
 /* ===== Plantio · visão Mapa ===== */
 /* O mapa ocupa a altura livre do cartão, sem passar dele; a legenda fica numa linha abaixo */
 .mapa-area { position: relative; flex: 1; min-height: 200px; display: flex; flex-direction: column; }
-.mapa { flex: 1; min-height: 200px; border: 1px solid var(--borda); border-radius: 10px; background: #dfe5e1; }
+.mapa { flex: 1; min-height: 200px; border: 1px solid var(--borda); border-radius: 10px; background: var(--superficie-3); }
 .mapa__sem { display: flex; align-items: center; gap: 8px; margin: 0; padding: 16px; color: var(--texto-suave); }
 .mapa__dica {
   position: absolute; left: 10px; bottom: 10px; z-index: 500; display: flex; align-items: center; gap: 6px; margin: 0;
@@ -1830,10 +1869,10 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .mapa-rotulo { width: auto !important; height: auto !important; background: none; border: 0; }
 .mapa-rotulo {
   transform-origin: center; padding: 1px 5px; border-radius: 4px; background: rgba(255, 255, 255, .82);
-  color: #1a1f1c; font: 700 11px/1.3 var(--fonte); white-space: nowrap; translate: -50% -50%; pointer-events: none;
+  color: var(--texto); font: 700 11px/1.3 var(--fonte); white-space: nowrap; translate: -50% -50%; pointer-events: none;
 }
 /* Detalhe ao passar o mouse */
-.leaflet-tooltip.mapa-detalhe { padding: 4px 8px; font: 12px/1.3 var(--fonte); color: #1a1f1c; }
+.leaflet-tooltip.mapa-detalhe { padding: 4px 8px; font: 12px/1.3 var(--fonte); color: var(--texto); }
 .leaflet-interactive { cursor: pointer; }
 
 /* Data de plantio: digitável e com botão de calendário (o campo de data do navegador fica atrás do botão) */
@@ -1854,7 +1893,7 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .tabela__suave { color: var(--texto-suave); }
 .tabela__forte { font-weight: 600; }
 .tabela-populacao tfoot th, .tabela-populacao tfoot td {
-  position: sticky; bottom: 0; z-index: 1; padding: 9px 10px; background: #f6f7f6; border-top: 1px solid #cfd6d2; font-weight: 700; text-align: left;
+  position: sticky; bottom: 0; z-index: 1; padding: 9px 10px; background: var(--fundo); border-top: 1px solid var(--borda-forte); font-weight: 700; text-align: left;
 }
 .tabela-populacao tfoot .tabela__numero { text-align: right; padding-right: 32px; }
 .tabela-populacao tfoot .tabela__nota { font-weight: 400; color: var(--texto-suave); }
@@ -1867,7 +1906,7 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .populacao__numero span { font-size: 13px; color: var(--texto-suave); }
 .populacao__numero strong { font-size: 17px; }
 .populacao__germinacao { margin: 0; font-size: 13px; color: var(--texto-suave); }
-.populacao__sem-germinacao { display: flex; align-items: center; gap: 6px; margin: 0; font-size: 13px; font-weight: 600; color: #8a5a00; }
+.populacao__sem-germinacao { display: flex; align-items: center; gap: 6px; margin: 0; font-size: 13px; font-weight: 600; color: var(--aviso-texto); }
 .populacao__sem-germinacao .icone { width: 16px; height: 16px; flex-shrink: 0; }
 
 /* Plantio: "Exibir" Tabela · Mapa · Previsão de colheita (selecionada em verde-claro; o verde sólido é dos passos) */
@@ -1891,15 +1930,15 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 
 /* ===== Edição direto na tabela (plano em construção) ===== */
 /* Célula editável: fundo branco; o campo só mostra a borda ao passar o mouse e ao editar. Calculada: fundo cinza */
-.tabela .tabela__calculada { background: #f3f5f4; color: var(--texto-suave); }
+.tabela .tabela__calculada { background: var(--superficie-2); color: var(--texto-suave); }
 .tabela .tabela__editavel { background: var(--superficie); padding-top: 3px; padding-bottom: 3px; }
 .celula {
   width: 100%; min-width: 0; height: 32px; padding: 0 6px; border: 1px solid transparent; border-radius: 6px;
   background: transparent; font: inherit; color: inherit;
 }
 .celula:hover { border-color: var(--borda); }
-.celula:focus { outline: none; border-color: var(--verde-600); background: #fff; box-shadow: 0 0 0 2px var(--verde-100); }
-.celula::placeholder { color: #b9c0c5; }
+.celula:focus { outline: none; border-color: var(--verde-600); background: var(--superficie); box-shadow: 0 0 0 2px var(--verde-100); }
+.celula::placeholder { color: var(--texto-fraco); }
 .celula--numero { width: 72px; text-align: right; }
 .tabela-doses .celula--numero { width: 80px; text-align: center; }
 .celula--data { width: 112px; }
@@ -1908,12 +1947,12 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .celula-linha--numero { justify-content: flex-end; }
 
 /* TSI: grupos de produto (selo abaixo do nome), fora das cores de fungicida, inseticida e herbicida */
-.etiqueta-tipo--nematicida   { background: #fdf0e1; color: #8a4b00; }
+.etiqueta-tipo--nematicida   { background: #fdf0e1; color: var(--aviso-texto); }
 .etiqueta-tipo--inoculante   { background: #e6f4ea; color: #24663b; }
 .etiqueta-tipo--fertilizante { background: #eef3e2; color: #4f6118; }
 .etiqueta-tipo--polimero     { background: #fbe8f2; color: #8c2f62; }
 .etiqueta-tipo--po-secante   { background: #f1efe9; color: #5d5646; }
-.etiqueta-tipo--grafite      { background: #eceeef; color: #3f4649; }
+.etiqueta-tipo--grafite      { background: var(--superficie-3); color: var(--texto-suave); }
 .dica-plantio__link { padding: 0; border: 0; background: none; font: inherit; color: inherit; text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
 .dica-plantio__link:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 2px; border-radius: 3px; }
 .dica-plantio:not(:has(.dica-plantio__fechar)) { padding: 8px 14px; }
@@ -1947,16 +1986,16 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .importar[hidden] { display: none; } /* só com "Importar XLSX" escolhido */
 .importar__arquivo { font: inherit; font-size: 14px; }
 .importar__ok { margin: 0; font-size: 13px; color: var(--verde-700); font-weight: 600; }
-.importar__diferencas { margin-top: 4px; padding: 12px 14px; border: 1px solid #f2de9b; border-radius: 8px; background: #fff6d6; font-size: 14px; }
-.importar__titulo { display: flex; align-items: center; gap: 6px; margin: 0 0 6px; font-weight: 700; color: #7a5600; }
+.importar__diferencas { margin-top: 4px; padding: 12px 14px; border: 1px solid var(--aviso-borda); border-radius: 8px; background: var(--aviso-fundo); font-size: 14px; }
+.importar__titulo { display: flex; align-items: center; gap: 6px; margin: 0 0 6px; font-weight: 700; color: var(--aviso-texto); }
 .importar__titulo .icone { width: 16px; height: 16px; }
 .importar__lista { margin: 0 0 8px; padding-left: 20px; }
-.importar__aviso { margin: 0 0 8px; color: #7a5600; }
+.importar__aviso { margin: 0 0 8px; color: var(--aviso-texto); }
 .importar__botoes { display: flex; flex-wrap: wrap; gap: 8px; }
 
 /* Menu do plano: Excluir em vermelho; desabilitado (plano aprovado) com o motivo embaixo */
-.menu-contexto__item--perigo { color: #b03a2e; }
-.menu-contexto__item[aria-disabled="true"] { color: #9aa49f; cursor: not-allowed; }
+.menu-contexto__item--perigo { color: var(--erro); }
+.menu-contexto__item[aria-disabled="true"] { color: var(--texto-fraco); cursor: not-allowed; }
 .menu-contexto__item[aria-disabled="true"]:hover { background: transparent; }
 .menu-contexto__motivo { display: block; font-size: 12px; color: var(--texto-suave); }
 
@@ -1974,15 +2013,15 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .cal-filtro__seta svg { width: 16px; height: 16px; }
 .cal-filtro[open] .cal-filtro__seta { transform: rotate(180deg); }
 .cal-filtro__painel { position: absolute; z-index: 30; top: calc(100% + 4px); left: 0; min-width: 100%; max-height: 320px; overflow-y: auto;
-  background: #fff; border: 1px solid var(--borda, #d8ddd6); border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,.12); padding: 6px 0; }
+  background: var(--superficie); border: 1px solid var(--borda, var(--borda-forte)); border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,.12); padding: 6px 0; }
 .cal-filtro__opcao { display: flex; align-items: center; gap: 8px; padding: 7px 14px; font-size: 14px; cursor: pointer; white-space: nowrap; }
-.cal-filtro__opcao:hover { background: #f2f5f0; }
-.cal-filtro__opcao--todos { font-weight: 600; border-bottom: 1px solid var(--borda, #d8ddd6); margin-bottom: 4px; }
+.cal-filtro__opcao:hover { background: var(--superficie-2); }
+.cal-filtro__opcao--todos { font-weight: 600; border-bottom: 1px solid var(--borda, var(--borda-forte)); margin-bottom: 4px; }
 .cal-filtro__busca { padding: 4px 10px 8px; }
 .cal-filtro__busca .campo__controle { width: 100%; min-width: 0; }
 .cal-filtro__opcao[hidden] { display: none; }
-.cal-filtro__nada { margin: 0; padding: 8px 14px; font-size: 13px; color: #6b7280; }
-.cal-filtro__area { margin-left: auto; padding-left: 16px; color: #6b7280; font-size: 13px; }
+.cal-filtro__nada { margin: 0; padding: 8px 14px; font-size: 13px; color: var(--texto-suave); }
+.cal-filtro__area { margin-left: auto; padding-left: 16px; color: var(--texto-suave); font-size: 13px; }
 .calendario__visoes .visoes__botao { height: 38px; }
 .calendario { padding-top: 10px; gap: 10px; }
 .calendario__visoes .visoes__botao--ativo { background: var(--verde-100); color: var(--verde-800); box-shadow: inset 0 0 0 1px var(--verde-600); }
@@ -2004,9 +2043,9 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .cal-legenda { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; }
 .cal-leg { display: inline-flex; align-items: center; gap: 8px; height: 32px; padding: 0 10px; border: 1px solid transparent; border-radius: 999px; background: none; font: inherit; font-size: 14px; color: var(--texto); cursor: pointer; list-style: none; }
 .cal-leg::-webkit-details-marker { display: none; }
-.cal-leg:hover { background: #f1f4f2; }
-.cal-leg[aria-pressed="true"] { border-color: #cfd6d2; background: var(--superficie); font-weight: 600; }
-.cal-leg--desligado { color: #9aa49f; }
+.cal-leg:hover { background: var(--superficie-2); }
+.cal-leg[aria-pressed="true"] { border-color: var(--borda-forte); background: var(--superficie); font-weight: 600; }
+.cal-leg--desligado { color: var(--texto-fraco); }
 .cal-leg--desligado .cal-ponto { background: none; box-shadow: inset 0 0 0 2px #c3cbc6; }
 .cal-leg--mais { color: var(--verde-700); font-weight: 600; }
 .cal-leg--mais .icone { width: 14px; height: 14px; }
@@ -2025,13 +2064,13 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .cal-ponto--colheita, .cal-ev--colheita { --c: #d4a017; --f: #fbf3dc; }
 .cal-ponto--outro, .cal-ev--outro { --c: #3b74d6; --f: #e6eefb; }
 .cal-grade { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); background: var(--superficie); border: 1px solid var(--borda); border-radius: var(--raio); overflow: hidden; }
-.cal-grade__cab { padding: 8px; border-bottom: 1px solid var(--borda); background: #f7f8f7; text-align: center; font-size: 12px; font-weight: 700; letter-spacing: .04em; color: var(--texto-suave); }
+.cal-grade__cab { padding: 8px; border-bottom: 1px solid var(--borda); background: var(--superficie-2); text-align: center; font-size: 12px; font-weight: 700; letter-spacing: .04em; color: var(--texto-suave); }
 .cal-dia { display: flex; flex-direction: column; gap: 4px; min-height: 104px; padding: 6px; border-right: 1px solid var(--borda); border-bottom: 1px solid var(--borda); cursor: pointer; min-width: 0; }
 .cal-dia:nth-child(7n) { border-right: 0; }
 .cal-dia:hover { background: #fafcfa; }
 .cal-grade--semana .cal-dia { min-height: 360px; }
-.cal-dia--fora { background: #f7f8f7; }
-.cal-dia--fora .cal-dia__num { color: #a8b0ab; }
+.cal-dia--fora { background: var(--superficie-2); }
+.cal-dia--fora .cal-dia__num { color: var(--texto-fraco); }
 .cal-dia--aberto { box-shadow: inset 0 0 0 2px var(--verde-600); }
 .cal-dia__topo { display: flex; align-items: center; gap: 6px; }
 .cal-dia__num { font-size: 13px; font-weight: 700; }
@@ -2078,18 +2117,18 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .cal-cartao { display: flex; flex-direction: column; gap: 4px; }
 .cal-cartao__nome { margin: 4px 0 0; font-size: 15px; }
 .cal-cartao__sub { margin: 0; font-size: 13px; color: var(--texto-suave); }
-.cal-cartao__sem { margin: 0; font-size: 13px; color: #9aa49f; }
+.cal-cartao__sem { margin: 0; font-size: 13px; color: var(--texto-fraco); }
 .cal-cartao__produtos { margin: 0; padding-left: 16px; font-size: 13px; }
 .cal-cartao__produtos li { margin-bottom: 4px; }
 .cal-cartao__produto { display: block; }
 .cal-cartao__dose { display: block; color: var(--texto-suave); }
 .cal-etiqueta { align-self: flex-start; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; }
-.cal-etiqueta--sementes   { background: #e6f2ec; color: #1e6b3f; }
+.cal-etiqueta--sementes   { background: var(--verde-100); color: #1e6b3f; }
 .cal-etiqueta--tratamento-de-sementes { background: #f3e9f5; color: #7a3f86; }
-.cal-etiqueta--defensivos { background: #e7effa; color: #2a5a9b; }
-.cal-etiqueta--fertilidade { background: #f1ece4; color: #6b5435; }
-.cal-etiqueta--colheita   { background: #fbeee0; color: #8a4b00; }
-.cal-etiqueta--outro      { background: #eceeef; color: #3f4649; }
+.cal-etiqueta--defensivos { background: #fdeee3; color: #a84f12; }
+.cal-etiqueta--fertilidade { background: #f2e6f7; color: #6a2f86; }
+.cal-etiqueta--colheita   { background: #fbeee0; color: var(--aviso-texto); }
+.cal-etiqueta--outro      { background: var(--superficie-3); color: var(--texto-suave); }
 
 /* Tabela: uma linha por operação, uma coluna por produto */
 .cal-tabela { max-height: none; }
@@ -2120,7 +2159,7 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .estrutura__aviso > .icone { width: 16px; height: 16px; flex-shrink: 0; color: var(--texto-suave); }
 .estrutura__aviso p { flex: 1; min-width: 240px; margin: 0; font-size: 14px; color: var(--texto-suave); }
 .estrutura__aviso p strong { color: var(--texto); font-weight: 600; }
-.estrutura__aviso { padding: 8px 8px 8px 14px; border: 1px solid #f0d98a; border-radius: var(--raio); background: #fffbea; }
+.estrutura__aviso { padding: 8px 8px 8px 14px; border: 1px solid var(--aviso-borda); border-radius: var(--raio); background: var(--aviso-fundo); }
 .estrutura__fechar { margin-left: auto; width: 30px; height: 30px; }
 .estrutura__fechar .icone { width: 16px; height: 16px; }
 /* Tabela por fase (Pré-plantio, Plantio, Manejo da cultura, Colheita), do tamanho do conteúdo: as colunas ficam juntas */
@@ -2137,7 +2176,7 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .tab-op__c-acao { width: 88px; }
 .tab-op td, .tab-op thead th { overflow: hidden; text-overflow: ellipsis; }
 .tab-op thead th { position: sticky; top: 0; z-index: 2; padding: 12px 16px; box-shadow: inset 0 -1px 0 var(--borda); text-align: left; font-size: 13px; font-weight: 600;
-  background: #f7f8f7; border-bottom: 1px solid var(--borda); white-space: nowrap; }
+  background: var(--superficie-2); border-bottom: 1px solid var(--borda); white-space: nowrap; }
 .tab-op td { padding: 6px 16px; border-top: 1px solid var(--borda); vertical-align: middle; }
 .tab-op__dap { text-align: center !important; font-variant-numeric: tabular-nums; }
 .tab-op__acao { text-align: center; }
@@ -2149,9 +2188,9 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .tab-op__inserir { width: 30px; height: 30px; color: var(--texto-suave); }
 .tab-op__inserir .icone { width: 16px; height: 16px; }
 .tab-op__inserir:hover { color: var(--verde-700); }
-.tab-op__nome--vazio { color: #9aa49f; font-style: italic; font-weight: 400; }
+.tab-op__nome--vazio { color: var(--texto-fraco); font-style: italic; font-weight: 400; }
 .tab-op__dica { margin: 0; font-size: 13px; color: var(--texto-suave); }
-.tab-op__faixa th { padding: 0; background: #eef4ef; border-top: 1px solid var(--borda); text-align: left; font-weight: 600; }
+.tab-op__faixa th { padding: 0; background: var(--superficie-2); border-top: 1px solid var(--borda); text-align: left; font-weight: 600; }
 .tab-op__faixa-linha { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; padding: 10px 16px; }
 .tab-op__faixa-linha > .icone, .tab-op__ico { width: 18px; height: 18px; flex-shrink: 0; color: var(--verde-700); }
 .tab-op__fase { font-size: 15px; }
@@ -2160,17 +2199,17 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .tab-op__adicionar .icone { width: 15px; height: 15px; }
 .tab-op__op { font-weight: 600; }
 .tab-op__nome { display: inline-block; padding: 2px 6px; margin-left: -6px; border-radius: 6px; cursor: text; }
-.tab-op__nome:hover { background: #eef2ef; }
+.tab-op__nome:hover { background: var(--superficie-2); }
 .tab-op__nome:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 2px; }
 .tab-op__campo { width: 100%; height: 34px; }
 .tab-op__grupo { display: flex; align-items: center; gap: 8px; white-space: nowrap; color: var(--texto-suave); }
 .tab-op__sel-grupo { flex: 1; min-width: 0; max-width: 280px; height: 34px; }
 .tab-op__grupo-nome { padding: 2px 4px; border-radius: 6px; cursor: text; }
 /* Operação sem grupo (o grupo dela foi excluído): destaque em âmbar até escolher o grupo */
-.tab-op__sem-grupo { color: #8a5a00; }
+.tab-op__sem-grupo { color: var(--aviso-texto); }
 .tab-op__sem-grupo > .icone { width: 16px; height: 16px; flex-shrink: 0; }
-.tab-op__sel-grupo--vazio { border-color: #e0b84a; background: #fffbea; color: #8a5a00; }
-.tab-op__grupo-nome:hover { background: #eef2ef; }
+.tab-op__sel-grupo--vazio { border-color: var(--aviso-borda); background: var(--aviso-fundo); color: var(--aviso-texto); }
+.tab-op__grupo-nome:hover { background: var(--superficie-2); }
 .tab-op__num { width: 72px; max-width: 100%; height: 34px; text-align: right; font-variant-numeric: tabular-nums; }
 .tab-op__dap .tab-op__num { text-align: center; }
 .tab-op__fen { width: 100%; max-width: 160px; height: 34px; }
@@ -2190,10 +2229,10 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .resumo-card__valor { font-size: 26px; font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; }
 .resumo-card__valor small { font-size: 15px; font-weight: 400; color: var(--texto-suave); }
 .resumo-card__valor--data { font-size: 18px; white-space: nowrap; }
-.resumo-card__barra { height: 8px; border-radius: 4px; background: #e6ebe8; overflow: hidden; }
+.resumo-card__barra { height: 8px; border-radius: 4px; background: var(--superficie-3); overflow: hidden; }
 .resumo-card__barra span { display: block; height: 100%; border-radius: 4px; background: var(--verde-600); }
 .resumo-card__pct { align-self: flex-end; font-size: 13px; font-weight: 600; color: var(--texto); font-variant-numeric: tabular-nums; }
-.resumo-card__vazio { font-size: 18px; font-weight: 700; color: #9aa49f; }
+.resumo-card__vazio { font-size: 18px; font-weight: 700; color: var(--texto-fraco); }
 .resumo-card__dica { font-size: 13px; color: var(--texto-suave); }
 .calendario__pendentes { display: flex; align-items: center; gap: 8px; margin: 0; font-size: 14px; color: var(--texto-suave); }
 .calendario__pendentes .icone { width: 16px; height: 16px; flex-shrink: 0; }
@@ -2205,10 +2244,10 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 /* Bordas separadas (com border-collapse as bordas das colunas congeladas somem ao rolar) */
 .cal-piv__tabela { border-collapse: separate; border-spacing: 0; font-size: 14px; min-width: 100%; }
 .cal-piv__tabela th, .cal-piv__tabela td { box-sizing: border-box; }
-.cal-piv__tabela thead th { position: sticky; top: 0; z-index: 2; padding: 10px 8px 10px 12px; background: #f7f8f7; font-size: 13px; font-weight: 600; text-align: left;
-  white-space: nowrap; vertical-align: bottom; border-right: 1px solid var(--borda); border-bottom: 2px solid #cfd8d2; }
+.cal-piv__tabela thead th { position: sticky; top: 0; z-index: 2; padding: 10px 8px 10px 12px; background: var(--superficie-2); font-size: 13px; font-weight: 600; text-align: left;
+  white-space: nowrap; vertical-align: bottom; border-right: 1px solid var(--borda); border-bottom: 2px solid var(--borda-forte); }
 .cal-piv__tabela td { padding: 8px 12px; border-right: 1px solid var(--borda); border-bottom: 1px solid var(--borda); white-space: nowrap; vertical-align: middle; background: var(--superficie); }
-.cal-piv__tabela tbody tr:last-child > * { border-bottom: 2px solid #cfd8d2; }
+.cal-piv__tabela tbody tr:last-child > * { border-bottom: 2px solid var(--borda-forte); }
 .cal-piv__tabela tbody:last-child tr:last-child > * { border-bottom: 0; }
 /* Colunas congeladas à esquerda (Fase até Unid.); posição e largura vêm do JS (dependem das colunas ocultas) */
 .cal-piv__fixa { position: sticky; z-index: 1; }
@@ -2226,14 +2265,14 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .cal-piv__tabela thead th.cal-piv__fixa.cal-piv__th-menu { padding-left: 8px; padding-right: 8px; text-align: center; vertical-align: middle; }
 .cal-piv__tabela thead th.cal-piv__th-menu--aberto { background: #eaf0ec; }
 .cal-piv__cab { display: block; width: 100%; padding: 0; border: 0; background: none; font: inherit; color: inherit; text-align: inherit; cursor: inherit; }
-.cal-piv__menu { position: absolute; top: calc(100% - 4px); right: 4px; z-index: 5; min-width: 190px; padding: 4px 0; background: #fff;
+.cal-piv__menu { position: absolute; top: calc(100% - 4px); right: 4px; z-index: 5; min-width: 190px; padding: 4px 0; background: var(--superficie);
   border: 1px solid var(--borda); border-radius: 8px; box-shadow: 0 8px 24px rgba(0, 0, 0, .14); }
 .cal-piv__menu button { display: block; width: 100%; padding: 8px 14px; border: 0; background: none; font: inherit; font-size: 14px; font-weight: 400;
   text-align: left; color: var(--texto); cursor: pointer; }
-.cal-piv__menu button:hover, .cal-piv__menu button:focus-visible { background: #f2f5f0; }
+.cal-piv__menu button:hover, .cal-piv__menu button:focus-visible { background: var(--superficie-2); }
 .cal-piv__menu-divisor { margin: 4px 0; border: 0; border-top: 1px solid var(--borda); }
 /* Coluna oculta: faixa estreita com traço duplo; no cabeçalho, clicar exibe a coluna de novo */
-.cal-piv__tabela .cal-piv__oculta { padding: 0 !important; background: #eef1ef; }
+.cal-piv__tabela .cal-piv__oculta { padding: 0 !important; background: var(--superficie-2); }
 .cal-piv__exibir { display: block; width: 100%; height: 100%; min-height: 60px; padding: 0; border: 0; cursor: pointer;
   background: linear-gradient(90deg, transparent 5px, #9aa49f 5px, #9aa49f 6px, transparent 6px, transparent 8px, #9aa49f 8px, #9aa49f 9px, transparent 9px); }
 .cal-piv__exibir:hover, .cal-piv__exibir:focus-visible { background-color: var(--verde-100); }
@@ -2247,10 +2286,10 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .cal-piv__area { text-align: right !important; font-variant-numeric: tabular-nums; }
 
 .cal-piv__nome strong { display: block; font-weight: 700; }
-.cal-piv__chip { display: inline-block; margin-top: 6px; padding: 2px 10px; border-radius: 999px; background: #eef1ef; color: var(--texto-suave); font-size: 12px; }
-.cal-piv__sem { color: #9aa49f; font-style: italic; }
+.cal-piv__chip { display: inline-block; margin-top: 6px; padding: 2px 10px; border-radius: 999px; background: var(--superficie-2); color: var(--texto-suave); font-size: 12px; }
+.cal-piv__sem { color: var(--texto-fraco); font-style: italic; }
 .cal-piv__unid { color: var(--texto-suave); }
-.cal-piv__nao { background: #f0f2f1; color: #9aa49f; }
+.cal-piv__nao { background: var(--superficie-2); color: var(--texto-fraco); }
 .cal-piv__nada { padding: 24px !important; text-align: center; color: var(--texto-suave); }
 
 /* ===== Menu: Plano de Safra com quatro itens (DECISOES 4.0) ===== */
@@ -2280,7 +2319,7 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 /* ===== Cabeçalho do plano: versão, Trocar versão e botões da versão (DECISOES 4.1.1) ===== */
 .plano__linha--versao { align-self: stretch; justify-content: space-between; gap: 8px 16px; padding-top: 10px; }
 .plano__identificacao { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; min-width: 0; }
-.plano__barra { color: #b9c2bd; }
+.plano__barra { color: var(--texto-fraco); }
 .plano__versao { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 14px; font-weight: 700; }
 .plano__acoes-versao { position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; padding: 4px 0; }
 .plano__acoes-versao .estado-salvo { margin-left: 6px; }
@@ -2350,7 +2389,7 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
   text-align: left;
   cursor: pointer;
 }
-.versoes-item:hover, .versoes-item:focus-visible { background: #f4f7f5; outline: none; }
+.versoes-item:hover, .versoes-item:focus-visible { background: var(--superficie-2); outline: none; }
 .versoes-item--atual, .versoes-item--atual:hover { background: var(--verde-100); }
 .versoes-item__num { grid-row: span 2; font-size: 16px; font-weight: 700; color: var(--verde-700); }
 .versoes-item .status { grid-row: span 2; }
@@ -2359,9 +2398,9 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .versoes-alerta {
   margin: 8px;
   padding: 10px 12px;
-  border: 1px solid #f0d58a;
+  border: 1px solid var(--aviso-borda);
   border-radius: 10px;
-  background: #fff8e6;
+  background: var(--aviso-fundo);
   color: #6b4e00;
   font-size: 14px;
 }
@@ -2389,14 +2428,14 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .cp-fazendas { display: flex; flex-direction: column; gap: 12px; }
 .cp-fazenda { border: 1px solid var(--borda); border-radius: 10px; }
 .cp-fazenda__topo { display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 4px 8px 4px 16px;
-  border-bottom: 1px solid var(--borda); border-radius: 10px 10px 0 0; background: #f1f4f2; font-weight: 600; }
+  border-bottom: 1px solid var(--borda); border-radius: 10px 10px 0 0; background: var(--superficie-2); font-weight: 600; }
 .cp-fazenda__campos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 16px; padding: 14px 16px 0; }
 .cp-fazenda__dica { display: flex; align-items: center; gap: 6px; margin: -6px 16px 14px; font-size: 13px; color: var(--texto-suave); }
 .cp-fazenda__dica .icone { width: 15px; height: 15px; flex-shrink: 0; }
-.cp-area { display: flex; align-items: center; margin: 0; background: #f1f4f2; color: var(--texto-suave); }
+.cp-area { display: flex; align-items: center; margin: 0; background: var(--superficie-2); color: var(--texto-suave); }
 .cp-talhoes { position: relative; }
 .cp-talhoes__botao { display: flex; align-items: center; justify-content: space-between; gap: 8px; text-align: left; cursor: pointer; }
-.cp-talhoes__botao:disabled { background: #f1f4f2; color: var(--texto-suave); cursor: not-allowed; }
+.cp-talhoes__botao:disabled { background: var(--superficie-2); color: var(--texto-suave); cursor: not-allowed; }
 .cp-talhoes__botao .icone { width: 16px; height: 16px; flex-shrink: 0; }
 /* Posição fixa, calculada no JS (posicionarLista), para a lista não ser cortada pela rolagem do modal */
 .cp-talhoes__lista { position: fixed; z-index: 1000; max-height: 320px; overflow: auto; padding: 6px 0;
@@ -2415,9 +2454,9 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .et-item input { width: 16px; height: 16px; accent-color: var(--verde-700); }
 .et-item--todos { grid-column: 1 / -1; border-bottom: 1px solid var(--borda); font-weight: 600; }
 .et-item__area { margin-left: auto; color: var(--texto-suave); font-variant-numeric: tabular-nums; }
-.et-item__planejado { padding: 1px 6px; border-radius: 999px; background: #eef4ef; color: var(--verde-700); font-size: 11px; font-weight: 600; }
-.et-item--sai { color: #b03a2e; text-decoration: line-through; }
-.et-item--sai .et-item__planejado { background: #fdf0ee; color: #b03a2e; }
+.et-item__planejado { padding: 1px 6px; border-radius: 999px; background: var(--superficie-2); color: var(--verde-700); font-size: 11px; font-weight: 600; }
+.et-item--sai { color: var(--erro); text-decoration: line-through; }
+.et-item--sai .et-item__planejado { background: var(--erro-fundo); color: var(--erro); }
 .et-item--entra { background: #f3f8f3; }
 .et-resumo { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 12px; margin: 12px 0 0; font-size: 14px; }
 .et-resumo__mudanca { color: var(--texto-suave); }
@@ -2438,8 +2477,8 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
   border: 1px solid var(--borda); border-radius: var(--raio); background: var(--superficie); box-shadow: var(--sombra); }
 .filtro-grupos__rotulo { margin-right: 6px; font-size: 14px; color: var(--texto-suave); }
 .filtro-grupos__botao { display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 14px;
-  border: 1px solid #cfd6d2; border-radius: 8px; background: var(--superficie); color: var(--texto); font: inherit; font-size: 14px; cursor: pointer; }
-.filtro-grupos__botao:hover { border-color: #9aa59f; }
+  border: 1px solid var(--borda-forte); border-radius: 8px; background: var(--superficie); color: var(--texto); font: inherit; font-size: 14px; cursor: pointer; }
+.filtro-grupos__botao:hover { border-color: var(--borda-forte); }
 .filtro-grupos__botao:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 2px; }
 .filtro-grupos__botao .tab-op__ico, .filtro-grupos__botao .icone { width: 16px; height: 16px; }
 .filtro-grupos__botao--ativo, .filtro-grupos__botao--ativo:hover { border-color: var(--verde-700); background: var(--verde-700); color: #fff; font-weight: 600; }
@@ -2454,9 +2493,9 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .tab-op tr.tab-op__linha--marcada > td { background: var(--verde-100); }
 .lote { position: sticky; bottom: 12px; z-index: 4; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 16px;
   padding: 12px 16px; border: 1px solid var(--verde-700); border-radius: var(--raio); background: var(--superficie); box-shadow: 0 8px 24px rgba(16, 24, 20, .14); }
-.lote--vazio { border-color: #f0d98a; background: #fffbea; box-shadow: none; }
+.lote--vazio { border-color: var(--aviso-borda); background: var(--aviso-fundo); box-shadow: none; }
 .lote__texto { display: flex; align-items: center; gap: 12px; margin: 0; font-size: 14px; }
-.lote--vazio .lote__texto { gap: 8px; color: #7a5600; }
+.lote--vazio .lote__texto { gap: 8px; color: var(--aviso-texto); }
 .lote__texto .icone { width: 16px; height: 16px; }
 .lote__desmarcar { margin: 0; }
 .lote__acoes { display: flex; gap: 10px; }
@@ -2473,8 +2512,8 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .lote__opcao--escolhida { background: var(--verde-100); font-weight: 600; }
 .lote__opcao--escolhida .lote__radio { border-color: var(--verde-700); box-shadow: inset 0 0 0 3px #fff; background: var(--verde-700); }
 .lote__menu-rodape { display: flex; justify-content: flex-end; gap: 8px; margin-top: 6px; padding: 10px 14px 4px; border-top: 1px solid var(--borda); }
-.lote__excluir { border-color: #c0392b; color: #b03a2e; }
-.lote__excluir:hover { background: #fdf0ee; }
+.lote__excluir { border-color: #c0392b; color: var(--erro); }
+.lote__excluir:hover { background: var(--erro-fundo); }
 .lote__lista { margin: 10px 0 0; padding-left: 20px; color: var(--texto-suave); line-height: 1.6; }
 .cal-mes__filtros .calendario__filtro .campo__controle { min-width: 180px; }
 
@@ -2490,7 +2529,7 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .calendario__corpo--cal { padding: 0; }
 .calendario__corpo--cal .cal-mes { flex: 1; gap: 0; align-items: stretch; }
 .cal-mes__principal { padding: 14px 24px 16px; }
-.cal-painel { position: static; margin: 0; min-height: 0; padding: 16px 20px; border-left: 1px solid var(--borda); background: #fbfcfb; }
+.cal-painel { position: static; margin: 0; min-height: 0; padding: 16px 20px; border-left: 1px solid var(--borda); background: var(--superficie-2); }
 .cal-grade { border-radius: 8px; }
 .calendario .cal-piv { box-shadow: none; }
 .calendario .resumo-guias { border-radius: 8px; }
@@ -2510,7 +2549,7 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 /* Barra do Calendário: Hoje · ‹ › · período · escala (lista); Talhão sempre à direita na linha da legenda */
 .cal-nav__hoje { height: 36px; }
 .cal-nav__seta { border: 0; background: none; }
-.cal-nav__seta:hover { background: #eef2ef; }
+.cal-nav__seta:hover { background: var(--superficie-2); }
 .cal-nav__escala { width: auto; min-width: 120px; height: 36px; }
 .cal-mes__filtros .calendario__filtro:last-child { margin-left: auto; }
 
@@ -2569,7 +2608,7 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 
 /* ===== Calendário Agrícola do menu: ciclo das culturas por empresa e fazenda ===== */
 .cabecalho__subtitulo { margin: 4px 0 0; font-size: 14px; color: var(--texto-suave); }
-.cag-etiqueta { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 999px; background: #EEF4F0; font-size: 13px; color: #2F4A3D; white-space: nowrap; }
+.cag-etiqueta { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 999px; background: var(--verde-100); font-size: 13px; color: var(--texto-suave); white-space: nowrap; }
 .cag-etiqueta .icone { width: 15px; height: 15px; }
 
 /* ===== Orçamento de Insumos ===== */
@@ -2638,13 +2677,18 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .orc-tipo-tabela { margin-bottom: -16px !important; }
 
 /* Resumo de custos: cards sem rodapé */
-.orc-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(165px, 1fr)); gap: 10px; }
-.orc-card { display: flex; align-items: center; gap: 10px; padding: 12px; min-width: 0; border: 1px solid var(--borda); border-radius: var(--raio); }
-.orc-card__icone { display: grid; place-items: center; flex: none; width: 36px; height: 36px; border-radius: 50%; background: var(--verde-100); color: var(--verde-700); }
-.orc-card__icone .icone { width: 18px; height: 18px; }
+.orc-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+.orc-card { display: flex; align-items: center; gap: 14px; padding: 16px 18px; min-height: 72px; min-width: 0; border: 1px solid var(--borda-forte); border-radius: var(--raio); }
+.orc-card__icone { display: grid; place-items: center; flex: none; width: 44px; height: 44px; border-radius: 50%; background: var(--verde-100); color: var(--verde-700); }
+.orc-card__icone .icone { width: 22px; height: 22px; }
 .orc-card__corpo { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
 .orc-card__rotulo { font-size: 13px; color: var(--texto-suave); }
-.orc-card__numero { font-size: 18px; font-weight: 700; line-height: 1.2; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.orc-card__numero { font-size: 22px; font-weight: 700; line-height: 1.2; font-variant-numeric: tabular-nums; white-space: nowrap; }
+/* Cinco cartões (com o Custo em sacas): número e ícone um pouco menores para caber */
+.orc-cards:has(> :nth-child(5)) .orc-card { gap: 10px; padding: 14px; }
+.orc-cards:has(> :nth-child(5)) .orc-card__icone { width: 38px; height: 38px; }
+.orc-cards:has(> :nth-child(5)) .orc-card__icone .icone { width: 19px; height: 19px; }
+.orc-cards:has(> :nth-child(5)) .orc-card__numero { font-size: 18px; }
 .orc-card__linha { display: flex; justify-content: space-between; gap: 12px; font-size: 14px; font-variant-numeric: tabular-nums; }
 .orc-card__linha strong { font-size: 15px; white-space: nowrap; }
 
@@ -2663,11 +2707,11 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 [data-orc-tabela-detalhe] .orc-tabela th.tabela__numero .titulo-coluna { justify-content: center; text-align: center; }
 [data-orc-tabela-detalhe] .orc-tabela th.tabela__numero, [data-orc-tabela-detalhe] .orc-tabela td.tabela__numero,
 [data-orc-tabela-detalhe] .orc-tabela td.orc-tabela__grupo, [data-orc-tabela-detalhe] .orc-tabela td.orc-tabela__unidade { width: 1%; }
-.orc-pendente { color: #b26a00; font-size: 13px; }
+.orc-pendente { color: var(--aviso-texto); font-size: 13px; }
 
 /* Custo por tipo de insumo: barra cinza até 100% e verde UniSystem até o % */
 .orc-tipo__barra-col { width: 38%; min-width: 160px; }
-.orc-barra { display: block; height: 10px; border-radius: 5px; background: #e8ece9; overflow: hidden; }
+.orc-barra { display: block; height: 10px; border-radius: 5px; background: var(--superficie-3); overflow: hidden; }
 .orc-barra > span { display: block; height: 100%; border-radius: 5px; background: var(--verde-600); }
 
 /* Detalhamento: título, guias, busca e Exportar XLSX numa linha */
@@ -2700,42 +2744,43 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .orc-culturas__acoes { width: 48px; text-align: right; }
 .orc-culturas .botao-icone { width: 30px; height: 30px; }
 .cag { display: flex; flex-direction: column; gap: 10px; }
-.cag__legenda { display: flex; flex-wrap: wrap; gap: 6px 20px; font-size: 13px; color: #33443B; }
+.cag__legenda { display: flex; flex-wrap: wrap; gap: 6px 20px; font-size: 13px; color: var(--texto-suave); }
 .cag__legenda > span { display: inline-flex; align-items: center; gap: 6px; }
-.cag__cor { width: 18px; height: 10px; border-radius: 3px; }
-.cag__cor--hoje { width: 0; height: 14px; border-radius: 0; border-left: 2px dotted #8A958F; }
+.cag__cor { width: 12px; height: 12px; border-radius: 50%; background: color-mix(in srgb, var(--c) 55%, transparent); }
+.cag__cor--hoje { background: #8A9BA8; }
 .cag__rolagem { overflow-x: auto; border: 1px solid var(--borda); border-radius: var(--raio); background: var(--superficie); }
 .cag__tabela { min-width: 1000px; }
-.cag__linha { display: grid; grid-template-columns: 200px 140px 100px minmax(0, 1fr); border-bottom: 1px solid #EEEEEE; font-size: 14px; }
+.cag__linha { display: grid; grid-template-columns: 200px 140px 100px minmax(0, 1fr); border-bottom: 1px solid var(--borda); font-size: 14px; }
 .cag__linha > span { display: flex; flex-direction: column; justify-content: center; padding: 10px 12px; min-width: 0; }
 .cag__linha small { font-size: 12px; color: var(--texto-suave); }
-.cag__linha--cab { background: #FFFFFF; border-bottom: 1px solid var(--borda); font-size: 12px; font-weight: 700; color: #4A5A52; text-transform: uppercase; letter-spacing: .03em; }
+.cag__linha--cab { background: var(--superficie); border-bottom: 1px solid var(--borda); font-size: 12px; font-weight: 700; color: var(--texto-suave); text-transform: uppercase; letter-spacing: .03em; }
 .cag__linha--cab > span { padding-top: 9px; padding-bottom: 9px; }
 .cag__num { align-items: flex-end; text-align: right; font-variant-numeric: tabular-nums; }
 .cag__meses { display: grid !important; padding: 0 !important; border-left: 1px solid var(--borda); }
 .cag__meses > span { padding: 9px 0; text-align: center; border-left: 1px solid var(--borda); }
 .cag__meses > span:first-child { border-left: 0; }
 .cag__tempo { position: relative; min-height: 52px; padding: 0 !important; border-left: 1px solid var(--borda);
-  background-image: linear-gradient(to right, #EEEEEE 1px, transparent 1px); background-size: calc(100% / 12) 100%; }
+  background-image: linear-gradient(to right, var(--borda) 1px, transparent 1px); background-size: calc(100% / 12) 100%; }
 /* Calendário Agrícola: Empresa › Fazenda › Safra; uma faixa fina por grupo de operação, barras transparentes */
 .cag__barra-topo { display: flex; align-items: center; justify-content: space-between; gap: 12px 20px; flex-wrap: wrap; }
 .cag__navegar { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; }
-.cag__navegar strong { min-width: 150px; text-align: center; font-weight: 600; }
+.cag__navegar strong { min-width: 150px; padding: 6px 14px; border: 1px solid var(--borda); border-radius: var(--raio); background: var(--superficie); text-align: center; font-weight: 600; }
 .cag__navegar .botao-icone:disabled { opacity: .35; cursor: default; }
 .cag__abrir { display: inline-flex; align-items: center; gap: 6px; padding: 0; border: 0; background: none; font: inherit; color: inherit; cursor: pointer; text-align: left; }
 .cag__seta .icone { width: 16px; height: 16px; transition: transform .15s; }
 .cag__seta--fechada .icone { transform: rotate(-90deg); }
-.cag__linha--empresa { background: #FFFFFF; }
+.cag__linha--empresa { background: var(--superficie); }
 .cag__linha--empresa > span, .cag__linha--fazenda > span { padding-top: 7px; padding-bottom: 7px; }
-.cag__linha--fazenda { background: #FFFFFF; }
+.cag__linha--fazenda { background: var(--superficie); }
 .cag__linha--fazenda > span:first-child { padding-left: 26px; }
 .cag__linha--safra > span:first-child { padding-left: 52px; }
 .cag__tempo--vazio { min-height: 34px; }
-.cag__tempo--faixas { min-height: 48px; }
-.cag__faixa { position: absolute; height: 8px; border-radius: 3px; }
+.cag__tempo--faixas { min-height: 56px; }
+.cag__faixa { position: absolute; height: 9px; border-radius: 5px; background: color-mix(in srgb, var(--c) 40%, transparent); }
 .cag__faixa:hover { outline: 1px solid rgba(26, 31, 28, .45); z-index: 2; }
 .cag__meses--dias > span { font-size: 10px; padding: 9px 0; }
-.cag__hoje { position: absolute; top: 0; bottom: 0; width: 0; border-left: 2px dotted #8A958F; pointer-events: none; }
+.cag__hoje { position: absolute; top: 0; bottom: 0; width: 0; border-left: 2px dotted var(--borda-forte); pointer-events: none; }
+.cag__hoje-rotulo { position: absolute; z-index: 3; top: 4px; left: -1px; transform: translateX(-50%); padding: 1px 5px; border-radius: 3px; background: var(--texto-suave); font-size: 11px; font-weight: 600; line-height: 1.4; color: var(--superficie); }
 .cag__sem { position: relative; z-index: 1; align-self: flex-start; margin-left: 10px; padding: 2px 6px; background: var(--superficie); font-size: 13px; font-style: italic; color: #6B7A72; }
 .cag__pendente { color: var(--texto-suave); }
 .cag__vazio, .cag__nota { margin: 0; font-size: 13px; color: var(--texto-suave); }
@@ -2750,27 +2795,150 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .painel-info .icone { width: 17px; height: 17px; }
 
 /* Planejamento das Fazendas: três números com barra */
-.painel-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px; margin-top: 16px; }
-.painel-kpi { display: flex; align-items: center; gap: 18px; padding: 18px 20px; border: 1px solid var(--borda); border-radius: var(--raio); }
-.painel-kpi__icone { display: grid; place-items: center; width: 56px; height: 56px; border-radius: 50%; }
-.painel-kpi__icone .icone { width: 26px; height: 26px; }
-.painel-kpi__corpo { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 0; }
-.painel-kpi__rotulo { font-size: 14px; font-weight: 600; }
-.painel-kpi__numero { font-size: 26px; font-weight: 700; line-height: 1.15; font-variant-numeric: tabular-nums; }
-.painel-kpi__barra { display: block; height: 8px; margin-top: 4px; border-radius: 4px; background: #e8edf0; overflow: hidden; }
+.painel-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px; }
+.painel-kpi { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border: 1px solid var(--borda); border-radius: 12px; background: var(--superficie); box-shadow: var(--sombra); }
+/* Cards compactos: ícone num quadrado colorido, nome com ⓘ, número, barra e % das fazendas */
+.painel-kpi__icone { display: grid; place-items: center; flex: none; width: 40px; height: 40px; border-radius: 10px; }
+.painel-kpi__icone .icone { width: 20px; height: 20px; }
+.painel-kpi__corpo { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+.painel-kpi__rotulo { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 500; }
+.painel-kpi__rotulo .painel-info .icone { width: 15px; height: 15px; color: var(--texto-fraco); }
+.painel-kpi__numero { font-size: 24px; font-weight: 700; line-height: 1.15; font-variant-numeric: tabular-nums; }
+.painel-kpi__barra { display: block; height: 5px; margin-top: 3px; border-radius: 4px; background: var(--superficie-3); overflow: hidden; }
 .painel-kpi__barra > span { display: block; height: 100%; border-radius: 4px; }
-.painel-kpi__texto { font-size: 13px; color: var(--texto-suave); }
-.painel-kpi--sem .painel-kpi__icone { background: #e3eefb; color: #1f6fd1; }
+.painel-kpi__texto { font-size: 12px; color: var(--texto-suave); }
+.painel-kpi--sem .painel-kpi__texto strong { color: #1f6fd1; }
+.painel-kpi--construcao .painel-kpi__texto strong { color: #d9850b; }
+.painel-kpi--publicada .painel-kpi__texto strong { color: var(--verde-600); }
+.painel-kpi--sem .painel-kpi__icone { background: var(--info-fundo); color: #1f6fd1; }
 .painel-kpi--sem .painel-kpi__barra > span { background: #1f6fd1; }
 .painel-kpi--construcao .painel-kpi__icone { background: #fdf0dc; color: #d9850b; }
 .painel-kpi--construcao .painel-kpi__barra > span { background: #ee9b1d; }
-.painel-kpi--publicada .painel-kpi__icone { background: #def2e6; color: var(--verde-600); }
+.painel-kpi--publicada .painel-kpi__icone { background: var(--verde-100); color: var(--verde-600); }
 .painel-kpi--publicada .painel-kpi__barra > span { background: var(--verde-600); }
 
 /* Planos de Safra do Painel: barrinhas de % por grupo */
 .painel-tabela th, .painel-tabela td { padding-left: 8px; padding-right: 8px; }
 .painel-tabela td { padding-top: 10px; padding-bottom: 10px; }
-.painel-tabela__vazio { color: #9aa5a0; }
+.painel-tabela__vazio { color: var(--texto-fraco); }
 .painel-progresso { display: inline-flex; align-items: center; gap: 8px; font-variant-numeric: tabular-nums; }
-.painel-progresso__barra { display: block; width: 40px; height: 8px; border-radius: 4px; background: #e8edf0; overflow: hidden; }
+.painel-progresso__barra { display: block; width: 40px; height: 8px; border-radius: 4px; background: var(--superficie-3); overflow: hidden; }
 .painel-progresso__barra > span { display: block; height: 100%; border-radius: 4px; background: var(--verde-600); }
+
+
+/* ===== Configurações: seções à esquerda (Aparência) e a escolha Claro | Escuro ===== */
+.modal--configuracoes { max-width: 640px; }
+.cfg__topo { position: relative; padding: 20px 24px 16px; border-bottom: 1px solid var(--borda); }
+.cfg__topo .modal__fechar { top: 14px; right: 16px; }
+.cfg { display: flex; min-height: 260px; }
+.cfg__secoes { flex: none; width: 190px; padding: 12px; border-right: 1px solid var(--borda); background: var(--superficie-2); }
+.cfg__secao { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 12px; border: 0; border-radius: 8px; background: none; font: inherit; font-size: 14px; color: var(--texto-suave); cursor: pointer; text-align: left; }
+.cfg__secao svg, .cfg-tema svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.cfg__secao--ativa { background: var(--verde-100); color: var(--texto); font-weight: 600; }
+.cfg__painel { flex: 1; display: flex; flex-direction: column; gap: 4px; padding: 20px 24px; }
+.cfg__titulo { margin: 0; font-size: 16px; font-weight: 700; }
+.cfg__texto { margin: 0 0 12px; font-size: 13px; color: var(--texto-suave); }
+.cfg__temas { display: flex; gap: 12px; }
+.cfg-tema { flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 10px; height: 52px; border: 2px solid var(--borda); border-radius: 12px; background: transparent; font: inherit; font-size: 15px; font-weight: 600; color: var(--texto-suave); cursor: pointer; }
+.cfg-tema:hover { border-color: var(--borda-forte); }
+.cfg-tema--ativo { border-color: var(--verde-700); background: var(--verde-100); color: var(--texto); }
+
+/* ===== Modo escuro (Configurações › Aparência › Escuro) =====
+   Paleta-base: Fundo #0B1720 · Superfícies #15232D · Texto #E6EDF2 · Verde ativo #176B50 · Informativo #203A4A · Aviso neutro #30363D.
+   O verde da marca vira o verde ativo nos fundos e um verde claro nos textos e bordas, para ler bem no escuro. */
+html[data-tema="escuro"] {
+  color-scheme: dark;
+  --fundo:        #0B1720;
+  --superficie:   #15232D;
+  --superficie-2: #182936;
+  --superficie-3: #22333F;
+  --borda:        #22333F;
+  --borda-forte:  #2A3E4C;
+  --texto:        #E6EDF2;
+  --texto-suave:  #9FB0BD;
+  --texto-fraco:  #7C8E9B;
+  --verde-900:    #06100B;
+  --verde-800:    #0F4D39;
+  --verde-700:    #2FBF71;
+  --verde-600:    #5FD896;
+  --verde-100:    rgba(23, 107, 80, .30);
+  --aviso-fundo:  #2A2416;
+  --aviso-borda:  #5A4A22;
+  --aviso-texto:  #E8C46A;
+  --erro:         #F28B82;
+  --erro-fundo:   #3A1D1D;
+  --info:         #8DB6CE;
+  --info-fundo:   #13283A;
+  --cor-sementes:    #4FD28A;
+  --cor-fertilidade: #C08BE0;
+  --cor-defensivos:  #F0995A;
+  --cor-colheita:    #E2B93B;
+  --sombra: 0 1px 2px rgba(0, 0, 0, .35), 0 2px 10px rgba(0, 0, 0, .25);
+}
+
+/* Menu lateral escuro: fundo do app, item ativo e grupo no verde ativo */
+html[data-tema="escuro"] .menu { background: #08121A; border-right: 1px solid #1C2C38; }
+html[data-tema="escuro"] .menu__item--ativo, html[data-tema="escuro"] .menu__item--ativo:hover { background: #176B50; }
+html[data-tema="escuro"] .menu__alternar { background: #176B50; border-color: #08121A; }
+/* Botões e status no escuro */
+html[data-tema="escuro"] .botao--primario { background: #176B50; color: #fff; }
+html[data-tema="escuro"] .botao--primario:hover { background: #1E8763; }
+html[data-tema="escuro"] .status--aprovado { background: rgba(23, 107, 80, .45); color: #8BE3B5; }
+html[data-tema="escuro"] .status--construcao { background: #30363D; color: #C9D1D9; }
+html[data-tema="escuro"] .status--nao-iniciado { background: #203A4A; color: #CFE3EF; box-shadow: none; }
+html[data-tema="escuro"] .status--pendente { background: #3A2A14; color: #F0B86A; }
+/* Mapa e imagens: sem escurecer os mosaicos de satélite */
+html[data-tema="escuro"] .modal-fundo { background: rgba(0, 0, 0, .6); }
+html[data-tema="escuro"] .visoes__botao--ativo { background: #176B50; color: #fff; }
+html[data-tema="escuro"] .filtro-grupos__botao--ativo, html[data-tema="escuro"] .filtro-grupos__botao--ativo:hover { border-color: #176B50; background: #176B50; }
+html[data-tema="escuro"] .plano__versao .status--aprovado { background: #203A4A; color: #CFE3EF; }
+html[data-tema="escuro"] .plano__versao .status--aprovado::before { background: #2FBF71; }
+/* Visão Geral no escuro: o fundo do campo no topo; cards na paleta (Informativo, Aviso neutro, Verde ativo) */
+html[data-tema="escuro"] .vg-cabecalho { border-bottom: 0; background: transparent; }
+html[data-tema="escuro"] .vg-cabecalho__fundo { display: block; }
+html[data-tema="escuro"] .vg-cabecalho .cabecalho__titulo { font-size: 34px; }
+html[data-tema="escuro"] .painel-kpi--sem .painel-kpi__icone { background: #203A4A; color: #8DB6CE; }
+html[data-tema="escuro"] .painel-kpi--sem .painel-kpi__barra > span, html[data-tema="escuro"] .painel-kpi--sem .painel-kpi__texto strong { background-color: #8DB6CE; color: #8DB6CE; }
+html[data-tema="escuro"] .painel-kpi--construcao .painel-kpi__icone { background: #30363D; color: #B9C1C9; }
+html[data-tema="escuro"] .painel-kpi--construcao .painel-kpi__barra > span, html[data-tema="escuro"] .painel-kpi--construcao .painel-kpi__texto strong { background-color: #B9C1C9; color: #B9C1C9; }
+html[data-tema="escuro"] .painel-kpi--publicada .painel-kpi__icone { background: #176B50; color: #5FD896; }
+html[data-tema="escuro"] .painel-kpi--publicada .painel-kpi__barra > span, html[data-tema="escuro"] .painel-kpi--publicada .painel-kpi__texto strong { background-color: #5FD896; color: #5FD896; }
+html[data-tema="escuro"] .painel-kpi__texto strong { background: none !important; }
+/* Escuro: texto do verde-escuro vira verde claro (visões e filtros selecionados, guias do Resumo) */
+html[data-tema="escuro"] .filtro-talhoes--ativo, html[data-tema="escuro"] .filtro-talhoes--ativo:hover,
+html[data-tema="escuro"] .exibir .visoes__botao--ativo, html[data-tema="escuro"] .calendario__visoes .visoes__botao--ativo,
+html[data-tema="escuro"] .resumo-guias__guia--ativa { color: #8BE3B5; }
+/* Calendário do plano: etiquetas das operações escuras, com a cor do grupo na borda e no ponto */
+html[data-tema="escuro"] .cal-ev { --f: color-mix(in srgb, var(--c) 24%, #15232D); color: var(--texto); }
+/* Ciclo Produtivo: etiquetas dos grupos com a cor do grupo, sobre fundo escuro */
+html[data-tema="escuro"] .cal-etiqueta--sementes { background: rgba(31, 157, 85, .22); color: #8BE3B5; }
+html[data-tema="escuro"] .cal-etiqueta--tratamento-de-sementes { background: rgba(138, 75, 42, .30); color: #E5B79A; }
+html[data-tema="escuro"] .cal-etiqueta--defensivos { background: rgba(232, 119, 46, .22); color: #F5B58A; }
+html[data-tema="escuro"] .cal-etiqueta--fertilidade { background: rgba(142, 68, 173, .28); color: #D9B3EE; }
+html[data-tema="escuro"] .cal-etiqueta--colheita { background: rgba(212, 160, 23, .22); color: #EBCB6E; }
+/* Mapa no escuro: nomes dos talhões e a dica em caixa escura; detalhe do Leaflet na superfície */
+html[data-tema="escuro"] .mapa-rotulo { background: rgba(11, 23, 32, .82); color: #E6EDF2; }
+html[data-tema="escuro"] .mapa__dica { background: rgba(11, 23, 32, .88); color: #E6EDF2; }
+html[data-tema="escuro"] .leaflet-tooltip.mapa-detalhe { background: #15232D; border-color: #22333F; color: #E6EDF2; }
+html[data-tema="escuro"] .leaflet-bar a { background: #15232D; color: #E6EDF2; border-bottom-color: #22333F; }
+/* Orçamento no escuro: moeda selecionada no verde ativo */
+html[data-tema="escuro"] .orc-moeda__opcao--ativa { border-color: #176B50; background: #176B50; }
+html[data-tema="escuro"] .orc-congelar--ativo { color: #5FD896; }
+
+/* Escuro: rótulos dos eixos X e Y da Previsão de colheita em branco e negrito; valores das barras em branco */
+html[data-tema="escuro"] .colheita__eixo-x, html[data-tema="escuro"] .colheita__eixo-y { fill: #fff; font-weight: 700; }
+html[data-tema="escuro"] .colheita__valor { fill: #fff; }
+/* Escuro: dia do Calendário sem preenchimento ao passar o mouse (dia de outro mês mantém o seu fundo); o dia selecionado fica só com a borda verde */
+html[data-tema="escuro"] .cal-dia:not(.cal-dia--fora):hover { background: transparent; }
+html[data-tema="escuro"] .cal-dia--fora:hover { background: var(--superficie-2); }
+/* Escuro: linha, pontos e rótulos da Produtividade (painel do talhão no Plantio) no verde claro */
+html[data-tema="escuro"] .grafico-historico__seg { stroke: #5FD896; }
+html[data-tema="escuro"] .grafico-historico__ponto { fill: #5FD896; }
+html[data-tema="escuro"] .grafico-historico__valor { fill: #5FD896; }
+
+/* Calendário Agrícola escuro: barras e legenda mais vivas, linha de hoje clara e tracejada, etiqueta verde com borda */
+html[data-tema="escuro"] .cag__faixa { background: color-mix(in srgb, var(--c) 85%, transparent); }
+html[data-tema="escuro"] .cag__cor:not(.cag__cor--hoje) { background: var(--c); }
+html[data-tema="escuro"] .cag__hoje { border-left: 1px dashed rgba(230, 237, 242, .55); }
+html[data-tema="escuro"] .cag__hoje-rotulo { background: #C9D6E0; color: #0B1720; }
+html[data-tema="escuro"] .cag-etiqueta { padding: 7px 16px; border: 1px solid #176B50; background: rgba(23, 107, 80, .25); font-size: 14px; color: var(--texto); }

@@ -52,7 +52,7 @@
             </a>
             <a class="menu__item menu__sub" href="#/orcamento" data-rota="orcamento" title="Orçamento">
               <svg class="menu__icone" viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M21 8 12 3 3 8v8l9 5 9-5Z"/><path d="M3 8l9 5 9-5M12 13v8"/>
+                <circle cx="12" cy="12" r="9"/><path d="M15 9.5c-.5-1-1.6-1.5-3-1.5-1.7 0-3 .8-3 2s1.3 1.7 3 2 3 .8 3 2-1.3 2-3 2c-1.4 0-2.5-.5-3-1.5M12 6.5V8M12 16v1.5"/>
               </svg>
               <span class="menu__texto">Orçamento</span>
             </a>
@@ -60,17 +60,17 @@
         </div>
         <a class="menu__item" href="#/ordens-servico" data-rota="ordens-servico" title="Ordens de Serviço">
           <svg class="menu__icone" viewBox="0 0 24 24" aria-hidden="true">
-            <rect x="5" y="4" width="14" height="17" rx="2"/>
-            <path d="M9 4V3h6v1"/>
-            <path d="M9 10h6M9 14h6M9 18h3"/>
+            <!-- Trator -->
+            <circle cx="7" cy="16.5" r="3"/><circle cx="18" cy="17.5" r="2"/>
+            <path d="M4.5 14V8h6.5l2 6"/><path d="M10 16.5h6M13 14h6.5l.5 1.5"/><path d="M15.5 14V9.5h3M7 8V5"/>
           </svg>
           <span class="menu__texto">Ordens de Serviço</span>
         </a>
         <a class="menu__item" href="#/cadastros" data-rota="cadastros" title="Cadastros">
           <svg class="menu__icone" viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z"/>
-            <path d="M14 3v5h5"/>
-            <path d="M9 12h6M9 16h6"/>
+            <!-- Pessoas -->
+            <circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5"/>
+            <circle cx="17" cy="9" r="2.6"/><path d="M15.6 14.6c3 .2 5.4 2.1 5.4 5.4"/>
           </svg>
           <span class="menu__texto">Cadastros</span>
         </a>
@@ -82,32 +82,25 @@
       </button>
 
       <div class="menu__rodape">
-        <!-- Demonstração: troca entre começar sem planos e ver os planos de exemplo -->
-        <div class="demo">
-          <button class="menu__item demo__botao" id="demo-botao" type="button" title="Demonstração"
-                  aria-haspopup="menu" aria-expanded="false" aria-controls="demo-opcoes">
-            <svg class="menu__icone" viewBox="0 0 24 24" aria-hidden="true">
-              <rect x="3" y="4" width="18" height="12" rx="2"/>
-              <path d="M10 8l4 2-4 2Z"/>
-              <path d="M8 20h8M12 16v4"/>
-            </svg>
-            <span class="menu__texto">Demonstração</span>
-          </button>
-          <div class="demo__opcoes" id="demo-opcoes" role="menu" aria-label="Demonstração" hidden>
-            <p class="demo__titulo">Demonstração</p>
-            <button class="demo__opcao" type="button" role="menuitem" data-demo="zero">
-              <span class="demo__opcao-titulo">Começar do zero</span>
-              <span class="demo__opcao-texto">Sem planos cadastrados, a partir do primeiro uso.</span>
+        <!-- Usuário: abre o menu do usuário (Configurações › Aparência e Sair) -->
+        <div class="usuario">
+          <div class="usuario__opcoes" id="usuario-opcoes" role="menu" aria-label="Menu do usuário" hidden>
+            <button class="usuario__opcao" type="button" role="menuitem" data-usuario="configuracoes">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"/>
+              </svg>
+              Configurações
             </button>
-            <button class="demo__opcao" type="button" role="menuitem" data-demo="exemplo">
-              <span class="demo__opcao-titulo">Ver com planos de exemplo</span>
-              <span class="demo__opcao-texto">Plano de soja 26/27 em duas fazendas: um com versão em construção e um com a versão 0.2 publicada.</span>
+            <button class="usuario__opcao" type="button" role="menuitem" data-usuario="sair">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+              Sair
             </button>
           </div>
-        </div>
-
-        <div class="menu__usuario" id="menu-usuario">
-          <!-- preenchido por js/app.js a partir de js/dados-exemplo.js -->
+          <button class="menu__usuario" id="menu-usuario" type="button" title="Menu do usuário"
+                  aria-haspopup="menu" aria-expanded="false" aria-controls="usuario-opcoes">
+            <!-- preenchido por js/app.js a partir de js/dados-exemplo.js -->
+          </button>
         </div>
       </div>
     </aside>
@@ -138,6 +131,7 @@
   <script src="js/telas/04.0-operacoes-plano.js"></script>
   <script src="js/telas/inicio-plano.js"></script>
   <script src="js/telas/04-operacoes.js"></script>
+  <script src="js/configuracoes.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

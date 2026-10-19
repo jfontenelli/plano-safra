@@ -17,7 +17,6 @@ window.Icones = (function () {
     grafico: svg('<path d="M4 20h16"/><rect x="6" y="12" width="3" height="6" rx=".5"/><rect x="11" y="8" width="3" height="10" rx=".5"/><rect x="16" y="4" width="3" height="14" rx=".5"/>'),
     seta:   svg('<path d="M5 12h14M13 6l6 6-6 6"/>'),
     voltar: svg('<path d="M19 12H5M11 6l-6 6 6 6"/>'),
-    demonstracao: svg('<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M10 8l4 2-4 2Z"/><path d="M8 20h8M12 16v4"/>'),
     lixeira: svg('<path d="M4 7h16M10 11v6M14 11v6"/><path d="M6 7l1 13h10l1-13"/><path d="M9 7V4h6v3"/>'),
     mapa:   svg('<path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2Z"/><path d="M9 4v14M15 6v14"/>'),
     talhoes: svg('<rect x="3" y="3" width="8" height="8" rx="1"/><rect x="13" y="3" width="8" height="8" rx="1"/><rect x="3" y="13" width="8" height="8" rx="1"/><rect x="13" y="13" width="8" height="8" rx="1"/>'),

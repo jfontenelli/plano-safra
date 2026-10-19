@@ -216,7 +216,7 @@ window.Telas.planoOperacoes = (function () {
           <div class="plano__identificacao">
             <a class="plano__titulo" href="#/plano-safra" title="Voltar para a Visão Geral (para trocar de plano)">Plano de Safra</a>
             <span class="plano__seta" aria-hidden="true">›</span>
-            <p class="plano__contexto">${contexto.map(esc).join('<span class="plano__ponto">·</span>')}</p>
+            <p class="plano__contexto">${contexto.map(esc).join('<span class="plano__ponto">›</span>')}</p>
             <span class="plano__barra" aria-hidden="true">|</span>
             <span class="plano__versao">Versão ${esc(v.num)}
               <span class="status ${somenteLeitura ? 'status--aprovado' : 'status--construcao'}">${Versoes.rotuloStatus(v)}</span></span>
@@ -235,7 +235,9 @@ window.Telas.planoOperacoes = (function () {
         </div>
       </header>
       ${somenteLeitura && etapa !== 'calendario' ? `
-        <p class="faixa-leitura">${Icones.cadeado} Versão ${esc(v.num)} publicada: somente consulta. Para alterar, use Criar nova versão.</p>` : ''}
+        ${ui.leituraFechada ? '' : `
+        <p class="faixa-leitura">${Icones.info} <span><strong>Versão ${esc(v.num)} publicada:</strong> somente consulta. Para alterar, use Criar nova versão.</span>
+          <button class="botao-icone faixa-leitura__fechar" type="button" data-acao="ver-fechar-leitura" aria-label="Fechar o aviso" title="Fechar">${Icones.fechar}</button></p>`}` : ''}
     `;
   }
 
@@ -300,7 +302,7 @@ window.Telas.planoOperacoes = (function () {
     somenteLeitura = Versoes.somenteLeitura(plano);
     talhoesFazenda = Util.talhoesPlano(plano); // cada versão tem os seus talhões
     limparSelecao();
-    Object.assign(ui, { versoes: null, jaExiste: false, maisAcoes: false, rascunho: null, receitaPorOp: {},
+    Object.assign(ui, { versoes: null, jaExiste: false, maisAcoes: false, leituraFechada: false, rascunho: null, receitaPorOp: {},
                         renomeandoOp: null, renomeandoGrupo: null, painelTalhao: null, preCadastro: null, validarOp: null });
     if (!somenteLeitura) limparReceitasVazias();
     desenharTudo();
@@ -318,6 +320,8 @@ window.Telas.planoOperacoes = (function () {
         if (num === plano.versaoAberta) { ui.versoes = null; ui.jaExiste = false; desenharTudo(); break; }
         abrirVersao(num); break;
       }
+      case 'ver-fechar-leitura':
+        ui.leituraFechada = true; desenharTudo(); break;
       case 'ver-fechar-aviso':
         ui.versoes = null; ui.jaExiste = false; desenharTudo(); break;
       case 'ver-publicar': {
@@ -2092,7 +2096,7 @@ window.Telas.planoOperacoes = (function () {
     const ySc = (sc) => 46 - (Math.min(80, Math.max(40, sc)) - 40) * 0.8;
     const descricao = h.map(([safra, variedade, sc, mm]) => `safra ${safra}, ${variedade}: ${sc} sc/ha e ${mm} mm`).join('; ');
     const segmentos = h.slice(1).map(([, , sc], i) =>
-      `<line x1="${x(i)}%" y1="${ySc(h[i][2])}%" x2="${x(i + 1)}%" y2="${ySc(sc)}%" stroke="#13603f" stroke-width="2.5"></line>`).join('');
+      `<line x1="${x(i)}%" y1="${ySc(h[i][2])}%" x2="${x(i + 1)}%" y2="${ySc(sc)}%" stroke="#13603f" stroke-width="2.5" class="grafico-historico__seg"></line>`).join('');
     return `
       <figure class="grafico-historico">
         <figcaption class="grafico-historico__titulo">Produtividade e chuva acumulada por safra</figcaption>
@@ -2109,8 +2113,8 @@ window.Telas.planoOperacoes = (function () {
           }).join('')}
           ${segmentos}
           ${h.map(([safra, , sc], i) => `
-            <circle cx="${x(i)}%" cy="${ySc(sc)}%" r="5" fill="#13603f" stroke="#fff" stroke-width="2"><title>Safra ${safra}: ${sc} sc/ha</title></circle>
-            <text x="${x(i)}%" y="${ySc(sc)}%" dy="-9" font-size="12" font-weight="700" fill="#13603f" text-anchor="middle">${sc} sc/ha</text>`).join('')}
+            <circle cx="${x(i)}%" cy="${ySc(sc)}%" r="5" fill="#13603f" stroke="#fff" stroke-width="2" class="grafico-historico__ponto"><title>Safra ${safra}: ${sc} sc/ha</title></circle>
+            <text x="${x(i)}%" y="${ySc(sc)}%" dy="-9" font-size="12" font-weight="700" fill="#13603f" text-anchor="middle" class="grafico-historico__valor">${sc} sc/ha</text>`).join('')}
         </svg>
         <div class="grafico-historico__eixo" style="grid-template-columns: repeat(${n}, minmax(0, 1fr))" aria-hidden="true">
           ${h.map(([safra, variedade]) => `<span><strong>${esc(variedade)}</strong>Safra ${safra}</span>`).join('')}
@@ -2182,10 +2186,10 @@ window.Telas.planoOperacoes = (function () {
       <figure class="colheita__grafico">
         <figcaption class="colheita__titulo">Previsão de colheita por decêndio</figcaption>
         <svg viewBox="0 0 ${L} 222" role="img" aria-label="Previsão de colheita por decêndio: ${esc(descricao)}">
-          <text x="0" y="14" font-size="11" fill="#5f6b64">Hectares</text>
+          <text x="0" y="14" font-size="11" fill="#5f6b64" class="colheita__eixo-y">Hectares</text>
           ${ticks.map((v) => `
             <line x1="${x0}" y1="${y(v)}" x2="${L}" y2="${y(v)}" stroke="${v ? '#eef1ef' : '#cfd6d2'}"></line>
-            <text x="${x0 - 8}" y="${y(v) + 4}" font-size="11" fill="#5f6b64" text-anchor="end">${v}</text>`).join('')}
+            <text x="${x0 - 8}" y="${y(v) + 4}" font-size="11" fill="#5f6b64" text-anchor="end" class="colheita__eixo-y">${v}</text>`).join('')}
           ${grupos.map((g, i) => {
             const centro = x0 + fatia * i + fatia / 2;
             const ha = area(g);
@@ -2193,8 +2197,8 @@ window.Telas.planoOperacoes = (function () {
             return `
               <rect x="${centro - largura / 2}" y="${y(ha)}" width="${largura}" height="${base - y(ha)}" rx="4" fill="#2f7d57">
                 <title>${esc(g.dec.longo)}: ${n} ${n === 1 ? 'talhão' : 'talhões'} · ${ha} ha</title></rect>
-              <text x="${centro}" y="${y(ha) - 7}" font-size="13" font-weight="600" fill="#1a1f1c" text-anchor="middle">${ha} ha</text>
-              <text x="${centro}" y="${base + 18}" font-size="12" fill="#1a1f1c" text-anchor="middle">${esc(g.dec.curto)}</text>`;
+              <text x="${centro}" y="${y(ha) - 7}" font-size="13" font-weight="600" fill="#1a1f1c" text-anchor="middle" class="colheita__valor">${ha} ha</text>
+              <text x="${centro}" y="${base + 18}" font-size="12" fill="#1a1f1c" text-anchor="middle" class="colheita__eixo-x">${esc(g.dec.curto)}</text>`;
           }).join('')}
         </svg>
       </figure>`;
@@ -2278,7 +2282,7 @@ window.Telas.planoOperacoes = (function () {
       <div class="mapa-area">
         ${semGeometria ? `<p class="mapa__sem">${Icones.info} A Fazenda ${esc(plano.fazenda)} ainda não tem o desenho dos talhões.</p>`
           : `<div id="mapa-variedades" class="mapa" role="region" aria-label="Mapa de variedades por talhão"></div>
-             <p class="mapa__dica">${Icones.info} Clique num talhão para definir a variedade</p>`}
+             <p class="mapa__dica">${Icones.info} Selecione um talhão para definir a variedade</p>`}
       </div>`;
   }
 

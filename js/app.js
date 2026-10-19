@@ -1,5 +1,5 @@
 /*
- * Casca do protótipo: navegação entre telas, estado do menu lateral e menu Demonstração.
+ * Casca do protótipo: navegação entre telas, estado do menu lateral e menu do usuário.
  * A navegação usa o endereço com # (ex.: index.html#/cadastros), assim funciona
  * abrindo o arquivo direto no navegador e no Netlify, e o botão Voltar funciona.
  */
@@ -36,9 +36,6 @@
   };
   const ROTA_INICIAL = 'plano-safra';
 
-  // Safras cadastradas no início, para o "Começar do zero" voltar a elas
-  const SAFRAS_INICIAIS = [...DADOS.safras];
-
   // Estado da sessão (só em memória)
   const estado = {
     menuRecolhido: false, // menu começa expandido
@@ -49,8 +46,8 @@
   const menu = document.getElementById('menu');
   const botaoAlternar = document.getElementById('menu-alternar');
   const conteudo = document.getElementById('conteudo');
-  const botaoDemo = document.getElementById('demo-botao');
-  const opcoesDemo = document.getElementById('demo-opcoes');
+  const botaoUsuario = document.getElementById('menu-usuario');
+  const opcoesUsuario = document.getElementById('usuario-opcoes');
 
   function temPlanos() {
     return DADOS.planos.length > 0;
@@ -157,19 +154,6 @@
     else { window.addEventListener('hashchange', aviso, { once: true }); location.hash = '#/plano-safra'; }
   }
 
-  // ----- Menu Demonstração -----
-  function abrirDemo(abrir) {
-    opcoesDemo.hidden = !abrir;
-    botaoDemo.setAttribute('aria-expanded', String(abrir));
-    if (abrir) opcoesDemo.querySelector('.demo__opcao').focus();
-  }
-
-  function comecarDoZero() {
-    DADOS.planos = [];
-    DADOS.safras = [...SAFRAS_INICIAIS];
-    irPara('#/plano-safra');
-  }
-
   // Mantém as safras já cadastradas (inclusive a criada no modal) e inclui a dos exemplos
   function carregarPlanosExemplo() {
     DADOS.planos = DADOS.planosExemplo.map(({ operacoes, versoes, modelo, ...p }) => {
@@ -186,28 +170,29 @@
     });
   }
 
-  function verPlanosExemplo() {
-    DADOS.safras = [...SAFRAS_INICIAIS];
-    carregarPlanosExemplo();
-    irPara('#/plano-safra');
+  // ----- Menu do usuário (rodapé): Configurações e Sair -----
+  function abrirUsuario(abrir) {
+    opcoesUsuario.hidden = !abrir;
+    botaoUsuario.setAttribute('aria-expanded', String(abrir));
+    if (abrir) opcoesUsuario.querySelector('.usuario__opcao').focus();
   }
 
-  botaoDemo.addEventListener('click', () => abrirDemo(opcoesDemo.hidden));
+  botaoUsuario.addEventListener('click', () => abrirUsuario(opcoesUsuario.hidden));
 
-  opcoesDemo.addEventListener('click', (e) => {
-    const opcao = e.target.closest('[data-demo]');
+  opcoesUsuario.addEventListener('click', (e) => {
+    const opcao = e.target.closest('[data-usuario]');
     if (!opcao) return;
-    abrirDemo(false);
-    if (opcao.dataset.demo === 'zero') comecarDoZero();
-    else verPlanosExemplo();
+    abrirUsuario(false);
+    if (opcao.dataset.usuario === 'configuracoes') Configuracoes.abrir();
+    else Aviso.mostrar('Sair ainda não faz parte do protótipo.');
   });
 
   // Fecha as opções ao clicar fora ou com Esc
   document.addEventListener('click', (e) => {
-    if (!opcoesDemo.hidden && !e.target.closest('.demo')) abrirDemo(false);
+    if (!opcoesUsuario.hidden && !e.target.closest('.usuario')) abrirUsuario(false);
   });
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && !opcoesDemo.hidden) { abrirDemo(false); botaoDemo.focus(); }
+    if (e.key === 'Escape' && !opcoesUsuario.hidden) { abrirUsuario(false); botaoUsuario.focus(); }
   });
 
   // ----- Eventos gerais -----
@@ -230,7 +215,7 @@
 
   desenharUsuario();
   aplicarEstadoMenu();
-  // Ao abrir o protótipo, já vem com os planos de exemplo (Demonstração → "Começar do zero" volta ao primeiro uso)
+  // Ao abrir o protótipo, já vem com os planos de exemplo
   carregarPlanosExemplo();
   mostrarTela();
 })();

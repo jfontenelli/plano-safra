@@ -27,7 +27,7 @@ Cabeçalho, filtros e estimativas ficam **congelados no topo** enquanto a págin
 3. **Estimativas de comercialização**, numa linha: "PTAX: R$ 5,20/US$ · Soja: US$ 23,00/sc · 65 sc/ha · Milho: R$ 55,00/sc · 110 sc/ha" e o botão **Editar parâmetros**.
 
 ### Resumo do orçamento
-Cards sem texto de rodapé:
+Cards sem texto de rodapé, cada um com o ícone num círculo verde e o valor em destaque (com cinco cards, o ícone e o valor ficam um pouco menores para caber):
 - **Área produtiva** (ha) · **Custo total** · **Custo por hectare** · **Custo em sacas · Cultura** (só quando o filtro resulta em **uma cultura**) · **Receita estimada** (um card só, somando as culturas).
 
 ### Orçamento por tipo de insumo

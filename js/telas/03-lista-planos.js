@@ -50,13 +50,21 @@ window.Telas.listaPlanos = (function () {
     if (safraPedida) { filtros.anoAgricola = String(Util.anoAgricola(safraPedida)); safraPedida = null; }
 
     return `
-      <header class="cabecalho cabecalho--guias">
-        <h1 class="cabecalho__titulo">Visão Geral</h1>
-        <nav class="etapas" aria-label="Guias da Visão Geral">
-          ${GUIAS.map(([id, nome]) => `
-            <button class="etapa ${id === guia ? 'etapa--ativa' : ''}" type="button" data-guia="${id}"
-                    ${id === guia ? 'aria-current="page"' : ''}>${nome}</button>`).join('')}
-        </nav>
+      <header class="cabecalho cabecalho--guias vg-cabecalho">
+        <!-- Fundo do campo no topo: só aparece no modo escuro -->
+        <span class="vg-cabecalho__fundo" style="background-image: url('img/fundo-plano-safra.jpg')" aria-hidden="true"></span>
+        <div class="vg-cabecalho__titulo">
+          <h1 class="cabecalho__titulo">Visão Geral</h1>
+          <nav class="caminho" aria-label="Caminho"><span>Plano de Safra</span><span aria-hidden="true">›</span><span class="caminho__atual">Visão Geral</span></nav>
+        </div>
+        <div class="vg-cabecalho__guias">
+          <nav class="etapas" aria-label="Guias da Visão Geral">
+            ${GUIAS.map(([id, nome]) => `
+              <button class="etapa ${id === guia ? 'etapa--ativa' : ''}" type="button" data-guia="${id}"
+                      ${id === guia ? 'aria-current="page"' : ''}>${nome}</button>`).join('')}
+          </nav>
+          <button class="botao botao--primario" type="button" data-acao="criar-plano">${Icones.mais} Criar Plano Safra</button>
+        </div>
       </header>
 
       <div class="pagina">

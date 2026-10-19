@@ -2,7 +2,8 @@
  * Calendário Agrícola do menu (DECISOES 4.0): vários planos somados, no ano agrícola escolhido (safras e safrinhas).
  * Empresa › Fazenda › Safra/Safrinha (empresa e fazenda se recolhem pela seta); cada operação é uma barra transparente,
  * do primeiro ao último talhão, numa faixa por grupo de operação. A linha da fazenda junta a safra e a safrinha.
- * Filtro Período: Ano, Semestre, Trimestre ou Mês, com setas para andar no tempo.
+ * Filtro Período: Ano, Semestre, Trimestre ou Mês, com setas para andar no tempo. Sem filtro Ano Agrícola: no período Ano,
+ * as setas trocam o ano agrícola.
  * Usa a última versão publicada de cada plano (DECISOES 4.0).
  */
 window.Telas = window.Telas || {};
@@ -15,7 +16,6 @@ window.Telas.calendarioAgricola = (function () {
   const COR_GRUPO = { Sementes: '#1f9d55', Fertilidade: '#8e44ad', Defensivos: '#e8772e', Colheita: '#d4a017' };
   const ORDEM_GRUPO = ['Sementes', 'Fertilidade', 'Defensivos', 'Colheita'];
   const PERIODOS = [['ano', 'Ano', 0], ['semestre', 'Semestre', 6], ['trimestre', 'Trimestre', 3], ['mes', 'Mês', 1]];
-  const rgba = (hex, a) => `rgba(${parseInt(hex.slice(1, 3), 16)}, ${parseInt(hex.slice(3, 5), 16)}, ${parseInt(hex.slice(5, 7), 16)}, ${a})`;
 
   let filtros = {};
   // Período (ano, semestre, trimestre, mês), o mês em que ele começa (ano × 12 + mês; null = o padrão), as empresas
@@ -99,7 +99,7 @@ window.Telas.calendarioAgricola = (function () {
       const esq = pct(o.ini, j); const dir = pct(fimMais, j);
       const faixa = Math.max(0, ORDEM_GRUPO.indexOf(o.tipo));
       const dica = `${o.nome} · ${o.grupo} · ${o.cultura} · ${ddmm(o.ini)} a ${ddmm(o.fim)}${o.area ? ` · ${Util.area(o.area)}` : ''}`;
-      return `<span class="cag__faixa" style="left: ${esq.toFixed(2)}%; width: ${Math.max(0.4, dir - esq).toFixed(2)}%; top: ${6 + faixa * 10}px; background: ${rgba(COR_GRUPO[o.tipo] || '#7B8A82', 0.4)}"
+      return `<span class="cag__faixa" style="left: ${esq.toFixed(2)}%; width: ${Math.max(0.4, dir - esq).toFixed(2)}%; top: ${6 + faixa * 12}px; --c: ${COR_GRUPO[o.tipo] || '#7B8A82'}"
                    title="${esc(dica)}" role="img" aria-label="${esc(dica)}"></span>`;
     }).join('');
   }
@@ -128,7 +128,6 @@ window.Telas.calendarioAgricola = (function () {
       </header>
       <div class="pagina">
         <section class="cartao filtros" aria-label="Filtrar o calendário">
-          ${filtro('anoAgricola', 'Ano Agrícola', Util.anosAgricolas(DADOS.planos), null)}
           ${filtro('empresa', 'Empresa', presentes('empresa', DADOS.empresas))}
           ${filtro('fazenda', 'Fazenda', presentes('fazenda', DADOS.fazendas))}
           ${filtro('cultura', 'Cultura', presentes('cultura', DADOS.culturasPlanos))}
@@ -144,7 +143,6 @@ window.Telas.calendarioAgricola = (function () {
       </div>`;
   }
 
-  // todos = null: sem a opção "Todas" (o Ano Agrícola é sempre um só)
   function filtro(nome, rotulo, itens, todos = 'Todas') {
     return `
       <div class="campo">
@@ -156,12 +154,29 @@ window.Telas.calendarioAgricola = (function () {
       </div>`;
   }
 
+  // Período Ano: o ano agrícola numa caixa, com setas para o anterior e o próximo (entre os anos que têm planos)
+  function navegarAno() {
+    const anos = Util.anosAgricolas(DADOS.planos);
+    const i = anos.indexOf(filtros.anoAgricola);
+    return `
+      <button class="botao-icone botao-icone--borda" type="button" data-cag-ano="-1" aria-label="Ano agrícola anterior" ${i <= 0 ? 'disabled' : ''}>${Icones.anterior}</button>
+      <strong>Ano agrícola ${esc(filtros.anoAgricola)}</strong>
+      <button class="botao-icone botao-icone--borda" type="button" data-cag-ano="1" aria-label="Próximo ano agrícola" ${i >= anos.length - 1 ? 'disabled' : ''}>${Icones.proxima}</button>`;
+  }
+  const barraTopo = (legenda, navegar) => `
+      <div class="cag__barra-topo">
+        <div class="cag__legenda">${legenda}</div>
+        <div class="cag__navegar">${navegar}</div>
+      </div>`;
+  // Sem nada para mostrar: no período Ano, as setas continuam (para trocar de ano)
+  const vazio = (texto) => `${periodo === 'ano' ? barraTopo('', navegarAno()) : ''}<p class="cag__vazio">${texto}</p>`;
+
   function linhaDoTempo() {
     const planos = planosFiltrados();
-    if (!planos.length) return '<p class="cag__vazio">Nenhum plano com esses filtros.</p>';
+    if (!planos.length) return vazio('Nenhum plano com esses filtros.');
     const ops = new Map(planos.map((p) => [p, operacoesDoPlano(p)]));
     const todas = [...ops.values()].flat();
-    if (!todas.length) return '<p class="cag__vazio">Nenhuma operação com data nos planos publicados com esses filtros.</p>';
+    if (!todas.length) return vazio('Nenhuma operação com data nos planos publicados com esses filtros.');
     const j = janelaDe(todas);
     // Colunas: os meses; no período Mês, os dias
     const colunas = periodo === 'mes'
@@ -170,10 +185,11 @@ window.Telas.calendarioAgricola = (function () {
     const grade = `grid-template-columns: repeat(${colunas.length}, minmax(0, 1fr))`;
     const fundo = `background-size: calc(100% / ${colunas.length}) 100%`;
     const hoje = new Date();
-    const marcaHoje = hoje >= j.ini && hoje < j.fim ? `<span class="cag__hoje" style="left: ${pct(hoje, j).toFixed(2)}%" aria-hidden="true"></span>` : '';
-    const rotulo = periodo === 'ano' ? `Ano agrícola ${esc(filtros.anoAgricola)}`
-      : periodo === 'mes' ? `${MESES_LONGO[j.iniMi % 12]} de ${Math.floor(j.iniMi / 12)}` : `${mesCurto(j.iniMi)} – ${mesCurto(j.iniMi + j.tam - 1)}`;
-    const navegavel = periodo !== 'ano';
+    const temHoje = hoje >= j.ini && hoje < j.fim;
+    // Linha de hoje em todas as linhas; a etiqueta "Hoje" só na primeira
+    const marca = (rotuloHoje) => (temHoje ? `<span class="cag__hoje" style="left: ${pct(hoje, j).toFixed(2)}%" aria-hidden="true">${rotuloHoje ? '<span class="cag__hoje-rotulo">Hoje</span>' : ''}</span>` : '');
+    const marcaHoje = marca(false);
+    const rotulo = periodo === 'mes' ? `${MESES_LONGO[j.iniMi % 12]} de ${Math.floor(j.iniMi / 12)}` : `${mesCurto(j.iniMi)} – ${mesCurto(j.iniMi + j.tam - 1)}`;
     const grupos = ORDEM_GRUPO.map((tipo) => todas.find((o) => o.tipo === tipo)).filter(Boolean);
     const seta = (aberto) => `<span class="cag__seta ${aberto ? '' : 'cag__seta--fechada'}" aria-hidden="true">${Icones.abaixo}</span>`;
     const areaDe = (lista) => lista.reduce((s, p) => s + (Util.areaCultivo(p, Versoes.ultimaPublicada(p)) || 0), 0);
@@ -187,7 +203,7 @@ window.Telas.calendarioAgricola = (function () {
         <div class="cag__linha cag__linha--empresa" role="row">
           <span role="cell"><button class="cag__abrir" type="button" data-cag-recolher="${esc(ce)}" aria-expanded="${abertaE}">${seta(abertaE)}<strong>${esc(e)}</strong></button></span>
           <span role="cell"></span><span role="cell" class="cag__num"><strong>${Util.area(areaDe(daEmpresa))}</strong></span>
-          <span role="cell" class="cag__tempo cag__tempo--vazio" style="${fundo}">${marcaHoje}</span>
+          <span role="cell" class="cag__tempo cag__tempo--vazio" style="${fundo}">${marca(!linhas.length)}</span>
         </div>`);
       if (!abertaE) return;
       [...new Set(daEmpresa.map((p) => p.fazenda))].sort((a, b) => a.localeCompare(b, 'pt-BR')).forEach((f) => {
@@ -220,18 +236,14 @@ window.Telas.calendarioAgricola = (function () {
       });
     });
 
-    return `
-      <div class="cag__barra-topo">
-        <div class="cag__legenda">
-          ${grupos.map((o) => `<span><span class="cag__cor" style="background: ${rgba(COR_GRUPO[o.tipo], 0.55)}" aria-hidden="true"></span>${esc(o.grupo)}</span>`).join('')}
-          ${marcaHoje ? '<span><span class="cag__cor cag__cor--hoje" aria-hidden="true"></span>Hoje</span>' : ''}
-        </div>
-        <div class="cag__navegar">
-          ${navegavel ? `<button class="botao-icone" type="button" data-cag-mover="-1" aria-label="Período anterior" ${j.iniMi <= j.primeiro ? 'disabled' : ''}>${Icones.anterior}</button>` : ''}
+    const legenda = grupos.map((o) => `<span><span class="cag__cor" style="--c: ${COR_GRUPO[o.tipo]}" aria-hidden="true"></span>${esc(o.grupo)}</span>`).join('')
+      + (temHoje ? '<span><span class="cag__cor cag__cor--hoje" aria-hidden="true"></span>Hoje</span>' : '');
+    const navegar = periodo === 'ano' ? navegarAno() : `
+          <button class="botao-icone botao-icone--borda" type="button" data-cag-mover="-1" aria-label="Período anterior" ${j.iniMi <= j.primeiro ? 'disabled' : ''}>${Icones.anterior}</button>
           <strong>${rotulo}</strong>
-          ${navegavel ? `<button class="botao-icone" type="button" data-cag-mover="1" aria-label="Próximo período" ${j.iniMi + j.tam > j.ultimo ? 'disabled' : ''}>${Icones.proxima}</button>` : ''}
-        </div>
-      </div>
+          <button class="botao-icone botao-icone--borda" type="button" data-cag-mover="1" aria-label="Próximo período" ${j.iniMi + j.tam > j.ultimo ? 'disabled' : ''}>${Icones.proxima}</button>`;
+    return `
+      ${barraTopo(legenda, navegar)}
       <div class="cag__rolagem">
         <div class="cag__tabela" role="table" aria-label="Operações por empresa, fazenda e safra">
           <div class="cag__linha cag__linha--cab" role="row">
@@ -248,8 +260,16 @@ window.Telas.calendarioAgricola = (function () {
     const caixa = conteudo.querySelector('[data-cag]');
     const atualizar = () => { caixa.innerHTML = linhaDoTempo(); };
     conteudo.querySelector('[data-cag-periodo]').addEventListener('change', (e) => { periodo = e.target.value; inicioPeriodo = null; atualizar(); });
-    // Recolher/abrir empresa e fazenda; setas do período
+    // Recolher/abrir empresa e fazenda; setas do ano agrícola (período Ano) e do período
     caixa.addEventListener('click', (e) => {
+      const a = e.target.closest('[data-cag-ano]');
+      if (a && !a.disabled) {
+        const anos = Util.anosAgricolas(DADOS.planos);
+        filtros.anoAgricola = anos[anos.indexOf(filtros.anoAgricola) + Number(a.dataset.cagAno)];
+        atualizar();
+        caixa.querySelector(`[data-cag-ano="${a.dataset.cagAno}"]:not(:disabled)`)?.focus();
+        return;
+      }
       const r = e.target.closest('[data-cag-recolher]');
       if (r) {
         const k = r.dataset.cagRecolher;

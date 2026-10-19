@@ -90,19 +90,11 @@ window.Telas.painelPlanos = (function () {
   function desenhar() {
     return `
       <div class="painel" data-guia-painel="painel">
-        <section class="cartao painel-secao" aria-labelledby="pn-titulo-fazendas">
-          <h2 class="painel-secao__titulo" id="pn-titulo-fazendas">Planejamento das Fazendas
-            <span class="painel-info" tabindex="0" title="Cada fazenda conta uma vez por safra e uma vez por safrinha. Cadastrada a safra ou a safrinha, todas as fazendas de todas as empresas passam a contar; quem ainda não tem plano nela aparece como Sem plano.">${Icones.info}</span></h2>
-          <p class="painel-secao__subtitulo">Situação dos planos de safra no contexto selecionado.</p>
-          <div class="painel-kpis" data-pn="kpis"></div>
-        </section>
+        <section class="painel-kpis" aria-label="Planejamento das Fazendas" data-pn="kpis"></section>
 
         <section class="cartao lista-planos" aria-labelledby="pn-titulo-planos">
           <div class="secao__topo lista-planos__topo">
-            <h2 class="secao__titulo" id="pn-titulo-planos">Planos de Safra</h2>
-            <button class="botao botao--primario" type="button" data-acao="criar-plano">
-              ${Icones.mais} Criar Plano Safra
-            </button>
+            <h2 class="secao__titulo lista-planos__titulo" id="pn-titulo-planos">${Icones.documento} Planos de Safra</h2>
           </div>
           <div class="tabela-rolagem">
             <table class="tabela painel-tabela">
@@ -171,6 +163,7 @@ window.Telas.painelPlanos = (function () {
   }
 
   // ----- Planejamento das Fazendas -----
+  const REGRA_CONTAGEM = 'Cada fazenda conta uma vez por safra e uma vez por safrinha. Cadastrada a safra ou a safrinha, todas as fazendas de todas as empresas passam a contar; quem ainda não tem plano nela aparece como Sem plano.';
   function kpis(ls) {
     const total = ls.length;
     const conta = (sts) => ls.filter((l) => sts.includes(l.status)).length;
@@ -185,10 +178,11 @@ window.Telas.painelPlanos = (function () {
         <div class="painel-kpi painel-kpi--${chave}">
           <span class="painel-kpi__icone" aria-hidden="true">${icone}</span>
           <div class="painel-kpi__corpo">
-            <span class="painel-kpi__rotulo">${rotulo}</span>
+            <span class="painel-kpi__rotulo">${rotulo}
+              <span class="painel-info" tabindex="0" title="${esc(REGRA_CONTAGEM)}" aria-label="Como as fazendas são contadas">${Icones.info}</span></span>
             <strong class="painel-kpi__numero">${n} de ${total}</strong>
             <span class="painel-kpi__barra" aria-hidden="true"><span style="width: ${p.toFixed(1)}%"></span></span>
-            <span class="painel-kpi__texto">${pct(p)} das fazendas</span>
+            <span class="painel-kpi__texto"><strong>${pct(p)}</strong> das fazendas</span>
           </div>
         </div>`;
     }).join('');
