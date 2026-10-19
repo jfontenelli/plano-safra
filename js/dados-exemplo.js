@@ -379,9 +379,9 @@ window.DADOS = {
   planos: [],
 
   // Planos carregados ao abrir o protótipo: ano agrícola 2025, soja 25/26 e milho safrinha 26/26 da Santa Clara;
-  // ano agrícola 2026, soja 26/27 e milho safrinha 27/27 da Boa Vista (publicados) e soja 26/27 da São José, criado
-  // e não iniciado (sem "operacoes": só a 0.1, vazia). A Primavera fica sem plano. O plano em construção o usuário
-  // monta ele mesmo (a partir da São José ou de um plano novo). "operacoes" detalha, por nome de operação do modelo: fenologia, produtos [nome, dose],
+  // ano agrícola 2026, soja 26/27 e milho safrinha 27/27 da Boa Vista (publicados) e soja 26/27 da São José, em
+  // construção: iniciado pelo "Usar modelo" (inicio: 'modelo'), com as operações do modelo e ainda sem planejamento.
+  // A Primavera fica sem plano. "operacoes" detalha, por nome de operação do modelo: fenologia, produtos [nome, dose],
   // talhões que recebem e ajustes por talhão. Operações não listadas ficam sem recomendação e sem talhões.
   planosExemplo: [
     {
@@ -484,12 +484,15 @@ window.DADOS = {
           'Plantio': { germinacao: 92, plantio: [
             { talhao: 'T01', variedade: 'NS 7709 IPRO',    data: '2026-09-20', populacao: 280 },
             { talhao: 'T02', variedade: 'NS 7709 IPRO',    data: '2026-09-21', populacao: 280 },
-            { talhao: 'T03', variedade: 'BMX Olimpo IPRO', data: '2026-09-26', populacao: 250 },
+            // T03 e T08 com duas variedades cada (área de aplicação de cada uma, em ha)
+            { talhao: 'T03', variedade: 'BMX Olimpo IPRO', data: '2026-09-26', populacao: 250, area: 85 },
+            { talhao: 'T03', variedade: 'NS 7709 IPRO',    data: '2026-09-29', populacao: 270, area: 60 },
             { talhao: 'T04', variedade: 'BMX Olimpo IPRO', data: '2026-09-27', populacao: 250 },
             { talhao: 'T05', variedade: 'TMG 2383 IPRO',   data: '2026-10-02', populacao: 220 },
             { talhao: 'T06', variedade: 'TMG 2383 IPRO',   data: '2026-10-03', populacao: 220 },
             { talhao: 'T07', variedade: 'BMX Foco IPRO',   data: '2026-09-24', populacao: 300 },
-            { talhao: 'T08', variedade: 'M 8372 IPRO',     data: '2026-10-08', populacao: 230 },
+            { talhao: 'T08', variedade: 'M 8372 IPRO',     data: '2026-10-08', populacao: 230, area: 70 },
+            { talhao: 'T08', variedade: 'TMG 2383 IPRO',   data: '2026-10-10', populacao: 220, area: 40 },
             { talhao: 'T09', variedade: 'M 8372 IPRO',     data: '2026-10-09', populacao: 230 },
             { talhao: 'T10', variedade: 'BMX Foco IPRO',   data: '2026-09-25', populacao: 300 }
           ] },
@@ -542,8 +545,10 @@ window.DADOS = {
       })()
     },
     {
-      // Soja 26/27 da São José (Empresa A): plano criado e ainda não iniciado. Ao abrir, "Como deseja iniciar o plano?"
+      // Soja 26/27 da São José (Empresa A): em construção, iniciado pelo "Usar modelo" (0.1 e 0.2 em construção, com as
+      // operações do modelo da cultura e ainda sem planejamento), como se o usuário tivesse escolhido essa opção
       safra: '26/27', empresa: 'Empresa A', atividade: 'Agricultura', fazenda: 'São José', cultura: 'Soja',
+      inicio: 'modelo',
       versoes: { criadaEm: '2026-10-15T09:30' },
       custo: null, receita: null,
       atualizadoEm: '2026-10-15', atualizadoPor: 'Maria Gonçalves'

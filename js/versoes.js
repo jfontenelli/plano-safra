@@ -34,6 +34,12 @@ window.Versoes = (function () {
     return [...lista(plano)].reverse().find((v) => v.status === 'publicada') || null;
   }
   // A versão que a seta da Visão Geral abre: a em construção ou, se não houver, a última publicada
+  // Última publicada com planejamento: a 0.1 vazia (registro da criação do plano) não conta. É a que entra nas telas
+  // que somam planos publicados (Orçamento, Calendário Agrícola, Ordens de Serviço)
+  function publicadaComPlanejamento(plano) {
+    const v = ultimaPublicada(plano);
+    return v && v.grupos && v.grupos.length ? v : null;
+  }
   function deTrabalho(plano) { return emConstrucao(plano) || ultimaPublicada(plano); }
   function somenteLeitura(plano) { const v = aberta(plano); return !v || v.status === 'publicada'; }
 
@@ -155,7 +161,7 @@ window.Versoes = (function () {
   }
 
   return {
-    lista, buscar, aberta, emConstrucao, ultimaPublicada, deTrabalho, somenteLeitura, proximoNumero,
+    lista, buscar, aberta, emConstrucao, ultimaPublicada, publicadaComPlanejamento, deTrabalho, somenteLeitura, proximoNumero,
     iniciar, aIniciar, comecar, abrir, salvar, publicar, criarNova, grupos, talhoes, quando, statusExibido, rotuloStatus, detalhe
   };
 })();

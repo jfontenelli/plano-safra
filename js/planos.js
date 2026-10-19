@@ -35,8 +35,8 @@ window.Planos = (function () {
 
   // prazo: prazo para encerramento da OS, em dias (informado no Calendário Agrícola; null = padrão do grupo)
   function novaOperacao(nome, dap = null, prazo = null) {
-    // Só no grupo Plantio: plantio { 'T01': { variedade, data ('AAAA-MM-DD'), populacao (mil plantas/ha) } }
-    // e germinação por talhão (%): germinacoes { 'T01': 95 }, à parte do plantio (talhão só com germinação não conta como planejado)
+    // Só no grupo Plantio: plantio { 'T01': [variedades do talhão] } (ver linhasPlantio) e germinacao (%), o número
+    // geral do plano (o título da coluna Germinação aplica em todas as linhas; cada linha pode ter a sua)
     return { id: novoId('o'), nome, dap, fenologia: '', prazo, receitas: [], talhoes: {}, plantio: {}, germinacoes: {} };
   }
 
@@ -104,9 +104,13 @@ window.Planos = (function () {
       if (!d) return;
       if (d.fenologia) op.fenologia = d.fenologia; // senão, fica a do modelo
       if (d.dap !== undefined) op.dap = d.dap; // operação sem DAP no modelo (ex.: TSI)
-      (d.plantio || []).forEach(({ talhao, variedade, data, populacao }) => { op.plantio[talhao] = { variedade, data, populacao }; });
-      // Germinação dos exemplos: o mesmo valor em todos os talhões do plantio
-      if (d.germinacao) (d.plantio || []).forEach(({ talhao }) => { op.germinacoes[talhao] = d.germinacao; });
+      // Plantio: uma entrada por variedade; o mesmo talhão pode aparecer mais de uma vez (cada uma com a sua área)
+      (d.plantio || []).forEach(({ talhao, variedade, data, populacao, area }) => {
+        (op.plantio[talhao] = op.plantio[talhao] || []).push({ variedade, data, populacao, area: area ?? null, germinacao: d.germinacao || null,
+          ...(area ? { areaDigitada: true } : {}) });
+      });
+      // Germinação dos exemplos: o número geral do plano
+      if (d.germinacao) op.germinacao = d.germinacao;
       // Tratamento de sementes (TSI): cada um vira "TSI N", nos talhões listados
       (d.tsi || []).forEach(({ produtos, talhoes }) => {
         const r = novaReceita(op, produtos.map(([nome, dose]) => linhaDoProduto(nome, dose)), 'TSI');
@@ -214,11 +218,39 @@ window.Planos = (function () {
     return linha.produto || linha.principioAtivo || 'Produto';
   }
 
+  // ----- Plantio: várias variedades no mesmo talhão (DECISOES 4.4) -----
+  // op.plantio[talhao] = [{ variedade, area (ha da variedade; null = a área do talhão, quando é a única), data,
+  // populacao (mil plantas/ha), germinacao (%; null = a geral do plano), areaDigitada (a área foi informada pelo usuário:
+  // ao inserir outra variedade, ela não muda) }]. Plano antigo (um objeto por talhão): uma linha.
+  function linhasPlantio(op, talhao) {
+    const x = ((op && op.plantio) || {})[talhao];
+    return !x ? [] : Array.isArray(x) ? x : [x];
+  }
+  // Área de aplicação da linha i: a informada; sem área e sendo a única variedade, a área do talhão; senão, null (falta informar)
+  function areaLinhaPlantio(linhas, i, areaTalhao) {
+    const a = linhas[i] && linhas[i].area;
+    if (a !== null && a !== undefined && a !== '') return Number(a);
+    return linhas.length === 1 ? areaTalhao : null;
+  }
+  // Germinação da linha: a dela, a do talhão (planos antigos) ou a geral do plano
+  function germinacaoLinha(op, talhao, linha) {
+    return (linha && linha.germinacao) || ((op && op.germinacoes) || {})[talhao] || (op && op.germinacao) || null;
+  }
+  // Primeira data de plantio do talhão: dela partem as outras operações do talhão (DAP), na área inteira
+  function dataPlantioTalhao(op, talhao) {
+    return linhasPlantio(op, talhao).map((l) => l.data).filter(Boolean).sort()[0] || null;
+  }
+  // Talhão com variedade (planejado no Plantio)
+  function temVariedadePlantio(op, talhao) {
+    return linhasPlantio(op, talhao).some((l) => l.variedade);
+  }
+
   return {
     novoId, novaLinha, linhaDoProduto, novaOperacao, novaReceita, novoAjuste, novoGrupo,
     gruposModelo, modeloDaCultura, gruposFixos, copiarSemTalhoes, montarExemplo, produtoDoCadastro,
     linhaPreenchida, chaveLinha, composicao, receitaDoTalhao, talhoesDaReceita,
     linhasTalhao, doseTalhao, temAjuste, statusTalhao, resumo,
-    colunasDose, linhaNoTalhao, unidadeDose, nomeLinha
+    colunasDose, linhaNoTalhao, unidadeDose, nomeLinha,
+    linhasPlantio, areaLinhaPlantio, germinacaoLinha, dataPlantioTalhao, temVariedadePlantio
   };
 })();

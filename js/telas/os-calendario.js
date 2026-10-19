@@ -28,7 +28,7 @@ window.Telas.osCalendario = (function () {
 
   const cicloDe = (p) => p.ciclo || 'Safra';
   const tipoDe = (grupo) => Util.normalizar(grupo.tipo || 'outro').replace(/\s+/g, '-');
-  const comPublicada = () => DADOS.planos.filter((p) => Versoes.ultimaPublicada(p));
+  const comPublicada = () => DADOS.planos.filter((p) => Versoes.publicadaComPlanejamento(p));
   const valorDe = { ciclo: cicloDe, empresa: (p) => p.empresa, fazenda: (p) => p.fazenda, cultura: (p) => p.cultura };
   const planosFiltrados = () => comPublicada().filter((p) => Object.keys(valorDe).every((c) => Cal().marcado(est, c, valorDe[c](p))));
 

@@ -52,28 +52,41 @@ window.Telas.calendarioAgricola = (function () {
   // Plantio: a data de plantio; Colheita: plantio + ciclo da variedade) e vai até o fim da previsão de conclusão
   // no último talhão. Entram os talhões incluídos com data de plantio e com a operação planejada.
   function operacoesDoPlano(p) {
-    const v = Versoes.ultimaPublicada(p);
+    const v = Versoes.publicadaComPlanejamento(p);
     if (!v) return [];
     const grupos = Versoes.grupos(p, v);
     const talhoes = Util.talhoesPlano(p, v);
-    const pl = ((grupos.find((g) => g.tipo === 'Sementes') || { operacoes: [] }).operacoes[0] || {}).plantio || {};
+    // Plantio (várias variedades por talhão): as operações partem da primeira data de plantio do talhão;
+    // a colheita, de cada variedade (data de plantio + ciclo dela)
+    const opPlantio = (grupos.find((g) => g.tipo === 'Sementes') || { operacoes: [] }).operacoes[0] || null;
     const lista = [];
     grupos.forEach((g) => g.operacoes.forEach((op) => {
       let ini = null; let fim = null; let area = 0;
+      const estender = (a, b) => { if (!ini || a < ini) ini = a; if (!fim || b > fim) fim = b; };
+      const prazo = op.prazo || (g.tipo === 'Colheita' ? 10 : g.tipo === 'Sementes' ? 3 : 2);
       talhoes.forEach((t) => {
-        const x = pl[t.nome];
-        if (!x || !x.data) return;
-        let dap = op.dap;
-        if (g.tipo === 'Colheita') { const va = DADOS.variedades.find((vv) => vv.nome === x.variedade); dap = va && va.ciclo; }
-        else if (g.tipo !== 'Sementes') {
-          const ajuste = op.talhoes && op.talhoes[t.nome];
-          if (!ajuste || !Planos.linhasTalhao(op, ajuste).length) return;
+        const linhas = Planos.linhasPlantio(opPlantio, t.nome);
+        const data = Planos.dataPlantioTalhao(opPlantio, t.nome);
+        if (!data) return;
+        if (g.tipo === 'Colheita') {
+          linhas.forEach((l, i) => {
+            const va = DADOS.variedades.find((vv) => vv.nome === l.variedade);
+            if (!l.data || !va || !va.ciclo) return;
+            estender(somaDias(l.data, va.ciclo), somaDias(l.data, va.ciclo + prazo - 1));
+            area += Planos.areaLinhaPlantio(linhas, i, t.area) || 0;
+          });
+          return;
         }
-        if (dap === null || dap === undefined) return;
-        const prazo = op.prazo || (g.tipo === 'Colheita' ? 10 : g.tipo === 'Sementes' ? 3 : 2);
-        const a = somaDias(x.data, dap); const b = somaDias(x.data, dap + prazo - 1);
-        if (!ini || a < ini) ini = a;
-        if (!fim || b > fim) fim = b;
+        // Plantio: a data de cada variedade
+        if (g.tipo === 'Sementes') {
+          linhas.filter((l) => l.data).forEach((l) => estender(somaDias(l.data, 0), somaDias(l.data, prazo - 1)));
+          area += t.area;
+          return;
+        }
+        const ajuste = op.talhoes && op.talhoes[t.nome];
+        if (!ajuste || !Planos.linhasTalhao(op, ajuste).length) return;
+        if (op.dap === null || op.dap === undefined) return;
+        estender(somaDias(data, op.dap), somaDias(data, op.dap + prazo - 1));
         area += t.area;
       });
       if (ini) lista.push({ nome: op.nome, grupo: g.nome, tipo: g.tipo, cultura: p.cultura, ini, fim, area });
@@ -224,8 +237,8 @@ window.Telas.calendarioAgricola = (function () {
           </div>`);
         if (!abertaF) return;
         daFazenda.forEach((p) => {
-          const v = Versoes.ultimaPublicada(p);
-          const area = Util.areaCultivo(p, v);
+          const v = Versoes.publicadaComPlanejamento(p);
+          const area = Util.areaCultivo(p, Versoes.ultimaPublicada(p));
           const lista = ops.get(p);
           linhas.push(`
             <div class="cag__linha cag__linha--safra" role="row">

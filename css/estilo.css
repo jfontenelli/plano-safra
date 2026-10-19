@@ -1673,6 +1673,10 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
 
 /* Tabela do passo Variedade */
 .tabela-variedade tr.linha--aberta > * { background: var(--verde-100); }
+/* A linha inteira abre o painel do talhão */
+.tabela-variedade tr.linha--clicavel { cursor: pointer; }
+.tabela-variedade tr.linha--clicavel:hover > * { background: var(--superficie-2); }
+.tabela-variedade tr.linha--clicavel.linha--aberta:hover > * { background: var(--verde-100); }
 .tabela-variedade tr.linha--aberta > :first-child { box-shadow: inset 3px 0 0 var(--verde-700); }
 .tabela__ciclo { color: var(--texto-suave); }
 .texto-alerta { color: var(--aviso-texto); font-weight: 600; }
@@ -1697,7 +1701,7 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
 .link-historico--aberto { background: var(--verde-100) !important; }
 
 /* Painel lateral do talhão */
-.painel-talhao { width: 440px; flex-shrink: 0; min-height: 0; display: flex; flex-direction: column; padding: 12px 16px; }
+.painel-talhao { width: 580px; flex-shrink: 0; min-height: 0; display: flex; flex-direction: column; padding: 12px 16px; }
 /* Expandido: painel largo e gráficos maiores (a tabela fica mais estreita) */
 .painel-talhao--expandido { width: min(760px, 58%); }
 .painel-talhao__topo { display: flex; align-items: center; gap: 6px; padding-bottom: 10px; border-bottom: 1px solid var(--borda); }
@@ -1717,6 +1721,19 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
 .painel-talhao__campos { display: flex; flex-direction: column; gap: 10px; padding-top: 10px; border-top: 1px solid var(--borda); }
 .painel-talhao__campos .campo { margin: 0; }
 .painel-talhao__datas, .plantio__datas { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: start; }
+/* Painel do talhão: um bloco por variedade */
+.painel-talhao__variedades { display: flex; flex-direction: column; gap: 10px; padding-top: 10px; border-top: 1px solid var(--borda); }
+.painel-variedade { display: flex; flex-direction: column; gap: 10px; padding: 10px 12px; border: 1px solid var(--borda); border-radius: var(--raio); }
+.painel-variedade .campo { margin: 0; }
+.painel-variedade__topo { display: flex; align-items: flex-start; gap: 8px; }
+.painel-variedade__topo > .botao-icone { margin-top: 28px; }
+.painel-variedade__num { display: grid; place-items: center; flex: none; width: 22px; height: 22px; margin-top: 35px; border-radius: 50%;
+  background: var(--verde-100); font-size: 12px; font-weight: 700; color: var(--verde-700); }
+.painel-variedade__nome { flex: 1; min-width: 0; }
+.painel-talhao__adicionar { display: inline-flex; align-items: center; gap: 6px; margin-top: 8px; font-weight: 600; }
+.painel-talhao__adicionar .icone { width: 16px; height: 16px; }
+.painel-talhao__area { margin: 8px 0 0; font-size: 14px; color: var(--texto-suave); }
+.painel-talhao__area--erro { color: var(--erro); }
 .plantio__datas .campo { margin: 0; }
 .plantio__orientacao { margin: 0 0 4px; }
 .painel-talhao__previsao { display: flex; align-items: center; height: 42px; margin: 0; padding: 0 12px; border-radius: 8px; background: var(--fundo); font-weight: 700; }
@@ -1748,6 +1765,20 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
 
 /* Modal "Definir variedade e plantio" (talhões marcados) */
 .definir--estreito { max-width: 620px; }
+/* Definir plantio (em massa): composição de variedades, com a % de cada uma, a data e a população */
+.definir--composicao { max-width: 780px; }
+.composicao { display: flex; flex-direction: column; gap: 8px; }
+/* Títulos numa linha só, em cima; cada variedade numa linha, com os campos na mesma altura */
+.composicao__linha { display: grid; grid-template-columns: minmax(160px, 1fr) 84px 168px 150px 32px; gap: 10px; align-items: center; }
+.composicao__linha .campo { margin: 0; min-width: 0; }
+.composicao__linha .campo__controle { height: 40px; }
+.composicao__cab { font-size: 13px; font-weight: 600; color: var(--texto); white-space: nowrap; }
+.composicao__remover { justify-self: center; }
+.composicao__rodape { display: flex; align-items: center; justify-content: space-between; margin: 10px 0 14px; }
+.composicao__adicionar { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; }
+.composicao__adicionar .icone { width: 16px; height: 16px; }
+.composicao__soma { font-size: 14px; color: var(--texto-suave); }
+.composicao__soma--erro { color: var(--erro); }
 .plantio__pre { padding: 10px 12px; border: 1px solid var(--aviso-borda); border-radius: 8px; background: var(--aviso-fundo); }
 .plantio__pre .pre-cadastro__titulo { margin: 0 0 8px; }
 .plantio__pre-linha { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -1852,6 +1883,15 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .mapa-legenda strong { font-weight: 600; color: var(--texto-suave); }
 .mapa-legenda li { display: flex; align-items: center; gap: 6px; }
 .mapa-legenda__cor { display: inline-block; width: 14px; height: 14px; flex-shrink: 0; border-radius: 3px; border: 1px solid rgba(0, 0, 0, .25); }
+/* Talhão com várias variedades: hachura em tons do verde UniSystem (a mesma do mapa) */
+.mapa-legenda__cor--multiplas { background: repeating-linear-gradient(45deg, #1f7a4d 0 3px, #9fd3b4 3px 7px); }
+/* Plantio: várias variedades no talhão. No nome do talhão, tirar (lixeira) e adicionar (+) variedade */
+.tabela__talhao-nome { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+.tabela__var-acoes { display: inline-flex; gap: 2px; margin-left: 4px; }
+.tabela__var-acoes .botao-icone { width: 24px; height: 24px; }
+.tabela__var-acoes .icone { width: 14px; height: 14px; }
+.tabela-variedade tr.linha--variedade > * { border-top-style: dashed; }
+.celula--erro { box-shadow: inset 0 0 0 1px var(--erro); }
 .mapa-legenda__ha { color: var(--texto-suave); }
 /* Nome fixo do talhão: pequeno, sem caixa grande */
 .mapa-rotulo { width: auto !important; height: auto !important; background: none; border: 0; }
@@ -2965,3 +3005,51 @@ html[data-tema="escuro"] .grafico-historico__valor { fill: #5FD896; }
 html[data-tema="escuro"] .cag__faixa { background: color-mix(in srgb, var(--c) 85%, transparent); }
 html[data-tema="escuro"] .cag__cor:not(.cag__cor--hoje) { background: var(--c); }
 html[data-tema="escuro"] .cag-etiqueta { padding: 7px 16px; border: 1px solid #176B50; background: rgba(23, 107, 80, .25); font-size: 14px; color: var(--texto); }
+
+/* Painel do talhão (Plantio): histórico recolhível, variedades planejadas com ✎, rodapé com Salvar */
+.pt-secao { padding: 12px 0; border-top: 1px solid var(--borda); }
+.pt-secao__cab { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 0; border: 0; background: none;
+  font: inherit; font-size: 15px; font-weight: 700; color: var(--texto); cursor: pointer; text-align: left; }
+.pt-secao__seta { display: inline-flex; transition: transform .15s; }
+.pt-secao__seta .icone { width: 18px; height: 18px; }
+.pt-secao__seta--aberta { transform: rotate(180deg); }
+.pt-secao .grafico-historico { margin-top: 10px; }
+.pt-variedades__cab { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.pt-variedades__titulo { margin: 0; font-size: 15px; font-weight: 700; }
+.pt-variedades__total { font-size: 14px; color: var(--texto-suave); }
+.pt-barra { height: 8px; margin: 10px 0 6px; border-radius: 999px; background: var(--superficie-3); overflow: hidden; }
+.pt-barra > span { display: block; height: 100%; border-radius: 999px; background: var(--verde-700); }
+.pt-barra--passou > span { background: var(--erro); }
+.pt-variedades__disp { margin: 0 0 10px; font-size: 13px; color: var(--texto-suave); }
+.pt-variedades__disp--erro { color: var(--erro); }
+.pt-var { display: flex; flex-direction: column; gap: 6px; }
+.pt-var { gap: 0; border: 1px solid var(--borda); border-radius: var(--raio); overflow: clip; }
+/* Títulos da tabela de variedades presos no topo ao rolar o painel */
+.pt-var__cab { position: sticky; top: -1px; z-index: 2; }
+.pt-var__cab, .pt-var__linha { display: grid; grid-template-columns: minmax(150px, 2.3fr) 0.7fr 1.2fr 0.8fr 0.6fr 28px; gap: 6px; align-items: center; }
+.pt-var__cab { padding: 8px 10px; background: var(--superficie-2); font-size: 12px; font-weight: 600; color: var(--texto-suave); }
+.pt-var__linha { padding: 6px 10px; border-top: 1px solid var(--borda); font-size: 14px; font-variant-numeric: tabular-nums; }
+.pt-var__linha--erro { background: var(--erro-fundo); }
+.pt-var__linha .celula { width: 100%; min-width: 0; }
+.pt-var__sel { padding-right: 18px; text-overflow: ellipsis; }
+.pt-var__data { display: flex; align-items: center; gap: 4px; }
+.pt-var__germ { color: var(--texto-suave); text-align: right; padding-right: 4px; }
+.pt-var__extra { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 6px 10px 8px; background: var(--superficie-2); }
+.pt-var__extra .campo__rotulo { margin: 0; }
+.pt-var__ciclo { width: 90px; height: 32px; }
+.pt-var__erro { margin: 0; padding: 4px 10px 8px; background: var(--erro-fundo); }
+.pt-var__nome { display: flex; flex-direction: column; min-width: 0; }
+.pt-var__nome strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pt-var__nome small { font-size: 12px; color: var(--texto-suave); }
+.pt-var__vazio { margin: 0; padding: 10px; font-size: 14px; color: var(--texto-suave); }
+.pt-var__edicao { display: flex; flex-direction: column; gap: 10px; padding: 12px; border: 1px solid var(--verde-600); border-radius: var(--raio); background: var(--superficie); }
+.pt-var__edicao .campo { margin: 0; }
+.pt-var__campos { display: grid; grid-template-columns: 0.8fr 1.3fr 0.9fr; gap: 8px; align-items: start; }
+.pt-var__acoes { display: flex; align-items: center; justify-content: space-between; }
+.link-acao--perigo { display: inline-flex; align-items: center; gap: 4px; color: var(--erro); }
+.link-acao--perigo .icone { width: 15px; height: 15px; }
+.pt-var__adicionar { display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; margin-top: 10px; }
+.pt-var__adicionar .icone { width: 16px; height: 16px; }
+.painel-talhao__rodape { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-shrink: 0;
+  margin: 0 -16px -12px; padding: 12px 16px; border-top: 1px solid var(--borda); font-size: 14px; color: var(--texto-suave); }
+.painel-talhao__botoes { display: inline-flex; gap: 8px; }

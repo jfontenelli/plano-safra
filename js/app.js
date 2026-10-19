@@ -81,18 +81,19 @@
     }
     // Plano que não existe mais (ex.: página recarregada) volta para a lista
     if (nome === 'plano' && !buscarPlano(parametro)) return { nome: ROTA_INICIAL };
-    // Plano ainda não iniciado (ex.: pelo menu Planejamento): Visão Geral, com o modal "Como deseja iniciar o plano?"
+    // Endereço de um plano ainda não iniciado (ex.: página atualizada: os dados voltam ao exemplo inicial): Visão Geral,
+    // no ano agrícola dele, sem abrir o modal de início (ele só abre ao clicar na linha do plano)
     if (nome === 'plano' && Versoes.aIniciar(buscarPlano(parametro))) {
       const plano = buscarPlano(parametro);
       history.replaceState(null, '', `#/${ROTA_INICIAL}`);
       Telas.listaPlanos.mostrarSafra(plano.safra);
-      return { nome: ROTA_INICIAL, iniciar: plano };
+      return { nome: ROTA_INICIAL };
     }
     return { nome, parametro, extra };
   }
 
   function mostrarTela() {
-    const { nome, parametro, extra, iniciar } = rotaAtual();
+    const { nome, parametro, extra } = rotaAtual();
     const rota = ROTAS[nome];
 
     document.querySelector('.aviso')?.remove();
@@ -100,7 +101,6 @@
     if (rota.aoMostrar) rota.aoMostrar(conteudo, parametro, extra);
     conteudo.scrollTop = 0;
     document.title = `${rota.titulo} · UniSystem`;
-    if (iniciar) Telas.listaPlanos.abrirPlano(iniciar);
 
     document.querySelectorAll('.menu__item[data-rota]').forEach((item) => {
       const ativo = item.dataset.rota === rota.menu;
@@ -164,13 +164,15 @@
 
   // Mantém as safras já cadastradas (inclusive a criada no modal) e inclui a dos exemplos
   function carregarPlanosExemplo() {
-    DADOS.planos = DADOS.planosExemplo.map(({ operacoes, versoes, modelo, ...p }) => {
+    DADOS.planos = DADOS.planosExemplo.map(({ operacoes, versoes, modelo, inicio, ...p }) => {
       if (!DADOS.safras.includes(p.safra)) DADOS.safras.push(p.safra);
       const plano = { ...p, id: estado.proximoIdPlano++ };
       // Versões do exemplo: 0.1 publicada e 0.2 com o planejamento (em construção ou publicada).
-      // Sem "operacoes": plano não iniciado (só a 0.1, vazia)
+      // inicio 'modelo': iniciado pelo "Usar modelo" (as operações do modelo da cultura, sem planejamento).
+      // Sem "operacoes" nem inicio: plano não iniciado (só a 0.1, vazia)
       const criada = new Date(versoes.criadaEm);
-      const grupos = operacoes ? Planos.montarExemplo(operacoes, modelo ? DADOS.modelosCultura[modelo] : undefined) : [];
+      const grupos = operacoes ? Planos.montarExemplo(operacoes, modelo ? DADOS.modelosCultura[modelo] : undefined)
+        : inicio === 'modelo' ? Planos.gruposModelo(Planos.modeloDaCultura(p.cultura)) : [];
       Versoes.iniciar(plano, grupos, { quando: criada, por: p.atualizadoPor });
       if (versoes.publicadaEm) {
         Versoes.publicar(plano);

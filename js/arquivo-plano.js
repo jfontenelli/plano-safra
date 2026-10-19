@@ -48,22 +48,24 @@ window.ArquivoPlano = (function () {
     });
     if (plantio && plantio.prazoColheita) abaPlano.push(['prazo_colheita', plantio.prazoColheita]);
 
-    const abaVariedade = [['fazenda', 'talhao', 'area_talhao', 'cultura', 'grupo_operacao', 'operacao', 'variedade',
+    // Uma linha por variedade (o talhão pode ter várias, cada uma com a sua área de aplicação)
+    const abaVariedade = [['fazenda', 'talhao', 'area_talhao', 'area_aplicacao', 'cultura', 'grupo_operacao', 'operacao', 'variedade',
       'data_plantio', 'pop_plantas_planejada', 'pop_plantas_recomendada', 'perc_germinacao', 'quantidade_total_sementes', 'bags']];
     // bags: na embalagem da cultura (soja: 1 bag = 5 milhões de sementes; milho: 1 saco = 60 mil)
     const porEmbalagem = (DADOS.embalagemSemente[plano.cultura] || DADOS.embalagemSemente.Soja).sementes;
     if (sementes) {
       sementes.operacoes.forEach((op) => {
         talhoes.forEach((t) => {
-          // Germinação por talhão (pode existir sem plantio)
-          const g = (op.germinacoes || {})[t.nome] || null;
-          const p = (op.plantio || {})[t.nome] || (g ? {} : null);
-          if (!p) return;
-          const v = p.variedade ? DADOS.variedades.find((x) => x.nome === p.variedade) : null;
-          const sem = p.populacao && g ? p.populacao * 1000 * t.area / (g / 100) : null;
-          abaVariedade.push([plano.fazenda, t.nome, t.area, plano.cultura, sementes.nome, op.nome, p.variedade || '',
-            p.data || '', p.populacao || '', v && v.populacao ? `${v.populacao[0]}-${v.populacao[1]}` : '',
-            g || '', sem ? Math.round(sem) : '', sem ? Math.round(sem / porEmbalagem * 10) / 10 : '']);
+          const linhas = Planos.linhasPlantio(op, t.nome);
+          linhas.forEach((p, i) => {
+            const g = Planos.germinacaoLinha(op, t.nome, p);
+            const areaVar = Planos.areaLinhaPlantio(linhas, i, t.area);
+            const v = p.variedade ? DADOS.variedades.find((x) => x.nome === p.variedade) : null;
+            const sem = p.populacao && g && areaVar ? p.populacao * 1000 * areaVar / (g / 100) : null;
+            abaVariedade.push([plano.fazenda, t.nome, t.area, areaVar ?? '', plano.cultura, sementes.nome, op.nome, p.variedade || '',
+              p.data || '', p.populacao || '', v && v.populacao ? `${v.populacao[0]}-${v.populacao[1]}` : '',
+              g || '', sem ? Math.round(sem) : '', sem ? Math.round(sem / porEmbalagem * 10) / 10 : '']);
+          });
         });
       });
     }
@@ -83,7 +85,7 @@ window.ArquivoPlano = (function () {
           if (!ajuste) return;
           const r = Planos.receitaDoTalhao(op, ajuste);
           if (!r) return;
-          const variedade = ((op.plantio || {})[t.nome] || (plantio && plantio.plantio[t.nome]) || {}).variedade || '';
+          const variedade = Planos.linhasPlantio(plantio, t.nome).map((l) => l.variedade).filter(Boolean).join(' + ');
           r.produtos.filter(Planos.linhaPreenchida).forEach((l) => {
             const dose = Planos.doseTalhao(op, ajuste, l);
             aba.push([plano.fazenda, t.nome, t.area, t.area, 'ha', plano.cultura, variedade, g.nome, op.nome,
@@ -169,9 +171,11 @@ window.ArquivoPlano = (function () {
         DADOS.variedades.push({ cultura: String(x.cultura), nome: variedade, gm: null, ciclo: null, populacao: null, janela: null, preCadastro: true });
       }
       const germinacao = x.perc_germinacao !== '' && x.perc_germinacao !== undefined ? Number(x.perc_germinacao) : dados.germinacao;
-      if (germinacao) op.germinacoes[talhao] = germinacao;
       if (!variedade && !x.data_plantio) return; // linha só com germinação
-      op.plantio[talhao] = { variedade, data: String(x.data_plantio || ''), ...(x.pop_plantas_planejada !== '' ? { populacao: Number(x.pop_plantas_planejada) } : {}) };
+      // Uma linha por variedade: o mesmo talhão pode vir mais de uma vez (área de aplicação de cada uma; arquivo antigo, sem a coluna: null)
+      const area = x.area_aplicacao !== '' && x.area_aplicacao !== undefined ? Number(x.area_aplicacao) : null;
+      (op.plantio[talhao] = Planos.linhasPlantio(op, talhao).slice()).push({ variedade, data: String(x.data_plantio || ''), area, ...(area ? { areaDigitada: true } : {}),
+        ...(x.pop_plantas_planejada !== '' ? { populacao: Number(x.pop_plantas_planejada) } : {}), germinacao: germinacao || null });
     });
 
     ABAS_REC.forEach((aba) => {

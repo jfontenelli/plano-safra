@@ -33,7 +33,7 @@ window.Telas.orcamento = (function () {
 
   const cicloDe = (p) => p.ciclo || 'Safra';
   // Só planos publicados: o não iniciado (só a 0.1, vazia) fica fora, mesmo na área e na receita
-  const publicados = () => DADOS.planos.filter((p) => Versoes.ultimaPublicada(p) && !Versoes.aIniciar(p));
+  const publicados = () => DADOS.planos.filter((p) => Versoes.publicadaComPlanejamento(p));
   // Ano Agrícola: uma escolha só (os parâmetros são do ano). Os outros: várias escolhas (vazio = todos)
   const filtrosIniciais = () => ({ anoAgricola: Util.anoAgricolaMaisRecente(Util.anosAgricolas(publicados())),
     ciclo: [], empresa: [], fazenda: [], talhao: [], cultura: [], insumo: [] });
@@ -96,15 +96,17 @@ window.Telas.orcamento = (function () {
       const talhoes = talhoesDe(p).filter((t) => passa('talhao', t.nome));
       Versoes.grupos(p, v).forEach((g) => g.operacoes.forEach((op) => talhoes.forEach((t) => {
         const base = { plano: p, talhao: t.nome, area: t.area };
-        // Sementes: população × área ÷ germinação, na embalagem da cultura (bag ou saco)
-        const pl = op.plantio && op.plantio[t.nome];
-        if (pl && pl.variedade && pl.populacao) {
-          const germ = ((op.germinacoes || {})[t.nome] || 100) / 100;
+        // Sementes, uma por variedade do talhão: população × área de aplicação ÷ germinação, na embalagem da cultura
+        const linhasPl = Planos.linhasPlantio(op, t.nome);
+        linhasPl.forEach((pl, i) => {
+          if (!pl.variedade || !pl.populacao) return;
+          const areaVar = Planos.areaLinhaPlantio(linhasPl, i, t.area) || 0;
+          const germ = (Planos.germinacaoLinha(op, t.nome, pl) || 100) / 100;
           const emb = DADOS.embalagemSemente[p.cultura] || DADOS.embalagemSemente.Soja;
           const preco = DADOS.precosSementes[pl.variedade];
           itens.push({ ...base, produto: pl.variedade, grupo: 'Sementes', unidade: emb.texto,
-            quantidade: pl.populacao * 1000 * t.area / germ / emb.sementes, moedaPreco: 'R$', preco: preco ?? null });
-        }
+            quantidade: pl.populacao * 1000 * areaVar / germ / emb.sementes, moedaPreco: 'R$', preco: preco ?? null });
+        });
         const ajuste = op.talhoes && op.talhoes[t.nome];
         if (!ajuste) return;
         Planos.linhasTalhao(op, ajuste).forEach((linha) => {

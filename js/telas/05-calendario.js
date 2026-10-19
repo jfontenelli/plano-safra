@@ -52,7 +52,7 @@ window.Telas.calendario = (function () {
         const semente = grupo.tipo === 'Sementes';
         if (semente && !plantio) plantio = op;
         const recebem = daFazenda.map((t) => t.nome).filter((t) =>
-          semente ? !!((op.plantio || {})[t] && op.plantio[t].variedade) : !!op.talhoes[t]);
+          semente ? Planos.temVariedadePlantio(op, t) : !!op.talhoes[t]);
         // Produtos: um por produto comercial, com a dose de cada talhão (receitas da operação; no grupo Tratamento de semente, as TSI)
         const produtos = new Map();
         daFazenda.forEach((t) => {
@@ -64,7 +64,7 @@ window.Telas.calendario = (function () {
             produtos.get(chave).doses.push({ talhao: t.nome, dose: Planos.doseTalhao(op, ajuste, l) });
           });
         });
-        const variedades = semente ? new Set(recebem.map((t) => op.plantio[t].variedade)) : null;
+        const variedades = semente ? new Set(recebem.flatMap((t) => Planos.linhasPlantio(op, t).map((l) => l.variedade).filter(Boolean))) : null;
         lista.push({ grupo, op, dap: op.dap, fenologia: fenologiaDe(op), prazo: prazoDe(op, grupo),
           talhoes: recebem, area: area(recebem), produtos: [...produtos.entries()], variedades });
       });
@@ -72,11 +72,9 @@ window.Telas.calendario = (function () {
     // Colheita: talhões com variedade, data de plantio e ciclo; o DAP é o ciclo da variedade
     // Colheita: sempre a última coluna. Com plantio (variedade, data e ciclo), o DAP é o ciclo da variedade;
     // antes disso, aparece "Aguardando plantio" (o DAP é pelo ciclo, só existe depois do plantio)
-    const comPrevisao = plantio ? daFazenda.filter((t) => {
-      const p = (plantio.plantio || {})[t.nome];
-      const v = p && p.variedade ? variedade(p.variedade) : null;
-      return p && p.data && v && v.ciclo;
-    }).map((t) => t.nome) : [];
+    // Várias variedades no talhão: a colheita de cada uma (data de plantio + ciclo dela)
+    const comPrevisao = plantio ? daFazenda.filter((t) => Planos.linhasPlantio(plantio, t.nome).some((l) => previsaoColheita(l)))
+      .map((t) => t.nome) : [];
     const prazoColheita = opColheita ? prazoDe(opColheita, gColheita) : (plantio && plantio.prazoColheita) ?? PRAZO_COLHEITA;
     if (!comPrevisao.length) {
       lista.push({ colheita: true, aguardando: true, grupo: gColheita || { nome: 'Colheita', tipo: 'Colheita' }, op: opColheita || plantio,
@@ -84,11 +82,12 @@ window.Telas.calendario = (function () {
     }
     {
       if (comPrevisao.length) {
-        const ciclos = comPrevisao.map((t) => variedade(plantio.plantio[t].variedade).ciclo);
+        const linhasCom = comPrevisao.flatMap((t) => Planos.linhasPlantio(plantio, t).filter((l) => previsaoColheita(l)));
+        const ciclos = linhasCom.map((l) => variedade(l.variedade).ciclo);
         lista.push({ colheita: true, grupo: gColheita || { nome: 'Colheita', tipo: 'Colheita' }, op: opColheita || plantio,
           dap: Math.min(...ciclos), dapMax: Math.max(...ciclos), fenologia: '',
           prazo: prazoColheita, talhoes: comPrevisao, area: area(comPrevisao), produtos: [],
-          variedades: new Set(comPrevisao.map((t) => plantio.plantio[t].variedade)) });
+          variedades: new Set(linhasCom.map((l) => l.variedade)) });
       }
     }
     const ordemGrupo = (i) => plano.grupos.indexOf(i.grupo);
@@ -238,6 +237,19 @@ window.Telas.calendario = (function () {
     const v = p && p.variedade ? variedade(p.variedade) : null;
     return p && p.data && v && v.ciclo ? somaDias(p.data, v.ciclo) : null;
   }
+  // Resumo do plantio por talhão (pode ter várias variedades): a primeira data de plantio (as outras operações do
+  // talhão partem dela), as variedades, as populações e as variedades (linhas), para a colheita de cada uma
+  function resumoPlantio(op) {
+    const r = {};
+    Object.keys((op && op.plantio) || {}).forEach((t) => {
+      const linhas = Planos.linhasPlantio(op, t);
+      r[t] = { data: Planos.dataPlantioTalhao(op, t), linhas,
+        variedade: linhas.map((l) => l.variedade).filter(Boolean).join(' + '),
+        populacoes: [...new Set(linhas.map((l) => l.populacao).filter(Boolean))] };
+    });
+    return r;
+  }
+  const previsoesTalhao = (p) => (p ? [...new Set(p.linhas.map(previsaoColheita).filter(Boolean))].sort() : []);
 
   function etiqueta(grupo) {
     const tipo = Util.normalizar(grupo.tipo || 'outro').replace(/\s+/g, '-');
@@ -293,17 +305,20 @@ window.Telas.calendario = (function () {
 
   // Linhas de baixo de cada operação: [rótulo, unidade, valor por talhão → { texto, classe }]
   function subLinhas(it, ctx) {
-    const pl = (it.colheita || it.grupo.tipo === 'Sementes') ? ((plantioDo(ctx.plano) || {}).plantio || {}) : null;
+    const pl = (it.colheita || it.grupo.tipo === 'Sementes') ? resumoPlantio(plantioDo(ctx.plano)) : null;
     if (it.colheita) {
+      // Várias variedades no talhão: as previsões de cada uma
       return [['Previsão de colheita', 'data', (t) => {
-        const prev = previsaoColheita(pl[t.nome]);
-        return prev ? { texto: diaMes(prev) } : { texto: '—', classe: 'cal-piv__nao' };
+        const prev = previsoesTalhao(pl[t.nome]);
+        return prev.length ? { texto: prev.map(diaMes).join(' · ') } : { texto: '—', classe: 'cal-piv__nao' };
       }]];
     }
     if (it.grupo.tipo === 'Sementes') {
+      // Data: a primeira do talhão; população: a de cada variedade
       return [
         ['Data de plantio', 'data', (t) => (pl[t.nome] && pl[t.nome].data ? { texto: diaMes(pl[t.nome].data) } : { texto: '—', classe: 'cal-piv__nao' })],
-        ['População', 'mil pl/ha', (t) => (pl[t.nome] && pl[t.nome].populacao ? { texto: Util.dose(pl[t.nome].populacao).replace(/,00$/, '') } : { texto: '—', classe: 'cal-piv__nao' })]
+        ['População', 'mil pl/ha', (t) => (pl[t.nome] && pl[t.nome].populacoes.length
+          ? { texto: pl[t.nome].populacoes.map((n) => Util.dose(n).replace(/,00$/, '')).join(' · ') } : { texto: '—', classe: 'cal-piv__nao' })]
       ];
     }
     const op = it.op;
@@ -324,7 +339,7 @@ window.Telas.calendario = (function () {
   function dataPrevista(it, visiveis, pl) {
     const nomes = it.talhoes.length ? it.talhoes : visiveis.map((t) => t.nome);
     const datas = it.colheita
-      ? nomes.map((t) => previsaoColheita(pl[t])).filter(Boolean)
+      ? nomes.flatMap((t) => previsoesTalhao(pl[t]))
       : (it.dap === null || it.dap === undefined || it.dap === '') ? []
       : nomes.filter((t) => pl[t] && pl[t].data).map((t) => somaDias(pl[t].data, Number(it.dap)));
     return datas.length ? intervalo(datas) : '—';
@@ -347,7 +362,7 @@ window.Telas.calendario = (function () {
   function tabela(ctx, lista) {
     const { talhoes, estado, plano } = ctx;
     const visiveis = talhoes.filter((t) => talhaoMarcado(estado, t.nome));
-    const pl = (plantioDo(plano) || {}).plantio || {};
+    const pl = resumoPlantio(plantioDo(plano));
     const ocultas = new Set(estado.colunasOcultas || []);
     // Deslocamento de cada coluna congelada: soma das larguras à esquerda (oculta conta só a faixa estreita)
     let x = 0;
@@ -467,23 +482,34 @@ window.Telas.calendario = (function () {
   const dataDe = (iso) => { const { a, m, d } = partes(iso); return new Date(a, m - 1, d); };
   const hojeIso = () => isoDe(new Date());
 
+  // Operações: da primeira data de plantio do talhão, na área inteira dele. Colheita: de cada variedade (data de
+  // plantio + ciclo dela), na área de aplicação dela.
   function eventos(ctx, lista) {
-    const pl = (plantioDo(ctx.plano) || {}).plantio || {};
-    const area = (nomes) => ctx.talhoes.filter((t) => nomes.includes(t.nome)).reduce((s, t) => s + t.area, 0);
+    const op = plantioDo(ctx.plano);
+    const pl = resumoPlantio(op);
+    const areaTalhao = (nome) => (ctx.talhoes.find((t) => t.nome === nome) || { area: 0 }).area;
     const saida = [];
     lista.forEach((it) => {
       const porDia = new Map();
+      const somar = (inicio, t, area) => {
+        if (!porDia.has(inicio)) porDia.set(inicio, { talhoes: [], area: 0 });
+        const d = porDia.get(inicio);
+        if (!d.talhoes.includes(t)) d.talhoes.push(t);
+        d.area += area;
+      };
       it.talhoes.forEach((t) => {
         const p = pl[t];
-        let inicio = null;
-        if (it.colheita) inicio = previsaoColheita(p);
-        else if (p && p.data && it.dap !== null && it.dap !== undefined && it.dap !== '') inicio = somaDias(p.data, Number(it.dap));
-        if (!inicio) return;
-        if (!porDia.has(inicio)) porDia.set(inicio, []);
-        porDia.get(inicio).push(t);
+        if (it.colheita) {
+          (p ? p.linhas : []).forEach((l, i) => {
+            const inicio = previsaoColheita(l);
+            if (inicio) somar(inicio, t, Planos.areaLinhaPlantio(p.linhas, i, areaTalhao(t)) || 0);
+          });
+        } else if (p && p.data && it.dap !== null && it.dap !== undefined && it.dap !== '') {
+          somar(somaDias(p.data, Number(it.dap)), t, areaTalhao(t));
+        }
       });
-      porDia.forEach((talhoes, inicio) => {
-        saida.push({ it, inicio, fim: somaDias(inicio, Math.max(1, it.prazo || 1) - 1), talhoes, area: area(talhoes),
+      porDia.forEach(({ talhoes, area }, inicio) => {
+        saida.push({ it, inicio, fim: somaDias(inicio, Math.max(1, it.prazo || 1) - 1), talhoes, area,
           nome: it.colheita ? 'Colheita' : it.op.nome || 'Sem operação', tipo: Util.normalizar(it.grupo.tipo || 'outro').replace(/\s+/g, '-') });
       });
     });
