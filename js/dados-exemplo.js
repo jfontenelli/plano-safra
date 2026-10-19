@@ -84,7 +84,7 @@ window.DADOS = {
   //    (calendário de semeadura do MT após o vazio sanitário; plantio cedo abre a janela do milho safrinha).
   // gm: grupo de maturação · ciclo: dias da semeadura à colheita (null = não informado para a safra)
   // populacao: recomendada, mil plantas/ha [mínima, máxima] · janela: recomendada, [início, fim] em 'MM-DD'
-  // Pré-cadastros feitos na tela de Operações (grupo Semente) entram aqui, sem recomendação.
+  // Pré-cadastros feitos na tela de Operações (grupo Plantio) entram aqui, sem recomendação.
   variedades: [
     { cultura: 'Soja', nome: 'BMX Foco IPRO',   gm: 7.4, ciclo: 104, populacao: [260, 320], janela: ['09-16', '10-31'] },
     { cultura: 'Soja', nome: 'NS 7709 IPRO',    gm: 7.7, ciclo: 108, populacao: [240, 300], janela: ['09-16', '10-31'] },
@@ -305,15 +305,15 @@ window.DADOS = {
 
   // Modelo de operações (levantado com clientes). Usado pelo "Usar modelo" e pelos planos de exemplo.
   // prazo: prazo para encerramento da OS, em dias (DECISOES 4.3: preparo, calcário, fósforo, 1ª dessecação e
-  // 1ª metade do K = 5; plantio 3); sem prazo, vale o padrão do grupo (2 dias; Semente 3). Colheita: 10.
-  // Por enquanto, para os testes com usuários, os grupos Semente, Defensivo e Fertilidade (os outros grupos
+  // 1ª metade do K = 5; plantio 3); sem prazo, vale o padrão do grupo (2 dias; Plantio 3). Colheita: 10.
+  // Por enquanto, para os testes com usuários, os grupos Plantio, Defensivo e Fertilidade (os outros grupos
   // do modelo — Preparo do solo e Colheita — estão no histórico do git).
   // Fertilidade (soja no Cerrado/MT): calagem 60 a 90 dias antes do plantio (pH alvo 5,5–6,0); gessagem;
   // potássio a lanço antecipado (7 a 30 dias antes) e em cobertura; fósforo (MAP) no sulco de plantio.
   // K₂O ≈ 20 kg por tonelada de soja produzida (MT/MS). Fontes: Embrapa (Circular Técnica 33, Documentos
   // 458/2023, Sistema soja-milho) e ensaios no MT (Rev. Cerrado Agrociências/UNIPAM; Agrarian/UFGD).
   modeloOperacoes: [
-    { nome: 'Semente', tipo: 'Sementes', operacoes: [
+    { nome: 'Plantio', tipo: 'Sementes', operacoes: [
       { nome: 'Plantio', dap: 0, prazo: 3 }
     ] },
     // Fenologia pré-preenchida (DAP positivo), pela literatura para soja no MT (cultivares de 104 a 118 dias):
@@ -358,7 +358,7 @@ window.DADOS = {
     // Milho safrinha: as sementes já vêm tratadas (sem grupo TSI). Cigarrinha (Dalbulus maidis) no começo do
     // ciclo, cobertura nitrogenada em V4–V6 (≈ 25 DAP), lagarta-do-cartucho e um fungicida antes do pendoamento.
     'Milho': [
-      { nome: 'Semente', tipo: 'Sementes', operacoes: [{ nome: 'Plantio', dap: 0, prazo: 3 }] },
+      { nome: 'Plantio', tipo: 'Sementes', operacoes: [{ nome: 'Plantio', dap: 0, prazo: 3 }] },
       { nome: 'Defensivo', tipo: 'Defensivos', operacoes: [
         { nome: '1ª Inseticida: cigarrinha', dap: 7 },
         { nome: '2ª Inseticida: cigarrinha', dap: 15 },
@@ -378,22 +378,21 @@ window.DADOS = {
   // Planos de safra cadastrados. Começa vazio = menu "Plano de Safra" abre a Tela 01 (Primeiro uso).
   planos: [],
 
-  // Planos carregados pelo menu Demonstração → "Ver com planos de exemplo".
-  // Só planos publicados: soja 26/27 da Santa Clara, da Boa Vista e da Primavera; milho safrinha 27/27 da Santa Clara
-  // e da Boa Vista (São José fica sem plano nas duas, Primavera sem safrinha). A Santa Clara também tem o ano agrícola
-  // 2025 (soja 25/26 e milho safrinha 26/26, no fim do arquivo). O plano em construção o usuário cria e monta
-  // ele mesmo (Criar Plano Safra). "operacoes" detalha, por nome de operação do modelo: fenologia, produtos [nome, dose],
+  // Planos carregados ao abrir o protótipo: ano agrícola 2025, soja 25/26 e milho safrinha 26/26 da Santa Clara;
+  // ano agrícola 2026, soja 26/27 e milho safrinha 27/27 da Boa Vista (publicados) e soja 26/27 da São José, criado
+  // e não iniciado (sem "operacoes": só a 0.1, vazia). A Primavera fica sem plano. O plano em construção o usuário
+  // monta ele mesmo (a partir da São José ou de um plano novo). "operacoes" detalha, por nome de operação do modelo: fenologia, produtos [nome, dose],
   // talhões que recebem e ajustes por talhão. Operações não listadas ficam sem recomendação e sem talhões.
   planosExemplo: [
     {
-      safra: '26/27', empresa: 'Empresa A', atividade: 'Agricultura', fazenda: 'Santa Clara', cultura: 'Soja',
+      safra: '25/26', empresa: 'Empresa A', atividade: 'Agricultura', fazenda: 'Santa Clara', cultura: 'Soja',
       // Versões: 0.1 publicada (registro inicial) e 0.2 publicada (sem versão em construção)
-      versoes: { criadaEm: '2026-09-18T08:40', publicadaEm: '2026-09-25T17:05' },
+      versoes: { criadaEm: '2025-09-18T08:40', publicadaEm: '2025-09-25T17:05' },
       // PROVISÓRIO: valores digitados até existirem as telas de orçamento e premissas.
       // Custo ≈ R$ 3.150/ha; receita ≈ 63 sc/ha × R$ 122/sc (845 ha).
       custo: 2661750,
       receita: 6494670,
-      atualizadoEm: '2026-09-25', atualizadoPor: 'Maria Gonçalves',
+      atualizadoEm: '2025-09-25', atualizadoPor: 'Maria Gonçalves',
       operacoes: (function () {
         const todos = ['T01', 'T02', 'T03', 'T04', 'T05', 'T06', 'T07', 'T08'];
         const op = (produtos, fenologia = '') => ({ fenologia, produtos, talhoes: todos });
@@ -409,14 +408,14 @@ window.DADOS = {
           'Adubação de plantio': op([['MAP 11-52-00', 180]]),
           '2ª Adubação potássica': { fenologia: 'V4', produtos: [['KCl 00-00-60', 80]], talhoes: ['T05', 'T06', 'T07', 'T08'] },
           'Plantio': { germinacao: 95, plantio: [
-            { talhao: 'T01', variedade: 'BMX Foco IPRO',   data: '2026-09-22', populacao: 300 },
-            { talhao: 'T02', variedade: 'BMX Foco IPRO',   data: '2026-09-22', populacao: 300 },
-            { talhao: 'T03', variedade: 'BMX Olimpo IPRO', data: '2026-09-28', populacao: 250 },
-            { talhao: 'T04', variedade: 'BMX Olimpo IPRO', data: '2026-10-01', populacao: 250 },
-            { talhao: 'T05', variedade: 'TMG 2383 IPRO',   data: '2026-10-05', populacao: 220 },
-            { talhao: 'T06', variedade: 'NS 7709 IPRO',    data: '2026-09-25', populacao: 270 },
-            { talhao: 'T07', variedade: 'M 8372 IPRO',     data: '2026-10-10', populacao: 230 },
-            { talhao: 'T08', variedade: 'TMG 2383 IPRO',   data: '2026-10-08', populacao: 220 }
+            { talhao: 'T01', variedade: 'BMX Foco IPRO',   data: '2025-09-22', populacao: 300 },
+            { talhao: 'T02', variedade: 'BMX Foco IPRO',   data: '2025-09-22', populacao: 300 },
+            { talhao: 'T03', variedade: 'BMX Olimpo IPRO', data: '2025-09-28', populacao: 250 },
+            { talhao: 'T04', variedade: 'BMX Olimpo IPRO', data: '2025-10-01', populacao: 250 },
+            { talhao: 'T05', variedade: 'TMG 2383 IPRO',   data: '2025-10-05', populacao: 220 },
+            { talhao: 'T06', variedade: 'NS 7709 IPRO',    data: '2025-09-25', populacao: 270 },
+            { talhao: 'T07', variedade: 'M 8372 IPRO',     data: '2025-10-10', populacao: 230 },
+            { talhao: 'T08', variedade: 'TMG 2383 IPRO',   data: '2025-10-08', populacao: 220 }
           ] },
           '1ª Dessecação: pré-plantio': op([['Roundup Original DI', 2.5], ['DMA 806 BR', 1.0]]),
           '2ª Dessecação: pré-plantio': op([['Finale', 2.0]]),
@@ -437,25 +436,25 @@ window.DADOS = {
     },
     {
       // Milho safrinha na Santa Clara, depois da soja: cada talhão é plantado 3 dias depois da colheita prevista
-      // da soja nele (plantio da soja + ciclo da variedade). Safrinha 27/27, no ano agrícola 2026 (o da soja 26/27)
-      safra: '27/27', empresa: 'Empresa A', atividade: 'Agricultura', fazenda: 'Santa Clara', cultura: 'Milho', ciclo: 'Safrinha',
+      // da soja nele (plantio da soja + ciclo da variedade). Safrinha 26/26, no ano agrícola 2025 (o da soja 25/26)
+      safra: '26/26', empresa: 'Empresa A', atividade: 'Agricultura', fazenda: 'Santa Clara', cultura: 'Milho', ciclo: 'Safrinha',
       modelo: 'Milho',
-      versoes: { criadaEm: '2026-09-28T10:20', publicadaEm: '2026-10-06T16:40' },
+      versoes: { criadaEm: '2025-09-28T10:20', publicadaEm: '2025-10-06T16:40' },
       custo: null, receita: null,
-      atualizadoEm: '2026-10-06', atualizadoPor: 'Maria Gonçalves',
+      atualizadoEm: '2025-10-06', atualizadoPor: 'Maria Gonçalves',
       operacoes: (function () {
         const todos = ['T01', 'T02', 'T03', 'T04', 'T05', 'T06', 'T07', 'T08'];
         const op = (produtos) => ({ produtos, talhoes: todos });
         return {
           'Plantio': { germinacao: 95, plantio: [
-            { talhao: 'T01', variedade: 'DKB 360 PRO3', data: '2027-01-07', populacao: 64 },
-            { talhao: 'T02', variedade: 'DKB 360 PRO3', data: '2027-01-07', populacao: 64 },
-            { talhao: 'T06', variedade: 'P3707VYH',     data: '2027-01-14', populacao: 66 },
-            { talhao: 'T03', variedade: 'AG 8700 PRO3', data: '2027-01-21', populacao: 62 },
-            { talhao: 'T04', variedade: 'AG 8700 PRO3', data: '2027-01-24', populacao: 62 },
-            { talhao: 'T05', variedade: 'P3707VYH',     data: '2027-02-01', populacao: 66 },
-            { talhao: 'T08', variedade: 'FS 575 PWU',   data: '2027-02-04', populacao: 60 },
-            { talhao: 'T07', variedade: 'FS 575 PWU',   data: '2027-02-08', populacao: 60 }
+            { talhao: 'T01', variedade: 'DKB 360 PRO3', data: '2026-01-07', populacao: 64 },
+            { talhao: 'T02', variedade: 'DKB 360 PRO3', data: '2026-01-07', populacao: 64 },
+            { talhao: 'T06', variedade: 'P3707VYH',     data: '2026-01-14', populacao: 66 },
+            { talhao: 'T03', variedade: 'AG 8700 PRO3', data: '2026-01-21', populacao: 62 },
+            { talhao: 'T04', variedade: 'AG 8700 PRO3', data: '2026-01-24', populacao: 62 },
+            { talhao: 'T05', variedade: 'P3707VYH',     data: '2026-02-01', populacao: 66 },
+            { talhao: 'T08', variedade: 'FS 575 PWU',   data: '2026-02-04', populacao: 60 },
+            { talhao: 'T07', variedade: 'FS 575 PWU',   data: '2026-02-08', populacao: 60 }
           ] },
           'Adubação de plantio': op([['MAP 11-52-00', 120]]),
           'Adubação potássica': op([['KCl 00-00-60', 80]]),
@@ -509,43 +508,6 @@ window.DADOS = {
       })()
     },
     {
-      // Soja 26/27 da Primavera (Empresa C): calagem e gessagem em toda a área, 00-20-20 no plantio
-      safra: '26/27', empresa: 'Empresa C', atividade: 'Agricultura', fazenda: 'Primavera', cultura: 'Soja',
-      versoes: { criadaEm: '2026-09-05T14:00', publicadaEm: '2026-09-19T11:20' },
-      custo: null, receita: null,
-      atualizadoEm: '2026-09-19', atualizadoPor: 'Ana Ribeiro',
-      operacoes: (function () {
-        const todos = ['T01', 'T02', 'T03', 'T04', 'T05', 'T06'];
-        const op = (produtos, fenologia = '') => ({ fenologia, produtos, talhoes: todos });
-        return {
-          'Calagem': op([['Calcário dolomítico PRNT 85%', 2.5]]),
-          'Gessagem': op([['Gesso agrícola', 2.0]]),
-          'Adubação de plantio': op([['Formulado 00-20-20', 400]]),
-          '1ª Adubação foliar': op([['Borosol K', 1.0]], 'V4'),
-          '2ª Adubação foliar': op([['Nutre Zinco', 0.5], ['Nutre Fer', 0.5]], 'R3'),
-          'Plantio': { germinacao: 94, plantio: [
-            { talhao: 'T01', variedade: 'BMX Olimpo IPRO', data: '2026-09-23', populacao: 250 },
-            { talhao: 'T02', variedade: 'BMX Olimpo IPRO', data: '2026-09-24', populacao: 250 },
-            { talhao: 'T03', variedade: 'NS 7709 IPRO',    data: '2026-09-28', populacao: 270 },
-            { talhao: 'T04', variedade: 'TMG 2383 IPRO',   data: '2026-10-04', populacao: 220 },
-            { talhao: 'T05', variedade: 'NS 7709 IPRO',    data: '2026-09-29', populacao: 270 },
-            { talhao: 'T06', variedade: 'M 8372 IPRO',     data: '2026-10-07', populacao: 230 }
-          ] },
-          'Tratamento de sementes': { grupo: 'Defensivo', dap: 0, produtos: [['Standak Top', 0.12], ['Masterfix L Soja', 0.30]], talhoes: todos },
-          '1ª Dessecação: pré-plantio': op([['Roundup Original DI', 3.0], ['DMA 806 BR', 1.0], ['Agral', 0.10]]),
-          '2ª Dessecação: pré-plantio': op([['Finale', 2.0]]),
-          'Pré-emergente': op([['Dual Gold', 1.2]]),
-          '1ª Pós-emergente': op([['Roundup Original DI', 2.0]], 'V2'),
-          '2ª Pós-emergente': op([['Select 240 EC', 0.45], ['Assist', 0.50]], 'V4'),
-          '1ª Fungicida': op([['Aproach Prima', 0.30], ['Assist', 0.50]], 'R1'),
-          '2ª Fungicida': op([['Fox', 0.40], ['Unizeb Gold', 1.5]], 'R3'),
-          '3ª Fungicida': op([['Elatus', 0.20], ['Connect', 1.0]], 'R4'),
-          '4ª Fungicida': op([['Cypress', 0.30], ['Ampligo', 0.15]], 'R5'),
-          'Desfolha': op([['Finale', 2.0]], 'R7')
-        };
-      })()
-    },
-    {
       // Milho safrinha 27/27 da Boa Vista, depois da soja (plantio de janeiro a fevereiro)
       safra: '27/27', empresa: 'Empresa B', atividade: 'Agricultura', fazenda: 'Boa Vista', cultura: 'Milho', ciclo: 'Safrinha',
       modelo: 'Milho',
@@ -578,20 +540,13 @@ window.DADOS = {
           'Fungicida': op([['Priori Xtra', 0.30], ['Áureo', 0.25]])
         };
       })()
+    },
+    {
+      // Soja 26/27 da São José (Empresa A): plano criado e ainda não iniciado. Ao abrir, "Como deseja iniciar o plano?"
+      safra: '26/27', empresa: 'Empresa A', atividade: 'Agricultura', fazenda: 'São José', cultura: 'Soja',
+      versoes: { criadaEm: '2026-10-15T09:30' },
+      custo: null, receita: null,
+      atualizadoEm: '2026-10-15', atualizadoPor: 'Maria Gonçalves'
     }
   ]
 };
-
-// Ano agrícola 2025 da Santa Clara (o Calendário Agrícola anda entre os anos): soja 25/26 e milho safrinha 26/26,
-// cópias dos planos de 2026 com as datas um ano antes
-(function () {
-  const umAnoAntes = (iso) => iso.replace(/^\d{4}/, (a) => String(Number(a) - 1));
-  const copia = (p, safra) => ({
-    ...p, safra,
-    versoes: { criadaEm: umAnoAntes(p.versoes.criadaEm), publicadaEm: umAnoAntes(p.versoes.publicadaEm) },
-    atualizadoEm: umAnoAntes(p.atualizadoEm),
-    operacoes: { ...p.operacoes, Plantio: { ...p.operacoes.Plantio, plantio: p.operacoes.Plantio.plantio.map((x) => ({ ...x, data: umAnoAntes(x.data) })) } }
-  });
-  const [soja, milho] = DADOS.planosExemplo;
-  DADOS.planosExemplo.push(copia(soja, '25/26'), copia(milho, '26/26'));
-})();

@@ -16,7 +16,7 @@ window.Telas.inicioPlano = (function () {
     { valor: 'importar', titulo: 'Importar XLSX', icone: Icones.planilha,
       texto: 'Continue um plano exportado por este sistema (.xlsx).' },
     { valor: 'copiar', titulo: 'Copiar plano existente', icone: Icones.copiar,
-      texto: 'Copie operações, produtos e doses de outro plano de safra da mesma cultura.' },
+      texto: 'Copie um plano de safra da mesma cultura.' },
     { valor: 'zero', titulo: 'Começar do zero', icone: Icones.mais,
       texto: 'Cadastre suas operações.' }
   ];
@@ -69,8 +69,7 @@ window.Telas.inicioPlano = (function () {
       <div class="modal__corpo">
         <button class="modal__fechar" type="button" aria-label="Fechar" data-fechar>${Icones.fechar}</button>
         <h2 class="modal__titulo" id="modal-titulo">Como deseja iniciar o plano?</h2>
-        <p class="modal__subtitulo">${esc(plano.cultura)} · Safra ${esc(plano.safra)} · ${esc(plano.empresa)} · Fazenda ${esc(plano.fazenda)}.
-          O plano passa para a versão ${esc(Versoes.proximoNumero(plano))}, em construção, e abre na aba Operações para você ajustar.</p>
+        <p class="modal__subtitulo">Safra ${esc(plano.safra)} · ${esc(plano.empresa)} · Fazenda ${esc(plano.fazenda)} · ${esc(plano.cultura)}</p>
         <div data-ini-corpo></div>
       </div>
       <div class="modal__rodape">
@@ -126,7 +125,7 @@ window.Telas.inicioPlano = (function () {
                 Safra ${esc(p.safra)} · ${esc(p.empresa)} · Fazenda ${esc(p.fazenda)} · versão ${esc(v.num)}
               </option>`).join('')}
           </select>
-          <p class="inicio-plano__nota">Copia a última versão publicada do plano escolhido: grupos de operação, operações, recomendações com produtos e doses padrão. Talhões, áreas e plantio não são copiados.</p>
+          <p class="inicio-plano__nota">Copia a última versão publicada do plano escolhido: grupos de operação, operações, recomendações com produtos e doses padrão.</p>
           ${e.tentou && !e.copiarDe ? '<p class="erro-campo" role="alert">Escolha o plano para copiar.</p>' : ''}`
           : `<p class="inicio-plano__nota">Ainda não há plano de ${esc(plano.cultura)} publicado para copiar.</p>`}
       </div>`;

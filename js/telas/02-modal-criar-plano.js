@@ -66,6 +66,16 @@ window.Telas.abrirModalCriarPlano = function ({ aoCriar, inicial = {} }) {
   selectSafra.focus();
 
   // ----- Fazendas -----
+  // Cada empresa tem as suas fazendas (DADOS.fazendasPorEmpresa): a lista de fazendas segue a empresa escolhida.
+  // Sem empresa, a lista fica desabilitada. Trocar a empresa tira as fazendas que não são dela.
+  function fazendasDaEmpresa() { return (DADOS.fazendasPorEmpresa || {})[form.elements.empresa.value] || []; }
+  form.elements.empresa.addEventListener('change', () => {
+    const daEmpresa = fazendasDaEmpresa();
+    blocos.forEach((b) => { if (b.fazenda && !daEmpresa.includes(b.fazenda)) { b.fazenda = ''; b.talhoes = []; } });
+    talhoesAbertos = null;
+    desenharFazendas();
+  });
+
   function desenharFazendas() {
     caixaFazendas.innerHTML = blocos.map(blocoFazenda).join('');
     posicionarLista();
@@ -112,8 +122,8 @@ window.Telas.abrirModalCriarPlano = function ({ aoCriar, inicial = {} }) {
         <div class="cp-fazenda__campos">
           <div class="campo">
             <label class="campo__rotulo" for="cp-fazenda-${b.chave}">Fazenda ${asterisco()}</label>
-            <select class="campo__controle" id="cp-fazenda-${b.chave}" data-campo="fazenda">
-              ${opcoes('Selecione', DADOS.fazendas, b.fazenda)}
+            <select class="campo__controle" id="cp-fazenda-${b.chave}" data-campo="fazenda" ${form.elements.empresa.value ? '' : 'disabled'}>
+              ${opcoes(form.elements.empresa.value ? 'Selecione' : 'Escolha a empresa', fazendasDaEmpresa(), b.fazenda)}
             </select>
             <p class="erro-campo" data-erro-fazenda hidden></p>
           </div>

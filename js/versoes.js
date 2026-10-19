@@ -12,6 +12,7 @@
  *                      Na versão em construção, cada alteração é salva na hora (salvamento automático).
  *
  * Versão publicada é imutável. Só pode haver uma versão em construção por plano.
+ * Status mostrado nas telas: só a última versão publicada é "Publicada"; as publicadas antes dela, "Revisada".
  */
 window.Versoes = (function () {
   const copiar = (grupos) => structuredClone(grupos || []);
@@ -138,7 +139,13 @@ window.Versoes = (function () {
     return `${d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })} às ${d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
   }
 
-  function rotuloStatus(v) { return v.status === 'construcao' ? 'Em construção' : 'Publicada'; }
+  // 'construcao' | 'publicada' (a última publicada do plano) | 'revisada' (publicada antes da última)
+  function statusExibido(plano, v) {
+    if (v.status === 'construcao') return 'construcao';
+    return v === ultimaPublicada(plano) ? 'publicada' : 'revisada';
+  }
+  const ROTULOS = { construcao: 'Em construção', publicada: 'Publicada', revisada: 'Revisada' };
+  function rotuloStatus(plano, v) { return ROTULOS[statusExibido(plano, v)]; }
 
   // Linha de detalhe: "Publicada em 12/10 às 17:05 por Maria Gonçalves"
   function detalhe(v) {
@@ -149,6 +156,6 @@ window.Versoes = (function () {
 
   return {
     lista, buscar, aberta, emConstrucao, ultimaPublicada, deTrabalho, somenteLeitura, proximoNumero,
-    iniciar, aIniciar, comecar, abrir, salvar, publicar, criarNova, grupos, talhoes, quando, rotuloStatus, detalhe
+    iniciar, aIniciar, comecar, abrir, salvar, publicar, criarNova, grupos, talhoes, quando, statusExibido, rotuloStatus, detalhe
   };
 })();

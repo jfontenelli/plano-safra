@@ -32,9 +32,10 @@ window.Telas.orcamento = (function () {
   const parametros = {};
 
   const cicloDe = (p) => p.ciclo || 'Safra';
-  const publicados = () => DADOS.planos.filter((p) => Versoes.ultimaPublicada(p));
+  // Só planos publicados: o não iniciado (só a 0.1, vazia) fica fora, mesmo na área e na receita
+  const publicados = () => DADOS.planos.filter((p) => Versoes.ultimaPublicada(p) && !Versoes.aIniciar(p));
   // Ano Agrícola: uma escolha só (os parâmetros são do ano). Os outros: várias escolhas (vazio = todos)
-  const filtrosIniciais = () => ({ anoAgricola: Util.anoAgricolaInicial(Util.anosAgricolas(publicados())),
+  const filtrosIniciais = () => ({ anoAgricola: Util.anoAgricolaMaisRecente(Util.anosAgricolas(publicados())),
     ciclo: [], empresa: [], fazenda: [], talhao: [], cultura: [], insumo: [] });
   const passa = (campo, valor) => !filtros[campo].length || filtros[campo].includes(valor);
 

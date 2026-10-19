@@ -26,26 +26,8 @@ window.Telas.painelPlanos = (function () {
   function anos() {
     return [...new Set(safras().map((s) => Util.anoAgricola(s)).filter(Boolean).map(String))].sort();
   }
-  // Grupos de operação do Detalhamento (a Colheita vem do plantio e não entra)
-  const GRUPOS = [['Sementes', 'Sementes'], ['Fertilidade', 'Fertilidade'], ['Defensivos', 'Defensivos']];
-  const media = (xs) => xs.reduce((s, x) => s + x, 0) / xs.length;
   const pct = (n) => `${Math.round(n)}%`;
   const ha = (n) => Math.round(n).toLocaleString('pt-BR');
-
-  // ----- Cálculos -----
-  // % de um grupo, por área: em cada operação, a área dos talhões com recomendação completa (produto e dose; no
-  // Sementes, variedade e data de plantio) ÷ área de cultivo; o grupo é a média das operações. Sem o grupo: null.
-  function pctGrupo(p, v, tipo) {
-    const ops = Versoes.grupos(p, v).filter((g) => g.tipo === tipo).flatMap((g) => g.operacoes);
-    if (!ops.length) return null;
-    const talhoes = Util.talhoesPlano(p, v);
-    const total = talhoes.reduce((s, t) => s + t.area, 0);
-    if (!total) return 0;
-    const pronto = (op, t) => (tipo === 'Sementes'
-      ? !!(op.plantio && op.plantio[t] && op.plantio[t].variedade && op.plantio[t].data)
-      : Planos.statusTalhao(op, t) === 'Completo');
-    return media(ops.map((op) => talhoes.filter((t) => pronto(op, t.nome)).reduce((s, t) => s + t.area, 0) / total * 100));
-  }
 
   function statusDe(p) {
     if (!p) return 'sem';
@@ -72,8 +54,7 @@ window.Telas.painelPlanos = (function () {
         && (!l.plano || ((!f.atividade || l.atividade === f.atividade) && (!f.cultura || l.cultura === f.cultura))))
       .map((l) => {
         const v = l.plano && Versoes.deTrabalho(l.plano);
-        const grupos = GRUPOS.map(([tipo]) => (l.plano && !Versoes.aIniciar(l.plano) ? pctGrupo(l.plano, v, tipo) : null));
-        return { ...l, status: statusDe(l.plano), grupos,
+        return { ...l, status: statusDe(l.plano),
           area: l.plano ? Util.areaCultivo(l.plano, v) : null };
       })
       .sort((a, b) => ordemEmpresa(a.empresa) - ordemEmpresa(b.empresa) || a.fazenda.localeCompare(b.fazenda, 'pt-BR')
@@ -116,7 +97,7 @@ window.Telas.painelPlanos = (function () {
     // A tabela mostra só os planos (Em construção, incluindo Não iniciado, e Publicado); a fazenda sem plano só conta nos quadros
     const planos = ls.filter((l) => l.plano);
     raiz.querySelector('[data-pn="linhas"]').innerHTML = planos.length ? ordenadas(planos).map(linha).join('')
-      : '<tr><td class="tabela__vazia" colspan="10">Nenhum plano com esses filtros.</td></tr>';
+      : '<tr><td class="tabela__vazia" colspan="7">Nenhum plano com esses filtros.</td></tr>';
   }
 
   // ----- Ordenar por coluna -----
@@ -131,7 +112,6 @@ window.Telas.painelPlanos = (function () {
     ['safra', 'Safra', (l) => `${l.safra} ${l.ciclo}`],
     ['cultura', 'Cultura', (l) => l.cultura || null],
     ['area', 'Área (ha)', (l) => l.area || null, 'tabela__numero', 'Área de cultivo: talhões incluídos no plano'],
-    ...GRUPOS.map(([tipo, rotulo], i) => [`g${i}`, rotulo, (l) => l.grupos[i], '', rotulo !== tipo ? tipo : '']),
     ['status', 'Status', (l) => ORDEM_STATUS.indexOf(l.status)]
   ];
 
@@ -195,11 +175,6 @@ window.Telas.painelPlanos = (function () {
     publicada: ['Publicado', 'status--aprovado']
   };
 
-  function celulaGrupo(valor) {
-    if (valor === null) return '<td class="painel-tabela__vazio">—</td>';
-    return `<td><span class="painel-progresso"><span class="painel-progresso__barra" aria-hidden="true"><span style="width: ${valor.toFixed(1)}%"></span></span>${pct(valor)}</span></td>`;
-  }
-
   function linha(l) {
     const [rotulo, classe] = STATUS[l.status];
     const p = l.plano;
@@ -211,7 +186,6 @@ window.Telas.painelPlanos = (function () {
         <td>${esc(l.ciclo)} ${esc(l.safra)}</td>
         <td>${esc(p.cultura)}</td>
         <td class="tabela__numero">${l.area ? ha(l.area) : '<span class="painel-tabela__vazio">—</span>'}</td>
-        ${l.grupos.map(celulaGrupo).join('')}
         <td><span class="status ${classe}">${rotulo}</span></td>
         <td class="lista-planos__menu">
           <button class="botao-icone" type="button" data-menu-plano="${p.id}" title="Mais ações"

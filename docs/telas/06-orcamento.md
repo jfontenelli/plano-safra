@@ -10,7 +10,7 @@ Mostrar, para todos os planos do Ano Agrícola, **quanto de cada insumo os plano
 
 ## Quando aparece
 - Item **Orçamento** do menu Plano de Safra (antes "Suprimentos"). Título da página: **Orçamento de Insumos**.
-- Soma a **última versão publicada de cada plano** (etiqueta "ⓘ Últimas versões publicadas" ao lado do título). Versão em construção não entra.
+- Soma a **última versão publicada de cada plano** (etiqueta "ⓘ Últimas versões publicadas" ao lado do título). Versão em construção não entra. **Só planos publicados**: o plano não iniciado (só a 0.1, vazia) fica fora da área produtiva, da receita estimada e dos filtros (19/10/2026).
 - Sem nenhum plano: o convite "Crie seu primeiro plano para visualizar o Orçamento de Insumos" (DECISOES 4.0).
 
 ## Conteúdo (de cima para baixo)
@@ -23,7 +23,7 @@ Cabeçalho, filtros e estimativas ficam **congelados no topo** enquanto a págin
    - Menos o Ano Agrícola, todos têm **várias escolhas**: lista com caixas de marcar e "Todas"/"Todos" no topo; o campo mostra "Todas", o nome escolhido ou "2 selecionadas". A lista fica aberta enquanto se marca; fecha ao clicar fora ou com Esc.
    - As opções vêm dos planos publicados e dependem dos filtros de cima (ex.: com duas fazendas marcadas, Talhão mostra só os talhões delas). Opção que sai da lista é desmarcada.
    - **Insumos** = os grupos de insumo (abaixo).
-   - Limpar filtros: Ano Agrícola volta ao de hoje; os demais a "Todas"/"Todos".
+   - Abre no **ano agrícola mais recente com planos publicados** (19/10/2026). Limpar filtros: Ano Agrícola volta a ele; os demais a "Todas"/"Todos".
 3. **Estimativas de comercialização**, numa linha: "PTAX: R$ 5,20/US$ · Soja: US$ 23,00/sc · 65 sc/ha · Milho: R$ 55,00/sc · 110 sc/ha" e o botão **Editar parâmetros**.
 
 ### Resumo do orçamento
@@ -79,7 +79,7 @@ Fertilizantes · Defensivos · Sementes · Corretivos · Tratamento de semente �
 - Exportar XLSX → baixa a planilha (`orcamento-insumos-2026-por-produto.xlsx` ou `-por-talhao`).
 
 ## Para testar
-- Planos de exemplo publicados (ano agrícola 2026): soja 26/27 da Santa Clara, da Boa Vista e da Primavera; milho safrinha 27/27 da Santa Clara e da Boa Vista. São José sem plano.
+- Planos de exemplo publicados: ano agrícola 2025, soja 25/26 e milho safrinha 26/26 da Santa Clara; ano agrícola 2026, soja 26/27 e milho safrinha 27/27 da Boa Vista. A soja 26/27 da São José (não iniciado) não entra. Primavera sem plano.
 - Dados de exemplo em `js/dados-exemplo.js`: `precosInsumos` (moeda e valor), `embalagemSemente`, `precosSementes`, `estoqueInsumos` (por fazenda), `gruposInsumo`, `grupoInsumoPorClasse`, `ptaxReferencia`, `comercializacao`. Preços estimados para o médio-norte do MT, safra 26/27 (pesquisa de 16/10/2026; a conferir).
 - Para ter os 8 grupos, os exemplos têm produtos de Tratamento de semente, Biológicos, Adjuvantes e Óleo. O tratamento de semente on farm entra como operação "Tratamento de sementes" no grupo Defensivo, no dia do plantio, **só nos planos de exemplo** (o TSI continua fora do protótipo; o "Usar modelo" não mudou).
 

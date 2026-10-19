@@ -36,7 +36,7 @@ window.ArquivoPlano = (function () {
       ['campo', 'valor'],
       ['formato', FORMATO], ['versao', VERSAO],
       ['safra', plano.safra], ['empresa', plano.empresa], ['fazenda', plano.fazenda], ['cultura', plano.cultura],
-      ['versao_plano', `${plano.versaoAberta} · ${Versoes.rotuloStatus(Versoes.aberta(plano))}`],
+      ['versao_plano', `${plano.versaoAberta} · ${Versoes.rotuloStatus(plano, Versoes.aberta(plano))}`],
       ['exportado_em', Util.hojeISO()], ['exportado_por', DADOS.usuario.nome]
     ];
 

@@ -15,7 +15,7 @@ Identificar os novos planos: informações gerais (safra, empresa, atividade, cu
   - Atividade: Agricultura (já escolhida), Pecuária (Em breve), Silvicultura (Em breve).
   - Cultura: Soja e Milho (nenhuma vem escolhida).
 - **Fazendas**: um bloco por fazenda, com o título "Fazenda 1", "Fazenda 2"… e três campos:
-  - **Fazenda** (obrigatória).
+  - **Fazenda** (obrigatória): só as fazendas da **empresa escolhida** (cada empresa tem as suas; nos dados de exemplo, `fazendasPorEmpresa`). Sem empresa, a lista fica desabilitada, com "Escolha a empresa". Trocar a empresa desmarca a fazenda que não é dela (e os talhões).
   - **Talhões (opcional)**: lista com caixas de marcar ("Todos" e cada talhão com a área). O campo mostra "Todos os talhões (12)", "9 de 10 talhões" ou "Selecionar talhões".
   - **Área de cultivo**: calculada (fundo cinza), soma dos talhões marcados; sem talhões, "Pendente".
   - Sem talhões marcados, embaixo: "A área de cultivo será calculada automaticamente quando houver talhões selecionados."
@@ -51,14 +51,14 @@ Identificar os novos planos: informações gerais (safra, empresa, atividade, cu
 - Por cima da Visão Geral, ao abrir um plano **não iniciado** (só a 0.1, vazia): clique na linha, "Abrir" no ⋯ ou menu Planejamento.
 
 ## Conteúdo
-- Título "Como deseja iniciar o plano?"; subtítulo com o plano ("Soja · Safra 26/27 · Empresa B · Fazenda Boa Vista.") e "O plano passa para a versão 0.2, em construção, e abre na aba Operações para você ajustar."
+- Título "Como deseja iniciar o plano?"; subtítulo só com o plano: "Safra 26/27 · Empresa A · Fazenda São José · Soja" (19/10/2026). Ao começar, o plano passa para a versão 0.2, em construção, e abre na aba Operações.
 - Quatro cards (um escolhido por vez; Usar modelo já vem marcado), em duas colunas, nesta ordem:
 
 | Card | Texto | Comportamento |
 |---|---|---|
 | Usar modelo | Use uma estrutura pronta de operações e ajuste conforme necessário. | Grupos e operações do modelo da cultura do plano (Soja ou Milho). |
 | Importar XLSX | Continue um plano exportado por este sistema (.xlsx). | Campo do arquivo (obrigatório). Ver as regras abaixo. |
-| Copiar plano existente | Copie operações, produtos e doses de outro plano de safra da mesma cultura. | Lista "Plano para copiar" (obrigatória). Ver as regras abaixo. |
+| Copiar plano existente | Copie um plano de safra da mesma cultura. | Lista "Plano para copiar" (obrigatória). Ver as regras abaixo. |
 | Começar do zero | Cadastre suas operações. | Só as operações fixas: Plantio e Colheita (do modelo da cultura do plano). |
 
 - Rodapé: "Cancelar" e "Começar o planejamento".

@@ -33,17 +33,17 @@ window.Telas.planoOperacoes = (function () {
     somenteLeitura = Versoes.somenteLeitura(plano);
     talhoesFazenda = Util.talhoesPlano(plano); // só os talhões incluídos no plano (modal Criar Plano)
     ui = estados[plano.id] = estados[plano.id] || {
-      // Abre no primeiro grupo das guias (Semente vem antes de Defensivo)
+      // Abre no primeiro grupo das guias (Plantio vem antes de Defensivo)
       grupoId: (plano.grupos[0] || {}).id || null,
       opPorGrupo: {},          // operação aberta em cada grupo
-      listaRecolhidaPorGrupo: {}, // lista de operações minimizada em cada grupo (Semente começa minimizada)
+      listaRecolhidaPorGrupo: {}, // lista de operações minimizada em cada grupo (Plantio começa minimizada)
       marcados: new Set(),     // talhões marcados na tabela
       filtroTalhoes: 'todos',  // todos | nao-planejados | rec:<id da recomendação>
       quadroAberto: false,     // quadro da recomendação filtrada: lista de produtos aberta
       erroNome: null,          // modal: nome da recomendação repetido
       naoEncontrado: {},       // texto digitado sem escolher na lista e que não está no cadastro: { 'linhaId:pa|produto': texto }
       definindo: null,         // modal "Definir recomendação" aberto: { talhoes, editando }
-      plantando: null,         // modal "Definir variedade" (grupo Semente): { talhoes, variedade, data, dataTexto, preVariedade, erros }
+      plantando: null,         // modal "Definir variedade" (grupo Plantio): { talhoes, variedade, data, dataTexto, preVariedade, erros }
       visaoSemente: 'talhoes', // passo Plantio, "Exibir": talhoes (tabela) | mapa | colheita (previsão de colheita)
       painelTalhao: null,      // talhão aberto no painel lateral (passo Variedade)
       prePainel: null,         // painel: nome da variedade em pré-cadastro
@@ -69,6 +69,7 @@ window.Telas.planoOperacoes = (function () {
     ui.maisAcoes = false;
     if (!somenteLeitura) limparReceitasVazias();
     raiz = conteudo.querySelector('#plano-raiz');
+    raiz.addEventListener('click', aoClicarConsulta, true);
     raiz.addEventListener('click', aoClicar);
     // Botão "Aplicar germinação em todos os talhões": sem tirar o foco do campo (o clique não se perde no redesenho)
     raiz.addEventListener('mousedown', (e) => { if (e.target.closest('[data-acao="pt-germinacao-todos"]')) e.preventDefault(); });
@@ -88,7 +89,7 @@ window.Telas.planoOperacoes = (function () {
   }
 
   // ================= Estado atual =================
-  // Lista de operações minimizada: escolha de cada grupo; sem escolha, o grupo Semente (uma operação só) começa minimizado
+  // Lista de operações minimizada: escolha de cada grupo; sem escolha, o grupo Plantio (uma operação só) começa minimizado
   function listaRecolhida() {
     const g = grupoAtual();
     if (!g) return false;
@@ -219,7 +220,7 @@ window.Telas.planoOperacoes = (function () {
             <p class="plano__contexto">${contexto.map(esc).join('<span class="plano__ponto">›</span>')}</p>
             <span class="plano__barra" aria-hidden="true">|</span>
             <span class="plano__versao">Versão ${esc(v.num)}
-              <span class="status ${somenteLeitura ? 'status--aprovado' : 'status--construcao'}">${Versoes.rotuloStatus(v)}</span></span>
+              <span class="status status--${{ construcao: 'construcao', publicada: 'aprovado', revisada: 'revisada' }[Versoes.statusExibido(plano, v)]}">${Versoes.rotuloStatus(plano, v)}</span></span>
           </div>
         </div>
         <div class="plano__linha-etapas">
@@ -234,10 +235,6 @@ window.Telas.planoOperacoes = (function () {
           </div>
         </div>
       </header>
-      ${somenteLeitura && etapa !== 'calendario' ? `
-        ${ui.leituraFechada ? '' : `
-        <p class="faixa-leitura">${Icones.info} <span><strong>Versão ${esc(v.num)} publicada:</strong> somente consulta. Para alterar, use Criar nova versão.</span>
-          <button class="botao-icone faixa-leitura__fechar" type="button" data-acao="ver-fechar-leitura" aria-label="Fechar o aviso" title="Fechar">${Icones.fechar}</button></p>`}` : ''}
     `;
   }
 
@@ -289,11 +286,38 @@ window.Telas.planoOperacoes = (function () {
           <button class="versoes-item ${v.num === plano.versaoAberta ? 'versoes-item--atual' : ''}" type="button" role="menuitem"
                   data-acao="ver-abrir" data-versao="${esc(v.num)}">
             <span class="versoes-item__num">${esc(v.num)}</span>
-            <span><strong>${Versoes.rotuloStatus(v)}</strong>${v.num === plano.versaoAberta ? ' · aberta agora' : ''}</span>
+            <span><strong>${Versoes.rotuloStatus(plano, v)}</strong>${v.num === plano.versaoAberta ? ' · aberta agora' : ''}</span>
             <span class="status ${v.status === 'publicada' ? 'status--aprovado' : 'status--construcao'}">${v.status === 'publicada' ? 'Consulta' : 'Editável'}</span>
             <span class="versoes-item__info">${esc(Versoes.detalhe(v))}</span>
           </button>`).join('')}
       </div>`;
+  }
+
+  // Versão publicada ou revisada (somente consulta): não há faixa fixa de aviso. Ao tentar editar (clicar num valor
+  // de uma tabela ou no cabeçalho da operação, fora de botões, links e campos), abre o aviso com Criar nova versão.
+  // Abas, guias, filtros, mapa e Exportar continuam funcionando. O Resumo é só de consulta e não avisa.
+  function aoClicarConsulta(e) {
+    if (!somenteLeitura || etapa === 'calendario') return;
+    const t = e.target;
+    if (t.closest('button, a, input, select, textarea, summary, label, [data-acao], [role="tab"], .plano__cabecalho, .mapa, .leaflet-container')) return;
+    if (!t.closest('td, .op-cabecalho')) return;
+    e.stopPropagation();
+    avisoConsulta();
+  }
+
+  // "Versão 0.2 publicada" · Cancelar · Criar nova versão (com outra versão em construção: Abrir versão 0.3)
+  function avisoConsulta() {
+    const v = Versoes.aberta(plano);
+    const construcao = Versoes.emConstrucao(plano);
+    Modal.confirmar({
+      titulo: `Versão ${esc(v.num)} ${Versoes.rotuloStatus(plano, v).toLowerCase()}`,
+      texto: construcao
+        ? `Somente consulta. As alterações são feitas na versão ${esc(construcao.num)}, que já está em construção.`
+        : 'Somente consulta. Para alterar, crie uma nova versão a partir desta.',
+      botoes: [{ rotulo: 'Cancelar' }, construcao
+        ? { rotulo: `Abrir versão ${esc(construcao.num)}`, classe: 'primario', acao: () => abrirVersao(construcao.num) }
+        : { rotulo: 'Criar nova versão', classe: 'primario', acao: () => acaoVersao('ver-nova') }]
+    });
   }
 
   // Abre outra versão na área de trabalho e redesenha (seleções e rascunhos da versão anterior são descartados)
@@ -302,7 +326,7 @@ window.Telas.planoOperacoes = (function () {
     somenteLeitura = Versoes.somenteLeitura(plano);
     talhoesFazenda = Util.talhoesPlano(plano); // cada versão tem os seus talhões
     limparSelecao();
-    Object.assign(ui, { versoes: null, jaExiste: false, maisAcoes: false, leituraFechada: false, rascunho: null, receitaPorOp: {},
+    Object.assign(ui, { versoes: null, jaExiste: false, maisAcoes: false, rascunho: null, receitaPorOp: {},
                         renomeandoOp: null, renomeandoGrupo: null, painelTalhao: null, preCadastro: null, validarOp: null });
     if (!somenteLeitura) limparReceitasVazias();
     desenharTudo();
@@ -320,8 +344,6 @@ window.Telas.planoOperacoes = (function () {
         if (num === plano.versaoAberta) { ui.versoes = null; ui.jaExiste = false; desenharTudo(); break; }
         abrirVersao(num); break;
       }
-      case 'ver-fechar-leitura':
-        ui.leituraFechada = true; desenharTudo(); break;
       case 'ver-fechar-aviso':
         ui.versoes = null; ui.jaExiste = false; desenharTudo(); break;
       case 'ver-publicar': {
@@ -1086,7 +1108,7 @@ window.Telas.planoOperacoes = (function () {
         <div class="dica-plantio" role="note">${Icones.info}
           <p>Talhões sem variedade não recebem TSI. ${gSementes ? `Defina a variedade na guia
             <button class="dica-plantio__link" type="button" data-acao="ir-plantio">${esc(gSementes.nome)}</button>.`
-            : 'Crie um grupo do tipo Sementes para definir a variedade.'}</p>
+            : 'Crie um grupo do tipo Plantio para definir a variedade.'}</p>
         </div>` : ''}
       ${filtrosTalhoes([
         { valor: 'todos', rotulo: `Todos os talhões: ${talhoesFazenda.length}` },
@@ -1106,7 +1128,7 @@ window.Telas.planoOperacoes = (function () {
             ${vazio ? `<tr><td class="tabela__vazia" colspan="${nColunas}">${vazio}</td></tr>` : visiveis.map((t) => {
               const ajuste = op.talhoes[t.nome];
               const r = ajuste ? Planos.receitaDoTalhao(op, ajuste) : null;
-              const cinza = editar ? ' class="tabela__calculada" title="Vem do Plantio (guia Semente)"' : '';
+              const cinza = editar ? ' class="tabela__calculada" title="Vem do Plantio (guia Plantio)"' : '';
               // Em construção: a dose do talhão se edita na célula (fundo branco) e vira dose própria dele;
               // "—" (talhão sem a recomendação ou sem o produto) fica cinza, sem edição
               const doses = colunas.map((col) => {
@@ -1441,7 +1463,7 @@ window.Telas.planoOperacoes = (function () {
       : { nome: 'recomendação', Nome: 'Recomendação', base: 'Recomendação', pa, paOpcional };
   }
 
-  // ================= Grupo Semente: plantio por talhão =================
+  // ================= Grupo Plantio: plantio por talhão =================
   // docs/telas/04.2-operacoes-sementes.md. Plantio: variedade, data e população por talhão.
   // O TSI fica no grupo Tratamento de semente (ver ehGrupoTsi).
   function ehSemente(grupo) {
@@ -1558,6 +1580,7 @@ window.Telas.planoOperacoes = (function () {
     const t = onde === 'pt' ? ui.painelTalhao : input.dataset.talhao;
     op.plantio[t] = { ...(op.plantio[t] || { variedade: '', data: '' }), variedade: nome };
     alterou();
+    if (onde === 'pt') marcarSalvoPainel();
     if (semFoco) { redesenharMantendoCelula(); return; }
     desenharMantendoFoco(onde === 'pt' ? '#pt-data' : `[data-campo="tb-data"][data-talhao="${CSS.escape(t)}"]`);
   }
@@ -1783,7 +1806,6 @@ window.Telas.planoOperacoes = (function () {
   }
 
   // Título de coluna: ordena só pelas setas (1º clique crescente, 2º decrescente).
-  // "Produtividade histórica": o nome abre o painel no primeiro talhão da tabela.
   // O rótulo pode ter quebra de linha (<br>); "depois" entra ao lado da seta (ex.: o filtro de variedade).
   // dica: texto ao passar o mouse no nome da coluna (ex.: "1 bag = 5 milhões de sementes")
   function tituloOrdenavel(coluna, rotulo, classe = '', depois = '', dica = '') {
@@ -1791,9 +1813,7 @@ window.Telas.planoOperacoes = (function () {
     const texto = rotulo.replace(/<br>/g, ' ');
     const ativa = ordem && ordem.coluna === coluna;
     const sentido = ativa ? ordem.sentido : null;
-    const nome = coluna === 'produtividade'
-      ? `<button class="titulo-abrir" type="button" data-acao="abrir-primeiro" title="Abrir o painel no primeiro talhão da tabela">${rotulo}</button>`
-      : `<span${dica ? ` title="${esc(dica)}" class="titulo-dica"` : ''}>${rotulo}</span>`;
+    const nome = `<span${dica ? ` title="${esc(dica)}" class="titulo-dica"` : ''}>${rotulo}</span>`;
     return `
       <th class="${classe}" ${ativa ? `aria-sort="${sentido === 'asc' ? 'ascending' : 'descending'}"` : ''}>
         <span class="titulo-coluna">${nome}
@@ -2050,6 +2070,7 @@ window.Telas.planoOperacoes = (function () {
                   title="${ui.painelExpandido ? 'Reduzir o painel' : 'Expandir o painel'}"
                   aria-label="${ui.painelExpandido ? 'Reduzir o painel' : 'Expandir o painel'}">${ui.painelExpandido ? Icones.reduzir : Icones.ampliar}</button>
           <h3 class="painel-talhao__titulo">${esc(talhao)} · ${Util.area(t ? t.area : 0)}</h3>
+          ${ui.painelSalvo === talhao ? `<span class="painel-talhao__salvo" role="status">${Icones.certo} Salvo</span>` : ''}
           ${seta(anterior, 'painel-anterior', Icones.voltar, 'Talhão anterior')}
           ${seta(proximo, 'painel-proximo', Icones.seta, 'Próximo talhão')}
           <button class="botao-icone" type="button" data-acao="fechar-painel" aria-label="Fechar o painel">${Icones.fechar}</button>
@@ -2387,13 +2408,28 @@ window.Telas.planoOperacoes = (function () {
     desenharMantendoFoco(`[data-acao="abrir-painel"][data-talhao="${t}"]`);
   }
 
+  // Painel do talhão: cada campo grava sozinho (salvamento automático). Logo depois de gravar, "✓ Salvo" aparece no
+  // topo do painel por alguns segundos, para a pessoa ver que o que digitou ficou gravado.
+  let timerSalvoPainel = null;
+  function marcarSalvoPainel() {
+    ui.painelSalvo = ui.painelTalhao;
+    clearTimeout(timerSalvoPainel);
+    timerSalvoPainel = setTimeout(() => {
+      ui.painelSalvo = null;
+      const aviso = raiz && raiz.querySelector('.painel-talhao__salvo');
+      if (!aviso) return;
+      aviso.classList.add('painel-talhao__salvo--sumindo');
+      setTimeout(() => aviso.remove(), 400);
+    }, 3000);
+  }
+
   // Muda variedade, data ou população do talhão do painel (vale na hora)
   function alterarPlantioPainel(op, campo, valor) {
     const t = ui.painelTalhao;
     const p = { ...(op.plantio[t] || { variedade: '', data: '' }), [campo]: valor };
     if (!p.populacao) delete p.populacao;
     if (!p.variedade && !p.data && !p.populacao) delete op.plantio[t]; else op.plantio[t] = p;
-    alterou();
+    alterou(); marcarSalvoPainel();
     // Escolhida a variedade, o cursor vai para a data de plantio
     desenharMantendoFoco(campo === 'populacao' ? '#pt-populacao' : '#pt-data');
   }
@@ -2406,7 +2442,7 @@ window.Telas.planoOperacoes = (function () {
     const n = Util.numero(valor);
     if (!v || !n || n <= 0) return;
     v.ciclo = Math.round(n);
-    alterou(); desenharMantendoFoco('#pt-data');
+    alterou(); marcarSalvoPainel(); desenharMantendoFoco('#pt-data');
     Aviso.mostrar(`Ciclo de ${esc(v.nome)}: ${v.ciclo} dias`);
   }
 
@@ -2758,7 +2794,7 @@ window.Telas.planoOperacoes = (function () {
     ui.erroGerminacao = null;
     if (!op.germinacoes) op.germinacoes = {};
     if (texto.trim()) op.germinacoes[talhao] = n; else delete op.germinacoes[talhao];
-    alterou();
+    alterou(); marcarSalvoPainel();
     desenharMantendoFoco('#pt-germinacao');
   }
 
@@ -2780,7 +2816,7 @@ window.Telas.planoOperacoes = (function () {
     const antes = { ...(op.germinacoes || {}) };
     op.germinacoes = Object.fromEntries(talhoesFazenda.map((t) => [t.nome, n]));
     ui.erroGerminacao = null;
-    alterou(); desenharMantendoFoco('#pt-germinacao');
+    alterou(); marcarSalvoPainel(); desenharMantendoFoco('#pt-germinacao');
     Aviso.mostrar(`Germinação de ${numeroTexto(n)}% aplicada em ${talhoesFazenda.length} talhões`, { acao: 'Desfazer', aoAgir: () => {
       op.germinacoes = antes; alterou(); desenharTudo();
     } });
@@ -3034,11 +3070,6 @@ window.Telas.planoOperacoes = (function () {
       case 'abrir-calendario': {
         const nativo = alvo.parentElement.querySelector('.campo-data__nativo');
         try { nativo.showPicker(); } catch (erro) { nativo.focus(); nativo.click(); }
-        break;
-      }
-      case 'abrir-primeiro': {
-        const primeiro = talhoesVisiveisPlantio(op)[0];
-        if (primeiro) abrirPainel(primeiro.nome);
         break;
       }
       case 'painel-anterior': passarPainel(op, -1); break;
@@ -3805,7 +3836,7 @@ window.Telas.planoOperacoes = (function () {
             <label class="campo__rotulo" for="ng-tipo">Tipo</label>
             <select class="campo__controle" id="ng-tipo" name="tipo" required>
               <option value="" disabled selected>Selecione o tipo</option>
-              ${DADOS.tiposGrupo.filter((t) => t !== 'Colheita').map((t) => `<option>${t}</option>`).join('')}
+              ${DADOS.tiposGrupo.filter((t) => t !== 'Colheita').map((t) => `<option value="${t}">${t === 'Sementes' ? 'Plantio' : t}</option>`).join('')}
             </select>
           </div>
         </div>

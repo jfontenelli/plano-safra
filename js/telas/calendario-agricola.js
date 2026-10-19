@@ -19,11 +19,13 @@ window.Telas.calendarioAgricola = (function () {
 
   let filtros = {};
   // Período (ano, semestre, trimestre, mês), o mês em que ele começa (ano × 12 + mês; null = o padrão), as empresas
-  // recolhidas ('e:Empresa A') e as fazendas abertas ('f:Empresa A|Santa Clara'). Abre com as empresas abertas e as
-  // fazendas fechadas (safra e safrinha aparecem ao abrir a fazenda). Tudo se mantém ao navegar.
+  // abertas ('e:Empresa A') e as fazendas abertas ('f:Empresa A|Santa Clara'). Abre no nível Empresa (tudo fechado):
+  // o usuário abre a empresa (fazendas) e a fazenda (safra e safrinha). Tudo se mantém ao navegar.
+  // As barras ficam só no nível mais aberto de cada ramo: empresa fechada mostra as operações de todas as fazendas
+  // juntas; aberta, as barras passam para as fazendas; fazenda aberta, para a safra e a safrinha.
   let periodo = 'ano';
   let inicioPeriodo = null;
-  const recolhidos = new Set();
+  const empresasAbertas = new Set();
   const fazendasAbertas = new Set();
 
   // Safra/Safrinha do plano: ainda não é escolhida ao criar o plano (DECISOES 4.2: a detalhar); por enquanto, Safra
@@ -33,8 +35,8 @@ window.Telas.calendarioAgricola = (function () {
     const naLista = new Set(DADOS.planos.map((p) => valorDe(p, campo)));
     return cadastro.filter((item) => naLista.has(item));
   }
-  // Ano Agrícola: junta as safras e safrinhas do ano; começa no de hoje, ou no mais recente com planos
-  const filtrosIniciais = () => ({ anoAgricola: Util.anoAgricolaInicial(Util.anosAgricolas(DADOS.planos)), empresa: '', fazenda: '', cultura: '' });
+  // Ano Agrícola: junta as safras e safrinhas do ano; começa sempre no mais recente com planos
+  const filtrosIniciais = () => ({ anoAgricola: Util.anoAgricolaMaisRecente(Util.anosAgricolas(DADOS.planos)), empresa: '', fazenda: '', cultura: '' });
   const planosFiltrados = () => DADOS.planos.filter((p) => ['anoAgricola', 'empresa', 'fazenda', 'cultura'].every((c) => !filtros[c] || valorDe(p, c) === filtros[c]));
 
   // ----- Datas -----
@@ -186,9 +188,8 @@ window.Telas.calendarioAgricola = (function () {
     const fundo = `background-size: calc(100% / ${colunas.length}) 100%`;
     const hoje = new Date();
     const temHoje = hoje >= j.ini && hoje < j.fim;
-    // Linha de hoje em todas as linhas; a etiqueta "Hoje" só na primeira
-    const marca = (rotuloHoje) => (temHoje ? `<span class="cag__hoje" style="left: ${pct(hoje, j).toFixed(2)}%" aria-hidden="true">${rotuloHoje ? '<span class="cag__hoje-rotulo">Hoje</span>' : ''}</span>` : '');
-    const marcaHoje = marca(false);
+    // Hoje: só a linha vertical pontilhada, em todas as linhas (sem etiqueta; o nome fica na legenda)
+    const marcaHoje = temHoje ? `<span class="cag__hoje" style="left: ${pct(hoje, j).toFixed(2)}%" aria-hidden="true"></span>` : '';
     const rotulo = periodo === 'mes' ? `${MESES_LONGO[j.iniMi % 12]} de ${Math.floor(j.iniMi / 12)}` : `${mesCurto(j.iniMi)} – ${mesCurto(j.iniMi + j.tam - 1)}`;
     const grupos = ORDEM_GRUPO.map((tipo) => todas.find((o) => o.tipo === tipo)).filter(Boolean);
     const seta = (aberto) => `<span class="cag__seta ${aberto ? '' : 'cag__seta--fechada'}" aria-hidden="true">${Icones.abaixo}</span>`;
@@ -198,12 +199,13 @@ window.Telas.calendarioAgricola = (function () {
     const linhas = [];
     DADOS.empresas.filter((e) => planos.some((p) => p.empresa === e)).forEach((e) => {
       const daEmpresa = planos.filter((p) => p.empresa === e);
-      const ce = `e:${e}`; const abertaE = !recolhidos.has(ce);
+      const ce = `e:${e}`; const abertaE = empresasAbertas.has(ce);
       linhas.push(`
         <div class="cag__linha cag__linha--empresa" role="row">
           <span role="cell"><button class="cag__abrir" type="button" data-cag-recolher="${esc(ce)}" aria-expanded="${abertaE}">${seta(abertaE)}<strong>${esc(e)}</strong></button></span>
           <span role="cell"></span><span role="cell" class="cag__num"><strong>${Util.area(areaDe(daEmpresa))}</strong></span>
-          <span role="cell" class="cag__tempo cag__tempo--vazio" style="${fundo}">${marca(!linhas.length)}</span>
+          ${abertaE ? `<span role="cell" class="cag__tempo cag__tempo--vazio" style="${fundo}">${marcaHoje}</span>`
+            : `<span role="cell" class="cag__tempo cag__tempo--faixas" style="${fundo}">${barras(juntar(daEmpresa.map((p) => ops.get(p))), j)}${marcaHoje}</span>`}
         </div>`);
       if (!abertaE) return;
       [...new Set(daEmpresa.map((p) => p.fazenda))].sort((a, b) => a.localeCompare(b, 'pt-BR')).forEach((f) => {
@@ -217,7 +219,8 @@ window.Telas.calendarioAgricola = (function () {
             <span role="cell"><button class="cag__abrir" type="button" data-cag-recolher="${esc(cf)}" aria-expanded="${abertaF}">${seta(abertaF)}<strong>${esc(f)}</strong></button></span>
             <span role="cell">${[...new Set(daFazenda.map((p) => p.cultura))].map(esc).join(' → ')}</span>
             <span role="cell" class="cag__num"><strong>${Util.area(areaF)}</strong></span>
-            <span role="cell" class="cag__tempo cag__tempo--faixas" style="${fundo}">${barras(juntar(daFazenda.map((p) => ops.get(p))), j)}${marcaHoje}</span>
+            ${abertaF ? `<span role="cell" class="cag__tempo cag__tempo--vazio" style="${fundo}">${marcaHoje}</span>`
+              : `<span role="cell" class="cag__tempo cag__tempo--faixas" style="${fundo}">${barras(juntar(daFazenda.map((p) => ops.get(p))), j)}${marcaHoje}</span>`}
           </div>`);
         if (!abertaF) return;
         daFazenda.forEach((p) => {
@@ -230,7 +233,7 @@ window.Telas.calendarioAgricola = (function () {
               <span role="cell">${esc(p.cultura)}</span>
               <span role="cell" class="cag__num">${area ? Util.area(area) : '<span class="cag__pendente">Pendente</span>'}</span>
               <span role="cell" class="cag__tempo cag__tempo--faixas" style="${fundo}">${lista.length ? barras(lista, j)
-                : `<span class="cag__sem">${v ? 'Nenhuma operação com data na versão publicada' : 'Plano ainda sem versão publicada'}</span>`}${marcaHoje}</span>
+                : `<span class="cag__sem">${Versoes.aIniciar(p) ? 'Plano ainda não iniciado' : v ? 'Nenhuma operação com data na versão publicada' : 'Plano ainda sem versão publicada'}</span>`}${marcaHoje}</span>
             </div>`);
         });
       });
@@ -273,7 +276,7 @@ window.Telas.calendarioAgricola = (function () {
       const r = e.target.closest('[data-cag-recolher]');
       if (r) {
         const k = r.dataset.cagRecolher;
-        const conjunto = k.startsWith('f:') ? fazendasAbertas : recolhidos;
+        const conjunto = k.startsWith('f:') ? fazendasAbertas : empresasAbertas;
         if (conjunto.has(k)) conjunto.delete(k); else conjunto.add(k);
         atualizar();
         caixa.querySelector(`[data-cag-recolher="${CSS.escape(k)}"]`)?.focus();

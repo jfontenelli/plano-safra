@@ -29,8 +29,10 @@
     'orcamento':      { titulo: 'Orçamento de Insumos', menu: 'orcamento',
                         desenhar: () => temPlanos() ? Telas.orcamento.desenhar() : Telas.semPlanos('orcamento'),
                         aoMostrar: (conteudo) => { if (temPlanos()) Telas.orcamento.aoMostrar(conteudo); } },
+    // Ordens de Serviço: por enquanto, o Calendário (Mês, Semana, Dia) das operações de vários planos somados
     'ordens-servico': { titulo: 'Ordens de Serviço', menu: 'ordens-servico',
-                        desenhar: () => Telas.emConstrucao('Ordens de Serviço') },
+                        desenhar: () => temPlanos() ? Telas.osCalendario.desenhar() : Telas.semPlanos('ordens-servico'),
+                        aoMostrar: (conteudo) => { if (temPlanos()) Telas.osCalendario.aoMostrar(conteudo); } },
     'cadastros':      { titulo: 'Cadastros', menu: 'cadastros',
                         desenhar: () => Telas.emConstrucao('Cadastros') }
   };
@@ -57,18 +59,24 @@
     return DADOS.planos.find((p) => String(p.id) === id);
   }
 
-  // Plano mais recente: o último aberto ou, se nenhum foi aberto, o atualizado por último
+  // Plano mais recente para o menu Planejamento: o último aberto ou, se nenhum foi aberto, o atualizado por último,
+  // entre os planos já iniciados (com a forma de iniciar escolhida: modelo, planilha, cópia ou do zero).
+  // Plano não iniciado só abre pela linha dele na Visão Geral. Nenhum iniciado: null.
   function planoMaisRecente() {
-    return buscarPlano(String(estado.ultimoPlanoId))
-      || [...DADOS.planos].sort((a, b) => a.atualizadoEm.localeCompare(b.atualizadoEm)).pop();
+    const iniciados = DADOS.planos.filter((p) => !Versoes.aIniciar(p));
+    return iniciados.find((p) => p.id === estado.ultimoPlanoId)
+      || iniciados.sort((a, b) => a.atualizadoEm.localeCompare(b.atualizadoEm)).pop() || null;
   }
 
   function rotaAtual() {
     let [nome, parametro, extra] = location.hash.replace(/^#\/?/, '').split('/');
     if (!ROTAS[nome]) return { nome: ROTA_INICIAL };
-    // Menu Planejamento com planos: abre o plano mais recente, na versão em que ele está
+    // Menu Planejamento com planos: abre o plano mais recente já iniciado, na versão em que ele está;
+    // sem nenhum iniciado, a Visão Geral (sem o modal de início)
     if (nome === 'planejamento' && temPlanos()) {
-      [nome, parametro, extra] = ['plano', String(planoMaisRecente().id), undefined];
+      const recente = planoMaisRecente();
+      if (!recente) { history.replaceState(null, '', `#/${ROTA_INICIAL}`); return { nome: ROTA_INICIAL }; }
+      [nome, parametro, extra] = ['plano', String(recente.id), undefined];
       history.replaceState(null, '', `#/plano/${parametro}`);
     }
     // Plano que não existe mais (ex.: página recarregada) volta para a lista
@@ -159,9 +167,11 @@
     DADOS.planos = DADOS.planosExemplo.map(({ operacoes, versoes, modelo, ...p }) => {
       if (!DADOS.safras.includes(p.safra)) DADOS.safras.push(p.safra);
       const plano = { ...p, id: estado.proximoIdPlano++ };
-      // Versões do exemplo: 0.1 publicada e 0.2 com o planejamento (em construção ou publicada)
+      // Versões do exemplo: 0.1 publicada e 0.2 com o planejamento (em construção ou publicada).
+      // Sem "operacoes": plano não iniciado (só a 0.1, vazia)
       const criada = new Date(versoes.criadaEm);
-      Versoes.iniciar(plano, Planos.montarExemplo(operacoes, modelo ? DADOS.modelosCultura[modelo] : undefined), { quando: criada, por: p.atualizadoPor });
+      const grupos = operacoes ? Planos.montarExemplo(operacoes, modelo ? DADOS.modelosCultura[modelo] : undefined) : [];
+      Versoes.iniciar(plano, grupos, { quando: criada, por: p.atualizadoPor });
       if (versoes.publicadaEm) {
         Versoes.publicar(plano);
         Object.assign(Versoes.aberta(plano), { publicadaEm: new Date(versoes.publicadaEm), publicadaPor: p.atualizadoPor });

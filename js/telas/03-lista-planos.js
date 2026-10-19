@@ -14,7 +14,7 @@ window.Telas.listaPlanos = (function () {
   // ciclo: Safra ou Safrinha (o filtro "Safra")
   const CAMPOS_FILTRO = ['anoAgricola', 'atividade', 'ciclo', 'empresa', 'fazenda', 'cultura', 'status'];
   const CICLOS = ['Safra', 'Safrinha'];
-  const STATUS = [['nao-iniciado', 'Não iniciado'], ['construcao', 'Em construção'], ['publicada', 'Publicada']];
+  const STATUS = [['nao-iniciado', 'Não iniciado'], ['construcao', 'Em construção'], ['publicada', 'Publicada'], ['revisada', 'Revisada']];
   let filtros = {};
   const filtrosIniciais = () => ({ anoAgricola: Util.anoAgricolaInicial(Telas.painelPlanos.anos()), atividade: '', ciclo: '', empresa: '', fazenda: '', cultura: '', status: '' });
 
@@ -33,6 +33,22 @@ window.Telas.listaPlanos = (function () {
     return cadastro.filter((item) => naLista.has(Array.isArray(item) ? item[0] : item));
   }
 
+  // Fazendas do filtro: com uma empresa escolhida, só as dela (cada empresa tem as suas fazendas)
+  function fazendasDoFiltro() {
+    const lista = presentes('fazenda', DADOS.fazendas);
+    if (!filtros.empresa) return lista;
+    const daEmpresa = new Set([...((DADOS.fazendasPorEmpresa || {})[filtros.empresa] || []),
+      ...DADOS.planos.filter((p) => p.empresa === filtros.empresa).map((p) => p.fazenda)]);
+    return lista.filter((f) => daEmpresa.has(f));
+  }
+  // Trocar a empresa refaz a lista de fazendas; a fazenda que não é da empresa volta para "Todas"
+  function atualizarFazendas(conteudo) {
+    const select = conteudo.querySelector('[data-filtro="fazenda"]');
+    const lista = fazendasDoFiltro();
+    if (filtros.fazenda && !lista.includes(filtros.fazenda)) filtros.fazenda = '';
+    select.innerHTML = `<option value="">Todas</option>${lista.map((f) => `<option value="${esc(f)}" ${f === filtros.fazenda ? 'selected' : ''}>${esc(f)}</option>`).join('')}`;
+  }
+
   // Safra que a lista deve mostrar na próxima vez que for desenhada (ex.: a dos planos recém-criados): o filtro
   // vai para o ano agrícola dela, na guia Planos de Safra
   let safraPedida = null;
@@ -43,7 +59,8 @@ window.Telas.listaPlanos = (function () {
   const GUIAS = [['painel', 'Planos de Safra'], ['historico', 'Histórico de versões']];
   let guia = 'painel';
   // Status de uma versão: a 0.1 de um plano ainda não iniciado aparece como "Não iniciado"
-  const statusVersao = (p, v) => (Versoes.aIniciar(p) ? 'nao-iniciado' : v.status);
+  // Status de cada versão: só a última publicada do plano é Publicada; as publicadas antes dela, Revisada
+  const statusVersao = (p, v) => (Versoes.aIniciar(p) ? 'nao-iniciado' : Versoes.statusExibido(p, v));
 
   function desenhar() {
     filtros = filtrosIniciais();
@@ -73,7 +90,7 @@ window.Telas.listaPlanos = (function () {
           ${filtro('atividade', 'Atividade produtiva', presentes('atividade', DADOS.atividades))}
           ${filtro('ciclo', 'Safra', presentes('ciclo', CICLOS))}
           ${filtro('empresa', 'Empresa', presentes('empresa', DADOS.empresas))}
-          ${filtro('fazenda', 'Fazenda', presentes('fazenda', DADOS.fazendas))}
+          ${filtro('fazenda', 'Fazenda', fazendasDoFiltro())}
           ${filtro('cultura', 'Cultura', presentes('cultura', DADOS.culturasPlanos))}
           ${filtro('status', 'Status', presentes('status', STATUS), 'Todos')}
           <button class="link-acao filtros__limpar" type="button" data-acao="lp-limpar">${Icones.limpar} Limpar filtros</button>
@@ -106,12 +123,14 @@ window.Telas.listaPlanos = (function () {
     conteudo.querySelectorAll('[data-filtro]').forEach((select) => {
       select.addEventListener('change', () => {
         filtros[select.dataset.filtro] = select.value;
+        if (select.dataset.filtro === 'empresa') atualizarFazendas(conteudo);
         atualizar(conteudo);
       });
     });
     // Limpar filtros: volta ao começo (Ano Agrícola de hoje; os demais em Todas/Todos)
     conteudo.querySelector('[data-acao="lp-limpar"]').addEventListener('click', () => {
       filtros = filtrosIniciais();
+      atualizarFazendas(conteudo);
       conteudo.querySelectorAll('[data-filtro]').forEach((select) => { select.value = filtros[select.dataset.filtro]; });
       atualizar(conteudo);
     });
@@ -220,6 +239,7 @@ window.Telas.listaPlanos = (function () {
   function verHistorico(p) {
     const conteudo = document.getElementById('conteudo');
     filtros = { anoAgricola: valorDe(p, 'anoAgricola'), atividade: p.atividade || '', ciclo: valorDe(p, 'ciclo'), empresa: p.empresa, fazenda: p.fazenda, cultura: p.cultura, status: '' };
+    atualizarFazendas(conteudo);
     conteudo.querySelectorAll('[data-filtro]').forEach((select) => { select.value = filtros[select.dataset.filtro]; });
     atualizar(conteudo);
     trocarGuia(conteudo, 'historico');
@@ -313,11 +333,11 @@ window.Telas.listaPlanos = (function () {
     const status = statusVersao(p, v);
     const quando = status === 'construcao' ? v.salvaEm : v.publicadaEm;
     const quem = status === 'construcao' ? v.salvaPor : v.publicadaPor;
-    const rotulo = { 'nao-iniciado': 'Não iniciado', construcao: 'Em construção', publicada: 'Publicada' }[status];
-    const classe = { 'nao-iniciado': 'status--nao-iniciado', construcao: 'status--construcao', publicada: 'status--aprovado' }[status];
+    const rotulo = Object.fromEntries(STATUS)[status];
+    const classe = { 'nao-iniciado': 'status--nao-iniciado', construcao: 'status--construcao', publicada: 'status--aprovado', revisada: 'status--revisada' }[status];
     return `
       <tr class="lista-planos__linha" data-plano="${p.id}" data-versao="${esc(v.num)}" tabindex="0"
-          title="Abrir a versão ${esc(v.num)}${status === 'publicada' ? ' (publicada, em consulta)' : ''}"
+          title="Abrir a versão ${esc(v.num)}${status === 'publicada' || status === 'revisada' ? ` (${status}, em consulta)` : ''}"
           aria-label="Abrir plano ${esc(p.safra)} · ${esc(p.fazenda)}, versão ${esc(v.num)}">
         <td>${esc(p.safra)}</td>
         <td>${esc(p.empresa)}</td>

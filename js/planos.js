@@ -35,7 +35,7 @@ window.Planos = (function () {
 
   // prazo: prazo para encerramento da OS, em dias (informado no Calendário Agrícola; null = padrão do grupo)
   function novaOperacao(nome, dap = null, prazo = null) {
-    // Só no grupo Semente: plantio { 'T01': { variedade, data ('AAAA-MM-DD'), populacao (mil plantas/ha) } }
+    // Só no grupo Plantio: plantio { 'T01': { variedade, data ('AAAA-MM-DD'), populacao (mil plantas/ha) } }
     // e germinação por talhão (%): germinacoes { 'T01': 95 }, à parte do plantio (talhão só com germinação não conta como planejado)
     return { id: novoId('o'), nome, dap, fenologia: '', prazo, receitas: [], talhoes: {}, plantio: {}, germinacoes: {} };
   }

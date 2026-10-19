@@ -59,6 +59,11 @@ window.Util = {
   },
 
   // Ano agrícola que os filtros mostram ao abrir: o de hoje (01/09 a 31/08) se tiver planos; senão, o mais recente
+  // Ano agrícola mais recente com planos (Calendário Agrícola e Orçamento abrem nele)
+  anoAgricolaMaisRecente(anos) {
+    return anos[anos.length - 1] ?? '';
+  },
+
   anoAgricolaInicial(anos) {
     const hoje = new Date();
     const atual = hoje.getMonth() >= 8 ? hoje.getFullYear() : hoje.getFullYear() - 1;
