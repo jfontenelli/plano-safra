@@ -29,7 +29,8 @@ window.Telas.calendarioAgricola = (function () {
   const fazendasAbertas = new Set();
 
   // Safra/Safrinha do plano: ainda não é escolhida ao criar o plano (DECISOES 4.2: a detalhar); por enquanto, Safra
-  const cicloDe = (p) => p.ciclo || 'Safra';
+  // Sem ciclo informado (plano criado no modal), pelo nome da safra ("27/27", os dois anos iguais, é safrinha)
+  const cicloDe = (p) => p.ciclo || (String(p.safra).split('/')[0] === String(p.safra).split('/')[1] ? 'Safrinha' : 'Safra');
   const valorDe = (p, campo) => (campo === 'anoAgricola' ? String(Util.anoAgricola(p.safra)) : p[campo]);
   function presentes(campo, cadastro) {
     const naLista = new Set(DADOS.planos.map((p) => valorDe(p, campo)));

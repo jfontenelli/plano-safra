@@ -72,7 +72,7 @@ Ver **todas as operações do plano juntas**, de todos os grupos (Plantio, Defen
 ## 8. Regras
 
 - **Só as operações já planejadas** aparecem (com produto e dose; no Plantio, variedade), na ordem do DAP, **em construção e no aprovado**. Operação ainda sem recomendação não aparece em nenhuma das visões. Qualquer mudança em Operações ou no Planejamento aparece ao voltar ao Calendário. (Antes, em construção, todas as operações cadastradas apareciam como "Sem recomendação"; testado e trocado.)
-- **Nada planejado ainda:** no lugar das visões, um aviso (amarelo-claro, como o da etapa Operações): "**Nenhuma operação planejada ainda.** As operações planejadas aparecem aqui com datas e doses por talhão." As guias continuam na barra. Com operações planejadas, o aviso não aparece; se os filtros esconderem tudo, a Programação diz "Nenhuma operação com os filtros escolhidos".
+- **Nada planejado ainda:** no lugar das visões, um aviso (amarelo-claro, como o da etapa Operações): "**Nenhuma operação planejada ainda.** As operações planejadas aparecem aqui com datas e doses por talhão." As guias continuam na barra. Com operações planejadas (em qualquer talhão, sem olhar o filtro de talhão), o aviso não aparece e os filtros ficam sempre à vista; se os filtros esconderem tudo (ex.: nenhum talhão marcado), a Programação e o Ciclo Produtivo dizem "Nenhuma operação com os filtros escolhidos" (20/10/2026).
 
 - A colheita vem do Plantio: previsão = data de plantio + ciclo da variedade; talhão com variedade sem ciclo fica fora da colheita.
 - **A Colheita aparece no fim, depois que houver plantio** (variedade, data e ciclo), com a previsão de colheita.

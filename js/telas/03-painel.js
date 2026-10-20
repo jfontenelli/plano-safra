@@ -1,22 +1,16 @@
 /*
  * Tela 03 — Visão Geral, guia Planos de Safra (docs/telas/03-lista-planos.md)
- * Acompanha o planejamento no ano agrícola escolhido, com os mesmos filtros das outras guias:
- * Planejamento das Fazendas (Sem plano, Em construção, Publicado) e Planos de Safra (uma linha por plano, Em construção
- * ou Publicado; a fazenda sem plano só conta nos quadros).
- *
- * Quem entra na conta (uma linha por fazenda e safra):
- *  - Cada safra ou safrinha cadastrada (DADOS.cadastroSafras e as criadas no modal, em DADOS.safras), mesmo sem
- *    nenhum plano: todas as fazendas de todas as empresas (DADOS.fazendasPorEmpresa) podem ter plano nela; a
- *    fazenda sem plano aparece como "Sem plano".
- * Os planos usam a versão de trabalho (a em construção ou, sem ela, a última publicada), como a lista.
+ * Planos de Safra no ano agrícola escolhido, com os mesmos filtros das outras guias: uma linha por plano (Não
+ * iniciado, Em construção ou Publicado), na versão de trabalho (a em construção ou, sem ela, a última publicada).
+ * Sem plano nos filtros: no lugar da tabela, "Nenhum Plano de Safra cadastrado" com o link + Criar Plano Safra.
  */
 window.Telas = window.Telas || {};
 
 window.Telas.painelPlanos = (function () {
   const esc = Util.escapar;
-  const cicloDe = (p) => p.ciclo || 'Safra';
-  // Safra sem plano: pelo nome ("27/27", os dois anos iguais, é safrinha)
+  // Safra pelo nome ("27/27", os dois anos iguais, é safrinha); no plano, o ciclo informado ou o do nome
   const cicloDoNome = (safra) => { const [a, b] = String(safra).split('/'); return a === b ? 'Safrinha' : 'Safra'; };
+  const cicloDe = (p) => p.ciclo || cicloDoNome(p.safra);
 
   // Safras cadastradas e as dos planos, sem repetir
   function safras() {
@@ -26,42 +20,38 @@ window.Telas.painelPlanos = (function () {
   function anos() {
     return [...new Set(safras().map((s) => Util.anoAgricola(s)).filter(Boolean).map(String))].sort();
   }
-  const pct = (n) => `${Math.round(n)}%`;
   const ha = (n) => Math.round(n).toLocaleString('pt-BR');
 
   function statusDe(p) {
-    if (!p) return 'sem';
     return Versoes.aIniciar(p) ? 'nao-iniciado' : Versoes.deTrabalho(p).status;
   }
 
-  // Linhas do painel no ano agrícola (em "Todas", em cada ano agrícola), com os filtros. Fazenda sem plano passa
-  // pelos filtros de Atividade e Cultura (ainda não tem nenhuma das duas).
+  // Planos do ano agrícola (em "Todas", de todos os anos), com os filtros. Ordem padrão: status (Não iniciado,
+  // Em construção, Publicado) e, no mesmo status, Safra, Empresa, Fazenda e Cultura em ordem alfabética
   function linhas(f) {
-    const doAno = DADOS.planos.filter((p) => !f.anoAgricola || String(Util.anoAgricola(p.safra)) === f.anoAgricola);
-    const lista = doAno.map((p) => ({ plano: p, empresa: p.empresa, fazenda: p.fazenda, ciclo: cicloDe(p), safra: p.safra, cultura: p.cultura, atividade: p.atividade }));
-    // Cada safra ou safrinha cadastrada no ano agrícola: as fazendas sem plano nela entram como "Sem plano".
-    // Um plano por safra e fazenda: a fazenda já com plano nela (de qualquer empresa) não entra de novo.
-    safras().filter((s) => !f.anoAgricola || String(Util.anoAgricola(s)) === f.anoAgricola).forEach((safra) => {
-      const daSafra = doAno.filter((p) => p.safra === safra);
-      const ciclo = daSafra.length ? cicloDe(daSafra[0]) : cicloDoNome(safra);
-      Object.entries(DADOS.fazendasPorEmpresa || {}).forEach(([empresa, fazendas]) => fazendas.forEach((fazenda) => {
-        if (!daSafra.some((p) => p.fazenda === fazenda)) lista.push({ plano: null, empresa, fazenda, ciclo, safra });
-      }));
-    });
-    const ordemEmpresa = (e) => { const i = DADOS.empresas.indexOf(e); return i < 0 ? 99 : i; };
-    return lista
+    const texto = (a, b) => String(a || '').localeCompare(String(b || ''), 'pt-BR');
+    return DADOS.planos
+      .filter((p) => !f.anoAgricola || String(Util.anoAgricola(p.safra)) === f.anoAgricola)
+      .map((p) => ({ plano: p, empresa: p.empresa, fazenda: p.fazenda, ciclo: cicloDe(p), safra: p.safra, cultura: p.cultura, atividade: p.atividade }))
       .filter((l) => (!f.ciclo || l.ciclo === f.ciclo) && (!f.empresa || l.empresa === f.empresa) && (!f.fazenda || l.fazenda === f.fazenda)
-        && (!l.plano || ((!f.atividade || l.atividade === f.atividade) && (!f.cultura || l.cultura === f.cultura))))
-      .map((l) => {
-        const v = l.plano && Versoes.deTrabalho(l.plano);
-        return { ...l, status: statusDe(l.plano),
-          area: l.plano ? Util.areaCultivo(l.plano, v) : null };
-      })
-      .sort((a, b) => ordemEmpresa(a.empresa) - ordemEmpresa(b.empresa) || a.fazenda.localeCompare(b.fazenda, 'pt-BR')
-        || (a.ciclo === 'Safrinha') - (b.ciclo === 'Safrinha') || String(a.cultura || '').localeCompare(String(b.cultura || ''), 'pt-BR'));
+        && (!f.atividade || l.atividade === f.atividade) && (!f.cultura || l.cultura === f.cultura))
+      .map((l) => ({ ...l, status: statusDe(l.plano), area: Util.areaCultivo(l.plano, Versoes.deTrabalho(l.plano)) }))
+      .sort((a, b) => ORDEM_STATUS.indexOf(a.status) - ORDEM_STATUS.indexOf(b.status)
+        || texto(`${a.ciclo} ${a.safra}`, `${b.ciclo} ${b.safra}`) || texto(a.empresa, b.empresa)
+        || texto(a.fazenda, b.fazenda) || texto(a.cultura, b.cultura));
   }
 
-  // Valores que os filtros Empresa e Fazenda oferecem além dos planos (as fazendas de cada empresa)
+  // Safras do ano agrícola para o modal Criar Plano (link do aviso sem plano). Já escolhida quando o filtro Safra
+  // diz qual (Safra ou Safrinha) e só há uma dela no ano.
+  function safrasDoAno(f) {
+    if (!f.anoAgricola) return {};
+    const lista = safras().filter((s) => String(Util.anoAgricola(s)) === f.anoAgricola)
+      .sort((a, b) => (cicloDoNome(a) === 'Safrinha') - (cicloDoNome(b) === 'Safrinha') || a.localeCompare(b));
+    const doCiclo = f.ciclo ? lista.filter((s) => cicloDoNome(s) === f.ciclo) : [];
+    return { safras: lista, safra: doCiclo.length === 1 ? doCiclo[0] : '' };
+  }
+
+  // Valores que os filtros Empresa e Fazenda oferecem além dos planos (as fazendas de cada empresa, mesmo sem plano)
   function empresasEFazendas() {
     const pares = Object.entries(DADOS.fazendasPorEmpresa || {});
     return { empresas: pares.map(([e]) => e), fazendas: pares.flatMap(([, fs]) => fs) };
@@ -71,17 +61,19 @@ window.Telas.painelPlanos = (function () {
   function desenhar() {
     return `
       <div class="painel" data-guia-painel="painel">
-        <section class="painel-kpis" aria-label="Planejamento das Fazendas" data-pn="kpis"></section>
-
         <section class="cartao lista-planos" aria-labelledby="pn-titulo-planos">
           <div class="secao__topo lista-planos__topo">
             <h2 class="secao__titulo lista-planos__titulo" id="pn-titulo-planos">${Icones.documento} Planos de Safra</h2>
           </div>
-          <div class="tabela-rolagem">
+          <div class="tabela-rolagem" data-pn="tabela">
             <table class="tabela painel-tabela">
               <thead data-pn="cabecalho"></thead>
               <tbody data-pn="linhas"></tbody>
             </table>
+          </div>
+          <div class="painel-vazio" data-pn="vazio" hidden>
+            <p class="painel-vazio__titulo">Nenhum Plano de Safra cadastrado</p>
+            <p class="painel-vazio__texto">Clique em <button class="link-acao painel-vazio__link" type="button" data-pn-criar>+ Criar Plano Safra</button> para começar seu planejamento.</p>
           </div>
         </section>
       </div>`;
@@ -91,13 +83,12 @@ window.Telas.painelPlanos = (function () {
     const raiz = conteudo.querySelector('[data-guia-painel="painel"]');
     if (!raiz) return;
     ultimo = { conteudo, filtros };
-    const ls = linhas(filtros);
-    raiz.querySelector('[data-pn="kpis"]').innerHTML = kpis(ls);
+    const planos = linhas(filtros);
+    // Sem plano nos filtros: o aviso no lugar da tabela
+    raiz.querySelector('[data-pn="tabela"]').hidden = !planos.length;
+    raiz.querySelector('[data-pn="vazio"]').hidden = !!planos.length;
     raiz.querySelector('[data-pn="cabecalho"]').innerHTML = cabecalho();
-    // A tabela mostra só os planos (Em construção, incluindo Não iniciado, e Publicado); a fazenda sem plano só conta nos quadros
-    const planos = ls.filter((l) => l.plano);
-    raiz.querySelector('[data-pn="linhas"]').innerHTML = planos.length ? ordenadas(planos).map(linha).join('')
-      : '<tr><td class="tabela__vazia" colspan="7">Nenhum plano com esses filtros.</td></tr>';
+    raiz.querySelector('[data-pn="linhas"]').innerHTML = ordenadas(planos).map(linha).join('');
   }
 
   // ----- Ordenar por coluna -----
@@ -142,32 +133,6 @@ window.Telas.painelPlanos = (function () {
     }).join('')}<th class="lista-planos__menu">Ações</th></tr>`;
   }
 
-  // ----- Planejamento das Fazendas -----
-  const REGRA_CONTAGEM = 'Cada fazenda conta uma vez por safra e uma vez por safrinha. Cadastrada a safra ou a safrinha, todas as fazendas de todas as empresas passam a contar; quem ainda não tem plano nela aparece como Sem plano.';
-  function kpis(ls) {
-    const total = ls.length;
-    const conta = (sts) => ls.filter((l) => sts.includes(l.status)).length;
-    const cartoes = [
-      ['sem', 'Sem plano', conta(['sem']), Icones.documento],
-      ['construcao', 'Em construção', conta(['construcao', 'nao-iniciado']), Icones.engrenagem],
-      ['publicada', 'Publicado', conta(['publicada']), Icones.certo]
-    ];
-    return cartoes.map(([chave, rotulo, n, icone]) => {
-      const p = total ? n / total * 100 : 0;
-      return `
-        <div class="painel-kpi painel-kpi--${chave}">
-          <span class="painel-kpi__icone" aria-hidden="true">${icone}</span>
-          <div class="painel-kpi__corpo">
-            <span class="painel-kpi__rotulo">${rotulo}
-              <span class="painel-info" tabindex="0" title="${esc(REGRA_CONTAGEM)}" aria-label="Como as fazendas são contadas">${Icones.info}</span></span>
-            <strong class="painel-kpi__numero">${n} de ${total}</strong>
-            <span class="painel-kpi__barra" aria-hidden="true"><span style="width: ${p.toFixed(1)}%"></span></span>
-            <span class="painel-kpi__texto"><strong>${pct(p)}</strong> das fazendas</span>
-          </div>
-        </div>`;
-    }).join('');
-  }
-
   // ----- Planos de Safra -----
   const STATUS = {
     'nao-iniciado': ['Não iniciado', 'status--nao-iniciado'],
@@ -204,6 +169,14 @@ window.Telas.painelPlanos = (function () {
         ordem = { coluna: c, sentido: ordem && ordem.coluna === c && ordem.sentido === 'asc' ? 'desc' : 'asc' };
         atualizar(ultimo.conteudo, ultimo.filtros);
         raiz.querySelector(`[data-pn-ordenar="${c}"]`).focus();
+        return;
+      }
+      // Link do aviso sem plano: o modal já com as safras do Ano Agrícola e a Empresa e a Fazenda do filtro (só a
+      // fazenda: a empresa dela)
+      if (e.target.closest('[data-pn-criar]')) {
+        const { empresa, fazenda } = ultimo.filtros;
+        const daFazenda = fazenda && Object.keys(DADOS.fazendasPorEmpresa || {}).find((x) => DADOS.fazendasPorEmpresa[x].includes(fazenda));
+        Telas.criarPlano({ ...safrasDoAno(ultimo.filtros), empresa: empresa || daFazenda || '', fazenda: fazenda || '' });
         return;
       }
       const menuPlano = e.target.closest('[data-menu-plano]');

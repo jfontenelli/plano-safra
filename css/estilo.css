@@ -2216,9 +2216,7 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .tab-op__inserir { width: 30px; height: 30px; color: var(--texto-suave); }
 .tab-op__inserir .icone { width: 16px; height: 16px; }
 .tab-op__inserir:hover { color: var(--verde-700); }
-.tab-op__nome--vazio { color: var(--texto-fraco); font-style: italic; font-weight: 400; }
-.tab-op__dica { margin: 0; font-size: 13px; color: var(--texto-suave); }
-.tab-op__faixa th { padding: 0; background: var(--superficie-2); border-top: 1px solid var(--borda); text-align: left; font-weight: 600; }
+.tab-op__nome--vazio { color: var(--texto-fraco); font-style: italic; font-weight: 400; }.tab-op__faixa th { padding: 0; background: var(--superficie-2); border-top: 1px solid var(--borda); text-align: left; font-weight: 600; }
 .tab-op__faixa-linha { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; padding: 10px 16px; }
 .tab-op__faixa-linha > .icone, .tab-op__ico { width: 18px; height: 18px; flex-shrink: 0; color: var(--verde-700); }
 .tab-op__fase { font-size: 15px; }
@@ -2820,35 +2818,17 @@ html[data-tema="escuro"] .tab-op__caixa-marcar { border-color: #4a5b67; }
 
 /* ===== Tela 03 · Guia Painel ===== */
 .painel { display: flex; flex-direction: column; gap: 20px; }
+/* Sem plano nos filtros: aviso no lugar da tabela */
+.painel-vazio { padding: 40px 16px 48px; text-align: center; }
+.painel-vazio[hidden] { display: none; }
+.painel-vazio__titulo { margin: 0 0 6px; font-size: 16px; font-weight: 600; color: var(--texto); }
+.painel-vazio__texto { margin: 0; font-size: 14px; color: var(--texto-suave); }
+.painel-vazio__link { margin-top: 0; padding: 0; vertical-align: baseline; }
 .painel[hidden], .filtros .campo[hidden] { display: none; }
 .painel-secao { padding: 18px 20px 20px; }
 .painel-secao__titulo { display: flex; align-items: center; gap: 8px; font-size: 18px; font-weight: 700; }
 .painel-secao__subtitulo { margin: 4px 0 0; font-size: 14px; color: var(--texto-suave); }
-.painel-info { display: inline-flex; color: #1f6fd1; cursor: help; }
-.painel-info .icone { width: 17px; height: 17px; }
 
-/* Planejamento das Fazendas: três números com barra */
-.painel-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px; }
-.painel-kpi { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border: 1px solid var(--borda); border-radius: 12px; background: var(--superficie); box-shadow: var(--sombra); }
-/* Cards compactos: ícone num quadrado colorido, nome com ⓘ, número, barra e % das fazendas */
-.painel-kpi__icone { display: grid; place-items: center; flex: none; width: 40px; height: 40px; border-radius: 10px; }
-.painel-kpi__icone .icone { width: 20px; height: 20px; }
-.painel-kpi__corpo { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
-.painel-kpi__rotulo { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 500; }
-.painel-kpi__rotulo .painel-info .icone { width: 15px; height: 15px; color: var(--texto-fraco); }
-.painel-kpi__numero { font-size: 24px; font-weight: 700; line-height: 1.15; font-variant-numeric: tabular-nums; }
-.painel-kpi__barra { display: block; height: 5px; margin-top: 3px; border-radius: 4px; background: var(--superficie-3); overflow: hidden; }
-.painel-kpi__barra > span { display: block; height: 100%; border-radius: 4px; }
-.painel-kpi__texto { font-size: 12px; color: var(--texto-suave); }
-.painel-kpi--sem .painel-kpi__texto strong { color: #1f6fd1; }
-.painel-kpi--construcao .painel-kpi__texto strong { color: #d9850b; }
-.painel-kpi--publicada .painel-kpi__texto strong { color: var(--verde-600); }
-.painel-kpi--sem .painel-kpi__icone { background: var(--info-fundo); color: #1f6fd1; }
-.painel-kpi--sem .painel-kpi__barra > span { background: #1f6fd1; }
-.painel-kpi--construcao .painel-kpi__icone { background: #fdf0dc; color: #d9850b; }
-.painel-kpi--construcao .painel-kpi__barra > span { background: #ee9b1d; }
-.painel-kpi--publicada .painel-kpi__icone { background: var(--verde-100); color: var(--verde-600); }
-.painel-kpi--publicada .painel-kpi__barra > span { background: var(--verde-600); }
 
 /* Planos de Safra do Painel: barrinhas de % por grupo */
 .painel-tabela th, .painel-tabela td { padding-left: 8px; padding-right: 8px; }
@@ -2936,13 +2916,6 @@ html[data-tema="escuro"] .plano__versao .status--aprovado::before { background: 
 html[data-tema="escuro"] .vg-cabecalho { border-bottom: 0; background: transparent; }
 html[data-tema="escuro"] .vg-cabecalho__fundo { display: block; }
 html[data-tema="escuro"] .vg-cabecalho .cabecalho__titulo { font-size: 34px; }
-html[data-tema="escuro"] .painel-kpi--sem .painel-kpi__icone { background: #203A4A; color: #8DB6CE; }
-html[data-tema="escuro"] .painel-kpi--sem .painel-kpi__barra > span, html[data-tema="escuro"] .painel-kpi--sem .painel-kpi__texto strong { background-color: #8DB6CE; color: #8DB6CE; }
-html[data-tema="escuro"] .painel-kpi--construcao .painel-kpi__icone { background: #30363D; color: #B9C1C9; }
-html[data-tema="escuro"] .painel-kpi--construcao .painel-kpi__barra > span, html[data-tema="escuro"] .painel-kpi--construcao .painel-kpi__texto strong { background-color: #B9C1C9; color: #B9C1C9; }
-html[data-tema="escuro"] .painel-kpi--publicada .painel-kpi__icone { background: #176B50; color: #5FD896; }
-html[data-tema="escuro"] .painel-kpi--publicada .painel-kpi__barra > span, html[data-tema="escuro"] .painel-kpi--publicada .painel-kpi__texto strong { background-color: #5FD896; color: #5FD896; }
-html[data-tema="escuro"] .painel-kpi__texto strong { background: none !important; }
 /* Escuro: texto do verde-escuro vira verde claro (visões e filtros selecionados, guias do Resumo) */
 html[data-tema="escuro"] .filtro-talhoes--ativo, html[data-tema="escuro"] .filtro-talhoes--ativo:hover,
 html[data-tema="escuro"] .exibir .visoes__botao--ativo, html[data-tema="escuro"] .calendario__visoes .visoes__botao--ativo,

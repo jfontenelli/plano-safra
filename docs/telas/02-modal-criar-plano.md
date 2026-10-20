@@ -12,6 +12,7 @@ Identificar os novos planos: informações gerais (safra, empresa, atividade, cu
 - Título: "Criar Plano de Safra"; subtítulo: "Defina as informações gerais do plano e selecione as fazendas que farão parte da criação."; botão X para fechar.
 - **Informações gerais**, lado a lado, todas obrigatórias: Safra, Empresa, Atividade, Cultura.
   - Na lista de Safra, a última opção é "+ Criar nova safra".
+  - Aberto pelo link do aviso sem plano da Visão Geral (Tela 03): a lista de Safra traz só as safras do Ano Agrícola do filtro, e Safra, Empresa e Fazenda já vêm com o que os filtros dizem.
   - Atividade: Agricultura (já escolhida), Pecuária (Em breve), Silvicultura (Em breve).
   - Cultura: Soja e Milho (nenhuma vem escolhida).
 - **Fazendas**: um bloco por fazenda, com o título "Fazenda 1", "Fazenda 2"… e três campos:

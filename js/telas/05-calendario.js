@@ -175,9 +175,11 @@ window.Telas.calendario = (function () {
   function desenhar(ctx) {
     const { talhoes, estado, plano } = ctx;
     // Só o que já foi planejado (produto e dose, ou plantio; Colheita depois do plantio), em construção ou aprovado.
-    // Nada planejado ainda: um aviso no lugar da Tabela e do Infográfico.
-    const planejados = itens(ctx).filter((it) => (it.colheita ? !it.aguardando : it.talhoes.length > 0));
-    const lista = planejados.filter((it) => marcado(estado, 'grupo', chaveGrupo(it)));
+    // Nada planejado ainda (em nenhum talhão, sem olhar o filtro de talhão): um aviso no lugar da Tabela e do
+    // Infográfico. Com planejamento, os filtros ficam sempre à vista, mesmo quando nenhum talhão ou grupo é escolhido.
+    const foiPlanejado = (it) => (it.colheita ? !it.aguardando : it.talhoes.length > 0);
+    const planejados = itens({ ...ctx, estado: { ...estado, talhao: 'todos' } }).filter(foiPlanejado);
+    const lista = itens(ctx).filter(foiPlanejado).filter((it) => marcado(estado, 'grupo', chaveGrupo(it)));
     const vazio = `
         <div class="estrutura__aviso calendario__vazio" role="note">${Icones.info}
           <p><strong>Nenhuma operação planejada ainda.</strong> As operações planejadas aparecem aqui com datas e doses por talhão.</p>
@@ -276,6 +278,7 @@ window.Telas.calendario = (function () {
   }
 
   function infografico(ctx, lista) {
+    if (!lista.length) return '<p class="cal-piv__nada">Nenhuma operação com os filtros escolhidos</p>';
     const cols = colunas(lista);
     return `
       <div class="cal-info" role="list" aria-label="Calendário por fase da cultura">

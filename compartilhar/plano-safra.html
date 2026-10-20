@@ -2226,9 +2226,7 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .tab-op__inserir { width: 30px; height: 30px; color: var(--texto-suave); }
 .tab-op__inserir .icone { width: 16px; height: 16px; }
 .tab-op__inserir:hover { color: var(--verde-700); }
-.tab-op__nome--vazio { color: var(--texto-fraco); font-style: italic; font-weight: 400; }
-.tab-op__dica { margin: 0; font-size: 13px; color: var(--texto-suave); }
-.tab-op__faixa th { padding: 0; background: var(--superficie-2); border-top: 1px solid var(--borda); text-align: left; font-weight: 600; }
+.tab-op__nome--vazio { color: var(--texto-fraco); font-style: italic; font-weight: 400; }.tab-op__faixa th { padding: 0; background: var(--superficie-2); border-top: 1px solid var(--borda); text-align: left; font-weight: 600; }
 .tab-op__faixa-linha { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; padding: 10px 16px; }
 .tab-op__faixa-linha > .icone, .tab-op__ico { width: 18px; height: 18px; flex-shrink: 0; color: var(--verde-700); }
 .tab-op__fase { font-size: 15px; }
@@ -2830,35 +2828,17 @@ html[data-tema="escuro"] .tab-op__caixa-marcar { border-color: #4a5b67; }
 
 /* ===== Tela 03 · Guia Painel ===== */
 .painel { display: flex; flex-direction: column; gap: 20px; }
+/* Sem plano nos filtros: aviso no lugar da tabela */
+.painel-vazio { padding: 40px 16px 48px; text-align: center; }
+.painel-vazio[hidden] { display: none; }
+.painel-vazio__titulo { margin: 0 0 6px; font-size: 16px; font-weight: 600; color: var(--texto); }
+.painel-vazio__texto { margin: 0; font-size: 14px; color: var(--texto-suave); }
+.painel-vazio__link { margin-top: 0; padding: 0; vertical-align: baseline; }
 .painel[hidden], .filtros .campo[hidden] { display: none; }
 .painel-secao { padding: 18px 20px 20px; }
 .painel-secao__titulo { display: flex; align-items: center; gap: 8px; font-size: 18px; font-weight: 700; }
 .painel-secao__subtitulo { margin: 4px 0 0; font-size: 14px; color: var(--texto-suave); }
-.painel-info { display: inline-flex; color: #1f6fd1; cursor: help; }
-.painel-info .icone { width: 17px; height: 17px; }
 
-/* Planejamento das Fazendas: três números com barra */
-.painel-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px; }
-.painel-kpi { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border: 1px solid var(--borda); border-radius: 12px; background: var(--superficie); box-shadow: var(--sombra); }
-/* Cards compactos: ícone num quadrado colorido, nome com ⓘ, número, barra e % das fazendas */
-.painel-kpi__icone { display: grid; place-items: center; flex: none; width: 40px; height: 40px; border-radius: 10px; }
-.painel-kpi__icone .icone { width: 20px; height: 20px; }
-.painel-kpi__corpo { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
-.painel-kpi__rotulo { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 500; }
-.painel-kpi__rotulo .painel-info .icone { width: 15px; height: 15px; color: var(--texto-fraco); }
-.painel-kpi__numero { font-size: 24px; font-weight: 700; line-height: 1.15; font-variant-numeric: tabular-nums; }
-.painel-kpi__barra { display: block; height: 5px; margin-top: 3px; border-radius: 4px; background: var(--superficie-3); overflow: hidden; }
-.painel-kpi__barra > span { display: block; height: 100%; border-radius: 4px; }
-.painel-kpi__texto { font-size: 12px; color: var(--texto-suave); }
-.painel-kpi--sem .painel-kpi__texto strong { color: #1f6fd1; }
-.painel-kpi--construcao .painel-kpi__texto strong { color: #d9850b; }
-.painel-kpi--publicada .painel-kpi__texto strong { color: var(--verde-600); }
-.painel-kpi--sem .painel-kpi__icone { background: var(--info-fundo); color: #1f6fd1; }
-.painel-kpi--sem .painel-kpi__barra > span { background: #1f6fd1; }
-.painel-kpi--construcao .painel-kpi__icone { background: #fdf0dc; color: #d9850b; }
-.painel-kpi--construcao .painel-kpi__barra > span { background: #ee9b1d; }
-.painel-kpi--publicada .painel-kpi__icone { background: var(--verde-100); color: var(--verde-600); }
-.painel-kpi--publicada .painel-kpi__barra > span { background: var(--verde-600); }
 
 /* Planos de Safra do Painel: barrinhas de % por grupo */
 .painel-tabela th, .painel-tabela td { padding-left: 8px; padding-right: 8px; }
@@ -2946,13 +2926,6 @@ html[data-tema="escuro"] .plano__versao .status--aprovado::before { background: 
 html[data-tema="escuro"] .vg-cabecalho { border-bottom: 0; background: transparent; }
 html[data-tema="escuro"] .vg-cabecalho__fundo { display: block; }
 html[data-tema="escuro"] .vg-cabecalho .cabecalho__titulo { font-size: 34px; }
-html[data-tema="escuro"] .painel-kpi--sem .painel-kpi__icone { background: #203A4A; color: #8DB6CE; }
-html[data-tema="escuro"] .painel-kpi--sem .painel-kpi__barra > span, html[data-tema="escuro"] .painel-kpi--sem .painel-kpi__texto strong { background-color: #8DB6CE; color: #8DB6CE; }
-html[data-tema="escuro"] .painel-kpi--construcao .painel-kpi__icone { background: #30363D; color: #B9C1C9; }
-html[data-tema="escuro"] .painel-kpi--construcao .painel-kpi__barra > span, html[data-tema="escuro"] .painel-kpi--construcao .painel-kpi__texto strong { background-color: #B9C1C9; color: #B9C1C9; }
-html[data-tema="escuro"] .painel-kpi--publicada .painel-kpi__icone { background: #176B50; color: #5FD896; }
-html[data-tema="escuro"] .painel-kpi--publicada .painel-kpi__barra > span, html[data-tema="escuro"] .painel-kpi--publicada .painel-kpi__texto strong { background-color: #5FD896; color: #5FD896; }
-html[data-tema="escuro"] .painel-kpi__texto strong { background: none !important; }
 /* Escuro: texto do verde-escuro vira verde claro (visões e filtros selecionados, guias do Resumo) */
 html[data-tema="escuro"] .filtro-talhoes--ativo, html[data-tema="escuro"] .filtro-talhoes--ativo:hover,
 html[data-tema="escuro"] .exibir .visoes__botao--ativo, html[data-tema="escuro"] .calendario__visoes .visoes__botao--ativo,
@@ -4838,7 +4811,9 @@ window.Telas.abrirModalCriarPlano = function ({ aoCriar, inicial = {} }) {
   const erroCriar = form.querySelector('#cp-erro-criar');
   let safraAnterior = '';
 
-  preencherSafras(inicial.safra && DADOS.safras.includes(inicial.safra) ? inicial.safra : '');
+  // Lista de safras: as do cadastro ou, vindo da Visão Geral, só as do Ano Agrícola do filtro (inicial.safras)
+  const listaSafras = inicial.safras ? [...inicial.safras] : DADOS.safras;
+  preencherSafras(inicial.safra && listaSafras.includes(inicial.safra) ? inicial.safra : '');
   desenharFazendas();
   selectSafra.focus();
 
@@ -5002,7 +4977,7 @@ window.Telas.abrirModalCriarPlano = function ({ aoCriar, inicial = {} }) {
 
   // ----- Criar nova safra (última opção da lista de safras) -----
   function preencherSafras(selecionada = '') {
-    selectSafra.innerHTML = opcoes('Selecione', DADOS.safras, selecionada) +
+    selectSafra.innerHTML = opcoes('Selecione', listaSafras, selecionada) +
       `<option value="${NOVA_SAFRA}">+ Criar nova safra</option>`;
     safraAnterior = selecionada;
   }
@@ -5054,6 +5029,7 @@ window.Telas.abrirModalCriarPlano = function ({ aoCriar, inicial = {} }) {
       if (!nome) { input.focus(); return; }
       // Se o nome já existe, só seleciona a safra existente
       if (!DADOS.safras.includes(nome)) DADOS.safras.push(nome);
+      if (!listaSafras.includes(nome)) listaSafras.push(nome);
       preencherSafras(nome);
       janela.fechar();
       form.elements.empresa.focus();
@@ -5160,23 +5136,17 @@ window.Telas.abrirModalCriarPlano = function ({ aoCriar, inicial = {} }) {
   <script>
 /*
  * Tela 03 — Visão Geral, guia Planos de Safra (docs/telas/03-lista-planos.md)
- * Acompanha o planejamento no ano agrícola escolhido, com os mesmos filtros das outras guias:
- * Planejamento das Fazendas (Sem plano, Em construção, Publicado) e Planos de Safra (uma linha por plano, Em construção
- * ou Publicado; a fazenda sem plano só conta nos quadros).
- *
- * Quem entra na conta (uma linha por fazenda e safra):
- *  - Cada safra ou safrinha cadastrada (DADOS.cadastroSafras e as criadas no modal, em DADOS.safras), mesmo sem
- *    nenhum plano: todas as fazendas de todas as empresas (DADOS.fazendasPorEmpresa) podem ter plano nela; a
- *    fazenda sem plano aparece como "Sem plano".
- * Os planos usam a versão de trabalho (a em construção ou, sem ela, a última publicada), como a lista.
+ * Planos de Safra no ano agrícola escolhido, com os mesmos filtros das outras guias: uma linha por plano (Não
+ * iniciado, Em construção ou Publicado), na versão de trabalho (a em construção ou, sem ela, a última publicada).
+ * Sem plano nos filtros: no lugar da tabela, "Nenhum Plano de Safra cadastrado" com o link + Criar Plano Safra.
  */
 window.Telas = window.Telas || {};
 
 window.Telas.painelPlanos = (function () {
   const esc = Util.escapar;
-  const cicloDe = (p) => p.ciclo || 'Safra';
-  // Safra sem plano: pelo nome ("27/27", os dois anos iguais, é safrinha)
+  // Safra pelo nome ("27/27", os dois anos iguais, é safrinha); no plano, o ciclo informado ou o do nome
   const cicloDoNome = (safra) => { const [a, b] = String(safra).split('/'); return a === b ? 'Safrinha' : 'Safra'; };
+  const cicloDe = (p) => p.ciclo || cicloDoNome(p.safra);
 
   // Safras cadastradas e as dos planos, sem repetir
   function safras() {
@@ -5186,42 +5156,38 @@ window.Telas.painelPlanos = (function () {
   function anos() {
     return [...new Set(safras().map((s) => Util.anoAgricola(s)).filter(Boolean).map(String))].sort();
   }
-  const pct = (n) => `${Math.round(n)}%`;
   const ha = (n) => Math.round(n).toLocaleString('pt-BR');
 
   function statusDe(p) {
-    if (!p) return 'sem';
     return Versoes.aIniciar(p) ? 'nao-iniciado' : Versoes.deTrabalho(p).status;
   }
 
-  // Linhas do painel no ano agrícola (em "Todas", em cada ano agrícola), com os filtros. Fazenda sem plano passa
-  // pelos filtros de Atividade e Cultura (ainda não tem nenhuma das duas).
+  // Planos do ano agrícola (em "Todas", de todos os anos), com os filtros. Ordem padrão: status (Não iniciado,
+  // Em construção, Publicado) e, no mesmo status, Safra, Empresa, Fazenda e Cultura em ordem alfabética
   function linhas(f) {
-    const doAno = DADOS.planos.filter((p) => !f.anoAgricola || String(Util.anoAgricola(p.safra)) === f.anoAgricola);
-    const lista = doAno.map((p) => ({ plano: p, empresa: p.empresa, fazenda: p.fazenda, ciclo: cicloDe(p), safra: p.safra, cultura: p.cultura, atividade: p.atividade }));
-    // Cada safra ou safrinha cadastrada no ano agrícola: as fazendas sem plano nela entram como "Sem plano".
-    // Um plano por safra e fazenda: a fazenda já com plano nela (de qualquer empresa) não entra de novo.
-    safras().filter((s) => !f.anoAgricola || String(Util.anoAgricola(s)) === f.anoAgricola).forEach((safra) => {
-      const daSafra = doAno.filter((p) => p.safra === safra);
-      const ciclo = daSafra.length ? cicloDe(daSafra[0]) : cicloDoNome(safra);
-      Object.entries(DADOS.fazendasPorEmpresa || {}).forEach(([empresa, fazendas]) => fazendas.forEach((fazenda) => {
-        if (!daSafra.some((p) => p.fazenda === fazenda)) lista.push({ plano: null, empresa, fazenda, ciclo, safra });
-      }));
-    });
-    const ordemEmpresa = (e) => { const i = DADOS.empresas.indexOf(e); return i < 0 ? 99 : i; };
-    return lista
+    const texto = (a, b) => String(a || '').localeCompare(String(b || ''), 'pt-BR');
+    return DADOS.planos
+      .filter((p) => !f.anoAgricola || String(Util.anoAgricola(p.safra)) === f.anoAgricola)
+      .map((p) => ({ plano: p, empresa: p.empresa, fazenda: p.fazenda, ciclo: cicloDe(p), safra: p.safra, cultura: p.cultura, atividade: p.atividade }))
       .filter((l) => (!f.ciclo || l.ciclo === f.ciclo) && (!f.empresa || l.empresa === f.empresa) && (!f.fazenda || l.fazenda === f.fazenda)
-        && (!l.plano || ((!f.atividade || l.atividade === f.atividade) && (!f.cultura || l.cultura === f.cultura))))
-      .map((l) => {
-        const v = l.plano && Versoes.deTrabalho(l.plano);
-        return { ...l, status: statusDe(l.plano),
-          area: l.plano ? Util.areaCultivo(l.plano, v) : null };
-      })
-      .sort((a, b) => ordemEmpresa(a.empresa) - ordemEmpresa(b.empresa) || a.fazenda.localeCompare(b.fazenda, 'pt-BR')
-        || (a.ciclo === 'Safrinha') - (b.ciclo === 'Safrinha') || String(a.cultura || '').localeCompare(String(b.cultura || ''), 'pt-BR'));
+        && (!f.atividade || l.atividade === f.atividade) && (!f.cultura || l.cultura === f.cultura))
+      .map((l) => ({ ...l, status: statusDe(l.plano), area: Util.areaCultivo(l.plano, Versoes.deTrabalho(l.plano)) }))
+      .sort((a, b) => ORDEM_STATUS.indexOf(a.status) - ORDEM_STATUS.indexOf(b.status)
+        || texto(`${a.ciclo} ${a.safra}`, `${b.ciclo} ${b.safra}`) || texto(a.empresa, b.empresa)
+        || texto(a.fazenda, b.fazenda) || texto(a.cultura, b.cultura));
   }
 
-  // Valores que os filtros Empresa e Fazenda oferecem além dos planos (as fazendas de cada empresa)
+  // Safras do ano agrícola para o modal Criar Plano (link do aviso sem plano). Já escolhida quando o filtro Safra
+  // diz qual (Safra ou Safrinha) e só há uma dela no ano.
+  function safrasDoAno(f) {
+    if (!f.anoAgricola) return {};
+    const lista = safras().filter((s) => String(Util.anoAgricola(s)) === f.anoAgricola)
+      .sort((a, b) => (cicloDoNome(a) === 'Safrinha') - (cicloDoNome(b) === 'Safrinha') || a.localeCompare(b));
+    const doCiclo = f.ciclo ? lista.filter((s) => cicloDoNome(s) === f.ciclo) : [];
+    return { safras: lista, safra: doCiclo.length === 1 ? doCiclo[0] : '' };
+  }
+
+  // Valores que os filtros Empresa e Fazenda oferecem além dos planos (as fazendas de cada empresa, mesmo sem plano)
   function empresasEFazendas() {
     const pares = Object.entries(DADOS.fazendasPorEmpresa || {});
     return { empresas: pares.map(([e]) => e), fazendas: pares.flatMap(([, fs]) => fs) };
@@ -5231,17 +5197,19 @@ window.Telas.painelPlanos = (function () {
   function desenhar() {
     return `
       <div class="painel" data-guia-painel="painel">
-        <section class="painel-kpis" aria-label="Planejamento das Fazendas" data-pn="kpis"></section>
-
         <section class="cartao lista-planos" aria-labelledby="pn-titulo-planos">
           <div class="secao__topo lista-planos__topo">
             <h2 class="secao__titulo lista-planos__titulo" id="pn-titulo-planos">${Icones.documento} Planos de Safra</h2>
           </div>
-          <div class="tabela-rolagem">
+          <div class="tabela-rolagem" data-pn="tabela">
             <table class="tabela painel-tabela">
               <thead data-pn="cabecalho"></thead>
               <tbody data-pn="linhas"></tbody>
             </table>
+          </div>
+          <div class="painel-vazio" data-pn="vazio" hidden>
+            <p class="painel-vazio__titulo">Nenhum Plano de Safra cadastrado</p>
+            <p class="painel-vazio__texto">Clique em <button class="link-acao painel-vazio__link" type="button" data-pn-criar>+ Criar Plano Safra</button> para começar seu planejamento.</p>
           </div>
         </section>
       </div>`;
@@ -5251,13 +5219,12 @@ window.Telas.painelPlanos = (function () {
     const raiz = conteudo.querySelector('[data-guia-painel="painel"]');
     if (!raiz) return;
     ultimo = { conteudo, filtros };
-    const ls = linhas(filtros);
-    raiz.querySelector('[data-pn="kpis"]').innerHTML = kpis(ls);
+    const planos = linhas(filtros);
+    // Sem plano nos filtros: o aviso no lugar da tabela
+    raiz.querySelector('[data-pn="tabela"]').hidden = !planos.length;
+    raiz.querySelector('[data-pn="vazio"]').hidden = !!planos.length;
     raiz.querySelector('[data-pn="cabecalho"]').innerHTML = cabecalho();
-    // A tabela mostra só os planos (Em construção, incluindo Não iniciado, e Publicado); a fazenda sem plano só conta nos quadros
-    const planos = ls.filter((l) => l.plano);
-    raiz.querySelector('[data-pn="linhas"]').innerHTML = planos.length ? ordenadas(planos).map(linha).join('')
-      : '<tr><td class="tabela__vazia" colspan="7">Nenhum plano com esses filtros.</td></tr>';
+    raiz.querySelector('[data-pn="linhas"]').innerHTML = ordenadas(planos).map(linha).join('');
   }
 
   // ----- Ordenar por coluna -----
@@ -5302,32 +5269,6 @@ window.Telas.painelPlanos = (function () {
     }).join('')}<th class="lista-planos__menu">Ações</th></tr>`;
   }
 
-  // ----- Planejamento das Fazendas -----
-  const REGRA_CONTAGEM = 'Cada fazenda conta uma vez por safra e uma vez por safrinha. Cadastrada a safra ou a safrinha, todas as fazendas de todas as empresas passam a contar; quem ainda não tem plano nela aparece como Sem plano.';
-  function kpis(ls) {
-    const total = ls.length;
-    const conta = (sts) => ls.filter((l) => sts.includes(l.status)).length;
-    const cartoes = [
-      ['sem', 'Sem plano', conta(['sem']), Icones.documento],
-      ['construcao', 'Em construção', conta(['construcao', 'nao-iniciado']), Icones.engrenagem],
-      ['publicada', 'Publicado', conta(['publicada']), Icones.certo]
-    ];
-    return cartoes.map(([chave, rotulo, n, icone]) => {
-      const p = total ? n / total * 100 : 0;
-      return `
-        <div class="painel-kpi painel-kpi--${chave}">
-          <span class="painel-kpi__icone" aria-hidden="true">${icone}</span>
-          <div class="painel-kpi__corpo">
-            <span class="painel-kpi__rotulo">${rotulo}
-              <span class="painel-info" tabindex="0" title="${esc(REGRA_CONTAGEM)}" aria-label="Como as fazendas são contadas">${Icones.info}</span></span>
-            <strong class="painel-kpi__numero">${n} de ${total}</strong>
-            <span class="painel-kpi__barra" aria-hidden="true"><span style="width: ${p.toFixed(1)}%"></span></span>
-            <span class="painel-kpi__texto"><strong>${pct(p)}</strong> das fazendas</span>
-          </div>
-        </div>`;
-    }).join('');
-  }
-
   // ----- Planos de Safra -----
   const STATUS = {
     'nao-iniciado': ['Não iniciado', 'status--nao-iniciado'],
@@ -5364,6 +5305,14 @@ window.Telas.painelPlanos = (function () {
         ordem = { coluna: c, sentido: ordem && ordem.coluna === c && ordem.sentido === 'asc' ? 'desc' : 'asc' };
         atualizar(ultimo.conteudo, ultimo.filtros);
         raiz.querySelector(`[data-pn-ordenar="${c}"]`).focus();
+        return;
+      }
+      // Link do aviso sem plano: o modal já com as safras do Ano Agrícola e a Empresa e a Fazenda do filtro (só a
+      // fazenda: a empresa dela)
+      if (e.target.closest('[data-pn-criar]')) {
+        const { empresa, fazenda } = ultimo.filtros;
+        const daFazenda = fazenda && Object.keys(DADOS.fazendasPorEmpresa || {}).find((x) => DADOS.fazendasPorEmpresa[x].includes(fazenda));
+        Telas.criarPlano({ ...safrasDoAno(ultimo.filtros), empresa: empresa || daFazenda || '', fazenda: fazenda || '' });
         return;
       }
       const menuPlano = e.target.closest('[data-menu-plano]');
@@ -5944,9 +5893,11 @@ window.Telas.calendario = (function () {
   function desenhar(ctx) {
     const { talhoes, estado, plano } = ctx;
     // Só o que já foi planejado (produto e dose, ou plantio; Colheita depois do plantio), em construção ou aprovado.
-    // Nada planejado ainda: um aviso no lugar da Tabela e do Infográfico.
-    const planejados = itens(ctx).filter((it) => (it.colheita ? !it.aguardando : it.talhoes.length > 0));
-    const lista = planejados.filter((it) => marcado(estado, 'grupo', chaveGrupo(it)));
+    // Nada planejado ainda (em nenhum talhão, sem olhar o filtro de talhão): um aviso no lugar da Tabela e do
+    // Infográfico. Com planejamento, os filtros ficam sempre à vista, mesmo quando nenhum talhão ou grupo é escolhido.
+    const foiPlanejado = (it) => (it.colheita ? !it.aguardando : it.talhoes.length > 0);
+    const planejados = itens({ ...ctx, estado: { ...estado, talhao: 'todos' } }).filter(foiPlanejado);
+    const lista = itens(ctx).filter(foiPlanejado).filter((it) => marcado(estado, 'grupo', chaveGrupo(it)));
     const vazio = `
         <div class="estrutura__aviso calendario__vazio" role="note">${Icones.info}
           <p><strong>Nenhuma operação planejada ainda.</strong> As operações planejadas aparecem aqui com datas e doses por talhão.</p>
@@ -6045,6 +5996,7 @@ window.Telas.calendario = (function () {
   }
 
   function infografico(ctx, lista) {
+    if (!lista.length) return '<p class="cal-piv__nada">Nenhuma operação com os filtros escolhidos</p>';
     const cols = colunas(lista);
     return `
       <div class="cal-info" role="list" aria-label="Calendário por fase da cultura">
@@ -6702,7 +6654,8 @@ window.Telas.calendarioAgricola = (function () {
   const fazendasAbertas = new Set();
 
   // Safra/Safrinha do plano: ainda não é escolhida ao criar o plano (DECISOES 4.2: a detalhar); por enquanto, Safra
-  const cicloDe = (p) => p.ciclo || 'Safra';
+  // Sem ciclo informado (plano criado no modal), pelo nome da safra ("27/27", os dois anos iguais, é safrinha)
+  const cicloDe = (p) => p.ciclo || (String(p.safra).split('/')[0] === String(p.safra).split('/')[1] ? 'Safrinha' : 'Safra');
   const valorDe = (p, campo) => (campo === 'anoAgricola' ? String(Util.anoAgricola(p.safra)) : p[campo]);
   function presentes(campo, cadastro) {
     const naLista = new Set(DADOS.planos.map((p) => valorDe(p, campo)));
@@ -7236,7 +7189,8 @@ window.Telas.orcamento = (function () {
   // Parâmetros de cada Ano Agrícola: { ptax, linhas: [{ cultura, moeda, preco, produtividade }] }
   const parametros = {};
 
-  const cicloDe = (p) => p.ciclo || 'Safra';
+  // Sem ciclo informado (plano criado no modal), pelo nome da safra ("27/27", os dois anos iguais, é safrinha)
+  const cicloDe = (p) => p.ciclo || (String(p.safra).split('/')[0] === String(p.safra).split('/')[1] ? 'Safrinha' : 'Safra');
   // Só planos publicados: o não iniciado (só a 0.1, vazia) fica fora, mesmo na área e na receita
   const publicados = () => DADOS.planos.filter((p) => Versoes.publicadaComPlanejamento(p));
   // Ano Agrícola: uma escolha só (os parâmetros são do ano). Os outros: várias escolhas (vazio = todos)
@@ -7965,7 +7919,8 @@ window.Telas.operacoesPlano = (function () {
   function desenhar(ctx) {
     const { plano } = ctx;
     // Filtro por grupo de operação (barra acima da tabela): '' = Todos. Grupo que sumiu do plano volta a Todos.
-    const comOperacao = plano.grupos.filter((g) => g.operacoes.length);
+    // Todos os grupos do plano, mesmo o recém-criado ainda sem operação; "Sem grupo" só quando tem operação.
+    const comOperacao = plano.grupos.filter((g) => !semGrupo(g) || g.operacoes.length);
     if (ctx.estado.filtroGrupo && !comOperacao.some((g) => g.id === ctx.estado.filtroGrupo)) ctx.estado.filtroGrupo = '';
     const filtro = ctx.estado.filtroGrupo || '';
     // Uma lista só: pela fase (pré-plantio, plantio, manejo, colheita) e, dentro dela, pelo DAP
@@ -7982,7 +7937,7 @@ window.Telas.operacoesPlano = (function () {
       <section class="estrutura">
         ${ler || ctx.estado.avisoFechado ? '' : `
           <div class="estrutura__aviso" role="note">${Icones.info}
-            <p><strong>Revise as operações cadastradas.</strong> Cada operação vira uma Ordem de Serviço (OS) a partir da versão publicada. Se estiver tudo certo, siga para o planejamento.</p>
+            <p><strong>Revise as operações cadastradas.</strong> Se estiver tudo certo, siga para o planejamento.</p>
             <button class="botao-icone estrutura__fechar" type="button" data-acao="est-fechar-aviso" aria-label="Fechar o aviso" title="Fechar">${Icones.fechar}</button>
           </div>`}
         <div class="filtro-grupos" role="group" aria-label="Filtrar por grupo de operação">
@@ -8011,11 +7966,10 @@ window.Telas.operacoesPlano = (function () {
                         aria-label="Excluir ${plural(marcadas.size, 'operação marcada', 'operações marcadas')}">${Icones.lixeira}</button>`
                 : '<span class="so-leitor">Ações</span>'}</th>`}
             </tr></thead>
-            <tbody>${linhas.map(({ g, op, fase }) => linha(g, op, fase, ctx)).join('')}</tbody>
+            <tbody>${linhas.length ? linhas.map(({ g, op, fase }) => linha(g, op, fase, ctx)).join('')
+              : `<tr><td class="tabela__vazia" colspan="${ler ? 5 : 7}">Nenhuma operação neste grupo. Escolha o grupo na lista de cada operação.</td></tr>`}</tbody>
           </table>
-        </div>
-        ${ler ? '' : '<p class="tab-op__dica">+ no fim da linha: insere uma linha logo abaixo. Botão direito numa linha (ou ⋯): Inserir · Excluir · Limpar conteúdo. Marque as caixas para excluir várias de uma vez (lixeira no título da tabela).</p>'}
-      </section>`;
+        </div>      </section>`;
   }
 
   // Ordem da tabela: fase e DAP. A linha criada pelo "+" (ou Inserir) fica logo abaixo da linha em que se clicou,
@@ -11427,16 +11381,19 @@ window.Telas.planoOperacoes = (function () {
     nova.area = sobra > 0 ? sobra : null;
   }
 
-  // Inserir variedade no talhão (botão direito na linha): linha nova logo abaixo, com a área pela regra acima
+  // Inserir variedade no talhão (botão direito na linha): linha nova logo abaixo, com a área pela regra acima.
+  // Na tabela, só redesenha (nenhum campo fica aberto); a pessoa clica na célula que quiser preencher.
   function adicionarVariedade(op, talhao, onde, depois = null) {
     const ls = linhasDe(op, talhao);
-    // Talhão sem plantio: a linha nova é a primeira (o talhão inteiro)
-    const vi = !ls.length ? 0 : depois === null ? ls.length : Math.min(ls.length, depois + 1);
+    // Talhão sem plantio: a linha vazia que já aparece na tabela vira a primeira, e a nova entra abaixo dela
+    // (um Inserir já mostra duas linhas, com a área dividida)
+    if (!ls.length) ls.push({ ...novaLinhaPlantio(op, talhao, ls), novo: true });
+    const vi = depois === null ? ls.length : Math.min(ls.length, depois + 1);
     ls.splice(vi, 0, { ...novaLinhaPlantio(op, talhao, ls), novo: true });
     distribuirArea(ls, vi, areaTalhaoDe(talhao));
     op.plantio[talhao] = ls;
     alterou();
-    desenharMantendoFoco(onde === 'pt' ? `#pt-variedade-${vi}` : `[data-variedade="tb"][data-talhao="${CSS.escape(talhao)}"][data-var="${vi}"]`);
+    desenharTudo();
   }
 
   // Limpar conteúdo da linha: variedade, data e população em branco (a área fica); com Desfazer
@@ -12088,7 +12045,8 @@ window.Telas.planoOperacoes = (function () {
         ed.linhas.push(linhaEmBranco(op));
         distribuirArea(ed.linhas, ed.linhas.length - 1, areaTalhaoDe(ed.talhao));
         ed.alterado = true;
-        desenharMantendoFoco(`#pt-variedade-${ed.linhas.length - 1}`); break;
+        // Como no Inserir da tabela: nenhum campo da linha nova fica aberto (o foco fica no botão)
+        desenharMantendoFoco('[data-acao="pt-adicionar-variedade"]'); break;
       }
       case 'pt-remover-variedade': {
         const ed = ui.painelEdicao;

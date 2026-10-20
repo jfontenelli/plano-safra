@@ -61,7 +61,9 @@ window.Telas.abrirModalCriarPlano = function ({ aoCriar, inicial = {} }) {
   const erroCriar = form.querySelector('#cp-erro-criar');
   let safraAnterior = '';
 
-  preencherSafras(inicial.safra && DADOS.safras.includes(inicial.safra) ? inicial.safra : '');
+  // Lista de safras: as do cadastro ou, vindo da Visão Geral, só as do Ano Agrícola do filtro (inicial.safras)
+  const listaSafras = inicial.safras ? [...inicial.safras] : DADOS.safras;
+  preencherSafras(inicial.safra && listaSafras.includes(inicial.safra) ? inicial.safra : '');
   desenharFazendas();
   selectSafra.focus();
 
@@ -225,7 +227,7 @@ window.Telas.abrirModalCriarPlano = function ({ aoCriar, inicial = {} }) {
 
   // ----- Criar nova safra (última opção da lista de safras) -----
   function preencherSafras(selecionada = '') {
-    selectSafra.innerHTML = opcoes('Selecione', DADOS.safras, selecionada) +
+    selectSafra.innerHTML = opcoes('Selecione', listaSafras, selecionada) +
       `<option value="${NOVA_SAFRA}">+ Criar nova safra</option>`;
     safraAnterior = selecionada;
   }
@@ -277,6 +279,7 @@ window.Telas.abrirModalCriarPlano = function ({ aoCriar, inicial = {} }) {
       if (!nome) { input.focus(); return; }
       // Se o nome já existe, só seleciona a safra existente
       if (!DADOS.safras.includes(nome)) DADOS.safras.push(nome);
+      if (!listaSafras.includes(nome)) listaSafras.push(nome);
       preencherSafras(nome);
       janela.fechar();
       form.elements.empresa.focus();

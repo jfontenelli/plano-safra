@@ -44,7 +44,8 @@ window.Telas.operacoesPlano = (function () {
   function desenhar(ctx) {
     const { plano } = ctx;
     // Filtro por grupo de operação (barra acima da tabela): '' = Todos. Grupo que sumiu do plano volta a Todos.
-    const comOperacao = plano.grupos.filter((g) => g.operacoes.length);
+    // Todos os grupos do plano, mesmo o recém-criado ainda sem operação; "Sem grupo" só quando tem operação.
+    const comOperacao = plano.grupos.filter((g) => !semGrupo(g) || g.operacoes.length);
     if (ctx.estado.filtroGrupo && !comOperacao.some((g) => g.id === ctx.estado.filtroGrupo)) ctx.estado.filtroGrupo = '';
     const filtro = ctx.estado.filtroGrupo || '';
     // Uma lista só: pela fase (pré-plantio, plantio, manejo, colheita) e, dentro dela, pelo DAP
@@ -61,7 +62,7 @@ window.Telas.operacoesPlano = (function () {
       <section class="estrutura">
         ${ler || ctx.estado.avisoFechado ? '' : `
           <div class="estrutura__aviso" role="note">${Icones.info}
-            <p><strong>Revise as operações cadastradas.</strong> Cada operação vira uma Ordem de Serviço (OS) a partir da versão publicada. Se estiver tudo certo, siga para o planejamento.</p>
+            <p><strong>Revise as operações cadastradas.</strong> Se estiver tudo certo, siga para o planejamento.</p>
             <button class="botao-icone estrutura__fechar" type="button" data-acao="est-fechar-aviso" aria-label="Fechar o aviso" title="Fechar">${Icones.fechar}</button>
           </div>`}
         <div class="filtro-grupos" role="group" aria-label="Filtrar por grupo de operação">
@@ -90,11 +91,10 @@ window.Telas.operacoesPlano = (function () {
                         aria-label="Excluir ${plural(marcadas.size, 'operação marcada', 'operações marcadas')}">${Icones.lixeira}</button>`
                 : '<span class="so-leitor">Ações</span>'}</th>`}
             </tr></thead>
-            <tbody>${linhas.map(({ g, op, fase }) => linha(g, op, fase, ctx)).join('')}</tbody>
+            <tbody>${linhas.length ? linhas.map(({ g, op, fase }) => linha(g, op, fase, ctx)).join('')
+              : `<tr><td class="tabela__vazia" colspan="${ler ? 5 : 7}">Nenhuma operação neste grupo. Escolha o grupo na lista de cada operação.</td></tr>`}</tbody>
           </table>
-        </div>
-        ${ler ? '' : '<p class="tab-op__dica">+ no fim da linha: insere uma linha logo abaixo. Botão direito numa linha (ou ⋯): Inserir · Excluir · Limpar conteúdo. Marque as caixas para excluir várias de uma vez (lixeira no título da tabela).</p>'}
-      </section>`;
+        </div>      </section>`;
   }
 
   // Ordem da tabela: fase e DAP. A linha criada pelo "+" (ou Inserir) fica logo abaixo da linha em que se clicou,

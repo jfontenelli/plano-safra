@@ -2634,16 +2634,19 @@ window.Telas.planoOperacoes = (function () {
     nova.area = sobra > 0 ? sobra : null;
   }
 
-  // Inserir variedade no talhão (botão direito na linha): linha nova logo abaixo, com a área pela regra acima
+  // Inserir variedade no talhão (botão direito na linha): linha nova logo abaixo, com a área pela regra acima.
+  // Na tabela, só redesenha (nenhum campo fica aberto); a pessoa clica na célula que quiser preencher.
   function adicionarVariedade(op, talhao, onde, depois = null) {
     const ls = linhasDe(op, talhao);
-    // Talhão sem plantio: a linha nova é a primeira (o talhão inteiro)
-    const vi = !ls.length ? 0 : depois === null ? ls.length : Math.min(ls.length, depois + 1);
+    // Talhão sem plantio: a linha vazia que já aparece na tabela vira a primeira, e a nova entra abaixo dela
+    // (um Inserir já mostra duas linhas, com a área dividida)
+    if (!ls.length) ls.push({ ...novaLinhaPlantio(op, talhao, ls), novo: true });
+    const vi = depois === null ? ls.length : Math.min(ls.length, depois + 1);
     ls.splice(vi, 0, { ...novaLinhaPlantio(op, talhao, ls), novo: true });
     distribuirArea(ls, vi, areaTalhaoDe(talhao));
     op.plantio[talhao] = ls;
     alterou();
-    desenharMantendoFoco(onde === 'pt' ? `#pt-variedade-${vi}` : `[data-variedade="tb"][data-talhao="${CSS.escape(talhao)}"][data-var="${vi}"]`);
+    desenharTudo();
   }
 
   // Limpar conteúdo da linha: variedade, data e população em branco (a área fica); com Desfazer
@@ -3295,7 +3298,8 @@ window.Telas.planoOperacoes = (function () {
         ed.linhas.push(linhaEmBranco(op));
         distribuirArea(ed.linhas, ed.linhas.length - 1, areaTalhaoDe(ed.talhao));
         ed.alterado = true;
-        desenharMantendoFoco(`#pt-variedade-${ed.linhas.length - 1}`); break;
+        // Como no Inserir da tabela: nenhum campo da linha nova fica aberto (o foco fica no botão)
+        desenharMantendoFoco('[data-acao="pt-adicionar-variedade"]'); break;
       }
       case 'pt-remover-variedade': {
         const ed = ui.painelEdicao;

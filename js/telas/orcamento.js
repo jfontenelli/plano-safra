@@ -31,7 +31,8 @@ window.Telas.orcamento = (function () {
   // Parâmetros de cada Ano Agrícola: { ptax, linhas: [{ cultura, moeda, preco, produtividade }] }
   const parametros = {};
 
-  const cicloDe = (p) => p.ciclo || 'Safra';
+  // Sem ciclo informado (plano criado no modal), pelo nome da safra ("27/27", os dois anos iguais, é safrinha)
+  const cicloDe = (p) => p.ciclo || (String(p.safra).split('/')[0] === String(p.safra).split('/')[1] ? 'Safrinha' : 'Safra');
   // Só planos publicados: o não iniciado (só a 0.1, vazia) fica fora, mesmo na área e na receita
   const publicados = () => DADOS.planos.filter((p) => Versoes.publicadaComPlanejamento(p));
   // Ano Agrícola: uma escolha só (os parâmetros são do ano). Os outros: várias escolhas (vazio = todos)
