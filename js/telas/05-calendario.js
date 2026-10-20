@@ -1,7 +1,7 @@
 /*
  * Tela 05 — Calendário Agrícola (docs/telas/05-calendario-agricola.md)
  * Etapa do plano que junta todos os grupos (Plantio, Defensivo, Fertilidade…) em ordem de DAP.
- * Na aba Resumo do plano. Duas visões: Programação (uma linha por operação, uma coluna por talhão) e
+ * Na aba Programação do plano (antes Resumo). Duas visões: Tabela (antes Programação; uma linha por operação, uma coluna por talhão) e
  * Ciclo Produtivo (uma coluna por fase da cultura). Filtros por grupo e talhão.
  * Desenhada dentro da Tela 04 (mesmo cabeçalho do plano); a Tela 04 repassa os eventos para cá.
  * A grade do Calendário (mês, semana ou dia) saiu do Resumo e foi para o menu Ordens de Serviço (Telas.osCalendario),
@@ -184,14 +184,14 @@ window.Telas.calendario = (function () {
         <div class="estrutura__aviso calendario__vazio" role="note">${Icones.info}
           <p><strong>Nenhuma operação planejada ainda.</strong> As operações planejadas aparecem aqui com datas e doses por talhão.</p>
         </div>`;
-    // O Resumo ocupa a área logo abaixo das abas. Em cima, as visões em guias (Programação · Ciclo Produtivo);
+    // A Programação ocupa a área logo abaixo das abas. Em cima, as visões em guias (Tabela · Ciclo Produtivo);
     // embaixo, os filtros de grupo e talhão.
     if (estado.visao !== 'infografico') estado.visao = 'tabela';
     return `
       <section class="calendario">
         <div class="calendario__barra">
-          <div class="resumo-guias" role="tablist" aria-label="Visão do Resumo">
-            ${[['tabela', Icones.lista, 'Programação'], ['infografico', Icones.grafico, 'Ciclo Produtivo']].map(([v, icone, rotulo]) => `
+          <div class="resumo-guias" role="tablist" aria-label="Visão da Programação">
+            ${[['tabela', Icones.lista, 'Tabela'], ['infografico', Icones.grafico, 'Ciclo Produtivo']].map(([v, icone, rotulo]) => `
               <button class="resumo-guias__guia ${estado.visao === v ? 'resumo-guias__guia--ativa' : ''}" type="button" role="tab" data-acao="cal-visao"
                       data-visao="${v}" aria-selected="${estado.visao === v}">${icone}${rotulo}</button>`).join('')}
           </div>

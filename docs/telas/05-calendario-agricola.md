@@ -13,12 +13,12 @@ Ver **todas as operações do plano juntas**, de todos os grupos (Plantio, Defen
 
 ## 2. Lugar na jornada
 
-- Etapa **Calendário Agrícola** do plano, na aba **Resumo** do cabeçalho (Operações · Planejamento · Resumo). Mesmo cabeçalho do plano da Tela 04 (com o botão Exportar).
+- Etapa **Calendário Agrícola** do plano, na aba **Programação** do cabeçalho (Operações · Planejamento · Programação; antes Resumo, renomeada em 20/10/2026). Mesmo cabeçalho do plano da Tela 04 (com o botão Exportar).
 - Os dados vêm do que foi planejado nas guias da etapa Planejamento. O calendário cresce durante o planejamento.
 
 ## 3. Barra de cima
 
-- **Duas visões em guias**, à esquerda, numa linha própria com uma linha embaixo: **Programação** (antes Tabela) · **Ciclo Produtivo** (antes Infográfico) (ícone e nome; a ativa em verde-claro com traço verde embaixo). **Abre na Programação.**
+- **Duas visões em guias**, à esquerda, numa linha própria com uma linha embaixo: **Tabela** (antes Programação; 20/10/2026) · **Ciclo Produtivo** (antes Infográfico) (ícone e nome; a ativa em verde-claro com traço verde embaixo). **Abre na Programação.**
 - Embaixo, os filtros **Grupo de operação** e **Talhão**.
 - **Uma superfície só**: o Resumo tem fundo branco e as partes se integram à tela (sem caixas soltas sobre fundo cinza).
 - Sem "Visão consolidada" e sem "Agenda de atividades" (estão na imagem, mas foram retirados).

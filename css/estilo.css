@@ -1678,7 +1678,6 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
 .tabela-variedade tr.linha--clicavel:hover > * { background: var(--superficie-2); }
 .tabela-variedade tr.linha--clicavel.linha--aberta:hover > * { background: var(--verde-100); }
 .tabela-variedade tr.linha--aberta > :first-child { box-shadow: inset 3px 0 0 var(--verde-700); }
-.tabela__ciclo { color: var(--texto-suave); }
 .texto-alerta { color: var(--aviso-texto); font-weight: 600; }
 .aviso-janela { display: inline-flex; vertical-align: -2px; color: var(--aviso-texto); }
 .aviso-janela .icone { width: 14px; height: 14px; }
@@ -1701,11 +1700,20 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
 .link-historico--aberto { background: var(--verde-100) !important; }
 
 /* Painel lateral do talhão */
-.painel-talhao { width: 580px; flex-shrink: 0; min-height: 0; display: flex; flex-direction: column; padding: 12px 16px; }
+.painel-talhao { width: 620px; flex-shrink: 0; min-height: 0; display: flex; flex-direction: column; padding: 12px 16px; }
 /* Expandido: painel largo e gráficos maiores (a tabela fica mais estreita) */
-.painel-talhao--expandido { width: min(760px, 58%); }
+.painel-talhao--expandido { width: auto; flex: 1; min-width: 0; }
+.semente-layout--painel-cheio > .op-painel { display: none; }
+/* Expandido: Histórico à esquerda e Variedades à direita, lado a lado */
+.painel-talhao--expandido .painel-talhao__rolagem { display: grid; grid-template-columns: minmax(300px, 2fr) minmax(0, 3fr); gap: 0 24px; align-content: stretch; }
+.painel-talhao--expandido .pt-secao { border-top: 0; }
+.painel-talhao--expandido .pt-secao--historico { padding-right: 24px; border-right: 1px solid var(--borda); }
+.painel-talhao--expandido .pt-secao--historico { display: flex; flex-direction: column; }
+.painel-talhao--expandido .pt-secao--historico .grafico-historico { flex: 1; min-height: 260px; }
 .painel-talhao__topo { display: flex; align-items: center; gap: 6px; padding-bottom: 10px; border-bottom: 1px solid var(--borda); }
-.painel-talhao__titulo { flex: 1; margin: 0; font-size: 20px; font-weight: 700; }
+.painel-talhao__nome { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.painel-talhao__titulo { margin: 0; font-size: 20px; font-weight: 700; }
+.painel-talhao__posicao { font-size: 13px; color: var(--texto-suave); }
 /* "✓ Salvo" no topo do painel, logo depois de gravar um campo; some sozinho */
 .painel-talhao__salvo { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 999px; background: var(--verde-100);
   font-size: 13px; font-weight: 600; color: var(--verde-700); white-space: nowrap; transition: opacity .4s; }
@@ -2979,50 +2987,158 @@ html[data-tema="escuro"] .cag__faixa { background: color-mix(in srgb, var(--c) 8
 html[data-tema="escuro"] .cag__cor:not(.cag__cor--hoje) { background: var(--c); }
 html[data-tema="escuro"] .cag-etiqueta { padding: 7px 16px; border: 1px solid #176B50; background: rgba(23, 107, 80, .25); font-size: 14px; color: var(--texto); }
 
-/* Painel do talhão (Plantio): histórico recolhível, variedades planejadas com ✎, rodapé com Salvar */
+/* Painel do talhão (Plantio): histórico recolhível; variedades com a germinação do talhão, a tabela editável,
+   Cancelar e Salvar logo abaixo e as setas entre talhões. Expandido: histórico à esquerda, variedades à direita */
 .pt-secao { padding: 12px 0; border-top: 1px solid var(--borda); }
-.pt-secao__cab { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 0; border: 0; background: none;
-  font: inherit; font-size: 15px; font-weight: 700; color: var(--texto); cursor: pointer; text-align: left; }
-.pt-secao__seta { display: inline-flex; transition: transform .15s; }
+.pt-secao:first-child { border-top: 0; }
+.pt-secao__linha { display: flex; align-items: center; gap: 6px; }
+.pt-secao__seta { margin-left: auto; transition: transform .15s; }
 .pt-secao__seta .icone { width: 18px; height: 18px; }
 .pt-secao__seta--aberta { transform: rotate(180deg); }
 .pt-secao .grafico-historico { margin-top: 10px; }
-.pt-variedades__cab { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.pt-dica { display: inline-flex; color: var(--texto-suave); cursor: help; }
+.pt-dica .icone { width: 15px; height: 15px; }
+.pt-variedades__cab { display: flex; align-items: center; gap: 6px; }
 .pt-variedades__titulo { margin: 0; font-size: 15px; font-weight: 700; }
-.pt-variedades__total { font-size: 14px; color: var(--texto-suave); }
-.pt-barra { height: 8px; margin: 10px 0 6px; border-radius: 999px; background: var(--superficie-3); overflow: hidden; }
-.pt-barra > span { display: block; height: 100%; border-radius: 999px; background: var(--verde-700); }
+.pt-variedades__total { margin-left: auto; font-size: 13px; color: var(--texto-suave); white-space: nowrap; }
+.pt-variedades__total strong { font-size: 15px; color: var(--texto); }
+.pt-barra-linha { display: flex; align-items: center; gap: 8px; margin: 10px 0 6px; }
+.pt-barra { flex: 1; height: 8px; border-radius: 999px; background: var(--superficie-3); overflow: hidden; }
+.pt-barra > span { display: block; height: 100%; border-radius: 999px; background: var(--cor-sementes); }
 .pt-barra--passou > span { background: var(--erro); }
-.pt-variedades__disp { margin: 0 0 10px; font-size: 13px; color: var(--texto-suave); }
+.pt-barra__pct { font-size: 12px; color: var(--texto-suave); font-variant-numeric: tabular-nums; }
+.pt-variedades__disp { margin: 0 0 6px; font-size: 13px; color: var(--texto-suave); }
 .pt-variedades__disp--erro { color: var(--erro); }
-.pt-var { display: flex; flex-direction: column; gap: 6px; }
-.pt-var { gap: 0; border: 1px solid var(--borda); border-radius: var(--raio); overflow: clip; }
+/* Germinação padrão do talhão (um valor para todas as variedades): faixa verde-clara com ícone, campo com "%" */
+.pt-germ { display: flex; align-items: center; gap: 12px; margin: 0 0 12px; padding: 10px 14px; border: 1px solid #dcebe2; border-radius: var(--raio); background: #f3f8f5; }
+.pt-germ--erro { border-color: var(--erro); }
+.pt-germ__icone { display: grid; place-items: center; flex: none; width: 34px; height: 34px; border-radius: 8px; background: var(--verde-100); color: var(--verde-700); }
+.pt-germ__icone .icone { width: 18px; height: 18px; }
+.pt-germ__rotulo { font-size: 14px; font-weight: 700; white-space: nowrap; }
+.pt-germ__entrada { display: inline-flex; flex: none; border: 1px solid var(--borda-forte); border-radius: 8px; background: var(--superficie); overflow: hidden; }
+.pt-germ__entrada:focus-within { border-color: var(--verde-600); box-shadow: 0 0 0 2px var(--verde-100); }
+.pt-germ--erro .pt-germ__entrada { border-color: var(--erro); }
+.pt-germ__campo { width: 64px; height: 34px; padding: 0 10px; border: 0; background: none; font: inherit; font-size: 14px; color: var(--texto); outline: none; }
+.pt-germ__unidade { display: grid; place-items: center; width: 34px; border-left: 1px solid var(--borda); background: var(--superficie-2); font-size: 13px; color: var(--texto-suave); }
+.pt-germ__valor { font-size: 15px; }
+.pt-germ__texto { flex: 1; font-size: 13px; color: var(--texto-suave); }
+.pt-germ__erro { margin: -6px 0 10px; }
+/* Variedades do talhão (sem caixa em volta, uma superfície só): título e total; barra; tabela com cabeçalho
+   verde-claro; "+ Adicionar variedade" sempre embaixo da tabela */
+.pt-quadro { display: flex; flex-direction: column; }
+.pt-quadro__cab { display: flex; align-items: baseline; gap: 10px; }
+.pt-quadro__cab .pt-variedades__total { margin-left: auto; }
+.pt-var { display: flex; flex-direction: column; gap: 0; }
 /* Títulos da tabela de variedades presos no topo ao rolar o painel */
 .pt-var__cab { position: sticky; top: -1px; z-index: 2; }
-.pt-var__cab, .pt-var__linha { display: grid; grid-template-columns: minmax(150px, 2.3fr) 0.7fr 1.2fr 0.8fr 0.6fr 28px; gap: 6px; align-items: center; }
-.pt-var__cab { padding: 8px 10px; background: var(--superficie-2); font-size: 12px; font-weight: 600; color: var(--texto-suave); }
-.pt-var__linha { padding: 6px 10px; border-top: 1px solid var(--borda); font-size: 14px; font-variant-numeric: tabular-nums; }
+.pt-var__cab, .pt-var__linha { display: grid; grid-template-columns: minmax(150px, 2.2fr) 0.7fr 1.2fr 0.8fr 40px; gap: 6px; align-items: center; }
+.pt-var--largo .pt-var__cab, .pt-var--largo .pt-var__linha { grid-template-columns: minmax(170px, 2fr) 0.6fr minmax(132px, 1.3fr) minmax(96px, 1fr) 0.8fr 40px; }
+.pt-var__cab { padding: 9px 10px; border-radius: 8px; background: #eef5f0; font-size: 12px; font-weight: 600; color: var(--texto-suave); align-items: end; }
+.pt-var__titulo { white-space: nowrap; }
+.pt-var__acoes-titulo { text-align: center; }
+.pt-var__linha { padding: 6px 10px; border-bottom: 1px solid var(--borda); font-size: 14px; font-variant-numeric: tabular-nums; }
+.pt-var__linha:last-child { border-bottom: 0; }
 .pt-var__linha--erro { background: var(--erro-fundo); }
 .pt-var__linha .celula { width: 100%; min-width: 0; }
+.pt-var__linha--edicao .celula:not(.celula--erro) { border-color: var(--borda-forte); background: var(--superficie); }
 .pt-var__sel { padding-right: 18px; text-overflow: ellipsis; }
 .pt-var__data { display: flex; align-items: center; gap: 4px; }
-.pt-var__germ { color: var(--texto-suave); text-align: right; padding-right: 4px; }
+.pt-var__campo-data { position: relative; flex: 1; min-width: 0; display: flex; align-items: center; }
+.pt-var__campo-data .celula { padding-right: 30px; }
+.pt-var__calendario { position: absolute; right: 2px; width: 28px; height: 28px; color: var(--texto-suave); }
+.pt-var__calendario:hover { color: var(--verde-700); }
+.pt-var__calendario .icone { width: 16px; height: 16px; }
+.pt-var__calc { display: flex; align-items: center; height: 34px; padding: 0 10px; border-radius: 6px; background: var(--superficie-2); color: var(--texto-suave); white-space: nowrap; }
+.pt-var__linha--edicao .celula { height: 34px; }
+.pt-var__linha--edicao .celula--numero { text-align: right; }
+.pt-var__nome small { font-size: 12px; color: var(--texto-suave); }
 .pt-var__extra { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 6px 10px 8px; background: var(--superficie-2); }
 .pt-var__extra .campo__rotulo { margin: 0; }
 .pt-var__ciclo { width: 90px; height: 32px; }
 .pt-var__erro { margin: 0; padding: 4px 10px 8px; background: var(--erro-fundo); }
 .pt-var__nome { display: flex; flex-direction: column; min-width: 0; }
 .pt-var__nome strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.pt-var__nome small { font-size: 12px; color: var(--texto-suave); }
 .pt-var__vazio { margin: 0; padding: 10px; font-size: 14px; color: var(--texto-suave); }
-.pt-var__edicao { display: flex; flex-direction: column; gap: 10px; padding: 12px; border: 1px solid var(--verde-600); border-radius: var(--raio); background: var(--superficie); }
-.pt-var__edicao .campo { margin: 0; }
-.pt-var__campos { display: grid; grid-template-columns: 0.8fr 1.3fr 0.9fr; gap: 8px; align-items: start; }
-.pt-var__acoes { display: flex; align-items: center; justify-content: space-between; }
 .link-acao--perigo { display: inline-flex; align-items: center; gap: 4px; color: var(--erro); }
 .link-acao--perigo .icone { width: 15px; height: 15px; }
-.pt-var__adicionar { display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; margin-top: 10px; }
+.pt-var__adicionar { display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; height: 38px; min-height: 38px; margin-top: 8px;
+  border: 1px dashed var(--borda-forte); border-radius: 8px; background: var(--superficie); color: var(--verde-700); font-weight: 600; }
+.pt-var__adicionar:hover { border-color: var(--verde-600); background: var(--verde-100); }
 .pt-var__adicionar .icone { width: 16px; height: 16px; }
-.painel-talhao__rodape { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-shrink: 0;
-  margin: 0 -16px -12px; padding: 12px 16px; border-top: 1px solid var(--borda); font-size: 14px; color: var(--texto-suave); }
-.painel-talhao__botoes { display: inline-flex; gap: 8px; }
+.painel-talhao__botoes { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; }
+.painel-talhao__navegar { display: flex; align-items: center; justify-content: flex-end; gap: 10px; margin-top: 12px; padding-top: 10px;
+  border-top: 1px solid var(--borda); font-size: 13px; color: var(--texto-suave); }
+/* Painel recolhido (ao lado da tabela): compacto, para caber até as setas; o expandido tem mais espaço */
+.painel-talhao:not(.painel-talhao--expandido) .painel-talhao__topo { padding-bottom: 6px; }
+.painel-talhao:not(.painel-talhao--expandido) .painel-talhao__titulo { font-size: 18px; }
+.painel-talhao:not(.painel-talhao--expandido) .painel-talhao__rolagem { gap: 0; padding-top: 4px; }
+.painel-talhao:not(.painel-talhao--expandido) .pt-secao { padding: 8px 0; }
+.painel-talhao:not(.painel-talhao--expandido) .pt-secao .grafico-historico { flex: none; height: 165px; min-height: 0; margin-top: 4px; gap: 4px; }
+.painel-talhao:not(.painel-talhao--expandido) .pt-barra-linha { margin: 6px 0 4px; }
+.painel-talhao:not(.painel-talhao--expandido) .pt-germ { margin: 4px 0 8px; padding: 6px 10px; gap: 10px; }
+.painel-talhao:not(.painel-talhao--expandido) .pt-germ__icone { width: 28px; height: 28px; }
+.painel-talhao:not(.painel-talhao--expandido) .pt-germ__campo,
+.painel-talhao:not(.painel-talhao--expandido) .pt-var__linha .celula { height: 30px; min-height: 30px; }
+.painel-talhao:not(.painel-talhao--expandido) .pt-var__cab { padding: 6px 10px; }
+.painel-talhao:not(.painel-talhao--expandido) .pt-var__linha { padding: 4px 10px; }
+.painel-talhao:not(.painel-talhao--expandido) .painel-talhao__botoes { margin-top: 8px; }
+.painel-talhao:not(.painel-talhao--expandido) .painel-talhao__botoes .botao { height: 34px; min-height: 34px; }
+.painel-talhao:not(.painel-talhao--expandido) .painel-talhao__navegar { margin-top: 8px; padding-top: 6px; }
+.painel-talhao:not(.painel-talhao--expandido) .painel-talhao__seta { width: 32px; height: 32px; }
+/* Modo escuro: germinação e cabeçalho da tabela de variedades */
+html[data-tema="escuro"] .pt-germ { border-color: #23443A; background: #13261F; }
+html[data-tema="escuro"] .pt-germ__icone { background: #176B50; color: #DFF5E9; }
+html[data-tema="escuro"] .pt-var__cab { background: #1C2F2A; }
+.painel-talhao:not(.painel-talhao--expandido) .pt-var__adicionar { height: 32px; min-height: 32px; margin-top: 6px; }
+.painel-talhao:not(.painel-talhao--expandido) .pt-var__calc { height: 30px; }
+/* Painel resumido (uma variedade): sem linhas separando as partes; gráfico; campos dois a dois */
+.painel-talhao--resumido .painel-talhao__topo { padding-bottom: 0; border-bottom: 0; }
+.painel-talhao--resumido .painel-talhao__titulo { flex: 1; }
+.painel-talhao--resumido .painel-talhao__rolagem { gap: 10px; padding-top: 0; }
+/* O gráfico fica com a altura que sobra: é o primeiro a encolher para tudo caber na tela de quem usa (até 100 px;
+   abaixo disso, rola). Mais baixo e com um respiro embaixo, longe dos campos */
+.painel-talhao--resumido .grafico-historico { flex: 1 1 190px; max-height: 210px; min-height: 100px; margin: 0 0 14px; }
+.painel-talhao--resumido .painel-talhao__rolagem > :not(.grafico-historico) { flex-shrink: 0; }
+.pt-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 14px; }
+.pt-form__campo { margin: 0; }
+.pt-form__campo .combo { width: 100%; }
+.pt-form__valor { margin: 0; min-height: 40px; display: flex; align-items: center; font-weight: 600; }
+.pt-form__valor small { margin-left: 4px; font-weight: 400; color: var(--texto-suave); }
+.pt-form__ciclo { border-radius: 8px; }
+.painel-talhao--resumido .pt-var__adicionar { margin-top: 0; }
+.painel-talhao--resumido .painel-talhao__botoes { margin-top: 0; }
+/* Painel expandido (como a imagem da usuária, 20/10/2026): histórico à esquerda, variedades à direita;
+   tabela com borda e cabeçalho cinza-claro, campos sem borda (aparece ao passar o mouse); setas no rodapé */
+.painel-talhao--expandido .painel-talhao__topo { border-bottom: 1px solid var(--borda); }
+.painel-talhao--expandido .painel-talhao__titulo { flex: 1; font-size: 22px; }
+.painel-talhao--expandido .painel-talhao__rolagem { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0 28px; padding-top: 0; }
+.painel-talhao--expandido .pt-secao { padding: 18px 0; }
+.pt-secao__titulo { margin: 0; font-size: 17px; font-weight: 700; }
+.painel-talhao--expandido .pt-secao--historico .grafico-historico { flex: none; height: 360px; min-height: 0; margin-top: 14px; }
+.painel-talhao--expandido .pt-secao--variedades { display: flex; flex-direction: column; gap: 10px; }
+.painel-talhao--expandido .pt-variedades__cab { align-items: baseline; }
+.painel-talhao--expandido .pt-variedades__total { margin-left: auto; font-size: 14px; }
+.painel-talhao--expandido .pt-barra { flex: none; margin: 0; height: 7px; }
+.painel-talhao--expandido .pt-barra > span { background: var(--verde-700); }
+.painel-talhao--expandido .pt-variedades__disp { margin: 0; }
+.painel-talhao--expandido .pt-germ { margin: 0; padding: 10px 14px; border: 1px solid var(--borda); background: var(--superficie-2); }
+.painel-talhao--expandido .pt-germ__rotulo { font-weight: 600; }
+.painel-talhao--expandido .pt-germ__campo { width: 64px; height: 36px; padding: 0 10px; border: 1px solid var(--borda-forte); border-radius: 8px; background: var(--superficie); text-align: right; }
+.painel-talhao--expandido .pt-var { border: 1px solid var(--borda); border-radius: var(--raio); overflow: clip; }
+.painel-talhao--expandido .pt-var__cab { border-radius: 0; background: var(--superficie-2); padding: 12px 14px; font-size: 13px; color: var(--texto); align-items: center; }
+.painel-talhao--expandido .pt-var__cab, .painel-talhao--expandido .pt-var__linha { grid-template-columns: minmax(150px, 2fr) 0.8fr 1.2fr 0.9fr 36px; gap: 8px; }
+.painel-talhao--expandido .pt-var__linha { padding: 8px 14px; border-bottom: 1px dashed var(--borda); }
+.painel-talhao--expandido .pt-var__linha:last-child { border-bottom: 0; }
+.painel-talhao--expandido .pt-var__linha--edicao .celula:not(.celula--erro) { border-color: transparent; background: transparent; }
+.painel-talhao--expandido .pt-var__linha--edicao .celula:not(.celula--erro):hover,
+.painel-talhao--expandido .pt-var__linha--edicao .celula:focus { border-color: var(--borda-forte); background: var(--superficie); }
+.painel-talhao--expandido .pt-var__campo-data .celula { padding-right: 8px; }
+.painel-talhao--expandido .pt-var__adicionar { height: 44px; min-height: 44px; margin-top: 0; border: 1px solid var(--borda); border-radius: var(--raio); }
+.painel-talhao--expandido .painel-talhao__botoes { margin-top: 0; }
+.botao--texto { border: 0; background: none; color: var(--texto); font-weight: 600; }
+.botao--texto:hover:not(:disabled) { background: var(--superficie-2); }
+.pt-salvar { border-radius: 999px; padding: 0 26px; }
+.painel-talhao--expandido > .painel-talhao__navegar { flex-shrink: 0; margin: 0 -16px -12px; padding: 12px 16px; border-top: 1px solid var(--borda); }
+.painel-talhao--expandido .painel-talhao__seta { width: 40px; height: 40px; }
+.painel-talhao--resumido .painel-talhao__navegar { margin-top: 0; padding-top: 10px; }
+.painel-talhao--resumido .painel-talhao__seta { width: 40px; height: 40px; }
