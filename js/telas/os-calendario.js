@@ -1,5 +1,5 @@
 /*
- * Calendário do menu Ordens de Serviço (DECISOES 4.0): a grade Mês · Semana · Dia que antes ficava no Resumo do plano,
+ * Agenda Agrícola, aba de Gestão da Lavoura › Operações Agrícolas (DECISOES 4.0): a grade Mês · Semana · Dia que antes ficava no Resumo do plano,
  * agora com as operações de vários planos somados, sem a associação a um plano. Usa a última versão publicada de cada
  * plano. Filtros com várias escolhas: Safra (Safra ou Safrinha), Empresa, Fazenda, Cultura e Talhão. Sem filtro de
  * Ano Agrícola: o tempo anda pelas setas do calendário. Abre no dia de hoje. A legenda filtra os grupos de operação.
@@ -96,13 +96,7 @@ window.Telas.osCalendario = (function () {
   function desenhar() {
     est = est || novoEstado();
     return `
-      <header class="cabecalho os-cabecalho">
-        <div>
-          <h1 class="cabecalho__titulo">Ordens de Serviço</h1>
-          <p class="cabecalho__subtitulo">Calendário das operações planejadas, dia a dia, em todas as fazendas.</p>
-        </div>
-        <span class="cag-etiqueta" title="Mostra a última versão publicada de cada plano. Alterações em versões em construção aparecem aqui depois de publicadas.">${Icones.info} Últimas versões publicadas</span>
-      </header>
+      ${Telas.centralOperacoes.cabecalho('agenda')}
       <div class="pagina os-cal">
         <section class="cartao filtros" aria-label="Filtrar o calendário" data-os-filtros></section>
         <section class="calendario os-cal__corpo" aria-label="Calendário das operações" data-os></section>

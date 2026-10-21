@@ -766,6 +766,23 @@ select.campo__controle option { color: var(--texto); }
 .usuario__opcao:hover,
 .usuario__opcao:focus-visible { background: var(--verde-100); outline: none; }
 
+/* Trocar usuário (como no menu de conta do Claude): no topo, o usuário logado com ›; ao lado, a lista dos usuários
+   do protótipo (UniSystem Fazenda e UniSystem Corp), com ✓ no logado */
+.usuario__opcoes { width: 240px; }
+.usuario__trocar { position: relative; margin-bottom: 6px; padding-bottom: 6px; border-bottom: 1px solid var(--borda); }
+.usuario__atual { background: var(--superficie-2); }
+.usuario__atual > .icone { width: 16px; height: 16px; margin-left: auto; color: var(--texto-suave); }
+.usuario__iniciais { display: grid; place-items: center; flex: none; width: 28px; height: 28px; border-radius: 50%;
+  background: var(--verde-700); color: #fff; font-size: 11px; font-weight: 700; }
+.usuario__pessoa-texto { display: flex; flex-direction: column; flex: 1; min-width: 0; line-height: 1.25; }
+.usuario__pessoa-texto small { font-size: 12px; color: var(--texto-suave); }
+.usuario__contas { position: absolute; top: 0; left: calc(100% + 14px); z-index: 6; width: 250px; padding: 6px; border-radius: 12px;
+  background: var(--superficie); box-shadow: 0 12px 32px rgba(0, 0, 0, .25); }
+.usuario__contas[hidden] { display: none; }
+.usuario__pessoa + .usuario__pessoa { margin-top: 2px; border-top: 0; border-radius: 8px; }
+.usuario__marca { display: inline-flex; width: 18px; margin-left: auto; }
+.usuario__marca .icone { width: 18px; height: 18px; color: var(--verde-700); }
+
 /* ===== Página com seções (Tela 03 em diante) ===== */
 .pagina {
   display: flex;
@@ -2990,12 +3007,9 @@ html[data-tema="escuro"] .grafico-historico__seg { stroke: #5FD896; }
 html[data-tema="escuro"] .grafico-historico__ponto { fill: #5FD896; }
 html[data-tema="escuro"] .grafico-historico__valor { fill: #5FD896; }
 
-/* Ordens de Serviço: o Calendário de vários planos. Cabeçalho e filtros compactos; a tela ocupa a altura da janela
+/* Operações Agrícolas (Agenda Agrícola): o Calendário de vários planos. Cabeçalho e filtros compactos; a tela ocupa a altura da janela
    e a grade do mês fica inteira à vista (as etiquetas que não cabem no dia viram "+N mais") */
 .conteudo:has(> .os-cal) { display: flex; flex-direction: column; }
-.os-cabecalho { min-height: 0; padding: 12px 40px; }
-.os-cabecalho .cabecalho__titulo { font-size: 24px; }
-.os-cabecalho .cabecalho__subtitulo { margin-top: 2px; font-size: 13px; }
 .os-cal { flex: 1; min-height: 0; gap: 12px; padding: 12px 40px 14px; }
 .os-cal .filtros { margin-bottom: 0; padding: 10px 20px; }
 .os-cal .filtros .campo { max-width: 220px; }
@@ -3183,3 +3197,113 @@ html[data-tema="escuro"] .pt-var__cab { background: #1C2F2A; }
 .cal-lista--passado .cal-lista__item { opacity: .5; }
 .cal-dia--passado .cal-ev:hover,
 .cal-dia--passado .cal-ev:focus-visible { opacity: .85; }
+
+/* ===== Operações Agrícolas (Gestão da Lavoura): cabeçalho das abas Central de Operações e Agenda Agrícola ===== */
+.oa-cabecalho { flex-direction: column; align-items: stretch; gap: 10px; min-height: 0; padding: 12px 40px 0; }
+.oa-caminho { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--texto-suave); }
+.oa-caminho a { color: inherit; text-decoration: none; }
+.oa-caminho a:hover { color: var(--texto); text-decoration: underline; }
+.oa-caminho__casa { display: inline-flex; }
+.oa-caminho__casa .icone { width: 18px; height: 18px; }
+.oa-caminho .caminho__atual { font-weight: 600; }
+.oa-cabecalho__titulo .cabecalho__titulo { font-size: 26px; }
+.oa-cabecalho__titulo .cabecalho__subtitulo { margin-top: 2px; font-size: 14px; color: var(--texto-suave); }
+.oa-cabecalho__abas { display: flex; align-items: center; justify-content: space-between; gap: 8px 16px; flex-wrap: wrap; }
+.oa-cabecalho .etapa { padding: 6px 2px 10px; }
+.oa-cabecalho .etapa--ativa { color: var(--verde-700); }
+
+/* ===== Central de Operações (Tela 08) ===== */
+.oc { gap: 20px; padding-top: 20px; }
+.oc-filtros { padding: 16px 20px 12px; }
+.oc-filtros__campos { margin: 0; padding: 0; }
+.oc-filtros__campos .campo { flex: 1 1 110px; max-width: 200px; }
+.oc-limpar { flex: none; height: 36px; margin-left: auto; white-space: nowrap; }
+.oc-limpar .icone { width: 16px; height: 16px; }
+.oc-filtros__periodo { display: flex; align-items: center; gap: 6px; margin-top: 10px; font-size: 13px; color: var(--texto-suave); }
+.oc-filtros__periodo .icone { width: 15px; height: 15px; }
+.oc-resumo__titulo { margin-bottom: 10px; font-size: 18px; font-weight: 700; }
+.oc-cartoes { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+.oc-cartao { --c: var(--verde-700); --c-fundo: var(--verde-100);
+  display: flex; align-items: center; gap: 12px; padding: 10px 14px; border: 1px solid var(--borda); border-radius: 10px;
+  background: var(--superficie); box-shadow: var(--sombra); font: inherit; color: inherit; text-align: left; cursor: pointer; }
+.oc-cartao:hover { border-color: var(--borda-forte); }
+.oc-cartao:focus-visible { outline: 2px solid var(--verde-700); outline-offset: 2px; }
+.oc-cartao--vermelho { --c: #d93025; --c-fundo: var(--erro-fundo); }
+.oc-cartao--laranja { --c: #e8772e; --c-fundo: #fdf0e6; }
+.oc-cartao--azul { --c: var(--info); --c-fundo: var(--info-fundo); }
+.oc-cartao--ativo { border-color: var(--verde-700); background: var(--verde-100); }
+.oc-cartao--verde .oc-cartao__icone { background: color-mix(in srgb, var(--verde-700) 12%, transparent); }
+.oc-cartao__icone { display: grid; place-items: center; flex: none; width: 40px; height: 40px; border-radius: 8px; background: var(--c-fundo); color: var(--c); }
+.oc-cartao__icone .icone { width: 22px; height: 22px; }
+.oc-cartao__texto { display: flex; flex-direction: column; gap: 0; min-width: 0; }
+.oc-cartao__titulo { font-size: 13px; font-weight: 700; }
+.oc-cartao__numero { font-size: 22px; font-weight: 700; line-height: 1.15; color: var(--c); }
+.oc-cartao__sub { font-size: 12px; line-height: 1.3; color: var(--texto-suave); }
+.oc-lista { padding: 0; overflow: hidden; }
+.oc-lista__topo { display: flex; align-items: center; justify-content: space-between; gap: 12px 16px; flex-wrap: wrap; padding: 14px 20px; }
+.oc-lista__titulo { font-size: 20px; font-weight: 700; }
+.oc-lista__acoes { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.oc-horizonte { width: auto; min-width: 150px; height: 38px; }
+.oc-tabela th { padding: 10px 8px; font-size: 12px; font-weight: 500; color: var(--texto-suave); }
+.oc-tabela td { padding: 10px 8px; font-size: 13px; }
+.oc-tabela th:first-child, .oc-tabela td:first-child { padding-left: 20px; }
+.oc-tabela th:last-child, .oc-tabela td:last-child { padding-right: 20px; }
+.oc-tabela .titulo-ordenar { width: 20px; height: 20px; }
+.oc-tabela__quebra { min-width: 80px; max-width: 160px; white-space: normal !important; }
+.oc-tabela th.oc-tabela__quebra .titulo-coluna { white-space: normal; }
+.oc-tabela__linha { cursor: pointer; }
+.oc-tabela__linha:focus-visible { outline: 2px solid var(--verde-700); outline-offset: -2px; }
+.oc-tabela__rolagem { max-height: 460px; overflow-y: auto; }
+.oc-tabela__rolagem thead th { position: sticky; top: 0; z-index: 1; }
+.oc-recomendar { display: flex; align-items: center; justify-content: flex-end; gap: 12px; padding: 12px 20px; border-top: 1px solid var(--borda); }
+.oc-recomendar__texto { font-size: 13px; color: var(--texto-suave); }
+.oc-recomendar .botao:disabled { opacity: .45; cursor: not-allowed; }
+.oc-tabela .oc-tabela__marcar { width: 1%; padding-right: 4px; }
+.oc-caixa { width: 16px; height: 16px; accent-color: var(--verde-700); cursor: pointer; vertical-align: middle; }
+.oc-tabela__linha--marcada, .oc-tabela__linha--marcada:hover { background: var(--verde-100); }
+html[data-tema="escuro"] .oc-cartao--laranja { --c-fundo: rgba(240, 153, 90, .16); }
+html[data-tema="escuro"] .oc-cartao--vermelho { --c: var(--erro); }
+
+/* ===== Central de Operações do usuário Corp (Tela 09): mesmo layout da Central da Fazenda (.oc) ===== */
+.cc-cartoes { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+.cc-cartao { cursor: default; }
+.cc-cartao:hover { border-color: var(--borda); }
+.cc-cartao__numero { color: var(--texto); }
+.cc-graficos { display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 16px; }
+.cc-painel { display: flex; flex-direction: column; gap: 10px; padding: 16px 20px; }
+.cc-painel__titulo { font-size: 18px; font-weight: 700; }
+.cc-painel__nota, .cc-painel__vazio { font-size: 12px; color: var(--texto-suave); }
+.cc-painel__vazio { padding: 40px 0; text-align: center; }
+.cc-painel__controles { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
+.cc-painel__rotulo { display: block; margin-bottom: 4px; font-size: 12px; color: var(--texto-suave); }
+.cc-segmento { display: inline-flex; border: 1px solid var(--borda-forte); border-radius: 8px; overflow: hidden; }
+.cc-segmento__opcao { padding: 6px 12px; border: 0; background: var(--superficie); font: inherit; font-size: 13px; color: var(--texto); cursor: pointer; }
+.cc-segmento__opcao + .cc-segmento__opcao { border-left: 1px solid var(--borda-forte); }
+.cc-segmento__opcao--ativa { background: var(--verde-700); color: #fff; font-weight: 600; }
+html[data-tema="escuro"] .cc-segmento__opcao--ativa { color: #0B1720; }
+/* Gráfico de barras: eixo à esquerda com 4 linhas de grade recessivas, barras finas com topo arredondado */
+.cc-grafico { --eixo: 34px; }
+.cc-grafico__area { position: relative; height: 190px; margin: 18px 0 0 var(--eixo); border-bottom: 1px solid var(--borda-forte); }
+.cc-grafico__linha { position: absolute; left: 0; right: 0; border-top: 1px solid var(--borda); }
+.cc-grafico__linha > span { position: absolute; right: calc(100% + 8px); top: -8px; font-size: 11px; color: var(--texto-suave); font-variant-numeric: tabular-nums; }
+.cc-grafico__barras { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(var(--n), 1fr); gap: 2px; }
+.cc-barra { display: flex; align-items: flex-end; justify-content: center; height: 100%; padding: 0 12%; border: 0; background: none; cursor: pointer; }
+.cc-barra:hover .cc-barra__coluna { filter: brightness(1.15); }
+.cc-barra:focus-visible { outline: 2px solid var(--verde-700); outline-offset: 2px; border-radius: 4px; }
+.cc-barra__coluna { position: relative; width: 100%; max-width: 64px; min-height: 2px; border-radius: 4px 4px 0 0; background: var(--verde-700); }
+.cc-barra--apagada .cc-barra__coluna { background: color-mix(in srgb, var(--verde-700) 30%, var(--superficie)); }
+.cc-barra__valor { position: absolute; bottom: calc(100% + 3px); left: 50%; transform: translateX(-50%); font-size: 12px; font-weight: 700;
+  color: var(--texto); font-variant-numeric: tabular-nums; }
+.cc-grafico__rotulos { display: grid; grid-template-columns: repeat(var(--n), 1fr); gap: 2px; margin: 6px 0 0 var(--eixo); }
+.cc-grafico__rotulos > span { font-size: 11px; line-height: 1.3; text-align: center; color: var(--texto-suave); white-space: pre-line; }
+/* Tabela Ordens de Serviço */
+.cc-tabela__topo { align-items: flex-start; }
+.cc-tabela__sub { font-size: 13px; color: var(--texto-suave); }
+.cc-tabela__filtros { display: flex; align-items: center; gap: 10px 16px; flex-wrap: wrap; padding: 0 20px 12px; }
+.cc-busca { width: 220px; height: 36px; }
+.cc-tabela__filtro { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--texto-suave); }
+.cc-tabela__filtro .campo__controle { width: auto; min-width: 190px; height: 36px; }
+.cc-status--atraso { color: var(--erro); font-weight: 600; }
+.cc-tabela__rodape { padding: 10px 20px; border-top: 1px solid var(--borda); font-size: 12px; color: var(--texto-suave); }
+.cc .oc-lista__acoes .botao:disabled { opacity: .45; cursor: not-allowed; }
+.cc .oc-lista__acoes .botao .icone { width: 16px; height: 16px; }

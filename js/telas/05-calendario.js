@@ -4,7 +4,7 @@
  * Na aba Programação do plano (antes Resumo). Duas visões: Tabela (antes Programação; uma linha por operação, uma coluna por talhão) e
  * Ciclo Produtivo (uma coluna por fase da cultura). Filtros por grupo e talhão.
  * Desenhada dentro da Tela 04 (mesmo cabeçalho do plano); a Tela 04 repassa os eventos para cá.
- * A grade do Calendário (mês, semana ou dia) saiu do Resumo e foi para o menu Ordens de Serviço (Telas.osCalendario),
+ * A grade do Calendário (mês, semana ou dia) saiu do Resumo e foi para a Agenda Agrícola (Gestão da Lavoura › Operações Agrícolas; Telas.osCalendario),
  * que usa daqui o cálculo das datas e o desenho da grade (exportados no fim).
  */
 window.Telas = window.Telas || {};
@@ -474,7 +474,7 @@ window.Telas.calendario = (function () {
     const v = estado[chave];
     return v === undefined || v === 'todos' || (Array.isArray(v) && v.includes(valor));
   }
-  // ----- Calendário (menu Ordens de Serviço, Telas.osCalendario): Mês · Semana · Dia -----
+  // ----- Calendário (Agenda Agrícola de Operações Agrícolas, Telas.osCalendario): Mês · Semana · Dia -----
   // Cada operação entra no dia em que começa em cada talhão (data de plantio + DAP; Plantio: a data de plantio;
   // Colheita: plantio + ciclo da variedade), juntando os talhões que começam no mesmo dia. Vai até o fim da
   // previsão de conclusão (início + dias − 1). Talhão sem data de plantio: a operação não tem data e não aparece.
@@ -899,7 +899,7 @@ window.Telas.calendario = (function () {
     if (!th.querySelector('.cal-piv__menu')) alternarMenuColuna(th);
   });
 
-  // Para o Calendário de Ordens de Serviço: itens e eventos de um plano, a grade e a barra de navegação, os filtros com caixas
+  // Para a Agenda Agrícola (Operações Agrícolas): itens e eventos de um plano, a grade e a barra de navegação, os filtros com caixas
   return { desenhar, aoClicar, aoMudar, aoDigitar, prazoDe,
     itens, eventos, calendarioMes, navCalendario, filtroCaixa, marcado, hojeIso };
 })();

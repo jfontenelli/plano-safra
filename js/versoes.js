@@ -35,7 +35,7 @@ window.Versoes = (function () {
   }
   // A versão que a seta da Visão Geral abre: a em construção ou, se não houver, a última publicada
   // Última publicada com planejamento: a 0.1 vazia (registro da criação do plano) não conta. É a que entra nas telas
-  // que somam planos publicados (Orçamento, Calendário Agrícola, Ordens de Serviço)
+  // que somam planos publicados (Orçamento, Calendário Agrícola, Agenda Agrícola)
   function publicadaComPlanejamento(plano) {
     const v = ultimaPublicada(plano);
     return v && v.grupos && v.grupos.length ? v : null;

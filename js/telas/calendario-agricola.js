@@ -164,7 +164,7 @@ window.Telas.calendarioAgricola = (function () {
       </div>`;
   }
 
-  // Navegação como no Calendário de Ordens de Serviço: ‹ › · o período · a lista suspensa Período (Ano, Semestre, Trimestre, Mês)
+  // Navegação como na Agenda Agrícola (Operações Agrícolas): ‹ › · o período · a lista suspensa Período (Ano, Semestre, Trimestre, Mês)
   const seletorPeriodo = () => `
       <select class="campo__controle cal-nav__escala" data-cag-periodo aria-label="Período">
         ${PERIODOS.map(([id, nome]) => `<option value="${id}" ${id === periodo ? 'selected' : ''}>${nome}</option>`).join('')}

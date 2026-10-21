@@ -29,10 +29,15 @@
     'orcamento':      { titulo: 'Orçamento de Insumos', menu: 'orcamento',
                         desenhar: () => temPlanos() ? Telas.orcamento.desenhar() : Telas.semPlanos('orcamento'),
                         aoMostrar: (conteudo) => { if (temPlanos()) Telas.orcamento.aoMostrar(conteudo); } },
-    // Ordens de Serviço: por enquanto, o Calendário (Mês, Semana, Dia) das operações de vários planos somados
-    'ordens-servico': { titulo: 'Ordens de Serviço', menu: 'ordens-servico',
-                        desenhar: () => temPlanos() ? Telas.osCalendario.desenhar() : Telas.semPlanos('ordens-servico'),
-                        aoMostrar: (conteudo) => { if (temPlanos()) Telas.osCalendario.aoMostrar(conteudo); } },
+    // Gestão da Lavoura › Operações Agrícolas: abas Central de Operações (#/operacoes-agricolas) e Agenda Agrícola
+    // (#/operacoes-agricolas/agenda; Mês, Semana, Dia), com as operações de vários planos somados
+    'operacoes-agricolas': { titulo: 'Operações Agrícolas', menu: 'operacoes-agricolas',
+                        desenhar: (aba) => !temPlanos() ? Telas.semPlanos('operacoes-agricolas')
+                          : aba === 'agenda' ? Telas.osCalendario.desenhar() : Telas.centralOperacoes.desenhar(),
+                        aoMostrar: (conteudo, aba) => {
+                          if (!temPlanos()) return;
+                          if (aba === 'agenda') Telas.osCalendario.aoMostrar(conteudo); else Telas.centralOperacoes.aoMostrar(conteudo);
+                        } },
     'cadastros':      { titulo: 'Cadastros', menu: 'cadastros',
                         desenhar: () => Telas.emConstrucao('Cadastros') }
   };
@@ -41,14 +46,14 @@
   // Estado da sessão (só em memória)
   const estado = {
     menuRecolhido: false, // menu começa expandido
-    grupoFechado: false,  // grupo Plano de Safra começa aberto (a setinha minimiza)
+    gruposFechados: new Set(), // grupos do menu (Plano de Safra, Gestão da Lavoura) começam abertos; a setinha minimiza
     proximoIdPlano: 1,
     ultimoPlanoId: null   // último plano aberto (o menu Planejamento abre nele)
   };
 
   const menu = document.getElementById('menu');
   const botaoAlternar = document.getElementById('menu-alternar');
-  const botaoGrupo = document.getElementById('menu-grupo-alternar');
+  const botoesGrupo = document.querySelectorAll('.menu__grupo-alternar');
   const conteudo = document.getElementById('conteudo');
   const botaoUsuario = document.getElementById('menu-usuario');
   const opcoesUsuario = document.getElementById('usuario-opcoes');
@@ -122,17 +127,38 @@
     menu.classList.toggle('menu--recolhido', estado.menuRecolhido);
     botaoAlternar.setAttribute('aria-expanded', String(!estado.menuRecolhido));
     botaoAlternar.title = estado.menuRecolhido ? 'Expandir menu' : 'Recolher menu';
-    botaoGrupo.closest('.menu__grupo').classList.toggle('menu__grupo--fechado', estado.grupoFechado);
-    botaoGrupo.setAttribute('aria-expanded', String(!estado.grupoFechado));
-    botaoGrupo.title = estado.grupoFechado ? 'Abrir Plano de Safra' : 'Minimizar Plano de Safra';
+    botoesGrupo.forEach((botao) => {
+      const fechado = estado.gruposFechados.has(botao.dataset.grupo);
+      botao.closest('.menu__grupo').classList.toggle('menu__grupo--fechado', fechado);
+      botao.setAttribute('aria-expanded', String(!fechado));
+      botao.title = `${fechado ? 'Abrir' : 'Minimizar'} ${botao.dataset.grupo}`;
+    });
   }
 
   function desenharUsuario() {
-    const { nome, iniciais } = window.DADOS.usuario;
+    const { id, nome, iniciais } = window.DADOS.usuario;
     document.getElementById('menu-usuario').innerHTML = `
       <span class="menu__avatar" title="${nome}">${iniciais}</span>
       <span class="menu__usuario-nome">${nome}</span>
     `;
+    // Menu do usuário: no topo, o usuário logado (com ›); ao lado, a lista para trocar, com ✓ no logado
+    opcoesUsuario.querySelector('.usuario__atual').innerHTML = `
+      <span class="usuario__iniciais" aria-hidden="true">${iniciais}</span>
+      <span class="usuario__pessoa-texto"><span>${nome}</span><small>${DADOS.usuario.perfil}</small></span>
+      ${Icones.proxima}`;
+    opcoesUsuario.querySelector('[data-usuarios]').innerHTML = DADOS.usuarios.map((u) => `
+      <button class="usuario__opcao usuario__pessoa" type="button" role="menuitemradio"
+              aria-checked="${u.id === id}" data-usuario="trocar" data-id="${u.id}">
+        <span class="usuario__iniciais" aria-hidden="true">${u.iniciais}</span>
+        <span class="usuario__pessoa-texto"><span>${u.nome}</span><small>${u.perfil}</small></span>
+        <span class="usuario__marca">${u.id === id ? Icones.certo : ''}</span>
+      </button>`).join('');
+  }
+  function abrirContas(abrir) {
+    const contas = opcoesUsuario.querySelector('.usuario__contas');
+    contas.hidden = !abrir;
+    opcoesUsuario.querySelector('.usuario__atual').setAttribute('aria-expanded', String(abrir));
+    if (abrir) contas.querySelector('[aria-checked="true"]')?.focus();
   }
 
   // Cria um plano por fazenda do modal (Safra + Empresa + Fazenda + Cultura identificam o plano) e volta para a
@@ -191,6 +217,7 @@
   function abrirUsuario(abrir) {
     opcoesUsuario.hidden = !abrir;
     botaoUsuario.setAttribute('aria-expanded', String(abrir));
+    abrirContas(false);
     if (abrir) opcoesUsuario.querySelector('.usuario__opcao').focus();
   }
 
@@ -199,7 +226,20 @@
   opcoesUsuario.addEventListener('click', (e) => {
     const opcao = e.target.closest('[data-usuario]');
     if (!opcao) return;
+    // Usuário logado: abre ou fecha, ao lado, a lista para trocar (o menu continua aberto)
+    if (opcao.dataset.usuario === 'contas') { abrirContas(opcoesUsuario.querySelector('.usuario__contas').hidden); return; }
     abrirUsuario(false);
+    // Trocar usuário: o rodapé passa a mostrar o novo usuário e a tela é desenhada de novo na visão dele
+    if (opcao.dataset.usuario === 'trocar') {
+      const novo = DADOS.usuarios.find((u) => u.id === opcao.dataset.id);
+      if (novo.id === DADOS.usuario.id) return;
+      DADOS.usuario = { ...novo };
+      desenharUsuario();
+      mostrarTela();
+      Aviso.mostrar(`Você entrou como ${novo.nome}.`);
+      botaoUsuario.focus();
+      return;
+    }
     if (opcao.dataset.usuario === 'configuracoes') Configuracoes.abrir();
     else Aviso.mostrar('Sair ainda não faz parte do protótipo.');
   });
@@ -217,10 +257,11 @@
     estado.menuRecolhido = !estado.menuRecolhido;
     aplicarEstadoMenu();
   });
-  botaoGrupo.addEventListener('click', () => {
-    estado.grupoFechado = !estado.grupoFechado;
+  botoesGrupo.forEach((botao) => botao.addEventListener('click', () => {
+    const grupo = botao.dataset.grupo;
+    if (estado.gruposFechados.has(grupo)) estado.gruposFechados.delete(grupo); else estado.gruposFechados.add(grupo);
     aplicarEstadoMenu();
-  });
+  }));
 
   // Botões das telas avisam o que fazer pelo atributo data-acao
   conteudo.addEventListener('click', (e) => {

@@ -41,6 +41,8 @@ window.Icones = (function () {
     calendario: svg('<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>'),
     ordenar: svg('<path d="M8 10l4-4 4 4M8 14l4 4 4-4"/>'),
     acima: svg('<path d="M8 14l4-4 4 4"/>'),
+    // Central de Operações: balão (justificativas)
+    balao: svg('<path d="M5 5h14a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1h-8l-4 3.5V16H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Z"/>'),
     funil: svg('<path d="M4 5h16l-6 8v5l-4 2v-7Z"/>'),
     baixar: svg('<path d="M12 4v11M7 10l5 5 5-5"/><path d="M5 19h14"/>'),
     alfinete: svg('<path d="M12 17v5"/><path d="M9 4h6l-1 6 3 3v2H7v-2l3-3Z"/>'),

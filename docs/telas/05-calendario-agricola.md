@@ -1,6 +1,6 @@
 # Tela 05 — Calendário Agrícola
 
-Atualizado em 19/10/2026 (a guia Calendário foi para o menu Ordens de Serviço, Tela 07). Este doc mostra só o estado atual da tela. Decisão alterada é reescrita, não acumulada.
+Atualizado em 19/10/2026 (a guia Calendário foi para a Agenda Agrícola, em Gestão da Lavoura › Operações Agrícolas, Tela 07). Este doc mostra só o estado atual da tela. Decisão alterada é reescrita, não acumulada.
 Tudo é **Definido**, exceto as seções "Sugestões em teste" e "Em aberto".
 Imagens: `referencias/05-calendario-agricola.png` (Ciclo Produtivo), `referencias/05-calendario-tabela.png` (Programação) e `referencias/05.3-resumo-calendario.png` (Calendário). Quando imagem e documento divergirem, vale este documento.
 **Situação no protótipo:** construída.
@@ -61,7 +61,7 @@ Ver **todas as operações do plano juntas**, de todos os grupos (Plantio, Defen
 
 ## 6.1 Calendário (saiu do Resumo)
 
-- A terceira visão, **Calendário** (Mês, Semana, Dia), saiu do Resumo em 19/10/2026 (reunião com stakeholders) e foi para o menu **Ordens de Serviço**, sem a associação a um plano. O detalhe está na **Tela 07** (docs/telas/07-ordens-servico-calendario.md).
+- A terceira visão, **Calendário** (Mês, Semana, Dia), saiu do Resumo em 19/10/2026 (reunião com stakeholders) e foi para a **Agenda Agrícola** (menu Gestão da Lavoura › Operações Agrícolas), sem a associação a um plano. O detalhe está na **Tela 07** (docs/telas/07-agenda-agricola.md).
 
 ## 7. Doses no Ciclo Produtivo
 

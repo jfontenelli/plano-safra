@@ -3,11 +3,14 @@
  * Edite à vontade: tudo fica só na memória do navegador e se perde ao fechar a página.
  */
 window.DADOS = {
-  // Usuário mostrado no rodapé do menu lateral
-  usuario: {
-    nome: 'Unisystem',
-    iniciais: 'U'
-  },
+  // Usuários do protótipo (Trocar usuário, no menu do usuário). UniSystem Fazenda: agrônomo da fazenda;
+  // UniSystem Corp: gestor. A Central de Operações mostra a visão do usuário logado.
+  usuarios: [
+    { id: 'fazenda', nome: 'UniSystem Fazenda', iniciais: 'UF', perfil: 'Agrônomo da fazenda' },
+    { id: 'corp', nome: 'UniSystem Corp', iniciais: 'UC', perfil: 'Gestor' }
+  ],
+  // Usuário logado, mostrado no rodapé do menu lateral (começa no UniSystem Fazenda)
+  usuario: { id: 'fazenda', nome: 'UniSystem Fazenda', iniciais: 'UF', perfil: 'Agrônomo da fazenda' },
 
   // Listas do modal "Criar Plano de Safra". Safras novas criadas no modal entram aqui.
   safras:   ['24/25', '25/26'],
@@ -377,6 +380,40 @@ window.DADOS = {
 
   // Planos de safra cadastrados. Começa vazio = menu "Plano de Safra" abre a Tela 01 (Primeiro uso).
   planos: [],
+
+  // ----- Ordens de Serviço de exemplo (Central de Operações, Tela 08) -----
+  // Operações com data planejada até esta data contam como já feitas (OS fechada), para o exemplo não encher de
+  // atrasos antigos. As demais só têm OS se estiverem na lista abaixo.
+  osFechadasAte: '2026-10-12',
+  // Uma OS por operação (pelo nome) e talhões de um plano (fazenda + safra). status: 'recomendada' (ainda não abriu),
+  // 'execucao' ou 'fechada'. abertura + prazo (dias) = data prevista de conclusão; fechamento: data em que a OS foi fechada.
+  // executor: equipe que executa (no sistema, informado no modal Recomendar OS).
+  // justificativa: motivo 'Atraso na recomendação' ou 'Atraso na execução', quem pediu (nome e perfil) e
+  // respondida: false = aguardando resposta.
+  ordensServico: [
+    { numero: 1035, fazenda: 'Boa Vista', safra: '26/27', operacao: 'Pré-emergente', talhoes: ['T09'],
+      status: 'fechada', abertura: '2026-10-10', prazo: 2, fechamento: '2026-10-12', executor: 'Equipe Ceta',
+      justificativa: { motivo: 'Atraso na recomendação', data: '2026-10-12', solicitadaPor: { nome: 'Maria Gonçalves', perfil: 'Agrônomo corporativo' }, respondida: false } },
+    { numero: 1038, fazenda: 'Boa Vista', safra: '26/27', operacao: '1ª Pós-emergente', talhoes: ['T04'],
+      status: 'fechada', abertura: '2026-10-12', prazo: 2, fechamento: '2026-10-14', executor: 'Equipe Alpha',
+      justificativa: { motivo: 'Atraso na recomendação', data: '2026-10-14', solicitadaPor: { nome: 'Maria Gonçalves', perfil: 'Agrônomo corporativo' }, respondida: false } },
+    { numero: 1041, fazenda: 'Boa Vista', safra: '26/27', operacao: '2ª Pós-emergente', talhoes: ['T01', 'T02'],
+      status: 'execucao', abertura: '2026-10-15', prazo: 2, executor: 'Equipe Beta',
+      justificativa: { motivo: 'Atraso na execução', data: '2026-10-18', solicitadaPor: { nome: 'Carlos Menezes', perfil: 'Agrônomo da fazenda' }, respondida: false } },
+    { numero: 1042, fazenda: 'Boa Vista', safra: '26/27', operacao: '1ª Adubação foliar', talhoes: ['T01', 'T02'],
+      status: 'fechada', abertura: '2026-10-15', prazo: 2, fechamento: '2026-10-16', executor: 'Equipe Beta' },
+    { numero: 1043, fazenda: 'Boa Vista', safra: '26/27', operacao: '1ª Pós-emergente', talhoes: ['T05', 'T06'],
+      status: 'execucao', abertura: '2026-10-17', prazo: 2, executor: 'Equipe Ômega',
+      justificativa: { motivo: 'Atraso na execução', data: '2026-10-20', solicitadaPor: { nome: 'Carlos Menezes', perfil: 'Agrônomo da fazenda' }, respondida: false } },
+    { numero: 1044, fazenda: 'Boa Vista', safra: '26/27', operacao: '2ª Pós-emergente', talhoes: ['T07'],
+      status: 'recomendada', abertura: '2026-10-22', prazo: 2, executor: 'Equipe Alpha' },
+    { numero: 1045, fazenda: 'Boa Vista', safra: '26/27', operacao: '1ª Pós-emergente', talhoes: ['T08'],
+      status: 'recomendada', abertura: '2026-10-23', prazo: 2, executor: 'Equipe Ceta' }
+  ],
+  // Justificativas pedidas pelo usuário Corp em operações ainda sem OS (planejadas com atraso): começa vazio
+  justificativasOperacoes: [],
+  // Executores das OS geradas para o exemplo (Central do usuário Corp, Tela 09)
+  executores: ['Equipe Alpha', 'Equipe Beta', 'Equipe Ceta', 'Equipe Ômega'],
 
   // Planos carregados ao abrir o protótipo: ano agrícola 2025, soja 25/26 e milho safrinha 26/26 da Santa Clara;
   // ano agrícola 2026, soja 26/27 e milho safrinha 27/27 da Boa Vista (publicados) e soja 26/27 da São José, em
