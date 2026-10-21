@@ -2327,8 +2327,42 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .cal-piv__nada { padding: 24px !important; text-align: center; color: var(--texto-suave); }
 
 /* ===== Menu: Plano de Safra com quatro itens (DECISOES 4.0) ===== */
-.menu__grupo { display: flex; flex-direction: column; gap: 2px; }
-.menu__pai { font-weight: 600; color: #fff; }
+.menu__grupo { position: relative; display: flex; flex-direction: column; gap: 2px; }
+.menu__pai { font-weight: 600; color: #fff; padding-right: 44px; }
+/* setinha que minimiza o grupo, à direita do nome */
+.menu__grupo-alternar {
+  position: absolute;
+  top: 7px;
+  right: 6px;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--raio);
+  background: transparent;
+  color: rgba(255, 255, 255, .86);
+  cursor: pointer;
+}
+.menu__grupo-alternar:hover { background: rgba(255, 255, 255, .12); color: #fff; }
+.menu__grupo-alternar:focus-visible { outline: 2px solid var(--amarelo); outline-offset: 2px; }
+.menu__grupo-alternar svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform .15s ease;
+}
+.menu__grupo--fechado .menu__grupo-alternar svg { transform: rotate(-90deg); }
+.menu__grupo--fechado .menu__subitens { display: none; }
+/* menu recolhido (só ícones): sem a setinha e com os quatro itens sempre à vista */
+.menu--recolhido .menu__grupo-alternar { display: none; }
+.menu--recolhido .menu__pai { padding-right: 0; }
+.menu--recolhido .menu__grupo--fechado .menu__subitens { display: flex; }
 .menu__subitens {
   display: flex;
   flex-direction: column;

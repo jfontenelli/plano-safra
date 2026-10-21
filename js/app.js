@@ -41,12 +41,14 @@
   // Estado da sessão (só em memória)
   const estado = {
     menuRecolhido: false, // menu começa expandido
+    grupoFechado: false,  // grupo Plano de Safra começa aberto (a setinha minimiza)
     proximoIdPlano: 1,
     ultimoPlanoId: null   // último plano aberto (o menu Planejamento abre nele)
   };
 
   const menu = document.getElementById('menu');
   const botaoAlternar = document.getElementById('menu-alternar');
+  const botaoGrupo = document.getElementById('menu-grupo-alternar');
   const conteudo = document.getElementById('conteudo');
   const botaoUsuario = document.getElementById('menu-usuario');
   const opcoesUsuario = document.getElementById('usuario-opcoes');
@@ -120,6 +122,9 @@
     menu.classList.toggle('menu--recolhido', estado.menuRecolhido);
     botaoAlternar.setAttribute('aria-expanded', String(!estado.menuRecolhido));
     botaoAlternar.title = estado.menuRecolhido ? 'Expandir menu' : 'Recolher menu';
+    botaoGrupo.closest('.menu__grupo').classList.toggle('menu__grupo--fechado', estado.grupoFechado);
+    botaoGrupo.setAttribute('aria-expanded', String(!estado.grupoFechado));
+    botaoGrupo.title = estado.grupoFechado ? 'Abrir Plano de Safra' : 'Minimizar Plano de Safra';
   }
 
   function desenharUsuario() {
@@ -210,6 +215,10 @@
   // ----- Eventos gerais -----
   botaoAlternar.addEventListener('click', () => {
     estado.menuRecolhido = !estado.menuRecolhido;
+    aplicarEstadoMenu();
+  });
+  botaoGrupo.addEventListener('click', () => {
+    estado.grupoFechado = !estado.grupoFechado;
     aplicarEstadoMenu();
   });
 

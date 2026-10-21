@@ -2337,8 +2337,42 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .cal-piv__nada { padding: 24px !important; text-align: center; color: var(--texto-suave); }
 
 /* ===== Menu: Plano de Safra com quatro itens (DECISOES 4.0) ===== */
-.menu__grupo { display: flex; flex-direction: column; gap: 2px; }
-.menu__pai { font-weight: 600; color: #fff; }
+.menu__grupo { position: relative; display: flex; flex-direction: column; gap: 2px; }
+.menu__pai { font-weight: 600; color: #fff; padding-right: 44px; }
+/* setinha que minimiza o grupo, à direita do nome */
+.menu__grupo-alternar {
+  position: absolute;
+  top: 7px;
+  right: 6px;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--raio);
+  background: transparent;
+  color: rgba(255, 255, 255, .86);
+  cursor: pointer;
+}
+.menu__grupo-alternar:hover { background: rgba(255, 255, 255, .12); color: #fff; }
+.menu__grupo-alternar:focus-visible { outline: 2px solid var(--amarelo); outline-offset: 2px; }
+.menu__grupo-alternar svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform .15s ease;
+}
+.menu__grupo--fechado .menu__grupo-alternar svg { transform: rotate(-90deg); }
+.menu__grupo--fechado .menu__subitens { display: none; }
+/* menu recolhido (só ícones): sem a setinha e com os quatro itens sempre à vista */
+.menu--recolhido .menu__grupo-alternar { display: none; }
+.menu--recolhido .menu__pai { padding-right: 0; }
+.menu--recolhido .menu__grupo--fechado .menu__subitens { display: flex; }
 .menu__subitens {
   display: flex;
   flex-direction: column;
@@ -3175,7 +3209,12 @@ html[data-tema="escuro"] .pt-var__cab { background: #1C2F2A; }
             </svg>
             <span class="menu__texto">Plano de Safra</span>
           </a>
-          <div class="menu__subitens">
+          <!-- Setinha: abre e fecha a lista do grupo (o nome continua levando à Visão Geral) -->
+          <button class="menu__grupo-alternar" id="menu-grupo-alternar" type="button"
+                  aria-controls="menu-subitens" aria-expanded="true" title="Minimizar Plano de Safra">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="menu__subitens" id="menu-subitens">
             <a class="menu__item menu__sub" href="#/plano-safra" data-rota="visao-geral" title="Visão Geral">
               <svg class="menu__icone" viewBox="0 0 24 24" aria-hidden="true">
                 <rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/>
@@ -13390,12 +13429,14 @@ window.Configuracoes = (function () {
   // Estado da sessão (só em memória)
   const estado = {
     menuRecolhido: false, // menu começa expandido
+    grupoFechado: false,  // grupo Plano de Safra começa aberto (a setinha minimiza)
     proximoIdPlano: 1,
     ultimoPlanoId: null   // último plano aberto (o menu Planejamento abre nele)
   };
 
   const menu = document.getElementById('menu');
   const botaoAlternar = document.getElementById('menu-alternar');
+  const botaoGrupo = document.getElementById('menu-grupo-alternar');
   const conteudo = document.getElementById('conteudo');
   const botaoUsuario = document.getElementById('menu-usuario');
   const opcoesUsuario = document.getElementById('usuario-opcoes');
@@ -13469,6 +13510,9 @@ window.Configuracoes = (function () {
     menu.classList.toggle('menu--recolhido', estado.menuRecolhido);
     botaoAlternar.setAttribute('aria-expanded', String(!estado.menuRecolhido));
     botaoAlternar.title = estado.menuRecolhido ? 'Expandir menu' : 'Recolher menu';
+    botaoGrupo.closest('.menu__grupo').classList.toggle('menu__grupo--fechado', estado.grupoFechado);
+    botaoGrupo.setAttribute('aria-expanded', String(!estado.grupoFechado));
+    botaoGrupo.title = estado.grupoFechado ? 'Abrir Plano de Safra' : 'Minimizar Plano de Safra';
   }
 
   function desenharUsuario() {
@@ -13559,6 +13603,10 @@ window.Configuracoes = (function () {
   // ----- Eventos gerais -----
   botaoAlternar.addEventListener('click', () => {
     estado.menuRecolhido = !estado.menuRecolhido;
+    aplicarEstadoMenu();
+  });
+  botaoGrupo.addEventListener('click', () => {
+    estado.grupoFechado = !estado.grupoFechado;
     aplicarEstadoMenu();
   });
 
