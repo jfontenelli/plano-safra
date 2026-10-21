@@ -564,10 +564,11 @@ window.Telas.calendario = (function () {
         ${dias.map((iso) => {
           const fora = !!mes && (iso < de || iso > ate);
           const hoje = iso === hojeIso();
+          const passado = iso < hojeIso(); // dia que já passou: etiquetas esmaecidas
           const lista = doDia(evs, iso);
           const cabem = lista.length > limite ? Math.max(1, limite - 1) : lista.length; // com "+N mais", ele ocupa um lugar
           return `
-            <div class="cal-dia ${fora ? 'cal-dia--fora' : ''} ${hoje ? 'cal-dia--hoje' : ''} ${iso === aberto ? 'cal-dia--aberto' : ''}"
+            <div class="cal-dia ${fora ? 'cal-dia--fora' : ''} ${hoje ? 'cal-dia--hoje' : ''} ${passado ? 'cal-dia--passado' : ''} ${iso === aberto ? 'cal-dia--aberto' : ''}"
                  data-acao="cal-dia" data-dia="${iso}" role="gridcell" aria-label="${esc(tituloPeriodo('dia', iso))}${hoje ? ' (hoje)' : ''}">
               <span class="cal-dia__topo"><span class="cal-dia__num">${dataDe(iso).getDate()}</span>${hoje ? '<span class="cal-hoje">Hoje</span>' : ''}</span>
               ${lista.slice(0, cabem).map((ev) => `
@@ -625,7 +626,7 @@ window.Telas.calendario = (function () {
     const lista = doDia(evs, iso);
     return `
       <h3 class="cal-painel__subtitulo">Operações do dia (${lista.length})</h3>
-      ${lista.length ? `<ul class="cal-lista">${lista.map((ev) => `
+      ${lista.length ? `<ul class="cal-lista ${iso < hojeIso() ? 'cal-lista--passado' : ''}">${lista.map((ev) => `
         <li class="cal-lista__item" title="${esc(faixaDias(ev))}">
           <span class="cal-ponto cal-ponto--${ev.tipo}"></span>
           <span><strong class="cal-lista__nome">${esc(ev.nome)}</strong>

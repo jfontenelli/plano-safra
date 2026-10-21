@@ -3176,3 +3176,10 @@ html[data-tema="escuro"] .pt-var__cab { background: #1C2F2A; }
 .painel-talhao--expandido .painel-talhao__seta { width: 40px; height: 40px; }
 .painel-talhao--resumido .painel-talhao__navegar { margin-top: 0; padding-top: 10px; }
 .painel-talhao--resumido .painel-talhao__seta { width: 40px; height: 40px; }
+
+/* Calendário das operações: dias que já passaram com as operações esmaecidas (como no Google Agenda) */
+.cal-dia--passado .cal-ev,
+.cal-dia--passado .cal-dia__mais,
+.cal-lista--passado .cal-lista__item { opacity: .5; }
+.cal-dia--passado .cal-ev:hover,
+.cal-dia--passado .cal-ev:focus-visible { opacity: .85; }

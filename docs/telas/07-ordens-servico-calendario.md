@@ -26,6 +26,7 @@ Ver, dia a dia, as operações planejadas de todas as fazendas (vários planos s
 - **Mês:** a tela inteira cabe na janela (cabeçalho e filtros compactos; a grade ocupa a altura que sobra, com mínimo de 300 px). Etiquetas finas só com o nome; as que não cabem no dia viram "+N mais". **Sem etiquetas de talhão no Mês** (não cabem).
 - **Semana:** cada operação numa caixinha com o nome, a área e **uma etiqueta por talhão** (T05, T06…, em ordem); a caixinha cresce para caber as etiquetas. Todas as operações do dia aparecem (o dia rola por dentro se a lista for longa).
 - **Dia e painel do dia:** cada operação com o nome, **de onde vem** ("Boa Vista · Safra 26/27"), a área, o número de talhões e as **etiquetas dos talhões**; com mais de 12, "+N talhões" mostra todos ("Mostrar menos" volta).
+- **Dias que já passaram** (antes de hoje): as operações aparecem **esmaecidas** (Mês, Semana, Dia e painel do dia), para mostrar que já passou, como no Google Agenda. Hoje e os dias seguintes, na cor normal.
 - Ao passar o mouse numa operação: nome, fazenda e safra, período, área e talhões.
 - Operações planejadas sem data de plantio nos talhões: ficam fora, com o aviso "N operações planejadas ficam fora do calendário: sem data de plantio nos talhões dela."
 - Com uma caixa de filtro aberta, **Esc** fecha a caixa.
