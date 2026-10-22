@@ -183,10 +183,10 @@ svg { flex-shrink: 0; }
   outline-offset: 2px;
 }
 
-/* botão de seta na borda do menu */
+/* botão de seta na borda do menu, na altura do nome UniSystem (padding do menu 20px + metade do topo de 48px) */
 .menu__alternar {
   position: absolute;
-  top: 50%;
+  top: 44px;
   right: -14px;
   z-index: 2;
   display: grid;
@@ -775,23 +775,6 @@ select.campo__controle option { color: var(--texto); }
 
 .usuario__opcao:hover,
 .usuario__opcao:focus-visible { background: var(--verde-100); outline: none; }
-
-/* Trocar usuário (como no menu de conta do Claude): no topo, o usuário logado com ›; ao lado, a lista dos usuários
-   do protótipo (UniSystem Fazenda e UniSystem Corp), com ✓ no logado */
-.usuario__opcoes { width: 240px; }
-.usuario__trocar { position: relative; margin-bottom: 6px; padding-bottom: 6px; border-bottom: 1px solid var(--borda); }
-.usuario__atual { background: var(--superficie-2); }
-.usuario__atual > .icone { width: 16px; height: 16px; margin-left: auto; color: var(--texto-suave); }
-.usuario__iniciais { display: grid; place-items: center; flex: none; width: 28px; height: 28px; border-radius: 50%;
-  background: var(--verde-700); color: #fff; font-size: 11px; font-weight: 700; }
-.usuario__pessoa-texto { display: flex; flex-direction: column; flex: 1; min-width: 0; line-height: 1.25; }
-.usuario__pessoa-texto small { font-size: 12px; color: var(--texto-suave); }
-.usuario__contas { position: absolute; top: 0; left: calc(100% + 14px); z-index: 6; width: 250px; padding: 6px; border-radius: 12px;
-  background: var(--superficie); box-shadow: 0 12px 32px rgba(0, 0, 0, .25); }
-.usuario__contas[hidden] { display: none; }
-.usuario__pessoa + .usuario__pessoa { margin-top: 2px; border-top: 0; border-radius: 8px; }
-.usuario__marca { display: inline-flex; width: 18px; margin-left: auto; }
-.usuario__marca .icone { width: 18px; height: 18px; color: var(--verde-700); }
 
 /* ===== Página com seções (Tela 03 em diante) ===== */
 .pagina {
@@ -3292,8 +3275,9 @@ html[data-tema="escuro"] .oc-cartao--vermelho { --c: var(--erro); }
 .cc-segmento__opcao--ativa { background: var(--verde-700); color: #fff; font-weight: 600; }
 html[data-tema="escuro"] .cc-segmento__opcao--ativa { color: #0B1720; }
 /* Gráfico de barras: eixo à esquerda com 4 linhas de grade recessivas, barras finas com topo arredondado */
-.cc-grafico { --eixo: 34px; }
-.cc-grafico__area { position: relative; height: 190px; margin: 18px 0 0 var(--eixo); border-bottom: 1px solid var(--borda-forte); }
+/* O gráfico ocupa a altura que sobra no painel (os dois painéis da linha ficam com a mesma altura) */
+.cc-grafico { --eixo: 34px; flex: 1; display: flex; flex-direction: column; }
+.cc-grafico__area { position: relative; flex: 1; min-height: 190px; margin: 18px 0 0 var(--eixo); border-bottom: 1px solid var(--borda-forte); }
 .cc-grafico__linha { position: absolute; left: 0; right: 0; border-top: 1px solid var(--borda); }
 .cc-grafico__linha > span { position: absolute; right: calc(100% + 8px); top: -8px; font-size: 11px; color: var(--texto-suave); font-variant-numeric: tabular-nums; }
 .cc-grafico__barras { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(var(--n), 1fr); gap: 2px; }
@@ -3306,6 +3290,10 @@ html[data-tema="escuro"] .cc-segmento__opcao--ativa { color: #0B1720; }
   color: var(--texto); font-variant-numeric: tabular-nums; }
 .cc-grafico__rotulos { display: grid; grid-template-columns: repeat(var(--n), 1fr); gap: 2px; margin: 6px 0 0 var(--eixo); }
 .cc-grafico__rotulos > span { font-size: 11px; line-height: 1.3; text-align: center; color: var(--texto-suave); white-space: pre-line; }
+/* Segundo nível do eixo (Status da OS): o nome do grupo com um traço sobre as barras dele */
+.cc-grafico__grupos { display: grid; grid-template-columns: repeat(var(--n), 1fr); gap: 2px; margin: 4px 0 0 var(--eixo); }
+.cc-grafico__grupo { margin: 0 10px; padding-top: 3px; border-top: 1px solid var(--borda-forte); font-size: 11px; font-weight: 600;
+  text-align: center; color: var(--texto); }
 /* Tabela Ordens de Serviço */
 .cc-tabela__topo { align-items: flex-start; }
 .cc-tabela__sub { font-size: 13px; color: var(--texto-suave); }
@@ -3419,12 +3407,6 @@ html[data-tema="escuro"] .cc-segmento__opcao--ativa { color: #0B1720; }
         <!-- Usuário: abre o menu do usuário (Configurações › Aparência e Sair) -->
         <div class="usuario">
           <div class="usuario__opcoes" id="usuario-opcoes" role="menu" aria-label="Menu do usuário" hidden>
-            <!-- Usuário logado (abre ao lado a lista para trocar: UniSystem Fazenda e UniSystem Corp; preenchido por js/app.js) -->
-            <div class="usuario__trocar">
-              <button class="usuario__opcao usuario__atual" type="button" role="menuitem" data-usuario="contas"
-                      aria-haspopup="menu" aria-expanded="false" aria-controls="usuario-contas" title="Trocar usuário"></button>
-              <div class="usuario__contas" id="usuario-contas" role="menu" aria-label="Trocar usuário" hidden data-usuarios></div>
-            </div>
             <button class="usuario__opcao" type="button" role="menuitem" data-usuario="configuracoes">
               <svg viewBox="0 0 24 24" aria-hidden="true">
             <circle cx="12" cy="12" r="3"/>
@@ -3458,14 +3440,11 @@ html[data-tema="escuro"] .cc-segmento__opcao--ativa { color: #0B1720; }
  * Edite à vontade: tudo fica só na memória do navegador e se perde ao fechar a página.
  */
 window.DADOS = {
-  // Usuários do protótipo (Trocar usuário, no menu do usuário). UniSystem Fazenda: agrônomo da fazenda;
-  // UniSystem Corp: gestor. A Central de Operações mostra a visão do usuário logado.
-  usuarios: [
-    { id: 'fazenda', nome: 'UniSystem Fazenda', iniciais: 'UF', perfil: 'Agrônomo da fazenda' },
-    { id: 'corp', nome: 'UniSystem Corp', iniciais: 'UC', perfil: 'Gestor' }
-  ],
-  // Usuário logado, mostrado no rodapé do menu lateral (começa no UniSystem Fazenda)
-  usuario: { id: 'fazenda', nome: 'UniSystem Fazenda', iniciais: 'UF', perfil: 'Agrônomo da fazenda' },
+  // Usuário mostrado no rodapé do menu lateral
+  usuario: {
+    nome: 'Unisystem',
+    iniciais: 'U'
+  },
 
   // Listas do modal "Criar Plano de Safra". Safras novas criadas no modal entram aqui.
   safras:   ['24/25', '25/26'],
@@ -3865,9 +3844,9 @@ window.DADOS = {
     { numero: 1045, fazenda: 'Boa Vista', safra: '26/27', operacao: '1ª Pós-emergente', talhoes: ['T08'],
       status: 'recomendada', abertura: '2026-10-23', prazo: 2, executor: 'Equipe Ceta' }
   ],
-  // Justificativas pedidas pelo usuário Corp em operações ainda sem OS (planejadas com atraso): começa vazio
+  // Justificativas pedidas na Central de Operações em operações ainda sem OS (planejadas com atraso): começa vazio
   justificativasOperacoes: [],
-  // Executores das OS geradas para o exemplo (Central do usuário Corp, Tela 09)
+  // Executores das OS geradas para o exemplo (Central de Operações, Tela 09)
   executores: ['Equipe Alpha', 'Equipe Beta', 'Equipe Ceta', 'Equipe Ômega'],
 
   // Planos carregados ao abrir o protótipo: ano agrícola 2025, soja 25/26 e milho safrinha 26/26 da Santa Clara;
@@ -7305,20 +7284,22 @@ window.Telas.calendarioAgricola = (function () {
 </script>
   <script>
 /*
- * Tela 08 — Central de Operações (docs/telas/08-central-operacoes.md), aba de Gestão da Lavoura › Operações Agrícolas.
+ * Tela 08 — Minhas tarefas (docs/telas/08-central-operacoes.md), primeira aba de Gestão da Lavoura › Operações Agrícolas.
  * Quatro cartões (A recomendar, Recomendação em atraso, Execução em atraso, Justificativas solicitadas) e a tabela do
  * cartão escolhido. Vários planos somados, na última versão publicada de cada. As OS vêm dos dados de exemplo
  * (DADOS.ordensServico; DADOS.osFechadasAte: o que é planejado até essa data conta como feito).
- * Também desenha o cabeçalho de Operações Agrícolas (caminho, título, subtítulo e abas), usado pela Agenda Agrícola.
+ * Também desenha o cabeçalho de Operações Agrícolas (caminho, título, subtítulo e abas), usado pela Central de Operações
+ * e pela Agenda Agrícola.
  */
 window.Telas = window.Telas || {};
 
 window.Telas.centralOperacoes = (function () {
   const esc = Util.escapar;
 
-  // ----- Cabeçalho de Operações Agrícolas (as duas abas) -----
+  // ----- Cabeçalho de Operações Agrícolas (as três abas) -----
   const ABAS = [
-    ['central', 'Central de Operações', '#/operacoes-agricolas', 'Acompanhe as ordens de serviço, recomendações e execução das operações agrícolas.'],
+    ['tarefas', 'Minhas tarefas', '#/operacoes-agricolas', 'Operações a recomendar, atrasos e justificativas que aguardam a sua ação.'],
+    ['central', 'Central de Operações', '#/operacoes-agricolas/central', 'Acompanhe as ordens de serviço, recomendações e execução das operações agrícolas.'],
     ['agenda', 'Agenda Agrícola', '#/operacoes-agricolas/agenda', 'Calendário das operações planejadas, dia a dia, em todas as fazendas.']
   ];
   function cabecalho(aba) {
@@ -7481,7 +7462,7 @@ window.Telas.centralOperacoes = (function () {
       return os.filter((o) => o.status === 'execucao' && o.conclusao < h && noPeriodo(o.conclusao, per))
         .flatMap((o) => o.talhoes.map((t) => ({ ...o, talhao: t, area: o.areaDe(t), atraso: diasEntre(o.conclusao, h) })));
     }
-    // Justificativas das OS e das operações ainda sem OS (planejadas com atraso, notificadas pelo usuário Corp)
+    // Justificativas das OS e das operações ainda sem OS (planejadas com atraso, notificadas na Central de Operações)
     const semOS = (DADOS.justificativasOperacoes || []).filter((j) => j.safra === est.safra).map((j) => {
       const plano = publicados().find((p) => p.fazenda === j.fazenda && p.safra === j.safra);
       return plano ? { ...j, plano, numero: null, talhoes: [j.talhao] } : null;
@@ -7510,7 +7491,7 @@ window.Telas.centralOperacoes = (function () {
     motivo: ['motivo', 'Motivo da solicitação', (l) => l.justificativa.motivo],
     solicitacao: ['solicitacao', 'Data da solicitação', (l) => l.justificativa.data, false, (l) => Util.data(l.justificativa.data)],
     solicitadaPor: ['solicitadaPor', 'Solicitada por', (l) => l.justificativa.solicitadaPor.nome, false, null,
-      (l) => l.justificativa.solicitadaPor.perfil],
+      (l) => l.justificativa.solicitadaPor.perfil || ''],
     aguardando: ['aguardando', 'Dias aguardando', (l) => l.aguardando, true, (l) => dias(l.aguardando)]
   };
   const OPERACAO = ['safra', 'cultura', 'empresa', 'fazenda', 'talhao', 'area', 'grupo', 'operacao', 'data'];
@@ -7550,12 +7531,10 @@ window.Telas.centralOperacoes = (function () {
   const chaveLinha = (l) => `${l.plano.id}|${l.talhao}|${l.operacao}|${l.data}`;
 
   // ----- Desenho -----
-  const ehCorp = () => DADOS.usuario.id === 'corp';
   function desenhar() {
-    if (ehCorp()) return Telas.centralCorp.desenhar();
     est = est || novoEstado();
     return `
-      ${cabecalho('central')}
+      ${cabecalho('tarefas')}
       <div class="pagina oc">
         <section class="cartao oc-filtros" aria-label="Filtrar operações" data-oc-filtros></section>
         <section class="oc-resumo" aria-labelledby="oc-resumo-titulo">
@@ -7700,7 +7679,6 @@ window.Telas.centralOperacoes = (function () {
   }
 
   function aoMostrar(conteudo) {
-    if (ehCorp()) { Telas.centralCorp.aoMostrar(conteudo); return; }
     est = est || novoEstado();
     const raiz = conteudo.querySelector('.oc');
     const caixaFiltros = raiz.querySelector('[data-oc-filtros]');
@@ -7790,7 +7768,7 @@ window.Telas.centralOperacoes = (function () {
     redesenhar();
   }
 
-  // Para a Central do usuário Corp (Tela 09): dados, safras, filtros e ordenação compartilhados
+  // Para a Central de Operações (Tela 09): dados, safras, filtros e ordenação compartilhados
   const base = { linhasOperacoes, publicados, safras, safraInicial, primeiraData, somaDias, diasEntre, hoje, ordens,
     opcoesSelect, gruposDaSafra, comparar, esc };
   return { desenhar, aoMostrar, cabecalho, base };
@@ -7799,10 +7777,9 @@ window.Telas.centralOperacoes = (function () {
 </script>
   <script>
 /*
- * Tela 09 — Central de Operações do usuário UniSystem Corp, o gestor (docs/telas/09-central-operacoes-corp.md).
- * Mesmo cabeçalho, filtros e layout da Central da Fazenda (Tela 08, js/telas/central-operacoes.js, que chama esta tela
- * quando o usuário logado é o Corp). Visão geral (cartões), gráficos Status da OS e Nº OS por Empresa/Fazenda/Executor
- * e a tabela Ordens de Serviço, com Notificar selecionadas (pede justificativa ao usuário Fazenda) e Exportar CSV.
+ * Tela 09 — Central de Operações (docs/telas/09-central-operacoes-corp.md), segunda aba de Operações Agrícolas.
+ * Mesmo cabeçalho, filtros e layout de Minhas tarefas (Tela 08, js/telas/central-operacoes.js). Visão geral (cartões), gráficos Status da OS e Nº OS por Empresa/Fazenda/Executor
+ * e a tabela Ordens de Serviço, com Notificar selecionadas (pede justificativa, que aparece em Minhas tarefas) e Exportar CSV.
  * OS de exemplo: as escritas em DADOS.ordensServico e, para as demais operações planejadas até DADOS.osFechadasAte,
  * OS fechadas geradas por uma regra fixa (sem sorteio).
  */
@@ -7816,7 +7793,12 @@ window.Telas.centralCorp = (function () {
   const STATUS = [
     ['planejada', 'Planejada'], ['recomendada', 'Recomendada'], ['execucao', 'Em execução'], ['fechada', 'Fechada']
   ];
-  const STATUS_TODOS = STATUS.flatMap(([id, nome]) => [[`${id}-prazo`, `${nome} (no prazo)`], [`${id}-atraso`, `${nome} (com atraso)`]]);
+  // Planejada não se divide (o planejamento é automático); passou da data sem recomendação, conta como
+  // Sem recomendação (a Recomendada com atraso)
+  const NOMES_RECOMENDADA = { 'recomendada-prazo': 'Com recomendação', 'recomendada-atraso': 'Sem recomendação' };
+  const STATUS_TODOS = STATUS.flatMap(([id, nome]) => (id === 'planejada' ? [[id, nome]]
+    : [[`${id}-prazo`, `${nome} · No prazo`], [`${id}-atraso`, `${nome} · Em atraso`]]))
+    .map(([id, nome]) => [id, NOMES_RECOMENDADA[id] || nome]);
   const nomeStatus = (k) => STATUS_TODOS.find(([id]) => id === k)[1];
   const NIVEIS = [['empresa', 'Empresa'], ['fazenda', 'Fazenda'], ['executor', 'Executor']];
   const ACOES = [['pendente', 'Pendente de notificação'], ['enviada', 'Notificação enviada']];
@@ -7858,7 +7840,7 @@ window.Telas.centralCorp = (function () {
           executor: DADOS.executores[n % DADOS.executores.length], abertura: l.data, conclusao,
           fechamento: n % 5 === 0 ? somaDias(conclusao, 1 + (n % 4)) : somaDias(conclusao, -(n % 2)), justificativa: null };
       } else {
-        // Ainda sem OS: planejada (a justificativa, se o gestor pediu, fica em DADOS.justificativasOperacoes)
+        // Ainda sem OS: planejada; com a data vencida, Sem recomendação (a justificativa, se o gestor pediu, fica em DADOS.justificativasOperacoes)
         const j = (DADOS.justificativasOperacoes || []).find((x) => x.fazenda === l.plano.fazenda && x.safra === l.plano.safra
           && x.operacao === l.operacao && x.talhao === l.talhao);
         r = { numero: null, status: 'planejada', executor: '—', abertura: null, conclusao: null, fechamento: null,
@@ -7869,7 +7851,9 @@ window.Telas.centralCorp = (function () {
         : r.status === 'recomendada' ? Math.max(0, diasEntre(l.data, r.abertura))
           : r.status === 'execucao' ? Math.max(0, diasEntre(r.conclusao, h))
             : Math.max(0, diasEntre(r.conclusao, r.fechamento || r.conclusao));
-      saida.push({ ...l, ...r, chave, atraso, situacao: `${r.status}-${atraso > 0 ? 'atraso' : 'prazo'}`,
+      const situacao = r.status === 'planejada' ? (atraso > 0 ? 'recomendada-atraso' : 'planejada')
+        : `${r.status}-${atraso > 0 ? 'atraso' : 'prazo'}`;
+      saida.push({ ...l, ...r, chave, atraso, situacao,
         referencia: r.abertura || l.data,
         acao: r.justificativa ? 'enviada' : atraso > 0 ? 'pendente' : null });
     });
@@ -7988,12 +7972,33 @@ window.Telas.centralCorp = (function () {
           </div>
         </div>
         <div class="cc-grafico__rotulos" style="--n: ${itens.length}">${itens.map((i) => `<span>${esc(i.rotulo || i.nome)}</span>`).join('')}</div>
+        ${itens.some((i) => i.grupo) ? `<div class="cc-grafico__grupos" style="--n: ${itens.length}">${gruposDoEixo(itens)}</div>` : ''}
       </div>`;
   }
 
+  // Eixo em dois níveis: embaixo da barra, a parte curta (Com, No prazo…); na linha de baixo, o grupo
+  // (Recomendação, Em execução, Fechada) ocupando as barras dele
+  function gruposDoEixo(itens) {
+    const blocos = [];
+    itens.forEach((i) => {
+      const ultimo = blocos[blocos.length - 1];
+      if (i.grupo && ultimo && ultimo.grupo === i.grupo) ultimo.n += 1;
+      else blocos.push({ grupo: i.grupo, n: 1 });
+    });
+    return blocos.map((b) => `<span class="${b.grupo ? 'cc-grafico__grupo' : ''}" style="grid-column: span ${b.n}">${esc(b.grupo || '')}</span>`).join('');
+  }
+
+  // Nome do status em duas partes para o eixo: Com recomendação → Com | Recomendação; Em execução · No prazo → No prazo | Em execução
+  function partesDoEixo(id, nome) {
+    if (id === 'planejada') return { rotulo: nome, grupo: null };
+    if (id.startsWith('recomendada')) return { rotulo: nome.split(' ')[0], grupo: 'Recomendação' };
+    const [grupo, rotulo] = nome.split(' · ');
+    return { rotulo, grupo };
+  }
+
   function graficos(rs) {
-    const status = STATUS_TODOS.map(([id, nome]) => ({ id, nome,
-      rotulo: nome.replace(' (', '\n('), valor: contar(rs.filter((r) => r.situacao === id)) }));
+    const status = STATUS_TODOS.map(([id, nome]) => ({ id, nome, ...partesDoEixo(id, nome),
+      valor: contar(rs.filter((r) => r.situacao === id)) }));
     const doStatus = est.status ? rs.filter((r) => r.situacao === est.status) : rs;
     const grupos = new Map();
     doStatus.forEach((r) => { const v = valorNivel(r, est.nivel); if (!grupos.has(v)) grupos.set(v, []); grupos.get(v).push(r); });
@@ -8075,7 +8080,7 @@ window.Telas.centralCorp = (function () {
         </div>
         <div class="oc-lista__acoes">
           <button class="botao botao--secundario" type="button" data-cc-notificar ${n ? '' : 'disabled'}
-                  title="${n ? 'Pedir ao usuário UniSystem Fazenda a justificativa das OS marcadas' : 'Marque OS com atraso pendentes de notificação'}">Notificar selecionadas (${n})</button>
+                  title="${n ? 'Pedir a justificativa das OS marcadas' : 'Marque OS com atraso pendentes de notificação'}">Notificar selecionadas (${n})</button>
           <button class="botao botao--secundario" type="button" data-cc-exportar>${Icones.baixar} Exportar CSV</button>
         </div>
       </div>
@@ -8126,12 +8131,12 @@ window.Telas.centralCorp = (function () {
       <p class="cc-tabela__rodape">${contar(ls).toLocaleString('pt-BR')} ${contar(ls) === 1 ? 'registro' : 'registros'} · ${ls.length.toLocaleString('pt-BR')} ${ls.length === 1 ? 'linha' : 'linhas'} (uma por talhão)</p>`;
   }
 
-  // Notificar: pede ao usuário UniSystem Fazenda a justificativa das linhas marcadas (Tela 08, Justificativas solicitadas)
+  // Notificar: pede a justificativa das linhas marcadas (Minhas tarefas, Tela 08, Justificativas solicitadas)
   function notificar(rs) {
     const { hoje } = B();
     const marcadas = rs.filter((r) => est.selecao.has(r.chave));
     const pedido = (r) => ({ motivo: r.status === 'planejada' || r.status === 'recomendada' ? 'Atraso na recomendação' : 'Atraso na execução',
-      data: hoje(), solicitadaPor: { nome: DADOS.usuario.nome, perfil: DADOS.usuario.perfil }, respondida: false });
+      data: hoje(), solicitadaPor: { nome: DADOS.usuario.nome }, respondida: false });
     marcadas.forEach((r) => {
       const original = r.numero && !r.gerada ? DADOS.ordensServico.find((o) => o.numero === r.numero) : null;
       if (original) { original.justificativa = pedido(r); return; }
@@ -8201,7 +8206,7 @@ window.Telas.centralCorp = (function () {
       if (t.closest('[data-cc-notificar]')) {
         const n = notificar(rs);
         redesenhar();
-        Aviso.mostrar(`${n === 1 ? 'Justificativa pedida' : `${n} justificativas pedidas`} ao usuário UniSystem Fazenda.`);
+        Aviso.mostrar(`${n === 1 ? 'Justificativa pedida' : `${n} justificativas pedidas`}. Aparecem em Minhas tarefas, em Justificativas solicitadas.`);
         return;
       }
       if (t.closest('[data-cc-exportar]')) exportar(rs);
@@ -14559,14 +14564,18 @@ window.Configuracoes = (function () {
     'orcamento':      { titulo: 'Orçamento de Insumos', menu: 'orcamento',
                         desenhar: () => temPlanos() ? Telas.orcamento.desenhar() : Telas.semPlanos('orcamento'),
                         aoMostrar: (conteudo) => { if (temPlanos()) Telas.orcamento.aoMostrar(conteudo); } },
-    // Gestão da Lavoura › Operações Agrícolas: abas Central de Operações (#/operacoes-agricolas) e Agenda Agrícola
-    // (#/operacoes-agricolas/agenda; Mês, Semana, Dia), com as operações de vários planos somados
+    // Gestão da Lavoura › Operações Agrícolas: abas Minhas tarefas (#/operacoes-agricolas), Central de Operações
+    // (#/operacoes-agricolas/central) e Agenda Agrícola (#/operacoes-agricolas/agenda; Mês, Semana, Dia),
+    // com as operações de vários planos somados
     'operacoes-agricolas': { titulo: 'Operações Agrícolas', menu: 'operacoes-agricolas',
                         desenhar: (aba) => !temPlanos() ? Telas.semPlanos('operacoes-agricolas')
-                          : aba === 'agenda' ? Telas.osCalendario.desenhar() : Telas.centralOperacoes.desenhar(),
+                          : aba === 'agenda' ? Telas.osCalendario.desenhar()
+                            : aba === 'central' ? Telas.centralCorp.desenhar() : Telas.centralOperacoes.desenhar(),
                         aoMostrar: (conteudo, aba) => {
                           if (!temPlanos()) return;
-                          if (aba === 'agenda') Telas.osCalendario.aoMostrar(conteudo); else Telas.centralOperacoes.aoMostrar(conteudo);
+                          if (aba === 'agenda') Telas.osCalendario.aoMostrar(conteudo);
+                          else if (aba === 'central') Telas.centralCorp.aoMostrar(conteudo);
+                          else Telas.centralOperacoes.aoMostrar(conteudo);
                         } },
     'cadastros':      { titulo: 'Cadastros', menu: 'cadastros',
                         desenhar: () => Telas.emConstrucao('Cadastros') }
@@ -14666,29 +14675,11 @@ window.Configuracoes = (function () {
   }
 
   function desenharUsuario() {
-    const { id, nome, iniciais } = window.DADOS.usuario;
+    const { nome, iniciais } = window.DADOS.usuario;
     document.getElementById('menu-usuario').innerHTML = `
       <span class="menu__avatar" title="${nome}">${iniciais}</span>
       <span class="menu__usuario-nome">${nome}</span>
     `;
-    // Menu do usuário: no topo, o usuário logado (com ›); ao lado, a lista para trocar, com ✓ no logado
-    opcoesUsuario.querySelector('.usuario__atual').innerHTML = `
-      <span class="usuario__iniciais" aria-hidden="true">${iniciais}</span>
-      <span class="usuario__pessoa-texto"><span>${nome}</span><small>${DADOS.usuario.perfil}</small></span>
-      ${Icones.proxima}`;
-    opcoesUsuario.querySelector('[data-usuarios]').innerHTML = DADOS.usuarios.map((u) => `
-      <button class="usuario__opcao usuario__pessoa" type="button" role="menuitemradio"
-              aria-checked="${u.id === id}" data-usuario="trocar" data-id="${u.id}">
-        <span class="usuario__iniciais" aria-hidden="true">${u.iniciais}</span>
-        <span class="usuario__pessoa-texto"><span>${u.nome}</span><small>${u.perfil}</small></span>
-        <span class="usuario__marca">${u.id === id ? Icones.certo : ''}</span>
-      </button>`).join('');
-  }
-  function abrirContas(abrir) {
-    const contas = opcoesUsuario.querySelector('.usuario__contas');
-    contas.hidden = !abrir;
-    opcoesUsuario.querySelector('.usuario__atual').setAttribute('aria-expanded', String(abrir));
-    if (abrir) contas.querySelector('[aria-checked="true"]')?.focus();
   }
 
   // Cria um plano por fazenda do modal (Safra + Empresa + Fazenda + Cultura identificam o plano) e volta para a
@@ -14747,7 +14738,6 @@ window.Configuracoes = (function () {
   function abrirUsuario(abrir) {
     opcoesUsuario.hidden = !abrir;
     botaoUsuario.setAttribute('aria-expanded', String(abrir));
-    abrirContas(false);
     if (abrir) opcoesUsuario.querySelector('.usuario__opcao').focus();
   }
 
@@ -14756,20 +14746,7 @@ window.Configuracoes = (function () {
   opcoesUsuario.addEventListener('click', (e) => {
     const opcao = e.target.closest('[data-usuario]');
     if (!opcao) return;
-    // Usuário logado: abre ou fecha, ao lado, a lista para trocar (o menu continua aberto)
-    if (opcao.dataset.usuario === 'contas') { abrirContas(opcoesUsuario.querySelector('.usuario__contas').hidden); return; }
     abrirUsuario(false);
-    // Trocar usuário: o rodapé passa a mostrar o novo usuário e a tela é desenhada de novo na visão dele
-    if (opcao.dataset.usuario === 'trocar') {
-      const novo = DADOS.usuarios.find((u) => u.id === opcao.dataset.id);
-      if (novo.id === DADOS.usuario.id) return;
-      DADOS.usuario = { ...novo };
-      desenharUsuario();
-      mostrarTela();
-      Aviso.mostrar(`Você entrou como ${novo.nome}.`);
-      botaoUsuario.focus();
-      return;
-    }
     if (opcao.dataset.usuario === 'configuracoes') Configuracoes.abrir();
     else Aviso.mostrar('Sair ainda não faz parte do protótipo.');
   });

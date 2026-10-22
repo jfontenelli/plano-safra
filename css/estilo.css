@@ -173,10 +173,10 @@ svg { flex-shrink: 0; }
   outline-offset: 2px;
 }
 
-/* botão de seta na borda do menu */
+/* botão de seta na borda do menu, na altura do nome UniSystem (padding do menu 20px + metade do topo de 48px) */
 .menu__alternar {
   position: absolute;
-  top: 50%;
+  top: 44px;
   right: -14px;
   z-index: 2;
   display: grid;
@@ -765,23 +765,6 @@ select.campo__controle option { color: var(--texto); }
 
 .usuario__opcao:hover,
 .usuario__opcao:focus-visible { background: var(--verde-100); outline: none; }
-
-/* Trocar usuário (como no menu de conta do Claude): no topo, o usuário logado com ›; ao lado, a lista dos usuários
-   do protótipo (UniSystem Fazenda e UniSystem Corp), com ✓ no logado */
-.usuario__opcoes { width: 240px; }
-.usuario__trocar { position: relative; margin-bottom: 6px; padding-bottom: 6px; border-bottom: 1px solid var(--borda); }
-.usuario__atual { background: var(--superficie-2); }
-.usuario__atual > .icone { width: 16px; height: 16px; margin-left: auto; color: var(--texto-suave); }
-.usuario__iniciais { display: grid; place-items: center; flex: none; width: 28px; height: 28px; border-radius: 50%;
-  background: var(--verde-700); color: #fff; font-size: 11px; font-weight: 700; }
-.usuario__pessoa-texto { display: flex; flex-direction: column; flex: 1; min-width: 0; line-height: 1.25; }
-.usuario__pessoa-texto small { font-size: 12px; color: var(--texto-suave); }
-.usuario__contas { position: absolute; top: 0; left: calc(100% + 14px); z-index: 6; width: 250px; padding: 6px; border-radius: 12px;
-  background: var(--superficie); box-shadow: 0 12px 32px rgba(0, 0, 0, .25); }
-.usuario__contas[hidden] { display: none; }
-.usuario__pessoa + .usuario__pessoa { margin-top: 2px; border-top: 0; border-radius: 8px; }
-.usuario__marca { display: inline-flex; width: 18px; margin-left: auto; }
-.usuario__marca .icone { width: 18px; height: 18px; color: var(--verde-700); }
 
 /* ===== Página com seções (Tela 03 em diante) ===== */
 .pagina {
@@ -3282,8 +3265,9 @@ html[data-tema="escuro"] .oc-cartao--vermelho { --c: var(--erro); }
 .cc-segmento__opcao--ativa { background: var(--verde-700); color: #fff; font-weight: 600; }
 html[data-tema="escuro"] .cc-segmento__opcao--ativa { color: #0B1720; }
 /* Gráfico de barras: eixo à esquerda com 4 linhas de grade recessivas, barras finas com topo arredondado */
-.cc-grafico { --eixo: 34px; }
-.cc-grafico__area { position: relative; height: 190px; margin: 18px 0 0 var(--eixo); border-bottom: 1px solid var(--borda-forte); }
+/* O gráfico ocupa a altura que sobra no painel (os dois painéis da linha ficam com a mesma altura) */
+.cc-grafico { --eixo: 34px; flex: 1; display: flex; flex-direction: column; }
+.cc-grafico__area { position: relative; flex: 1; min-height: 190px; margin: 18px 0 0 var(--eixo); border-bottom: 1px solid var(--borda-forte); }
 .cc-grafico__linha { position: absolute; left: 0; right: 0; border-top: 1px solid var(--borda); }
 .cc-grafico__linha > span { position: absolute; right: calc(100% + 8px); top: -8px; font-size: 11px; color: var(--texto-suave); font-variant-numeric: tabular-nums; }
 .cc-grafico__barras { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(var(--n), 1fr); gap: 2px; }
@@ -3296,6 +3280,10 @@ html[data-tema="escuro"] .cc-segmento__opcao--ativa { color: #0B1720; }
   color: var(--texto); font-variant-numeric: tabular-nums; }
 .cc-grafico__rotulos { display: grid; grid-template-columns: repeat(var(--n), 1fr); gap: 2px; margin: 6px 0 0 var(--eixo); }
 .cc-grafico__rotulos > span { font-size: 11px; line-height: 1.3; text-align: center; color: var(--texto-suave); white-space: pre-line; }
+/* Segundo nível do eixo (Status da OS): o nome do grupo com um traço sobre as barras dele */
+.cc-grafico__grupos { display: grid; grid-template-columns: repeat(var(--n), 1fr); gap: 2px; margin: 4px 0 0 var(--eixo); }
+.cc-grafico__grupo { margin: 0 10px; padding-top: 3px; border-top: 1px solid var(--borda-forte); font-size: 11px; font-weight: 600;
+  text-align: center; color: var(--texto); }
 /* Tabela Ordens de Serviço */
 .cc-tabela__topo { align-items: flex-start; }
 .cc-tabela__sub { font-size: 13px; color: var(--texto-suave); }

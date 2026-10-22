@@ -1,18 +1,20 @@
 /*
- * Tela 08 — Central de Operações (docs/telas/08-central-operacoes.md), aba de Gestão da Lavoura › Operações Agrícolas.
+ * Tela 08 — Minhas tarefas (docs/telas/08-central-operacoes.md), primeira aba de Gestão da Lavoura › Operações Agrícolas.
  * Quatro cartões (A recomendar, Recomendação em atraso, Execução em atraso, Justificativas solicitadas) e a tabela do
  * cartão escolhido. Vários planos somados, na última versão publicada de cada. As OS vêm dos dados de exemplo
  * (DADOS.ordensServico; DADOS.osFechadasAte: o que é planejado até essa data conta como feito).
- * Também desenha o cabeçalho de Operações Agrícolas (caminho, título, subtítulo e abas), usado pela Agenda Agrícola.
+ * Também desenha o cabeçalho de Operações Agrícolas (caminho, título, subtítulo e abas), usado pela Central de Operações
+ * e pela Agenda Agrícola.
  */
 window.Telas = window.Telas || {};
 
 window.Telas.centralOperacoes = (function () {
   const esc = Util.escapar;
 
-  // ----- Cabeçalho de Operações Agrícolas (as duas abas) -----
+  // ----- Cabeçalho de Operações Agrícolas (as três abas) -----
   const ABAS = [
-    ['central', 'Central de Operações', '#/operacoes-agricolas', 'Acompanhe as ordens de serviço, recomendações e execução das operações agrícolas.'],
+    ['tarefas', 'Minhas tarefas', '#/operacoes-agricolas', 'Operações a recomendar, atrasos e justificativas que aguardam a sua ação.'],
+    ['central', 'Central de Operações', '#/operacoes-agricolas/central', 'Acompanhe as ordens de serviço, recomendações e execução das operações agrícolas.'],
     ['agenda', 'Agenda Agrícola', '#/operacoes-agricolas/agenda', 'Calendário das operações planejadas, dia a dia, em todas as fazendas.']
   ];
   function cabecalho(aba) {
@@ -175,7 +177,7 @@ window.Telas.centralOperacoes = (function () {
       return os.filter((o) => o.status === 'execucao' && o.conclusao < h && noPeriodo(o.conclusao, per))
         .flatMap((o) => o.talhoes.map((t) => ({ ...o, talhao: t, area: o.areaDe(t), atraso: diasEntre(o.conclusao, h) })));
     }
-    // Justificativas das OS e das operações ainda sem OS (planejadas com atraso, notificadas pelo usuário Corp)
+    // Justificativas das OS e das operações ainda sem OS (planejadas com atraso, notificadas na Central de Operações)
     const semOS = (DADOS.justificativasOperacoes || []).filter((j) => j.safra === est.safra).map((j) => {
       const plano = publicados().find((p) => p.fazenda === j.fazenda && p.safra === j.safra);
       return plano ? { ...j, plano, numero: null, talhoes: [j.talhao] } : null;
@@ -204,7 +206,7 @@ window.Telas.centralOperacoes = (function () {
     motivo: ['motivo', 'Motivo da solicitação', (l) => l.justificativa.motivo],
     solicitacao: ['solicitacao', 'Data da solicitação', (l) => l.justificativa.data, false, (l) => Util.data(l.justificativa.data)],
     solicitadaPor: ['solicitadaPor', 'Solicitada por', (l) => l.justificativa.solicitadaPor.nome, false, null,
-      (l) => l.justificativa.solicitadaPor.perfil],
+      (l) => l.justificativa.solicitadaPor.perfil || ''],
     aguardando: ['aguardando', 'Dias aguardando', (l) => l.aguardando, true, (l) => dias(l.aguardando)]
   };
   const OPERACAO = ['safra', 'cultura', 'empresa', 'fazenda', 'talhao', 'area', 'grupo', 'operacao', 'data'];
@@ -244,12 +246,10 @@ window.Telas.centralOperacoes = (function () {
   const chaveLinha = (l) => `${l.plano.id}|${l.talhao}|${l.operacao}|${l.data}`;
 
   // ----- Desenho -----
-  const ehCorp = () => DADOS.usuario.id === 'corp';
   function desenhar() {
-    if (ehCorp()) return Telas.centralCorp.desenhar();
     est = est || novoEstado();
     return `
-      ${cabecalho('central')}
+      ${cabecalho('tarefas')}
       <div class="pagina oc">
         <section class="cartao oc-filtros" aria-label="Filtrar operações" data-oc-filtros></section>
         <section class="oc-resumo" aria-labelledby="oc-resumo-titulo">
@@ -394,7 +394,6 @@ window.Telas.centralOperacoes = (function () {
   }
 
   function aoMostrar(conteudo) {
-    if (ehCorp()) { Telas.centralCorp.aoMostrar(conteudo); return; }
     est = est || novoEstado();
     const raiz = conteudo.querySelector('.oc');
     const caixaFiltros = raiz.querySelector('[data-oc-filtros]');
@@ -484,7 +483,7 @@ window.Telas.centralOperacoes = (function () {
     redesenhar();
   }
 
-  // Para a Central do usuário Corp (Tela 09): dados, safras, filtros e ordenação compartilhados
+  // Para a Central de Operações (Tela 09): dados, safras, filtros e ordenação compartilhados
   const base = { linhasOperacoes, publicados, safras, safraInicial, primeiraData, somaDias, diasEntre, hoje, ordens,
     opcoesSelect, gruposDaSafra, comparar, esc };
   return { desenhar, aoMostrar, cabecalho, base };

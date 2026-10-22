@@ -3,14 +3,11 @@
  * Edite à vontade: tudo fica só na memória do navegador e se perde ao fechar a página.
  */
 window.DADOS = {
-  // Usuários do protótipo (Trocar usuário, no menu do usuário). UniSystem Fazenda: agrônomo da fazenda;
-  // UniSystem Corp: gestor. A Central de Operações mostra a visão do usuário logado.
-  usuarios: [
-    { id: 'fazenda', nome: 'UniSystem Fazenda', iniciais: 'UF', perfil: 'Agrônomo da fazenda' },
-    { id: 'corp', nome: 'UniSystem Corp', iniciais: 'UC', perfil: 'Gestor' }
-  ],
-  // Usuário logado, mostrado no rodapé do menu lateral (começa no UniSystem Fazenda)
-  usuario: { id: 'fazenda', nome: 'UniSystem Fazenda', iniciais: 'UF', perfil: 'Agrônomo da fazenda' },
+  // Usuário mostrado no rodapé do menu lateral
+  usuario: {
+    nome: 'Unisystem',
+    iniciais: 'U'
+  },
 
   // Listas do modal "Criar Plano de Safra". Safras novas criadas no modal entram aqui.
   safras:   ['24/25', '25/26'],
@@ -410,9 +407,9 @@ window.DADOS = {
     { numero: 1045, fazenda: 'Boa Vista', safra: '26/27', operacao: '1ª Pós-emergente', talhoes: ['T08'],
       status: 'recomendada', abertura: '2026-10-23', prazo: 2, executor: 'Equipe Ceta' }
   ],
-  // Justificativas pedidas pelo usuário Corp em operações ainda sem OS (planejadas com atraso): começa vazio
+  // Justificativas pedidas na Central de Operações em operações ainda sem OS (planejadas com atraso): começa vazio
   justificativasOperacoes: [],
-  // Executores das OS geradas para o exemplo (Central do usuário Corp, Tela 09)
+  // Executores das OS geradas para o exemplo (Central de Operações, Tela 09)
   executores: ['Equipe Alpha', 'Equipe Beta', 'Equipe Ceta', 'Equipe Ômega'],
 
   // Planos carregados ao abrir o protótipo: ano agrícola 2025, soja 25/26 e milho safrinha 26/26 da Santa Clara;

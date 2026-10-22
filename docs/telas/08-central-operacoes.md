@@ -1,21 +1,19 @@
-# Tela 08 — Operações Agrícolas: aba Central de Operações
+# Tela 08 — Operações Agrícolas: aba Minhas tarefas
 
-Atualizado em 21/10/2026. Este doc mostra só o estado atual da tela. Decisão alterada é reescrita, não acumulada.
-Imagem: enviada pela usuária em 21/10/2026 (design da Central de Operações). Quando imagem e documento divergirem, vale este documento.
+Atualizado em 22/10/2026. Este doc mostra só o estado atual da tela. Decisão alterada é reescrita, não acumulada.
+Imagem: enviada pela usuária em 21/10/2026 (design da antiga Central de Operações do usuário Fazenda, hoje Minhas tarefas). Quando imagem e documento divergirem, vale este documento.
 **Situação no protótipo:** construída.
 
 ## Objetivo
-**Visão do usuário UniSystem Fazenda** (agrônomo da fazenda). A Central de Operações do usuário **UniSystem Corp** (gestor) é outra visão, ainda a construir.
-
 Acompanhar, de todas as fazendas, as operações que precisam de recomendação agronômica e as OS com atraso ou com justificativa pendente, para o agrônomo agir.
 
 ## Quando aparece
-- Menu lateral **Gestão da Lavoura › Operações Agrícolas**: abre nesta aba (a primeira; a segunda é a Agenda Agrícola, Tela 07).
+- Menu lateral **Gestão da Lavoura › Operações Agrícolas**: abre nesta aba (a primeira; depois vêm a Central de Operações, Tela 09, e a Agenda Agrícola, Tela 07).
 - Sem nenhum plano cadastrado: o convite "Crie seu primeiro plano para visualizar…" com "+ Criar Plano de Safra" (como as outras telas).
 
 ## Conteúdo
-- **Cabeçalho** (o mesmo nas duas abas): caminho no topo "⌂ Operações Agrícolas › Central de Operações" (o nome da aba aberta), título com o nome da aba, subtítulo e as abas **Central de Operações · Agenda Agrícola**.
-  - Subtítulo da Central: "Acompanhe as ordens de serviço, recomendações e execução das operações agrícolas."
+- **Cabeçalho** (o mesmo nas três abas): caminho no topo "⌂ Operações Agrícolas › Minhas tarefas" (o nome da aba aberta), título com o nome da aba, subtítulo e as abas **Minhas tarefas · Central de Operações · Agenda Agrícola**.
+  - Subtítulo de Minhas tarefas: "Operações a recomendar, atrasos e justificativas que aguardam a sua ação."
 - **Filtros** num cartão: **Safra** (uma escolha; começa na safra de hoje, ex.: 2026/2027), **Cultura**, **Empresa**, **Fazenda**, **Grupo de operação** (uma escolha cada, "Todas"/"Todos"; os grupos dos planos publicados da safra, na ordem Plantio, Fertilidade, Defensivo, Colheita), **Data inicial**, **Data final** e **Limpar filtros**. Embaixo, o texto do período, conforme o cartão escolhido:
   - A recomendar e Recomendação em atraso: "O período considera a data planejada das operações."
   - Execução em atraso: "O período considera a data prevista de conclusão das OS."

@@ -29,14 +29,18 @@
     'orcamento':      { titulo: 'Orçamento de Insumos', menu: 'orcamento',
                         desenhar: () => temPlanos() ? Telas.orcamento.desenhar() : Telas.semPlanos('orcamento'),
                         aoMostrar: (conteudo) => { if (temPlanos()) Telas.orcamento.aoMostrar(conteudo); } },
-    // Gestão da Lavoura › Operações Agrícolas: abas Central de Operações (#/operacoes-agricolas) e Agenda Agrícola
-    // (#/operacoes-agricolas/agenda; Mês, Semana, Dia), com as operações de vários planos somados
+    // Gestão da Lavoura › Operações Agrícolas: abas Minhas tarefas (#/operacoes-agricolas), Central de Operações
+    // (#/operacoes-agricolas/central) e Agenda Agrícola (#/operacoes-agricolas/agenda; Mês, Semana, Dia),
+    // com as operações de vários planos somados
     'operacoes-agricolas': { titulo: 'Operações Agrícolas', menu: 'operacoes-agricolas',
                         desenhar: (aba) => !temPlanos() ? Telas.semPlanos('operacoes-agricolas')
-                          : aba === 'agenda' ? Telas.osCalendario.desenhar() : Telas.centralOperacoes.desenhar(),
+                          : aba === 'agenda' ? Telas.osCalendario.desenhar()
+                            : aba === 'central' ? Telas.centralCorp.desenhar() : Telas.centralOperacoes.desenhar(),
                         aoMostrar: (conteudo, aba) => {
                           if (!temPlanos()) return;
-                          if (aba === 'agenda') Telas.osCalendario.aoMostrar(conteudo); else Telas.centralOperacoes.aoMostrar(conteudo);
+                          if (aba === 'agenda') Telas.osCalendario.aoMostrar(conteudo);
+                          else if (aba === 'central') Telas.centralCorp.aoMostrar(conteudo);
+                          else Telas.centralOperacoes.aoMostrar(conteudo);
                         } },
     'cadastros':      { titulo: 'Cadastros', menu: 'cadastros',
                         desenhar: () => Telas.emConstrucao('Cadastros') }
@@ -136,29 +140,11 @@
   }
 
   function desenharUsuario() {
-    const { id, nome, iniciais } = window.DADOS.usuario;
+    const { nome, iniciais } = window.DADOS.usuario;
     document.getElementById('menu-usuario').innerHTML = `
       <span class="menu__avatar" title="${nome}">${iniciais}</span>
       <span class="menu__usuario-nome">${nome}</span>
     `;
-    // Menu do usuário: no topo, o usuário logado (com ›); ao lado, a lista para trocar, com ✓ no logado
-    opcoesUsuario.querySelector('.usuario__atual').innerHTML = `
-      <span class="usuario__iniciais" aria-hidden="true">${iniciais}</span>
-      <span class="usuario__pessoa-texto"><span>${nome}</span><small>${DADOS.usuario.perfil}</small></span>
-      ${Icones.proxima}`;
-    opcoesUsuario.querySelector('[data-usuarios]').innerHTML = DADOS.usuarios.map((u) => `
-      <button class="usuario__opcao usuario__pessoa" type="button" role="menuitemradio"
-              aria-checked="${u.id === id}" data-usuario="trocar" data-id="${u.id}">
-        <span class="usuario__iniciais" aria-hidden="true">${u.iniciais}</span>
-        <span class="usuario__pessoa-texto"><span>${u.nome}</span><small>${u.perfil}</small></span>
-        <span class="usuario__marca">${u.id === id ? Icones.certo : ''}</span>
-      </button>`).join('');
-  }
-  function abrirContas(abrir) {
-    const contas = opcoesUsuario.querySelector('.usuario__contas');
-    contas.hidden = !abrir;
-    opcoesUsuario.querySelector('.usuario__atual').setAttribute('aria-expanded', String(abrir));
-    if (abrir) contas.querySelector('[aria-checked="true"]')?.focus();
   }
 
   // Cria um plano por fazenda do modal (Safra + Empresa + Fazenda + Cultura identificam o plano) e volta para a
@@ -217,7 +203,6 @@
   function abrirUsuario(abrir) {
     opcoesUsuario.hidden = !abrir;
     botaoUsuario.setAttribute('aria-expanded', String(abrir));
-    abrirContas(false);
     if (abrir) opcoesUsuario.querySelector('.usuario__opcao').focus();
   }
 
@@ -226,20 +211,7 @@
   opcoesUsuario.addEventListener('click', (e) => {
     const opcao = e.target.closest('[data-usuario]');
     if (!opcao) return;
-    // Usuário logado: abre ou fecha, ao lado, a lista para trocar (o menu continua aberto)
-    if (opcao.dataset.usuario === 'contas') { abrirContas(opcoesUsuario.querySelector('.usuario__contas').hidden); return; }
     abrirUsuario(false);
-    // Trocar usuário: o rodapé passa a mostrar o novo usuário e a tela é desenhada de novo na visão dele
-    if (opcao.dataset.usuario === 'trocar') {
-      const novo = DADOS.usuarios.find((u) => u.id === opcao.dataset.id);
-      if (novo.id === DADOS.usuario.id) return;
-      DADOS.usuario = { ...novo };
-      desenharUsuario();
-      mostrarTela();
-      Aviso.mostrar(`Você entrou como ${novo.nome}.`);
-      botaoUsuario.focus();
-      return;
-    }
     if (opcao.dataset.usuario === 'configuracoes') Configuracoes.abrir();
     else Aviso.mostrar('Sair ainda não faz parte do protótipo.');
   });

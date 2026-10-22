@@ -1,8 +1,7 @@
 /*
- * Tela 09 — Central de Operações do usuário UniSystem Corp, o gestor (docs/telas/09-central-operacoes-corp.md).
- * Mesmo cabeçalho, filtros e layout da Central da Fazenda (Tela 08, js/telas/central-operacoes.js, que chama esta tela
- * quando o usuário logado é o Corp). Visão geral (cartões), gráficos Status da OS e Nº OS por Empresa/Fazenda/Executor
- * e a tabela Ordens de Serviço, com Notificar selecionadas (pede justificativa ao usuário Fazenda) e Exportar CSV.
+ * Tela 09 — Central de Operações (docs/telas/09-central-operacoes-corp.md), segunda aba de Operações Agrícolas.
+ * Mesmo cabeçalho, filtros e layout de Minhas tarefas (Tela 08, js/telas/central-operacoes.js). Visão geral (cartões), gráficos Status da OS e Nº OS por Empresa/Fazenda/Executor
+ * e a tabela Ordens de Serviço, com Notificar selecionadas (pede justificativa, que aparece em Minhas tarefas) e Exportar CSV.
  * OS de exemplo: as escritas em DADOS.ordensServico e, para as demais operações planejadas até DADOS.osFechadasAte,
  * OS fechadas geradas por uma regra fixa (sem sorteio).
  */
@@ -16,7 +15,12 @@ window.Telas.centralCorp = (function () {
   const STATUS = [
     ['planejada', 'Planejada'], ['recomendada', 'Recomendada'], ['execucao', 'Em execução'], ['fechada', 'Fechada']
   ];
-  const STATUS_TODOS = STATUS.flatMap(([id, nome]) => [[`${id}-prazo`, `${nome} (no prazo)`], [`${id}-atraso`, `${nome} (com atraso)`]]);
+  // Planejada não se divide (o planejamento é automático); passou da data sem recomendação, conta como
+  // Sem recomendação (a Recomendada com atraso)
+  const NOMES_RECOMENDADA = { 'recomendada-prazo': 'Com recomendação', 'recomendada-atraso': 'Sem recomendação' };
+  const STATUS_TODOS = STATUS.flatMap(([id, nome]) => (id === 'planejada' ? [[id, nome]]
+    : [[`${id}-prazo`, `${nome} · No prazo`], [`${id}-atraso`, `${nome} · Em atraso`]]))
+    .map(([id, nome]) => [id, NOMES_RECOMENDADA[id] || nome]);
   const nomeStatus = (k) => STATUS_TODOS.find(([id]) => id === k)[1];
   const NIVEIS = [['empresa', 'Empresa'], ['fazenda', 'Fazenda'], ['executor', 'Executor']];
   const ACOES = [['pendente', 'Pendente de notificação'], ['enviada', 'Notificação enviada']];
@@ -58,7 +62,7 @@ window.Telas.centralCorp = (function () {
           executor: DADOS.executores[n % DADOS.executores.length], abertura: l.data, conclusao,
           fechamento: n % 5 === 0 ? somaDias(conclusao, 1 + (n % 4)) : somaDias(conclusao, -(n % 2)), justificativa: null };
       } else {
-        // Ainda sem OS: planejada (a justificativa, se o gestor pediu, fica em DADOS.justificativasOperacoes)
+        // Ainda sem OS: planejada; com a data vencida, Sem recomendação (a justificativa, se o gestor pediu, fica em DADOS.justificativasOperacoes)
         const j = (DADOS.justificativasOperacoes || []).find((x) => x.fazenda === l.plano.fazenda && x.safra === l.plano.safra
           && x.operacao === l.operacao && x.talhao === l.talhao);
         r = { numero: null, status: 'planejada', executor: '—', abertura: null, conclusao: null, fechamento: null,
@@ -69,7 +73,9 @@ window.Telas.centralCorp = (function () {
         : r.status === 'recomendada' ? Math.max(0, diasEntre(l.data, r.abertura))
           : r.status === 'execucao' ? Math.max(0, diasEntre(r.conclusao, h))
             : Math.max(0, diasEntre(r.conclusao, r.fechamento || r.conclusao));
-      saida.push({ ...l, ...r, chave, atraso, situacao: `${r.status}-${atraso > 0 ? 'atraso' : 'prazo'}`,
+      const situacao = r.status === 'planejada' ? (atraso > 0 ? 'recomendada-atraso' : 'planejada')
+        : `${r.status}-${atraso > 0 ? 'atraso' : 'prazo'}`;
+      saida.push({ ...l, ...r, chave, atraso, situacao,
         referencia: r.abertura || l.data,
         acao: r.justificativa ? 'enviada' : atraso > 0 ? 'pendente' : null });
     });
@@ -188,12 +194,33 @@ window.Telas.centralCorp = (function () {
           </div>
         </div>
         <div class="cc-grafico__rotulos" style="--n: ${itens.length}">${itens.map((i) => `<span>${esc(i.rotulo || i.nome)}</span>`).join('')}</div>
+        ${itens.some((i) => i.grupo) ? `<div class="cc-grafico__grupos" style="--n: ${itens.length}">${gruposDoEixo(itens)}</div>` : ''}
       </div>`;
   }
 
+  // Eixo em dois níveis: embaixo da barra, a parte curta (Com, No prazo…); na linha de baixo, o grupo
+  // (Recomendação, Em execução, Fechada) ocupando as barras dele
+  function gruposDoEixo(itens) {
+    const blocos = [];
+    itens.forEach((i) => {
+      const ultimo = blocos[blocos.length - 1];
+      if (i.grupo && ultimo && ultimo.grupo === i.grupo) ultimo.n += 1;
+      else blocos.push({ grupo: i.grupo, n: 1 });
+    });
+    return blocos.map((b) => `<span class="${b.grupo ? 'cc-grafico__grupo' : ''}" style="grid-column: span ${b.n}">${esc(b.grupo || '')}</span>`).join('');
+  }
+
+  // Nome do status em duas partes para o eixo: Com recomendação → Com | Recomendação; Em execução · No prazo → No prazo | Em execução
+  function partesDoEixo(id, nome) {
+    if (id === 'planejada') return { rotulo: nome, grupo: null };
+    if (id.startsWith('recomendada')) return { rotulo: nome.split(' ')[0], grupo: 'Recomendação' };
+    const [grupo, rotulo] = nome.split(' · ');
+    return { rotulo, grupo };
+  }
+
   function graficos(rs) {
-    const status = STATUS_TODOS.map(([id, nome]) => ({ id, nome,
-      rotulo: nome.replace(' (', '\n('), valor: contar(rs.filter((r) => r.situacao === id)) }));
+    const status = STATUS_TODOS.map(([id, nome]) => ({ id, nome, ...partesDoEixo(id, nome),
+      valor: contar(rs.filter((r) => r.situacao === id)) }));
     const doStatus = est.status ? rs.filter((r) => r.situacao === est.status) : rs;
     const grupos = new Map();
     doStatus.forEach((r) => { const v = valorNivel(r, est.nivel); if (!grupos.has(v)) grupos.set(v, []); grupos.get(v).push(r); });
@@ -275,7 +302,7 @@ window.Telas.centralCorp = (function () {
         </div>
         <div class="oc-lista__acoes">
           <button class="botao botao--secundario" type="button" data-cc-notificar ${n ? '' : 'disabled'}
-                  title="${n ? 'Pedir ao usuário UniSystem Fazenda a justificativa das OS marcadas' : 'Marque OS com atraso pendentes de notificação'}">Notificar selecionadas (${n})</button>
+                  title="${n ? 'Pedir a justificativa das OS marcadas' : 'Marque OS com atraso pendentes de notificação'}">Notificar selecionadas (${n})</button>
           <button class="botao botao--secundario" type="button" data-cc-exportar>${Icones.baixar} Exportar CSV</button>
         </div>
       </div>
@@ -326,12 +353,12 @@ window.Telas.centralCorp = (function () {
       <p class="cc-tabela__rodape">${contar(ls).toLocaleString('pt-BR')} ${contar(ls) === 1 ? 'registro' : 'registros'} · ${ls.length.toLocaleString('pt-BR')} ${ls.length === 1 ? 'linha' : 'linhas'} (uma por talhão)</p>`;
   }
 
-  // Notificar: pede ao usuário UniSystem Fazenda a justificativa das linhas marcadas (Tela 08, Justificativas solicitadas)
+  // Notificar: pede a justificativa das linhas marcadas (Minhas tarefas, Tela 08, Justificativas solicitadas)
   function notificar(rs) {
     const { hoje } = B();
     const marcadas = rs.filter((r) => est.selecao.has(r.chave));
     const pedido = (r) => ({ motivo: r.status === 'planejada' || r.status === 'recomendada' ? 'Atraso na recomendação' : 'Atraso na execução',
-      data: hoje(), solicitadaPor: { nome: DADOS.usuario.nome, perfil: DADOS.usuario.perfil }, respondida: false });
+      data: hoje(), solicitadaPor: { nome: DADOS.usuario.nome }, respondida: false });
     marcadas.forEach((r) => {
       const original = r.numero && !r.gerada ? DADOS.ordensServico.find((o) => o.numero === r.numero) : null;
       if (original) { original.justificativa = pedido(r); return; }
@@ -401,7 +428,7 @@ window.Telas.centralCorp = (function () {
       if (t.closest('[data-cc-notificar]')) {
         const n = notificar(rs);
         redesenhar();
-        Aviso.mostrar(`${n === 1 ? 'Justificativa pedida' : `${n} justificativas pedidas`} ao usuário UniSystem Fazenda.`);
+        Aviso.mostrar(`${n === 1 ? 'Justificativa pedida' : `${n} justificativas pedidas`}. Aparecem em Minhas tarefas, em Justificativas solicitadas.`);
         return;
       }
       if (t.closest('[data-cc-exportar]')) exportar(rs);
