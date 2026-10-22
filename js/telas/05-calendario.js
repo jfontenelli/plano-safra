@@ -739,10 +739,12 @@ window.Telas.calendario = (function () {
     const q = Util.normalizar(((estado.busca || {})[chave] || '').trim());
     return !q || Util.normalizar(nome).includes(q);
   }
-  // chave: 'talhao' ou 'grupo'; textos: [todos, nenhum, plural]
+  // chave: 'talhao' ou 'grupo'; textos: [todos, nenhum, plural]. Com uma opção só (ex.: os outros filtros deixam só a
+  // Soja), mostra o nome dela, e não "Todas", e a caixa fica sem a linha "Todas"
   function filtroCaixa(estado, chave, opcoes, [todos, nenhum, plural], rotulo) {
     const marcadas = opcoes.filter((o) => marcado(estado, chave, o.valor));
-    const texto = marcadas.length === opcoes.length ? todos
+    const unica = opcoes.length === 1;
+    const texto = marcadas.length === opcoes.length && !unica ? todos
       : !marcadas.length ? nenhum
       : marcadas.length === 1 ? marcadas[0].nome : `${marcadas.length} ${plural}`;
     return `
@@ -753,9 +755,9 @@ window.Telas.calendario = (function () {
             <input type="search" class="campo__controle" data-campo="cal-busca" data-filtro="${chave}" placeholder="Pesquisar"
                    aria-label="Pesquisar ${esc(rotulo.toLowerCase())}" value="${esc((estado.busca || {})[chave] || '')}" autocomplete="off">
           </div>
-          <label class="cal-filtro__opcao cal-filtro__opcao--todos">
+          ${unica ? '' : `<label class="cal-filtro__opcao cal-filtro__opcao--todos">
             <input type="checkbox" data-campo="cal-filtro" data-filtro="${chave}" value="todos" ${marcadas.length === opcoes.length ? 'checked' : ''}> ${esc(todos)}
-          </label>
+          </label>`}
           ${opcoes.map((o) => `
             <label class="cal-filtro__opcao" data-nome="${esc(Util.normalizar(o.nome))}" ${casaBusca(estado, chave, o.nome) ? '' : 'hidden'}>
               <input type="checkbox" data-campo="cal-filtro" data-filtro="${chave}" value="${esc(o.valor)}" ${marcado(estado, chave, o.valor) ? 'checked' : ''}>

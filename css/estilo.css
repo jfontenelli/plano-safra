@@ -2998,6 +2998,134 @@ html[data-tema="escuro"] .grafico-historico__valor { fill: #5FD896; }
 .os-cal .filtros .campo { max-width: 220px; }
 .os-cal .filtros .campo__rotulo { margin-bottom: 2px; }
 .os-cal .cal-filtro__botao { height: 34px; font-size: 14px; }
+/* Monitoramento de Aplicações (Gestão da Lavoura › Monitoramento): filtros compactos como os da Agenda Agrícola e
+   a tabela por talhão, com uma coluna por aplicação (Planejado · Executada · Dif.) */
+.ma { display: flex; flex-direction: column; gap: 12px; padding: 12px 40px 14px; }
+.ma .filtros { margin-bottom: 0; padding: 10px 20px; }
+.ma .filtros .campo { max-width: 220px; }
+.ma .filtros .campo__rotulo { margin-bottom: 2px; }
+.ma .cal-filtro__botao { height: 34px; font-size: 14px; }
+.ma-tabela__rolagem { max-height: calc(100vh - 330px); min-height: 220px; overflow: auto; }
+/* Cabeçalho parado ao rolar para baixo e colunas Fazenda até Data de plantio congeladas ao rolar para o lado
+   (a posição de cada uma é medida no JS). Bordas separadas: com bordas juntas, as linhas somem nas células paradas */
+.ma-tabela { border-collapse: separate; border-spacing: 0; }
+.ma-tabela th { position: sticky; top: 0; z-index: 2; }
+.ma-tabela .ma-fixa { position: sticky; z-index: 1; background: var(--superficie); }
+.ma-tabela th.ma-fixa { z-index: 3; background: var(--superficie-2); }
+.ma-tabela tbody tr:hover .ma-fixa { background: var(--superficie-2); }
+.ma-tabela .ma-fixa--ultima { box-shadow: 6px 0 6px -4px rgba(0, 0, 0, .12); }
+/* Títulos centralizados na coluna, na horizontal e na vertical, com a seta de ordenar depois do texto */
+.ma-tabela th, .ma-tabela th.tabela__numero { vertical-align: middle; text-align: center !important; }
+.ma-tabela th .titulo-coluna { justify-content: center; text-align: center; }
+.ma-tabela th.tabela__numero .titulo-coluna { flex-direction: row; }
+/* Linhas entre todas as colunas, como na imagem de referência */
+.ma-tabela th + th, .ma-tabela td + td, .ma-tabela thead tr + tr th:first-child { border-left: 1px solid var(--borda); }
+.ma-tabela .ma-quebra { min-width: 96px; max-width: 130px; white-space: normal; }
+/* Títulos longos (Aplicações executadas, Dias sem aplicação, operações) quebram linha dentro da coluna */
+.ma-tabela th.ma-quebra .titulo-coluna { white-space: normal; }
+.ma-tabela .ma-talhao { font-weight: 600; }
+.ma-tabela .ma-variedade { min-width: 140px; max-width: 220px; white-space: normal; }
+.ma-tabela .ma-vazio { color: var(--texto-fraco); }
+/* Cabeçalho: título e subtítulo à esquerda; Executadas | Planejada × Executada à direita (botão ativo em verde) */
+.ma-cabecalho { padding-bottom: 4px; }
+.ma-cabecalho__linha { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px 24px; }
+.ma-visao { display: inline-flex; border: 1px solid var(--borda); border-radius: 10px; background: var(--superficie); overflow: hidden; }
+.ma-visao__botao { display: inline-flex; align-items: center; gap: 10px; height: 42px; padding: 0 20px; border: 0; background: transparent;
+  font: inherit; font-size: 15px; font-weight: 600; color: var(--texto); cursor: pointer; }
+.ma-visao__botao .icone { width: 18px; height: 18px; }
+.ma-visao__botao:hover { background: var(--superficie-2); }
+.ma-visao__botao--ativo, .ma-visao__botao--ativo:hover { background: var(--verde-700); color: #fff; }
+html[data-tema="escuro"] .ma-visao__botao--ativo { background: #176B50; }
+.ma-visao__botao:focus-visible { outline: 2px solid var(--verde-600); outline-offset: -2px; }
+.ma-construcao { margin: 0; padding: 48px 20px; text-align: center; color: var(--texto-suave); }
+/* Linha do tempo do Monitoramento: uma faixa por talhão (coluna Talhão parada à esquerda, escala parada no topo) */
+.ma-lista { --mt-adiantada: #c99a06; --mt-prazo: #1f9d55; --mt-atrasada: #e8772e; --mt-pendente: #d93025; --mt-futura: #9aa5ad; }
+html[data-tema="escuro"] .ma-lista { --mt-adiantada: #E2B93B; --mt-prazo: #4FD28A; --mt-atrasada: #F0995A; --mt-pendente: #F28B82; --mt-futura: #7C8E9B; }
+.mt-rolagem { max-height: calc(100vh - 330px); min-height: 220px; overflow: auto; border-top: 1px solid var(--borda); }
+.mt { width: max-content; min-width: 100%; }
+.mt-linha { display: flex; border-bottom: 1px solid var(--borda); }
+.mt-linha--cabecalho { position: sticky; top: 0; z-index: 3; background: var(--superficie-2); }
+.mt-talhao { position: sticky; left: 0; z-index: 2; flex: none; width: 250px; padding: 14px 16px 12px 20px; background: var(--superficie);
+  border-right: 1px solid var(--borda); box-shadow: 6px 0 6px -4px rgba(0, 0, 0, .08); }
+.mt-talhao--cabecalho { display: flex; align-items: center; background: var(--superficie-2); font-size: 13px; font-weight: 600; color: var(--texto-suave); }
+.mt-talhao p { margin: 0; }
+.mt-talhao__nome strong { font-size: 18px; }
+.mt-talhao__nome span, .mt-talhao__var { font-size: 13px; color: var(--texto-suave); }
+.mt-talhao__var { margin-top: 2px !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mt-segmentos { display: flex; gap: 4px; margin: 10px 0 6px; }
+.mt-segmento { flex: 1; height: 6px; border-radius: 3px; }
+.mt-talhao__conta { font-size: 13px; color: var(--texto-suave); }
+.mt-talhao__pendente { color: var(--mt-pendente); font-weight: 600; }
+.mt-fundo--adiantada { background: var(--mt-adiantada); }
+.mt-fundo--prazo { background: var(--mt-prazo); }
+.mt-fundo--atrasada { background: var(--mt-atrasada); }
+.mt-fundo--pendente { background: var(--mt-pendente); }
+.mt-fundo--futura { background: var(--superficie-3); }
+.mt-trilho { position: relative; flex: none; width: var(--mt-largura); height: 146px; background-repeat: repeat-x; }
+.mt-escala { height: 56px; }
+.mt-escala__marca { position: absolute; bottom: 10px; transform: translateX(-50%); font-size: 13px; color: var(--texto-suave); }
+.mt-escala__hoje { position: absolute; top: 6px; z-index: 1; transform: translateX(-50%); padding: 2px 10px; border-radius: 999px;
+  background: var(--texto-suave); color: var(--superficie); font-size: 12px; font-weight: 600; white-space: nowrap; }
+.mt-hoje { position: absolute; top: 0; bottom: 0; border-left: 2px dashed var(--texto-fraco); opacity: .7; }
+.mt-escala .mt-hoje { top: 28px; }
+.mt-ev__nome, .mt-ev__status, .mt-ev__exec, .mt-ponto { position: absolute; transform: translateX(-50%); white-space: nowrap; }
+.mt-ev__nome { top: 14px; font-size: 13px; color: var(--texto-suave); }
+.mt-ev__nome strong { color: var(--texto); }
+.mt-ev__status { top: 78px; min-width: 0; padding: 3px 9px; font-size: 13px; }
+.mt-ev__exec { top: 110px; font-size: 12px; color: var(--texto-suave); }
+.mt-ponto { top: 48px; z-index: 1; width: 18px; height: 18px; border-radius: 50%; box-sizing: border-box; }
+.mt-ponto--planejado { border: 2px solid var(--texto); background: var(--superficie); }
+.mt-ponto--executado { top: 52px; width: 10px; height: 10px; }
+.mt-ponto--futura { border: 2px dashed var(--mt-futura); background: var(--superficie); }
+.mt-ponto--no-dia::after { content: ""; position: absolute; inset: 3px; border-radius: 50%; background: var(--mt-prazo); }
+.mt-ponto--planejado.mt-cor--pendente { border-color: var(--mt-pendente); }
+.mt-ponto--executado.mt-cor--adiantada { background: var(--mt-adiantada); }
+.mt-ponto--executado.mt-cor--atrasada { background: var(--mt-atrasada); }
+.mt-desvio { position: absolute; top: 55px; height: 4px; border-radius: 2px; }
+.mt-desvio.mt-cor--adiantada { background: var(--mt-adiantada); }
+.mt-desvio.mt-cor--atrasada { background: var(--mt-atrasada); }
+.mt-atraso { position: absolute; top: 56px; border-top: 3px dashed var(--mt-pendente); }
+/* Barra acima da tabela: legenda dos status da aplicação (clicável) */
+.ma-barra { display: flex; align-items: center; flex-wrap: wrap; gap: 12px 24px; padding: 14px 20px; }
+/* Status da aplicação: cor de fundo da última célula da aplicação (e da legenda) */
+.ma-legenda { display: flex; align-items: center; gap: 16px; font-size: 13px; color: var(--texto-suave); }
+.ma-legenda__titulo { color: var(--texto); }
+.ma-legenda ul { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 0; padding: 0; list-style: none; }
+.ma-legenda li { display: inline-flex; }
+.ma-legenda__item { display: inline-flex; align-items: center; gap: 6px; padding: 4px 6px; border: 0; border-radius: 6px; background: transparent;
+  font: inherit; color: inherit; cursor: pointer; }
+.ma-legenda__item:hover { background: var(--superficie-2); color: var(--texto); }
+.ma-legenda__item[aria-pressed="true"] { color: var(--texto); font-weight: 600; }
+.ma-legenda__item--apagado { opacity: .45; }
+.ma-legenda__item:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 1px; }
+.ma-legenda__cor { display: inline-grid; place-items: center; width: 16px; height: 16px; border-radius: 4px; border: 1px solid var(--borda-forte); }
+/* Pendente e Futura: o mesmo ícone da tabela, na cor do status */
+.ma-legenda__cor .icone { width: 12px; height: 12px; }
+.ma-legenda__cor.ma-st--pendente { color: var(--erro); }
+.ma-legenda__cor.ma-st--futura { color: var(--texto-suave); }
+/* Quadradinhos da legenda nas cores fortes, as mesmas das barrinhas de cada talhão na linha do tempo */
+.ma-legenda .ma-legenda__cor { border-color: transparent; }
+.ma-legenda .ma-legenda__cor.ma-st--adiantada { background: var(--mt-adiantada); }
+.ma-legenda .ma-legenda__cor.ma-st--prazo { background: var(--mt-prazo); }
+.ma-legenda .ma-legenda__cor.ma-st--atrasada { background: var(--mt-atrasada); }
+.ma-legenda .ma-legenda__cor.ma-st--pendente { background: var(--mt-pendente); color: #fff; }
+.ma-legenda .ma-legenda__cor.ma-st--futura { background: var(--superficie-3); color: var(--texto-suave); }
+.ma-st--adiantada { background: var(--aviso-fundo); }
+.ma-st--prazo     { background: var(--verde-100); }
+.ma-st--atrasada  { background: #fdebdc; }
+.ma-st--pendente  { background: #f6cfca; }
+.ma-st--futura    { background: var(--superficie-2); }
+/* Etiqueta do status na última célula da aplicação: fundo da legenda e texto na cor do status */
+.ma-etiqueta { display: inline-block; min-width: 42px; padding: 3px 10px; border-radius: 6px; font-weight: 600; text-align: center; font-variant-numeric: tabular-nums; }
+.ma-etiqueta.ma-st--adiantada { color: var(--aviso-texto); }
+.ma-etiqueta.ma-st--prazo     { color: var(--verde-700); }
+.ma-etiqueta.ma-st--atrasada  { color: #b9560f; }
+.ma-etiqueta.ma-st--pendente  { color: var(--erro); }
+.ma-etiqueta.ma-st--futura    { color: var(--texto-suave); font-weight: 400; }
+.ma-etiqueta .icone { width: 15px; height: 15px; margin-right: 5px; vertical-align: -3px; }
+html[data-tema="escuro"] .ma-st--pendente { background: #5A2626; }
+html[data-tema="escuro"] .ma-st--atrasada { background: #3D2817; }
+html[data-tema="escuro"] .ma-etiqueta.ma-st--atrasada { color: #F0995A; }
 .os-cal__corpo { flex: 1; display: flex; flex-direction: column; min-height: 0; padding: 0; gap: 8px; }
 .os-cal__corpo .calendario__barra { flex: none; }
 .os-cal__corpo .cal-mes { flex: 1; min-height: 0; align-items: stretch; }

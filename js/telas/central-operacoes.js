@@ -288,7 +288,7 @@ window.Telas.centralOperacoes = (function () {
     const cartao = CARTOES.find((c) => c.id === est.cartao);
     return `
       <div class="filtros oc-filtros__campos">
-        ${opcoesSelect('safra', 'Safra', safras().map((s) => [s.nome, s.descricao]), '', est.safra)}
+        ${opcoesSelect('safra', 'Safra', safras().map((s) => [s.nome, s.nome]), '', est.safra)}
         ${opcoesSelect('cultura', 'Cultura', presentes('cultura', DADOS.culturasPlanos), 'Todas', est.cultura)}
         ${opcoesSelect('empresa', 'Empresa', presentes('empresa', DADOS.empresas), 'Todas', est.empresa)}
         ${opcoesSelect('fazenda', 'Fazenda', presentes('fazenda', fazendas), 'Todas', est.fazenda)}

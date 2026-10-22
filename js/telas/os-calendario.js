@@ -15,7 +15,7 @@ window.Telas.osCalendario = (function () {
   // Grupos de operação pelo tipo (os nomes de cada plano podem mudar; a cor segue o tipo), nesta ordem na legenda
   const ORDEM_TIPO = ['sementes', 'fertilidade', 'defensivos', 'colheita'];
   const FILTROS = [
-    ['ciclo', 'Safra', ['Todas', 'Nenhuma', 'selecionadas']],
+    ['safra', 'Safra', ['Todas', 'Nenhuma', 'selecionadas']],
     ['cultura', 'Cultura', ['Todas', 'Nenhuma', 'culturas']],
     ['empresa', 'Empresa', ['Todas', 'Nenhuma', 'empresas']],
     ['fazenda', 'Fazenda', ['Todas', 'Nenhuma', 'fazendas']],
@@ -24,7 +24,7 @@ window.Telas.osCalendario = (function () {
   ];
 
   // Estado da tela: período, dia aberto e filtros ('todos' ou a lista do que está marcado). Mantém-se ao navegar.
-  const novoEstado = () => ({ escala: 'mes', dataRef: Cal().hojeIso(), ciclo: 'todos', empresa: 'todos', fazenda: 'todos',
+  const novoEstado = () => ({ escala: 'mes', dataRef: Cal().hojeIso(), safra: 'todos', empresa: 'todos', fazenda: 'todos',
     cultura: 'todos', operacao: 'todos', talhao: 'todos', grupo: 'todos' });
   let est = null;
 
@@ -35,7 +35,7 @@ window.Telas.osCalendario = (function () {
   // Aparece no calendário: grupo ligado na legenda e operação marcada no filtro
   const visivel = (it) => Cal().marcado(est, 'grupo', tipoDe(it.grupo)) && Cal().marcado(est, 'operacao', nomeOp(it));
   const comPublicada = () => DADOS.planos.filter((p) => Versoes.publicadaComPlanejamento(p));
-  const valorDe = { ciclo: cicloDe, empresa: (p) => p.empresa, fazenda: (p) => p.fazenda, cultura: (p) => p.cultura };
+  const valorDe = { safra: (p) => p.safra, empresa: (p) => p.empresa, fazenda: (p) => p.fazenda, cultura: (p) => p.cultura };
   const planosFiltrados = () => comPublicada().filter((p) => Object.keys(valorDe).every((c) => Cal().marcado(est, c, valorDe[c](p))));
 
   // Opções de cada filtro: o que existe nos planos com versão publicada. Talhão: os talhões dos planos que passam
@@ -59,8 +59,10 @@ window.Telas.osCalendario = (function () {
       }));
       return [...vistos.values()].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR', { numeric: true }));
     }
-    const ordem = { ciclo: ['Safra', 'Safrinha'], empresa: DADOS.empresas, fazenda: DADOS.fazendas, cultura: DADOS.culturasPlanos }[chave];
     const presentes = new Set(comPublicada().map(valorDe[chave]));
+    // Safra: as do cadastro (26/27, 27/27…), na ordem do cadastro
+    if (chave === 'safra') return Util.ordenarSafras([...presentes]).map((x) => ({ valor: x, nome: x }));
+    const ordem = { empresa: DADOS.empresas, fazenda: DADOS.fazendas, cultura: DADOS.culturasPlanos }[chave];
     return ordem.filter((x) => presentes.has(x)).map((x) => ({ valor: x, nome: x }));
   }
 

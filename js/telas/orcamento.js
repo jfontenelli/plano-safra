@@ -13,7 +13,6 @@ window.Telas = window.Telas || {};
 
 window.Telas.orcamento = (function () {
   const esc = Util.escapar;
-  const CICLOS = ['Safra', 'Safrinha'];
 
   // Estado da sessão (só em memória): mantido ao navegar entre telas
   let moeda = 'R$';
@@ -37,17 +36,16 @@ window.Telas.orcamento = (function () {
   const publicados = () => DADOS.planos.filter((p) => Versoes.publicadaComPlanejamento(p));
   // Ano Agrícola: uma escolha só (os parâmetros são do ano). Os outros: várias escolhas (vazio = todos)
   const filtrosIniciais = () => ({ anoAgricola: Util.anoAgricolaMaisRecente(Util.anosAgricolas(publicados())),
-    ciclo: [], empresa: [], fazenda: [], talhao: [], cultura: [], insumo: [] });
+    safra: [], empresa: [], fazenda: [], talhao: [], cultura: [], insumo: [] });
   const passa = (campo, valor) => !filtros[campo].length || filtros[campo].includes(valor);
 
   // ----- Filtros -----
   // Planos do ano agrícola; com "ate", também os filtros de cima até aquele campo (as opções dependem dos de cima)
-  const CAMPOS = ['ciclo', 'empresa', 'fazenda', 'cultura'];
+  const CAMPOS = ['safra', 'empresa', 'fazenda', 'cultura'];
   function planosFiltrados(ate) {
     const usados = ate ? CAMPOS.slice(0, CAMPOS.indexOf(ate)) : CAMPOS;
-    const valor = (p, c) => (c === 'ciclo' ? cicloDe(p) : p[c]);
     return publicados().filter((p) => String(Util.anoAgricola(p.safra)) === filtros.anoAgricola
-      && usados.every((c) => passa(c, valor(p, c))));
+      && usados.every((c) => passa(c, p[c])));
   }
   const talhoesDe = (p) => Util.talhoesPlano(p, Versoes.ultimaPublicada(p));
   function opcoes(campo) {
@@ -57,8 +55,10 @@ window.Telas.orcamento = (function () {
       const nomes = new Set(planosFiltrados().flatMap((p) => talhoesDe(p).map((t) => t.nome)));
       return [...nomes].sort((a, b) => a.localeCompare(b, 'pt-BR', { numeric: true }));
     }
-    const naLista = new Set(planosFiltrados(campo).map((p) => (campo === 'ciclo' ? cicloDe(p) : p[campo])));
-    const cadastro = { ciclo: CICLOS, empresa: DADOS.empresas, fazenda: DADOS.fazendas, cultura: DADOS.culturasPlanos }[campo];
+    const naLista = new Set(planosFiltrados(campo).map((p) => p[campo]));
+    // Safra: as do cadastro (26/27, 27/27…), na ordem do cadastro
+    if (campo === 'safra') return Util.ordenarSafras([...naLista]);
+    const cadastro = { empresa: DADOS.empresas, fazenda: DADOS.fazendas, cultura: DADOS.culturasPlanos }[campo];
     return cadastro.filter((item) => naLista.has(item));
   }
 
@@ -196,7 +196,7 @@ window.Telas.orcamento = (function () {
           ${anos.map((a) => `<option value="${esc(a)}" ${a === filtros.anoAgricola ? 'selected' : ''}>${esc(a)}</option>`).join('')}
         </select>
       </div>
-      ${multi('ciclo', 'Safra', 'Todas', 'selecionadas')}
+      ${multi('safra', 'Safra', 'Todas', 'selecionadas')}
       ${multi('empresa', 'Empresa', 'Todas', 'selecionadas')}
       ${multi('fazenda', 'Fazenda', 'Todas', 'selecionadas')}
       ${multi('talhao', 'Talhão', 'Todos', 'selecionados')}

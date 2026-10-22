@@ -53,6 +53,14 @@ window.Util = {
     return Util.cadastroSafra(safra).anoAgricola;
   },
 
+  // Safras para o filtro Safra, pelo cadastro: da mais recente para a mais antiga (no mesmo ano agrícola, a safrinha
+  // vem antes da safra): "27/27", "26/27", "26/26", "25/26"
+  ordenarSafras(nomes) {
+    const safrinha = (s) => { const [a, b] = String(s).split('/'); return a === b; };
+    return [...new Set(nomes)].sort((a, b) => (Util.anoAgricola(b) || 0) - (Util.anoAgricola(a) || 0)
+      || safrinha(b) - safrinha(a) || b.localeCompare(a));
+  },
+
   // Anos agrícolas dos planos, do mais antigo ao mais recente, em texto ("2026"), como nos filtros
   anosAgricolas(planos) {
     return [...new Set(planos.map((p) => Util.anoAgricola(p.safra)).filter(Boolean).map(String))].sort();

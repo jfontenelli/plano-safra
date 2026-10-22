@@ -33,7 +33,7 @@ window.Telas.painelPlanos = (function () {
     return DADOS.planos
       .filter((p) => !f.anoAgricola || String(Util.anoAgricola(p.safra)) === f.anoAgricola)
       .map((p) => ({ plano: p, empresa: p.empresa, fazenda: p.fazenda, ciclo: cicloDe(p), safra: p.safra, cultura: p.cultura, atividade: p.atividade }))
-      .filter((l) => (!f.ciclo || l.ciclo === f.ciclo) && (!f.empresa || l.empresa === f.empresa) && (!f.fazenda || l.fazenda === f.fazenda)
+      .filter((l) => (!f.safra || l.safra === f.safra) && (!f.empresa || l.empresa === f.empresa) && (!f.fazenda || l.fazenda === f.fazenda)
         && (!f.atividade || l.atividade === f.atividade) && (!f.cultura || l.cultura === f.cultura))
       .map((l) => ({ ...l, status: statusDe(l.plano), area: Util.areaCultivo(l.plano, Versoes.deTrabalho(l.plano)) }))
       .sort((a, b) => ORDEM_STATUS.indexOf(a.status) - ORDEM_STATUS.indexOf(b.status)
@@ -42,13 +42,12 @@ window.Telas.painelPlanos = (function () {
   }
 
   // Safras do ano agrícola para o modal Criar Plano (link do aviso sem plano). Já escolhida quando o filtro Safra
-  // diz qual (Safra ou Safrinha) e só há uma dela no ano.
+  // diz qual.
   function safrasDoAno(f) {
     if (!f.anoAgricola) return {};
     const lista = safras().filter((s) => String(Util.anoAgricola(s)) === f.anoAgricola)
       .sort((a, b) => (cicloDoNome(a) === 'Safrinha') - (cicloDoNome(b) === 'Safrinha') || a.localeCompare(b));
-    const doCiclo = f.ciclo ? lista.filter((s) => cicloDoNome(s) === f.ciclo) : [];
-    return { safras: lista, safra: doCiclo.length === 1 ? doCiclo[0] : '' };
+    return { safras: lista, safra: f.safra && lista.includes(f.safra) ? f.safra : '' };
   }
 
   // Valores que os filtros Empresa e Fazenda oferecem além dos planos (as fazendas de cada empresa, mesmo sem plano)

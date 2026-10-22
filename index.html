@@ -23,9 +23,10 @@
         <div class="menu__grupo">
           <a class="menu__item menu__pai" href="#/plano-safra" title="Plano de Safra">
             <svg class="menu__icone" viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M12 21v-9"/>
-              <path d="M12 12c0-4 2.5-6.5 7-6.5 0 4.5-2.5 6.5-7 6.5Z"/>
-              <path d="M12 14c0-3.5-2.2-5.5-6.5-5.5 0 3.8 2.2 5.5 6.5 5.5Z"/>
+              <!-- Plano: folha de papel com um broto no topo e as linhas do texto -->
+              <rect x="4.5" y="2.5" width="15" height="19" rx="1.5"/>
+              <path d="M12 10.5V7.8M12 7.8c0-1.8-1.1-2.9-3-2.9 0 1.8 1.1 2.9 3 2.9ZM12 7.8c0-1.8 1.1-2.9 3-2.9 0 1.8-1.1 2.9-3 2.9Z"/>
+              <path d="M8 13h8M8 15.6h8M8 18.2h5"/>
             </svg>
             <span class="menu__texto">Plano de Safra</span>
           </a>
@@ -67,10 +68,10 @@
         <div class="menu__grupo">
           <a class="menu__item menu__pai" href="#/operacoes-agricolas" title="Gestão da Lavoura">
             <svg class="menu__icone" viewBox="0 0 24 24" aria-hidden="true">
-              <!-- Lavoura: brotos sobre as linhas do campo -->
-              <path d="M3 20h18M5 16.5h14"/>
-              <path d="M8 13V9M8 9c0-2 1.2-3.2 3.2-3.2 0 2-1.2 3.2-3.2 3.2ZM8 10.5c0-1.6-1-2.6-2.8-2.6 0 1.6 1 2.6 2.8 2.6Z"/>
-              <path d="M16 13V8M16 8c0-2.2 1.3-3.5 3.5-3.5 0 2.2-1.3 3.5-3.5 3.5ZM16 9.8c0-1.7-1-2.8-3-2.8 0 1.7 1 2.8 3 2.8Z"/>
+              <!-- Lavoura: o broto (antes o ícone do Plano de Safra) -->
+              <path d="M12 21v-9"/>
+              <path d="M12 12c0-4 2.5-6.5 7-6.5 0 4.5-2.5 6.5-7 6.5Z"/>
+              <path d="M12 14c0-3.5-2.2-5.5-6.5-5.5 0 3.8 2.2 5.5 6.5 5.5Z"/>
             </svg>
             <span class="menu__texto">Gestão da Lavoura</span>
           </a>
@@ -89,11 +90,36 @@
             </a>
           </div>
         </div>
+        <!-- Monitoramento: por enquanto, um item (Aplicações) -->
+        <div class="menu__grupo">
+          <a class="menu__item menu__pai" href="#/monitoramento" title="Monitoramento">
+            <svg class="menu__icone" viewBox="0 0 24 24" aria-hidden="true">
+              <!-- Lupa sobre uma folha -->
+              <circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5 5"/>
+              <path d="M8 13c0-3 1.8-5 5-5 0 3-2 5-5 5ZM8 13l2.5-2.5"/>
+            </svg>
+            <span class="menu__texto">Monitoramento</span>
+          </a>
+          <button class="menu__grupo-alternar" type="button" data-grupo="Monitoramento"
+                  aria-controls="menu-subitens-monitoramento" aria-expanded="true" title="Minimizar Monitoramento">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="menu__subitens" id="menu-subitens-monitoramento">
+            <a class="menu__item menu__sub" href="#/monitoramento" data-rota="aplicacoes" title="Aplicações">
+              <svg class="menu__icone" viewBox="0 0 24 24" aria-hidden="true">
+                <!-- Pulverizador: bico com gotas -->
+                <path d="M4 8h8l3 3H4z"/><path d="M15 11h2"/>
+                <path d="M19 8.5v.01M20.5 11v.01M19 13.5v.01M17.5 16v.01M20 16.5v.01"/>
+              </svg>
+              <span class="menu__texto">Aplicações</span>
+            </a>
+          </div>
+        </div>
         <a class="menu__item" href="#/cadastros" data-rota="cadastros" title="Cadastros">
           <svg class="menu__icone" viewBox="0 0 24 24" aria-hidden="true">
-            <!-- Pessoas -->
-            <circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5"/>
-            <circle cx="17" cy="9" r="2.6"/><path d="M15.6 14.6c3 .2 5.4 2.1 5.4 5.4"/>
+            <!-- Editar: lápis sobre um quadro aberto -->
+            <path d="M11 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5"/>
+            <path d="M18.4 2.6a2 2 0 0 1 2.9 2.9L12 14.8l-3.8 1 1-3.8Z"/>
           </svg>
           <span class="menu__texto">Cadastros</span>
         </a>
@@ -153,6 +179,7 @@
   <script src="js/telas/central-operacoes.js"></script>
   <script src="js/telas/central-corp.js"></script>
   <script src="js/telas/os-calendario.js"></script>
+  <script src="js/telas/monitoramento-aplicacoes.js"></script>
   <script src="js/telas/orcamento.js"></script>
   <script src="js/telas/04.0-operacoes-plano.js"></script>
   <script src="js/telas/inicio-plano.js"></script>

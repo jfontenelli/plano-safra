@@ -42,6 +42,10 @@
                           else if (aba === 'central') Telas.centralCorp.aoMostrar(conteudo);
                           else Telas.centralOperacoes.aoMostrar(conteudo);
                         } },
+    // Menu Monitoramento › Aplicações (#/monitoramento)
+    'monitoramento':  { titulo: 'Aplicações', menu: 'aplicacoes',
+                        desenhar: () => temPlanos() ? Telas.monitoramentoAplicacoes.desenhar() : Telas.semPlanos('monitoramento'),
+                        aoMostrar: (conteudo) => { if (temPlanos()) Telas.monitoramentoAplicacoes.aoMostrar(conteudo); } },
     'cadastros':      { titulo: 'Cadastros', menu: 'cadastros',
                         desenhar: () => Telas.emConstrucao('Cadastros') }
   };
@@ -50,7 +54,7 @@
   // Estado da sessão (só em memória)
   const estado = {
     menuRecolhido: false, // menu começa expandido
-    gruposFechados: new Set(), // grupos do menu (Plano de Safra, Gestão da Lavoura) começam abertos; a setinha minimiza
+    gruposFechados: new Set(), // grupos do menu (Plano de Safra, Gestão da Lavoura, Monitoramento) começam abertos; a setinha minimiza
     proximoIdPlano: 1,
     ultimoPlanoId: null   // último plano aberto (o menu Planejamento abre nele)
   };
@@ -179,6 +183,50 @@
     else { window.addEventListener('hashchange', aviso, { once: true }); location.hash = '#/plano-safra'; }
   }
 
+  // O exemplo anda com o dia (DADOS.dataReferencia): todas as datas do exemplo andam a diferença entre hoje e a data de
+  // referência, e hoje cai sempre no mesmo ponto da safra. Os nomes das safras andam os anos agrícolas entre as duas
+  // datas (o ano agrícola vira em 01/09; ex.: 26/27 → 27/28), inclusive no cadastro de safras, que anda em anos (a safra
+  // começa sempre em 01/09): assim, a safra do exemplo é sempre a safra atual. Uma vez, ao abrir.
+  function ajustarCenario() {
+    const ref = DADOS.dataReferencia;
+    if (!ref) return;
+    const hoje = Util.hojeISO();
+    const dias = Math.round((Date.parse(hoje) - Date.parse(ref)) / 86400000);
+    if (!dias) return;
+    const anoAgricola = (iso) => (+iso.slice(5, 7) >= 9 ? +iso.slice(0, 4) : +iso.slice(0, 4) - 1);
+    const anos = anoAgricola(hoje) - anoAgricola(ref);
+    const dois = (n) => String(n).padStart(2, '0');
+    const data = (iso) => {
+      const [d, hora] = iso.split('T');
+      const [a, m, dd] = d.split('-').map(Number);
+      const dt = new Date(a, m - 1, dd + dias);
+      const nova = `${dt.getFullYear()}-${dois(dt.getMonth() + 1)}-${dois(dt.getDate())}`;
+      return hora ? `${nova}T${hora}` : nova;
+    };
+    const safra = (nome) => nome.replace(/(\d\d)\/(\d\d)/, (_, a, b) => `${dois((+a + anos) % 100)}/${dois((+b + anos) % 100)}`);
+    const ISO = /^\d{4}-\d{2}-\d{2}(T[\d:]+)?$/;
+    const SAFRA = /^\d\d\/\d\d$/;
+    // Percorre o dado: datas andam os dias; nomes de safra (também nas chaves, ex.: "Boa Vista 26/27") andam os anos
+    const andar = (v) => {
+      if (typeof v === 'string') return ISO.test(v) ? data(v) : anos && SAFRA.test(v) ? safra(v) : v;
+      if (Array.isArray(v)) return v.map(andar);
+      if (v && typeof v === 'object') {
+        return Object.fromEntries(Object.entries(v).map(([k, x]) => [anos ? k.replace(/\b\d\d\/\d\d\b/, safra) : k, andar(x)]));
+      }
+      return v;
+    };
+    ['planosExemplo', 'ordensServico', 'osFechadasAte', 'justificativasOperacoes', 'monitoramento', 'historico', 'safras']
+      .forEach((chave) => { if (chave in DADOS) DADOS[chave] = andar(DADOS[chave]); });
+    if (anos) {
+      DADOS.cadastroSafras = DADOS.cadastroSafras.map((c) => {
+        const [a, b] = c.descricao.split('/').map(Number);
+        const ano = (iso) => `${+iso.slice(0, 4) + anos}${iso.slice(4)}`;
+        return { ...c, nome: safra(c.nome), descricao: `${a + anos}/${b + anos}`, apelido: String(+c.apelido + anos),
+          inicio: ano(c.inicio), fim: ano(c.fim), anoAgricola: c.anoAgricola + anos };
+      });
+    }
+  }
+
   // Mantém as safras já cadastradas (inclusive a criada no modal) e inclui a dos exemplos
   function carregarPlanosExemplo() {
     DADOS.planos = DADOS.planosExemplo.map(({ operacoes, versoes, modelo, inicio, ...p }) => {
@@ -249,7 +297,8 @@
 
   desenharUsuario();
   aplicarEstadoMenu();
-  // Ao abrir o protótipo, já vem com os planos de exemplo
+  // Ao abrir o protótipo, já vem com os planos de exemplo, com as datas andadas para hoje
+  ajustarCenario();
   carregarPlanosExemplo();
   mostrarTela();
 })();

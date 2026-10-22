@@ -11,16 +11,14 @@ window.Telas.listaPlanos = (function () {
 
   // Filtros, os mesmos nas duas guias (Status só no Histórico). Ano Agrícola (junta as safras e
   // safrinhas do ano) começa no de hoje, ou no mais recente com planos; os demais em "Todas"/"Todos" ('').
-  // ciclo: Safra ou Safrinha (o filtro "Safra")
-  const CAMPOS_FILTRO = ['anoAgricola', 'atividade', 'ciclo', 'empresa', 'fazenda', 'cultura', 'status'];
-  const CICLOS = ['Safra', 'Safrinha'];
+  // Safra: as safras do cadastro (26/27, 27/27…) dos planos do ano agrícola escolhido
+  const CAMPOS_FILTRO = ['anoAgricola', 'atividade', 'safra', 'empresa', 'fazenda', 'cultura', 'status'];
   const STATUS = [['nao-iniciado', 'Não iniciado'], ['construcao', 'Em construção'], ['publicada', 'Publicada'], ['revisada', 'Revisada']];
   let filtros = {};
-  const filtrosIniciais = () => ({ anoAgricola: Util.anoAgricolaInicial(Telas.painelPlanos.anos()), atividade: '', ciclo: '', empresa: '', fazenda: '', cultura: '', status: '' });
+  const filtrosIniciais = () => ({ anoAgricola: Util.anoAgricolaInicial(Telas.painelPlanos.anos()), atividade: '', safra: '', empresa: '', fazenda: '', cultura: '', status: '' });
 
   // Opções de cada filtro: só os valores que aparecem nos planos da lista (na ordem do cadastro)
   const valorDe = (p, campo) => (campo === 'anoAgricola' ? String(Util.anoAgricola(p.safra))
-    : campo === 'ciclo' ? Telas.painelPlanos.cicloDe(p)
     : campo !== 'status' ? p[campo] : Versoes.aIniciar(p) ? 'nao-iniciado' : Versoes.deTrabalho(p).status);
   function presentes(campo, cadastro) {
     const naLista = new Set(DADOS.planos.map((p) => valorDe(p, campo)));
@@ -40,6 +38,16 @@ window.Telas.listaPlanos = (function () {
     const daEmpresa = new Set([...((DADOS.fazendasPorEmpresa || {})[filtros.empresa] || []),
       ...DADOS.planos.filter((p) => p.empresa === filtros.empresa).map((p) => p.fazenda)]);
     return lista.filter((f) => daEmpresa.has(f));
+  }
+  // Safras do filtro: as dos planos do ano agrícola escolhido (em "Todas", de todos os anos), na ordem do cadastro
+  const safrasDoFiltro = () => Util.ordenarSafras(DADOS.planos
+    .filter((p) => !filtros.anoAgricola || String(Util.anoAgricola(p.safra)) === filtros.anoAgricola).map((p) => p.safra));
+  // Trocar o ano agrícola refaz a lista de safras; a safra que não é do ano volta para "Todas"
+  function atualizarSafras(conteudo) {
+    const select = conteudo.querySelector('[data-filtro="safra"]');
+    const lista = safrasDoFiltro();
+    if (filtros.safra && !lista.includes(filtros.safra)) filtros.safra = '';
+    select.innerHTML = `<option value="">Todas</option>${lista.map((s) => `<option value="${esc(s)}" ${s === filtros.safra ? 'selected' : ''}>${esc(s)}</option>`).join('')}`;
   }
   // Trocar a empresa refaz a lista de fazendas; a fazenda que não é da empresa volta para "Todas"
   function atualizarFazendas(conteudo) {
@@ -88,7 +96,7 @@ window.Telas.listaPlanos = (function () {
         <section class="cartao filtros" aria-label="Filtrar planos">
           ${filtro('anoAgricola', 'Ano Agrícola', Telas.painelPlanos.anos())}
           ${filtro('atividade', 'Atividade produtiva', presentes('atividade', DADOS.atividades))}
-          ${filtro('ciclo', 'Safra', presentes('ciclo', CICLOS))}
+          ${filtro('safra', 'Safra', safrasDoFiltro())}
           ${filtro('empresa', 'Empresa', presentes('empresa', DADOS.empresas))}
           ${filtro('fazenda', 'Fazenda', fazendasDoFiltro())}
           ${filtro('cultura', 'Cultura', presentes('cultura', DADOS.culturasPlanos))}
@@ -124,12 +132,14 @@ window.Telas.listaPlanos = (function () {
       select.addEventListener('change', () => {
         filtros[select.dataset.filtro] = select.value;
         if (select.dataset.filtro === 'empresa') atualizarFazendas(conteudo);
+        if (select.dataset.filtro === 'anoAgricola') atualizarSafras(conteudo);
         atualizar(conteudo);
       });
     });
     // Limpar filtros: volta ao começo (Ano Agrícola de hoje; os demais em Todas/Todos)
     conteudo.querySelector('[data-acao="lp-limpar"]').addEventListener('click', () => {
       filtros = filtrosIniciais();
+      atualizarSafras(conteudo);
       atualizarFazendas(conteudo);
       conteudo.querySelectorAll('[data-filtro]').forEach((select) => { select.value = filtros[select.dataset.filtro]; });
       atualizar(conteudo);
@@ -238,7 +248,8 @@ window.Telas.listaPlanos = (function () {
   // "Histórico de versões" do menu ⋯: a guia Histórico, com os filtros naquele plano
   function verHistorico(p) {
     const conteudo = document.getElementById('conteudo');
-    filtros = { anoAgricola: valorDe(p, 'anoAgricola'), atividade: p.atividade || '', ciclo: valorDe(p, 'ciclo'), empresa: p.empresa, fazenda: p.fazenda, cultura: p.cultura, status: '' };
+    filtros = { anoAgricola: valorDe(p, 'anoAgricola'), atividade: p.atividade || '', safra: p.safra, empresa: p.empresa, fazenda: p.fazenda, cultura: p.cultura, status: '' };
+    atualizarSafras(conteudo);
     atualizarFazendas(conteudo);
     conteudo.querySelectorAll('[data-filtro]').forEach((select) => { select.value = filtros[select.dataset.filtro]; });
     atualizar(conteudo);

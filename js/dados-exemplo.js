@@ -356,15 +356,14 @@ window.DADOS = {
   // DAP pela prática no médio-norte do MT; sem fenologia (o cadastro de estádios é o da soja).
   modelosCultura: {
     // Milho safrinha: as sementes já vêm tratadas (sem grupo TSI). Cigarrinha (Dalbulus maidis) no começo do
-    // ciclo, cobertura nitrogenada em V4–V6 (≈ 25 DAP), lagarta-do-cartucho e um fungicida antes do pendoamento.
+    // ciclo, cobertura nitrogenada em V4–V6 (≈ 25 DAP), lagarta-do-cartucho (sem fungicida no modelo).
     'Milho': [
       { nome: 'Plantio', tipo: 'Sementes', operacoes: [{ nome: 'Plantio', dap: 0, prazo: 3 }] },
       { nome: 'Defensivo', tipo: 'Defensivos', operacoes: [
         { nome: '1ª Inseticida: cigarrinha', dap: 7 },
         { nome: '2ª Inseticida: cigarrinha', dap: 15 },
         { nome: 'Herbicida pós-emergente', dap: 20 },
-        { nome: 'Inseticida: lagarta-do-cartucho', dap: 30 },
-        { nome: 'Fungicida', dap: 55 }
+        { nome: 'Inseticida: lagarta-do-cartucho', dap: 30 }
       ] },
       { nome: 'Fertilidade', tipo: 'Fertilidade', operacoes: [
         { nome: 'Adubação de plantio', dap: 0 },
@@ -411,6 +410,45 @@ window.DADOS = {
   justificativasOperacoes: [],
   // Executores das OS geradas para o exemplo (Central de Operações, Tela 09)
   executores: ['Equipe Alpha', 'Equipe Beta', 'Equipe Ceta', 'Equipe Ômega'],
+
+  // ----- Data de referência do exemplo -----
+  // O "hoje" para o qual as datas deste arquivo foram escritas: dentro da janela das fungicidas da soja 26/27, para a
+  // página Aplicações ter aplicações executadas, pendentes e planejadas. Ao abrir o protótipo, todas as datas do
+  // exemplo (plantio, versões, OS, justificativas) andam a diferença entre hoje e esta data, e hoje cai sempre no mesmo
+  // ponto da safra. Os nomes das safras andam os anos agrícolas entre as duas datas (26/27 → 27/28) (js/app.js, ajustarCenario).
+  dataReferencia: '2026-11-25',
+
+  // ----- Monitoramento › Aplicações: dados SIMULADOS -----
+  // Data executada = data de recomendação da OS (abertura): a da OS escrita acima, se houver; senão, a planejada + um
+  // deslocamento em dias (para mais ou para menos). Só conta como executada se essa data já chegou (até hoje).
+  // deslocamentos: usados em sequência quando o talhão não tem um deslocamento próprio para a operação.
+  // talhoes['Fazenda safra'][talhão]: plantasM (estande medido no monitoramento, plantas por metro) e, por operação
+  // (inclusive 'Plantio'), o deslocamento em dias; null = não executada (pendente, se a data planejada já passou).
+  monitoramento: {
+    deslocamentos: [0, 2, -1, 5, 1, -3, 0, 3, 7, -2, 1, 4],
+    talhoes: {
+      'Santa Clara 25/26': {
+        T01: { plantasM: 13.2 }, T02: { plantasM: 12.8 }, T03: { plantasM: 11.6, '3ª Fungicida': 9 }, T04: { plantasM: 11.9 },
+        T05: { plantasM: 10.4 }, T06: { plantasM: 12.1 }, T07: { plantasM: 10.9, '4ª Fungicida': -4 }, T08: { plantasM: 10.2 }
+      },
+      'Santa Clara 26/26': {
+        T01: { plantasM: 3.1 }, T02: { plantasM: 3.0 }, T03: { plantasM: 2.9 }, T04: { plantasM: 2.8 },
+        T05: { plantasM: 3.2 }, T06: { plantasM: 3.1 }, T07: { plantasM: 2.7 }, T08: { plantasM: 2.9 }
+      },
+      'Boa Vista 26/27': {
+        T01: { plantasM: 12.6, Plantio: 1 },
+        T02: { plantasM: 13.1, Plantio: 0, '2ª Fungicida': null },
+        T03: { plantasM: 11.4, Plantio: 3 },
+        T04: { plantasM: 11.8, Plantio: -2, '1ª Fungicida': 6 },
+        T05: { plantasM: 10.1, Plantio: 5 },
+        T06: { plantasM: 10.6, Plantio: 2, '1ª Fungicida': null },
+        T07: { plantasM: 13.9, Plantio: 0 },
+        T08: { plantasM: 10.8, Plantio: -1 },
+        T09: { plantasM: null, Plantio: 4 },
+        T10: { plantasM: 14.0, Plantio: -3, '2ª Fungicida': -2 }
+      }
+    }
+  },
 
   // Planos carregados ao abrir o protótipo: ano agrícola 2025, soja 25/26 e milho safrinha 26/26 da Santa Clara;
   // ano agrícola 2026, soja 26/27 e milho safrinha 27/27 da Boa Vista (publicados) e soja 26/27 da São José, em
@@ -496,8 +534,7 @@ window.DADOS = {
           '1ª Inseticida: cigarrinha': op([['Engeo Pleno', 0.25]]),
           '2ª Inseticida: cigarrinha': op([['Connect', 1.0]]),
           'Herbicida pós-emergente': op([['Primóleo', 3.0], ['Callisto', 0.3]]),
-          'Inseticida: lagarta-do-cartucho': op([['Premio', 0.10]]),
-          'Fungicida': op([['Priori Xtra', 0.30]])
+          'Inseticida: lagarta-do-cartucho': op([['Premio', 0.10]])
         };
       })()
     },
@@ -573,8 +610,7 @@ window.DADOS = {
           '1ª Inseticida: cigarrinha': op([['Engeo Pleno', 0.25], ['Agral', 0.05]]),
           '2ª Inseticida: cigarrinha': op([['Connect', 1.0]]),
           'Herbicida pós-emergente': op([['Primóleo', 3.0], ['Callisto', 0.3], ['Assist', 0.50]]),
-          'Inseticida: lagarta-do-cartucho': op([['Dipel WG', 0.50], ['Premio', 0.10]]),
-          'Fungicida': op([['Priori Xtra', 0.30], ['Áureo', 0.25]])
+          'Inseticida: lagarta-do-cartucho': op([['Dipel WG', 0.50], ['Premio', 0.10]])
         };
       })()
     },
