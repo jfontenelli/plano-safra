@@ -1,6 +1,6 @@
 # Tela 07 — Operações Agrícolas: aba Agenda Agrícola
 
-Atualizado em 21/10/2026. Este doc mostra só o estado atual da tela. Decisão alterada é reescrita, não acumulada.
+Atualizado em 22/10/2026. Este doc mostra só o estado atual da tela. Decisão alterada é reescrita, não acumulada.
 Origem: reunião com stakeholders de 19/10/2026. A guia **Calendário** do Resumo do plano (Tela 05) foi migrada para fora do plano, sem a associação a um plano. Hoje fica no menu **Gestão da Lavoura › Operações Agrícolas**, aba **Agenda Agrícola** (o menu Ordens de Serviço passou a Gestão da Lavoura em 21/10/2026). **Por enquanto só migrada**; o refinamento para a programação das OS vem depois.
 Imagem: `referencias/05.3-resumo-calendario.png` (a do Calendário do Resumo, de onde veio). Quando imagem e documento divergirem, vale este documento.
 **Situação no protótipo:** construída.
@@ -14,7 +14,8 @@ Ver, dia a dia, as operações planejadas de todas as fazendas (vários planos s
 
 ## Conteúdo
 - **Cabeçalho** (o mesmo de Minhas tarefas e da Central de Operações): caminho no topo "⌂ Operações Agrícolas › Agenda Agrícola", título "Agenda Agrícola", subtítulo "Calendário das operações planejadas, dia a dia, em todas as fazendas." e as abas **Minhas tarefas · Central de Operações · Agenda Agrícola**, com a etiqueta "Últimas versões publicadas ⓘ" à direita.
-- **Filtros** num cartão compacto, todos com **várias escolhas** (caixa com Pesquisar, "Todas"/"Todos" e uma marcação por opção): **Safra** (Safra ou Safrinha), **Empresa**, **Fazenda**, **Cultura** e **Talhão**; **Limpar filtros** à direita. As opções são as que existem nos planos com versão publicada. No Talhão, os talhões dos planos que passam pelos outros filtros, com a fazenda junto ("Santa Clara · T01"), porque o nome se repete entre fazendas.
+- **Filtros** num cartão compacto, todos com **várias escolhas** (caixa com Pesquisar, "Todas"/"Todos" e uma marcação por opção): **Safra** (Safra ou Safrinha), **Cultura**, **Empresa**, **Fazenda**, **Talhão** e **Operação**, nesta ordem; **Limpar filtros** à direita. As opções são as que existem nos planos com versão publicada. No Talhão, os talhões dos planos que passam pelos outros filtros, com a fazenda junto ("Santa Clara · T01"), porque o nome se repete entre fazendas.
+- **Operação:** as operações dos grupos à mostra na legenda, pelo nome (o mesmo nome em vários planos é uma opção só, ex.: Adubação de plantio da soja e do milho), na ordem da legenda (Plantio, Fertilidade, Defensivo, Colheita) e, dentro do grupo, na ordem do plano; o grupo aparece ao lado. Escolher operações leva o calendário para a **operação escolhida mais cedo**; marcar "Todas" (ou deixar nenhuma) volta para **hoje**.
 - **Sem filtro de Ano Agrícola:** o tempo anda pelas setas do calendário, atravessando os anos.
 - **Barra do calendário:** à esquerda, a **legenda que filtra** os grupos de operação (Plantio, Fertilidade, Defensivo, Colheita, na cor de cada grupo); à direita, **Hoje · ‹ › · período · [Mês ▾]** (Mês, Semana, Dia).
 - **Grade** de domingo a sábado, o **painel do dia** e o rodapé **Área operacional** do período, como eram no Resumo (Tela 05, antiga seção 6.1).
@@ -22,7 +23,7 @@ Ver, dia a dia, as operações planejadas de todas as fazendas (vários planos s
 ## Regras
 - **Vários planos somados**, sempre a **última versão publicada de cada plano**; plano sem versão publicada não aparece. Entram as operações já planejadas (com talhão; a colheita depois do plantio), com a data de cada talhão: data de plantio + DAP (Plantio: a data de plantio; Colheita: plantio + ciclo da variedade), até o fim da previsão de conclusão.
 - **Abre no dia de hoje**, no Mês. O período, os filtros e o dia aberto se mantêm ao navegar entre telas. Limpar filtros mantém o período.
-- **Legenda:** pelos tipos de grupo (os nomes vêm dos planos). Com todos ligados, clicar num grupo mostra só ele; depois, cada clique liga ou desliga o grupo; desligar o último volta a todos; com filtro, "Mostrar todos".
+- **Legenda:** pelos tipos de grupo (os nomes vêm dos planos). **Um grupo por vez:** clicar num grupo mostra só ele e leva o calendário para a **operação mais cedo dele** (mesmo que já tenha passado), na escala aberta; clicar em outro grupo substitui o anterior. Clicar de novo no grupo à mostra, ou em "Mostrar todos", volta a todos os grupos e o calendário volta para **hoje**.
 - **Mês:** a tela inteira cabe na janela (cabeçalho e filtros compactos; a grade ocupa a altura que sobra, com mínimo de 300 px). Etiquetas finas só com o nome; as que não cabem no dia viram "+N mais". **Sem etiquetas de talhão no Mês** (não cabem).
 - **Semana:** cada operação numa caixinha com o nome, a área e **uma etiqueta por talhão** (T05, T06…, em ordem); a caixinha cresce para caber as etiquetas. Todas as operações do dia aparecem (o dia rola por dentro se a lista for longa).
 - **Dia e painel do dia:** cada operação com o nome, **de onde vem** ("Boa Vista · Safra 26/27"), a área, o número de talhões e as **etiquetas dos talhões**; com mais de 12, "+N talhões" mostra todos ("Mostrar menos" volta).

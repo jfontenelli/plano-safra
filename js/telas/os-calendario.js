@@ -1,8 +1,9 @@
 /*
  * Agenda Agrícola, aba de Gestão da Lavoura › Operações Agrícolas (DECISOES 4.0): a grade Mês · Semana · Dia que antes ficava no Resumo do plano,
  * agora com as operações de vários planos somados, sem a associação a um plano. Usa a última versão publicada de cada
- * plano. Filtros com várias escolhas: Safra (Safra ou Safrinha), Empresa, Fazenda, Cultura e Talhão. Sem filtro de
- * Ano Agrícola: o tempo anda pelas setas do calendário. Abre no dia de hoje. A legenda filtra os grupos de operação.
+ * plano. Filtros com várias escolhas: Safra (Safra ou Safrinha), Cultura, Empresa, Fazenda, Talhão e Operação. Sem filtro de
+ * Ano Agrícola: o tempo anda pelas setas do calendário. Abre no dia de hoje. A legenda filtra os grupos de operação
+ * e o filtro Operação levam o calendário para a primeira operação escolhida; com todas, para hoje.
  * As datas e o desenho da grade vêm do Calendário do plano (js/telas/05-calendario.js).
  * Por enquanto só migrado; o refinamento para a programação das OS vem depois.
  */
@@ -15,26 +16,41 @@ window.Telas.osCalendario = (function () {
   const ORDEM_TIPO = ['sementes', 'fertilidade', 'defensivos', 'colheita'];
   const FILTROS = [
     ['ciclo', 'Safra', ['Todas', 'Nenhuma', 'selecionadas']],
+    ['cultura', 'Cultura', ['Todas', 'Nenhuma', 'culturas']],
     ['empresa', 'Empresa', ['Todas', 'Nenhuma', 'empresas']],
     ['fazenda', 'Fazenda', ['Todas', 'Nenhuma', 'fazendas']],
-    ['cultura', 'Cultura', ['Todas', 'Nenhuma', 'culturas']],
-    ['talhao', 'Talhão', ['Todos', 'Nenhum', 'talhões']]
+    ['talhao', 'Talhão', ['Todos', 'Nenhum', 'talhões']],
+    ['operacao', 'Operação', ['Todas', 'Nenhuma', 'operações']]
   ];
 
   // Estado da tela: período, dia aberto e filtros ('todos' ou a lista do que está marcado). Mantém-se ao navegar.
   const novoEstado = () => ({ escala: 'mes', dataRef: Cal().hojeIso(), ciclo: 'todos', empresa: 'todos', fazenda: 'todos',
-    cultura: 'todos', talhao: 'todos', grupo: 'todos' });
+    cultura: 'todos', operacao: 'todos', talhao: 'todos', grupo: 'todos' });
   let est = null;
 
   const cicloDe = (p) => p.ciclo || 'Safra';
   const tipoDe = (grupo) => Util.normalizar(grupo.tipo || 'outro').replace(/\s+/g, '-');
+  const nomeOp = (it) => (it.colheita ? 'Colheita' : it.op.nome || 'Sem operação');
+  const posTipo = (t) => (ORDEM_TIPO.includes(t) ? ORDEM_TIPO.indexOf(t) : 99);
+  // Aparece no calendário: grupo ligado na legenda e operação marcada no filtro
+  const visivel = (it) => Cal().marcado(est, 'grupo', tipoDe(it.grupo)) && Cal().marcado(est, 'operacao', nomeOp(it));
   const comPublicada = () => DADOS.planos.filter((p) => Versoes.publicadaComPlanejamento(p));
   const valorDe = { ciclo: cicloDe, empresa: (p) => p.empresa, fazenda: (p) => p.fazenda, cultura: (p) => p.cultura };
   const planosFiltrados = () => comPublicada().filter((p) => Object.keys(valorDe).every((c) => Cal().marcado(est, c, valorDe[c](p))));
 
   // Opções de cada filtro: o que existe nos planos com versão publicada. Talhão: os talhões dos planos que passam
   // pelos outros filtros, com a fazenda junto ("Santa Clara · T01"), porque o nome se repete entre fazendas.
+  // Operação: as operações dos grupos ligados na legenda, pelo nome (o mesmo nome em vários planos é uma opção só),
+  // na ordem da legenda e, dentro do grupo, na ordem do plano; ao lado, o grupo.
   function opcoes(chave) {
+    if (chave === 'operacao') {
+      const vistos = new Map();
+      calcular().itens.filter(({ it }) => Cal().marcado(est, 'grupo', tipoDe(it.grupo))).forEach(({ it }, i) => {
+        const nome = nomeOp(it);
+        if (!vistos.has(nome)) vistos.set(nome, { valor: nome, nome, extra: it.grupo.nome, pos: posTipo(tipoDe(it.grupo)), i });
+      });
+      return [...vistos.values()].sort((a, b) => a.pos - b.pos || a.i - b.i);
+    }
     if (chave === 'talhao') {
       const vistos = new Map();
       planosFiltrados().forEach((p) => Util.talhoesPlano(p, Versoes.ultimaPublicada(p)).forEach((t) => {
@@ -59,12 +75,12 @@ window.Telas.osCalendario = (function () {
       const lista = Cal().itens(ctx).filter((it) => (it.colheita ? !it.aguardando : it.talhoes.length > 0));
       const local = `${p.fazenda} · ${cicloDe(p)} ${p.safra}`;
       lista.forEach((it) => itens.push({ it, local }));
-      const visiveis = lista.filter((it) => Cal().marcado(est, 'grupo', tipoDe(it.grupo)));
+      const visiveis = lista.filter(visivel);
       Cal().eventos(ctx, visiveis).forEach((ev) => eventos.push({ ...ev, local,
         chave: `${p.id}:${ev.it.colheita ? 'colheita' : ev.it.op.id}` }));
     });
     eventos.sort((a, b) => a.inicio.localeCompare(b.inicio));
-    const semData = itens.filter(({ it }) => Cal().marcado(est, 'grupo', tipoDe(it.grupo)) && !eventos.some((ev) => ev.it === it)).length;
+    const semData = itens.filter(({ it }) => visivel(it) && !eventos.some((ev) => ev.it === it)).length;
     return { itens, eventos, semData };
   }
 
@@ -72,12 +88,12 @@ window.Telas.osCalendario = (function () {
   function gruposLegenda(itens) {
     const mapa = new Map();
     itens.forEach(({ it }) => { const t = tipoDe(it.grupo); if (!mapa.has(t)) mapa.set(t, it.grupo.nome); });
-    const pos = (t) => (ORDEM_TIPO.includes(t) ? ORDEM_TIPO.indexOf(t) : 99);
-    return [...mapa.entries()].map(([valor, nome]) => ({ valor, nome })).sort((a, b) => pos(a.valor) - pos(b.valor));
+    return [...mapa.entries()].map(([valor, nome]) => ({ valor, nome })).sort((a, b) => posTipo(a.valor) - posTipo(b.valor));
   }
 
-  // Legenda que filtra (como era no Resumo): com todos ligados, clicar num grupo mostra só ele; depois, cada clique
-  // liga ou desliga o grupo; desligar o último volta a todos
+  // Legenda que filtra: clicar num grupo mostra só ele (outro grupo substitui o anterior); clicar no grupo que está à
+  // mostra, ou em Mostrar todos, volta a todos. Com um grupo, o calendário vai para a operação mais cedo dele; com
+  // todos, volta para hoje.
   function legenda(grupos) {
     const todos = grupos.every((o) => Cal().marcado(est, 'grupo', o.valor));
     return `
@@ -86,7 +102,7 @@ window.Telas.osCalendario = (function () {
           const ligado = Cal().marcado(est, 'grupo', o.valor);
           return `
             <button class="cal-leg ${ligado ? '' : 'cal-leg--desligado'}" type="button" data-acao="os-leg" data-grupo="${esc(o.valor)}" aria-pressed="${ligado && !todos}"
-                    title="${todos ? `Mostrar só ${esc(o.nome)}` : ligado ? `Esconder ${esc(o.nome)}` : `Mostrar ${esc(o.nome)}`}">
+                    title="${ligado && !todos ? 'Mostrar todos' : `Mostrar só ${esc(o.nome)}`}">
               <span class="cal-ponto cal-ponto--${esc(o.valor)}"></span>${esc(o.nome)}</button>`;
         }).join('')}
         ${todos ? '' : '<button class="link-acao cal-legenda__todos" type="button" data-acao="os-leg-todos">Mostrar todos</button>'}
@@ -149,14 +165,12 @@ window.Telas.osCalendario = (function () {
       }
       const leg = e.target.closest('[data-acao="os-leg"], [data-acao="os-leg-todos"]');
       if (leg) {
-        const valores = gruposLegenda(calcular().itens).map((o) => o.valor);
-        let marcados = valores.filter((v) => Cal().marcado(est, 'grupo', v));
         const v = leg.dataset.grupo;
-        if (leg.dataset.acao === 'os-leg-todos') marcados = [...valores];
-        else if (marcados.length === valores.length) marcados = [v];
-        else if (marcados.includes(v)) marcados = marcados.filter((x) => x !== v);
-        else marcados.push(v);
-        est.grupo = !marcados.length || marcados.length === valores.length ? 'todos' : marcados;
+        const soEle = Array.isArray(est.grupo) && est.grupo.length === 1 && est.grupo[0] === v;
+        est.grupo = leg.dataset.acao === 'os-leg-todos' || soEle ? 'todos' : [v];
+        const primeira = est.grupo === 'todos' ? null : calcular().eventos[0];
+        est.dataRef = primeira ? primeira.inicio : Cal().hojeIso();
+        est.diaAberto = null;
         redesenhar(leg.dataset.acao === 'os-leg' ? `[data-acao="os-leg"][data-grupo="${CSS.escape(v)}"]` : '.cal-leg');
         return;
       }
@@ -174,6 +188,12 @@ window.Telas.osCalendario = (function () {
         else if (e.target.checked) marcados.push(e.target.value);
         else marcados = marcados.filter((n) => n !== e.target.value);
         est[chave] = marcados.length === valores.length ? 'todos' : marcados;
+        // Operação, como a legenda: com escolha, vai para a operação mais cedo; com todas, volta para hoje
+        if (chave === 'operacao') {
+          const primeira = est.operacao === 'todos' ? null : calcular().eventos[0];
+          est.dataRef = primeira ? primeira.inicio : Cal().hojeIso();
+          est.diaAberto = null;
+        }
         est.filtroAberto = chave;
         redesenhar(`[data-campo="cal-filtro"][data-filtro="${chave}"][value="${CSS.escape(e.target.value)}"]`);
         return;

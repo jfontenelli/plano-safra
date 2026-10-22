@@ -19,7 +19,7 @@ window.Telas.centralCorp = (function () {
   // Sem recomendação (a Recomendada com atraso)
   const NOMES_RECOMENDADA = { 'recomendada-prazo': 'Com recomendação', 'recomendada-atraso': 'Sem recomendação' };
   const STATUS_TODOS = STATUS.flatMap(([id, nome]) => (id === 'planejada' ? [[id, nome]]
-    : [[`${id}-prazo`, `${nome} · No prazo`], [`${id}-atraso`, `${nome} · Em atraso`]]))
+    : [[`${id}-atraso`, `${nome} · Em atraso`], [`${id}-prazo`, `${nome} · No prazo`]]))
     .map(([id, nome]) => [id, NOMES_RECOMENDADA[id] || nome]);
   const nomeStatus = (k) => STATUS_TODOS.find(([id]) => id === k)[1];
   const NIVEIS = [['empresa', 'Empresa'], ['fazenda', 'Fazenda'], ['executor', 'Executor']];
@@ -193,26 +193,26 @@ window.Telas.centralCorp = (function () {
               </button>`).join('')}
           </div>
         </div>
-        <div class="cc-grafico__rotulos" style="--n: ${itens.length}">${itens.map((i) => `<span>${esc(i.rotulo || i.nome)}</span>`).join('')}</div>
+        <div class="cc-grafico__rotulos" style="--n: ${itens.length}">${itens.map((i) => `<span>${esc(i.rotulo ?? i.nome)}</span>`).join('')}</div>
         ${itens.some((i) => i.grupo) ? `<div class="cc-grafico__grupos" style="--n: ${itens.length}">${gruposDoEixo(itens)}</div>` : ''}
       </div>`;
   }
 
   // Eixo em dois níveis: embaixo da barra, a parte curta (Com, No prazo…); na linha de baixo, o grupo
-  // (Recomendação, Em execução, Fechada) ocupando as barras dele
+  // (Recomendação, Em execução, Fechada) ocupando as barras dele. Planejada (solto) fica sem traço, na altura dele
   function gruposDoEixo(itens) {
     const blocos = [];
     itens.forEach((i) => {
       const ultimo = blocos[blocos.length - 1];
       if (i.grupo && ultimo && ultimo.grupo === i.grupo) ultimo.n += 1;
-      else blocos.push({ grupo: i.grupo, n: 1 });
+      else blocos.push({ grupo: i.grupo, solto: i.solto, n: 1 });
     });
-    return blocos.map((b) => `<span class="${b.grupo ? 'cc-grafico__grupo' : ''}" style="grid-column: span ${b.n}">${esc(b.grupo || '')}</span>`).join('');
+    return blocos.map((b) => `<span class="${b.grupo ? `cc-grafico__grupo${b.solto ? ' cc-grafico__grupo--solto' : ''}` : ''}" style="grid-column: span ${b.n}">${esc(b.grupo || '')}</span>`).join('');
   }
 
   // Nome do status em duas partes para o eixo: Com recomendação → Com | Recomendação; Em execução · No prazo → No prazo | Em execução
   function partesDoEixo(id, nome) {
-    if (id === 'planejada') return { rotulo: nome, grupo: null };
+    if (id === 'planejada') return { rotulo: '', grupo: nome, solto: true };
     if (id.startsWith('recomendada')) return { rotulo: nome.split(' ')[0], grupo: 'Recomendação' };
     const [grupo, rotulo] = nome.split(' · ');
     return { rotulo, grupo };
