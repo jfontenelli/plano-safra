@@ -19,7 +19,7 @@ Mostrar, para todos os planos do Ano Agrícola, **quanto de cada insumo os plano
 Cabeçalho, filtros e estimativas ficam **congelados no topo** enquanto a página rola. O **alfinete** no canto direito do cabeçalho congela e descongela (verde e preenchido = congelado; cinza, só o contorno = solto; texto ao passar o mouse "Descongelar cabeçalho" / "Congelar cabeçalho"). Começa congelado; a escolha se mantém ao navegar.
 
 1. **Cabeçalho** (baixo): título, etiqueta "Últimas versões publicadas" e, à direita, **Moeda de exibição ⓘ [R$ | US$]** e o alfinete.
-2. **Filtros**, numa linha: **Ano Agrícola** (uma escolha só, sem "Todos") · **Safra** (Safra/Safrinha) · **Empresa** · **Fazenda** · **Talhão** · **Cultura** · **Insumos** · Limpar filtros.
+2. **Filtros**, numa linha: **Ano Agrícola** (uma escolha só, sem "Todos") · **Safra** (as safras do cadastro do Ano Agrícola, da mais recente para a mais antiga) · **Empresa** · **Fazenda** · **Talhão** · **Cultura** · **Insumos** · Limpar filtros.
    - Menos o Ano Agrícola, todos têm **várias escolhas**: lista com caixas de marcar e "Todas"/"Todos" no topo; o campo mostra "Todas", o nome escolhido ou "2 selecionadas". A lista fica aberta enquanto se marca; fecha ao clicar fora ou com Esc.
    - As opções vêm dos planos publicados e dependem dos filtros de cima (ex.: com duas fazendas marcadas, Talhão mostra só os talhões delas). Opção que sai da lista é desmarcada.
    - **Insumos** = os grupos de insumo (abaixo).

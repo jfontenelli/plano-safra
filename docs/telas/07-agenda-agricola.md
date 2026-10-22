@@ -14,7 +14,7 @@ Ver, dia a dia, as operações planejadas de todas as fazendas (vários planos s
 
 ## Conteúdo
 - **Cabeçalho** (o mesmo de Minhas tarefas e da Central de Operações): caminho no topo "⌂ Operações Agrícolas › Agenda Agrícola", título "Agenda Agrícola", subtítulo "Calendário das operações planejadas, dia a dia, em todas as fazendas." e as abas **Minhas tarefas · Central de Operações · Agenda Agrícola**, com a etiqueta "Últimas versões publicadas ⓘ" à direita.
-- **Filtros** num cartão compacto, todos com **várias escolhas** (caixa com Pesquisar, "Todas"/"Todos" e uma marcação por opção): **Safra** (Safra ou Safrinha), **Cultura**, **Empresa**, **Fazenda**, **Talhão** e **Operação**, nesta ordem; **Limpar filtros** à direita. As opções são as que existem nos planos com versão publicada. No Talhão, os talhões dos planos que passam pelos outros filtros, com a fazenda junto ("Santa Clara · T01"), porque o nome se repete entre fazendas.
+- **Filtros** num cartão compacto, todos com **várias escolhas** (caixa com Pesquisar, "Todas"/"Todos" e uma marcação por opção): **Safra** (as safras do cadastro: 27/27, 26/27, 26/26, 25/26…, da mais recente para a mais antiga), **Cultura**, **Empresa**, **Fazenda**, **Talhão** e **Operação**, nesta ordem; **Limpar filtros** à direita. As opções são as que existem nos planos com versão publicada. No Talhão, os talhões dos planos que passam pelos outros filtros, com a fazenda junto ("Santa Clara · T01"), porque o nome se repete entre fazendas.
 - **Operação:** as operações dos grupos à mostra na legenda, pelo nome (o mesmo nome em vários planos é uma opção só, ex.: Adubação de plantio da soja e do milho), na ordem da legenda (Plantio, Fertilidade, Defensivo, Colheita) e, dentro do grupo, na ordem do plano; o grupo aparece ao lado. Escolher operações leva o calendário para a **operação escolhida mais cedo**; marcar "Todas" (ou deixar nenhuma) volta para **hoje**.
 - **Sem filtro de Ano Agrícola:** o tempo anda pelas setas do calendário, atravessando os anos.
 - **Barra do calendário:** à esquerda, a **legenda que filtra** os grupos de operação (Plantio, Fertilidade, Defensivo, Colheita, na cor de cada grupo); à direita, **Hoje · ‹ › · período · [Mês ▾]** (Mês, Semana, Dia).
@@ -43,4 +43,3 @@ Ver, dia a dia, as operações planejadas de todas as fazendas (vários planos s
 
 ## Sugestões (a validar)
 - Na caixinha da Semana, mostrar a fazenda junto da área quando há mais de uma fazenda ("Boa Vista · 203 ha").
-- Filtro Safra pelo nome da safra (25/26, 26/27…) em vez de Safra/Safrinha, já que não há filtro de ano.

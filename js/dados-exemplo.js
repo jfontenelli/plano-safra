@@ -422,30 +422,30 @@ window.DADOS = {
   // Data executada = data de recomendação da OS (abertura): a da OS escrita acima, se houver; senão, a planejada + um
   // deslocamento em dias (para mais ou para menos). Só conta como executada se essa data já chegou (até hoje).
   // deslocamentos: usados em sequência quando o talhão não tem um deslocamento próprio para a operação.
-  // talhoes['Fazenda safra'][talhão]: plantasM (estande medido no monitoramento, plantas por metro) e, por operação
+  // talhoes['Fazenda safra'][talhão]: plantasM (estande medido no monitoramento, plantas por metro, número inteiro) e, por operação
   // (inclusive 'Plantio'), o deslocamento em dias; null = não executada (pendente, se a data planejada já passou).
   monitoramento: {
     deslocamentos: [0, 2, -1, 5, 1, -3, 0, 3, 7, -2, 1, 4],
     talhoes: {
       'Santa Clara 25/26': {
-        T01: { plantasM: 13.2 }, T02: { plantasM: 12.8 }, T03: { plantasM: 11.6, '3ª Fungicida': 9 }, T04: { plantasM: 11.9 },
-        T05: { plantasM: 10.4 }, T06: { plantasM: 12.1 }, T07: { plantasM: 10.9, '4ª Fungicida': -4 }, T08: { plantasM: 10.2 }
+        T01: { plantasM: 13 }, T02: { plantasM: 13 }, T03: { plantasM: 12, '3ª Fungicida': 9 }, T04: { plantasM: 12 },
+        T05: { plantasM: 10 }, T06: { plantasM: 12 }, T07: { plantasM: 11, '4ª Fungicida': -4 }, T08: { plantasM: 10 }
       },
       'Santa Clara 26/26': {
-        T01: { plantasM: 3.1 }, T02: { plantasM: 3.0 }, T03: { plantasM: 2.9 }, T04: { plantasM: 2.8 },
-        T05: { plantasM: 3.2 }, T06: { plantasM: 3.1 }, T07: { plantasM: 2.7 }, T08: { plantasM: 2.9 }
+        T01: { plantasM: 3 }, T02: { plantasM: 3 }, T03: { plantasM: 3 }, T04: { plantasM: 3 },
+        T05: { plantasM: 3 }, T06: { plantasM: 3 }, T07: { plantasM: 3 }, T08: { plantasM: 3 }
       },
       'Boa Vista 26/27': {
-        T01: { plantasM: 12.6, Plantio: 1 },
-        T02: { plantasM: 13.1, Plantio: 0, '2ª Fungicida': null },
-        T03: { plantasM: 11.4, Plantio: 3 },
-        T04: { plantasM: 11.8, Plantio: -2, '1ª Fungicida': 6 },
-        T05: { plantasM: 10.1, Plantio: 5 },
-        T06: { plantasM: 10.6, Plantio: 2, '1ª Fungicida': null },
-        T07: { plantasM: 13.9, Plantio: 0 },
-        T08: { plantasM: 10.8, Plantio: -1 },
+        T01: { plantasM: 13, Plantio: 1 },
+        T02: { plantasM: 13, Plantio: 0, '2ª Fungicida': null },
+        T03: { plantasM: 11, Plantio: 3 },
+        T04: { plantasM: 12, Plantio: -2, '1ª Fungicida': 6 },
+        T05: { plantasM: 10, Plantio: 5 },
+        T06: { plantasM: 11, Plantio: 2, '1ª Fungicida': null },
+        T07: { plantasM: 14, Plantio: 0 },
+        T08: { plantasM: 11, Plantio: -1 },
         T09: { plantasM: null, Plantio: 4 },
-        T10: { plantasM: 14.0, Plantio: -3, '2ª Fungicida': -2 }
+        T10: { plantasM: 14, Plantio: -3, '2ª Fungicida': -2 }
       }
     }
   },

@@ -14,7 +14,7 @@ Acompanhar, de todas as fazendas, as operações que precisam de recomendação 
 ## Conteúdo
 - **Cabeçalho** (o mesmo nas três abas): caminho no topo "⌂ Operações Agrícolas › Minhas tarefas" (o nome da aba aberta), título com o nome da aba, subtítulo e as abas **Minhas tarefas · Central de Operações · Agenda Agrícola**.
   - Subtítulo de Minhas tarefas: "Operações a recomendar, atrasos e justificativas que aguardam a sua ação."
-- **Filtros** num cartão: **Safra** (uma escolha; começa na safra de hoje, ex.: 2026/2027), **Cultura**, **Empresa**, **Fazenda**, **Grupo de operação** (uma escolha cada, "Todas"/"Todos"; os grupos dos planos publicados da safra, na ordem Plantio, Fertilidade, Defensivo, Colheita), **Data inicial**, **Data final** e **Limpar filtros**. Embaixo, o texto do período, conforme o cartão escolhido:
+- **Filtros** num cartão: **Safra** (uma escolha; começa na safra de hoje, ex.: 26/27), **Cultura**, **Empresa**, **Fazenda**, **Grupo de operação** (uma escolha cada, "Todas"/"Todos"; os grupos dos planos publicados da safra, na ordem Plantio, Fertilidade, Defensivo, Colheita), **Data inicial**, **Data final** e **Limpar filtros**. Embaixo, o texto do período, conforme o cartão escolhido:
   - A recomendar e Recomendação em atraso: "O período considera a data planejada das operações."
   - Execução em atraso: "O período considera a data prevista de conclusão das OS."
   - Justificativas solicitadas: "O período considera a data da solicitação de justificativa."

@@ -410,7 +410,7 @@ window.Telas.monitoramentoAplicacoes = (function () {
                 <td class="ma-fixa" data-fixa="0">${esc(r.plano.fazenda)}</td>
                 <td class="ma-ini ma-talhao ma-fixa" data-fixa="1">${esc(r.talhao)}</td>
                 <td class="ma-ini ma-variedade ma-fixa" data-fixa="2">${esc(r.variedades.join(', ') || '—')}</td>
-                <td class="ma-ini tabela__numero ma-fixa" data-fixa="3">${r.plantasM === null ? '—' : r.plantasM.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}</td>
+                <td class="ma-ini tabela__numero ma-fixa" data-fixa="3">${r.plantasM === null ? '—' : Math.round(r.plantasM).toLocaleString('pt-BR')}</td>
                 ${plantioMarcado ? celula(r.plantio, 4) : `<td class="ma-ini ma-fixa ma-fixa--ultima" data-fixa="4">${r.plantio.executada ? Util.data(r.plantio.executada) : '—'}</td>`}
                 ${cols.map((c) => celula(r.aplic[c.nome])).join('')}
                 <td class="ma-ini tabela__numero">${r.feitas}/${r.total}</td>
