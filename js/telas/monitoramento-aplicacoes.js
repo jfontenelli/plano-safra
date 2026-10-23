@@ -271,7 +271,7 @@ window.Telas.monitoramentoAplicacoes = (function () {
   }
 
   // Status da aplicação, mostrado numa etiqueta na célula dela, com a legenda
-  const STATUS = [['adiantada', 'Antecipada'], ['prazo', 'No prazo'], ['atrasada', 'Atrasada'], ['pendente', 'Pendente'], ['futura', 'Planejada']];
+  const STATUS = [['adiantada', 'Iniciada antes'], ['prazo', 'Iniciada na data'], ['atrasada', 'Iniciada com atraso'], ['pendente', 'Não iniciada'], ['futura', 'Planejada']];
   function statusDe(a) {
     if (!a.executada) return a.planejado <= hoje() ? 'pendente' : 'futura';
     const d = diasEntre(a.planejado, a.executada);
@@ -288,7 +288,7 @@ window.Telas.monitoramentoAplicacoes = (function () {
     // Status escolhido na legenda: a aplicação em outro status fica vazia
     if (st && est.status && st !== est.status) return `<td class="${cls}"${congela}></td>`;
     if (!a) return `<td class="${cls} ma-vazio"${congela}>—</td>`;
-    // Sem execução: Pendente com a exclamação e o nome; Planejada (a futura) com o calendário com relógio e a data planejada, em cinza
+    // Sem execução: Não iniciada com a exclamação e o nome; Planejada (a futura) com o calendário com relógio e a data planejada, em cinza
     const texto = a.executada ? Util.data(a.executada) : st === 'pendente' ? `${Icones.pendente}${Util.data(a.planejado)}` : `${Icones.futura}${Util.data(a.planejado)}`;
     return `<td class="${cls}"${congela}><span class="ma-etiqueta ma-st--${st}" title="${STATUS.find(([x]) => x === st)[1]}${st === 'futura' ? ` para ${Util.data(a.planejado)}` : st === 'pendente' ? ` · planejada para ${Util.data(a.planejado)}` : ''}">${texto}</span></td>`;
   }
@@ -317,77 +317,60 @@ window.Telas.monitoramentoAplicacoes = (function () {
   }
 
   // ----- Planejada × Executada: uma linha por talhão e uma coluna por operação marcada (sem o Plantio). À esquerda, o
-  // talhão e o eixo Desvio (dias), o mesmo para a tela toda: de −(maior desvio + 2) a +(maior desvio + 2), a folga para a
-  // etiqueta. Em cada operação, o ponto no zero na cor do status e a barra do desvio (para cima se atrasada, para baixo
-  // se adiantada); a etiqueta em cima ("0", "+2", "−3", "Pendente 10 d", "Em 4 d") e "Plan:" / "Exec:" embaixo.
-  // Pendente: só o ponto vermelho. Planejada: círculo tracejado. -----
-  const MT_ZERO = 76;   // altura (px) do zero na linha
-  const MT_MEIO = 38;   // do zero ao topo (ou ao pé) do eixo, em px
+  // talhão. Em cada operação, todos na mesma altura: o ponto na linha, na cor do status; a etiqueta em cima ("+2 d",
+  // "−3 d", "Não iniciada 10 d", "Em 4 d"), acima dela o nome do status (só nas executadas) e embaixo "Planejada:" / "Executada:".
+  // Iniciada na data: sem a etiqueta ("0 d"). Não iniciada: só o ponto vermelho. Planejada: círculo tracejado. -----
+  const MT_ZERO = 90;   // altura (px) da linha do ponto
   const diaMes = (iso) => Util.data(iso).slice(0, 5);
   const desvio = (a) => (a.executada ? diasEntre(a.planejado, a.executada) : 0);
   function textoStatus(a, st) {
-    if (st === 'pendente') return `Pendente ${diasEntre(a.planejado, hoje())} d`;
+    if (st === 'pendente') return `Não iniciada ${diasEntre(a.planejado, hoje())} d`;
     if (st === 'futura') return `Em ${diasEntre(hoje(), a.planejado)} d`;
-    const d = desvio(a);
-    return d > 0 ? `+${d}` : d < 0 ? `−${-d}` : '0';
+    return dias(desvio(a));
   }
+  // Desvio em dias com o sinal: "+2 d", "0 d", "−3 d"
+  const dias = (d) => `${d > 0 ? '+' : d < 0 ? '−' : ''}${Math.abs(d)} d`;
 
-  function evento(a, nome, y) {
+  function evento(a, nome) {
     const st = statusDe(a);
     if (est.status && st !== est.status) return '';
-    const d = desvio(a);
-    const barra = d ? `<span class="mt-desvio mt-fundo--${st}" style="top:${Math.min(MT_ZERO, y(d))}px;height:${Math.abs(y(d) - MT_ZERO)}px"></span>` : '';
     const titulo = `${nome} · ${STATUS.find(([x]) => x === st)[1]} · planejada ${Util.data(a.planejado)}${a.executada ? ` · executada ${Util.data(a.executada)}` : ''}`;
     return `
       <div class="mt-ev" title="${esc(titulo)}">
-        ${barra}
         <span class="mt-ponto mt-ponto--${st}" style="top:${MT_ZERO}px"></span>
-        <span class="mt-ev__status ma-etiqueta ma-st--${st}" style="top:${y(Math.max(d, 0)) - 12}px">${textoStatus(a, st)}</span>
-        <span class="mt-ev__datas" style="top:${Math.max(MT_ZERO, y(d)) + 12}px">Plan: ${diaMes(a.planejado)}${a.executada ? `<br>Exec: ${diaMes(a.executada)}` : ''}</span>
+        ${a.executada ? `<strong class="mt-ev__nome mt-cor--${st}" style="top:${MT_ZERO - 52}px">${STATUS.find(([x]) => x === st)[1]}</strong>` : ''}
+        ${st === 'prazo' ? '' : `<span class="mt-ev__status ma-etiqueta ma-st--${st}" style="top:${MT_ZERO - 12}px">${textoStatus(a, st)}</span>`}
+        <span class="mt-ev__datas" style="top:${MT_ZERO + 12}px">Planejada: ${diaMes(a.planejado)}${a.executada ? `<br>Executada: ${diaMes(a.executada)}` : ''}</span>
       </div>`;
   }
 
   function linhaDoTempo(ls, cols) {
     if (!ls.length) return `<p class="ma-construcao">${est.status ? `Nenhum talhão com aplicação ${STATUS.find(([x]) => x === est.status)[1].toLowerCase()}.` : 'Nenhum talhão com essas operações planejadas.'}</p>`;
-    // Eixo: o maior desvio (em módulo) entre as aplicações à mostra, mais 2
-    let maior = 0;
-    ls.forEach((r) => cols.forEach((c) => {
-      const a = r.aplic[c.nome];
-      if (a && (!est.status || statusDe(a) === est.status)) maior = Math.max(maior, Math.abs(desvio(a)));
-    }));
-    const lim = maior + 2;
-    const y = (v) => MT_ZERO - (v * MT_MEIO) / lim;
-    const meio = Math.round(lim / 2);
-    const marcas = [...new Set([lim, meio, 0, -meio, -lim])];
-    const eixo = `
-      <div class="mt-eixo" aria-hidden="true">
-        <span class="mt-eixo__titulo" style="top:${MT_ZERO}px">Desvio (dias)</span>
-        ${marcas.map((v) => `<span class="mt-eixo__marca" style="top:${y(v)}px">${v < 0 ? `−${-v}` : v}</span>`).join('')}
-      </div>`;
     const faixa = (r) => {
-      const aps = cols.map((c) => r.aplic[c.nome]).filter(Boolean);
+      const ops = cols.filter((c) => r.aplic[c.nome]);
+      const aps = ops.map((c) => r.aplic[c.nome]);
       const sts = aps.map(statusDe);
       const feitas = aps.filter((a) => a.executada).length;
-      const pendentes = sts.filter((s) => s === 'pendente').length;
       return `
         <div class="mt-linha">
           <div class="mt-esq">
             <div class="mt-talhao">
-              <p class="mt-talhao__nome"><strong>${esc(r.talhao)}</strong> <span>${esc(r.plano.fazenda)}</span></p>
-              <p class="mt-talhao__var">Var. ${esc(r.variedades.join(', ') || '—')}</p>
-              <div class="mt-segmentos">${sts.map((s) => `<span class="mt-segmento mt-fundo--${s}" title="${STATUS.find(([x]) => x === s)[1]}"></span>`).join('')}</div>
-              <p class="mt-talhao__conta">${feitas} de ${aps.length} ${aps.length === 1 ? 'aplicada' : 'aplicadas'}${pendentes ? ` · <span class="mt-talhao__pendente">${pendentes} ${pendentes === 1 ? 'pendente' : 'pendentes'}</span>` : ''}</p>
+              <p class="mt-talhao__nome"><strong>${esc(r.talhao)}</strong></p>
+              <p class="mt-talhao__fazenda">${esc(r.plano.fazenda)}</p>
+              <p class="mt-talhao__var">${esc(r.variedades.join(', ') || '—')}</p>
+              <p class="mt-talhao__ops">Operações</p>
+              <div class="mt-segmentos">${sts.map((s, i) => `<span class="mt-segmento mt-fundo--${s}" title="${esc(ops[i].nome)}: ${STATUS.find(([x]) => x === s)[1]}"></span>`).join('')}</div>
+              <p class="mt-talhao__conta">${feitas} de ${aps.length} ${aps.length === 1 ? 'executada' : 'executadas'} <span class="mt-talhao__pct">${aps.length ? Math.round((feitas / aps.length) * 100) : 0}%</span></p>
             </div>
-            ${eixo}
           </div>
-          ${cols.map((c) => `<div class="mt-op" style="--mt-zero:${MT_ZERO}px">${r.aplic[c.nome] ? evento(r.aplic[c.nome], c.nome, y) : ''}</div>`).join('')}
+          ${cols.map((c) => `<div class="mt-op" style="--mt-zero:${MT_ZERO}px">${r.aplic[c.nome] ? evento(r.aplic[c.nome], c.nome) : ''}</div>`).join('')}
         </div>`;
     };
     return `
       <div class="mt-rolagem">
         <div class="mt">
           <div class="mt-linha mt-linha--cabecalho">
-            <div class="mt-esq"><div class="mt-talhao mt-talhao--cabecalho">Talhão</div><div class="mt-eixo"></div></div>
+            <div class="mt-esq"><div class="mt-talhao mt-talhao--cabecalho">Talhão</div></div>
             ${cols.map((c) => `<div class="mt-op mt-op--cabecalho">${esc(c.nome)}</div>`).join('')}
           </div>
           ${ls.map(faixa).join('')}
@@ -577,16 +560,23 @@ window.Telas.monitoramentoAplicacoes = (function () {
   }
 
   // Barra acima da tabela: legenda dos status da aplicação (clicável), com as bolinhas da visão Planejada × Executada
-  const LEGENDA = [['adiantada', 'Antecipada'], ['prazo', 'No prazo'], ['atrasada', 'Atrasada'],
-    ['pendente', 'Pendente'], ['futura', 'Planejada']];
+  const LEGENDA = ['pendente', 'adiantada', 'prazo', 'atrasada', 'futura'].map((id) => STATUS.find(([x]) => x === id));
+  // Dica de cada item da legenda (ao clicar, filtra os talhões; clicado de novo, mostra todos)
+  const DICA_LEGENDA = {
+    futura: 'A data planejada para início ainda não chegou.',
+    adiantada: 'A operação foi iniciada antes da data planejada.',
+    prazo: 'A operação foi iniciada na data planejada.',
+    atrasada: 'A operação foi iniciada após a data planejada.',
+    pendente: 'A data planejada já passou, mas a operação ainda não foi iniciada.',
+  };
   function barra() {
     return `
       <div class="ma-barra">
         <div class="ma-legenda">
-          <span class="ma-legenda__titulo">Aplicação</span>
+          <span class="ma-legenda__titulo">Operação</span>
           <ul aria-label="Status da aplicação">
             ${LEGENDA.map(([id, nome]) => `<li><button class="ma-legenda__item ${est.status && est.status !== id ? 'ma-legenda__item--apagado' : ''}" type="button"
-                data-ma-status="${id}" aria-pressed="${est.status === id}" title="${est.status === id ? 'Mostrar todos os talhões' : `Só os talhões com aplicação ${STATUS.find(([x]) => x === id)[1].toLowerCase()}`}">
+                data-ma-status="${id}" aria-pressed="${est.status === id}" title="${est.status === id ? 'Mostrar todos os talhões' : DICA_LEGENDA[id]}">
                 ${id === 'pendente' && est.visao === 'tabela' ? `<span class="ma-legenda__icone ma-st--pendente" aria-hidden="true">${Icones.pendente}</span>` : `<span class="ma-legenda__cor mt-ponto--${id}" aria-hidden="true"></span>`}${nome}</button></li>`).join('')}
           </ul>
         </div>

@@ -3080,8 +3080,8 @@ html[data-tema="escuro"] .md-modo__botao--ativo { background: #176B50; }
 .md-grafico--larga .md-rotulo { font-size: 13px; }
 /* Planejada × Executada do Monitoramento: uma linha por talhão e uma coluna por operação (talhão e eixo parados à
    esquerda, nomes das operações parados no topo). Em cada operação, o ponto no zero e a barra do desvio */
-.ma-lista { --mt-adiantada: #c99a06; --mt-prazo: #1f9d55; --mt-atrasada: #e8772e; --mt-pendente: #d93025; --mt-futura: #9aa5ad; }
-html[data-tema="escuro"] .ma-lista { --mt-adiantada: #E2B93B; --mt-prazo: #4FD28A; --mt-atrasada: #F0995A; --mt-pendente: #F28B82; --mt-futura: #7C8E9B; }
+.ma-lista { --mt-adiantada: #1f6fd1; --mt-prazo: #1f9d55; --mt-atrasada: #e8772e; --mt-pendente: #d93025; --mt-futura: #9aa5ad; }
+html[data-tema="escuro"] .ma-lista { --mt-adiantada: #6FA8E8; --mt-prazo: #4FD28A; --mt-atrasada: #F0995A; --mt-pendente: #F28B82; --mt-futura: #7C8E9B; }
 .mt-rolagem { max-height: calc(100vh - 330px); min-height: 220px; overflow: auto; border-top: 1px solid var(--borda); }
 .mt { width: max-content; min-width: 100%; }
 .mt-linha { display: flex; border-bottom: 1px solid var(--borda); }
@@ -3092,33 +3092,29 @@ html[data-tema="escuro"] .ma-lista { --mt-adiantada: #E2B93B; --mt-prazo: #4FD28
 .mt-talhao { width: 230px; padding: 18px 16px 12px 20px; border-right: 1px solid var(--borda); }
 .mt-talhao--cabecalho { display: flex; align-items: center; padding: 14px 16px 14px 20px; border-right: 0; font-size: 15px; font-weight: 600; }
 .mt-talhao p { margin: 0; }
-.mt-talhao__nome strong { font-size: 18px; }
-.mt-talhao__nome span, .mt-talhao__var { font-size: 13px; color: var(--texto-suave); }
-.mt-talhao__var { margin-top: 4px !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.mt-segmentos { display: flex; gap: 4px; margin: 10px 0 6px; }
+.mt-talhao__nome strong { font-size: 20px; line-height: 1.2; }
+.mt-talhao__fazenda { font-size: 14px; }
+.mt-talhao__var { margin-top: 2px !important; font-size: 13px; color: var(--texto-suave); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mt-talhao__ops { margin-top: 8px !important; font-size: 13px; }
+.mt-talhao__pct { margin-left: 4px; color: var(--verde-700); font-weight: 600; }
+.mt-segmentos { display: flex; gap: 4px; margin: 6px 0 6px; }
 .mt-segmento { flex: 1; height: 6px; border-radius: 3px; }
 .mt-talhao__conta { font-size: 13px; color: var(--texto-suave); }
-.mt-talhao__pendente { color: var(--mt-pendente); font-weight: 600; }
-.mt-eixo { position: relative; width: 64px; height: 164px; }
-.mt-linha--cabecalho .mt-eixo { height: auto; }
-.mt-eixo__titulo { position: absolute; left: 14px; transform: translate(-50%, -50%) rotate(-90deg); font-size: 12px; color: var(--texto-suave); white-space: nowrap; }
-.mt-eixo__marca { position: absolute; right: 10px; transform: translateY(-50%); font-size: 12px; color: var(--texto-suave); font-variant-numeric: tabular-nums; }
-/* Coluna da operação: só a largura da etiqueta mais longa ("Pendente 13 d"); nome longo quebra a linha. A linha do zero (--mt-zero) atravessa todas */
-.mt-op { position: relative; flex: none; width: 132px; height: 164px;
+/* Coluna da operação: só a largura da etiqueta mais longa ("Não iniciada 13 d"); nome longo quebra a linha. A linha do zero (--mt-zero) atravessa todas */
+.mt-op { position: relative; flex: none; width: 156px; min-height: 156px;
   background: linear-gradient(var(--borda-forte), var(--borda-forte)) 0 var(--mt-zero) / 100% 1px no-repeat; }
 .mt-op + .mt-op { border-left: 1px solid var(--borda); }
 .mt-op:last-child { border-right: 1px solid var(--borda); }
-.mt-op--cabecalho { height: auto; display: flex; align-items: center; justify-content: center; padding: 10px 8px; background: none; line-height: 1.25;
+.mt-op--cabecalho { height: auto; min-height: 0; display: flex; align-items: center; justify-content: center; padding: 10px 8px; background: none; line-height: 1.25;
   font-size: 15px; font-weight: 600; text-align: center; }
 .mt-ev { position: absolute; inset: 0; }
-.mt-ponto, .mt-desvio, .mt-ev__status, .mt-ev__datas { position: absolute; left: 50%; }
+.mt-ponto, .mt-ev__status, .mt-ev__datas, .mt-ev__nome { position: absolute; left: 50%; }
 .mt-ponto { z-index: 1; width: 14px; height: 14px; border-radius: 50%; box-sizing: border-box; transform: translate(-50%, -50%); }
 .mt-ponto--prazo { background: var(--mt-prazo); }
 .mt-ponto--atrasada { background: var(--mt-atrasada); }
 .mt-ponto--adiantada { background: var(--mt-adiantada); }
 .mt-ponto--pendente { background: var(--mt-pendente); }
 .mt-ponto--futura { width: 18px; height: 18px; border: 2px dashed var(--mt-futura); background: var(--superficie); }
-.mt-desvio { width: 74px; transform: translateX(-50%); opacity: .85; }
 .mt-fundo--adiantada { background: var(--mt-adiantada); }
 .mt-fundo--atrasada { background: var(--mt-atrasada); }
 .mt-fundo--prazo { background: var(--mt-prazo); }
@@ -3128,6 +3124,11 @@ html[data-tema="escuro"] .ma-lista { --mt-adiantada: #E2B93B; --mt-prazo: #4FD28
 .mt-ev__status { z-index: 1; min-width: 0; padding: 3px 9px; font-size: 13px; white-space: nowrap; transform: translate(-50%, -100%); }
 .mt-ev__status::after { content: ""; position: absolute; left: 50%; bottom: -4px; width: 8px; height: 8px; background: inherit; transform: translateX(-50%) rotate(45deg); }
 .mt-ev__datas { transform: translateX(-50%); font-size: 12px; line-height: 1.6; color: var(--texto-suave); text-align: center; white-space: nowrap; }
+/* Nome do status acima da etiqueta, na cor dele */
+.mt-ev__nome { transform: translate(-50%, -100%); font-size: 13px; font-weight: 600; white-space: nowrap; }
+.mt-cor--adiantada { color: var(--mt-adiantada); }
+.mt-cor--prazo { color: var(--mt-prazo); }
+.mt-cor--atrasada { color: var(--mt-atrasada); }
 /* Barra acima da tabela: legenda dos status da aplicação (clicável) */
 .ma-barra { display: flex; align-items: center; flex-wrap: wrap; gap: 12px 24px; padding: 14px 20px; }
 /* Status da aplicação: cor de fundo da última célula da aplicação (e da legenda) */
@@ -3147,14 +3148,15 @@ html[data-tema="escuro"] .ma-lista { --mt-adiantada: #E2B93B; --mt-prazo: #4FD28
 /* Executadas: Pendente com o mesmo ícone da tabela (bolinha com exclamação, em vermelho) */
 .ma-legenda__icone { display: inline-grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; color: var(--erro); }
 .ma-legenda__icone .icone { width: 18px; height: 18px; }
-.ma-st--adiantada { background: var(--aviso-fundo); }
+.ma-st--adiantada { background: var(--info-fundo); }
 .ma-st--prazo     { background: var(--verde-100); }
 .ma-st--atrasada  { background: #fdebdc; }
 .ma-st--pendente  { background: #f6cfca; }
 .ma-st--futura    { background: var(--superficie-2); }
 /* Etiqueta do status na última célula da aplicação: fundo da legenda e texto na cor do status */
 .ma-etiqueta { display: inline-block; min-width: 42px; padding: 3px 10px; border-radius: 6px; font-weight: 600; text-align: center; font-variant-numeric: tabular-nums; }
-.ma-etiqueta.ma-st--adiantada { color: var(--aviso-texto); }
+.ma-etiqueta.ma-st--adiantada { color: #1a5bb0; }
+html[data-tema="escuro"] .ma-etiqueta.ma-st--adiantada { color: #8FBCEF; }
 .ma-etiqueta.ma-st--prazo     { color: var(--verde-700); }
 .ma-etiqueta.ma-st--atrasada  { color: #b9560f; }
 .ma-etiqueta.ma-st--pendente  { color: var(--erro); }
