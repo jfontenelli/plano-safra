@@ -236,11 +236,11 @@ window.Telas.monitoramentoAplicacoes = (function () {
   }
 
   // Cabeçalho: caminho, título, subtítulo (conforme a guia) e as guias, no mesmo formato das abas do plano (Operações ·
-  // Planejamento · Programação): Executadas (tabela), Planejadas × Executadas (desvio por operação) e Duração da Aplicação
+  // Planejamento · Programação): Executadas (tabela), Planejadas × Executadas (desvio por operação) e Duração da Operação
   const GUIAS = [
     ['tabela', 'Executadas', 'Consulte as datas de execução e o status das operações por talhão.'],
     ['linha', 'Planejadas × Executadas', 'Compare as datas planejadas e executadas das operações por talhão.'],
-    ['duracao', 'Duração da Aplicação', 'Compare a duração das OS fechadas com o prazo de conclusão da operação.']
+    ['duracao', 'Duração da Operação', 'Compare a duração das OS fechadas com o prazo de conclusão da operação.']
   ];
   function cabecalho() {
     const [, , subtitulo] = GUIAS.find(([id]) => id === est.visao);
@@ -379,7 +379,7 @@ window.Telas.monitoramentoAplicacoes = (function () {
       <p class="cc-tabela__rodape">${ls.length.toLocaleString('pt-BR')} ${ls.length === 1 ? 'talhão' : 'talhões'} · Hoje: ${Util.data(hoje())}</p>`;
   }
 
-  // ----- Duração da Aplicação: só as OS fechadas; duração = da abertura da recomendação (data executada) até o
+  // ----- Duração da Operação: só as OS fechadas; duração = da abertura da recomendação (data executada) até o
   // fechamento da OS, em dias. Por talhão: um gráfico por operação marcada, uma barra por talhão, com a linha do prazo de
   // conclusão. Por operação: um gráfico, uma barra por operação com a média das durações dos talhões (arredondada) e um
   // tracejado curto no prazo. Barras verdes; números em cinza escuro. -----
@@ -601,7 +601,7 @@ window.Telas.monitoramentoAplicacoes = (function () {
     };
     const ctx = { estado: est };
 
-    // Guias Executadas · Planejadas × Executadas · Duração da Aplicação (no cabeçalho, fora da página da tela)
+    // Guias Executadas · Planejadas × Executadas · Duração da Operação (no cabeçalho, fora da página da tela)
     caixaCabecalho.addEventListener('click', (e) => {
       const b = e.target.closest('[data-ma-visao]');
       if (!b) return;

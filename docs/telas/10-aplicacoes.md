@@ -1,6 +1,6 @@
 # Tela 10 — Aplicações (Monitoramento › Aplicações)
 
-Atualizado em 23/10/2026 (legenda Operação com os nomes Não iniciada, Iniciada antes, Iniciada na data, Iniciada com atraso e Planejada, e dicas; Iniciada antes em azul; Planejadas × Executadas sem eixo e sem barra, tudo na mesma altura, com o nome do status acima da etiqueta; antes, no mesmo dia: guias no formato das abas do plano e nova guia Duração da Aplicação). Este doc mostra só o estado atual da tela. Decisão alterada é reescrita, não acumulada.
+Atualizado em 23/10/2026 (guia Duração da Aplicação renomeada para Duração da Operação; legenda Operação com os nomes Não iniciada, Iniciada antes, Iniciada na data, Iniciada com atraso e Planejada, e dicas; Iniciada antes em azul; Planejadas × Executadas sem eixo e sem barra, tudo na mesma altura, com o nome do status acima da etiqueta; antes, no mesmo dia: guias no formato das abas do plano e nova guia Duração da Operação). Este doc mostra só o estado atual da tela. Decisão alterada é reescrita, não acumulada.
 Imagem: imagens da usuária (22 e 23/10/2026). Os valores das imagens são ilustrativos; vale o layout.
 
 ## Objetivo
@@ -10,11 +10,11 @@ Acompanhar, talhão a talhão, as aplicações de uma safra: quando cada operaç
 Menu lateral **Monitoramento** (grupo com setinha, como Plano de Safra e Gestão da Lavoura) › **Aplicações**. O nome do grupo também leva à página. Sem nenhum plano cadastrado: "Crie seu primeiro plano para visualizar as Aplicações" e o botão "+ Criar Plano de Safra".
 
 ## Conteúdo
-1. **Cabeçalho:** caminho "⌂ Monitoramento › Aplicações", título **Aplicações**, o subtítulo da guia escolhida e as guias **Executadas · Planejadas × Executadas · Duração da Aplicação**, no mesmo formato das abas do plano (Operações · Planejamento · Programação): a escolhida em negrito, com o traço verde embaixo. Abre em Executadas.
+1. **Cabeçalho:** caminho "⌂ Monitoramento › Aplicações", título **Aplicações**, o subtítulo da guia escolhida e as guias **Executadas · Planejadas × Executadas · Duração da Operação**, no mesmo formato das abas do plano (Operações · Planejamento · Programação): a escolhida em negrito, com o traço verde embaixo. Abre em Executadas.
    - Executadas: "Consulte as datas de execução e o status das operações por talhão."
    - Planejadas × Executadas: "Compare as datas planejadas e executadas das operações por talhão."
-   - Duração da Aplicação: "Compare a duração das OS fechadas com o prazo de conclusão da operação."
-2. **Filtros**, com várias escolhas (as caixas da Agenda Agrícola, com Pesquisar e "Todas"/"Todos"), nesta ordem: **Safra** (as do cadastro, da mais recente para a mais antiga), **Cultura**, **Empresa**, **Fazenda**, **Talhão** ("Boa Vista · T01"), **Grupo de operação** e **Operação**; **Limpar filtros** à direita. Exceção na Duração da Aplicação › Por talhão (item 6).
+   - Duração da Operação: "Compare a duração das OS fechadas com o prazo de conclusão da operação."
+2. **Filtros**, com várias escolhas (as caixas da Agenda Agrícola, com Pesquisar e "Todas"/"Todos"), nesta ordem: **Safra** (as do cadastro, da mais recente para a mais antiga), **Cultura**, **Empresa**, **Fazenda**, **Talhão** ("Boa Vista · T01"), **Grupo de operação** e **Operação**; **Limpar filtros** à direita. Exceção na Duração da Operação › Por talhão (item 6).
 3. **Legenda "Operação"** acima da tabela, em Executadas e Planejadas × Executadas: **Não iniciada · Iniciada antes · Iniciada na data · Iniciada com atraso · Planejada**, com bolinhas nas cores do status (Planejada: círculo tracejado cinza). Em Executadas, a Não iniciada tem o ícone da tabela: a bolinha vermelha com exclamação. Ao passar o mouse, a dica de cada uma:
    - Não iniciada: "A data planejada já passou, mas a operação ainda não foi iniciada."
    - Iniciada antes: "A operação foi iniciada antes da data planejada."
@@ -34,7 +34,7 @@ Menu lateral **Monitoramento** (grupo com setinha, como Plano de Safra e Gestão
    - Em cada operação, tudo na **mesma altura**, qualquer que seja o desvio, no meio da linha do talhão: só a **bolinha** na cor do status, sem barra (Não iniciada: bolinha vermelha; Planejada: círculo tracejado cinza). A linha das bolinhas atravessa as colunas.
    - Em cima da bolinha, a etiqueta com setinha, sempre com o "d": "+2 d", "−3 d", "Não iniciada 10 d", "Em 4 d". **Iniciada na data** (planejada = executada) fica sem etiqueta: só a bolinha verde. Acima da etiqueta, com um respiro, o **nome do status** em negrito na cor dele (só nas iniciadas: Iniciada antes, Iniciada na data, Iniciada com atraso). Embaixo da bolinha: "Planejada: dd/mm" e, se iniciada, "Executada: dd/mm".
    - Rodapé: "10 talhões · Hoje: dd/mm/aaaa".
-6. **Duração da Aplicação**, com a chave **Por talhão | Por operação** (a escolhida em verde) no alto da área do gráfico, à direita. Abre em Por talhão. Barras verdes, números em cinza escuro, prazo de conclusão tracejado; no rodapé do gráfico, a legenda **▬ Duração da execução · ┄ Prazo de conclusão**. Sem a legenda de status.
+6. **Duração da Operação**, com a chave **Por talhão | Por operação** (a escolhida em verde) no alto da área do gráfico, à direita. Abre em Por talhão. Barras verdes, números em cinza escuro, prazo de conclusão tracejado; no rodapé do gráfico, a legenda **▬ Duração da execução · ┄ Prazo de conclusão**. Sem a legenda de status.
    - **Por talhão:** uma operação por vez. À esquerda, **‹ ›** juntas e, depois delas, o nome da operação com a posição ("Plantio 6 de 13") e "Prazo de conclusão: 3 dias". O gráfico tem uma barra por talhão com a duração em cima, o eixo **Duração (dias)**, o eixo **Talhões** e a linha do prazo atravessando o gráfico, com "3 dias" na ponta.
    - **Por operação:** um gráfico com uma barra por operação: a duração em cima ("3 d"), o nome e "Prazo: 2 d" embaixo e um tracejado curto na altura do prazo.
 
@@ -49,7 +49,7 @@ Menu lateral **Monitoramento** (grupo com setinha, como Plano de Safra e Gestão
 - **Só as operações planejadas em ao menos um talhão filtrado** aparecem (colunas, filtro Operação e gráficos, nas três guias). Ex.: a Gessagem e a Fosfatagem vêm do modelo, mas o plano da Boa Vista 26/27 não as planejou em nenhum talhão: ficam de fora; com a Santa Clara filtrada, a Gessagem aparece.
 - **Colunas de operação** (Executadas e Planejadas × Executadas): as operações marcadas no filtro, na ordem do DAP (Plantio primeiro, Colheita por último). Em Executadas, o Plantio marcado não ganha coluna própria: os dados dele ficam na Data de plantio, com a etiqueta do status.
 - **Desvio (Planejadas × Executadas):** dias entre a data planejada e a executada, só na etiqueta ("+2 d" com atraso, "−3 d" antes); na data, sem etiqueta. Não muda a altura da bolinha.
-- **Duração da Aplicação:**
+- **Duração da Operação:**
   - **Só as OS fechadas.** Duração = da abertura da recomendação (data executada) até o fechamento da OS, em dias.
   - **Prazo de conclusão:** a previsão de conclusão da operação no planejamento (vem do cadastro da operação; sem prazo próprio, o padrão do grupo: 2 dias; Plantio 3; Colheita 10).
   - Entram todas as operações marcadas, inclusive o Plantio e a Colheita.
@@ -67,7 +67,7 @@ Menu lateral **Monitoramento** (grupo com setinha, como Plano de Safra e Gestão
 ## Navegação
 - Menu Monitoramento ou Monitoramento › Aplicações → esta página (`#/monitoramento`).
 - Caminho "⌂ Monitoramento" → esta página.
-- Guias Executadas · Planejadas × Executadas · Duração da Aplicação → trocam a visão (os filtros continuam, menos o padrão da Duração › Por talhão).
+- Guias Executadas · Planejadas × Executadas · Duração da Operação → trocam a visão (os filtros continuam, menos o padrão da Duração › Por talhão).
 - Duração: Por talhão | Por operação; ‹ › → operação anterior / próxima.
 
 ## Para testar
@@ -76,7 +76,7 @@ Menu lateral **Monitoramento** (grupo com setinha, como Plano de Safra e Gestão
 - **O exemplo anda com o dia** (`dataReferencia`, 25/11/2026; DECISOES 4.0): hoje é o dia em que o protótipo é aberto, e a página abre sempre no mesmo ponto da safra: na Boa Vista 26/27, a 1ª Fungicida quase toda executada (T06 pendente), a 2ª em parte (T02 pendente), a 3ª e a 4ª planejadas.
 - Legenda Não iniciada → T02 (2ª Fungicida) e T06 (1ª Fungicida).
 - Safra 27/27 com Cultura Milho → as operações de Defensivo do milho, todas planejadas.
-- Duração da Aplicação › Por talhão na Boa Vista 26/27 → abre em Calagem 1 de 13 (a 3ª e a 4ª Fungicida ficam de fora, sem OS fechada); Por operação → só a 1ª e a 2ª Fungicida com o padrão de filtros.
+- Duração da Operação › Por talhão na Boa Vista 26/27 → abre em Calagem 1 de 13 (a 3ª e a 4ª Fungicida ficam de fora, sem OS fechada); Por operação → só a 1ª e a 2ª Fungicida com o padrão de filtros.
 
 ## Sugestões (a validar)
 - Planejadas × Executadas: operação não planejada no talhão fica vazia (só a linha do zero); poderia mostrar "—", como na tabela.

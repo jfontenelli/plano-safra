@@ -3032,7 +3032,7 @@ html[data-tema="escuro"] .grafico-historico__valor { fill: #5FD896; }
 .ma-guias .etapa--ativa { color: var(--texto); font-weight: 700; }
 .ma-guias .etapa:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 2px; }
 .ma-construcao { margin: 0; padding: 48px 20px; text-align: center; color: var(--texto-suave); }
-/* Duração da Aplicação: legenda e chave Por talhão | Por operação; gráficos de barras verdes com o prazo tracejado */
+/* Duração da Operação: legenda e chave Por talhão | Por operação; gráficos de barras verdes com o prazo tracejado */
 .ma-lista { --md-prazo: #34405a; }
 html[data-tema="escuro"] .ma-lista { --md-prazo: #A9B6C9; }
 .md-legenda { display: flex; flex-wrap: wrap; gap: 6px 24px; margin: 16px 0 0 -36px; padding: 0; list-style: none; font-size: 13px; color: var(--texto-suave); }
