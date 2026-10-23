@@ -14,8 +14,8 @@ window.Telas.centralOperacoes = (function () {
   // ----- Cabeçalho de Operações Agrícolas (as três abas) -----
   const ABAS = [
     ['tarefas', 'Minhas tarefas', '#/operacoes-agricolas', 'Operações a recomendar, atrasos e justificativas que aguardam a sua ação.'],
-    ['central', 'Central de Operações', '#/operacoes-agricolas/central', 'Acompanhe as ordens de serviço, recomendações e execução das operações agrícolas.'],
-    ['agenda', 'Agenda Agrícola', '#/operacoes-agricolas/agenda', 'Calendário das operações planejadas, dia a dia, em todas as fazendas.']
+    ['agenda', 'Agenda Agrícola', '#/operacoes-agricolas/agenda', 'Calendário das operações planejadas, dia a dia, em todas as fazendas.'],
+    ['central', 'Central OS', '#/operacoes-agricolas/central', 'Acompanhe as ordens de serviço, recomendações e execução das operações agrícolas.']
   ];
   function cabecalho(aba) {
     const [, titulo, , subtitulo] = ABAS.find(([id]) => id === aba);

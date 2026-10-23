@@ -1,6 +1,6 @@
 # Tela 08 — Operações Agrícolas: aba Minhas tarefas
 
-Atualizado em 22/10/2026. Este doc mostra só o estado atual da tela. Decisão alterada é reescrita, não acumulada.
+Atualizado em 23/10/2026 (ordem das abas: Minhas tarefas, Agenda Agrícola, Central OS). Este doc mostra só o estado atual da tela. Decisão alterada é reescrita, não acumulada.
 Imagem: enviada pela usuária em 21/10/2026 (design da antiga Central de Operações do usuário Fazenda, hoje Minhas tarefas). Quando imagem e documento divergirem, vale este documento.
 **Situação no protótipo:** construída.
 
@@ -8,11 +8,11 @@ Imagem: enviada pela usuária em 21/10/2026 (design da antiga Central de Operaç
 Acompanhar, de todas as fazendas, as operações que precisam de recomendação agronômica e as OS com atraso ou com justificativa pendente, para o agrônomo agir.
 
 ## Quando aparece
-- Menu lateral **Gestão da Lavoura › Operações Agrícolas**: abre nesta aba (a primeira; depois vêm a Central de Operações, Tela 09, e a Agenda Agrícola, Tela 07).
+- Menu lateral **Gestão da Lavoura › Operações Agrícolas**: abre nesta aba (a primeira; depois vêm a Agenda Agrícola, Tela 07, e a Central OS, Tela 09).
 - Sem nenhum plano cadastrado: o convite "Crie seu primeiro plano para visualizar…" com "+ Criar Plano de Safra" (como as outras telas).
 
 ## Conteúdo
-- **Cabeçalho** (o mesmo nas três abas): caminho no topo "⌂ Operações Agrícolas › Minhas tarefas" (o nome da aba aberta), título com o nome da aba, subtítulo e as abas **Minhas tarefas · Central de Operações · Agenda Agrícola**.
+- **Cabeçalho** (o mesmo nas três abas): caminho no topo "⌂ Operações Agrícolas › Minhas tarefas" (o nome da aba aberta), título com o nome da aba, subtítulo e as abas **Minhas tarefas · Agenda Agrícola · Central OS**.
   - Subtítulo de Minhas tarefas: "Operações a recomendar, atrasos e justificativas que aguardam a sua ação."
 - **Filtros** num cartão: **Safra** (uma escolha; começa na safra de hoje, ex.: 26/27), **Cultura**, **Empresa**, **Fazenda**, **Grupo de operação** (uma escolha cada, "Todas"/"Todos"; os grupos dos planos publicados da safra, na ordem Plantio, Fertilidade, Defensivo, Colheita), **Data inicial**, **Data final** e **Limpar filtros**. Embaixo, o texto do período, conforme o cartão escolhido:
   - A recomendar e Recomendação em atraso: "O período considera a data planejada das operações."
@@ -53,7 +53,7 @@ Acompanhar, de todas as fazendas, as operações que precisam de recomendação 
 
 ## Navegação
 - Gestão da Lavoura › Operações Agrícolas → esta aba.
-- Aba Agenda Agrícola → Tela 07.
+- Aba Agenda Agrícola → Tela 07; aba Central OS → Tela 09.
 - Recomendar (linhas marcadas) → modal Recomendar OS ("Em construção").
 
 ## Sugestões (a validar)

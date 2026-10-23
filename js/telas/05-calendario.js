@@ -740,10 +740,11 @@ window.Telas.calendario = (function () {
     return !q || Util.normalizar(nome).includes(q);
   }
   // chave: 'talhao' ou 'grupo'; textos: [todos, nenhum, plural]. Com uma opção só (ex.: os outros filtros deixam só a
-  // Soja), mostra o nome dela, e não "Todas", e a caixa fica sem a linha "Todas"
-  function filtroCaixa(estado, chave, opcoes, [todos, nenhum, plural], rotulo) {
+  // Soja), mostra o nome dela, e não "Todas", e a caixa fica sem a linha "Todas". unico: uma escolha por vez (botões de
+  // opção, sem a linha "Todas")
+  function filtroCaixa(estado, chave, opcoes, [todos, nenhum, plural], rotulo, { unico = false } = {}) {
     const marcadas = opcoes.filter((o) => marcado(estado, chave, o.valor));
-    const unica = opcoes.length === 1;
+    const unica = opcoes.length === 1 || unico;
     const texto = marcadas.length === opcoes.length && !unica ? todos
       : !marcadas.length ? nenhum
       : marcadas.length === 1 ? marcadas[0].nome : `${marcadas.length} ${plural}`;
@@ -760,7 +761,7 @@ window.Telas.calendario = (function () {
           </label>`}
           ${opcoes.map((o) => `
             <label class="cal-filtro__opcao" data-nome="${esc(Util.normalizar(o.nome))}" ${casaBusca(estado, chave, o.nome) ? '' : 'hidden'}>
-              <input type="checkbox" data-campo="cal-filtro" data-filtro="${chave}" value="${esc(o.valor)}" ${marcado(estado, chave, o.valor) ? 'checked' : ''}>
+              <input type="${unico ? 'radio' : 'checkbox'}" ${unico ? `name="cal-unico-${chave}"` : ''} data-campo="cal-filtro" data-filtro="${chave}" value="${esc(o.valor)}" ${marcado(estado, chave, o.valor) ? 'checked' : ''}>
               <span>${esc(o.nome)}</span>${o.extra ? `<span class="cal-filtro__area">${esc(o.extra)}</span>` : ''}
             </label>`).join('')}
           <p class="cal-filtro__nada" ${opcoes.some((o) => casaBusca(estado, chave, o.nome)) ? 'hidden' : ''}>Nada encontrado</p>

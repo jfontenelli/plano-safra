@@ -1,6 +1,6 @@
-# Tela 09 — Operações Agrícolas: aba Central de Operações
+# Tela 09 — Operações Agrícolas: aba Central OS
 
-Atualizado em 22/10/2026. Este doc mostra só o estado atual da tela. Decisão alterada é reescrita, não acumulada.
+Atualizado em 23/10/2026 (aba renomeada de Central de Operações para Central OS e passada para a terceira). Este doc mostra só o estado atual da tela. Decisão alterada é reescrita, não acumulada.
 Imagens: enviadas pela usuária em 21/10/2026 (cartões Visão geral, gráficos Status da OS e Nº OS por Empresa, tabela Ordens de Serviço e o filtro Status da ação). Quando imagem e documento divergirem, vale este documento.
 **Situação no protótipo:** construída (direto no HTML, sem passar pelo Claude Design).
 
@@ -8,10 +8,10 @@ Imagens: enviadas pela usuária em 21/10/2026 (cartões Visão geral, gráficos 
 Dar ao gestor a visão de todas as OS das fazendas: quantas, em que status, quanto atraso, por empresa, fazenda ou executor, e pedir justificativa das OS com atraso.
 
 ## Quando aparece
-- Menu **Gestão da Lavoura › Operações Agrícolas**, aba **Central de Operações** (a segunda; a primeira é Minhas tarefas, Tela 08). Sem perfis de usuário por enquanto.
+- Menu **Gestão da Lavoura › Operações Agrícolas**, aba **Central OS** (antes Central de Operações; a terceira, depois de Minhas tarefas, Tela 08, e da Agenda Agrícola, Tela 07). Sem perfis de usuário por enquanto.
 
 ## Conteúdo
-- **Cabeçalho e layout:** os mesmos da Tela 08 (caminho, título, subtítulo, abas Minhas tarefas · Central de Operações · Agenda Agrícola, etiqueta "Últimas versões publicadas"; mesmo CSS).
+- **Cabeçalho e layout:** os mesmos da Tela 08 (caminho, título, subtítulo, abas Minhas tarefas · Agenda Agrícola · Central OS, etiqueta "Últimas versões publicadas"; mesmo CSS).
 - **Filtros:** os mesmos da Tela 08: Safra, Cultura, Empresa, Fazenda, Grupo de operação, Data inicial, Data final e Limpar filtros. O período abre da primeira operação da safra até hoje + 30 dias e considera a data de abertura das OS (nas operações ainda planejadas, a data planejada); o texto embaixo dos filtros diz isso.
 - **Visão geral:** cinco cartões: **Total de OS** (recomendadas, em execução e fechadas; as planejadas ainda não são OS) · **Fechadas** (% do total de OS) · **Em execução** (% do total de OS) · **Atraso médio** (dias, entre as OS em execução) · **Maior atraso** (dias, entre as OS em execução).
 - **Gráficos** (barras verticais, valor em cima):

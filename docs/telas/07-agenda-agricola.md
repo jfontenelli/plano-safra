@@ -1,6 +1,6 @@
 # Tela 07 — Operações Agrícolas: aba Agenda Agrícola
 
-Atualizado em 22/10/2026. Este doc mostra só o estado atual da tela. Decisão alterada é reescrita, não acumulada.
+Atualizado em 23/10/2026 (ordem das abas: Minhas tarefas, Agenda Agrícola, Central OS). Este doc mostra só o estado atual da tela. Decisão alterada é reescrita, não acumulada.
 Origem: reunião com stakeholders de 19/10/2026. A guia **Calendário** do Resumo do plano (Tela 05) foi migrada para fora do plano, sem a associação a um plano. Hoje fica no menu **Gestão da Lavoura › Operações Agrícolas**, aba **Agenda Agrícola** (o menu Ordens de Serviço passou a Gestão da Lavoura em 21/10/2026). **Por enquanto só migrada**; o refinamento para a programação das OS vem depois.
 Imagem: `referencias/05.3-resumo-calendario.png` (a do Calendário do Resumo, de onde veio). Quando imagem e documento divergirem, vale este documento.
 **Situação no protótipo:** construída.
@@ -9,11 +9,11 @@ Imagem: `referencias/05.3-resumo-calendario.png` (a do Calendário do Resumo, de
 Ver, dia a dia, as operações planejadas de todas as fazendas (vários planos somados), para programar as Ordens de Serviço.
 
 ## Quando aparece
-- Menu lateral **Gestão da Lavoura** (grupo com setinha para minimizar, como o Plano de Safra) › **Operações Agrícolas**, aba **Agenda Agrícola** (a terceira; antes vêm Minhas tarefas, Tela 08, e a Central de Operações, Tela 09).
+- Menu lateral **Gestão da Lavoura** (grupo com setinha para minimizar, como o Plano de Safra) › **Operações Agrícolas**, aba **Agenda Agrícola** (a segunda; antes vem Minhas tarefas, Tela 08, e depois a Central OS, Tela 09).
 - Sem nenhum plano cadastrado: o convite "Crie seu primeiro plano para visualizar a Agenda Agrícola" com "+ Criar Plano de Safra" (como Planejamento, Calendário Agrícola e Orçamento).
 
 ## Conteúdo
-- **Cabeçalho** (o mesmo de Minhas tarefas e da Central de Operações): caminho no topo "⌂ Operações Agrícolas › Agenda Agrícola", título "Agenda Agrícola", subtítulo "Calendário das operações planejadas, dia a dia, em todas as fazendas." e as abas **Minhas tarefas · Central de Operações · Agenda Agrícola**, com a etiqueta "Últimas versões publicadas ⓘ" à direita.
+- **Cabeçalho** (o mesmo de Minhas tarefas e da Central OS): caminho no topo "⌂ Operações Agrícolas › Agenda Agrícola", título "Agenda Agrícola", subtítulo "Calendário das operações planejadas, dia a dia, em todas as fazendas." e as abas **Minhas tarefas · Agenda Agrícola · Central OS**, com a etiqueta "Últimas versões publicadas ⓘ" à direita.
 - **Filtros** num cartão compacto, todos com **várias escolhas** (caixa com Pesquisar, "Todas"/"Todos" e uma marcação por opção): **Safra** (as safras do cadastro: 27/27, 26/27, 26/26, 25/26…, da mais recente para a mais antiga), **Cultura**, **Empresa**, **Fazenda**, **Talhão** e **Operação**, nesta ordem; **Limpar filtros** à direita. As opções são as que existem nos planos com versão publicada. No Talhão, os talhões dos planos que passam pelos outros filtros, com a fazenda junto ("Santa Clara · T01"), porque o nome se repete entre fazendas.
 - **Operação:** as operações dos grupos à mostra na legenda, pelo nome (o mesmo nome em vários planos é uma opção só, ex.: Adubação de plantio da soja e do milho), na ordem da legenda (Plantio, Fertilidade, Defensivo, Colheita) e, dentro do grupo, na ordem do plano; o grupo aparece ao lado. Escolher operações leva o calendário para a **operação escolhida mais cedo**; marcar "Todas" (ou deixar nenhuma) volta para **hoje**.
 - **Sem filtro de Ano Agrícola:** o tempo anda pelas setas do calendário, atravessando os anos.

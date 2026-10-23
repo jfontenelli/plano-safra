@@ -3026,65 +3026,108 @@ html[data-tema="escuro"] .grafico-historico__valor { fill: #5FD896; }
 .ma-tabela .ma-talhao { font-weight: 600; }
 .ma-tabela .ma-variedade { min-width: 140px; max-width: 220px; white-space: normal; }
 .ma-tabela .ma-vazio { color: var(--texto-fraco); }
-/* Cabeçalho: título e subtítulo à esquerda; Executadas | Planejada × Executada à direita (botão ativo em verde) */
-.ma-cabecalho { padding-bottom: 4px; }
-.ma-cabecalho__linha { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px 24px; }
-.ma-visao { display: inline-flex; border: 1px solid var(--borda); border-radius: 10px; background: var(--superficie); overflow: hidden; }
-.ma-visao__botao { display: inline-flex; align-items: center; gap: 10px; height: 42px; padding: 0 20px; border: 0; background: transparent;
-  font: inherit; font-size: 15px; font-weight: 600; color: var(--texto); cursor: pointer; }
-.ma-visao__botao .icone { width: 18px; height: 18px; }
-.ma-visao__botao:hover { background: var(--superficie-2); }
-.ma-visao__botao--ativo, .ma-visao__botao--ativo:hover { background: var(--verde-700); color: #fff; }
-html[data-tema="escuro"] .ma-visao__botao--ativo { background: #176B50; }
-.ma-visao__botao:focus-visible { outline: 2px solid var(--verde-600); outline-offset: -2px; }
+/* Cabeçalho: caminho, título, subtítulo e as guias no formato das abas do plano (ativa em preto, com o traço verde) */
+.ma-cabecalho { padding-bottom: 0; }
+.ma-guias .etapa { border: 0; background: none; font: inherit; font-weight: 500; cursor: pointer; }
+.ma-guias .etapa--ativa { color: var(--texto); font-weight: 700; }
+.ma-guias .etapa:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 2px; }
 .ma-construcao { margin: 0; padding: 48px 20px; text-align: center; color: var(--texto-suave); }
-/* Linha do tempo do Monitoramento: uma faixa por talhão (coluna Talhão parada à esquerda, escala parada no topo) */
+/* Duração da Aplicação: legenda e chave Por talhão | Por operação; gráficos de barras verdes com o prazo tracejado */
+.ma-lista { --md-prazo: #34405a; }
+html[data-tema="escuro"] .ma-lista { --md-prazo: #A9B6C9; }
+.md-legenda { display: flex; flex-wrap: wrap; gap: 6px 24px; margin: 16px 0 0 -36px; padding: 0; list-style: none; font-size: 13px; color: var(--texto-suave); }
+.md-legenda li { display: inline-flex; align-items: center; gap: 8px; }
+.md-legenda__barra { width: 18px; height: 10px; border-radius: 2px; background: var(--mt-prazo); }
+.md-legenda__prazo { width: 24px; border-top: 2px dashed var(--md-prazo); }
+.md-modo { display: inline-flex; border: 1px solid var(--borda); border-radius: 8px; overflow: hidden; background: var(--superficie); }
+.md-modo__botao { height: 34px; padding: 0 18px; border: 0; background: transparent; font: inherit; font-size: 13px; font-weight: 600; color: var(--texto); cursor: pointer; }
+.md-modo__botao:hover { background: var(--superficie-2); }
+.md-modo__botao--ativo, .md-modo__botao--ativo:hover { background: var(--verde-700); color: #fff; }
+html[data-tema="escuro"] .md-modo__botao--ativo { background: #176B50; }
+.md-modo__botao:focus-visible { outline: 2px solid var(--verde-600); outline-offset: -2px; }
+.md-rolagem { max-height: calc(100vh - 270px); min-height: 220px; overflow: auto; }
+.md-secao { padding: 16px 20px 20px; border-bottom: 1px solid var(--borda); }
+.md-secao:last-child { border-bottom: 0; }
+.md-secao__titulo { margin: 0; font-size: 16px; }
+.md-nav { display: flex; align-items: center; gap: 12px; min-height: 40px; }
+.md-nav .md-modo { margin-left: auto; }
+.md-nav .botao-icone:disabled { opacity: .35; cursor: default; }
+.md-nav__conta { margin-left: 6px; font-size: 13px; font-weight: 400; color: var(--texto-suave); }
+/* ‹ › juntas antes do nome da operação (ficam sempre no mesmo lugar) */
+.md-nav__setas { display: flex; gap: 2px; }
+.md-nav__titulo { min-width: 0; }
+.md-secao__prazo { margin: 2px 0 0; font-size: 13px; color: var(--texto-suave); }
+.md-secao__vazio { margin: 6px 0 0; font-size: 13px; color: var(--texto-fraco); }
+/* Gráfico: eixo Y à esquerda (as marcas ficam na margem), uma coluna por barra; rola para o lado com muitas barras */
+.md-grafico { width: max-content; min-width: 100%; box-sizing: border-box; padding: 0 56px 0 36px; }
+.md-grafico__eixo-y { margin: 12px 0 14px -36px; font-size: 12px; color: var(--texto-suave); }
+.md-grafico__eixo-x { margin: 6px 0 0; text-align: center; font-size: 12px; color: var(--texto-suave); }
+.md-plot { position: relative; display: flex; align-items: flex-end; border-bottom: 1px solid var(--borda-forte); }
+.md-grade { position: absolute; left: 0; right: 0; border-top: 1px solid var(--borda); }
+.md-grade span { position: absolute; right: calc(100% + 10px); transform: translateY(-50%); font-size: 12px; color: var(--texto-suave); font-variant-numeric: tabular-nums; }
+.md-prazo { position: absolute; z-index: 1; left: 0; right: 0; border-top: 2px dashed var(--md-prazo); }
+.md-prazo span { position: absolute; left: calc(100% + 6px); transform: translateY(-50%); font-size: 12px; font-weight: 600; color: var(--md-prazo); white-space: nowrap; }
+.md-col, .md-rotulo { flex: 1 0 64px; max-width: 110px; }
+.md-grafico--larga .md-col, .md-grafico--larga .md-rotulo { flex-basis: 140px; max-width: 220px; }
+.md-col { position: relative; display: flex; justify-content: center; align-items: flex-end; height: 100%; }
+.md-barra { position: relative; width: 46px; border-radius: 2px 2px 0 0; background: var(--mt-prazo); }
+.md-grafico--larga .md-barra { width: 88px; }
+.md-valor { position: absolute; z-index: 2; left: 50%; transform: translateX(-50%); font-size: 14px; font-weight: 700; color: var(--texto); white-space: nowrap; }
+.md-prazo-curto { position: absolute; z-index: 1; left: 8%; right: 8%; border-top: 2px dashed var(--md-prazo); }
+.md-rotulos { display: flex; }
+.md-rotulo { display: flex; flex-direction: column; align-items: center; padding-top: 8px; font-size: 12px; color: var(--texto-suave); text-align: center; }
+.md-rotulo strong { color: var(--texto); font-weight: 600; }
+.md-grafico--larga .md-rotulo { font-size: 13px; }
+/* Planejada × Executada do Monitoramento: uma linha por talhão e uma coluna por operação (talhão e eixo parados à
+   esquerda, nomes das operações parados no topo). Em cada operação, o ponto no zero e a barra do desvio */
 .ma-lista { --mt-adiantada: #c99a06; --mt-prazo: #1f9d55; --mt-atrasada: #e8772e; --mt-pendente: #d93025; --mt-futura: #9aa5ad; }
 html[data-tema="escuro"] .ma-lista { --mt-adiantada: #E2B93B; --mt-prazo: #4FD28A; --mt-atrasada: #F0995A; --mt-pendente: #F28B82; --mt-futura: #7C8E9B; }
 .mt-rolagem { max-height: calc(100vh - 330px); min-height: 220px; overflow: auto; border-top: 1px solid var(--borda); }
 .mt { width: max-content; min-width: 100%; }
 .mt-linha { display: flex; border-bottom: 1px solid var(--borda); }
 .mt-linha--cabecalho { position: sticky; top: 0; z-index: 3; background: var(--superficie-2); }
-.mt-talhao { position: sticky; left: 0; z-index: 2; flex: none; width: 250px; padding: 14px 16px 12px 20px; background: var(--superficie);
+.mt-esq { position: sticky; left: 0; z-index: 2; flex: none; display: flex; background: var(--superficie);
   border-right: 1px solid var(--borda); box-shadow: 6px 0 6px -4px rgba(0, 0, 0, .08); }
-.mt-talhao--cabecalho { display: flex; align-items: center; background: var(--superficie-2); font-size: 13px; font-weight: 600; color: var(--texto-suave); }
+.mt-linha--cabecalho .mt-esq { background: var(--superficie-2); }
+.mt-talhao { width: 230px; padding: 18px 16px 12px 20px; border-right: 1px solid var(--borda); }
+.mt-talhao--cabecalho { display: flex; align-items: center; padding: 14px 16px 14px 20px; border-right: 0; font-size: 15px; font-weight: 600; }
 .mt-talhao p { margin: 0; }
 .mt-talhao__nome strong { font-size: 18px; }
 .mt-talhao__nome span, .mt-talhao__var { font-size: 13px; color: var(--texto-suave); }
-.mt-talhao__var { margin-top: 2px !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mt-talhao__var { margin-top: 4px !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .mt-segmentos { display: flex; gap: 4px; margin: 10px 0 6px; }
 .mt-segmento { flex: 1; height: 6px; border-radius: 3px; }
 .mt-talhao__conta { font-size: 13px; color: var(--texto-suave); }
 .mt-talhao__pendente { color: var(--mt-pendente); font-weight: 600; }
+.mt-eixo { position: relative; width: 64px; height: 164px; }
+.mt-linha--cabecalho .mt-eixo { height: auto; }
+.mt-eixo__titulo { position: absolute; left: 14px; transform: translate(-50%, -50%) rotate(-90deg); font-size: 12px; color: var(--texto-suave); white-space: nowrap; }
+.mt-eixo__marca { position: absolute; right: 10px; transform: translateY(-50%); font-size: 12px; color: var(--texto-suave); font-variant-numeric: tabular-nums; }
+/* Coluna da operação: só a largura da etiqueta mais longa ("Pendente 13 d"); nome longo quebra a linha. A linha do zero (--mt-zero) atravessa todas */
+.mt-op { position: relative; flex: none; width: 132px; height: 164px;
+  background: linear-gradient(var(--borda-forte), var(--borda-forte)) 0 var(--mt-zero) / 100% 1px no-repeat; }
+.mt-op + .mt-op { border-left: 1px solid var(--borda); }
+.mt-op:last-child { border-right: 1px solid var(--borda); }
+.mt-op--cabecalho { height: auto; display: flex; align-items: center; justify-content: center; padding: 10px 8px; background: none; line-height: 1.25;
+  font-size: 15px; font-weight: 600; text-align: center; }
+.mt-ev { position: absolute; inset: 0; }
+.mt-ponto, .mt-desvio, .mt-ev__status, .mt-ev__datas { position: absolute; left: 50%; }
+.mt-ponto { z-index: 1; width: 14px; height: 14px; border-radius: 50%; box-sizing: border-box; transform: translate(-50%, -50%); }
+.mt-ponto--prazo { background: var(--mt-prazo); }
+.mt-ponto--atrasada { background: var(--mt-atrasada); }
+.mt-ponto--adiantada { background: var(--mt-adiantada); }
+.mt-ponto--pendente { background: var(--mt-pendente); }
+.mt-ponto--futura { width: 18px; height: 18px; border: 2px dashed var(--mt-futura); background: var(--superficie); }
+.mt-desvio { width: 74px; transform: translateX(-50%); opacity: .85; }
 .mt-fundo--adiantada { background: var(--mt-adiantada); }
-.mt-fundo--prazo { background: var(--mt-prazo); }
 .mt-fundo--atrasada { background: var(--mt-atrasada); }
+.mt-fundo--prazo { background: var(--mt-prazo); }
 .mt-fundo--pendente { background: var(--mt-pendente); }
 .mt-fundo--futura { background: var(--superficie-3); }
-.mt-trilho { position: relative; flex: none; width: var(--mt-largura); height: 146px; background-repeat: repeat-x; }
-.mt-escala { height: 56px; }
-.mt-escala__marca { position: absolute; bottom: 10px; transform: translateX(-50%); font-size: 13px; color: var(--texto-suave); }
-.mt-escala__hoje { position: absolute; top: 6px; z-index: 1; transform: translateX(-50%); padding: 2px 10px; border-radius: 999px;
-  background: var(--texto-suave); color: var(--superficie); font-size: 12px; font-weight: 600; white-space: nowrap; }
-.mt-hoje { position: absolute; top: 0; bottom: 0; border-left: 2px dashed var(--texto-fraco); opacity: .7; }
-.mt-escala .mt-hoje { top: 28px; }
-.mt-ev__nome, .mt-ev__status, .mt-ev__exec, .mt-ponto { position: absolute; transform: translateX(-50%); white-space: nowrap; }
-.mt-ev__nome { top: 14px; font-size: 13px; color: var(--texto-suave); }
-.mt-ev__nome strong { color: var(--texto); }
-.mt-ev__status { top: 78px; min-width: 0; padding: 3px 9px; font-size: 13px; }
-.mt-ev__exec { top: 110px; font-size: 12px; color: var(--texto-suave); }
-.mt-ponto { top: 48px; z-index: 1; width: 18px; height: 18px; border-radius: 50%; box-sizing: border-box; }
-.mt-ponto--planejado { border: 2px solid var(--texto); background: var(--superficie); }
-.mt-ponto--executado { top: 52px; width: 10px; height: 10px; }
-.mt-ponto--futura { border: 2px dashed var(--mt-futura); background: var(--superficie); }
-.mt-ponto--no-dia::after { content: ""; position: absolute; inset: 3px; border-radius: 50%; background: var(--mt-prazo); }
-.mt-ponto--planejado.mt-cor--pendente { border-color: var(--mt-pendente); }
-.mt-ponto--executado.mt-cor--adiantada { background: var(--mt-adiantada); }
-.mt-ponto--executado.mt-cor--atrasada { background: var(--mt-atrasada); }
-.mt-desvio { position: absolute; top: 55px; height: 4px; border-radius: 2px; }
-.mt-desvio.mt-cor--adiantada { background: var(--mt-adiantada); }
-.mt-desvio.mt-cor--atrasada { background: var(--mt-atrasada); }
-.mt-atraso { position: absolute; top: 56px; border-top: 3px dashed var(--mt-pendente); }
+/* Etiqueta em cima do ponto (ou da barra, se atrasada), com a setinha para baixo */
+.mt-ev__status { z-index: 1; min-width: 0; padding: 3px 9px; font-size: 13px; white-space: nowrap; transform: translate(-50%, -100%); }
+.mt-ev__status::after { content: ""; position: absolute; left: 50%; bottom: -4px; width: 8px; height: 8px; background: inherit; transform: translateX(-50%) rotate(45deg); }
+.mt-ev__datas { transform: translateX(-50%); font-size: 12px; line-height: 1.6; color: var(--texto-suave); text-align: center; white-space: nowrap; }
 /* Barra acima da tabela: legenda dos status da aplicação (clicável) */
 .ma-barra { display: flex; align-items: center; flex-wrap: wrap; gap: 12px 24px; padding: 14px 20px; }
 /* Status da aplicação: cor de fundo da última célula da aplicação (e da legenda) */
@@ -3098,18 +3141,12 @@ html[data-tema="escuro"] .ma-lista { --mt-adiantada: #E2B93B; --mt-prazo: #4FD28
 .ma-legenda__item[aria-pressed="true"] { color: var(--texto); font-weight: 600; }
 .ma-legenda__item--apagado { opacity: .45; }
 .ma-legenda__item:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 1px; }
-.ma-legenda__cor { display: inline-grid; place-items: center; width: 16px; height: 16px; border-radius: 4px; border: 1px solid var(--borda-forte); }
-/* Pendente e Futura: o mesmo ícone da tabela, na cor do status */
-.ma-legenda__cor .icone { width: 12px; height: 12px; }
-.ma-legenda__cor.ma-st--pendente { color: var(--erro); }
-.ma-legenda__cor.ma-st--futura { color: var(--texto-suave); }
-/* Quadradinhos da legenda nas cores fortes, as mesmas das barrinhas de cada talhão na linha do tempo */
-.ma-legenda .ma-legenda__cor { border-color: transparent; }
-.ma-legenda .ma-legenda__cor.ma-st--adiantada { background: var(--mt-adiantada); }
-.ma-legenda .ma-legenda__cor.ma-st--prazo { background: var(--mt-prazo); }
-.ma-legenda .ma-legenda__cor.ma-st--atrasada { background: var(--mt-atrasada); }
-.ma-legenda .ma-legenda__cor.ma-st--pendente { background: var(--mt-pendente); color: #fff; }
-.ma-legenda .ma-legenda__cor.ma-st--futura { background: var(--superficie-3); color: var(--texto-suave); }
+/* Bolinhas da legenda: as mesmas da visão Planejada × Executada */
+.ma-legenda__cor { display: inline-block; width: 14px; height: 14px; border-radius: 50%; box-sizing: border-box; }
+.ma-legenda__cor.mt-ponto--futura { width: 14px; height: 14px; }
+/* Executadas: Pendente com o mesmo ícone da tabela (bolinha com exclamação, em vermelho) */
+.ma-legenda__icone { display: inline-grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; color: var(--erro); }
+.ma-legenda__icone .icone { width: 18px; height: 18px; }
 .ma-st--adiantada { background: var(--aviso-fundo); }
 .ma-st--prazo     { background: var(--verde-100); }
 .ma-st--atrasada  { background: #fdebdc; }

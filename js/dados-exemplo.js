@@ -422,10 +422,13 @@ window.DADOS = {
   // Data executada = data de recomendação da OS (abertura): a da OS escrita acima, se houver; senão, a planejada + um
   // deslocamento em dias (para mais ou para menos). Só conta como executada se essa data já chegou (até hoje).
   // deslocamentos: usados em sequência quando o talhão não tem um deslocamento próprio para a operação.
+  // duracoes: Duração da Aplicação (OS fechada): fechamento = data executada + prazo de conclusão da operação + o desvio
+  // da sequência (ao menos 1 dia). Só conta se o fechamento já chegou (até hoje). OS escrita acima: as datas dela.
   // talhoes['Fazenda safra'][talhão]: plantasM (estande medido no monitoramento, plantas por metro, número inteiro) e, por operação
   // (inclusive 'Plantio'), o deslocamento em dias; null = não executada (pendente, se a data planejada já passou).
   monitoramento: {
     deslocamentos: [0, 2, -1, 5, 1, -3, 0, 3, 7, -2, 1, 4],
+    duracoes: [0, 2, -1, 3, 0, 1, 4, -1, 0, 2, 5, 1, 0],
     talhoes: {
       'Santa Clara 25/26': {
         T01: { plantasM: 13 }, T02: { plantasM: 13 }, T03: { plantasM: 12, '3ª Fungicida': 9 }, T04: { plantasM: 12 },
