@@ -10,6 +10,9 @@ Protótipo navegável e preenchível do Plano de Safra (UniSystem), usado para v
 - `docs/telas/_MODELO.md` — modelo para novas telas.
 - `referencias/NN-nome.png` — imagem de referência, com o mesmo número da tela (só consulta, não usar na página).
 - `img/` — imagens usadas de verdade nas páginas (logo da empresa, ilustrações).
+- `base_conhecimento/` — documentos de apoio (levantamentos com clientes, revisões, e-book). Só consulta.
+- `plano-safra-versionamento/` — cópias datadas do arquivo único (ex.: `plano-safra-16-10-2026.html`). Só consulta.
+- `rascunhos/` — telas pausadas e estudos de design (ex.: `rascunhos/tsi/`). Não entram no protótipo.
 
 ## Antes de qualquer tarefa
 1. Leia `docs/DECISOES.md` e `docs/TELAS.md`.
@@ -28,6 +31,11 @@ Protótipo navegável e preenchível do Plano de Safra (UniSystem), usado para v
 - Quando precisar decidir algo de UX sem definição, implemente a opção mais simples e liste como "Sugestão" no resumo final da tarefa.
 - Trabalhe em passos pequenos: uma tela ou um comportamento por vez. Ao final, diga o que mudou e como testar.
 - Commits pequenos, com mensagem em português descrevendo a mudança.
+
+## Git
+- Repositório: https://github.com/jfontenelli/plano-safra (branch principal `main`).
+- Cada assunto numa branch própria; entra na `main` em squash, com mensagem que resume tudo o que mudou.
+- O Claude Code pode fazer `add`, `commit` e criar branches. `git push` e `git remote` ficam com a usuária (bloqueados em `.claude/settings.json`): ao terminar, peça para ela rodar `! git push`.
 
 ## Tecnologia
 - HTML, CSS e JavaScript puros. Sem framework (sem React, Vue etc.) e sem etapa de build.
@@ -52,10 +60,9 @@ Protótipo navegável e preenchível do Plano de Safra (UniSystem), usado para v
 ## Visual
 - Estilo próprio, clean e profissional. Menu lateral verde com o ícone reduzido da UniSystem.
 - Logo da empresa em `img/`: use os arquivos de lá, nunca redesenhe nem recrie o logo.
-  - `img/logo-unisystem.png` — logo completo, no topo do menu expandido.
-  - `img/icone-unisystem.png` — só o ícone, no topo do menu recolhido.
-  - Se só existir um dos arquivos, use o mesmo nos dois estados e me avise.
-- Itens do menu: Plano de Safra, Ordens de Serviço, Cadastros. Usuário no rodapé do menu.
+  - `img/icone-unisystem.png` — o ícone, no topo do menu (expandido e recolhido) e no favicon. Não há logo completo por enquanto.
+- Itens do menu (detalhe em DECISOES 4.0): Plano de Safra (Visão Geral · Planejamento · Calendário Agrícola · Orçamento), Gestão da Lavoura (Operações Agrícolas), Monitoramento (Aplicações) e Cadastros. Usuário no rodapé do menu.
+- Modo claro e escuro em todas as telas (Configurações › Aparência; cores em DECISOES 4.0).
 - Menu lateral começa expandido (ícone + nome) em todas as telas. O usuário pode recolher (só ícones) e expandir de novo com um botão de seta. O estado escolhido se mantém ao navegar entre telas.
 - Não usar o nome UniGestor.
 - Pensar na escala real: muitos talhões, operações e insumos (tabelas legíveis, filtros).
