@@ -1,6 +1,8 @@
 /*
- * Agenda Agrícola, aba de Gestão da Lavoura › Operações Agrícolas (DECISOES 4.0): a grade Mês · Semana · Dia que antes ficava no Resumo do plano,
- * agora com as operações de vários planos somados, sem a associação a um plano. Usa a última versão publicada de cada
+ * Calendário Agrícola, item de Gestão da Lavoura (DECISOES 4.0): a lista suspensa Ano · Mês · Semana · Dia. Ano (abre nele):
+ * o ano agrícola por Empresa › Fazenda › Safra/Safrinha (js/telas/calendario-agricola.js; as setas trocam o ano agrícola).
+ * Mês, Semana e Dia: a Agenda Agrícola, a grade que antes ficava no Resumo do plano,
+ * com as operações de vários planos somados, sem a associação a um plano. Usa a última versão publicada de cada
  * plano. Filtros com várias escolhas: Safra (Safra ou Safrinha), Cultura, Empresa, Fazenda, Talhão e Operação. Sem filtro de
  * Ano Agrícola: o tempo anda pelas setas do calendário. Abre no dia de hoje. A legenda filtra os grupos de operação
  * e o filtro Operação levam o calendário para a primeira operação escolhida; com todas, para hoje.
@@ -24,11 +26,12 @@ window.Telas.osCalendario = (function () {
   ];
 
   // Estado da tela: período, dia aberto e filtros ('todos' ou a lista do que está marcado). Mantém-se ao navegar.
-  const novoEstado = () => ({ escala: 'mes', dataRef: Cal().hojeIso(), safra: 'todos', empresa: 'todos', fazenda: 'todos',
+  const novoEstado = () => ({ escala: 'ano', anoAgricola: anoInicial(), dataRef: Cal().hojeIso(), safra: 'todos', empresa: 'todos', fazenda: 'todos',
     cultura: 'todos', operacao: 'todos', talhao: 'todos', grupo: 'todos' });
   let est = null;
 
   const cicloDe = (p) => p.ciclo || 'Safra';
+  // Grupo de operação (ou operação do Ano, que traz o tipo) → a chave da cor
   const tipoDe = (grupo) => Util.normalizar(grupo.tipo || 'outro').replace(/\s+/g, '-');
   const nomeOp = (it) => (it.colheita ? 'Colheita' : it.op.nome || 'Sem operação');
   const posTipo = (t) => (ORDEM_TIPO.includes(t) ? ORDEM_TIPO.indexOf(t) : 99);
@@ -36,6 +39,10 @@ window.Telas.osCalendario = (function () {
   const visivel = (it) => Cal().marcado(est, 'grupo', tipoDe(it.grupo)) && Cal().marcado(est, 'operacao', nomeOp(it));
   const comPublicada = () => DADOS.planos.filter((p) => Versoes.publicadaComPlanejamento(p));
   const valorDe = { safra: (p) => p.safra, empresa: (p) => p.empresa, fazenda: (p) => p.fazenda, cultura: (p) => p.cultura };
+  // Ano agrícola de uma data (01/09 a 31/08), em texto ("2026"); os anos com plano publicado; o de hoje ou o mais recente
+  const anoDe = (iso) => { const [a, m] = iso.split('-').map(Number); return String(m >= 9 ? a : a - 1); };
+  const anos = () => Util.anosAgricolas(comPublicada());
+  const anoInicial = () => { const lista = anos(); const h = anoDe(Cal().hojeIso()); return lista.includes(h) ? h : Util.anoAgricolaMaisRecente(lista); };
   const planosFiltrados = () => comPublicada().filter((p) => Object.keys(valorDe).every((c) => Cal().marcado(est, c, valorDe[c](p))));
 
   // Opções de cada filtro: o que existe nos planos com versão publicada. Talhão: os talhões dos planos que passam
@@ -96,7 +103,7 @@ window.Telas.osCalendario = (function () {
   // Legenda que filtra: clicar num grupo mostra só ele (outro grupo substitui o anterior); clicar no grupo que está à
   // mostra, ou em Mostrar todos, volta a todos. Com um grupo, o calendário vai para a operação mais cedo dele; com
   // todos, volta para hoje.
-  function legenda(grupos) {
+  function legenda(grupos, temHoje = false) {
     const todos = grupos.every((o) => Cal().marcado(est, 'grupo', o.valor));
     return `
       <div class="cal-legenda" role="group" aria-label="Filtrar por grupo de operação">
@@ -108,13 +115,14 @@ window.Telas.osCalendario = (function () {
               <span class="cal-ponto cal-ponto--${esc(o.valor)}"></span>${esc(o.nome)}</button>`;
         }).join('')}
         ${todos ? '' : '<button class="link-acao cal-legenda__todos" type="button" data-acao="os-leg-todos">Mostrar todos</button>'}
+        ${temHoje ? '<span class="os-cal__hoje"><span class="cag__cor cag__cor--hoje" aria-hidden="true"></span>Hoje</span>' : ''}
       </div>`;
   }
 
   function desenhar() {
     est = est || novoEstado();
     return `
-      ${Telas.centralOperacoes.cabecalho('agenda')}
+      ${Telas.gestaoLavoura.cabecalho('calendario')}
       <div class="pagina os-cal">
         <section class="cartao filtros" aria-label="Filtrar o calendário" data-os-filtros></section>
         <section class="calendario os-cal__corpo" aria-label="Calendário das operações" data-os></section>
@@ -131,8 +139,39 @@ window.Telas.osCalendario = (function () {
       <button class="link-acao filtros__limpar" type="button" data-acao="os-limpar">${Icones.limpar} Limpar filtros</button>`;
   }
 
+  // Visão Ano: Hoje (o ano agrícola de hoje) · ‹ › (o ano agrícola anterior e o próximo, entre os que têm plano) · o ano ·
+  // a lista suspensa Ano, Mês, Semana, Dia
+  function navAno() {
+    const lista = anos();
+    const i = lista.indexOf(est.anoAgricola);
+    return `
+      <div class="cal-nav">
+        <button class="botao botao--secundario botao--p cal-nav__hoje" type="button" data-acao="os-ano-hoje" title="Ir para o ano agrícola de hoje">Hoje</button>
+        <button class="botao-icone cal-nav__seta" type="button" data-os-ano="-1" aria-label="Ano agrícola anterior" title="Ano agrícola anterior" ${i <= 0 ? 'disabled' : ''}>${Icones.anterior}</button>
+        <button class="botao-icone cal-nav__seta" type="button" data-os-ano="1" aria-label="Próximo ano agrícola" title="Próximo ano agrícola" ${i >= lista.length - 1 ? 'disabled' : ''}>${Icones.proxima}</button>
+        <span class="cal-nav__titulo" title="Ano agrícola ${esc(est.anoAgricola)}" aria-live="polite">${esc(est.anoAgricola)}</span>
+        ${Cal().seletorEscala(est)}
+      </div>`;
+  }
+
+  // Visão Ano: os planos dos filtros no ano agrícola; Talhão, Operação e a legenda filtram as barras
+  function corpoAno(itens) {
+    const { html, temHoje } = Telas.calendarioAgricola.tabela({
+      planos: planosFiltrados().filter((p) => String(Util.anoAgricola(p.safra)) === est.anoAgricola),
+      talhaoOk: (p, t) => est.talhao === 'todos' || est.talhao.includes(`${p.fazenda}|${t}`),
+      opOk: (o) => Cal().marcado(est, 'grupo', tipoDe(o)) && Cal().marcado(est, 'operacao', o.tipo === 'Colheita' ? 'Colheita' : o.nome)
+    });
+    return `
+      <div class="calendario__barra">
+        ${legenda(gruposLegenda(itens), temHoje)}
+        ${navAno()}
+      </div>
+      <div class="os-cal__ano">${html}</div>`;
+  }
+
   function corpo() {
     const { itens, eventos, semData } = calcular();
+    if (est.escala === 'ano') return corpoAno(itens);
     const grupos = gruposLegenda(itens);
     return `
       <div class="calendario__barra">
@@ -160,7 +199,7 @@ window.Telas.osCalendario = (function () {
 
     raiz.addEventListener('click', (e) => {
       if (e.target.closest('[data-acao="os-limpar"]')) {
-        est = Object.assign(novoEstado(), { escala: est.escala, dataRef: est.dataRef });
+        est = Object.assign(novoEstado(), { escala: est.escala, dataRef: est.dataRef, anoAgricola: est.anoAgricola });
         ctx.estado = est;
         redesenhar('[data-acao="os-limpar"]');
         return;
@@ -170,12 +209,25 @@ window.Telas.osCalendario = (function () {
         const v = leg.dataset.grupo;
         const soEle = Array.isArray(est.grupo) && est.grupo.length === 1 && est.grupo[0] === v;
         est.grupo = leg.dataset.acao === 'os-leg-todos' || soEle ? 'todos' : [v];
-        const primeira = est.grupo === 'todos' ? null : calcular().eventos[0];
-        est.dataRef = primeira ? primeira.inicio : Cal().hojeIso();
-        est.diaAberto = null;
+        // No Ano, o ano agrícola fica; no Mês, na Semana e no Dia, vai para a primeira operação (todos: hoje)
+        if (est.escala !== 'ano') {
+          const primeira = est.grupo === 'todos' ? null : calcular().eventos[0];
+          est.dataRef = primeira ? primeira.inicio : Cal().hojeIso();
+          est.diaAberto = null;
+        }
         redesenhar(leg.dataset.acao === 'os-leg' ? `[data-acao="os-leg"][data-grupo="${CSS.escape(v)}"]` : '.cal-leg');
         return;
       }
+      // Visão Ano: Hoje, setas do ano agrícola e abrir/fechar empresa e fazenda
+      const ano = e.target.closest('[data-os-ano]');
+      if (ano && !ano.disabled) {
+        const lista = anos();
+        est.anoAgricola = lista[lista.indexOf(est.anoAgricola) + Number(ano.dataset.osAno)];
+        redesenhar(`[data-os-ano="${ano.dataset.osAno}"]:not(:disabled)`);
+        return;
+      }
+      if (e.target.closest('[data-acao="os-ano-hoje"]')) { est.anoAgricola = anoInicial(); redesenhar('[data-acao="os-ano-hoje"]'); return; }
+      if (Telas.calendarioAgricola.aoClicar(e, redesenhar)) return;
       // Hoje, setas, dia, painel do dia, "+N talhões" e abrir/fechar as caixas de filtro: como no Calendário do plano
       Cal().aoClicar(e, ctx, acoes);
     });
@@ -191,13 +243,26 @@ window.Telas.osCalendario = (function () {
         else marcados = marcados.filter((n) => n !== e.target.value);
         est[chave] = marcados.length === valores.length ? 'todos' : marcados;
         // Operação, como a legenda: com escolha, vai para a operação mais cedo; com todas, volta para hoje
-        if (chave === 'operacao') {
+        if (chave === 'operacao' && est.escala !== 'ano') {
           const primeira = est.operacao === 'todos' ? null : calcular().eventos[0];
           est.dataRef = primeira ? primeira.inicio : Cal().hojeIso();
           est.diaAberto = null;
         }
         est.filtroAberto = chave;
         redesenhar(`[data-campo="cal-filtro"][data-filtro="${chave}"][value="${CSS.escape(e.target.value)}"]`);
+        return;
+      }
+      // Escala: para o Ano, o ano agrícola do dia mostrado (se tiver plano); do Ano para Mês, Semana ou Dia, o dia
+      // mostrado antes, se estiver no ano agrícola; senão, hoje (no ano de hoje) ou o começo do ano agrícola
+      if (e.target.dataset.campo === 'cal-escala' && (e.target.value === 'ano' || est.escala === 'ano')) {
+        if (e.target.value === 'ano') {
+          const a = anoDe(est.diaAberto || est.dataRef);
+          if (anos().includes(a)) est.anoAgricola = a;
+        } else if (anoDe(est.dataRef) !== est.anoAgricola) {
+          est.dataRef = anoDe(Cal().hojeIso()) === est.anoAgricola ? Cal().hojeIso() : `${est.anoAgricola}-09-01`;
+        }
+        est.escala = e.target.value; est.diaAberto = null;
+        redesenhar('[data-campo="cal-escala"]');
         return;
       }
       Cal().aoMudar(e, ctx, acoes);

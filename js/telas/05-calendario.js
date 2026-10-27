@@ -707,10 +707,16 @@ window.Telas.calendario = (function () {
         <button class="botao-icone cal-nav__seta" type="button" data-acao="cal-nav" data-passo="-1" aria-label="Anterior" title="Anterior">${Icones.anterior}</button>
         <button class="botao-icone cal-nav__seta" type="button" data-acao="cal-nav" data-passo="1" aria-label="Próximo" title="Próximo">${Icones.proxima}</button>
         <span class="cal-nav__titulo" aria-live="polite">${tituloPeriodo(escala, ref)}</span>
-        <select class="campo__controle cal-nav__escala" data-campo="cal-escala" aria-label="Escala do calendário">
-          ${[['mes', 'Mês'], ['semana', 'Semana'], ['dia', 'Dia']].map(([v, rot]) => `<option value="${v}" ${escala === v ? 'selected' : ''}>${rot}</option>`).join('')}
-        </select>
+        ${seletorEscala(est)}
       </div>`;
+  }
+  // Lista suspensa da escala: Ano (a visão do ano agrícola do Calendário Agrícola, js/telas/os-calendario.js), Mês, Semana, Dia
+  function seletorEscala(est) {
+    const escala = est.escala || 'mes';
+    return `
+        <select class="campo__controle cal-nav__escala" data-campo="cal-escala" aria-label="Escala do calendário">
+          ${[['ano', 'Ano'], ['mes', 'Mês'], ['semana', 'Semana'], ['dia', 'Dia']].map(([v, rot]) => `<option value="${v}" ${escala === v ? 'selected' : ''}>${rot}</option>`).join('')}
+        </select>`;
   }
 
   // Anda um mês, uma semana ou um dia
@@ -904,5 +910,5 @@ window.Telas.calendario = (function () {
 
   // Para a Agenda Agrícola (Operações Agrícolas): itens e eventos de um plano, a grade e a barra de navegação, os filtros com caixas
   return { desenhar, aoClicar, aoMudar, aoDigitar, prazoDe,
-    itens, eventos, calendarioMes, navCalendario, filtroCaixa, marcado, hojeIso };
+    itens, eventos, calendarioMes, navCalendario, seletorEscala, filtroCaixa, marcado, hojeIso };
 })();

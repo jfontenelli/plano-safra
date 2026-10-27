@@ -21,30 +21,20 @@
                           estado.ultimoPlanoId = Number(id);
                           Telas.planoOperacoes.aoMostrar(conteudo, buscarPlano(id), etapa);
                         } },
-    // Calendário Agrícola do menu: vários planos somados (o ciclo de cada cultura, por empresa e fazenda)
-    'calendario':     { titulo: 'Calendário Agrícola', menu: 'calendario',
-                        desenhar: () => temPlanos() ? Telas.calendarioAgricola.desenhar() : Telas.semPlanos('calendario'),
-                        aoMostrar: (conteudo) => { if (temPlanos()) Telas.calendarioAgricola.aoMostrar(conteudo); } },
     // Orçamento de Insumos do menu (antes Suprimentos): vários planos somados, guias Safra e Safrinha
     'orcamento':      { titulo: 'Orçamento de Insumos', menu: 'orcamento',
                         desenhar: () => temPlanos() ? Telas.orcamento.desenhar() : Telas.semPlanos('orcamento'),
                         aoMostrar: (conteudo) => { if (temPlanos()) Telas.orcamento.aoMostrar(conteudo); } },
-    // Gestão da Lavoura › Operações Agrícolas: abas Minhas tarefas (#/operacoes-agricolas), Central de Operações
-    // (#/operacoes-agricolas/central) e Agenda Agrícola (#/operacoes-agricolas/agenda; Mês, Semana, Dia),
-    // com as operações de vários planos somados
-    'operacoes-agricolas': { titulo: 'Operações Agrícolas', menu: 'operacoes-agricolas',
-                        desenhar: (aba) => !temPlanos() ? Telas.semPlanos('operacoes-agricolas')
-                          : aba === 'agenda' ? Telas.osCalendario.desenhar()
-                            : aba === 'central' ? Telas.centralCorp.desenhar() : Telas.centralOperacoes.desenhar(),
-                        aoMostrar: (conteudo, aba) => {
-                          if (!temPlanos()) return;
-                          if (aba === 'agenda') Telas.osCalendario.aoMostrar(conteudo);
-                          else if (aba === 'central') Telas.centralCorp.aoMostrar(conteudo);
-                          else Telas.centralOperacoes.aoMostrar(conteudo);
-                        } },
-    // Menu Monitoramento › Aplicações (#/monitoramento)
-    'monitoramento':  { titulo: 'Aplicações', menu: 'aplicacoes',
-                        desenhar: () => temPlanos() ? Telas.monitoramentoAplicacoes.desenhar() : Telas.semPlanos('monitoramento'),
+    // Gestão da Lavoura (vários planos somados): Calendário Agrícola (Ano, Mês, Semana, Dia), Central OS e
+    // Planejado x Executado (antes Monitoramento › Aplicações)
+    'calendario-agricola': { titulo: 'Calendário Agrícola', menu: 'calendario-agricola',
+                        desenhar: () => temPlanos() ? Telas.osCalendario.desenhar() : Telas.semPlanos('calendario'),
+                        aoMostrar: (conteudo) => { if (temPlanos()) Telas.osCalendario.aoMostrar(conteudo); } },
+    'central-os':     { titulo: 'Central OS', menu: 'central-os',
+                        desenhar: () => temPlanos() ? Telas.centralCorp.desenhar() : Telas.semPlanos('central-os'),
+                        aoMostrar: (conteudo) => { if (temPlanos()) Telas.centralCorp.aoMostrar(conteudo); } },
+    'planejado-executado': { titulo: 'Planejado x Executado', menu: 'planejado-executado',
+                        desenhar: () => temPlanos() ? Telas.monitoramentoAplicacoes.desenhar() : Telas.semPlanos('planejado-executado'),
                         aoMostrar: (conteudo) => { if (temPlanos()) Telas.monitoramentoAplicacoes.aoMostrar(conteudo); } },
     'cadastros':      { titulo: 'Cadastros', menu: 'cadastros',
                         desenhar: () => Telas.emConstrucao('Cadastros') }
@@ -54,7 +44,7 @@
   // Estado da sessão (só em memória)
   const estado = {
     menuRecolhido: false, // menu começa expandido
-    gruposFechados: new Set(), // grupos do menu (Plano de Safra, Gestão da Lavoura, Monitoramento) começam abertos; a setinha minimiza
+    gruposFechados: new Set(), // grupos do menu (Plano de Safra, Gestão da Lavoura) começam abertos; a setinha minimiza
     proximoIdPlano: 1,
     ultimoPlanoId: null   // último plano aberto (o menu Planejamento abre nele)
   };

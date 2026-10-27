@@ -1,14 +1,14 @@
 /*
- * Tela 09 — Central de Operações (docs/telas/09-central-operacoes-corp.md), segunda aba de Operações Agrícolas.
- * Mesmo cabeçalho, filtros e layout de Minhas tarefas (Tela 08, js/telas/central-operacoes.js). Visão geral (cartões), gráficos Status da OS e Nº OS por Empresa/Fazenda/Executor
- * e a tabela Ordens de Serviço, com Notificar selecionadas (pede justificativa, que aparece em Minhas tarefas) e Exportar CSV.
+ * Tela 09 — Central OS (docs/telas/09-central-operacoes-corp.md), item do menu Gestão da Lavoura.
+ * Cabeçalho e funções comuns em js/telas/gestao-lavoura.js. Visão geral (cartões), gráficos Status da OS e Nº OS por Empresa/Fazenda/Executor
+ * e a tabela Ordens de Serviço, com Notificar selecionadas (pede justificativa) e Exportar CSV.
  * OS de exemplo: as escritas em DADOS.ordensServico e, para as demais operações planejadas até DADOS.osFechadasAte,
  * OS fechadas geradas por uma regra fixa (sem sorteio).
  */
 window.Telas = window.Telas || {};
 
 window.Telas.centralCorp = (function () {
-  const B = () => Telas.centralOperacoes.base;
+  const B = () => Telas.gestaoLavoura.base;
   const esc = Util.escapar;
 
   // ----- Status da OS (nesta ordem no gráfico) -----
@@ -106,7 +106,7 @@ window.Telas.centralCorp = (function () {
   function desenhar() {
     est = est || novoEstado();
     return `
-      ${Telas.centralOperacoes.cabecalho('central')}
+      ${Telas.gestaoLavoura.cabecalho('central')}
       <div class="pagina oc cc">
         <section class="cartao oc-filtros" aria-label="Filtrar ordens de serviço" data-cc-filtros></section>
         <section class="oc-resumo" aria-labelledby="cc-visao-titulo">
@@ -353,7 +353,7 @@ window.Telas.centralCorp = (function () {
       <p class="cc-tabela__rodape">${contar(ls).toLocaleString('pt-BR')} ${contar(ls) === 1 ? 'registro' : 'registros'} · ${ls.length.toLocaleString('pt-BR')} ${ls.length === 1 ? 'linha' : 'linhas'} (uma por talhão)</p>`;
   }
 
-  // Notificar: pede a justificativa das linhas marcadas (Minhas tarefas, Tela 08, Justificativas solicitadas)
+  // Notificar: pede a justificativa das linhas marcadas (Minhas tarefas, que as mostrava, saiu em 26/10/2026)
   function notificar(rs) {
     const { hoje } = B();
     const marcadas = rs.filter((r) => est.selecao.has(r.chave));
@@ -428,7 +428,7 @@ window.Telas.centralCorp = (function () {
       if (t.closest('[data-cc-notificar]')) {
         const n = notificar(rs);
         redesenhar();
-        Aviso.mostrar(`${n === 1 ? 'Justificativa pedida' : `${n} justificativas pedidas`}. Aparecem em Minhas tarefas, em Justificativas solicitadas.`);
+        Aviso.mostrar(n === 1 ? 'Justificativa pedida.' : `${n} justificativas pedidas.`);
         return;
       }
       if (t.closest('[data-cc-exportar]')) exportar(rs);

@@ -1,5 +1,5 @@
 /*
- * Aplicações (Monitoramento de Aplicações), no menu Monitoramento › Aplicações.
+ * Planejado x Executado (antes Aplicações, menu Monitoramento), no menu Gestão da Lavoura › Planejado x Executado.
  * Filtros com várias escolhas (as caixas da Agenda Agrícola): Safra (as do cadastro: 26/27, 27/27…), Cultura, Empresa, Fazenda,
  * Talhão, Grupo de operação (abre em Defensivo) e Operação (abre com as fungicidas do modelo), e Limpar filtros.
  * Tabela com uma linha por talhão: Fazenda, Talhão, Variedade, Plantas/m, Data de plantio, uma coluna por operação
@@ -245,16 +245,12 @@ window.Telas.monitoramentoAplicacoes = (function () {
   function cabecalho() {
     const [, , subtitulo] = GUIAS.find(([id]) => id === est.visao);
     return `
-      <nav class="oa-caminho" aria-label="Caminho">
-        <a class="oa-caminho__casa" href="#/monitoramento" aria-label="Monitoramento">${Icones.casa}</a>
-        <a href="#/monitoramento">Monitoramento</a><span aria-hidden="true">›</span>
-        <span class="caminho__atual" aria-current="page">Aplicações</span>
-      </nav>
+      ${Telas.gestaoLavoura.caminho('Planejado x Executado')}
       <div class="oa-cabecalho__titulo">
-        <h1 class="cabecalho__titulo">Aplicações</h1>
+        <h1 class="cabecalho__titulo">Planejado x Executado</h1>
         <p class="cabecalho__subtitulo">${subtitulo}</p>
       </div>
-      <nav class="etapas ma-guias" aria-label="Guias de Aplicações">
+      <nav class="etapas ma-guias" aria-label="Guias de Planejado x Executado">
         ${GUIAS.map(([id, nome]) => `<button class="etapa ${id === est.visao ? 'etapa--ativa' : ''}" type="button" data-ma-visao="${id}"
           ${id === est.visao ? 'aria-current="page"' : ''}>${nome}</button>`).join('')}
       </nav>`;

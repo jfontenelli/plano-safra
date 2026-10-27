@@ -19,7 +19,7 @@
       </div>
 
       <nav class="menu__nav" aria-label="Menu principal">
-        <!-- Plano de Safra: quatro itens (Visão Geral, Planejamento, Calendário Agrícola, Orçamento) -->
+        <!-- Plano de Safra: três itens (Visão Geral, Planejamento, Orçamento) -->
         <div class="menu__grupo">
           <a class="menu__item menu__pai" href="#/plano-safra" title="Plano de Safra">
             <svg class="menu__icone" viewBox="0 0 24 24" aria-hidden="true">
@@ -50,12 +50,6 @@
               </svg>
               <span class="menu__texto">Planejamento</span>
             </a>
-            <a class="menu__item menu__sub" href="#/calendario" data-rota="calendario" title="Calendário Agrícola">
-              <svg class="menu__icone" viewBox="0 0 24 24" aria-hidden="true">
-                <rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><path d="M8 14h2M14 14h2M8 17h2"/>
-              </svg>
-              <span class="menu__texto">Calendário Agrícola</span>
-            </a>
             <a class="menu__item menu__sub" href="#/orcamento" data-rota="orcamento" title="Orçamento">
               <svg class="menu__icone" viewBox="0 0 24 24" aria-hidden="true">
                 <circle cx="12" cy="12" r="9"/><path d="M15 9.5c-.5-1-1.6-1.5-3-1.5-1.7 0-3 .8-3 2s1.3 1.7 3 2 3 .8 3 2-1.3 2-3 2c-1.4 0-2.5-.5-3-1.5M12 6.5V8M12 16v1.5"/>
@@ -64,9 +58,9 @@
             </a>
           </div>
         </div>
-        <!-- Gestão da Lavoura: por enquanto, um item (Operações Agrícolas) -->
+        <!-- Gestão da Lavoura: Calendário Agrícola, Central OS e Planejado x Executado (o nome leva ao primeiro) -->
         <div class="menu__grupo">
-          <a class="menu__item menu__pai" href="#/operacoes-agricolas" title="Gestão da Lavoura">
+          <a class="menu__item menu__pai" href="#/calendario-agricola" title="Gestão da Lavoura">
             <svg class="menu__icone" viewBox="0 0 24 24" aria-hidden="true">
               <!-- Lavoura: o broto (antes o ícone do Plano de Safra) -->
               <path d="M12 21v-9"/>
@@ -80,38 +74,26 @@
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
           </button>
           <div class="menu__subitens" id="menu-subitens-lavoura">
-            <a class="menu__item menu__sub" href="#/operacoes-agricolas" data-rota="operacoes-agricolas" title="Operações Agrícolas">
+            <a class="menu__item menu__sub" href="#/calendario-agricola" data-rota="calendario-agricola" title="Calendário Agrícola">
+              <svg class="menu__icone" viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><path d="M8 14h2M14 14h2M8 17h2"/>
+              </svg>
+              <span class="menu__texto">Calendário Agrícola</span>
+            </a>
+            <a class="menu__item menu__sub" href="#/central-os" data-rota="central-os" title="Central OS">
+              <svg class="menu__icone" viewBox="0 0 24 24" aria-hidden="true">
+                <!-- Documento -->
+                <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h6"/>
+              </svg>
+              <span class="menu__texto">Central OS</span>
+            </a>
+            <a class="menu__item menu__sub" href="#/planejado-executado" data-rota="planejado-executado" title="Planejado x Executado">
               <svg class="menu__icone" viewBox="0 0 24 24" aria-hidden="true">
                 <!-- Trator -->
                 <circle cx="7" cy="16.5" r="3"/><circle cx="18" cy="17.5" r="2"/>
                 <path d="M4.5 14V8h6.5l2 6"/><path d="M10 16.5h6M13 14h6.5l.5 1.5"/><path d="M15.5 14V9.5h3M7 8V5"/>
               </svg>
-              <span class="menu__texto">Operações Agrícolas</span>
-            </a>
-          </div>
-        </div>
-        <!-- Monitoramento: por enquanto, um item (Aplicações) -->
-        <div class="menu__grupo">
-          <a class="menu__item menu__pai" href="#/monitoramento" title="Monitoramento">
-            <svg class="menu__icone" viewBox="0 0 24 24" aria-hidden="true">
-              <!-- Lupa sobre uma folha -->
-              <circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5 5"/>
-              <path d="M8 13c0-3 1.8-5 5-5 0 3-2 5-5 5ZM8 13l2.5-2.5"/>
-            </svg>
-            <span class="menu__texto">Monitoramento</span>
-          </a>
-          <button class="menu__grupo-alternar" type="button" data-grupo="Monitoramento"
-                  aria-controls="menu-subitens-monitoramento" aria-expanded="true" title="Minimizar Monitoramento">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-          </button>
-          <div class="menu__subitens" id="menu-subitens-monitoramento">
-            <a class="menu__item menu__sub" href="#/monitoramento" data-rota="aplicacoes" title="Aplicações">
-              <svg class="menu__icone" viewBox="0 0 24 24" aria-hidden="true">
-                <!-- Pulverizador: bico com gotas -->
-                <path d="M4 8h8l3 3H4z"/><path d="M15 11h2"/>
-                <path d="M19 8.5v.01M20.5 11v.01M19 13.5v.01M17.5 16v.01M20 16.5v.01"/>
-              </svg>
-              <span class="menu__texto">Aplicações</span>
+              <span class="menu__texto">Planejado x Executado</span>
             </a>
           </div>
         </div>
@@ -176,7 +158,7 @@
   <script src="js/telas/03-lista-planos.js"></script>
   <script src="js/telas/05-calendario.js"></script>
   <script src="js/telas/calendario-agricola.js"></script>
-  <script src="js/telas/central-operacoes.js"></script>
+  <script src="js/telas/gestao-lavoura.js"></script>
   <script src="js/telas/central-corp.js"></script>
   <script src="js/telas/os-calendario.js"></script>
   <script src="js/telas/monitoramento-aplicacoes.js"></script>

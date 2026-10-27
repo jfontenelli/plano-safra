@@ -1,16 +1,16 @@
-# Tela 10 — Aplicações (Monitoramento › Aplicações)
+# Tela 10 — Planejado x Executado (Gestão da Lavoura › Planejado x Executado)
 
-Atualizado em 23/10/2026 (guia Duração da Aplicação renomeada para Duração da Operação; legenda Operação com os nomes Não iniciada, Iniciada antes, Iniciada na data, Iniciada com atraso e Planejada, e dicas; Iniciada antes em azul; Planejadas × Executadas sem eixo e sem barra, tudo na mesma altura, com o nome do status acima da etiqueta; antes, no mesmo dia: guias no formato das abas do plano e nova guia Duração da Operação). Este doc mostra só o estado atual da tela. Decisão alterada é reescrita, não acumulada.
+Atualizado em 26/10/2026 (a página Aplicações, do menu Monitoramento, passa a se chamar Planejado x Executado e vai para Gestão da Lavoura; o menu Monitoramento saiu). Antes, em 23/10/2026 (guia Duração da Aplicação renomeada para Duração da Operação; legenda Operação com os nomes Não iniciada, Iniciada antes, Iniciada na data, Iniciada com atraso e Planejada, e dicas; Iniciada antes em azul; Planejadas × Executadas sem eixo e sem barra, tudo na mesma altura, com o nome do status acima da etiqueta; antes, no mesmo dia: guias no formato das abas do plano e nova guia Duração da Operação). Este doc mostra só o estado atual da tela. Decisão alterada é reescrita, não acumulada.
 Imagem: imagens da usuária (22 e 23/10/2026). Os valores das imagens são ilustrativos; vale o layout.
 
 ## Objetivo
 Acompanhar, talhão a talhão, as aplicações de uma safra: quando cada operação foi executada e se foi iniciada antes, na data ou com atraso, se ainda não foi iniciada ou se está planejada, e quanto tempo as OS fechadas levaram em relação ao prazo de conclusão. Uso principal: as aplicações de fungicida (que levam outros produtos junto; o pessoal chama de "a fungicida").
 
 ## Quando aparece
-Menu lateral **Monitoramento** (grupo com setinha, como Plano de Safra e Gestão da Lavoura) › **Aplicações**. O nome do grupo também leva à página. Sem nenhum plano cadastrado: "Crie seu primeiro plano para visualizar as Aplicações" e o botão "+ Criar Plano de Safra".
+Menu lateral **Gestão da Lavoura › Planejado x Executado** (`#/planejado-executado`), o terceiro item, depois do Calendário Agrícola (Tela 07) e da Central OS (Tela 09). Sem nenhum plano cadastrado: "Crie seu primeiro plano para visualizar o Planejado x Executado" e o botão "+ Criar Plano de Safra".
 
 ## Conteúdo
-1. **Cabeçalho:** caminho "⌂ Monitoramento › Aplicações", título **Aplicações**, o subtítulo da guia escolhida e as guias **Executadas · Planejadas × Executadas · Duração da Operação**, no mesmo formato das abas do plano (Operações · Planejamento · Programação): a escolhida em negrito, com o traço verde embaixo. Abre em Executadas.
+1. **Cabeçalho:** caminho "⌂ Gestão da Lavoura › Planejado x Executado", título **Planejado x Executado**, o subtítulo da guia escolhida e as guias **Executadas · Planejadas × Executadas · Duração da Operação**, no mesmo formato das abas do plano (Operações · Planejamento · Programação): a escolhida em negrito, com o traço verde embaixo. Abre em Executadas.
    - Executadas: "Consulte as datas de execução e o status das operações por talhão."
    - Planejadas × Executadas: "Compare as datas planejadas e executadas das operações por talhão."
    - Duração da Operação: "Compare a duração das OS fechadas com o prazo de conclusão da operação."
@@ -65,8 +65,8 @@ Menu lateral **Monitoramento** (grupo com setinha, como Plano de Safra e Gestão
 - **Ordenação** (Executadas): a mesma coluna inverte o sentido; outra coluna começa do menor para o maior; nas operações, pela data executada; vazios sempre no fim; empate na ordem padrão (fazenda, safra e talhão).
 
 ## Navegação
-- Menu Monitoramento ou Monitoramento › Aplicações → esta página (`#/monitoramento`).
-- Caminho "⌂ Monitoramento" → esta página.
+- Gestão da Lavoura › Planejado x Executado → esta página (`#/planejado-executado`).
+- Caminho "⌂ Gestão da Lavoura" → Calendário Agrícola (Tela 07).
 - Guias Executadas · Planejadas × Executadas · Duração da Operação → trocam a visão (os filtros continuam, menos o padrão da Duração › Por talhão).
 - Duração: Por talhão | Por operação; ‹ › → operação anterior / próxima.
 
