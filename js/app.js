@@ -14,7 +14,7 @@
     // Menu Planejamento: abre o plano mais recente (ver rotaAtual); sem planos, o convite para criar o primeiro
     'planejamento':   { titulo: 'Planejamento', menu: 'planejamento',
                         desenhar: () => Telas.semPlanos('planejamento') },
-    // Plano aberto: #/plano/<id>/<aba>. Abre em Operações (Tela 04.0); Planejamento = Tela 04; Calendário = Tela 05.
+    // Plano aberto: #/plano/<id>/<aba>. Abre no Planejamento (Tela 04); Programação = Tela 05; Revisão = Tela 04.0.
     'plano':          { titulo: 'Planejamento', menu: 'planejamento',
                         desenhar: () => Telas.planoOperacoes.desenhar(),
                         aoMostrar: (conteudo, id, etapa) => {
@@ -169,9 +169,13 @@
     const aviso = () => Aviso.mostrar(criados.length === 1 ? `Plano criado: Fazenda ${nomes}. Clique na linha para começar.`
       : `${criados.length} planos criados (${nomes}). Clique na linha de cada um para começar.`);
     Telas.listaPlanos.mostrarSafra(contexto.safra);
-    // O aviso entra depois de desenhar a lista (mostrarTela apaga o aviso anterior)
-    if (location.hash === '#/plano-safra') { mostrarTela(); aviso(); }
-    else { window.addEventListener('hashchange', aviso, { once: true }); location.hash = '#/plano-safra'; }
+    // O aviso entra depois de desenhar a lista (mostrarTela apaga o aviso anterior); a tabela rola até o plano novo
+    const depois = () => {
+      aviso();
+      document.querySelector('.lista-planos__linha--novo')?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    };
+    if (location.hash === '#/plano-safra') { mostrarTela(); depois(); }
+    else { window.addEventListener('hashchange', depois, { once: true }); location.hash = '#/plano-safra'; }
   }
 
   // O exemplo anda com o dia (DADOS.dataReferencia): todas as datas do exemplo andam a diferença entre hoje e a data de

@@ -63,6 +63,7 @@ window.Telas.painelPlanos = (function () {
         <section class="cartao lista-planos" aria-labelledby="pn-titulo-planos">
           <div class="secao__topo lista-planos__topo">
             <h2 class="secao__titulo lista-planos__titulo" id="pn-titulo-planos">${Icones.documento} Planos de Safra</h2>
+            <button class="botao botao--primario" type="button" data-acao="criar-plano" data-pn="criar">${Icones.mais} Criar Plano Safra</button>
           </div>
           <div class="tabela-rolagem" data-pn="tabela">
             <table class="tabela painel-tabela">
@@ -72,7 +73,7 @@ window.Telas.painelPlanos = (function () {
           </div>
           <div class="painel-vazio" data-pn="vazio" hidden>
             <p class="painel-vazio__titulo">Nenhum Plano de Safra cadastrado</p>
-            <p class="painel-vazio__texto">Clique em <button class="link-acao painel-vazio__link" type="button" data-pn-criar>+ Criar Plano Safra</button> para começar seu planejamento.</p>
+            <p class="painel-vazio__texto">Clique em <button class="botao botao--primario painel-vazio__botao" type="button" data-pn-criar>${Icones.mais} Criar Plano Safra</button> para começar seu planejamento.</p>
           </div>
         </section>
       </div>`;
@@ -86,6 +87,8 @@ window.Telas.painelPlanos = (function () {
     // Sem plano nos filtros: o aviso no lugar da tabela
     raiz.querySelector('[data-pn="tabela"]').hidden = !planos.length;
     raiz.querySelector('[data-pn="vazio"]').hidden = !!planos.length;
+    // Sem plano, o botão sai do cabeçalho e fica só no aviso
+    raiz.querySelector('[data-pn="criar"]').hidden = !planos.length;
     raiz.querySelector('[data-pn="cabecalho"]').innerHTML = cabecalho();
     raiz.querySelector('[data-pn="linhas"]').innerHTML = ordenadas(planos).map(linha).join('');
   }
@@ -142,11 +145,13 @@ window.Telas.painelPlanos = (function () {
   function linha(l) {
     const [rotulo, classe] = STATUS[l.status];
     const p = l.plano;
+    // Plano novo (Não iniciado): linha em destaque, com a etiqueta "Novo", até entrar em construção ou ser publicado
+    const novo = l.status === 'nao-iniciado';
     return `
-      <tr class="lista-planos__linha" data-plano="${p.id}" tabindex="0" title="Abrir o plano"
-          aria-label="Abrir plano ${esc(p.safra)} · ${esc(p.fazenda)} · ${esc(p.cultura)}">
+      <tr class="lista-planos__linha ${novo ? 'lista-planos__linha--novo' : ''}" data-plano="${p.id}" tabindex="0" title="Abrir o plano"
+          aria-label="Abrir plano ${novo ? 'novo ' : ''}${esc(p.safra)} · ${esc(p.fazenda)} · ${esc(p.cultura)}">
         <td>${esc(l.empresa)}</td>
-        <td>${esc(l.fazenda)}</td>
+        <td>${esc(l.fazenda)}${novo ? ' <span class="lista-planos__novo">Novo</span>' : ''}</td>
         <td>${esc(l.ciclo)} ${esc(l.safra)}</td>
         <td>${esc(p.cultura)}</td>
         <td class="tabela__numero">${l.area ? ha(l.area) : '<span class="painel-tabela__vazio">—</span>'}</td>

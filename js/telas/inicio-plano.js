@@ -2,7 +2,7 @@
  * Modal "Como deseja iniciar o plano?"
  * Abre por cima da Visão Geral ao abrir um plano ainda não iniciado (só a versão 0.1, vazia: Versoes.aIniciar).
  * Opções: Usar modelo · Começar do zero · Importar XLSX · Copiar plano existente.
- * "Começar o planejamento" cria a 0.2 em construção com esse conteúdo (Versoes.comecar) e abre o plano na aba Operações.
+ * "Começar o planejamento" cria a 0.2 em construção com esse conteúdo (Versoes.comecar) e abre o plano no Planejamento.
  * Cancelar ou X: fecha sem iniciar (o plano continua não iniciado).
  */
 window.Telas = window.Telas || {};

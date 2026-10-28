@@ -9,9 +9,9 @@ window.Telas = window.Telas || {};
 window.Telas.planoOperacoes = (function () {
   const esc = Util.escapar;
   const ETAPAS = [
-    { id: 'operacoes',   nome: 'Operações' },     // estrutura do plano (Tela 04.0)
     { id: 'planejamento', nome: 'Planejamento' }, // talhão a talhão, por grupo (esta tela)
-    { id: 'calendario',  nome: 'Programação' } // Calendário Agrícola do plano (Tela 05), com o nome Programação (antes Resumo) dentro do plano
+    { id: 'calendario',  nome: 'Programação' }, // Calendário Agrícola do plano (Tela 05), com o nome Programação (antes Resumo) dentro do plano
+    { id: 'revisao',     nome: 'Revisão' }      // estrutura do plano, com talhões e área de cada operação (Tela 04.0, antes aba Operações)
   ];
   const UNIDADES = ['L', 'mL', 'kg', 'g', 't'];
   // TSI: a dose é por quantidade de semente (a unidade usada pelos clientes fica para os testes)
@@ -29,7 +29,7 @@ window.Telas.planoOperacoes = (function () {
 
   function aoMostrar(conteudo, p, etapaId) {
     plano = p;
-    etapa = ETAPAS.some((e) => e.id === etapaId) ? etapaId : 'operacoes';
+    etapa = ETAPAS.some((e) => e.id === etapaId) ? etapaId : 'planejamento';
     somenteLeitura = Versoes.somenteLeitura(plano);
     talhoesFazenda = Util.talhoesPlano(plano); // só os talhões incluídos no plano (modal Criar Plano)
     ui = estados[plano.id] = estados[plano.id] || {
@@ -97,7 +97,7 @@ window.Telas.planoOperacoes = (function () {
   }
 
   // Guias do Planejamento: todos os grupos, menos o Colheita (vem do plantio; não há o que planejar talhão a talhão)
-  // e sem o "Sem grupo" (operações de um grupo excluído, até o usuário escolher o grupo delas na etapa Operações)
+  // e sem o "Sem grupo" (operações de um grupo excluído, até o usuário escolher o grupo delas na aba Revisão)
   function gruposPlanejamento() {
     return plano.grupos.filter((g) => g.tipo !== 'Colheita' && !g.semGrupo);
   }
@@ -181,7 +181,7 @@ window.Telas.planoOperacoes = (function () {
     raiz.innerHTML = `
       ${cabecalho()}
       <div class="plano__rolagem">
-        ${etapa === 'operacoes' ? Telas.operacoesPlano.desenhar(ctxEstrutura())
+        ${etapa === 'revisao' ? Telas.operacoesPlano.desenhar(ctxEstrutura())
           : etapa === 'planejamento' ? corpoOperacoes()
           : etapa === 'calendario' ? Telas.calendario.desenhar(ctxCalendario()) : etapaEmConstrucao()}
       </div>
@@ -487,13 +487,11 @@ window.Telas.planoOperacoes = (function () {
   // Operações do plano (Tela 04.0, etapa 1): desenhada aqui dentro, com o mesmo cabeçalho do plano
   function ctxEstrutura() {
     ui.estrutura = ui.estrutura || { renomeandoOp: null };
-    return { plano, somenteLeitura, estado: ui.estrutura };
+    return { plano, somenteLeitura, talhoesFazenda, estado: ui.estrutura };
   }
   const acoesEstrutura = {
     redesenhar: (foco) => (foco ? desenharMantendoFoco(foco) : desenharTudo()),
     alterou: () => alterou(),
-    novoGrupo: (aoCriar) => novoGrupo(aoCriar),
-    menu: (ancora, x, y, rotulo, itens) => abrirMenuContexto(ancora, x, y, rotulo, itens),
     nomeOperacaoRepetido: (nome, op) => nomeOperacaoRepetido(nome, op)
   };
 
@@ -614,7 +612,7 @@ window.Telas.planoOperacoes = (function () {
   }
 
   function aoDuploClique(e) {
-    if (etapa === 'operacoes' && Telas.operacoesPlano.aoDuploClique(e, ctxEstrutura(), acoesEstrutura)) return;
+    if (etapa === 'revisao' && Telas.operacoesPlano.aoDuploClique(e, ctxEstrutura(), acoesEstrutura)) return;
     const nome = e.target.closest('[data-renomear-op]');
     if (!nome || somenteLeitura) return;
     ui.renomeandoOp = nome.dataset.renomearOp; desenharTudo();
@@ -1973,7 +1971,7 @@ window.Telas.planoOperacoes = (function () {
     const aplicacao = editar
       ? campo('tb-area', r.area !== null && r.area !== undefined ? numeroTexto(r.area) : '', `celula--numero ${faltaArea ? 'celula--erro' : ''}`, 'Área de aplicação', 'inputmode="decimal"', faltaArea ? 'Informe' : '—')
       : r.area !== null && r.area !== undefined ? numeroTexto(r.area) : vazio;
-    // Inserir, excluir e limpar a linha: botão direito na linha (menu, como na etapa Operações)
+    // Inserir, excluir e limpar a linha: botão direito na linha (menu, como na aba Revisão)
     const acoes = '';
     const ed = editar ? ' tabela__editavel' : '';
     const calc = editar ? ' tabela__calculada' : '';
@@ -3281,7 +3279,7 @@ window.Telas.planoOperacoes = (function () {
 
   // ================= Ações =================
   function aoClicar(e) {
-    if (etapa === 'operacoes' && Telas.operacoesPlano.aoClicar(e, ctxEstrutura(), acoesEstrutura)) return;
+    if (etapa === 'revisao' && Telas.operacoesPlano.aoClicar(e, ctxEstrutura(), acoesEstrutura)) return;
     if (etapa === 'calendario' && Telas.calendario.aoClicar(e, ctxCalendario(), acoesCalendario)) return;
     // Plantio: clicar em qualquer lugar da linha abre o painel do talhão (menos na caixa de marcar, no "+" e nos campos)
     const linhaPlantio = e.target.closest('.tabela-variedade tbody tr[data-talhao]');
@@ -3502,7 +3500,7 @@ window.Telas.planoOperacoes = (function () {
   }
 
   function aoMudar(e) {
-    if (etapa === 'operacoes' && Telas.operacoesPlano.aoMudar(e, ctxEstrutura(), acoesEstrutura)) return;
+    if (etapa === 'revisao' && Telas.operacoesPlano.aoMudar(e, ctxEstrutura(), acoesEstrutura)) return;
     if (etapa === 'calendario' && Telas.calendario.aoMudar(e, ctxCalendario(), acoesCalendario)) return;
     const campo = e.target.dataset.campo;
     const op = opAtual();
@@ -3574,6 +3572,7 @@ window.Telas.planoOperacoes = (function () {
 
   function aoDigitar(e) {
     if (etapa === 'calendario' && Telas.calendario.aoDigitar(e, ctxCalendario())) return;
+    if (etapa === 'revisao' && Telas.operacoesPlano.aoDigitar(e, ctxEstrutura())) return;
     // Doses: registradas enquanto se digita, sem redesenhar
     if (e.target.dataset.campo === 'linha-dose') {
       // Só números e uma vírgula decimal; o ponto digitado vira vírgula
@@ -3623,7 +3622,7 @@ window.Telas.planoOperacoes = (function () {
   }
 
   function aoDesfocar(e) {
-    if (etapa === 'operacoes' && Telas.operacoesPlano.aoDesfocar(e, ctxEstrutura(), acoesEstrutura)) return;
+    if (etapa === 'revisao' && Telas.operacoesPlano.aoDesfocar(e, ctxEstrutura(), acoesEstrutura)) return;
     const el = e.target;
     if (el.dataset.variedade) {
       // Sem escolher uma opção: nome igual a uma variedade vale (ex.: colado); senão, volta ao que estava
@@ -3674,7 +3673,7 @@ window.Telas.planoOperacoes = (function () {
   }
 
   function aoTeclar(e) {
-    if (etapa === 'operacoes' && Telas.operacoesPlano.aoTeclar(e, ctxEstrutura(), acoesEstrutura)) return;
+    if (etapa === 'revisao' && Telas.operacoesPlano.aoTeclar(e, ctxEstrutura(), acoesEstrutura)) return;
     const el = e.target;
     if (el.dataset.variedade) { teclaBuscaVariedade(e); return; }
     if (el.dataset.campo && el.dataset.campo.startsWith('tb-') && el.dataset.talhao && teclaCelulaPlantio(e)) return;
@@ -4206,7 +4205,7 @@ window.Telas.planoOperacoes = (function () {
   }
 
   // ----- Grupos -----
-  // aoCriar(grupo): chamado com o grupo criado (ex.: a etapa Operações move a operação para ele)
+  // aoCriar(grupo): chamado com o grupo criado (ex.: a aba Revisão move a operação para ele)
   function novoGrupo(aoCriar) {
     const modal = Modal.abrir(`
       <form class="formulario" novalidate>
@@ -4251,8 +4250,8 @@ window.Telas.planoOperacoes = (function () {
     form.elements.nome.focus();
   }
 
-  // Excluir grupo (botão direito na guia): a mesma regra da etapa Operações — as operações continuam no plano,
-  // "Sem grupo", até o usuário escolher o grupo de cada uma (na etapa Operações). Se era a guia aberta, abre a vizinha.
+  // Excluir grupo (botão direito na guia): a mesma regra da aba Revisão — as operações continuam no plano,
+  // "Sem grupo", até o usuário escolher o grupo de cada uma (na aba Revisão). Se era a guia aberta, abre a vizinha.
   function excluirGrupo(grupo) {
     const indice = gruposPlanejamento().indexOf(grupo);
     const acoes = {
@@ -4278,7 +4277,6 @@ window.Telas.planoOperacoes = (function () {
   let menuContexto = null;
 
   function aoMenuContexto(e) {
-    if (etapa === 'operacoes' && Telas.operacoesPlano.aoMenuContexto(e, ctxEstrutura(), acoesEstrutura)) return;
     if (somenteLeitura) return;
     // Plantio: botão direito na linha (variedade) → Inserir (variedade logo abaixo) · Excluir · Limpar conteúdo
     const linhaPl = e.target.closest('.tabela-variedade tbody tr[data-talhao]');

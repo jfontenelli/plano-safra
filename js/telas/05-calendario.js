@@ -198,13 +198,13 @@ window.Telas.calendario = (function () {
         </div>
         <div class="calendario__corpo">
         ${!planejados.length ? '' : `
-          <div class="calendario__filtros">
-            <div class="calendario__filtro">
-              <span class="calendario__filtro-rotulo">Grupo de operação</span>
+          <div class="cartao filtros filtros--plano">
+            <div class="campo">
+              <span class="campo__rotulo">Grupo de operação</span>
               ${filtroCaixa(estado, 'grupo', opcoesGrupo(plano), ['Todos os grupos', 'Nenhum grupo', 'grupos'], 'Grupo de operação')}
             </div>
-            <div class="calendario__filtro">
-              <span class="calendario__filtro-rotulo">Talhão</span>
+            <div class="campo">
+              <span class="campo__rotulo">Talhão</span>
               ${filtroCaixa(estado, 'talhao', opcoesTalhao(talhoes), ['Todos os talhões', 'Nenhum talhão', 'talhões'], 'Talhões')}
             </div>
           </div>`}

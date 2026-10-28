@@ -837,6 +837,8 @@ select.campo__controle option { color: var(--texto); }
 .lista-planos__titulo .icone { width: 22px; height: 22px; color: var(--verde-600); }
 .filtros .campo__rotulo { margin-bottom: 4px; font-size: 13px; color: var(--texto-suave); }
 .filtros .campo__controle { height: 36px; font-size: 14px; }
+/* Filtros dentro do plano (Programação e Revisão): o mesmo padrão, rótulo em cima, sem o recuo de baixo */
+.filtros--plano { margin-bottom: 0; }
 
 /* ===== Tabelas ===== */
 .tabela-rolagem { position: relative; overflow-x: auto; }
@@ -2014,6 +2016,10 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .tabela th.lista-planos__menu, .tabela td.lista-planos__menu { width: 1%; padding-left: 0; padding-right: 8px; text-align: right; }
 /* Lista de planos: a linha inteira abre o plano */
 .lista-planos__linha { cursor: pointer; }
+/* Plano novo (Não iniciado): fundo verde-claro e a etiqueta "Novo", até entrar em construção ou ser publicado */
+.lista-planos__linha--novo > td { background: var(--verde-100); }
+.lista-planos__novo { display: inline-block; margin-left: 8px; padding: 1px 8px; border-radius: 999px; background: var(--verde-700);
+  color: #fff; font-size: 12px; font-weight: 600; vertical-align: 1px; }
 .tabela tbody tr.lista-planos__linha:hover { background: var(--verde-100); }
 .lista-planos__linha:focus-visible { outline: 2px solid var(--verde-700); outline-offset: -2px; }
 
@@ -2206,9 +2212,12 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .tab-op { width: 100%; table-layout: fixed; border-collapse: collapse; font-size: 14px; }
 .tab-op__c-dap { width: 8%; }
 .tab-op__c-fen { width: 13%; }
-.tab-op__c-op { width: 33%; }
-.tab-op__c-grupo { width: 25%; }
-.tab-op__c-prazo { width: 15%; }
+.tab-op__c-op { width: 30%; }
+.tab-op__c-grupo { width: 22%; }
+.tab-op__c-talhoes { width: 9%; }
+.tab-op__c-area { width: 13%; }
+/* Planejamento incompleto (ex.: 7/10): só o fundo da linha em vermelho bem claro; talhões e área no texto normal */
+.tab-op tr.tab-op__linha--incompleta > td { background: var(--erro-fundo); }
 .tab-op__c-acao { width: 88px; }
 .tab-op td, .tab-op thead th { overflow: hidden; text-overflow: ellipsis; }
 .tab-op thead th { position: sticky; top: 0; z-index: 2; padding: 12px 16px; box-shadow: inset 0 -1px 0 var(--borda); text-align: left; font-size: 13px; font-weight: 600;
@@ -2231,7 +2240,6 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .tab-op__qtd { font-size: 13px; font-weight: 400; color: var(--texto-suave); }
 .tab-op__adicionar { margin-left: auto; padding-left: 24px; font-size: 13px; font-weight: 500; }
 .tab-op__adicionar .icone { width: 15px; height: 15px; }
-.tab-op__op { font-weight: 600; }
 .tab-op__nome { display: inline-block; padding: 2px 6px; margin-left: -6px; border-radius: 6px; cursor: text; }
 .tab-op__nome:hover { background: var(--superficie-2); }
 .tab-op__nome:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 2px; }
@@ -2864,9 +2872,11 @@ html[data-tema="escuro"] .tab-op__caixa-marcar { border-color: #4a5b67; }
 /* Sem plano nos filtros: aviso no lugar da tabela */
 .painel-vazio { padding: 40px 16px 48px; text-align: center; }
 .painel-vazio[hidden] { display: none; }
-.painel-vazio__titulo { margin: 0 0 6px; font-size: 16px; font-weight: 600; color: var(--texto); }
-.painel-vazio__texto { margin: 0; font-size: 14px; color: var(--texto-suave); }
-.painel-vazio__link { margin-top: 0; padding: 0; vertical-align: baseline; }
+.painel-vazio__titulo { margin: 0 0 10px; font-size: 22px; font-weight: 600; color: var(--texto); }
+.painel-vazio__texto { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px 10px;
+  margin: 0; font-size: 17px; color: var(--texto-suave); }
+/* "+ Criar Plano Safra": o botão primário no meio da frase; o do cabeçalho some sem plano */
+.lista-planos__topo .botao[hidden] { display: none; }
 .painel[hidden], .filtros .campo[hidden] { display: none; }
 .painel-secao { padding: 18px 20px 20px; }
 .painel-secao__titulo { display: flex; align-items: center; gap: 8px; font-size: 18px; font-weight: 700; }
@@ -2945,6 +2955,7 @@ html[data-tema="escuro"] .menu__alternar { background: #176B50; border-color: #0
 /* Botões e status no escuro */
 html[data-tema="escuro"] .botao--primario { background: #176B50; color: #fff; }
 html[data-tema="escuro"] .botao--primario:hover { background: #1E8763; }
+html[data-tema="escuro"] .lista-planos__novo { background: #176B50; } /* como o botão primário: o verde claro do escuro com branco não se lê */
 html[data-tema="escuro"] .status--aprovado { background: rgba(23, 107, 80, .45); color: #8BE3B5; }
 html[data-tema="escuro"] .status--construcao { background: #30363D; color: #C9D1D9; }
 html[data-tema="escuro"] .status--nao-iniciado { background: #203A4A; color: #CFE3EF; box-shadow: none; }

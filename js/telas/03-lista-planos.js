@@ -88,7 +88,6 @@ window.Telas.listaPlanos = (function () {
               <button class="etapa ${id === guia ? 'etapa--ativa' : ''}" type="button" data-guia="${id}"
                       ${id === guia ? 'aria-current="page"' : ''}>${nome}</button>`).join('')}
           </nav>
-          <button class="botao botao--primario" type="button" data-acao="criar-plano">${Icones.mais} Criar Plano Safra</button>
         </div>
       </header>
 
@@ -264,7 +263,7 @@ window.Telas.listaPlanos = (function () {
   }
 
   // Abrir um plano. Ainda não iniciado (só a 0.1, vazia): primeiro o modal "Como deseja iniciar o plano?";
-  // ao começar, nasce a 0.2 em construção e o plano abre na aba Operações.
+  // ao começar, nasce a 0.2 em construção e o plano abre no Planejamento.
   function abrirPlano(p) {
     if (!Versoes.aIniciar(p)) {
       prepararAbrir(p);
@@ -276,7 +275,7 @@ window.Telas.listaPlanos = (function () {
         Versoes.comecar(p, grupos);
         // O aviso entra depois da troca de tela (a troca apaga o aviso anterior)
         if (aviso) window.addEventListener('hashchange', () => Aviso.mostrar(aviso), { once: true });
-        location.hash = `#/plano/${p.id}/operacoes`;
+        location.hash = `#/plano/${p.id}`;
       }
     });
   }
