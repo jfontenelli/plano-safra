@@ -13,7 +13,7 @@ Ver **todas as operações do plano juntas**, de todos os grupos (Plantio, Defen
 
 ## 2. Lugar na jornada
 
-- Etapa **Calendário Agrícola** do plano, na aba **Programação** do cabeçalho (Operações · Planejamento · Programação; antes Resumo, renomeada em 20/10/2026). Mesmo cabeçalho do plano da Tela 04 (com o botão Exportar).
+- Etapa **Calendário Agrícola** do plano, na aba **Programação** do cabeçalho (Planejamento · Programação · Revisão; antes Resumo, renomeada em 20/10/2026). Mesmo cabeçalho do plano da Tela 04 (com o botão Exportar).
 - Os dados vêm do que foi planejado nas guias da etapa Planejamento. O calendário cresce durante o planejamento.
 
 ## 3. Barra de cima
@@ -43,7 +43,7 @@ Ver **todas as operações do plano juntas**, de todos os grupos (Plantio, Defen
 
 ## 6. Programação (antes Tabela)
 
-- **Na ordem da safra** (pré-plantio, plantio, manejo da cultura e colheita), **sem faixa com o nome da fase** (como na etapa Operações; confundia).
+- **Na ordem da safra** (pré-plantio, plantio, manejo da cultura e colheita), **sem faixa com o nome da fase** (como na Revisão; confundia).
 - Colunas: **DAP · Fenologia · Data prevista · Área · Operação · Produto · Unid.** e **uma coluna por talhão** (nome, variedade e área no cabeçalho; com o filtro, só os talhões marcados).
 - **Filtros Grupo de operação e Talhão** (abaixo das guias): cada um é uma caixa com a busca **Pesquisar** no topo, "Todos os grupos" / "Todos os talhões" e uma marcação por opção (no talhão, com a área); dá para marcar vários. O botão mostra "Todos…", o nome (um só), "N grupos" / "N talhões" ou "Nenhum…". Os grupos são os do plano com operação, na ordem do plano, e a Colheita no fim. Valem para as duas visões.
 - **Calendário sempre ampliado**: ocupa a área logo abaixo das abas do plano, sem botão Expandir/Recolher (testado e retirado). Acima dele, só as guias e os filtros. No plano aprovado, a faixa "somente leitura" não aparece no Calendário (o selo **Aprovado** fica no cabeçalho). Com uma caixa de filtro aberta, a tecla **Esc** fecha a caixa.
@@ -56,7 +56,7 @@ Ver **todas as operações do plano juntas**, de todos os grupos (Plantio, Defen
 - **Data prevista:** data de plantio + DAP da operação, nos talhões que recebem a operação (sem talhão planejado, nos talhões do filtro com plantio). Datas diferentes entre talhões viram **intervalo**, no formato das previsões ("22/set–10/out/2026"). Colheita: a previsão de colheita dos talhões. Sem plantio ou sem DAP: "—".
 - **Área:** soma da área dos talhões que recebem a operação (com o filtro, só os talhões marcados); no Plantio, os talhões com variedade; na Colheita, os com previsão. Sem talhão planejado: "—".
 - **Dose do talhão diferente da padrão da receita**: sem destaque de cor por enquanto (o amarelo foi testado e retirado); ao passar o mouse, a dose padrão. **Talhão que não recebe** o produto: "—" em cinza.
-- A **previsão de conclusão** não aparece nem se edita aqui: fica na etapa Operações.
+- A **previsão de conclusão** não aparece nem se edita aqui (vale o padrão do modelo; DECISOES 4.3).
 - Fenologia da linha: a escolhida na operação; "—" no pré-plantio (DAP negativo), no plantio (DAP 0), na colheita e sem fenologia. Colheita: DAP em faixa ("104 a 118").
 
 ## 6.1 Calendário (saiu do Resumo)
@@ -72,7 +72,7 @@ Ver **todas as operações do plano juntas**, de todos os grupos (Plantio, Defen
 ## 8. Regras
 
 - **Só as operações já planejadas** aparecem (com produto e dose; no Plantio, variedade), na ordem do DAP, **em construção e no aprovado**. Operação ainda sem recomendação não aparece em nenhuma das visões. Qualquer mudança em Operações ou no Planejamento aparece ao voltar ao Calendário. (Antes, em construção, todas as operações cadastradas apareciam como "Sem recomendação"; testado e trocado.)
-- **Nada planejado ainda:** no lugar das visões, um aviso (amarelo-claro, como o da etapa Operações): "**Nenhuma operação planejada ainda.** As operações planejadas aparecem aqui com datas e doses por talhão." As guias continuam na barra. Com operações planejadas (em qualquer talhão, sem olhar o filtro de talhão), o aviso não aparece e os filtros ficam sempre à vista; se os filtros esconderem tudo (ex.: nenhum talhão marcado), a Programação e o Ciclo Produtivo dizem "Nenhuma operação com os filtros escolhidos" (20/10/2026).
+- **Nada planejado ainda:** no lugar das visões, um aviso (amarelo-claro): "**Nenhuma operação planejada ainda.** As operações planejadas aparecem aqui com datas e doses por talhão." As guias continuam na barra. Com operações planejadas (em qualquer talhão, sem olhar o filtro de talhão), o aviso não aparece e os filtros ficam sempre à vista; se os filtros esconderem tudo (ex.: nenhum talhão marcado), a Programação e o Ciclo Produtivo dizem "Nenhuma operação com os filtros escolhidos" (20/10/2026).
 
 - A colheita vem do Plantio: previsão = data de plantio + ciclo da variedade; talhão com variedade sem ciclo fica fora da colheita.
 - **A Colheita aparece no fim, depois que houver plantio** (variedade, data e ciclo), com a previsão de colheita.

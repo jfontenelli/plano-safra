@@ -11,18 +11,20 @@ Acompanhar o planejamento das fazendas no ano agrícola, filtrar e abrir ou cria
 - Ao abrir o protótipo: ele já vem com os planos de exemplo, só publicados (ano agrícola 2025: soja 25/26 e milho safrinha 26/26 da Santa Clara, publicados; ano agrícola 2026: soja 26/27 e milho safrinha 27/27 da Boa Vista, publicados, e soja 26/27 da São José, em construção, iniciada pelo "Usar modelo"). O plano em construção, o usuário cria e monta ele mesmo.
 
 ## Conteúdo
-- Título "Visão Geral" com o caminho "Plano de Safra › Visão Geral" embaixo e, abaixo, duas guias (mesmo estilo das abas do plano, com a barra verde grossa na selecionada): **Planos de Safra** (abre nela) e **Histórico de versões**. **+ Criar Plano Safra** fica na linha das guias, à direita.
+- Título "Visão Geral" com o caminho "Plano de Safra › Visão Geral" embaixo e, abaixo, duas guias (mesmo estilo das abas do plano, com a barra verde grossa na selecionada): **Planos de Safra** (abre nela) e **Histórico de versões**.
 - No modo escuro, o topo tem a foto do campo (`img/fundo-plano-safra.jpg`) por trás do título; no claro, não.
 - **Filtros** num cartão baixo, acima da tabela, sem título, compactos e lado a lado: **Ano Agrícola**, **Atividade produtiva**, **Safra** (as safras do cadastro do Ano Agrícola escolhido, da mais recente para a mais antiga: 27/27, 26/27; trocar o ano refaz a lista, e a safra que não é do ano volta para "Todas"), Empresa, Fazenda, Cultura e, só no Histórico, Status; **Limpar filtros** à direita. Valem para as duas guias.
 - **Guia Planos de Safra:**
-  - **Planos de Safra**: título com ícone no topo do cartão; tabela com os planos (Não iniciado, Em construção e Publicado), uma linha por plano (fazenda e safra). Colunas: Empresa, Fazenda, Safra ("Safra 26/27" ou "Safrinha 27/27"), Cultura, Área (ha), Status e Ações (⋯), com larguras fixas e equilibradas (Empresa e Fazenda 18%, Safra 17%, Cultura 14%, Área 12%, Status 15%, Ações 6%; espaço entre a Área e o Status).
-  - **Sem plano nos filtros:** no lugar da tabela, "**Nenhum Plano de Safra cadastrado**" e "Clique em **+ Criar Plano Safra** para começar seu planejamento.", com "+ Criar Plano Safra" como link (ver Navegação).
+  - **Planos de Safra**: título com ícone no topo do cartão e, à direita dele, o botão **+ Criar Plano Safra** (28/10/2026); tabela com os planos (Não iniciado, Em construção e Publicado), uma linha por plano (fazenda e safra). Colunas: Empresa, Fazenda, Safra ("Safra 26/27" ou "Safrinha 27/27"), Cultura, Área (ha), Status e Ações (⋯), com larguras fixas e equilibradas (Empresa e Fazenda 18%, Safra 17%, Cultura 14%, Área 12%, Status 15%, Ações 6%; espaço entre a Área e o Status).
+  - **Plano novo** (Não iniciado): linha com fundo **verde-claro** e a etiqueta **"Novo"** (verde) ao lado do nome da fazenda (28/10/2026).
+  - **Sem plano nos filtros:** no lugar da tabela, "**Nenhum Plano de Safra cadastrado**" (22 px) e "Clique em [**+ Criar Plano Safra**] para começar seu planejamento." (17 px), com o **botão primário no meio da frase**; o botão do cabeçalho do cartão some (28/10/2026; ver Navegação).
 - **Guia Histórico de versões:** uma linha por versão de cada plano; colunas Safra, Empresa, Atividade, Cultura, Fazenda, Versão, Status, Última atualização, Atualizado por. Status da versão: **Não iniciado**, **Em construção**, **Publicada** (só a última publicada do plano) ou **Revisada** (as publicadas antes dela; selo neutro, com contorno).
 
 ## Regras
 - Um plano por safra e fazenda. Os planos são criados pelo usuário no modal Criar Plano de Safra (Tela 02), não automaticamente.
 - **Status** (na tabela): **Não iniciado** (plano criado, só com a 0.1 vazia), **Em construção** e **Publicado**, pela versão de trabalho (a em construção ou, sem ela, a última publicada).
 - **Área (ha)**: área de cultivo do plano (talhões incluídos); sem talhões, "—".
+- **Destaque do plano novo:** dura enquanto o plano estiver **Não iniciado**; some quando ele entra em construção (Começar o planejamento) ou é publicado. Ao criar, a tabela rola até a linha nova (com vários planos criados de uma vez, todos ficam em destaque).
 - **Ordenar por coluna**: seta no título de cada coluna (menos Ações), 1º clique crescente, 2º decrescente; vazios ("—") sempre no fim; Status na ordem Não iniciado, Em construção, Publicado. Sem escolha: por status (Não iniciado, Em construção, Publicado) e, no mesmo status, em ordem alfabética de Safra, Empresa, Fazenda e Cultura (20/10/2026).
 - Filtro **Ano Agrícola** (DECISOES 1, cadastro de safras): escolher 2026 traz as safras e safrinhas daquele ano (26/27 e 27/27). Opções: os anos das safras cadastradas e dos planos. Começa no ano agrícola de hoje (01/09 a 31/08); senão, no mais recente. Depois de criar planos, abre no ano agrícola da safra deles.
 - Empresa e Fazenda oferecem também as fazendas das empresas, mesmo sem plano (`fazendasPorEmpresa` nos dados de exemplo); escolhida uma delas, aparece o aviso sem plano.
@@ -47,9 +49,9 @@ Acompanhar o planejamento das fazendas no ano agrícola, filtrar e abrir ou cria
 - As colunas Plantio, Fertilidade e Defensivos (% de cada grupo por área) saíram em 19/10/2026 (reunião com stakeholders).
 
 ## Navegação
-- "+ Criar Plano Safra" → abre a Tela 02 (modal) por cima desta tela; ao criar, volta à guia Planos de Safra no ano agrícola da safra criada.
-- Link "+ Criar Plano Safra" do aviso sem plano → o mesmo modal, já com os filtros: na lista Safra, só as safras do Ano Agrícola do filtro (mais "+ Criar nova safra"), já escolhida quando a safra do filtro Safra é do Ano Agrícola; Empresa e Fazenda do filtro (só a Fazenda escolhida: a empresa dela), a fazenda com todos os talhões. Ano Agrícola em "Todas": a lista de safras completa.
-- Clique na linha ou "Abrir" no menu → abre o plano no Planejamento, aba Operações (Tela 04.0), na versão em construção ou na última publicada. Plano não iniciado: antes, o modal "Como deseja iniciar o plano?" (Tela 02).
+- "+ Criar Plano Safra" (cabeçalho do cartão) → abre a Tela 02 (modal) por cima desta tela; ao criar, volta à guia Planos de Safra no ano agrícola da safra criada, com o plano novo em destaque.
+- Botão "+ Criar Plano Safra" do aviso sem plano → o mesmo modal, já com os filtros: na lista Safra, só as safras do Ano Agrícola do filtro (mais "+ Criar nova safra"), já escolhida quando a safra do filtro Safra é do Ano Agrícola; Empresa e Fazenda do filtro (só a Fazenda escolhida: a empresa dela), a fazenda com todos os talhões. Ano Agrícola em "Todas": a lista de safras completa.
+- Clique na linha ou "Abrir" no menu → abre o plano no Planejamento (aba Planejamento, Telas 04.1 a 04.3), na versão em construção ou na última publicada. Plano não iniciado: antes, o modal "Como deseja iniciar o plano?" (Tela 02).
 - Linha do Histórico de versões → abre aquela versão do plano.
 
 ## Para testar

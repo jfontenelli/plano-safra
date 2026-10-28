@@ -52,7 +52,7 @@ Identificar os novos planos: informações gerais (safra, empresa, atividade, cu
 - Por cima da Visão Geral, ao abrir um plano **não iniciado** (só a 0.1, vazia): clique na linha, "Abrir" no ⋯ ou menu Planejamento.
 
 ## Conteúdo
-- Título "Como deseja iniciar o plano?"; subtítulo só com o plano: "Safra 26/27 · Empresa A · Fazenda São José · Soja" (19/10/2026). Ao começar, o plano passa para a versão 0.2, em construção, e abre na aba Operações.
+- Título "Como deseja iniciar o plano?"; subtítulo só com o plano: "Safra 26/27 · Empresa A · Fazenda São José · Soja" (19/10/2026). Ao começar, o plano passa para a versão 0.2, em construção, e abre na aba Planejamento.
 - Quatro cards (um escolhido por vez; Usar modelo já vem marcado), em duas colunas, nesta ordem:
 
 | Card | Texto | Comportamento |
@@ -67,5 +67,5 @@ Identificar os novos planos: informações gerais (safra, empresa, atividade, cu
 ## Regras
 - **Importar XLSX** (só o arquivo exportado pelo Plano de Safra): ao carregar, mostra de qual plano é ("Planejamento da safra 26/27 · Empresa A · Fazenda São José · Soja"). Safra, Empresa, Fazenda e Cultura do plano são conferidas com as do arquivo; se forem diferentes, quadro amarelo "O arquivo é de outro plano" com as diferenças e o botão **Importar mesmo assim**. Talhões do arquivo que não estão no plano ficam de fora, com aviso. Arquivo que não é do sistema: "Este arquivo não foi exportado pelo Plano de Safra…". Sem arquivo: "Escolha o arquivo exportado pelo Plano de Safra."
 - **Copiar plano existente**: a lista mostra só os planos **da mesma cultura** (qualquer fazenda e safra) **já publicados**, como "Safra 26/27 · Empresa A · Fazenda Santa Clara · versão 0.2". Copia sempre a **última versão publicada**: grupos de operação, operações e recomendações com produtos e doses padrão. **Não copia** talhões, áreas, plantio, germinação nem doses próprias de talhão. Sem plano publicado: "Ainda não há plano de Soja publicado para copiar."
-- "Começar o planejamento" cria a **0.2 em construção** com o conteúdo escolhido e abre o plano na aba Operações (Tela 04.0), com aviso quando importado ou copiado ("Copiado do plano da Fazenda Santa Clara (safra 26/27, versão 0.2)").
+- "Começar o planejamento" cria a **0.2 em construção** com o conteúdo escolhido e abre o plano na aba Planejamento, com aviso quando importado ou copiado ("Copiado do plano da Fazenda Santa Clara (safra 26/27, versão 0.2)").
 - Cancelar ou X: fecha; o plano continua não iniciado. Cada vez que o modal abre, começa em "Usar modelo".
