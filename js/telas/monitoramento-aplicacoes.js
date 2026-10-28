@@ -1,5 +1,6 @@
 /*
  * Planejado x Executado (antes Aplicações, menu Monitoramento), no menu Gestão da Lavoura › Planejado x Executado.
+ * A primeira guia, Calendário Agrícola, é a página de js/telas/os-calendario.js (com o mesmo cabeçalho).
  * Filtros com várias escolhas (as caixas da Agenda Agrícola): Safra (as do cadastro: 26/27, 27/27…), Cultura, Empresa, Fazenda,
  * Talhão, Grupo de operação (abre em Defensivo) e Operação (abre com as fungicidas do modelo), e Limpar filtros.
  * Tabela com uma linha por talhão: Fazenda, Talhão, Variedade, Plantas/m, Data de plantio, uma coluna por operação
@@ -236,24 +237,37 @@ window.Telas.monitoramentoAplicacoes = (function () {
   }
 
   // Cabeçalho: caminho, título, subtítulo (conforme a guia) e as guias, no mesmo formato das abas do plano (Operações ·
-  // Planejamento · Programação): Executadas (tabela), Planejadas × Executadas (desvio por operação) e Duração da Operação
+  // Planejamento · Programação): Calendário Agrícola (a primeira, outra página: js/telas/os-calendario.js, com os seus
+  // filtros), Executadas (tabela), Planejadas × Executadas (desvio por operação) e Duração da Operação
   const GUIAS = [
+    ['calendario', 'Calendário Agrícola', 'As operações planejadas de todas as fazendas: o ano agrícola por empresa e fazenda, e o dia a dia no mês, na semana e no dia.'],
     ['tabela', 'Executadas', 'Consulte as datas de execução e o status das operações por talhão.'],
     ['linha', 'Planejadas × Executadas', 'Compare as datas planejadas e executadas das operações por talhão.'],
     ['duracao', 'Duração da Operação', 'Compare a duração das OS fechadas com o prazo de conclusão da operação.']
   ];
-  function cabecalho() {
-    const [, , subtitulo] = GUIAS.find(([id]) => id === est.visao);
+  // visao: a guia à mostra (o Calendário Agrícola chama com 'calendario'). Só no Calendário, a etiqueta das versões publicadas.
+  function cabecalho(visao = est.visao) {
+    const [, , subtitulo] = GUIAS.find(([id]) => id === visao);
+    const titulo = `
+        <div class="oa-cabecalho__titulo">
+          <h1 class="cabecalho__titulo">Planejado x Executado</h1>
+          <p class="cabecalho__subtitulo">${subtitulo}</p>
+        </div>`;
     return `
       ${Telas.gestaoLavoura.caminho('Planejado x Executado')}
-      <div class="oa-cabecalho__titulo">
-        <h1 class="cabecalho__titulo">Planejado x Executado</h1>
-        <p class="cabecalho__subtitulo">${subtitulo}</p>
-      </div>
+      ${visao === 'calendario' ? `<div class="oa-cabecalho__abas">${titulo}${Telas.gestaoLavoura.etiquetaPublicadas()}</div>` : titulo}
       <nav class="etapas ma-guias" aria-label="Guias de Planejado x Executado">
-        ${GUIAS.map(([id, nome]) => `<button class="etapa ${id === est.visao ? 'etapa--ativa' : ''}" type="button" data-ma-visao="${id}"
-          ${id === est.visao ? 'aria-current="page"' : ''}>${nome}</button>`).join('')}
+        ${GUIAS.map(([id, nome]) => `<button class="etapa ${id === visao ? 'etapa--ativa' : ''}" type="button" data-ma-visao="${id}"
+          ${id === visao ? 'aria-current="page"' : ''}>${nome}</button>`).join('')}
       </nav>`;
+  }
+  // Guia escolhida: o Calendário Agrícola é outra página; as demais, esta (vindo do Calendário: #/planejado-executado/tabela)
+  function irParaGuia(visao) {
+    if (visao === 'calendario') { location.hash = '#/calendario-agricola'; return; }
+    if (est.visao !== visao) {
+      est.visao = visao;
+      padraoDuracao();
+    }
   }
 
   function filtros() {
@@ -579,8 +593,9 @@ window.Telas.monitoramentoAplicacoes = (function () {
       </div>`;
   }
 
-  function aoMostrar(conteudo) {
+  function aoMostrar(conteudo, guia) {
     est = est || novoEstado();
+    if (guia && guia !== 'calendario' && GUIAS.some(([id]) => id === guia)) irParaGuia(guia);
     // Os eventos ficam na página da tela (a área de conteúdo é a mesma para todas as telas)
     const raiz = conteudo.querySelector('.ma');
     const caixaFiltros = raiz.querySelector('[data-ma-filtros]');
@@ -601,6 +616,7 @@ window.Telas.monitoramentoAplicacoes = (function () {
     caixaCabecalho.addEventListener('click', (e) => {
       const b = e.target.closest('[data-ma-visao]');
       if (!b) return;
+      if (b.dataset.maVisao === 'calendario') { irParaGuia('calendario'); return; }
       const entrou = est.visao !== b.dataset.maVisao;
       est.visao = b.dataset.maVisao;
       if (entrou) padraoDuracao();
@@ -687,5 +703,5 @@ window.Telas.monitoramentoAplicacoes = (function () {
     aberta.querySelector('.cal-filtro__botao').focus();
   });
 
-  return { desenhar, aoMostrar };
+  return { desenhar, aoMostrar, cabecalho };
 })();

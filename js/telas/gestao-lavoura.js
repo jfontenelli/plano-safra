@@ -10,10 +10,9 @@ window.Telas.gestaoLavoura = (function () {
 
   // ----- Cabeçalho das páginas de Gestão da Lavoura -----
   const PAGINAS = {
-    calendario: ['Calendário Agrícola', '#/calendario-agricola', 'As operações planejadas de todas as fazendas: o ano agrícola por empresa e fazenda, e o dia a dia no mês, na semana e no dia.'],
     central: ['Central OS', '#/central-os', 'Acompanhe as ordens de serviço, recomendações e execução das operações agrícolas.']
   };
-  // Caminho "⌂ Gestão da Lavoura › Página" (a casa e o nome do grupo levam ao primeiro item, Calendário Agrícola)
+  // Caminho "⌂ Gestão da Lavoura › Página" (a casa e o nome do grupo levam ao Planejado x Executado, na guia Calendário Agrícola)
   const caminho = (titulo) => `
         <nav class="oa-caminho" aria-label="Caminho">
           <a class="oa-caminho__casa" href="#/calendario-agricola" aria-label="Gestão da Lavoura">${Icones.casa}</a>
@@ -30,10 +29,11 @@ window.Telas.gestaoLavoura = (function () {
             <h1 class="cabecalho__titulo">${titulo}</h1>
             <p class="cabecalho__subtitulo">${subtitulo}</p>
           </div>
-          <span class="cag-etiqueta" title="Mostra a última versão publicada de cada plano. Alterações em versões em construção aparecem aqui depois de publicadas.">${Icones.info} Últimas versões publicadas</span>
+          ${etiquetaPublicadas()}
         </div>
       </header>`;
   }
+  const etiquetaPublicadas = () => `<span class="cag-etiqueta" title="Mostra a última versão publicada de cada plano. Alterações em versões em construção aparecem aqui depois de publicadas.">${Icones.info} Últimas versões publicadas</span>`;
 
   // ----- Datas -----
   const hoje = () => Util.hojeISO();
@@ -147,5 +147,5 @@ window.Telas.gestaoLavoura = (function () {
 
   const base = { linhasOperacoes, publicados, safras, safraInicial, primeiraData, somaDias, diasEntre, hoje, ordens,
     opcoesSelect, gruposDaSafra, comparar, esc };
-  return { cabecalho, caminho, base };
+  return { cabecalho, caminho, etiquetaPublicadas, base };
 })();

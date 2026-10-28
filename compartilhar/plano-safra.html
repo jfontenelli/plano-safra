@@ -2860,7 +2860,8 @@ html[data-tema="escuro"] .tab-op__caixa-marcar { border-color: #4a5b67; }
 .cag__linha--safra > span:first-child { padding-left: 52px; }
 .cag__tempo--vazio { min-height: 34px; }
 .cag__tempo--faixas { min-height: 56px; }
-.cag__faixa { position: absolute; height: 9px; border-radius: 5px; background: color-mix(in srgb, var(--c) 40%, transparent); }
+.cag__faixa { position: absolute; height: 9px; padding: 0; border: 0; border-radius: 5px; background: color-mix(in srgb, var(--c) 40%, transparent); cursor: pointer; }
+.cag__faixa:focus-visible { outline: 2px solid var(--c); outline-offset: 1px; z-index: 2; }
 .cag__faixa:hover { outline: 1px solid rgba(26, 31, 28, .45); z-index: 2; }
 .cag__meses--dias > span { font-size: 10px; padding: 9px 0; }
 .cag__hoje { position: absolute; top: 0; bottom: 0; width: 0; border-left: 2px dotted #8A9BA8; pointer-events: none; }
@@ -3531,7 +3532,7 @@ html[data-tema="escuro"] .cc-segmento__opcao--ativa { color: #0B1720; }
             </a>
           </div>
         </div>
-        <!-- Gestão da Lavoura: Calendário Agrícola, Central OS e Planejado x Executado (o nome leva ao primeiro) -->
+        <!-- Gestão da Lavoura: Planejado x Executado e Central OS (o nome leva ao Planejado x Executado, na guia Calendário Agrícola) -->
         <div class="menu__grupo">
           <a class="menu__item menu__pai" href="#/calendario-agricola" title="Gestão da Lavoura">
             <svg class="menu__icone" viewBox="0 0 24 24" aria-hidden="true">
@@ -3547,11 +3548,13 @@ html[data-tema="escuro"] .cc-segmento__opcao--ativa { color: #0B1720; }
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
           </button>
           <div class="menu__subitens" id="menu-subitens-lavoura">
-            <a class="menu__item menu__sub" href="#/calendario-agricola" data-rota="calendario-agricola" title="Calendário Agrícola">
+            <a class="menu__item menu__sub" href="#/calendario-agricola" data-rota="planejado-executado" title="Planejado x Executado">
               <svg class="menu__icone" viewBox="0 0 24 24" aria-hidden="true">
-                <rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><path d="M8 14h2M14 14h2M8 17h2"/>
+                <!-- Trator -->
+                <circle cx="7" cy="16.5" r="3"/><circle cx="18" cy="17.5" r="2"/>
+                <path d="M4.5 14V8h6.5l2 6"/><path d="M10 16.5h6M13 14h6.5l.5 1.5"/><path d="M15.5 14V9.5h3M7 8V5"/>
               </svg>
-              <span class="menu__texto">Calendário Agrícola</span>
+              <span class="menu__texto">Planejado x Executado</span>
             </a>
             <a class="menu__item menu__sub" href="#/central-os" data-rota="central-os" title="Central OS">
               <svg class="menu__icone" viewBox="0 0 24 24" aria-hidden="true">
@@ -3559,14 +3562,6 @@ html[data-tema="escuro"] .cc-segmento__opcao--ativa { color: #0B1720; }
                 <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h6"/>
               </svg>
               <span class="menu__texto">Central OS</span>
-            </a>
-            <a class="menu__item menu__sub" href="#/planejado-executado" data-rota="planejado-executado" title="Planejado x Executado">
-              <svg class="menu__icone" viewBox="0 0 24 24" aria-hidden="true">
-                <!-- Trator -->
-                <circle cx="7" cy="16.5" r="3"/><circle cx="18" cy="17.5" r="2"/>
-                <path d="M4.5 14V8h6.5l2 6"/><path d="M10 16.5h6M13 14h6.5l.5 1.5"/><path d="M15.5 14V9.5h3M7 8V5"/>
-              </svg>
-              <span class="menu__texto">Planejado x Executado</span>
             </a>
           </div>
         </div>
@@ -6843,11 +6838,11 @@ window.Telas.calendario = (function () {
 
   // ----- Grade do mês e da semana: em cada dia, uma etiqueta por operação em andamento nele (do início ao fim da
   // previsão de conclusão), sem emendar os dias.
-  // Mês: etiquetas finas, só com o nome; cabem quantas a altura do dia permitir e o resto vira "+N mais".
+  // Mês: etiquetas finas, só com o nome; cabem quantas a altura do dia permitir e o resto vira "+N operações" (encaixarDia).
   // Semana: etiquetas maiores (nome em até 2 linhas, a área e uma etiqueta por talhão); todas, com rolagem no dia.
   const ordemTalhoes = (nomes) => [...new Set(nomes)].sort((a, b) => a.localeCompare(b, 'pt-BR', { numeric: true }));
   const etiquetasTalhoes = (nomes) => `<span class="cal-talhoes">${ordemTalhoes(nomes).map((t) => `<span class="cal-talhao">${esc(t)}</span>`).join('')}</span>`;
-  function semana(dias, evs, { de, ate, mes, aberto, limite }) {
+  function semana(dias, evs, { de, ate, mes, aberto }) {
     return `
       <div class="cal-semana">
         ${dias.map((iso) => {
@@ -6855,31 +6850,49 @@ window.Telas.calendario = (function () {
           const hoje = iso === hojeIso();
           const passado = iso < hojeIso(); // dia que já passou: etiquetas esmaecidas
           const lista = doDia(evs, iso);
-          const cabem = lista.length > limite ? Math.max(1, limite - 1) : lista.length; // com "+N mais", ele ocupa um lugar
           return `
             <div class="cal-dia ${fora ? 'cal-dia--fora' : ''} ${hoje ? 'cal-dia--hoje' : ''} ${passado ? 'cal-dia--passado' : ''} ${iso === aberto ? 'cal-dia--aberto' : ''}"
                  data-acao="cal-dia" data-dia="${iso}" role="gridcell" aria-label="${esc(tituloPeriodo('dia', iso))}${hoje ? ' (hoje)' : ''}">
               <span class="cal-dia__topo"><span class="cal-dia__num">${dataDe(iso).getDate()}</span>${hoje ? '<span class="cal-hoje">Hoje</span>' : ''}</span>
-              ${lista.slice(0, cabem).map((ev) => `
+              ${lista.map((ev) => `
                 <button class="cal-ev cal-ev--${ev.tipo}" type="button" data-acao="cal-dia" data-dia="${iso}"
                         title="${esc(`${ev.nome}${ev.local ? ` · ${ev.local}` : ''} · ${faixaDias(ev)} · ${Util.area(ev.area)} · ${plural(ev.talhoes.length, 'talhão', 'talhões')}`)}">
                   <span class="cal-ev__nome"><span class="cal-ponto cal-ponto--${ev.tipo}"></span><span class="cal-ev__texto">${esc(ev.nome)}</span></span>
                   <span class="cal-ev__area">${Util.area(ev.area)}</span>
                   ${mes ? '' : etiquetasTalhoes(ev.talhoes)}
                 </button>`).join('')}
-              ${lista.length > cabem ? `<button class="cal-dia__mais" type="button" data-acao="cal-dia" data-dia="${iso}">+${lista.length - cabem} mais</button>` : ''}
             </div>`;
         }).join('')}
       </div>`;
   }
 
-  // Quantas etiquetas cabem em cada dia, pela altura livre da grade na tela (medida na grade já desenhada; na
-  // primeira vez, estimada pela altura da janela). Mês: etiqueta de 18 px; semana: 54 px. Mínimo de 2.
-  function etiquetasQueCabem(semanas, alturaEtiqueta) {
-    const grade = document.querySelector('.cal-grade');
-    const altura = (grade ? grade.clientHeight : window.innerHeight - 200) - 26;
-    return Math.max(2, Math.floor((altura / semanas - 30) / alturaEtiqueta));
+  // Mês: em cada dia, mostra as etiquetas que cabem inteiras na altura do quadro (medida no dia já desenhado) e
+  // troca o resto por "+N operações". Sempre fica ao menos a primeira operação com o nome.
+  // Roda quando uma grade do mês aparece na tela e quando a janela muda de tamanho.
+  function encaixarDia(dia) {
+    const evs = [...dia.querySelectorAll('.cal-ev')];
+    evs.forEach((el) => { el.style.display = ''; });
+    dia.querySelector('.cal-dia__mais')?.remove();
+    if (evs.length < 2 || dia.scrollHeight <= dia.clientHeight) return;
+    const mais = document.createElement('button');
+    mais.className = 'cal-dia__mais'; mais.type = 'button';
+    mais.dataset.acao = 'cal-dia'; mais.dataset.dia = dia.dataset.dia;
+    dia.append(mais);
+    let n = evs.length;
+    do {
+      n -= 1; evs[n].style.display = 'none';
+      mais.textContent = `+${plural(evs.length - n, 'operação', 'operações')}`;
+    } while (n > 1 && dia.scrollHeight > dia.clientHeight);
   }
+  function encaixarDias(todas) {
+    document.querySelectorAll(todas ? '.cal-grade--mes' : '.cal-grade--mes:not([data-encaixada])').forEach((grade) => {
+      if (!grade.clientHeight) return; // escondida: encaixa quando aparecer
+      grade.dataset.encaixada = '1';
+      grade.querySelectorAll('.cal-dia').forEach(encaixarDia);
+    });
+  }
+  new MutationObserver(() => encaixarDias(false)).observe(document.documentElement, { childList: true, subtree: true });
+  window.addEventListener('resize', () => encaixarDias(true));
 
   // Operações em andamento no dia (do início ao fim da previsão de conclusão). A mesma operação em talhões que
   // começam em dias diferentes aparece uma vez só no dia, somando a área e os talhões.
@@ -6960,7 +6973,7 @@ window.Telas.calendario = (function () {
         <div class="cal-grade ${escala === 'semana' ? 'cal-grade--semana' : 'cal-grade--mes'}" role="grid" style="--semanas: ${dias.length / 7}">
           <div class="cal-grade__cabs">${DIAS_CURTOS.map((n) => `<div class="cal-grade__cab" role="columnheader">${n}</div>`).join('')}</div>
           ${Array.from({ length: dias.length / 7 }, (_, w) => semana(dias.slice(w * 7, w * 7 + 7), todos,
-            { de, ate, mes: escala === 'mes', aberto, limite: escala === 'mes' ? etiquetasQueCabem(dias.length / 7, 21) : Infinity })).join('')}
+            { de, ate, mes: escala === 'mes', aberto })).join('')}
         </div>`;
     }
     return `
@@ -7295,15 +7308,20 @@ window.Telas.calendarioAgricola = (function () {
     return { iniMi: primeiro, tam: ultimo - primeiro + 1, ini: dataDoMes(primeiro), fim: dataDoMes(ultimo + 1) };
   }
 
-  // Barras de uma lista de operações: uma faixa por grupo (na ordem da legenda), transparentes (sobreposição mais forte)
-  function barras(lista, j) {
+  // Barras de uma lista de operações: uma faixa por grupo (na ordem da legenda), transparentes (sobreposição mais forte).
+  // Clicar na barra abre o Mês no começo da operação (a tela lê a linha: empresa, fazenda e safra; e a cultura).
+  // A operação não vira filtro.
+  function barras(lista, j, linha) {
+    const daLinha = Object.entries(linha).map(([k, v]) => `data-cag-${k}="${esc(v)}"`).join(' ');
+    const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     return lista.filter((o) => o.fim >= j.ini && o.ini < j.fim).map((o) => {
       const fimMais = new Date(o.fim); fimMais.setDate(fimMais.getDate() + 1);
       const esq = pct(o.ini, j); const dir = pct(fimMais, j);
       const faixa = Math.max(0, ORDEM_GRUPO.indexOf(o.tipo));
       const dica = `${o.nome} · ${o.grupo} · ${o.cultura} · ${ddmm(o.ini)} a ${ddmm(o.fim)}${o.area ? ` · ${Util.area(o.area)}` : ''}`;
-      return `<span class="cag__faixa" style="left: ${esq.toFixed(2)}%; width: ${Math.max(0.4, dir - esq).toFixed(2)}%; top: ${6 + faixa * 12}px; --c: ${COR_GRUPO[o.tipo] || '#7B8A82'}"
-                   title="${esc(dica)}" role="img" aria-label="${esc(dica)}"></span>`;
+      return `<button class="cag__faixa" type="button" style="left: ${esq.toFixed(2)}%; width: ${Math.max(0.4, dir - esq).toFixed(2)}%; top: ${6 + faixa * 12}px; --c: ${COR_GRUPO[o.tipo] || '#7B8A82'}"
+                   data-cag-op="${iso(o.ini)}" data-cag-cultura="${esc(o.cultura)}" ${daLinha}
+                   title="${esc(dica)} · Clique para ver no mês" aria-label="${esc(dica)}. Ver no mês"></button>`;
     }).join('');
   }
   // Junta as operações de vários planos (a linha da fazenda): a mesma operação da mesma cultura vai do primeiro ao último dia
@@ -7348,7 +7366,7 @@ window.Telas.calendarioAgricola = (function () {
           <span role="cell"><button class="cag__abrir" type="button" data-cag-recolher="${esc(ce)}" aria-expanded="${abertaE}">${seta(abertaE)}<strong>${esc(e)}</strong></button></span>
           <span role="cell"></span><span role="cell" class="cag__num"><strong>${Util.area(areaDe(daEmpresa))}</strong></span>
           ${abertaE ? `<span role="cell" class="cag__tempo cag__tempo--vazio" style="${fundo}">${marcaHoje}</span>`
-            : `<span role="cell" class="cag__tempo cag__tempo--faixas" style="${fundo}">${barras(juntar(daEmpresa.map((p) => ops.get(p))), j)}${marcaHoje}</span>`}
+            : `<span role="cell" class="cag__tempo cag__tempo--faixas" style="${fundo}">${barras(juntar(daEmpresa.map((p) => ops.get(p))), j, { empresa: e })}${marcaHoje}</span>`}
         </div>`);
       if (!abertaE) return;
       [...new Set(daEmpresa.map((p) => p.fazenda))].sort((a, b) => a.localeCompare(b, 'pt-BR')).forEach((f) => {
@@ -7363,7 +7381,7 @@ window.Telas.calendarioAgricola = (function () {
             <span role="cell">${[...new Set(daFazenda.map((p) => p.cultura))].map(esc).join(' → ')}</span>
             <span role="cell" class="cag__num"><strong>${Util.area(areaF)}</strong></span>
             ${abertaF ? `<span role="cell" class="cag__tempo cag__tempo--vazio" style="${fundo}">${marcaHoje}</span>`
-              : `<span role="cell" class="cag__tempo cag__tempo--faixas" style="${fundo}">${barras(juntar(daFazenda.map((p) => ops.get(p))), j)}${marcaHoje}</span>`}
+              : `<span role="cell" class="cag__tempo cag__tempo--faixas" style="${fundo}">${barras(juntar(daFazenda.map((p) => ops.get(p))), j, { empresa: e, fazenda: f })}${marcaHoje}</span>`}
           </div>`);
         if (!abertaF) return;
         daFazenda.forEach((p) => {
@@ -7375,7 +7393,7 @@ window.Telas.calendarioAgricola = (function () {
               <span role="cell">${esc(cicloDe(p))} ${esc(p.safra)}</span>
               <span role="cell">${esc(p.cultura)}</span>
               <span role="cell" class="cag__num">${area ? Util.area(area) : '<span class="cag__pendente">Pendente</span>'}</span>
-              <span role="cell" class="cag__tempo cag__tempo--faixas" style="${fundo}">${lista.length ? barras(lista, j)
+              <span role="cell" class="cag__tempo cag__tempo--faixas" style="${fundo}">${lista.length ? barras(lista, j, { empresa: e, fazenda: f, safra: p.safra })
                 : `<span class="cag__sem">${Versoes.aIniciar(p) ? 'Plano ainda não iniciado' : v ? 'Nenhuma operação com data na versão publicada' : 'Plano ainda sem versão publicada'}</span>`}${marcaHoje}</span>
             </div>`);
         });
@@ -7406,7 +7424,10 @@ window.Telas.calendarioAgricola = (function () {
     return true;
   }
 
-  return { tabela, aoClicar };
+  // Volta ao nível Empresa (tudo fechado), como ao abrir
+  function recolherTudo() { empresasAbertas.clear(); fazendasAbertas.clear(); }
+
+  return { tabela, aoClicar, recolherTudo };
 })();
 
 </script>
@@ -7423,10 +7444,9 @@ window.Telas.gestaoLavoura = (function () {
 
   // ----- Cabeçalho das páginas de Gestão da Lavoura -----
   const PAGINAS = {
-    calendario: ['Calendário Agrícola', '#/calendario-agricola', 'As operações planejadas de todas as fazendas: o ano agrícola por empresa e fazenda, e o dia a dia no mês, na semana e no dia.'],
     central: ['Central OS', '#/central-os', 'Acompanhe as ordens de serviço, recomendações e execução das operações agrícolas.']
   };
-  // Caminho "⌂ Gestão da Lavoura › Página" (a casa e o nome do grupo levam ao primeiro item, Calendário Agrícola)
+  // Caminho "⌂ Gestão da Lavoura › Página" (a casa e o nome do grupo levam ao Planejado x Executado, na guia Calendário Agrícola)
   const caminho = (titulo) => `
         <nav class="oa-caminho" aria-label="Caminho">
           <a class="oa-caminho__casa" href="#/calendario-agricola" aria-label="Gestão da Lavoura">${Icones.casa}</a>
@@ -7443,10 +7463,11 @@ window.Telas.gestaoLavoura = (function () {
             <h1 class="cabecalho__titulo">${titulo}</h1>
             <p class="cabecalho__subtitulo">${subtitulo}</p>
           </div>
-          <span class="cag-etiqueta" title="Mostra a última versão publicada de cada plano. Alterações em versões em construção aparecem aqui depois de publicadas.">${Icones.info} Últimas versões publicadas</span>
+          ${etiquetaPublicadas()}
         </div>
       </header>`;
   }
+  const etiquetaPublicadas = () => `<span class="cag-etiqueta" title="Mostra a última versão publicada de cada plano. Alterações em versões em construção aparecem aqui depois de publicadas.">${Icones.info} Últimas versões publicadas</span>`;
 
   // ----- Datas -----
   const hoje = () => Util.hojeISO();
@@ -7560,7 +7581,7 @@ window.Telas.gestaoLavoura = (function () {
 
   const base = { linhasOperacoes, publicados, safras, safraInicial, primeiraData, somaDias, diasEntre, hoje, ordens,
     opcoesSelect, gruposDaSafra, comparar, esc };
-  return { cabecalho, caminho, base };
+  return { cabecalho, caminho, etiquetaPublicadas, base };
 })();
 
 </script>
@@ -8045,13 +8066,14 @@ window.Telas.centralCorp = (function () {
 </script>
   <script>
 /*
- * Calendário Agrícola, item de Gestão da Lavoura (DECISOES 4.0): a lista suspensa Ano · Mês · Semana · Dia. Ano (abre nele):
+ * Calendário Agrícola, a primeira guia de Gestão da Lavoura › Planejado x Executado (DECISOES 4.0), com os seus próprios
+ * filtros: a lista suspensa Ano · Mês · Semana · Dia. Ano (abre nele):
  * o ano agrícola por Empresa › Fazenda › Safra/Safrinha (js/telas/calendario-agricola.js; as setas trocam o ano agrícola).
  * Mês, Semana e Dia: a Agenda Agrícola, a grade que antes ficava no Resumo do plano,
  * com as operações de vários planos somados, sem a associação a um plano. Usa a última versão publicada de cada
  * plano. Filtros com várias escolhas: Safra (Safra ou Safrinha), Cultura, Empresa, Fazenda, Talhão e Operação. Sem filtro de
  * Ano Agrícola: o tempo anda pelas setas do calendário. Abre no dia de hoje. A legenda filtra os grupos de operação
- * e o filtro Operação levam o calendário para a primeira operação escolhida; com todas, para hoje.
+ * e o filtro Operação levam o calendário para a primeira operação escolhida; voltar a todas não muda o tempo (só o Hoje vai para hoje).
  * As datas e o desenho da grade vêm do Calendário do plano (js/telas/05-calendario.js).
  * Por enquanto só migrado; o refinamento para a programação das OS vem depois.
  */
@@ -8168,7 +8190,7 @@ window.Telas.osCalendario = (function () {
   function desenhar() {
     est = est || novoEstado();
     return `
-      ${Telas.gestaoLavoura.cabecalho('calendario')}
+      <header class="cabecalho oa-cabecalho ma-cabecalho" data-os-cabecalho>${Telas.monitoramentoAplicacoes.cabecalho('calendario')}</header>
       <div class="pagina os-cal">
         <section class="cartao filtros" aria-label="Filtrar o calendário" data-os-filtros></section>
         <section class="calendario os-cal__corpo" aria-label="Calendário das operações" data-os></section>
@@ -8228,6 +8250,14 @@ window.Telas.osCalendario = (function () {
         : `<p class="cag__vazio">${planosFiltrados().length ? 'Nenhuma operação planejada nos planos publicados com esses filtros.' : 'Nenhum plano publicado com esses filtros.'}</p>`}`;
   }
 
+  // Operação aberta pela barra do Ano: os filtros de antes do clique ficam guardados em est.daBarra. Hoje volta a
+  // eles; mexer num filtro, Limpar filtros ou voltar ao Ano esquece o que foi guardado.
+  function voltarDaBarra() {
+    if (!est.daBarra) return;
+    Object.assign(est, est.daBarra);
+    est.daBarra = null;
+  }
+
   function aoMostrar(conteudo) {
     est = est || novoEstado();
     // Os eventos ficam na página da tela (a área de conteúdo é a mesma para todas as telas)
@@ -8243,9 +8273,16 @@ window.Telas.osCalendario = (function () {
     const ctx = { estado: est };
     const acoes = { redesenhar };
 
+    // Guias de Planejado x Executado: as outras guias são a página Planejado x Executado
+    conteudo.querySelector('[data-os-cabecalho]').addEventListener('click', (e) => {
+      const g = e.target.closest('[data-ma-visao]');
+      if (g && g.dataset.maVisao !== 'calendario') location.hash = `#/planejado-executado/${g.dataset.maVisao}`;
+    });
+
     raiz.addEventListener('click', (e) => {
       if (e.target.closest('[data-acao="os-limpar"]')) {
         est = Object.assign(novoEstado(), { escala: est.escala, dataRef: est.dataRef, anoAgricola: est.anoAgricola });
+        est.daBarra = null;
         ctx.estado = est;
         redesenhar('[data-acao="os-limpar"]');
         return;
@@ -8254,11 +8291,13 @@ window.Telas.osCalendario = (function () {
       if (leg) {
         const v = leg.dataset.grupo;
         const soEle = Array.isArray(est.grupo) && est.grupo.length === 1 && est.grupo[0] === v;
+        if (leg.dataset.acao === 'os-leg-todos') voltarDaBarra();
         est.grupo = leg.dataset.acao === 'os-leg-todos' || soEle ? 'todos' : [v];
-        // No Ano, o ano agrícola fica; no Mês, na Semana e no Dia, vai para a primeira operação (todos: hoje)
-        if (est.escala !== 'ano') {
-          const primeira = est.grupo === 'todos' ? null : calcular().eventos[0];
-          est.dataRef = primeira ? primeira.inicio : Cal().hojeIso();
+        // No Ano, o ano agrícola fica; no Mês, na Semana e no Dia, um grupo leva à primeira operação dele. Voltar a
+        // todos (Mostrar todos ou o grupo à mostra) não muda o tempo: só o botão Hoje vai para hoje
+        if (est.escala !== 'ano' && est.grupo !== 'todos') {
+          const primeira = calcular().eventos[0];
+          if (primeira) est.dataRef = primeira.inicio;
           est.diaAberto = null;
         }
         redesenhar(leg.dataset.acao === 'os-leg' ? `[data-acao="os-leg"][data-grupo="${CSS.escape(v)}"]` : '.cal-leg');
@@ -8273,7 +8312,24 @@ window.Telas.osCalendario = (function () {
         return;
       }
       if (e.target.closest('[data-acao="os-ano-hoje"]')) { est.anoAgricola = anoInicial(); redesenhar('[data-acao="os-ano-hoje"]'); return; }
+      // Barra do Ano: abre o Mês no começo da operação clicada, nos filtros da linha (empresa, fazenda, safra) e na
+      // cultura da barra; a operação não vira filtro
+      const barra = e.target.closest('[data-cag-op]');
+      if (barra) {
+        const d = barra.dataset;
+        est.daBarra = { operacao: est.operacao, cultura: est.cultura, empresa: est.empresa, fazenda: est.fazenda, safra: est.safra };
+        est.cultura = [d.cagCultura];
+        est.empresa = [d.cagEmpresa];
+        if (d.cagFazenda) est.fazenda = [d.cagFazenda];
+        if (d.cagSafra) est.safra = [d.cagSafra];
+        est.dataRef = d.cagOp;
+        est.escala = 'mes'; est.diaAberto = null;
+        redesenhar('[data-campo="cal-escala"]');
+        return;
+      }
       if (Telas.calendarioAgricola.aoClicar(e, redesenhar)) return;
+      // Hoje, depois de abrir uma operação pela barra do Ano: volta a todas as operações (o Calendário vai para hoje)
+      if (e.target.closest('[data-acao="cal-hoje"]')) voltarDaBarra();
       // Hoje, setas, dia, painel do dia, "+N talhões" e abrir/fechar as caixas de filtro: como no Calendário do plano
       Cal().aoClicar(e, ctx, acoes);
     });
@@ -8288,10 +8344,11 @@ window.Telas.osCalendario = (function () {
         else if (e.target.checked) marcados.push(e.target.value);
         else marcados = marcados.filter((n) => n !== e.target.value);
         est[chave] = marcados.length === valores.length ? 'todos' : marcados;
-        // Operação, como a legenda: com escolha, vai para a operação mais cedo; com todas, volta para hoje
-        if (chave === 'operacao' && est.escala !== 'ano') {
-          const primeira = est.operacao === 'todos' ? null : calcular().eventos[0];
-          est.dataRef = primeira ? primeira.inicio : Cal().hojeIso();
+        est.daBarra = null;
+        // Operação, como a legenda: com escolha, vai para a operação mais cedo; com todas, o tempo fica
+        if (chave === 'operacao' && est.escala !== 'ano' && est.operacao !== 'todos') {
+          const primeira = calcular().eventos[0];
+          if (primeira) est.dataRef = primeira.inicio;
           est.diaAberto = null;
         }
         est.filtroAberto = chave;
@@ -8304,10 +8361,13 @@ window.Telas.osCalendario = (function () {
         if (e.target.value === 'ano') {
           const a = anoDe(est.diaAberto || est.dataRef);
           if (anos().includes(a)) est.anoAgricola = a;
+          // O ano agrícola inteiro, no nível Empresa (como ao abrir)
+          Telas.calendarioAgricola.recolherTudo();
         } else if (anoDe(est.dataRef) !== est.anoAgricola) {
           est.dataRef = anoDe(Cal().hojeIso()) === est.anoAgricola ? Cal().hojeIso() : `${est.anoAgricola}-09-01`;
         }
         est.escala = e.target.value; est.diaAberto = null;
+        if (e.target.value === 'ano') est.daBarra = null;
         redesenhar('[data-campo="cal-escala"]');
         return;
       }
@@ -8336,6 +8396,7 @@ window.Telas.osCalendario = (function () {
   <script>
 /*
  * Planejado x Executado (antes Aplicações, menu Monitoramento), no menu Gestão da Lavoura › Planejado x Executado.
+ * A primeira guia, Calendário Agrícola, é a página de js/telas/os-calendario.js (com o mesmo cabeçalho).
  * Filtros com várias escolhas (as caixas da Agenda Agrícola): Safra (as do cadastro: 26/27, 27/27…), Cultura, Empresa, Fazenda,
  * Talhão, Grupo de operação (abre em Defensivo) e Operação (abre com as fungicidas do modelo), e Limpar filtros.
  * Tabela com uma linha por talhão: Fazenda, Talhão, Variedade, Plantas/m, Data de plantio, uma coluna por operação
@@ -8572,24 +8633,37 @@ window.Telas.monitoramentoAplicacoes = (function () {
   }
 
   // Cabeçalho: caminho, título, subtítulo (conforme a guia) e as guias, no mesmo formato das abas do plano (Operações ·
-  // Planejamento · Programação): Executadas (tabela), Planejadas × Executadas (desvio por operação) e Duração da Operação
+  // Planejamento · Programação): Calendário Agrícola (a primeira, outra página: js/telas/os-calendario.js, com os seus
+  // filtros), Executadas (tabela), Planejadas × Executadas (desvio por operação) e Duração da Operação
   const GUIAS = [
+    ['calendario', 'Calendário Agrícola', 'As operações planejadas de todas as fazendas: o ano agrícola por empresa e fazenda, e o dia a dia no mês, na semana e no dia.'],
     ['tabela', 'Executadas', 'Consulte as datas de execução e o status das operações por talhão.'],
     ['linha', 'Planejadas × Executadas', 'Compare as datas planejadas e executadas das operações por talhão.'],
     ['duracao', 'Duração da Operação', 'Compare a duração das OS fechadas com o prazo de conclusão da operação.']
   ];
-  function cabecalho() {
-    const [, , subtitulo] = GUIAS.find(([id]) => id === est.visao);
+  // visao: a guia à mostra (o Calendário Agrícola chama com 'calendario'). Só no Calendário, a etiqueta das versões publicadas.
+  function cabecalho(visao = est.visao) {
+    const [, , subtitulo] = GUIAS.find(([id]) => id === visao);
+    const titulo = `
+        <div class="oa-cabecalho__titulo">
+          <h1 class="cabecalho__titulo">Planejado x Executado</h1>
+          <p class="cabecalho__subtitulo">${subtitulo}</p>
+        </div>`;
     return `
       ${Telas.gestaoLavoura.caminho('Planejado x Executado')}
-      <div class="oa-cabecalho__titulo">
-        <h1 class="cabecalho__titulo">Planejado x Executado</h1>
-        <p class="cabecalho__subtitulo">${subtitulo}</p>
-      </div>
+      ${visao === 'calendario' ? `<div class="oa-cabecalho__abas">${titulo}${Telas.gestaoLavoura.etiquetaPublicadas()}</div>` : titulo}
       <nav class="etapas ma-guias" aria-label="Guias de Planejado x Executado">
-        ${GUIAS.map(([id, nome]) => `<button class="etapa ${id === est.visao ? 'etapa--ativa' : ''}" type="button" data-ma-visao="${id}"
-          ${id === est.visao ? 'aria-current="page"' : ''}>${nome}</button>`).join('')}
+        ${GUIAS.map(([id, nome]) => `<button class="etapa ${id === visao ? 'etapa--ativa' : ''}" type="button" data-ma-visao="${id}"
+          ${id === visao ? 'aria-current="page"' : ''}>${nome}</button>`).join('')}
       </nav>`;
+  }
+  // Guia escolhida: o Calendário Agrícola é outra página; as demais, esta (vindo do Calendário: #/planejado-executado/tabela)
+  function irParaGuia(visao) {
+    if (visao === 'calendario') { location.hash = '#/calendario-agricola'; return; }
+    if (est.visao !== visao) {
+      est.visao = visao;
+      padraoDuracao();
+    }
   }
 
   function filtros() {
@@ -8915,8 +8989,9 @@ window.Telas.monitoramentoAplicacoes = (function () {
       </div>`;
   }
 
-  function aoMostrar(conteudo) {
+  function aoMostrar(conteudo, guia) {
     est = est || novoEstado();
+    if (guia && guia !== 'calendario' && GUIAS.some(([id]) => id === guia)) irParaGuia(guia);
     // Os eventos ficam na página da tela (a área de conteúdo é a mesma para todas as telas)
     const raiz = conteudo.querySelector('.ma');
     const caixaFiltros = raiz.querySelector('[data-ma-filtros]');
@@ -8937,6 +9012,7 @@ window.Telas.monitoramentoAplicacoes = (function () {
     caixaCabecalho.addEventListener('click', (e) => {
       const b = e.target.closest('[data-ma-visao]');
       if (!b) return;
+      if (b.dataset.maVisao === 'calendario') { irParaGuia('calendario'); return; }
       const entrou = est.visao !== b.dataset.maVisao;
       est.visao = b.dataset.maVisao;
       if (entrou) padraoDuracao();
@@ -9023,7 +9099,7 @@ window.Telas.monitoramentoAplicacoes = (function () {
     aberta.querySelector('.cal-filtro__botao').focus();
   });
 
-  return { desenhar, aoMostrar };
+  return { desenhar, aoMostrar, cabecalho };
 })();
 
 </script>
@@ -15132,15 +15208,16 @@ window.Configuracoes = (function () {
                         aoMostrar: (conteudo) => { if (temPlanos()) Telas.orcamento.aoMostrar(conteudo); } },
     // Gestão da Lavoura (vários planos somados): Calendário Agrícola (Ano, Mês, Semana, Dia), Central OS e
     // Planejado x Executado (antes Monitoramento › Aplicações)
-    'calendario-agricola': { titulo: 'Calendário Agrícola', menu: 'calendario-agricola',
-                        desenhar: () => temPlanos() ? Telas.osCalendario.desenhar() : Telas.semPlanos('calendario'),
+    // Calendário Agrícola: a primeira guia do Planejado x Executado (o menu e o nome do grupo levam a ela)
+    'calendario-agricola': { titulo: 'Planejado x Executado', menu: 'planejado-executado',
+                        desenhar: () => temPlanos() ? Telas.osCalendario.desenhar() : Telas.semPlanos('planejado-executado'),
                         aoMostrar: (conteudo) => { if (temPlanos()) Telas.osCalendario.aoMostrar(conteudo); } },
     'central-os':     { titulo: 'Central OS', menu: 'central-os',
                         desenhar: () => temPlanos() ? Telas.centralCorp.desenhar() : Telas.semPlanos('central-os'),
                         aoMostrar: (conteudo) => { if (temPlanos()) Telas.centralCorp.aoMostrar(conteudo); } },
     'planejado-executado': { titulo: 'Planejado x Executado', menu: 'planejado-executado',
                         desenhar: () => temPlanos() ? Telas.monitoramentoAplicacoes.desenhar() : Telas.semPlanos('planejado-executado'),
-                        aoMostrar: (conteudo) => { if (temPlanos()) Telas.monitoramentoAplicacoes.aoMostrar(conteudo); } },
+                        aoMostrar: (conteudo, guia) => { if (temPlanos()) Telas.monitoramentoAplicacoes.aoMostrar(conteudo, guia); } },
     'cadastros':      { titulo: 'Cadastros', menu: 'cadastros',
                         desenhar: () => Telas.emConstrucao('Cadastros') }
   };

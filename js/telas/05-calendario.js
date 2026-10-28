@@ -554,11 +554,11 @@ window.Telas.calendario = (function () {
 
   // ----- Grade do mês e da semana: em cada dia, uma etiqueta por operação em andamento nele (do início ao fim da
   // previsão de conclusão), sem emendar os dias.
-  // Mês: etiquetas finas, só com o nome; cabem quantas a altura do dia permitir e o resto vira "+N mais".
+  // Mês: etiquetas finas, só com o nome; cabem quantas a altura do dia permitir e o resto vira "+N operações" (encaixarDia).
   // Semana: etiquetas maiores (nome em até 2 linhas, a área e uma etiqueta por talhão); todas, com rolagem no dia.
   const ordemTalhoes = (nomes) => [...new Set(nomes)].sort((a, b) => a.localeCompare(b, 'pt-BR', { numeric: true }));
   const etiquetasTalhoes = (nomes) => `<span class="cal-talhoes">${ordemTalhoes(nomes).map((t) => `<span class="cal-talhao">${esc(t)}</span>`).join('')}</span>`;
-  function semana(dias, evs, { de, ate, mes, aberto, limite }) {
+  function semana(dias, evs, { de, ate, mes, aberto }) {
     return `
       <div class="cal-semana">
         ${dias.map((iso) => {
@@ -566,31 +566,49 @@ window.Telas.calendario = (function () {
           const hoje = iso === hojeIso();
           const passado = iso < hojeIso(); // dia que já passou: etiquetas esmaecidas
           const lista = doDia(evs, iso);
-          const cabem = lista.length > limite ? Math.max(1, limite - 1) : lista.length; // com "+N mais", ele ocupa um lugar
           return `
             <div class="cal-dia ${fora ? 'cal-dia--fora' : ''} ${hoje ? 'cal-dia--hoje' : ''} ${passado ? 'cal-dia--passado' : ''} ${iso === aberto ? 'cal-dia--aberto' : ''}"
                  data-acao="cal-dia" data-dia="${iso}" role="gridcell" aria-label="${esc(tituloPeriodo('dia', iso))}${hoje ? ' (hoje)' : ''}">
               <span class="cal-dia__topo"><span class="cal-dia__num">${dataDe(iso).getDate()}</span>${hoje ? '<span class="cal-hoje">Hoje</span>' : ''}</span>
-              ${lista.slice(0, cabem).map((ev) => `
+              ${lista.map((ev) => `
                 <button class="cal-ev cal-ev--${ev.tipo}" type="button" data-acao="cal-dia" data-dia="${iso}"
                         title="${esc(`${ev.nome}${ev.local ? ` · ${ev.local}` : ''} · ${faixaDias(ev)} · ${Util.area(ev.area)} · ${plural(ev.talhoes.length, 'talhão', 'talhões')}`)}">
                   <span class="cal-ev__nome"><span class="cal-ponto cal-ponto--${ev.tipo}"></span><span class="cal-ev__texto">${esc(ev.nome)}</span></span>
                   <span class="cal-ev__area">${Util.area(ev.area)}</span>
                   ${mes ? '' : etiquetasTalhoes(ev.talhoes)}
                 </button>`).join('')}
-              ${lista.length > cabem ? `<button class="cal-dia__mais" type="button" data-acao="cal-dia" data-dia="${iso}">+${lista.length - cabem} mais</button>` : ''}
             </div>`;
         }).join('')}
       </div>`;
   }
 
-  // Quantas etiquetas cabem em cada dia, pela altura livre da grade na tela (medida na grade já desenhada; na
-  // primeira vez, estimada pela altura da janela). Mês: etiqueta de 18 px; semana: 54 px. Mínimo de 2.
-  function etiquetasQueCabem(semanas, alturaEtiqueta) {
-    const grade = document.querySelector('.cal-grade');
-    const altura = (grade ? grade.clientHeight : window.innerHeight - 200) - 26;
-    return Math.max(2, Math.floor((altura / semanas - 30) / alturaEtiqueta));
+  // Mês: em cada dia, mostra as etiquetas que cabem inteiras na altura do quadro (medida no dia já desenhado) e
+  // troca o resto por "+N operações". Sempre fica ao menos a primeira operação com o nome.
+  // Roda quando uma grade do mês aparece na tela e quando a janela muda de tamanho.
+  function encaixarDia(dia) {
+    const evs = [...dia.querySelectorAll('.cal-ev')];
+    evs.forEach((el) => { el.style.display = ''; });
+    dia.querySelector('.cal-dia__mais')?.remove();
+    if (evs.length < 2 || dia.scrollHeight <= dia.clientHeight) return;
+    const mais = document.createElement('button');
+    mais.className = 'cal-dia__mais'; mais.type = 'button';
+    mais.dataset.acao = 'cal-dia'; mais.dataset.dia = dia.dataset.dia;
+    dia.append(mais);
+    let n = evs.length;
+    do {
+      n -= 1; evs[n].style.display = 'none';
+      mais.textContent = `+${plural(evs.length - n, 'operação', 'operações')}`;
+    } while (n > 1 && dia.scrollHeight > dia.clientHeight);
   }
+  function encaixarDias(todas) {
+    document.querySelectorAll(todas ? '.cal-grade--mes' : '.cal-grade--mes:not([data-encaixada])').forEach((grade) => {
+      if (!grade.clientHeight) return; // escondida: encaixa quando aparecer
+      grade.dataset.encaixada = '1';
+      grade.querySelectorAll('.cal-dia').forEach(encaixarDia);
+    });
+  }
+  new MutationObserver(() => encaixarDias(false)).observe(document.documentElement, { childList: true, subtree: true });
+  window.addEventListener('resize', () => encaixarDias(true));
 
   // Operações em andamento no dia (do início ao fim da previsão de conclusão). A mesma operação em talhões que
   // começam em dias diferentes aparece uma vez só no dia, somando a área e os talhões.
@@ -671,7 +689,7 @@ window.Telas.calendario = (function () {
         <div class="cal-grade ${escala === 'semana' ? 'cal-grade--semana' : 'cal-grade--mes'}" role="grid" style="--semanas: ${dias.length / 7}">
           <div class="cal-grade__cabs">${DIAS_CURTOS.map((n) => `<div class="cal-grade__cab" role="columnheader">${n}</div>`).join('')}</div>
           ${Array.from({ length: dias.length / 7 }, (_, w) => semana(dias.slice(w * 7, w * 7 + 7), todos,
-            { de, ate, mes: escala === 'mes', aberto, limite: escala === 'mes' ? etiquetasQueCabem(dias.length / 7, 21) : Infinity })).join('')}
+            { de, ate, mes: escala === 'mes', aberto })).join('')}
         </div>`;
     }
     return `

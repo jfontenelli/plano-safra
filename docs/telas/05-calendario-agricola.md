@@ -61,7 +61,7 @@ Ver **todas as operações do plano juntas**, de todos os grupos (Plantio, Defen
 
 ## 6.1 Calendário (saiu do Resumo)
 
-- A terceira visão, **Calendário** (Mês, Semana, Dia), saiu do Resumo em 19/10/2026 (reunião com stakeholders) e hoje são as escalas Mês, Semana e Dia do **Calendário Agrícola** (menu Gestão da Lavoura), sem a associação a um plano. O detalhe está na **Tela 07** (docs/telas/07-agenda-agricola.md).
+- A terceira visão, **Calendário** (Mês, Semana, Dia), saiu do Resumo em 19/10/2026 (reunião com stakeholders) e hoje são as escalas Mês, Semana e Dia do **Calendário Agrícola** (Gestão da Lavoura › Planejado x Executado, primeira guia), sem a associação a um plano. O detalhe está na **Tela 07** (docs/telas/07-agenda-agricola.md).
 
 ## 7. Doses no Ciclo Produtivo
 

@@ -89,15 +89,20 @@ window.Telas.calendarioAgricola = (function () {
     return { iniMi: primeiro, tam: ultimo - primeiro + 1, ini: dataDoMes(primeiro), fim: dataDoMes(ultimo + 1) };
   }
 
-  // Barras de uma lista de operações: uma faixa por grupo (na ordem da legenda), transparentes (sobreposição mais forte)
-  function barras(lista, j) {
+  // Barras de uma lista de operações: uma faixa por grupo (na ordem da legenda), transparentes (sobreposição mais forte).
+  // Clicar na barra abre o Mês no começo da operação (a tela lê a linha: empresa, fazenda e safra; e a cultura).
+  // A operação não vira filtro.
+  function barras(lista, j, linha) {
+    const daLinha = Object.entries(linha).map(([k, v]) => `data-cag-${k}="${esc(v)}"`).join(' ');
+    const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     return lista.filter((o) => o.fim >= j.ini && o.ini < j.fim).map((o) => {
       const fimMais = new Date(o.fim); fimMais.setDate(fimMais.getDate() + 1);
       const esq = pct(o.ini, j); const dir = pct(fimMais, j);
       const faixa = Math.max(0, ORDEM_GRUPO.indexOf(o.tipo));
       const dica = `${o.nome} · ${o.grupo} · ${o.cultura} · ${ddmm(o.ini)} a ${ddmm(o.fim)}${o.area ? ` · ${Util.area(o.area)}` : ''}`;
-      return `<span class="cag__faixa" style="left: ${esq.toFixed(2)}%; width: ${Math.max(0.4, dir - esq).toFixed(2)}%; top: ${6 + faixa * 12}px; --c: ${COR_GRUPO[o.tipo] || '#7B8A82'}"
-                   title="${esc(dica)}" role="img" aria-label="${esc(dica)}"></span>`;
+      return `<button class="cag__faixa" type="button" style="left: ${esq.toFixed(2)}%; width: ${Math.max(0.4, dir - esq).toFixed(2)}%; top: ${6 + faixa * 12}px; --c: ${COR_GRUPO[o.tipo] || '#7B8A82'}"
+                   data-cag-op="${iso(o.ini)}" data-cag-cultura="${esc(o.cultura)}" ${daLinha}
+                   title="${esc(dica)} · Clique para ver no mês" aria-label="${esc(dica)}. Ver no mês"></button>`;
     }).join('');
   }
   // Junta as operações de vários planos (a linha da fazenda): a mesma operação da mesma cultura vai do primeiro ao último dia
@@ -142,7 +147,7 @@ window.Telas.calendarioAgricola = (function () {
           <span role="cell"><button class="cag__abrir" type="button" data-cag-recolher="${esc(ce)}" aria-expanded="${abertaE}">${seta(abertaE)}<strong>${esc(e)}</strong></button></span>
           <span role="cell"></span><span role="cell" class="cag__num"><strong>${Util.area(areaDe(daEmpresa))}</strong></span>
           ${abertaE ? `<span role="cell" class="cag__tempo cag__tempo--vazio" style="${fundo}">${marcaHoje}</span>`
-            : `<span role="cell" class="cag__tempo cag__tempo--faixas" style="${fundo}">${barras(juntar(daEmpresa.map((p) => ops.get(p))), j)}${marcaHoje}</span>`}
+            : `<span role="cell" class="cag__tempo cag__tempo--faixas" style="${fundo}">${barras(juntar(daEmpresa.map((p) => ops.get(p))), j, { empresa: e })}${marcaHoje}</span>`}
         </div>`);
       if (!abertaE) return;
       [...new Set(daEmpresa.map((p) => p.fazenda))].sort((a, b) => a.localeCompare(b, 'pt-BR')).forEach((f) => {
@@ -157,7 +162,7 @@ window.Telas.calendarioAgricola = (function () {
             <span role="cell">${[...new Set(daFazenda.map((p) => p.cultura))].map(esc).join(' → ')}</span>
             <span role="cell" class="cag__num"><strong>${Util.area(areaF)}</strong></span>
             ${abertaF ? `<span role="cell" class="cag__tempo cag__tempo--vazio" style="${fundo}">${marcaHoje}</span>`
-              : `<span role="cell" class="cag__tempo cag__tempo--faixas" style="${fundo}">${barras(juntar(daFazenda.map((p) => ops.get(p))), j)}${marcaHoje}</span>`}
+              : `<span role="cell" class="cag__tempo cag__tempo--faixas" style="${fundo}">${barras(juntar(daFazenda.map((p) => ops.get(p))), j, { empresa: e, fazenda: f })}${marcaHoje}</span>`}
           </div>`);
         if (!abertaF) return;
         daFazenda.forEach((p) => {
@@ -169,7 +174,7 @@ window.Telas.calendarioAgricola = (function () {
               <span role="cell">${esc(cicloDe(p))} ${esc(p.safra)}</span>
               <span role="cell">${esc(p.cultura)}</span>
               <span role="cell" class="cag__num">${area ? Util.area(area) : '<span class="cag__pendente">Pendente</span>'}</span>
-              <span role="cell" class="cag__tempo cag__tempo--faixas" style="${fundo}">${lista.length ? barras(lista, j)
+              <span role="cell" class="cag__tempo cag__tempo--faixas" style="${fundo}">${lista.length ? barras(lista, j, { empresa: e, fazenda: f, safra: p.safra })
                 : `<span class="cag__sem">${Versoes.aIniciar(p) ? 'Plano ainda não iniciado' : v ? 'Nenhuma operação com data na versão publicada' : 'Plano ainda sem versão publicada'}</span>`}${marcaHoje}</span>
             </div>`);
         });
@@ -200,5 +205,8 @@ window.Telas.calendarioAgricola = (function () {
     return true;
   }
 
-  return { tabela, aoClicar };
+  // Volta ao nível Empresa (tudo fechado), como ao abrir
+  function recolherTudo() { empresasAbertas.clear(); fazendasAbertas.clear(); }
+
+  return { tabela, aoClicar, recolherTudo };
 })();

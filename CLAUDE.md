@@ -61,7 +61,7 @@ Protótipo navegável e preenchível do Plano de Safra (UniSystem), usado para v
 - Estilo próprio, clean e profissional. Menu lateral verde com o ícone reduzido da UniSystem.
 - Logo da empresa em `img/`: use os arquivos de lá, nunca redesenhe nem recrie o logo.
   - `img/icone-unisystem.png` — o ícone, no topo do menu (expandido e recolhido) e no favicon. Não há logo completo por enquanto.
-- Itens do menu (detalhe em DECISOES 4.0): Plano de Safra (Visão Geral · Planejamento · Orçamento), Gestão da Lavoura (Calendário Agrícola · Central OS · Planejado x Executado) e Cadastros. Usuário no rodapé do menu.
+- Itens do menu (detalhe em DECISOES 4.0): Plano de Safra (Visão Geral · Planejamento · Orçamento), Gestão da Lavoura (Planejado x Executado, com o Calendário Agrícola na primeira guia · Central OS) e Cadastros. Usuário no rodapé do menu.
 - Modo claro e escuro em todas as telas (Configurações › Aparência; cores em DECISOES 4.0).
 - Menu lateral começa expandido (ícone + nome) em todas as telas. O usuário pode recolher (só ícones) e expandir de novo com um botão de seta. O estado escolhido se mantém ao navegar entre telas.
 - Não usar o nome UniGestor.
