@@ -302,20 +302,44 @@ window.DADOS = {
 
   // Tipos de grupo de operação (definem as informações mínimas pedidas no grupo)
   // Fertilidade junta corretivos e fertilizantes. O Tratamento de sementes (TSI) saiu por enquanto: rascunhos/tsi/
-  tiposGrupo: ['Sementes', 'Defensivos', 'Fertilidade', 'Colheita'],
+  tiposGrupo: ['Sementes', 'Defensivos', 'Fertilidade', 'Aplicação de insumos', 'Operação de campo', 'Colheita'],
 
   // Modelo de operações (levantado com clientes). Usado pelo "Usar modelo" e pelos planos de exemplo.
   // prazo: prazo para encerramento da OS, em dias (DECISOES 4.3: preparo, calcário, fósforo, 1ª dessecação e
   // 1ª metade do K = 5; plantio 3); sem prazo, vale o padrão do grupo (2 dias; Plantio 3). Colheita: 10.
-  // Por enquanto, para os testes com usuários, os grupos Plantio, Defensivo e Fertilidade (os outros grupos
-  // do modelo — Preparo do solo e Colheita — estão no histórico do git).
+  // Grupos: Preparo do solo (Subsolagem, Escarificação, Gradagem niveladora), Corretivos (Calagem e Gessagem), Plantio,
+  // Fertilidade, Defensivo e Colheita.
   // Fertilidade (soja no Cerrado/MT): calagem 60 a 90 dias antes do plantio (pH alvo 5,5–6,0); gessagem;
   // potássio a lanço antecipado (7 a 30 dias antes) e em cobertura; fósforo (MAP) no sulco de plantio.
   // K₂O ≈ 20 kg por tonelada de soja produzida (MT/MS). Fontes: Embrapa (Circular Técnica 33, Documentos
   // 458/2023, Sistema soja-milho) e ensaios no MT (Rev. Cerrado Agrociências/UNIPAM; Agrarian/UFGD).
   modeloOperacoes: [
+    // Ordem das guias (29/10/2026): Preparo do solo · Corretivos · Plantio · Fertilidade · Defensivo · Colheita
+    // Grupos dos tipos criados pelo "+" (29/10/2026): Corretivos (Aplicação de insumos), com a Calagem e a Gessagem, que
+    // saíram da Fertilidade; Preparo do solo (Operação de campo, sem insumos), com três operações sugeridas, sem talhões
+    // Preparo do solo (sugestão do modelo, 29/10/2026): no MT, quase tudo é plantio direto; o preparo entra quando há
+    // compactação (subsolagem, escarificação) e a niveladora acerta a superfície e incorpora o corretivo. Prazo 5 (DECISOES 4.3)
+    { nome: 'Preparo do solo', tipo: 'Operação de campo', operacoes: [
+      { nome: 'Subsolagem', dap: -60, prazo: 5 },
+      { nome: 'Escarificação', dap: -45, prazo: 5 },
+      { nome: 'Gradagem niveladora', dap: -15, prazo: 5 }
+    ] },
+    { nome: 'Corretivos', tipo: 'Aplicação de insumos', operacoes: [
+      { nome: 'Calagem', dap: -90, prazo: 5 },
+      { nome: 'Gessagem', dap: -60, prazo: 5 }
+    ] },
     { nome: 'Plantio', tipo: 'Sementes', operacoes: [
       { nome: 'Plantio', dap: 0, prazo: 3 }
+    ] },
+    { nome: 'Fertilidade', tipo: 'Fertilidade', operacoes: [
+      { nome: '1ª Adubação potássica', dap: -15, prazo: 5 },
+      { nome: 'Fosfatagem', dap: -10, prazo: 5 },
+      { nome: 'Adubação de plantio', dap: 0 },
+      // K em cobertura em V4 (antes do fechamento); foliar a partir de ~20 dias após a emergência (V4) e com 50 DAP (R3)
+      { nome: '2ª Adubação potássica', dap: 25, fenologia: 'V4' },
+      // Adubação foliar (micronutrientes: boro, cobre, zinco, ferro), como no plano de fertilidade do cliente
+      { nome: '1ª Adubação foliar', dap: 25, fenologia: 'V4' },
+      { nome: '2ª Adubação foliar', dap: 50, fenologia: 'R3' }
     ] },
     // Fenologia pré-preenchida (DAP positivo), pela literatura para soja no MT (cultivares de 104 a 118 dias):
     // herbicida pós-emergente em V2 e V4 (glifosato até V4); fungicida preventivo da ferrugem a partir de R1, com
@@ -335,18 +359,6 @@ window.DADOS = {
       { nome: '4ª Fungicida', dap: 85, fenologia: 'R5' },
       { nome: 'Desfolha', dap: 100, fenologia: 'R7' }
     ] },
-    { nome: 'Fertilidade', tipo: 'Fertilidade', operacoes: [
-      { nome: 'Calagem', dap: -90, prazo: 5 },
-      { nome: 'Gessagem', dap: -60, prazo: 5 },
-      { nome: '1ª Adubação potássica', dap: -15, prazo: 5 },
-      { nome: 'Fosfatagem', dap: -10, prazo: 5 },
-      { nome: 'Adubação de plantio', dap: 0 },
-      // K em cobertura em V4 (antes do fechamento); foliar a partir de ~20 dias após a emergência (V4) e com 50 DAP (R3)
-      { nome: '2ª Adubação potássica', dap: 25, fenologia: 'V4' },
-      // Adubação foliar (micronutrientes: boro, cobre, zinco, ferro), como no plano de fertilidade do cliente
-      { nome: '1ª Adubação foliar', dap: 25, fenologia: 'V4' },
-      { nome: '2ª Adubação foliar', dap: 50, fenologia: 'R3' }
-    ] },
     // Colheita: o DAP vem do ciclo da variedade (data de plantio + ciclo); fenologia Colheita; previsão de conclusão 10 dias
     { nome: 'Colheita', tipo: 'Colheita', operacoes: [
       { nome: 'Colheita', prazo: 10 }
@@ -359,17 +371,19 @@ window.DADOS = {
     // Milho safrinha: as sementes já vêm tratadas (sem grupo TSI). Cigarrinha (Dalbulus maidis) no começo do
     // ciclo, cobertura nitrogenada em V4–V6 (≈ 25 DAP), lagarta-do-cartucho (sem fungicida no modelo).
     'Milho': [
+      { nome: 'Preparo do solo', tipo: 'Operação de campo', operacoes: [] },
+      { nome: 'Corretivos', tipo: 'Aplicação de insumos', operacoes: [] },
       { nome: 'Plantio', tipo: 'Sementes', operacoes: [{ nome: 'Plantio', dap: 0, prazo: 3 }] },
+      { nome: 'Fertilidade', tipo: 'Fertilidade', operacoes: [
+        { nome: 'Adubação de plantio', dap: 0 },
+        { nome: 'Adubação potássica', dap: 20 },
+        { nome: 'Cobertura nitrogenada', dap: 25 }
+      ] },
       { nome: 'Defensivo', tipo: 'Defensivos', operacoes: [
         { nome: '1ª Inseticida: cigarrinha', dap: 7 },
         { nome: '2ª Inseticida: cigarrinha', dap: 15 },
         { nome: 'Herbicida pós-emergente', dap: 20 },
         { nome: 'Inseticida: lagarta-do-cartucho', dap: 30 }
-      ] },
-      { nome: 'Fertilidade', tipo: 'Fertilidade', operacoes: [
-        { nome: 'Adubação de plantio', dap: 0 },
-        { nome: 'Adubação potássica', dap: 20 },
-        { nome: 'Cobertura nitrogenada', dap: 25 }
       ] },
       { nome: 'Colheita', tipo: 'Colheita', operacoes: [{ nome: 'Colheita', prazo: 10 }] }
     ]

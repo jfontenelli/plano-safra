@@ -8,7 +8,7 @@ Imagens: enviadas pela usuária em 21/10/2026 (cartões Visão geral, gráficos 
 Dar ao gestor a visão de todas as OS das fazendas: quantas, em que status, quanto atraso, por empresa, fazenda ou executor, e pedir justificativa das OS com atraso.
 
 ## Quando aparece
-- Menu **Gestão da Lavoura › Central OS** (`#/central-os`), o segundo item, depois do Planejado x Executado (Tela 10, com o Calendário Agrícola na primeira guia). Sem perfis de usuário por enquanto.
+- Menu **Gestão da Lavoura › Central OS** (`#/central-os`), o segundo item, depois do Operações Agrícolas (Tela 10, com o Calendário Agrícola na primeira guia). Sem perfis de usuário por enquanto.
 - Sem nenhum plano cadastrado: "Crie seu primeiro plano para visualizar a Central OS" e o botão "+ Criar Plano de Safra".
 
 ## Conteúdo
@@ -47,7 +47,7 @@ Dar ao gestor a visão de todas as OS das fazendas: quantas, em que status, quan
 
 ## Navegação
 - Notificar selecionadas → aviso "Justificativa pedida." (uma) ou "N justificativas pedidas.".
-- Caminho "⌂ Gestão da Lavoura" → Planejado x Executado, na guia Calendário Agrícola (Telas 10 e 07).
+- Caminho "⌂ Gestão da Lavoura" → Operações Agrícolas, na guia Calendário Agrícola (Telas 10 e 07).
 
 ## Sugestões (a validar)
 - Gráfico Nº OS por nível com a métrica "Dias de atraso" além de "Nº de OS".

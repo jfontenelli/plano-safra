@@ -320,7 +320,6 @@ window.Telas.calendario = (function () {
           const { cor, imagem } = visualDe(c.chave);
           const [titulo, sub] = tituloColuna(c);
           const talhoes = new Set(c.itens.flatMap((it) => it.talhoes));
-          const area = ctx.talhoes.filter((t) => talhoes.has(t.nome)).reduce((s, t) => s + t.area, 0);
           const nOps = c.itens.length;
           return `
             ${i ? `<span class="cal-info__seta" aria-hidden="true">${Icones.proxima}</span>` : ''}
@@ -330,7 +329,7 @@ window.Telas.calendario = (function () {
               </header>
               <img class="cal-fase__desenho cal-fase__imagem" src="${imagem}" alt="">
               <div class="cal-fase__itens">${c.itens.map(cartao).join('')}</div>
-              <footer class="cal-fase__pe">${Icones.mapa}<span><strong>${Util.area(area)}</strong> · ${talhoes.size} ${talhoes.size === 1 ? 'talhão' : 'talhões'} · ${nOps} ${nOps === 1 ? 'operação' : 'operações'}</span></footer>
+              <footer class="cal-fase__pe">${Icones.mapa}<span>${talhoes.size} ${talhoes.size === 1 ? 'talhão' : 'talhões'} · ${nOps} ${nOps === 1 ? 'operação' : 'operações'}</span></footer>
             </section>`;
         }).join('')}
       </div>`;

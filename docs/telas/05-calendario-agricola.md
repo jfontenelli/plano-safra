@@ -1,6 +1,6 @@
 # Tela 05 — Calendário Agrícola
 
-Atualizado em 29/10/2026 (Ciclo Produtivo com as variedades e as doses com área; filtro Operação; Área (ha) depois da Operação; colunas Consumo e Dose, antes Unid.; data prevista com o mês em número; texto das colunas fixas quebra a linha). Antes, em 26/10/2026 (a guia Calendário, que saiu em 19/10/2026, hoje são as escalas Mês, Semana e Dia do Calendário Agrícola de Gestão da Lavoura, Tela 07). Este doc mostra só o estado atual da tela. Decisão alterada é reescrita, não acumulada.
+Atualizado em 29/10/2026 (resumo das fases sem a área; Ciclo Produtivo com as variedades e as doses com área; filtro Operação; Área (ha) depois da Operação; colunas Consumo e Dose, antes Unid.; data prevista com o mês em número; texto das colunas fixas quebra a linha). Antes, em 26/10/2026 (a guia Calendário, que saiu em 19/10/2026, hoje são as escalas Mês, Semana e Dia do Calendário Agrícola de Gestão da Lavoura, Tela 07). Este doc mostra só o estado atual da tela. Decisão alterada é reescrita, não acumulada.
 Tudo é **Definido**, exceto as seções "Sugestões em teste" e "Em aberto".
 Imagens: `referencias/05-calendario-agricola.png` (Ciclo Produtivo), `referencias/05-calendario-tabela.png` (Programação) e `referencias/05.3-resumo-calendario.png` (Calendário). Quando imagem e documento divergirem, vale este documento.
 **Situação no protótipo:** construída.
@@ -37,7 +37,7 @@ Ver **todas as operações do plano juntas**, de todos os grupos (Plantio, Defen
   - **Colheita** → aparece quando algum talhão tem previsão de colheita (variedade com ciclo e data de plantio). Título com a faixa de DAP pelo ciclo das variedades (ex.: "104 a 118 DAP").
 - **Título** colorido pela fase (pré-plantio, plantio, vegetativo, florescimento, vagens, maturação, colheita; cinza sem fenologia) e, embaixo, a **imagem da fase**, de `img/fenologia/` (feitas pela usuária, uma por estádio): PRE-PLANTIO, PLANTIO, VE, VC, V1 a V6, R1 a R8 e COLHEITA; **NEUTRO** (calendário) nas colunas sem fenologia ("N DAP") e "Sem DAP".
 - **Cartões** das operações da fase: etiqueta do **grupo** (Plantio, Tratamento de semente, Defensivo, Fertilidade, Colheita), nome da operação e, embaixo (29/10/2026; antes, "N variedades" e a faixa "130 a 160 kg/ha"): no **Plantio**, o **nome de cada variedade com a área** ("TMG 2383 IPRO · 300 ha", da maior área para a menor; a área é a soma das áreas de aplicação); nos **produtos**, cada produto com **cada dose e a área em que ela é aplicada** ("Calcário A" / "2 t/ha · 100 ha" / "3 t/ha · 10 ha"; doses iguais somam a área; dose própria de talhão em linha separada). A **Colheita** lista as variedades com previsão, com a área. Tudo segue o filtro Talhão. O TSI (grupo Tratamento de semente) é um cartão próprio na fase do DAP informado, com os produtos. Operação sem recomendação: "Sem recomendação", em cinza.
-- **Resumo no pé** de cada fase: área · talhões · operações.
+- **Resumo no pé** de cada fase: talhões · operações ("10 talhões · 4 operações"; a área saiu em 29/10/2026).
 - **Todas as fases com a mesma altura** (a altura livre da tela, mínimo de 360 px); o **resumo fica travado** no rodapé, na mesma linha em todas as colunas. O que passa da altura **rola dentro da própria fase** (título, ilustração e resumo ficam parados).
 - Sem o prazo para encerramento da OS (ele fica na Tabela).
 
@@ -61,7 +61,7 @@ Ver **todas as operações do plano juntas**, de todos os grupos (Plantio, Defen
 
 ## 6.1 Calendário (saiu do Resumo)
 
-- A terceira visão, **Calendário** (Mês, Semana, Dia), saiu do Resumo em 19/10/2026 (reunião com stakeholders) e hoje são as escalas Mês, Semana e Dia do **Calendário Agrícola** (Gestão da Lavoura › Planejado x Executado, primeira guia), sem a associação a um plano. O detalhe está na **Tela 07** (docs/telas/07-agenda-agricola.md).
+- A terceira visão, **Calendário** (Mês, Semana, Dia), saiu do Resumo em 19/10/2026 (reunião com stakeholders) e hoje são as escalas Mês, Semana e Dia do **Calendário Agrícola** (Gestão da Lavoura › Operações Agrícolas, primeira guia), sem a associação a um plano. O detalhe está na **Tela 07** (docs/telas/07-agenda-agricola.md).
 
 ## 7. Doses no Ciclo Produtivo
 

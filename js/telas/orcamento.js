@@ -88,6 +88,24 @@ window.Telas.orcamento = (function () {
 
   // ----- Cálculo: uma linha por talhão × produto -----
   const cadastroDe = (nome) => DADOS.defensivos.find((d) => d.produto === nome) || {};
+
+  // ----- Compra do insumo: data da compra e custo digitado (só na memória, como o resto do protótipo) -----
+  // Custo do cadastro: data simulada, entre 30 e 119 dias antes de hoje (fixa por produto). Custo digitado na tabela
+  // (Por produto): etiqueta "Manual" e a data do dia em que foi digitado.
+  const compras = {}; // produto → { data: 'aaaa-mm-dd', manual: true }
+  function dataSimulada(produto) {
+    const n = [...produto].reduce((s, c) => (s * 31 + c.charCodeAt(0)) % 9973, 7);
+    const d = new Date(`${Util.hojeISO()}T12:00`);
+    d.setDate(d.getDate() - (30 + (n % 90)));
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }
+  const compraDe = (produto) => compras[produto] || { data: dataSimulada(produto), manual: false };
+  // Grava o custo unitário digitado, na moeda que está à mostra (sementes: em reais, como no cadastro)
+  function gravarCusto(produto, grupo, valor) {
+    if (grupo === 'Sementes') DADOS.precosSementes[produto] = emReais(valor, moeda);
+    else DADOS.precosInsumos[produto] = [moeda, valor];
+    compras[produto] = { data: Util.hojeISO(), manual: true };
+  }
   const grupoDe = (cad) => DADOS.grupoInsumoPorClasse[cad.classe] || (cad.fertilidade ? 'Fertilizantes' : 'Defensivos');
 
   function consumo() {
@@ -406,6 +424,7 @@ window.Telas.orcamento = (function () {
       ['comprar', 'Volume a ser comprado', (l) => l.comprar, true],
       ['unidade', 'Unidade', (l) => l.unidade],
       ['unitario', 'Custo unitário', (l) => l.unitario, true],
+      ['compra', 'Data da compra', (l) => (l.unitario === null ? null : compraDe(l.produto).data)],
       ['custo', 'Custo total', (l) => l.custo, true]
     ],
     talhao: [
@@ -449,6 +468,21 @@ window.Telas.orcamento = (function () {
     }).join('')}</tr>`;
   }
 
+  // Custo unitário editável na célula, na moeda à mostra; digitado: etiqueta "Manual". Sem preço: o campo vazio
+  function celulaCusto(l) {
+    const manual = compraDe(l.produto).manual;
+    // Digitado: a etiqueta Manual embaixo do valor, na mesma célula (a linha fica mais alta)
+    return `<span class="orc-custo">
+        <span class="orc-custo__valor">
+          <span class="orc-custo__moeda">${moeda}</span>
+          <input class="celula celula--numero orc-custo__campo" type="text" inputmode="decimal" autocomplete="off"
+                 data-orc-custo="${esc(l.produto)}" data-grupo="${esc(l.grupo)}" placeholder="Sem preço"
+                 value="${l.unitario === null ? '' : fmt(exibir(l.unitario), 2)}" aria-label="Custo unitário de ${esc(l.produto)} (${moeda})">
+        </span>
+        ${manual ? '<span class="orc-custo__manual" title="Custo digitado no orçamento">Manual</span>' : ''}
+      </span>`;
+  }
+
   function tabelaDetalhe(itens) {
     const vazio = (n) => `<tr><td class="tabela__vazia" colspan="${n}">Nada encontrado.</td></tr>`;
     if (guiaDetalhe === 'produto') {
@@ -462,8 +496,9 @@ window.Telas.orcamento = (function () {
             <td class="tabela__numero">${l.estoque ? quantidade(l.estoque) : '—'}</td>
             <td class="tabela__numero">${quantidade(l.comprar)}</td>
             <td class="orc-tabela__unidade">${esc(l.unidade)}</td>
-            <td class="tabela__numero">${l.unitario === null ? '<span class="orc-pendente">Sem preço</span>' : unitario(l.unitario)}</td>
-            <td class="tabela__numero">${dinheiro(l.custo)}</td></tr>`).join('') : vazio(8)}</tbody>
+            <td class="tabela__numero tabela__editavel">${celulaCusto(l)}</td>
+            <td class="orc-tabela__compra">${l.unitario === null ? '—' : Util.data(compraDe(l.produto).data)}</td>
+            <td class="tabela__numero">${dinheiro(l.custo)}</td></tr>`).join('') : vazio(9)}</tbody>
         </table></div>${paginacao(ls.length)}`;
     }
     const ls = ordenadas(doTalhao(itens));
@@ -484,9 +519,10 @@ window.Telas.orcamento = (function () {
     const m = moeda;
     const dois = (n) => +n.toFixed(2);
     const linhas = guiaDetalhe === 'produto'
-      ? [['Grupo de insumo', 'Produto', 'Necessidade de consumo', 'Volume em estoque', 'Volume a ser comprado', 'Unidade', `Custo unitário (${m})`, `Custo total (${m})`],
+      ? [['Grupo de insumo', 'Produto', 'Necessidade de consumo', 'Volume em estoque', 'Volume a ser comprado', 'Unidade', `Custo unitário (${m})`, 'Data da compra', 'Custo manual', `Custo total (${m})`],
         ...ordenadas(doProduto(itens)).map((l) => [l.grupo, l.produto, dois(l.necessidade), dois(l.estoque), dois(l.comprar), l.unidade,
-          l.unitario === null ? '' : dois(exibir(l.unitario)), dois(exibir(l.custo))])]
+          l.unitario === null ? '' : dois(exibir(l.unitario)), l.unitario === null ? '' : Util.data(compraDe(l.produto).data),
+          compraDe(l.produto).manual ? 'Sim' : '', dois(exibir(l.custo))])]
       : [['Safra', 'Empresa', 'Fazenda', 'Cultura', 'Talhão', 'Hectares', `Custo total (${m})`, `${m}/ha`, 'Custo em sacas (por ha)'],
         ...ordenadas(doTalhao(itens)).map((l) => {
           const s = emSacas(l.custo, l.area, l.plano.cultura);
@@ -694,6 +730,23 @@ window.Telas.orcamento = (function () {
       corpo.querySelector('[data-orc-tabela-detalhe]').innerHTML = tabelaDetalhe(consumo());
       if (foco) corpo.querySelector(foco)?.focus();
     };
+    // Custo unitário digitado: grava ao sair do campo (ou Enter) e recalcula o orçamento todo (resumo, gráficos e tabela)
+    corpo.addEventListener('change', (e) => {
+      const campo = e.target.closest('[data-orc-custo]');
+      if (!campo) return;
+      const valor = numero(campo.value);
+      if (campo.value.trim() && !(valor > 0)) { campo.value = campo.defaultValue; Aviso.mostrar('Custo unitário: informe um valor maior que zero.'); return; }
+      if (valor === null) { campo.value = campo.defaultValue; return; }
+      const produto = campo.dataset.orcCusto;
+      gravarCusto(produto, campo.dataset.grupo, valor);
+      atualizarCorpo(); // a página da tabela continua a mesma
+      corpo.querySelector(`[data-orc-custo="${CSS.escape(produto)}"]`)?.focus();
+      Aviso.mostrar(`Custo de ${esc(produto)} atualizado`);
+    });
+    corpo.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && e.target.matches('[data-orc-custo]')) { e.preventDefault(); e.target.blur(); }
+      if (e.key === 'Escape' && e.target.matches('[data-orc-custo]')) { e.target.value = e.target.defaultValue; e.target.blur(); }
+    });
     corpo.addEventListener('change', (e) => {
       if (!e.target.matches('[data-orc-por-pagina]')) return;
       porPagina = Number(e.target.value);

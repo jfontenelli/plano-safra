@@ -11,7 +11,7 @@ window.Telas.semPlanos = function (item) {
     planejamento: { titulo: 'Planejamento', alvo: 'o planejamento', texto: TEXTO_PLANO, icone: Icones.lista },
     calendario:   { titulo: 'Calendário Agrícola', alvo: 'o Calendário Agrícola', texto: TEXTO_PLANO, icone: Icones.calendario },
     'central-os': { titulo: 'Central OS', alvo: 'a Central OS', texto: TEXTO_PLANO, icone: Icones.documento },
-    'planejado-executado': { titulo: 'Planejado x Executado', alvo: 'o Planejado x Executado', texto: TEXTO_PLANO, icone: Icones.calendario },
+    'planejado-executado': { titulo: 'Operações Agrícolas', alvo: 'as Operações Agrícolas', texto: TEXTO_PLANO, icone: Icones.calendario },
     orcamento:    { titulo: 'Orçamento de Insumos', alvo: 'o Orçamento de Insumos',
                     icone: '<svg viewBox="0 0 24 24"><path d="M21 8 12 3 3 8v8l9 5 9-5Z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg>',
                     texto: 'O plano organiza a necessidade de insumos por safra, empresa, fazenda e cultura. Depois de criado, ele abre aqui automaticamente.' }

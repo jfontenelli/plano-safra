@@ -11,8 +11,11 @@ window.Telas.calendarioAgricola = (function () {
   const esc = Util.escapar;
   const NOMES_MESES = ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'];
   // Cor de cada grupo de operação, pelo tipo (as mesmas do Calendário do plano); uma faixa por grupo, nesta ordem
-  const COR_GRUPO = { Sementes: '#1f9d55', Fertilidade: '#8e44ad', Defensivos: '#e8772e', Colheita: '#d4a017' };
-  const ORDEM_GRUPO = ['Sementes', 'Fertilidade', 'Defensivos', 'Colheita'];
+  // Grupos criados pelo "+": Operação de campo (ex.: Preparo do solo) numa faixa própria, cinza, antes do Plantio;
+  // Aplicação de insumos (ex.: Corretivos) junto da Fertilidade (mesma faixa e cor)
+  const COR_GRUPO = { 'Operação de campo': '#5b6b73', Sementes: '#1f9d55', Fertilidade: '#8e44ad', 'Aplicação de insumos': '#8e44ad', Defensivos: '#e8772e', Colheita: '#d4a017' };
+  const ORDEM_GRUPO = ['Operação de campo', 'Sementes', 'Fertilidade', 'Defensivos', 'Colheita'];
+  const faixaDe = (tipo) => Math.max(0, ORDEM_GRUPO.indexOf(tipo === 'Aplicação de insumos' ? 'Fertilidade' : tipo));
 
   // Empresas abertas ('e:Empresa A') e fazendas abertas ('f:Empresa A|Santa Clara'). Abre no nível Empresa (tudo
   // fechado); a escolha se mantém ao navegar. As barras ficam só no nível mais aberto de cada ramo: empresa fechada
@@ -98,7 +101,7 @@ window.Telas.calendarioAgricola = (function () {
     return lista.filter((o) => o.fim >= j.ini && o.ini < j.fim).map((o) => {
       const fimMais = new Date(o.fim); fimMais.setDate(fimMais.getDate() + 1);
       const esq = pct(o.ini, j); const dir = pct(fimMais, j);
-      const faixa = Math.max(0, ORDEM_GRUPO.indexOf(o.tipo));
+      const faixa = faixaDe(o.tipo);
       const dica = `${o.nome} · ${o.grupo} · ${o.cultura} · ${ddmm(o.ini)} a ${ddmm(o.fim)}${o.area ? ` · ${Util.area(o.area)}` : ''}`;
       return `<button class="cag__faixa" type="button" style="left: ${esq.toFixed(2)}%; width: ${Math.max(0.4, dir - esq).toFixed(2)}%; top: ${6 + faixa * 12}px; --c: ${COR_GRUPO[o.tipo] || '#7B8A82'}"
                    data-cag-op="${iso(o.ini)}" data-cag-cultura="${esc(o.cultura)}" ${daLinha}

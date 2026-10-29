@@ -43,6 +43,8 @@ window.Telas.planoOperacoes = (function () {
       erroNome: null,          // modal: nome da recomendação repetido
       naoEncontrado: {},       // texto digitado sem escolher na lista e que não está no cadastro: { 'linhaId:pa|produto': texto }
       definindo: null,         // modal "Definir recomendação" aberto: { talhoes, editando }
+      novasOps: null,          // modal "Nova operação" (grupo Operação de campo): { linhas: [{ nome, dap, fenologia }], erros }
+      campo: null,             // modal "Definir operação" (grupo Operação de campo): { grupoId, talhoes, linhas: [{ nome, dap, pct }], iniciais, erros }
       plantando: null,         // modal "Definir plantio" (grupo Plantio): { talhoes, linhas: [{ variedade, pct, data, populacao }], germinacao, datasTexto, erros }
       visaoSemente: 'talhoes', // passo Plantio, "Exibir": talhoes (tabela) | mapa (a Previsão de colheita está pausada)
       painelTalhao: null,      // talhão aberto no painel lateral (passo Variedade)
@@ -122,8 +124,17 @@ window.Telas.planoOperacoes = (function () {
 
   // Grupos com o detalhe da recomendação agronômica (talhões, receitas e doses): Defensivos e Fertilidade
   function usaRecomendacao(grupo) {
-    return grupo && ['Defensivos', 'Fertilidade'].includes(grupo.tipo);
+    return grupo && ['Defensivos', 'Fertilidade', 'Aplicação de insumos'].includes(grupo.tipo);
   }
+  // Aplicação de insumos (grupo criado pelo "+"): a tela de recomendação, com os produtos de todos os cadastros
+  // (defensivos, corretivos e fertilizantes)
+  const ehAplicacaoInsumos = (grupo) => grupo && grupo.tipo === 'Aplicação de insumos';
+  // Operação de campo (grupo criado pelo "+"): uma tela como a do Plantio, só com a tabela dos talhões, sem produtos
+  const ehOperacaoCampo = (grupo) => grupo && grupo.tipo === 'Operação de campo';
+  // Grupos criados pelo "+" (Aplicação de insumos e Operação de campo): começam pelo "+ Nova operação" da lista, com o
+  // modal de várias operações (Nome · DAP · Fenologia); depois, na Operação de campo cada operação define a área e na
+  // Aplicação de insumos, os produtos (como em Defensivo e Fertilidade)
+  const usaNovasOperacoes = (grupo) => ehOperacaoCampo(grupo) || ehAplicacaoInsumos(grupo);
 
   function ehFertilidade(grupo) {
     return grupo && grupo.tipo === 'Fertilidade';
@@ -173,6 +184,8 @@ window.Telas.planoOperacoes = (function () {
     ui.marcados = new Set();
     ui.definindo = null;
     ui.plantando = null;
+    ui.campo = null;
+    ui.novasOps = null;
   }
 
   // ================= Desenho =================
@@ -199,6 +212,8 @@ window.Telas.planoOperacoes = (function () {
       ${etapa === 'planejamento' ? rodapeGrupos() : ''}
       ${etapa === 'planejamento' && ui.definindo && opAtual() ? modalDefinir(opAtual()) : ''}
       ${etapa === 'planejamento' && ui.plantando && opAtual() ? modalPlantio(opAtual()) : ''}
+      ${etapa === 'planejamento' && ui.campo && ehOperacaoCampo(grupoAtual()) ? modalCampo(grupoAtual()) : ''}
+      ${etapa === 'planejamento' && ui.novasOps && usaNovasOperacoes(grupoAtual()) ? modalNovasOperacoes(grupoAtual()) : ''}
     `;
     // Redesenhar não pode jogar a página (nem a lista de operações ou o modal) de volta ao topo
     raiz.querySelector('.plano__rolagem').scrollTop = rolagemAntes;
@@ -579,7 +594,7 @@ window.Telas.planoOperacoes = (function () {
         </ul>
         ${somenteLeitura ? '' : `
           <button class="link-acao ops-lista__nova" type="button" data-acao="nova-op">${Icones.mais} Nova operação</button>`}
-        ${grupo.operacoes.length === 0 ? '<p class="ops-lista__vazia">Nenhuma operação neste grupo.</p>' : ''}
+        ${grupo.operacoes.length === 0 && !usaNovasOperacoes(grupo) ? '<p class="ops-lista__vazia">Nenhuma operação neste grupo.</p>' : ''}
       </aside>
     `;
   }
@@ -629,9 +644,34 @@ window.Telas.planoOperacoes = (function () {
     ui.renomeandoOp = nome.dataset.renomearOp; desenharTudo();
   }
 
+  // Grupo criado pelo "+" (Aplicação de insumos ou Operação de campo) ainda sem operação: a ilustração (um broto entre
+  // colinas), "Nenhuma operação neste grupo" e o convite com o link "+ Nova operação" (o mesmo da lista)
+  const ILUSTRACAO_VAZIO = `<svg class="grupo-vazio__ilustracao" viewBox="0 0 240 120" aria-hidden="true">
+      <ellipse cx="46" cy="28" rx="16" ry="7" fill="#e3e8ea"/><ellipse cx="58" cy="24" rx="11" ry="8" fill="#e3e8ea"/>
+      <ellipse cx="190" cy="22" rx="17" ry="7" fill="#e3e8ea"/><ellipse cx="202" cy="18" rx="11" ry="8" fill="#e3e8ea"/>
+      <path d="M0 120 C40 78 90 70 130 86 C170 100 205 88 240 76 V120 Z" fill="#cfe3d7"/>
+      <path d="M0 120 C55 92 105 94 150 104 C190 112 215 104 240 98 V120 Z" fill="#b6d5c2"/>
+      <path d="M20 112 C60 100 100 102 140 110 M60 118 C100 108 150 110 200 116" stroke="#e9f2ec" stroke-width="2" fill="none"/>
+      <path d="M120 98 V62" stroke="#1f7a4d" stroke-width="3" stroke-linecap="round"/>
+      <path d="M120 70 C104 70 96 58 98 46 C112 46 121 56 120 70 Z" fill="#2e9a62"/>
+      <path d="M120 64 C136 64 146 52 144 40 C128 40 119 50 120 64 Z" fill="#1f7a4d"/>
+    </svg>`;
+  function grupoSemOperacao(grupo) {
+    const oQue = ehAplicacaoInsumos(grupo) ? 'os produtos e as doses por talhão' : 'a área de aplicação por talhão';
+    return `
+      <section class="cartao grupo-vazio" aria-label="${esc(grupo.nome)}">
+        ${ILUSTRACAO_VAZIO}
+        <h2 class="grupo-vazio__titulo">Nenhuma operação neste grupo</h2>
+        <p class="grupo-vazio__texto">${somenteLeitura ? 'Este grupo ainda não tem operações.' : `Para começar, clique em
+          <button class="grupo-vazio__link" type="button" data-acao="nova-op">${Icones.mais} Nova operação</button> e defina o nome, o DAP e ${oQue}.`}</p>
+      </section>`;
+  }
+
   // ----- Detalhe -----
   function detalhe(grupo) {
     const op = opAtual();
+    if (usaNovasOperacoes(grupo) && !op) return grupoSemOperacao(grupo);
+    if (ehOperacaoCampo(grupo)) return detalheOperacaoCampo(grupo, op);
     if (!op) {
       return `<div class="cartao vazio"><p class="vazio__texto">${somenteLeitura
         ? 'Nenhuma operação neste grupo.' : 'Nenhuma operação neste grupo. Use "+ Nova operação" para criar.'}</p></div>`;
@@ -1147,7 +1187,7 @@ window.Telas.planoOperacoes = (function () {
                 const l = ajuste ? Planos.linhaNoTalhao(op, ajuste, col) : null;
                 if (!l) {
                   return editar
-                    ? `<td class="tabela__numero tabela__nao-recebe tabela__calculada" title="Talhão sem este produto. Para incluir, use Definir ${T().nome}.">—</td>`
+                    ? `<td class="tabela__numero tabela__nao-recebe tabela__calculada" title="Talhão sem este produto. Para incluir, use Planejar.">—</td>`
                     : '<td class="tabela__numero tabela__nao-recebe">—</td>';
                 }
                 const d = Planos.doseTalhao(op, ajuste, l);
@@ -1157,7 +1197,7 @@ window.Telas.planoOperacoes = (function () {
               // Em construção: clicar na linha abre o Definir recomendação só com este talhão
               const abre = editar && marcavel(op, t);
               return `
-                <tr data-talhao="${esc(t.nome)}" ${abre ? `class="linha--clicavel" title="Clique para definir a recomendação do ${esc(t.nome)}"` : ''}>
+                <tr data-talhao="${esc(t.nome)}" ${abre ? `class="linha--clicavel" title="Clique para planejar a ${T().nome} do ${esc(t.nome)}"` : ''}>
                   ${marcar ? `<td class="tabela__marcar">${marcavel(op, t)
                       ? `<input type="checkbox" data-acao="marcar" data-talhao="${esc(t.nome)}" aria-label="Marcar ${esc(t.nome)}" ${ui.marcados.has(t.nome) ? 'checked' : ''}>`
                       : `<input type="checkbox" disabled aria-label="${esc(t.nome)} sem variedade: defina a variedade antes da TSI" title="Defina a variedade antes da TSI">`}</td>` : ''}
@@ -1298,8 +1338,8 @@ window.Telas.planoOperacoes = (function () {
             <button class="botao botao--perigo-leve barra-definir__excluir" type="button" data-acao="excluir-marcados">${Icones.lixeira} Excluir ${T().nome}</button>` : ''}
           <button class="botao botao--secundario barra-definir__limpar" type="button" data-acao="limpar-selecao"
                   title="Desmarcar todos os talhões" aria-label="Limpar seleção: desmarcar todos os talhões">Limpar</button>`
-        : `<span class="barra-definir__texto">${Icones.info} Edite os dados na tabela ou selecione vários talhões para definir ${ehTsi() ? 'o TSI' : 'a recomendação'} em lote</span>`}
-        <button class="botao botao--primario" type="button" data-acao="definir-recomendacao" ${n ? '' : 'disabled'}>Definir ${T().nome}</button>
+        : `<span class="barra-definir__texto">${Icones.info} Edite os dados na tabela ou selecione vários talhões para planejar em lote</span>`}
+        <button class="botao botao--primario" type="button" data-acao="definir-recomendacao" ${n ? '' : 'disabled'}>Planejar</button>
       </div>`;
   }
 
@@ -1386,7 +1426,7 @@ window.Telas.planoOperacoes = (function () {
         <div class="definir" role="dialog" aria-modal="true" aria-labelledby="definir-titulo" tabindex="-1">
           <div class="definir__topo">
             <div class="definir__titulos">
-              <h2 class="definir__titulo" id="definir-titulo">${editando ? 'Editar' : 'Definir'} ${T().nome}</h2>
+              <h2 class="definir__titulo" id="definir-titulo">${editando ? 'Editar' : 'Planejar'} ${T().nome}</h2>
               <p class="definir__op">${esc(op.nome)} · ${ehTsi() ? 'Tratamento de sementes industrial' : `DAP ${op.dap}`}</p>
               <p class="definir__alvo">${alvoDefinir(talhoes, area)}</p>
             </div>
@@ -1402,8 +1442,7 @@ window.Telas.planoOperacoes = (function () {
             ${r && !somenteLeitura && Planos.talhoesDaReceita(op, r).length ? `
               <button class="botao botao--perigo-leve definir__excluir" type="button" data-acao="excluir-rec">${Icones.lixeira} Excluir ${T().nome}</button>` : ''}
             <button class="botao botao--secundario" type="button" data-acao="fechar-definir">Cancelar</button>
-            <button class="botao botao--primario" type="button" data-acao="aplicar-definicao" ${r ? '' : 'disabled'}>${editando
-              ? 'Salvar alterações' : `Definir ${T().nome}`}</button>
+            <button class="botao botao--primario" type="button" data-acao="aplicar-definicao" ${r ? '' : 'disabled'}>Salvar</button>
           </div>
         </div>
       </div>`;
@@ -1452,6 +1491,7 @@ window.Telas.planoOperacoes = (function () {
   // Produtos do cadastro: no TSI só os de tratamento de sementes; nos defensivos, sem eles.
   // Fertilidade: só corretivos e fertilizantes
   function cadastroAtual() {
+    if (ehAplicacaoInsumos(grupoAtual())) return DADOS.defensivos.filter((d) => usoProduto(d) !== 'tsi');
     const uso = usoAtual();
     return DADOS.defensivos.filter((d) => usoProduto(d) === uso);
   }
@@ -1871,15 +1911,310 @@ window.Telas.planoOperacoes = (function () {
     return `
       <div class="semente-layout ${comPainel && ui.painelExpandido ? 'semente-layout--painel-cheio' : ''}">
         <section class="cartao op-painel" aria-label="${esc(op.nome)}">
-          ${cabecalhoPaginaInteira(op)}
-          <div class="semente-topo">
-            ${(ui.visaoSemente || 'talhoes') === 'talhoes' ? filtrosPlantio(op) : ''}
+          <div class="semente-cabecalho">
+            <div class="semente-cabecalho__titulos">
+              ${cabecalhoPaginaInteira(op)}
+              <p class="semente-cabecalho__sub">Selecione um talhão para definir a variedade de plantio.</p>
+            </div>
             ${visoesVariedade()}
           </div>
+          ${(ui.visaoSemente || 'talhoes') === 'talhoes' ? `<div class="semente-topo">${filtrosPlantio(op)}</div>` : ''}
           ${passoVariedade(op)}
         </section>
         ${comPainel ? painelTalhao(op, ui.painelTalhao) : ''}
       </div>`;
+  }
+
+  // ----- Operação de campo: a lista de operações à esquerda (nome e DAP), como na recomendação de insumos, e uma página
+  // por operação, com as setas ‹ › no cabeçalho. Tabela Talhão · Produtividade histórica · Área do talhão (ha) · Área de
+  // aplicação (ha), a da operação aberta (área do talhão × Área %; o mesmo nome de coluna em todas as operações; editável
+  // na célula). Sem operação: a tabela sem a Área de aplicação. As operações se definem em lote: marcar os talhões e "Definir operação", ou clicar na
+  // linha (abre só com o talhão clicado, como na recomendação). Guardado em op.talhoes[talhão] = { pct } -----
+  const areaCampo = (op, t) => (op.talhoes[t.nome] ? Math.round(t.area * (op.talhoes[t.nome].pct ?? 100) / 100 * 100) / 100 : null);
+
+  function detalheOperacaoCampo(grupo, aberta) {
+    const u = unidadeProdutividade();
+    const marcar = !somenteLeitura;
+    const todos = talhoesFazenda.length > 0 && talhoesFazenda.every((t) => ui.marcados.has(t.nome));
+    const ops = aberta ? [aberta] : [];
+    const area = (n) => numeroTexto(n);
+    const nCol = ops.length + (marcar ? 4 : 3);
+    // Mesmo formato da recomendação de insumos: a lista de operações à esquerda e o cartão da operação
+    return `
+        <section class="cartao op-painel" aria-label="${esc(aberta ? aberta.nome : grupo.nome)}">
+          ${aberta ? cabecalhoOperacao(aberta, { semFenologia: true }) : `
+          <div class="semente-cabecalho">
+            <div class="semente-cabecalho__titulos"><div class="op-cabecalho__linha"><h2 class="op-cabecalho__nome">${esc(grupo.nome)}</h2></div></div>
+          </div>`}
+          <div class="talhoes-rolagem">
+            <table class="tabela tabela--compacta tabela-talhoes tabela-campo">
+              <thead><tr>
+                ${marcar ? `<th class="tabela__marcar"><input type="checkbox" data-acao="marcar-todos" aria-label="Marcar todos" ${todos ? 'checked' : ''}
+                     ${talhoesFazenda.length ? '' : 'disabled'}></th>` : ''}
+                <th>Talhão</th>
+                <th class="tabela__centro" title="Média das últimas 3 safras">Produtividade histórica (${u})</th>
+                <th class="tabela__numero">Área do talhão (ha)</th>
+                ${ops.map((op) => `<th class="tabela__numero" title="${esc(op.nome)} · DAP ${op.dap ?? '—'}">Área de aplicação (ha)</th>`).join('')}
+              </tr></thead>
+              <tbody>
+                ${talhoesFazenda.length ? talhoesFazenda.map((t) => `
+                  <tr data-talhao="${esc(t.nome)}" ${marcar ? `class="linha--clicavel" title="Clique para planejar a operação do ${esc(t.nome)}"` : ''}>
+                    ${marcar ? `<td class="tabela__marcar"><input type="checkbox" data-acao="marcar" data-talhao="${esc(t.nome)}"
+                        aria-label="Marcar ${esc(t.nome)}" ${ui.marcados.has(t.nome) ? 'checked' : ''}></td>` : ''}
+                    <th scope="row" class="tabela__talhao">${esc(t.nome)}</th>
+                    <td class="tabela__centro">${historicoLeitura(t.nome)}</td>
+                    <td class="tabela__numero">${area(t.area)}</td>
+                    ${ops.map((op) => {
+                      const a = areaCampo(op, t);
+                      // Em construção: a área aplicada se edita na célula (em ha, até a área do talhão); vazio tira o talhão da operação
+                      if (marcar) {
+                        return `<td class="tabela__numero tabela__editavel"><input class="celula celula--numero" type="text" inputmode="decimal" autocomplete="off"
+                          data-campo="campo-area" data-talhao="${esc(t.nome)}" data-op="${op.id}" placeholder="—" value="${a === null ? '' : area(a)}"
+                          aria-label="Área de ${esc(op.nome)} no ${esc(t.nome)} (ha)"></td>`;
+                      }
+                      return `<td class="tabela__numero">${a === null ? '<span class="tabela__nao-recebe">—</span>' : area(a)}</td>`;
+                    }).join('')}
+                  </tr>`).join('')
+                : `<tr><td class="tabela__vazia" colspan="${nCol}">Nenhum talhão cadastrado na fazenda ${esc(plano.fazenda)}.</td></tr>`}
+              </tbody>
+            </table>
+          </div>
+          ${marcar ? barraOperacaoCampo(aberta) : ''}
+        </section>`;
+  }
+
+  // Rodapé, no padrão da recomendação: sem talhão marcado, a faixa amarela e o botão desabilitado; com talhão marcado,
+  // "N talhões · X ha", Excluir operação (quando algum marcado tem a operação aberta), Limpar e Definir operação
+  function barraOperacaoCampo(aberta) {
+    const marcados = talhoesFazenda.filter((t) => ui.marcados.has(t.nome));
+    const n = marcados.length;
+    const area = marcados.reduce((s, t) => s + t.area, 0);
+    const comOperacao = aberta && marcados.some((t) => aberta.talhoes[t.nome]);
+    return `
+      <div class="barra-definir ${n ? '' : 'barra-definir--vazia'}">
+        ${n ? `
+          <span class="barra-definir__selecao"><strong>${n} ${n === 1 ? 'talhão' : 'talhões'}</strong> · ${Util.area(area)}</span>
+          ${comOperacao ? `<button class="botao botao--perigo-leve barra-definir__excluir" type="button" data-acao="campo-excluir">${Icones.lixeira} Excluir operação</button>` : ''}
+          <button class="botao botao--secundario barra-definir__limpar" type="button" data-acao="limpar-selecao"
+                  title="Desmarcar todos os talhões" aria-label="Limpar seleção: desmarcar todos os talhões">Limpar</button>`
+        : `<span class="barra-definir__texto">${Icones.info} Selecione vários talhões para planejar em lote</span>`}
+        <button class="botao botao--primario" type="button" data-acao="campo-definir" ${n ? '' : 'disabled'}>Planejar</button>
+      </div>`;
+  }
+
+  // Modal "Definir operação" (talhões marcados), no modelo do Definir plantio: uma linha por operação (Nome da operação ·
+  // DAP · Área (%) · lixeira), "+ Adicionar operação", Cancelar e Salvar. Abre com as operações que todos os talhões
+  // marcados já têm (com a mesma área); sem nenhuma, uma linha em branco (Área 100%). Ao salvar, substitui as operações
+  // desses talhões: as linhas valem para eles e as operações que saíram das linhas deixam de valer neles. Nome de uma
+  // operação do grupo: ela recebe os talhões (e o DAP); nome novo: cria a operação (uma coluna nova). Fica dentro da tela,
+  // como o Definir plantio: fecha só pelos botões.
+  const linhaCampoVazia = () => ({ nome: '', dap: '', pct: '100' });
+  function abrirDefinirCampo(grupo) {
+    const talhoes = talhoesFazenda.filter((t) => ui.marcados.has(t.nome)).map((t) => t.nome);
+    if (!talhoes.length) return;
+    // O modal é da operação aberta na página (ex.: na Aração, "Planejar operação · Aração"): o nome e o DAP já vêm
+    // preenchidos; a Área, a dos talhões marcados quando é a mesma em todos (senão 100%). Grupo sem operação: em branco.
+    const aberta = opAtual();
+    const daPagina = aberta && grupo.operacoes.includes(aberta) ? aberta : null;
+    const pcts = daPagina ? [...new Set(talhoes.map((t) => (daPagina.talhoes[t] ? daPagina.talhoes[t].pct ?? 100 : null)))] : [];
+    const pct = pcts.length === 1 && pcts[0] !== null ? numeroTexto(pcts[0]) : '100';
+    ui.campo = { grupoId: grupo.id, talhoes, opId: daPagina ? daPagina.id : null, iniciais: [], erros: {},
+      linhas: [daPagina ? { nome: daPagina.nome, dap: daPagina.dap ?? '', pct } : linhaCampoVazia()] };
+    desenharMantendoFoco('.definir');
+  }
+
+  function modalCampo(grupo) {
+    const dc = ui.campo;
+    const area = talhoesFazenda.filter((t) => dc.talhoes.includes(t.nome)).reduce((s, t) => s + t.area, 0);
+    const erro = (campo) => (dc.erros[campo] ? `<p class="erro-campo">${dc.erros[campo]}</p>` : '');
+    const classeErro = (campo) => (dc.erros[campo] ? 'campo__controle--erro' : '');
+    const ops = operacoesOrdenadas(grupo);
+    const linhas = dc.linhas.map((l, vi) => `
+        <div class="composicao__linha" data-var="${vi}">
+          <div class="campo"><input class="campo__controle ${classeErro(`nome${vi}`)}" data-campo="dc-nome" data-var="${vi}" list="dc-ops"
+                 autocomplete="off" placeholder="Nome da operação" value="${esc(l.nome)}" aria-label="Nome da operação ${vi + 1}"></div>
+          <div class="campo"><input class="campo__controle ${classeErro(`dap${vi}`)}" data-campo="dc-dap" data-var="${vi}" inputmode="numeric"
+                 autocomplete="off" placeholder="Ex.: -30" value="${esc(String(l.dap))}" aria-label="DAP da operação ${vi + 1}"></div>
+          <div class="campo"><input class="campo__controle ${classeErro(`pct${vi}`)}" data-campo="dc-pct" data-var="${vi}" inputmode="decimal"
+                 autocomplete="off" placeholder="%" value="${esc(String(l.pct))}" aria-label="Área da operação ${vi + 1} (% de cada talhão)"></div>
+          ${dc.linhas.length > 1 ? `<button class="botao-icone composicao__remover" type="button" data-acao="dc-remover" data-var="${vi}"
+                   title="Tirar esta operação" aria-label="Tirar a operação ${vi + 1}">${Icones.lixeira}</button>` : '<span class="composicao__remover"></span>'}
+        </div>
+        ${erro(`nome${vi}`)}${erro(`dap${vi}`)}${erro(`pct${vi}`)}`).join('');
+    return `
+      <div class="definir-fundo">
+        <div class="definir definir--composicao definir--campo" role="dialog" aria-modal="true" aria-labelledby="campo-titulo" tabindex="-1">
+          <div class="definir__topo">
+            <div class="definir__titulos">
+              <h2 class="definir__titulo" id="campo-titulo">Planejar operação${dc.opId ? ` · ${esc((grupo.operacoes.find((o) => o.id === dc.opId) || {}).nome || '')}` : ''}</h2>
+              <p class="definir__op">${esc(grupo.nome)} · Cultura ${esc(plano.cultura)}</p>
+              <p class="definir__alvo">${alvoDefinir(dc.talhoes, area)}</p>
+            </div>
+            <button class="botao-icone" type="button" data-acao="dc-fechar" aria-label="Fechar">${Icones.fechar}</button>
+          </div>
+          <div class="definir__corpo">
+            <p class="campo__ajuda plantio__orientacao">Informe as operações, o DAP e a área de cada uma em cada talhão marcado. Ao salvar, substitui as operações desses talhões.</p>
+            <datalist id="dc-ops">${ops.map((o) => `<option value="${esc(o.nome)}">`).join('')}</datalist>
+            <div class="composicao composicao--campo">
+              <div class="composicao__linha composicao__cab" aria-hidden="true">
+                <span>Nome da operação</span><span>DAP</span><span>Área (%)</span><span></span>
+              </div>
+              ${linhas}
+            </div>
+            ${erro('geral')}
+          </div>
+          <div class="definir__rodape">
+            <button class="botao botao--secundario" type="button" data-acao="dc-fechar">Cancelar</button>
+            <button class="botao botao--primario" type="button" data-acao="dc-salvar">Salvar</button>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  // Valida e grava: cada linha com nome (sem repetir nas linhas nem em operação de outro grupo), DAP inteiro (ou vazio)
+  // e Área de 1 a 100%
+  function salvarCampo(grupo) {
+    const dc = ui.campo;
+    dc.erros = {};
+    const vistos = new Set();
+    const ops = grupo.operacoes;
+    // Modal da operação da página: grava nela (mudar o nome no modal renomeia a operação)
+    const daPagina = dc.opId ? ops.find((o) => o.id === dc.opId) : null;
+    const achar = (nome) => daPagina || ops.find((o) => Util.normalizar(o.nome) === Util.normalizar(nome));
+    const linhas = dc.linhas.filter((l) => String(l.nome).trim() || String(l.dap).trim() || (String(l.pct).trim() && String(l.pct).trim() !== '100'));
+    if (!linhas.length) dc.erros.geral = 'Informe ao menos uma operação.';
+    dc.linhas.forEach((l, vi) => {
+      if (!linhas.includes(l)) return;
+      const nome = String(l.nome).trim();
+      const n = Util.normalizar(nome);
+      if (!nome) dc.erros[`nome${vi}`] = `Operação ${vi + 1}: informe o nome.`;
+      else if (vistos.has(n)) dc.erros[`nome${vi}`] = `Operação ${vi + 1}: a mesma operação aparece duas vezes.`;
+      else if (daPagina ? nomeOperacaoRepetido(nome, daPagina) : !achar(nome) && nomeOperacaoRepetido(nome)) dc.erros[`nome${vi}`] = `Operação ${vi + 1}: ${NOME_OP_REPETIDO.toLowerCase()}.`;
+      vistos.add(n);
+      const t = String(l.dap).trim();
+      if (t && !Number.isInteger(Number(t.replace(',', '.')))) dc.erros[`dap${vi}`] = `Operação ${vi + 1}: DAP é um número inteiro.`;
+      const pct = Util.numero(String(l.pct));
+      if (!(pct > 0 && pct <= 100)) dc.erros[`pct${vi}`] = `Operação ${vi + 1}: área de 1 a 100%.`;
+    });
+    if (Object.keys(dc.erros).length) { desenharTudo(); return; }
+    const usadas = [];
+    linhas.forEach((l) => {
+      const nome = String(l.nome).trim();
+      const t = String(l.dap).trim();
+      const dap = t ? Number(t.replace(',', '.')) : null;
+      let op = achar(nome);
+      if (!op) { op = Planos.novaOperacao(nome, dap); grupo.operacoes.push(op); }
+      else {
+        if (dap !== null) op.dap = dap;
+        if (op === daPagina && op.nome !== nome) op.nome = nome;
+      }
+      const pct = Util.numero(String(l.pct));
+      dc.talhoes.forEach((tal) => { op.talhoes[tal] = { ...Planos.novoAjuste(null), pct }; });
+      usadas.push(op.id);
+    });
+    // As operações que estavam nos talhões e saíram das linhas deixam de valer neles
+    dc.iniciais.filter((id) => !usadas.includes(id)).forEach((id) => {
+      const op = ops.find((o) => o.id === id);
+      if (op) dc.talhoes.forEach((tal) => { delete op.talhoes[tal]; });
+    });
+    const n = dc.talhoes.length;
+    ui.campo = null;
+    // Abre a primeira operação salva (as outras ficam na lista, com as setas ‹ ›)
+    if (usadas.length && !usadas.includes(ui.opPorGrupo[grupo.id])) ui.opPorGrupo[grupo.id] = usadas[0];
+    limparSelecao(); alterou(); desenharTudo();
+    Aviso.mostrar(`${usadas.length} ${usadas.length === 1 ? 'operação definida' : 'operações definidas'} em ${n} ${n === 1 ? 'talhão' : 'talhões'}`);
+  }
+
+  // Modal "Nova operação" (grupo Operação de campo), no modelo do Definir operação: uma linha por operação (Nome da operação ·
+  // DAP · Fenologia · lixeira), "+ Adicionar operação", Cancelar e Salvar. No cabeçalho, só o grupo (sem talhões). Cria as
+  // operações no grupo, sem talhões (eles se definem depois, pelo Definir operação ou na tabela). DAP 0 ou negativo:
+  // sem fenologia (pré-plantio e plantio). O nome não se repete no plano nem nas linhas. Fecha só pelos botões.
+  const linhaNovaOp = () => ({ nome: '', dap: '', fenologia: '' });
+  function abrirNovasOperacoes() {
+    ui.novasOps = { linhas: [linhaNovaOp()], erros: {} };
+    desenharMantendoFoco('[data-campo="no-nome"][data-var="0"]');
+  }
+
+  function modalNovasOperacoes(grupo) {
+    const no = ui.novasOps;
+    const erro = (campo) => (no.erros[campo] ? `<p class="erro-campo">${no.erros[campo]}</p>` : '');
+    const classeErro = (campo) => (no.erros[campo] ? 'campo__controle--erro' : '');
+    const linhas = no.linhas.map((l, vi) => `
+        <div class="composicao__linha" data-var="${vi}">
+          <div class="campo"><input class="campo__controle ${classeErro(`nome${vi}`)}" data-campo="no-nome" data-var="${vi}" autocomplete="off"
+                 placeholder="Nome da operação" value="${esc(l.nome)}" aria-label="Nome da operação ${vi + 1}"></div>
+          <div class="campo"><input class="campo__controle ${classeErro(`dap${vi}`)}" data-campo="no-dap" data-var="${vi}" inputmode="numeric"
+                 autocomplete="off" placeholder="Ex.: -30" value="${esc(String(l.dap))}" aria-label="DAP da operação ${vi + 1}"></div>
+          <div class="campo"><select class="campo__controle" data-campo="no-fenologia" data-var="${vi}" aria-label="Fenologia da operação ${vi + 1}">
+                 <option value="">—</option>
+                 ${DADOS.fenologia.map((f) => `<option ${f === l.fenologia ? 'selected' : ''}>${esc(f)}</option>`).join('')}
+               </select></div>
+          ${no.linhas.length > 1 ? `<button class="botao-icone composicao__remover" type="button" data-acao="no-remover" data-var="${vi}"
+                   title="Tirar esta operação" aria-label="Tirar a operação ${vi + 1}">${Icones.lixeira}</button>` : '<span class="composicao__remover"></span>'}
+        </div>
+        ${erro(`nome${vi}`)}${erro(`dap${vi}`)}`).join('');
+    return `
+      <div class="definir-fundo">
+        <div class="definir definir--composicao definir--campo" role="dialog" aria-modal="true" aria-labelledby="novas-titulo" tabindex="-1">
+          <div class="definir__topo">
+            <div class="definir__titulos">
+              <h2 class="definir__titulo" id="novas-titulo">Nova operação</h2>
+              <p class="definir__op">${esc(grupo.nome)} · Cultura ${esc(plano.cultura)}</p>
+            </div>
+            <button class="botao-icone" type="button" data-acao="no-fechar" aria-label="Fechar">${Icones.fechar}</button>
+          </div>
+          <div class="definir__corpo">
+            <p class="campo__ajuda plantio__orientacao">Informe as operações, o DAP e a fenologia de cada uma. ${ehAplicacaoInsumos(grupo)
+              ? 'Os produtos e os talhões de cada operação se definem depois, no Planejar.' : 'Os talhões de cada operação se definem depois, na tabela.'}</p>
+            <div class="composicao composicao--campo">
+              <div class="composicao__linha composicao__cab" aria-hidden="true">
+                <span>Nome da operação</span><span>DAP</span><span>Fenologia</span><span></span>
+              </div>
+              ${linhas}
+            </div>
+            <div class="composicao__rodape">
+              <button class="link-acao composicao__adicionar" type="button" data-acao="no-adicionar">${Icones.mais} Adicionar operação</button>
+            </div>
+            ${erro('geral')}
+          </div>
+          <div class="definir__rodape">
+            <button class="botao botao--secundario" type="button" data-acao="no-fechar">Cancelar</button>
+            <button class="botao botao--primario" type="button" data-acao="no-salvar">Salvar</button>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  function salvarNovasOperacoes(grupo) {
+    const no = ui.novasOps;
+    no.erros = {};
+    const linhas = no.linhas.filter((l) => String(l.nome).trim() || String(l.dap).trim() || l.fenologia);
+    if (!linhas.length) no.erros.geral = 'Informe ao menos uma operação.';
+    const vistos = new Set();
+    no.linhas.forEach((l, vi) => {
+      if (!linhas.includes(l)) return;
+      const nome = String(l.nome).trim();
+      const n = Util.normalizar(nome);
+      if (!nome) no.erros[`nome${vi}`] = `Operação ${vi + 1}: informe o nome.`;
+      else if (vistos.has(n)) no.erros[`nome${vi}`] = `Operação ${vi + 1}: a mesma operação aparece duas vezes.`;
+      else if (nomeOperacaoRepetido(nome)) no.erros[`nome${vi}`] = `Operação ${vi + 1}: ${NOME_OP_REPETIDO.toLowerCase()}.`;
+      vistos.add(n);
+      const t = String(l.dap).trim();
+      if (t && !Number.isInteger(Number(t.replace(',', '.')))) no.erros[`dap${vi}`] = `Operação ${vi + 1}: DAP é um número inteiro.`;
+    });
+    if (Object.keys(no.erros).length) { desenharTudo(); return; }
+    const criadas = linhas.map((l) => {
+      const t = String(l.dap).trim();
+      const dap = t ? Number(t.replace(',', '.')) : null;
+      const op = Planos.novaOperacao(String(l.nome).trim(), dap);
+      op.fenologia = dap !== null && dap <= 0 ? '' : l.fenologia || '';
+      grupo.operacoes.push(op);
+      return op;
+    });
+    ui.novasOps = null;
+    ui.opPorGrupo[grupo.id] = criadas[0].id;
+    limparSelecao(); alterou(); desenharTudo();
+    Aviso.mostrar(`${criadas.length} ${criadas.length === 1 ? 'operação criada' : 'operações criadas'} em ${esc(grupo.nome)}`);
   }
 
   // ----- Passo Plantio (variedade, data de plantio e população) -----
@@ -1887,13 +2222,14 @@ window.Telas.planoOperacoes = (function () {
   // (visaoColheita) continua aqui, só sem o botão
   function visoesVariedade() {
     const visao = ui.visaoSemente === 'mapa' ? 'mapa' : 'talhoes';
-    const botao = (valor, rotulo) => `
-      <button class="visoes__botao ${visao === valor ? 'visoes__botao--ativo' : ''}" type="button" data-acao="visao-semente"
-              data-visao="${valor}" aria-pressed="${visao === valor}">${rotulo}</button>`;
+    // No mesmo estilo do "+ Criar Plano Safra": a escolhida é o botão principal (verde); a outra, o botão com borda
+    const botao = (valor, rotulo, icone) => `
+      <button class="botao ${visao === valor ? 'botao--primario' : 'botao--secundario'} semente-visao" type="button" data-acao="visao-semente"
+              data-visao="${valor}" aria-pressed="${visao === valor}">${icone}${rotulo}</button>`;
     return `
       <div class="exibir">
-        <div class="visoes" role="group" aria-label="Exibir">
-          ${botao('talhoes', 'Tabela')}${botao('mapa', 'Mapa')}
+        <div class="semente-visoes" role="group" aria-label="Visualização do plantio">
+          ${botao('talhoes', 'Tabela', Icones.tabela)}${botao('mapa', 'Mapa', Icones.mapa)}
         </div>
       </div>`;
   }
@@ -2031,15 +2367,15 @@ window.Telas.planoOperacoes = (function () {
       ${marcar ? barraPlantio(op) : ''}`;
   }
 
-  // Barra de ação, sempre visível: sem talhão marcado, a orientação e o "Definir plantio" desabilitado;
-  // com talhão marcado, quantos e área · Excluir plantio · Limpar · Definir plantio
+  // Barra de ação, sempre visível: sem talhão marcado, a orientação e o "Planejar" desabilitado;
+  // com talhão marcado, quantos e área · Excluir plantio · Limpar · Planejar (o mesmo nome em todos os grupos)
   function barraPlantio(op) {
     const n = ui.marcados.size;
     if (!n) {
       return `
-      <div class="barra-acao barra-acao--vazia" role="region" aria-label="Definir plantio">
-        <p class="barra-acao__selecao">${Icones.info} Edite os dados na tabela ou selecione vários talhões para definir o plantio em lote</p>
-        <button class="botao botao--primario barra-acao__definir" type="button" disabled>${Icones.broto} Definir plantio</button>
+      <div class="barra-acao barra-acao--vazia" role="region" aria-label="Planejar plantio">
+        <p class="barra-acao__selecao">${Icones.info} Edite os dados na tabela ou selecione vários talhões para planejar em lote</p>
+        <button class="botao botao--primario barra-acao__definir" type="button" disabled>${Icones.broto} Planejar</button>
       </div>`;
     }
     // Área das linhas marcadas: a de aplicação de cada variedade (linha vazia: o talhão inteiro)
@@ -2054,7 +2390,7 @@ window.Telas.planoOperacoes = (function () {
           <button class="botao botao--perigo-leve barra-definir__excluir" type="button" data-acao="excluir-plantio">${Icones.lixeira} Excluir plantio</button>` : ''}
         <button class="botao botao--secundario barra-definir__limpar" type="button" data-acao="limpar-selecao"
                 title="Desmarcar todos os talhões" aria-label="Limpar seleção: desmarcar todos os talhões">Limpar</button>
-        <button class="botao botao--primario barra-acao__definir" type="button" data-acao="definir-plantio">${Icones.broto} Definir plantio</button>
+        <button class="botao botao--primario barra-acao__definir" type="button" data-acao="definir-plantio">${Icones.broto} Planejar</button>
       </div>`;
   }
 
@@ -2559,7 +2895,7 @@ window.Telas.planoOperacoes = (function () {
       <div class="mapa-area">
         ${semGeometria ? `<p class="mapa__sem">${Icones.info} A Fazenda ${esc(plano.fazenda)} ainda não tem o desenho dos talhões.</p>`
           : `<div id="mapa-variedades" class="mapa" role="region" aria-label="Mapa de variedades por talhão"></div>
-             <p class="mapa__dica">${Icones.info} Selecione um talhão para definir a variedade</p>`}
+             <p class="mapa__dica">${Icones.info} Selecione um talhão para definir a variedade.</p>`}
       </div>`;
   }
 
@@ -2593,6 +2929,7 @@ window.Telas.planoOperacoes = (function () {
     const op = opAtual();
     mapa = L.map(el, { zoomControl: true });
     L.tileLayer(SATELITE, { maxZoom: 18, attribution: 'Imagens © Esri, Maxar, Earthstar Geographics' }).addTo(mapa);
+    L.control.scale({ position: 'bottomright', imperial: false }).addTo(mapa); // escala em metros ("500 m")
     const pontos = [];
     const hachuras = [];
     let soma = 0; let sLat = 0; let sLng = 0;
@@ -2925,7 +3262,7 @@ window.Telas.planoOperacoes = (function () {
         <div class="definir definir--composicao" role="dialog" aria-modal="true" aria-labelledby="plantio-titulo" tabindex="-1">
           <div class="definir__topo">
             <div class="definir__titulos">
-              <h2 class="definir__titulo" id="plantio-titulo">Definir plantio</h2>
+              <h2 class="definir__titulo" id="plantio-titulo">Planejar plantio</h2>
               <p class="definir__op">${esc(op.nome)} · DAP ${op.dap ?? '—'} · Cultura ${esc(plano.cultura)}</p>
               <p class="definir__alvo">${alvoDefinir(pl.talhoes, area)}</p>
             </div>
@@ -2947,7 +3284,7 @@ window.Telas.planoOperacoes = (function () {
           </div>
           <div class="definir__rodape">
             <button class="botao botao--secundario" type="button" data-acao="pl-fechar">Cancelar</button>
-            <button class="botao botao--primario" type="button" data-acao="pl-aplicar">Definir plantio</button>
+            <button class="botao botao--primario" type="button" data-acao="pl-aplicar">Salvar</button>
           </div>
         </div>
       </div>`;
@@ -3364,9 +3701,16 @@ window.Telas.planoOperacoes = (function () {
     // Defensivo e Fertilidade (em construção): clicar na linha abre o Definir recomendação só com o talhão clicado
     // (fora da caixa de marcar e das células de dose). Os outros talhões marcados são desmarcados: o clicado passa a
     // ser o único marcado.
+    // Operação de campo: o clique na linha abre o Definir operação só com o talhão clicado (a mesma regra)
+    const linhaCampo = e.target.closest('.tabela-campo tbody tr.linha--clicavel[data-talhao]');
+    if (linhaCampo && !e.target.closest('input, button, select, label, a, .tabela__editavel')) {
+      ui.marcados = new Set([linhaCampo.dataset.talhao]);
+      abrirDefinirCampo(grupoAtual());
+      return;
+    }
     const linhaDose = e.target.closest('.tabela-doses tbody tr.linha--clicavel[data-talhao]');
     // A célula da caixa de marcar não abre o modal: clicar em volta da caixa marca ou desmarca o talhão
-    const celulaMarcar = e.target.closest('.tabela-doses td.tabela__marcar');
+    const celulaMarcar = e.target.closest('.tabela-doses td.tabela__marcar, .tabela-campo td.tabela__marcar');
     if (celulaMarcar && e.target.tagName !== 'INPUT') { celulaMarcar.querySelector('input:not(:disabled)')?.click(); return; }
     if (linhaDose && !e.target.closest('input, button, select, label, a, .combo, .tabela__editavel')) {
       ui.marcados = new Set([linhaDose.dataset.talhao]);
@@ -3408,7 +3752,13 @@ window.Telas.planoOperacoes = (function () {
         });
         break;
 
-      case 'nova-op': sairDaReceita(() => criarOperacao(grupo)); break;
+      // Operação de campo e Aplicação de insumos: o modal de várias operações de uma vez (Nome · DAP · Fenologia);
+      // nos outros grupos, o de antes
+      case 'nova-op': if (usaNovasOperacoes(grupo)) abrirNovasOperacoes(grupo); else sairDaReceita(() => criarOperacao(grupo)); break;
+      case 'no-adicionar': ui.novasOps.linhas.push(linhaNovaOp()); desenharMantendoFoco(`[data-campo="no-nome"][data-var="${ui.novasOps.linhas.length - 1}"]`); break;
+      case 'no-remover': ui.novasOps.linhas.splice(Number(alvo.dataset.var), 1); ui.novasOps.erros = {}; desenharMantendoFoco('[data-acao="no-adicionar"]'); break;
+      case 'no-fechar': ui.novasOps = null; desenharMantendoFoco('[data-acao="nova-op"]'); break;
+      case 'no-salvar': salvarNovasOperacoes(grupo); break;
 
       case 'exportar-plano': ui.maisAcoes = false; desenharTudo(); ArquivoPlano.exportar(plano); break;
 
@@ -3544,6 +3894,28 @@ window.Telas.planoOperacoes = (function () {
         ui.marcados = new Set(); desenharMantendoFoco('[data-acao="marcar-todos"]'); break;
 
       case 'definir-recomendacao': abrirDefinir(op); break;
+      case 'campo-definir': abrirDefinirCampo(grupo); break;
+      // Excluir operação: a operação aberta deixa de valer nos talhões marcados (a operação continua no grupo), com confirmação
+      case 'campo-excluir': {
+        const opCampo = opAtual();
+        const nomes = talhoesFazenda.filter((t) => ui.marcados.has(t.nome) && opCampo && opCampo.talhoes[t.nome]).map((t) => t.nome);
+        if (!nomes.length) break;
+        Modal.confirmar({
+          titulo: `Excluir ${esc(opCampo.nome)} de ${nomes.length} ${nomes.length === 1 ? 'talhão' : 'talhões'}?`,
+          texto: `${nomes.length <= 4 ? nomes.map(esc).join(', ') : `${nomes.length} talhões`} ${nomes.length === 1 ? 'deixa' : 'deixam'} de receber ${esc(opCampo.nome)}. A operação continua no grupo.`,
+          botoes: [{ rotulo: 'Cancelar' }, { rotulo: 'Excluir operação', classe: 'perigo', acao: () => {
+            nomes.forEach((t) => { delete opCampo.talhoes[t]; });
+            limparSelecao(); alterou(); desenharTudo();
+            Aviso.mostrar(`${esc(opCampo.nome)} excluída de ${nomes.length} ${nomes.length === 1 ? 'talhão' : 'talhões'}`);
+          } }]
+        });
+        break;
+      }
+      // Modal Definir operação (Operação de campo)
+      case 'dc-adicionar': ui.campo.linhas.push(linhaCampoVazia()); desenharMantendoFoco(`[data-campo="dc-nome"][data-var="${ui.campo.linhas.length - 1}"]`); break;
+      case 'dc-remover': ui.campo.linhas.splice(Number(alvo.dataset.var), 1); ui.campo.erros = {}; desenharMantendoFoco('[data-acao="dc-adicionar"]'); break;
+      case 'dc-fechar': ui.campo = null; desenharMantendoFoco('[data-acao="campo-definir"]'); break;
+      case 'dc-salvar': salvarCampo(grupo); break;
       case 'editar-rec': abrirEditar(op, alvo.dataset.rec); break;
       // Pelo "Editar" (a recomendação inteira): exclui a recomendação. Pelo "Definir recomendação"
       // (talhões marcados): tira a recomendação só desses talhões.
@@ -3582,6 +3954,27 @@ window.Telas.planoOperacoes = (function () {
     if (etapa === 'revisao' && Telas.operacoesPlano.aoMudar(e, ctxEstrutura(), acoesEstrutura)) return;
     if (etapa === 'calendario' && Telas.calendario.aoMudar(e, ctxCalendario(), acoesCalendario)) return;
     const campo = e.target.dataset.campo;
+    // Nova operação (Operação de campo): a fenologia escolhida na linha
+    if (campo === 'no-fenologia' && ui.novasOps) { ui.novasOps.linhas[Number(e.target.dataset.var)].fenologia = e.target.value; return; }
+    // Operação de campo: área aplicada digitada na célula (ha); guardada como % do talhão
+    if (campo === 'campo-area') {
+      const g = grupoAtual();
+      const opCampo = g && g.operacoes.find((o) => o.id === e.target.dataset.op);
+      const t = talhoesFazenda.find((x) => x.nome === e.target.dataset.talhao);
+      if (!opCampo || !t) return;
+      const texto = e.target.value.trim();
+      const ha = texto ? Util.numero(texto) : null;
+      if (texto && !(ha > 0 && ha <= t.area + 0.001)) {
+        e.target.value = e.target.defaultValue;
+        Aviso.mostrar(`Área: informe um valor maior que zero e até a área do ${esc(t.nome)} (${numeroTexto(t.area)} ha).`);
+        return;
+      }
+      if (ha === null) delete opCampo.talhoes[t.nome];
+      else opCampo.talhoes[t.nome] = { ...(opCampo.talhoes[t.nome] || Planos.novoAjuste(null)), pct: Math.min(100, ha / t.area * 100) };
+      alterou();
+      redesenharMantendoCelula();
+      return;
+    }
     const op = opAtual();
     if (campo === 'tb-dose' && e.target.dataset.talhao) { salvarDoseCelula(op, e.target); return; }
     if (campo && campo.startsWith('tb-') && e.target.dataset.talhao) { salvarCelulaPlantio(op, e.target); return; }
@@ -3666,6 +4059,12 @@ window.Telas.planoOperacoes = (function () {
 
   function aoDigitar(e) {
     if (etapa === 'calendario' && Telas.calendario.aoDigitar(e, ctxCalendario())) return;
+    // Definir operação (Operação de campo): guarda o que se digita na linha, sem redesenhar
+    const dcCampo = { 'dc-nome': 'nome', 'dc-dap': 'dap', 'dc-pct': 'pct' }[e.target.dataset.campo];
+    if (dcCampo && ui.campo) { ui.campo.linhas[Number(e.target.dataset.var)][dcCampo] = e.target.value; return; }
+    // Nova operação (Operação de campo): idem
+    const noCampo = { 'no-nome': 'nome', 'no-dap': 'dap' }[e.target.dataset.campo];
+    if (noCampo && ui.novasOps) { ui.novasOps.linhas[Number(e.target.dataset.var)][noCampo] = e.target.value; return; }
     if (etapa === 'revisao' && Telas.operacoesPlano.aoDigitar(e, ctxEstrutura())) return;
     // Doses: registradas enquanto se digita, sem redesenhar
     if (e.target.dataset.campo === 'linha-dose') {
@@ -3681,7 +4080,7 @@ window.Telas.planoOperacoes = (function () {
     // Plantio: nome do pré-cadastro de variedade (modal e painel); ciclo só com números
     if (e.target.dataset.campo === 'pt-pre') { ui.prePainel = e.target.value; return; }
     if (e.target.dataset.campo === 'tb-data') { const v = mascaraData(e.target.value); if (v !== e.target.value) e.target.value = v; return; }
-    if (['tb-populacao', 'tb-area', 'tb-germinacao', 'tb-dose'].includes(e.target.dataset.campo)) { soNumero(e.target); return; }
+    if (['tb-populacao', 'tb-area', 'tb-germinacao', 'tb-dose', 'campo-area'].includes(e.target.dataset.campo)) { soNumero(e.target); return; }
     if (e.target.dataset.campo === 'pt-data' || e.target.dataset.campo === 'pl-data') {
       const v = mascaraData(e.target.value);
       if (v !== e.target.value) e.target.value = v;
@@ -3825,6 +4224,7 @@ window.Telas.planoOperacoes = (function () {
       return;
     }
     if (e.key === 'Enter' && ['pt-area', 'pt-populacao', 'pt-germinacao', 'pt-data'].includes(el.dataset.campo)) { e.preventDefault(); el.blur(); return; }
+    if (el.dataset.campo === 'campo-area' && (e.key === 'Enter' || e.key === 'Escape')) { e.preventDefault(); if (e.key === 'Escape') el.value = el.defaultValue; el.blur(); return; }
     // Painel do talhão: Enter no ciclo ou no pré-cadastro salva
     if (e.key === 'Enter' && el.dataset.campo === 'pt-ciclo') { e.preventDefault(); salvarCiclo(el.value); return; }
     if (e.key === 'Enter' && el.dataset.campo === 'pt-pre') { e.preventDefault(); salvarPrePainel(); return; }
@@ -3933,11 +4333,13 @@ window.Telas.planoOperacoes = (function () {
     form.elements.nome.focus();
   }
 
-  // "Copiar" (botão direito na lista): leva recomendações, talhões e doses para uma operação
-  // que já existe, que mantém nome, DAP e fenologia. Destino com recomendações: confirma a substituição.
+  // "Copiar" (botão direito na lista): leva recomendações, talhões e doses para uma ou mais operações que já existem
+  // (ex.: a 1ª Fungicida para a 2ª, a 3ª e a 4ª), que mantêm nome, DAP e fenologia. Destinos com recomendações: uma
+  // confirmação só, com os nomes deles. Depois de colar, abre o primeiro destino (na ordem do DAP).
+  // "Nova operação" (a primeira opção): cria uma operação com a cópia, o mesmo DAP, fenologia e prazo, e o nome
+  // "Cópia de 1ª Fungicida"; depois de colar, ela abre com o nome em edição na lista, para a pessoa dar o nome.
   function copiarParaOperacao(grupo, origem) {
     const outras = operacoesOrdenadas(grupo).filter((o) => o !== origem);
-    if (!outras.length) { Aviso.mostrar('Não há outra operação no grupo para receber a cópia'); return; }
     const resumo = (o) => {
       const recs = o.receitas.filter((r) => Planos.talhoesDaReceita(o, r).length).length;
       const talhoes = Object.keys(o.talhoes).length;
@@ -3948,12 +4350,18 @@ window.Telas.planoOperacoes = (function () {
         <div class="modal__corpo">
           <button class="modal__fechar" type="button" aria-label="Fechar" data-fechar>${Icones.fechar}</button>
           <h2 class="modal__titulo" id="modal-titulo">Copiar ${esc(origem.nome)}</h2>
-          <p class="modal__subtitulo">Escolha a operação que vai receber as recomendações agronômicas.</p>
+          <p class="modal__subtitulo">Escolha as operações que vão receber as recomendações agronômicas.</p>
           <fieldset class="copiar-para">
-            <legend class="so-leitor">Operação de destino</legend>
+            <legend class="so-leitor">Operações de destino</legend>
+            <label class="copiar-para__item copiar-para__item--nova">
+              <input type="checkbox" name="destino" value="nova">
+              <span class="copiar-para__nome">${Icones.mais} Nova operação</span>
+              <span class="copiar-para__dap">DAP ${origem.dap ?? '—'}</span>
+              <span class="copiar-para__resumo">Você dá o nome depois de colar</span>
+            </label>
             ${outras.map((o) => `
               <label class="copiar-para__item">
-                <input type="radio" name="destino" value="${o.id}">
+                <input type="checkbox" name="destino" value="${o.id}">
                 <span class="copiar-para__nome">${esc(o.nome)}</span>
                 <span class="copiar-para__dap">DAP ${o.dap ?? '—'}</span>
                 <span class="copiar-para__resumo">${resumo(o)}</span>
@@ -3966,31 +4374,68 @@ window.Telas.planoOperacoes = (function () {
         </div>
       </form>`, { classe: 'modal--pequeno' });
     const form = modal.elemento.querySelector('form');
-    form.addEventListener('change', () => { form.querySelector('[type=submit]').disabled = !form.elements.destino.value; });
+    const marcados = () => [...form.querySelectorAll('input[name="destino"]:checked')].map((x) => (x.value === 'nova' ? 'nova' : outras.find((o) => o.id === x.value)));
+    // "Colar" habilitado com ao menos uma operação marcada; com várias, "Colar em 3 operações"
+    form.addEventListener('change', () => {
+      const n = marcados().length;
+      const botao = form.querySelector('[type=submit]');
+      botao.disabled = !n;
+      botao.textContent = n > 1 ? `Colar em ${n} operações` : 'Colar';
+    });
+    const nomes = (ops) => {
+      const ns = ops.map((o) => esc(o.nome));
+      return ns.length > 1 ? `${ns.slice(0, -1).join(', ')} e ${ns[ns.length - 1]}` : ns[0];
+    };
+    const comRecs = (o) => o.receitas.filter((r) => Planos.talhoesDaReceita(o, r).length).length;
+    // Nome da operação nova: "Cópia de 1ª Fungicida" (com número, se já existir: "Cópia de 1ª Fungicida (2)")
+    const nomeNova = () => {
+      const base = `Cópia de ${origem.nome}`;
+      let nome = base; let n = 2;
+      while (nomeOperacaoRepetido(nome)) nome = `${base} (${n++})`;
+      return nome;
+    };
     form.addEventListener('submit', (e) => {
       e.preventDefault();
-      const destino = outras.find((o) => o.id === form.elements.destino.value);
-      if (!destino) return;
+      const escolhidos = marcados();
+      if (!escolhidos.length) return;
+      const comNova = escolhidos.includes('nova');
+      const destinos = escolhidos.filter((x) => x !== 'nova');
       const copiar = () => {
-        destino.receitas = []; destino.talhoes = {};
-        copiarRecomendacoes(origem, destino);
-        delete ui.receitaPorOp[destino.id];
-        ui.opPorGrupo[grupo.id] = destino.id;
+        let nova = null;
+        if (comNova) {
+          nova = Planos.novaOperacao(nomeNova(), origem.dap, origem.prazo ?? null);
+          nova.fenologia = origem.fenologia || '';
+          grupo.operacoes.push(nova);
+        }
+        [...destinos, ...(nova ? [nova] : [])].forEach((destino) => {
+          destino.receitas = []; destino.talhoes = {};
+          copiarRecomendacoes(origem, destino);
+          delete ui.receitaPorOp[destino.id];
+        });
+        // Com a nova, abre nela, com o nome em edição na lista; senão, no primeiro destino
+        ui.opPorGrupo[grupo.id] = nova ? nova.id : destinos[0].id;
         ui.filtroTalhoes = 'todos'; ui.quadroAberto = false;
-        limparSelecao(); alterou(); desenharTudo();
-        Aviso.mostrar(`${esc(origem.nome)} copiada para ${esc(destino.nome)}`);
+        limparSelecao(); alterou();
+        if (nova) renomearNaLista(nova.id); else desenharTudo();
+        const todos = [...destinos, ...(nova ? [{ nome: 'uma operação nova' }] : [])];
+        Aviso.mostrar(`${esc(origem.nome)} copiada para ${todos.length > 3 ? `${todos.length} operações` : nomes(todos)}${nova ? '. Dê o nome à operação nova' : ''}`);
       };
       modal.fechar();
-      const recs = destino.receitas.filter((r) => Planos.talhoesDaReceita(destino, r).length).length;
-      if (!recs) { copiar(); return; }
-      const talhoes = Object.keys(destino.talhoes).length;
+      const substituir = destinos.filter(comRecs);
+      if (!substituir.length) { copiar(); return; }
+      const um = substituir.length === 1;
+      const d = substituir[0];
+      const recs = comRecs(d);
+      const talhoes = Object.keys(d.talhoes).length;
       Modal.confirmar({
-        titulo: `Substituir o que está em ${esc(destino.nome)}?`,
-        texto: `${esc(destino.nome)} já tem ${recs} ${recs === 1 ? 'recomendação' : 'recomendações'} em ${talhoes} ${talhoes === 1 ? 'talhão' : 'talhões'}. ${recs === 1 ? 'Ela será substituída' : 'Elas serão substituídas'} pelas de ${esc(origem.nome)}. Essa ação não pode ser desfeita.`,
+        titulo: um ? `Substituir o que está em ${esc(d.nome)}?` : `Substituir o que está em ${substituir.length} operações?`,
+        texto: um
+          ? `${esc(d.nome)} já tem ${recs} ${recs === 1 ? 'recomendação' : 'recomendações'} em ${talhoes} ${talhoes === 1 ? 'talhão' : 'talhões'}. ${recs === 1 ? 'Ela será substituída' : 'Elas serão substituídas'} pelas de ${esc(origem.nome)}. Essa ação não pode ser desfeita.`
+          : `${nomes(substituir)} já têm recomendações. Elas serão substituídas pelas de ${esc(origem.nome)}. Essa ação não pode ser desfeita.`,
         botoes: [{ rotulo: 'Cancelar' }, { rotulo: 'Substituir', classe: 'perigo', acao: copiar }]
       });
     });
-    form.querySelector('input[type=radio]').focus();
+    form.querySelector('input[name="destino"]').focus();
   }
 
   // Copia recomendações (nome, produtos e doses padrão), talhões e doses próprias, com ids novos
@@ -4304,6 +4749,13 @@ window.Telas.planoOperacoes = (function () {
   }
 
   // ----- Grupos -----
+  // Tipos de planejamento do "+": [tipo, nome, o que pede]. Plantio é o tipo Sementes; Aplicação de insumos abre a tela
+  // de recomendação (como Defensivo e Fertilidade), sem operação; Operação de campo, a tela da tabela dos talhões
+  const TIPOS_NOVO_GRUPO = [
+    ['Sementes', 'Plantio', 'Variedade, população e janela de plantio'],
+    ['Aplicação de insumos', 'Aplicação de insumos', 'Recomendação de produtos e doses'],
+    ['Operação de campo', 'Operação de campo', 'Operação sem recomendação de produto']
+  ];
   // aoCriar(grupo): chamado com o grupo criado (ex.: a aba Revisão move a operação para ele)
   function novoGrupo(aoCriar) {
     const modal = Modal.abrir(`
@@ -4314,14 +4766,22 @@ window.Telas.planoOperacoes = (function () {
           <p class="modal__subtitulo">O tipo define as informações mínimas pedidas no grupo.</p>
           <div class="campo">
             <label class="campo__rotulo" for="ng-nome">Nome</label>
-            <input class="campo__controle" id="ng-nome" name="nome" autocomplete="off" required>
+            <input class="campo__controle" id="ng-nome" name="nome" autocomplete="off" required aria-describedby="ng-nome-erro">
+            <p class="erro-campo" id="ng-nome-erro" data-ng-erro hidden></p>
           </div>
-          <div class="campo">
-            <label class="campo__rotulo" for="ng-tipo">Tipo</label>
-            <select class="campo__controle" id="ng-tipo" name="tipo" required>
-              <option value="" disabled selected>Selecione o tipo</option>
-              ${DADOS.tiposGrupo.filter((t) => t !== 'Colheita').map((t) => `<option value="${t}">${t === 'Sementes' ? 'Plantio' : t}</option>`).join('')}
-            </select>
+          <div class="campo ng-tipo">
+            <span class="campo__rotulo" id="ng-tipo-rotulo">Tipo de planejamento</span>
+            <input type="hidden" name="tipo" value="">
+            <button class="campo__controle ng-tipo__botao" type="button" id="ng-tipo" aria-haspopup="listbox" aria-expanded="false"
+                    aria-labelledby="ng-tipo-rotulo ng-tipo">
+              <span class="ng-tipo__texto ng-tipo__texto--vazio" data-ng-escolhido>Selecione o tipo</span>${Icones.abaixo}
+            </button>
+            <ul class="ng-tipo__lista" role="listbox" aria-labelledby="ng-tipo-rotulo" hidden>
+              ${TIPOS_NOVO_GRUPO.map(([valor, nome, texto]) => `
+                <li class="ng-tipo__opcao" role="option" tabindex="-1" data-valor="${valor}" aria-selected="false">
+                  <span class="ng-tipo__nome">${nome}</span><span class="ng-tipo__desc">${texto}</span>
+                </li>`).join('')}
+            </ul>
           </div>
         </div>
         <div class="modal__rodape">
@@ -4335,10 +4795,51 @@ window.Telas.planoOperacoes = (function () {
     };
     form.addEventListener('input', atualizar);
     form.addEventListener('change', atualizar);
+    // Lista do Tipo de planejamento: cada opção com o nome e, embaixo, o que ela pede (a lista nativa não mostra duas
+    // linhas). Abre pelo botão; setas ↑ ↓ andam, Enter ou clique escolhe, Esc fecha.
+    const botaoTipo = form.querySelector('.ng-tipo__botao');
+    const lista = form.querySelector('.ng-tipo__lista');
+    const opcoes = [...lista.querySelectorAll('.ng-tipo__opcao')];
+    const abrirLista = (abrir) => {
+      lista.hidden = !abrir;
+      botaoTipo.setAttribute('aria-expanded', String(abrir));
+      botaoTipo.classList.toggle('ng-tipo__botao--aberto', abrir);
+      if (abrir) (opcoes.find((o) => o.getAttribute('aria-selected') === 'true') || opcoes[0]).focus();
+    };
+    const escolher = (opcao) => {
+      form.elements.tipo.value = opcao.dataset.valor;
+      opcoes.forEach((o) => o.setAttribute('aria-selected', String(o === opcao)));
+      const texto = form.querySelector('[data-ng-escolhido]');
+      texto.textContent = opcao.querySelector('.ng-tipo__nome').textContent;
+      texto.classList.remove('ng-tipo__texto--vazio');
+      abrirLista(false); botaoTipo.focus(); atualizar();
+    };
+    botaoTipo.addEventListener('click', () => abrirLista(lista.hidden));
+    lista.addEventListener('click', (e) => { const o = e.target.closest('.ng-tipo__opcao'); if (o) escolher(o); });
+    lista.addEventListener('keydown', (e) => {
+      const i = opcoes.indexOf(document.activeElement);
+      if (e.key === 'ArrowDown') { e.preventDefault(); opcoes[Math.min(opcoes.length - 1, i + 1)].focus(); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); opcoes[Math.max(0, i - 1)].focus(); }
+      else if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); if (i >= 0) escolher(opcoes[i]); }
+      else if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); abrirLista(false); botaoTipo.focus(); }
+      else if (e.key === 'Tab') abrirLista(false);
+    });
+    botaoTipo.addEventListener('keydown', (e) => { if (e.key === 'ArrowDown') { e.preventDefault(); abrirLista(true); } });
+    // Nome de grupo não se repete no plano (sem diferenciar maiúsculas e acentos): ao criar, avisa e não cria
+    const erroNome = form.querySelector('[data-ng-erro]');
+    form.elements.nome.addEventListener('input', () => { erroNome.hidden = true; form.elements.nome.classList.remove('campo__controle--erro'); });
     form.addEventListener('submit', (e) => {
       e.preventDefault();
       if (form.querySelector('[type=submit]').disabled) return;
-      const grupo = Planos.novoGrupo(form.elements.nome.value.trim(), form.elements.tipo.value);
+      const nomeGrupo = form.elements.nome.value.trim();
+      if (plano.grupos.some((g) => Util.normalizar(g.nome) === Util.normalizar(nomeGrupo))) {
+        erroNome.textContent = 'Já existe um grupo de operações com esse nome.';
+        erroNome.hidden = false;
+        form.elements.nome.classList.add('campo__controle--erro');
+        form.elements.nome.focus();
+        return;
+      }
+      const grupo = Planos.novoGrupo(nomeGrupo, form.elements.tipo.value);
       // Entra antes do grupo Colheita, que fica sempre por último
       const iColheita = plano.grupos.findIndex((g) => g.tipo === 'Colheita');
       plano.grupos.splice(iColheita >= 0 ? iColheita : plano.grupos.length, 0, grupo);
@@ -4491,7 +4992,10 @@ window.Telas.planoOperacoes = (function () {
     if (!ui.renomeandoGrupo) return;
     const grupo = plano.grupos.find((g) => g.id === ui.renomeandoGrupo);
     ui.renomeandoGrupo = null;
-    if (grupo && valor.trim() && valor.trim() !== grupo.nome) { grupo.nome = valor.trim(); alterou(); }
+    // Nome repetido (outro grupo com o mesmo nome) volta ao anterior, com aviso
+    const repetido = grupo && plano.grupos.some((g) => g !== grupo && Util.normalizar(g.nome) === Util.normalizar(valor.trim()));
+    if (repetido) Aviso.mostrar('Já existe um grupo de operações com esse nome.');
+    else if (grupo && valor.trim() && valor.trim() !== grupo.nome) { grupo.nome = valor.trim(); alterou(); }
     desenharTudo();
   }
 

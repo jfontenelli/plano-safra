@@ -956,6 +956,32 @@ select.campo__controle option { color: var(--texto); }
 .botao-icone--borda { border: 1px solid var(--borda); background: var(--superficie); }
 
 .modal--pequeno { max-width: 460px; }
+/* Grupo criado pelo "+" sem operação: ilustração, título e convite com o link "+ Nova operação" */
+.grupo-vazio { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 32px 24px; text-align: center; }
+.grupo-vazio__ilustracao { width: 240px; height: 120px; }
+.grupo-vazio__titulo { margin: 8px 0 0; font-size: 22px; font-weight: 700; }
+.grupo-vazio__texto { max-width: 460px; margin: 0; font-size: 15px; line-height: 1.6; color: var(--texto-suave); }
+.grupo-vazio__link { display: inline-flex; align-items: center; gap: 2px; padding: 0; border: 0; background: none; font: inherit; font-weight: 600;
+  color: var(--verde-700); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.grupo-vazio__link .icone { width: 15px; height: 15px; stroke-width: 2.4; }
+
+/* Dois campos lado a lado no modal (ex.: DAP e Área no Definir operação da Operação de campo) */
+.campos-lado { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.campos-lado .campo { margin: 0; }
+.tabela-campo tr.linha--clicavel { cursor: pointer; }
+.tabela-campo tr.linha--clicavel:hover > * { background: var(--superficie-2); }
+/* Novo grupo › Tipo de planejamento: botão no formato do campo e, aberto, a lista logo embaixo (cada opção com o nome e a
+   descrição em cinza; a escolhida e a do mouse com fundo verde-acinzentado claro) */
+.ng-tipo__botao { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; text-align: left; cursor: pointer; }
+.ng-tipo__botao .icone { width: 18px; height: 18px; flex: none; color: var(--texto-suave); }
+.ng-tipo__botao--aberto, .ng-tipo__botao:focus-visible { border-color: var(--verde-700); outline: none; box-shadow: 0 0 0 1px var(--verde-700); }
+.ng-tipo__texto--vazio { color: var(--texto-fraco); }
+.ng-tipo__lista { margin: 6px 0 0; padding: 4px 0; list-style: none; border: 1px solid var(--borda); border-radius: 8px; background: var(--superficie); box-shadow: var(--sombra); }
+.ng-tipo__opcao { display: flex; flex-direction: column; gap: 2px; padding: 10px 14px; cursor: pointer; outline: none; }
+.ng-tipo__opcao:hover, .ng-tipo__opcao:focus, .ng-tipo__opcao[aria-selected="true"] { background: #eef4f1; }
+html[data-tema="escuro"] .ng-tipo__opcao:hover, html[data-tema="escuro"] .ng-tipo__opcao:focus, html[data-tema="escuro"] .ng-tipo__opcao[aria-selected="true"] { background: var(--superficie-2); }
+.ng-tipo__nome { font-weight: 500; color: var(--texto); }
+.ng-tipo__desc { font-size: 13px; color: var(--texto-suave); }
 .modal__texto { margin: 10px 0 8px; color: var(--texto-suave); }
 
 .rotulo-secao {
@@ -1500,6 +1526,10 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
 }
 .guia:hover { background: var(--superficie-2); color: var(--texto); }
 .guia--ativa, .guia--ativa:hover { background: var(--verde-100); color: var(--verde-700); border-bottom-color: var(--verde-700); font-weight: 600; }
+/* Guias de grupo de operação (Plantio, Defensivo, Fertilidade…): a escolhida com o preenchimento e a cor da fonte do
+   botão principal ("+ Criar Plano Safra"), verde com texto branco (29/10/2026); o tamanho e o formato da guia não mudam */
+.grupos .guia--ativa, .grupos .guia--ativa:hover { background: var(--verde-700); color: #fff; border-bottom-color: var(--verde-700); border-radius: 8px; } /* quinas arredondadas, como no botão */
+html[data-tema="escuro"] .grupos .guia--ativa, html[data-tema="escuro"] .grupos .guia--ativa:hover { background: #176B50; border-bottom-color: #176B50; color: #fff; }
 .guia--alvo { box-shadow: inset 3px 0 0 var(--amarelo); }
 .guia--mais { padding: 0 16px; }
 .guia--mais .icone { width: 18px; height: 18px; }
@@ -1785,6 +1815,9 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
 /* Títulos numa linha só, em cima; cada variedade numa linha, com os campos na mesma altura */
 .composicao__linha { display: grid; grid-template-columns: minmax(170px, 1fr) 84px 168px 150px 110px 32px; gap: 10px; align-items: start; }
 .composicao__cab { align-items: end; }
+/* Definir operação (Operação de campo): Nome da operação · DAP · Área (%) · lixeira */
+.definir--campo { max-width: 680px; }
+.composicao--campo .composicao__linha { grid-template-columns: minmax(220px, 1fr) 110px 110px 32px; }
 .composicao__ciclo { display: block; margin-top: 4px; font-size: 12px; color: var(--texto-suave); }
 .composicao__linha .campo { margin: 0; min-width: 0; }
 .composicao__linha .campo__controle { height: 40px; }
@@ -1829,7 +1862,22 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
 
 
 /* ===== Plantio: título da página, ícones das visões, ordenação e rodapé da tabela ===== */
-/* Plantio: etiquetas à esquerda e visões (Tabela, Mapa, Previsão de colheita) à direita, na mesma linha */
+/* Plantio: no alto, título e subtítulo à esquerda e Tabela · Mapa à direita; embaixo, as etiquetas (só na Tabela) */
+.semente-cabecalho { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 8px 16px; }
+.semente-cabecalho__titulos { min-width: 0; }
+.semente-cabecalho__sub { margin: 2px 0 0; font-size: 14px; color: var(--texto-suave); }
+.semente-cabecalho .exibir { margin-left: auto; }
+/* Tabela · Mapa (29/10/2026): os mesmos botões do "+ Criar Plano Safra", grudados como um interruptor, cada um com o seu
+   ícone; a visualização escolhida é o botão principal (verde) e a outra, o botão com borda */
+.semente-visoes { display: inline-flex; gap: 0; }
+.semente-visao .icone { width: 18px; height: 18px; }
+/* Grudados como um interruptor: só os cantos de fora arredondados; a borda do meio não fica dobrada */
+.semente-visoes .semente-visao:first-child { border-top-right-radius: 0; border-bottom-right-radius: 0; }
+.semente-visoes .semente-visao:last-child { border-top-left-radius: 0; border-bottom-left-radius: 0; margin-left: -1px; }
+.semente-visoes .semente-visao.botao--primario { position: relative; z-index: 1; }
+/* Plantio: menos espaço entre o cabeçalho e o conteúdo; a tabela ou o mapa começa logo abaixo */
+.semente-layout > .op-painel { gap: 10px; }
+.semente-cabecalho .op-cabecalho__linha { gap: 0; }
 .semente-topo { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
 
 .visoes__botao { display: inline-flex; align-items: center; gap: 8px; height: 38px; padding: 0 16px; font-size: 14px; }
@@ -2174,6 +2222,8 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .cal-etiqueta--sementes   { background: var(--verde-100); color: #1e6b3f; }
 .cal-etiqueta--tratamento-de-sementes { background: #f3e9f5; color: #7a3f86; }
 .cal-etiqueta--defensivos { background: #fdeee3; color: #a84f12; }
+/* Grupos criados pelo "+": Aplicação de insumos e Operação de campo, em tons neutros */
+.cal-etiqueta--aplicacao-de-insumos, .cal-etiqueta--operacao-de-campo { background: var(--superficie-3); color: var(--texto); }
 .cal-etiqueta--fertilidade { background: #f2e6f7; color: #6a2f86; }
 .cal-etiqueta--colheita   { background: #fbeee0; color: var(--aviso-texto); }
 .cal-etiqueta--outro      { background: var(--superficie-3); color: var(--texto-suave); }
@@ -2798,6 +2848,13 @@ html[data-tema="escuro"] .tab-op__caixa-marcar { border-color: #4a5b67; }
 /* Detalhamento: colunas de número do tamanho do conteúdo (a sobra vai para o Produto) e títulos centralizados na
    largura e na altura, também quando quebram em duas linhas */
 [data-orc-tabela-detalhe] .orc-tabela th { vertical-align: middle; }
+/* Custo unitário editável: moeda, campo e, quando digitado, a etiqueta Manual; Data da compra numa coluna própria */
+.orc-custo { display: inline-flex; flex-direction: column; align-items: flex-end; gap: 3px; white-space: nowrap; }
+.orc-custo__valor { display: inline-flex; align-items: center; gap: 6px; }
+.orc-custo__moeda { color: var(--texto-suave); }
+.orc-custo__campo { width: 92px; text-align: right; }
+.orc-custo__manual { padding: 1px 7px; border-radius: 999px; background: var(--info-fundo); color: var(--info); font-size: 11px; font-weight: 600; }
+.orc-tabela__compra { white-space: nowrap; color: var(--texto-suave); }
 [data-orc-tabela-detalhe] .orc-tabela th.tabela__numero { min-width: 124px; text-align: center !important; }
 [data-orc-tabela-detalhe] .orc-tabela td.orc-tabela__grupo { min-width: 150px; }
 [data-orc-tabela-detalhe] .orc-tabela th.tabela__numero .titulo-coluna { justify-content: center; text-align: center; }
@@ -2872,7 +2929,7 @@ html[data-tema="escuro"] .tab-op__caixa-marcar { border-color: #4a5b67; }
 .cag__linha--fazenda > span:first-child { padding-left: 26px; }
 .cag__linha--safra > span:first-child { padding-left: 52px; }
 .cag__tempo--vazio { min-height: 34px; }
-.cag__tempo--faixas { min-height: 56px; }
+.cag__tempo--faixas { min-height: 68px; } /* cinco faixas: Operação de campo, Plantio, Fertilidade, Defensivo, Colheita */
 .cag__faixa { position: absolute; height: 9px; padding: 0; border: 0; border-radius: 5px; background: color-mix(in srgb, var(--c) 40%, transparent); cursor: pointer; }
 .cag__faixa:focus-visible { outline: 2px solid var(--c); outline-offset: 1px; z-index: 2; }
 .cag__faixa:hover { outline: 1px solid rgba(26, 31, 28, .45); z-index: 2; }

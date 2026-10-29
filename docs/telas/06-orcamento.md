@@ -1,6 +1,6 @@
 # Tela 06 — Orçamento de Insumos
 
-Atualizado em 16/10/2026. Este doc mostra só o estado atual da tela. Decisão alterada é reescrita, não acumulada.
+Atualizado em 29/10/2026 (Por produto: custo unitário editável, etiqueta Manual e coluna Data da compra). Antes, em 16/10/2026. Este doc mostra só o estado atual da tela. Decisão alterada é reescrita, não acumulada.
 Tudo é **Definido**, exceto as seções "Em aberto" e "Sugestões".
 Imagem: `referencias/suprimentos.png` e a referência enviada pela usuária em 16/10 (dashboard "Orçamento de Insumos"), como inspiração de organização e hierarquia. Quando imagem e documento divergirem, vale este documento.
 **Situação no protótipo:** construída (`js/telas/orcamento.js`).
@@ -35,12 +35,16 @@ Uma linha por grupo de insumo, do mais caro ao mais barato: Tipo de insumo · ba
 
 ### Detalhamento do orçamento
 Título, guias **Por produto · Por talhão**, busca e **Exportar XLSX** (botão com contorno verde e a seta para baixo).
-- **Por produto** (uma linha por produto, sem setas de abrir): Grupo de insumo · Produto · Necessidade de consumo · Volume em estoque · Volume a ser comprado · Unidade · Custo unitário · Custo total. Busca por produto ou grupo.
+- **Por produto** (uma linha por produto, sem setas de abrir): Grupo de insumo · Produto · Necessidade de consumo · Volume em estoque · Volume a ser comprado · Unidade · Custo unitário · **Data da compra** · Custo total. Busca por produto ou grupo.
+  - **Custo unitário editável** (29/10/2026), direto na célula, na moeda à mostra (R$ ou US$; nas sementes, guardado em reais pela PTAX). Grava ao sair do campo ou com Enter; Esc desiste; valor zero, negativo ou inválido volta ao anterior, com aviso. Recalcula na hora o Custo total, o Resumo do orçamento e os gráficos, com o aviso "Custo de Fox Xpro atualizado". Produto sem preço: campo vazio, com "Sem preço", para digitar.
+  - Custo digitado: etiqueta **"Manual"** (azul) **embaixo do valor, na mesma célula** (a linha fica mais alta).
+  - **Data da compra** (coluna logo depois do Custo unitário): no custo do cadastro, uma data **simulada** (entre 1 e 4 meses antes de hoje, fixa por produto); no custo digitado, **a data do dia em que foi digitado**. Sem preço: "—". Ordena pela seta, como as outras.
+  - Como o resto do protótipo, o custo digitado fica só na memória do navegador.
 - **Por talhão**: Safra · Empresa · Fazenda · Cultura · Talhão · Hectares · Custo total · R$/ha (na moeda escolhida) · Custo em sacas. Busca por fazenda, talhão ou cultura.
 - Sem linha de Total.
 - **Ordenar** por qualquer coluna: seta no título (1º clique crescente, 2º decrescente; vazios sempre no fim), como na Visão Geral. Cada guia guarda a sua ordenação.
 - **Paginação** embaixo: "Itens por página" (10, 20, 50, 100; começa em 10), "1–10 de 52", "Página 1 de 6" e as setas. Filtrar, buscar, ordenar ou trocar de guia volta à página 1.
-- **Exportar XLSX**: a guia aberta, com filtros, busca e ordenação, na moeda de exibição, com os valores exatos.
+- **Exportar XLSX**: a guia aberta, com filtros, busca e ordenação, na moeda de exibição, com os valores exatos. Por produto também com **Data da compra** e **Custo manual** (Sim).
 
 ### Modal Editar parâmetros
 Título "Estimativas de comercialização"; "Ano Agrícola 2026. Usadas no custo em sacas e na receita estimada."
