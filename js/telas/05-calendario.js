@@ -2,7 +2,7 @@
  * Tela 05 — Calendário Agrícola (docs/telas/05-calendario-agricola.md)
  * Etapa do plano que junta todos os grupos (Plantio, Defensivo, Fertilidade…) em ordem de DAP.
  * Na aba Programação do plano (antes Resumo). Duas visões: Tabela (antes Programação; uma linha por operação, uma coluna por talhão) e
- * Ciclo Produtivo (uma coluna por fase da cultura). Filtros por grupo e talhão.
+ * Ciclo Produtivo (uma coluna por fase da cultura). Filtros Grupo de operação, Operação e Talhão, os mesmos nas duas visões.
  * Desenhada dentro da Tela 04 (mesmo cabeçalho do plano); a Tela 04 repassa os eventos para cá.
  * A grade do Calendário (mês, semana ou dia) saiu do Resumo e foi para a Agenda Agrícola (Gestão da Lavoura › Operações Agrícolas; Telas.osCalendario),
  * que usa daqui o cálculo das datas e o desenho da grade (exportados no fim).
@@ -61,10 +61,10 @@ window.Telas.calendario = (function () {
           Planos.linhasTalhao(op, ajuste).forEach((l) => {
             const chave = Planos.chaveLinha(l);
             if (!produtos.has(chave)) produtos.set(chave, { nome: Planos.nomeLinha(l), unidade: Planos.unidadeDose(l), doses: [] });
-            produtos.get(chave).doses.push({ talhao: t.nome, dose: Planos.doseTalhao(op, ajuste, l) });
+            produtos.get(chave).doses.push({ talhao: t.nome, area: t.area, dose: Planos.doseTalhao(op, ajuste, l) });
           });
         });
-        const variedades = semente ? new Set(recebem.flatMap((t) => Planos.linhasPlantio(op, t).map((l) => l.variedade).filter(Boolean))) : null;
+        const variedades = semente ? areasVariedades(op, recebem, daFazenda) : null;
         lista.push({ grupo, op, dap: op.dap, fenologia: fenologiaDe(op), prazo: prazoDe(op, grupo),
           talhoes: recebem, area: area(recebem), produtos: [...produtos.entries()], variedades });
       });
@@ -87,24 +87,37 @@ window.Telas.calendario = (function () {
         lista.push({ colheita: true, grupo: gColheita || { nome: 'Colheita', tipo: 'Colheita' }, op: opColheita || plantio,
           dap: Math.min(...ciclos), dapMax: Math.max(...ciclos), fenologia: '',
           prazo: prazoColheita, talhoes: comPrevisao, area: area(comPrevisao), produtos: [],
-          variedades: new Set(linhasCom.map((l) => l.variedade)) });
+          variedades: areasVariedades(plantio, comPrevisao, daFazenda, (l) => previsaoColheita(l)) });
       }
     }
     const ordemGrupo = (i) => plano.grupos.indexOf(i.grupo);
     return lista.sort((a, b) => (a.colheita - b.colheita) || ((a.dap ?? 9999) - (b.dap ?? 9999)) || (ordemGrupo(a) - ordemGrupo(b)));
   }
 
-  // "0,40 L/ha"; doses diferentes entre talhões: "130 a 160 kg/ha", com o detalhe ao passar o mouse
-  function dose(produto, grupo) {
-    const valores = [...new Set(produto.doses.map((d) => d.dose))].filter((d) => d !== null && d !== undefined).sort((a, b) => a - b);
+  // Variedades dos talhões, com a área de cada uma (soma das áreas de aplicação): Map nome → ha, da maior para a menor.
+  // filtro: quais linhas do plantio contam (na colheita, só as com previsão)
+  function areasVariedades(op, nomes, talhoes, filtro = () => true) {
+    const m = new Map();
+    nomes.forEach((nome) => {
+      const t = talhoes.find((x) => x.nome === nome);
+      const ls = Planos.linhasPlantio(op, nome);
+      ls.forEach((l, i) => {
+        if (!l.variedade || !filtro(l)) return;
+        m.set(l.variedade, (m.get(l.variedade) || 0) + (Planos.areaLinhaPlantio(ls, i, t ? t.area : 0) || 0));
+      });
+    });
+    return new Map([...m.entries()].sort((a, b) => b[1] - a[1]));
+  }
+
+  // Doses de um produto com a área em que cada uma é aplicada: [{ texto: "2 t/ha", area: 100 }], da maior área
+  function dosesComArea(produto, grupo) {
     const u = produto.unidade ? ` ${produto.unidade}` : '';
-    if (!valores.length) return { texto: '—', detalhe: '' };
-    if (valores.length === 1) return { texto: `${textoDose(valores[0], grupo)}${u}`, detalhe: '' };
-    const detalhe = valores.map((v) => {
-      const ts = produto.doses.filter((d) => d.dose === v).map((d) => d.talhao);
-      return `${textoDose(v, grupo)}${u} ${ts.length <= 3 ? `no${ts.length > 1 ? 's' : ''} ${ts.join(', ')}` : `em ${ts.length} talhões`}`;
-    }).join(' · ');
-    return { texto: `${textoDose(valores[0], grupo)} a ${textoDose(valores[valores.length - 1], grupo)}${u}`, detalhe };
+    const m = new Map();
+    produto.doses.forEach((d) => {
+      if (d.dose === null || d.dose === undefined) return;
+      m.set(d.dose, (m.get(d.dose) || 0) + (d.area || 0));
+    });
+    return [...m.entries()].sort((a, b) => b[1] - a[1]).map(([v, area]) => ({ texto: `${textoDose(v, grupo)}${u}`, area }));
   }
 
   // ----- Fases (colunas do infográfico) -----
@@ -177,15 +190,15 @@ window.Telas.calendario = (function () {
     // Só o que já foi planejado (produto e dose, ou plantio; Colheita depois do plantio), em construção ou aprovado.
     // Nada planejado ainda (em nenhum talhão, sem olhar o filtro de talhão): um aviso no lugar da Tabela e do
     // Infográfico. Com planejamento, os filtros ficam sempre à vista, mesmo quando nenhum talhão ou grupo é escolhido.
-    const foiPlanejado = (it) => (it.colheita ? !it.aguardando : it.talhoes.length > 0);
     const planejados = itens({ ...ctx, estado: { ...estado, talhao: 'todos' } }).filter(foiPlanejado);
-    const lista = itens(ctx).filter(foiPlanejado).filter((it) => marcado(estado, 'grupo', chaveGrupo(it)));
+    const lista = itens(ctx).filter(foiPlanejado).filter((it) => marcado(estado, 'grupo', chaveGrupo(it)))
+      .filter((it) => marcado(estado, 'operacao', chaveOperacao(it)));
     const vazio = `
         <div class="estrutura__aviso calendario__vazio" role="note">${Icones.info}
           <p><strong>Nenhuma operação planejada ainda.</strong> As operações planejadas aparecem aqui com datas e doses por talhão.</p>
         </div>`;
     // A Programação ocupa a área logo abaixo das abas. Em cima, as visões em guias (Tabela · Ciclo Produtivo);
-    // embaixo, os filtros de grupo e talhão.
+    // embaixo, os filtros Grupo de operação, Operação e Talhão.
     if (estado.visao !== 'infografico') estado.visao = 'tabela';
     return `
       <section class="calendario">
@@ -204,6 +217,10 @@ window.Telas.calendario = (function () {
               ${filtroCaixa(estado, 'grupo', opcoesGrupo(plano), ['Todos os grupos', 'Nenhum grupo', 'grupos'], 'Grupo de operação')}
             </div>
             <div class="campo">
+              <span class="campo__rotulo">Operação</span>
+              ${filtroCaixa(estado, 'operacao', opcoesOperacao(ctx), ['Todas as operações', 'Nenhuma operação', 'operações'], 'Operação')}
+            </div>
+            <div class="campo">
               <span class="campo__rotulo">Talhão</span>
               ${filtroCaixa(estado, 'talhao', opcoesTalhao(talhoes), ['Todos os talhões', 'Nenhum talhão', 'talhões'], 'Talhões')}
             </div>
@@ -211,6 +228,18 @@ window.Telas.calendario = (function () {
         ${!planejados.length ? vazio : estado.visao === 'tabela' ? tabela(ctx, lista) : infografico(ctx, lista)}
         </div>
       </section>`;
+  }
+
+  // Só o que já foi planejado (produto e dose, ou plantio; Colheita depois do plantio)
+  const foiPlanejado = (it) => (it.colheita ? !it.aguardando : it.talhoes.length > 0);
+  // Operação de um item: o id da operação; a colheita, "colheita"
+  function chaveOperacao(it) { return it.colheita ? 'colheita' : it.op.id; }
+  // Opções do filtro Operação: as operações planejadas dos grupos marcados, na ordem da Programação (DAP)
+  function opcoesOperacao(ctx) {
+    const { estado } = ctx;
+    return itens({ ...ctx, estado: { ...estado, talhao: 'todos' } }).filter(foiPlanejado)
+      .filter((it) => marcado(estado, 'grupo', chaveGrupo(it)))
+      .map((it) => ({ valor: chaveOperacao(it), nome: it.colheita ? (it.grupo.nome || 'Colheita') : it.op.nome }));
   }
 
   // ----- Datas -----
@@ -221,16 +250,17 @@ window.Telas.calendario = (function () {
     const dt = new Date(a, m - 1, d + n);
     return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
   }
-  // "01–20/out/2026"; meses diferentes: "22/set–10/out/2026"; anos diferentes: "28/dez/2026–05/jan/2027"
+  // Mês em número: "01–20/10/2026"; meses diferentes: "22/09–10/10/2026"; anos diferentes: "28/12/2026–05/01/2027"
   function intervalo(isos) {
     if (!isos.length) return '';
     const ord = [...isos].sort();
     const i = partes(ord[0]); const f = partes(ord[ord.length - 1]);
     const dd = (x) => String(x.d).padStart(2, '0');
-    if (ord[0] === ord[ord.length - 1]) return `${dd(i)}/${MESES_CURTOS[i.m - 1]}/${i.a}`;
-    if (i.a !== f.a) return `${dd(i)}/${MESES_CURTOS[i.m - 1]}/${i.a}–${dd(f)}/${MESES_CURTOS[f.m - 1]}/${f.a}`;
-    if (i.m !== f.m) return `${dd(i)}/${MESES_CURTOS[i.m - 1]}–${dd(f)}/${MESES_CURTOS[f.m - 1]}/${f.a}`;
-    return `${dd(i)}–${dd(f)}/${MESES_CURTOS[f.m - 1]}/${f.a}`;
+    const mm = (x) => String(x.m).padStart(2, '0');
+    if (ord[0] === ord[ord.length - 1]) return `${dd(i)}/${mm(i)}/${i.a}`;
+    if (i.a !== f.a) return `${dd(i)}/${mm(i)}/${i.a}–${dd(f)}/${mm(f)}/${f.a}`;
+    if (i.m !== f.m) return `${dd(i)}/${mm(i)}–${dd(f)}/${mm(f)}/${f.a}`;
+    return `${dd(i)}–${dd(f)}/${mm(f)}/${f.a}`;
   }
   function plantioDo(plano) {
     return (plano.grupos.find((g) => g.tipo === 'Sementes') || { operacoes: [] }).operacoes[0] || null;
@@ -258,16 +288,20 @@ window.Telas.calendario = (function () {
     return `<span class="cal-etiqueta cal-etiqueta--${tipo}">${esc(grupo.nome)}</span>`;
   }
 
+  // Cartão de uma operação no Ciclo Produtivo. Plantio e Colheita: o nome de cada variedade com a área ("Var A · 100 ha").
+  // Demais: cada produto com as doses e a área de cada dose ("Calcário A" / "2 t/ha · 100 ha" / "3 t/ha · 10 ha").
   function cartao(item) {
-    const n = item.variedades ? item.variedades.size : 0;
+    const ha = (n) => Util.area(n);
+    const variedades = item.variedades ? [...item.variedades.entries()] : [];
     const extra = item.aguardando ? '<p class="cal-cartao__sem">Aguardando plantio: a data vem do plantio + ciclo da variedade</p>'
-      : item.variedades ? `<p class="cal-cartao__sub">${n ? `${n} ${n === 1 ? 'variedade' : 'variedades'}` : 'Sem variedade'}</p>` : '';
+      : item.variedades ? (variedades.length ? `
+        <ul class="cal-cartao__produtos">
+          ${variedades.map(([nome, area]) => `<li><span class="cal-cartao__produto">${esc(nome)}</span><span class="cal-cartao__dose">${ha(area)}</span></li>`).join('')}
+        </ul>` : '<p class="cal-cartao__sub">Sem variedade</p>') : '';
     const produtos = item.produtos.length ? `
       <ul class="cal-cartao__produtos">
-        ${item.produtos.map(([, p]) => {
-          const d = dose(p, item.grupo);
-          return `<li><span class="cal-cartao__produto">${esc(p.nome)}</span><span class="cal-cartao__dose" ${d.detalhe ? `title="${esc(d.detalhe)}"` : ''}>${esc(d.texto)}</span></li>`;
-        }).join('')}
+        ${item.produtos.map(([, p]) => `<li><span class="cal-cartao__produto">${esc(p.nome)}</span>${dosesComArea(p, item.grupo)
+          .map((d) => `<span class="cal-cartao__dose">${esc(d.texto)} · ${ha(d.area)}</span>`).join('') || '<span class="cal-cartao__dose">—</span>'}</li>`).join('')}
       </ul>` : (!item.variedades && !item.colheita ? '<p class="cal-cartao__sem">Sem recomendação</p>' : '');
     return `
       <article class="cal-cartao">
@@ -325,20 +359,33 @@ window.Telas.calendario = (function () {
       ];
     }
     const op = it.op;
-    return Planos.colunasDose(op).map((col) => [Planos.nomeLinha(col), Planos.unidadeDose(col), (t) => {
+    // Produto: o quarto item dá a dose do talhão em número, para o Consumo (dose × área do talhão)
+    const doseNo = (col, t) => {
       const ajuste = op.talhoes[t.nome];
       const l = ajuste ? Planos.linhaNoTalhao(op, ajuste, col) : null;
-      if (!l) return { texto: '—', classe: 'cal-piv__nao' };
-      const d = Planos.doseTalhao(op, ajuste, l);
-      const ajustada = l.id in ajuste.doses && d !== l.dose;
-      return { texto: textoDose(d, it.grupo), titulo: ajustada ? `Dose do talhão; padrão da receita: ${textoDose(l.dose, it.grupo)}` : '' };
-    }]);
+      return l ? { l, ajuste, d: Planos.doseTalhao(op, ajuste, l) } : null;
+    };
+    return Planos.colunasDose(op).map((col) => [Planos.nomeLinha(col), Planos.unidadeDose(col), (t) => {
+      const x = doseNo(col, t);
+      if (!x) return { texto: '—', classe: 'cal-piv__nao' };
+      const ajustada = x.l.id in x.ajuste.doses && x.d !== x.l.dose;
+      return { texto: textoDose(x.d, it.grupo), titulo: ajustada ? `Dose do talhão; padrão da receita: ${textoDose(x.l.dose, it.grupo)}` : '' };
+    }, (t) => { const x = doseNo(col, t); return x && x.d ? x.d * t.area : 0; }]);
+  }
+
+  // Consumo do produto na operação: soma de dose × área nos talhões do filtro, na unidade sem o "/ha"
+  // ("0,40 L/ha" em 435 ha → "174 L"). Sem dose em nenhum talhão: "—"
+  function textoConsumo(consumoNo, unidade, talhoes) {
+    const total = talhoes.reduce((s, t) => s + consumoNo(t), 0);
+    if (!total) return '—';
+    const u = String(unidade || '').replace(/\/ha$/, '');
+    return `${total.toLocaleString('pt-BR', { maximumFractionDigits: total < 10 ? 2 : 1 })}${u ? ` ${u}` : ''}`;
   }
 
   function diaMes(iso) { const { m, d } = partes(iso); return `${String(d).padStart(2, '0')}/${String(m).padStart(2, '0')}`; }
 
   // Data prevista: data de plantio + DAP, nos talhões da operação (sem talhão planejado, nos talhões do filtro com
-  // plantio); datas diferentes entre talhões viram intervalo ("22/set–10/out/2026"). Colheita: a previsão de cada talhão.
+  // plantio); datas diferentes entre talhões viram intervalo ("22/09–10/10/2026"). Colheita: a previsão de cada talhão.
   function dataPrevista(it, visiveis, pl) {
     const nomes = it.talhoes.length ? it.talhoes : visiveis.map((t) => t.nome);
     const datas = it.colheita
@@ -355,10 +402,11 @@ window.Telas.calendario = (function () {
     { id: 'dap', rotulo: 'DAP', largura: 64, nivel: 'op', classe: 'cal-piv__num' },
     { id: 'fen', rotulo: 'Fenologia', largura: 96, nivel: 'op', classe: 'cal-piv__fen' },
     { id: 'data', rotulo: 'Data prevista', largura: 120, nivel: 'op', classe: 'cal-piv__data' },
-    { id: 'area', rotulo: 'Área', largura: 84, nivel: 'op', classe: 'cal-piv__area' },
     { id: 'op', rotulo: 'Operação', largura: 170, nivel: 'op', classe: 'cal-piv__nome' },
+    { id: 'area', rotulo: 'Área (ha)', largura: 84, nivel: 'op', classe: 'cal-piv__area' },
     { id: 'prod', rotulo: 'Produto', largura: 150, nivel: 'linha', classe: 'cal-piv__produto' },
-    { id: 'unid', rotulo: 'Unid.', largura: 96, nivel: 'linha', classe: 'cal-piv__unid' }
+    { id: 'consumo', rotulo: 'Consumo', largura: 104, nivel: 'linha', classe: 'cal-piv__num' },
+    { id: 'unid', rotulo: 'Dose', largura: 96, nivel: 'linha', classe: 'cal-piv__unid' }
   ];
   const LARGURA_OCULTA = 14;
 
@@ -397,7 +445,7 @@ window.Telas.calendario = (function () {
         dap: () => dap,
         fen: () => esc(it.fenologia || '—'),
         data: () => dataPrevista(it, visiveis, pl),
-        area: () => (it.area ? Util.area(it.area) : '—'),
+        area: () => (it.area ? Util.area(it.area).replace(' ha', '') : '—'),
         op: () => `<strong>${esc(nome)}</strong><span class="cal-piv__chip">${esc(it.colheita ? it.grupo.nome : nomeGrupo(it.grupo))}</span>`
       };
       const celulasOp = COLUNAS.filter((c) => c.nivel === 'op').map((c) => (ocultas.has(c.id) ? celOculta(c, n)
@@ -409,14 +457,16 @@ window.Telas.calendario = (function () {
         const texto = `<span class="cal-piv__sem">${it.grupo.tipo === 'Sementes' ? 'Sem variedade' : 'Sem recomendação'}</span>`;
         const naProd = !ocultas.has('prod');
         linhas.push(`
-          <tr class="cal-piv__linha cal-piv__linha--inicio">${celulasOp}${linhaFixa({ prod: naProd ? texto : '', unid: naProd ? '' : texto })}
+          <tr class="cal-piv__linha cal-piv__linha--inicio">${celulasOp}${linhaFixa({ prod: naProd ? texto : '', consumo: '', unid: naProd ? '' : texto })}
             ${visiveis.map((t) => (talhaoOculto(t) ? celTalhaoOculto : '<td></td>')).join('')}
           </tr>`);
         return;
       }
-      subs.forEach(([rotulo, unidade, valor], i) => {
+      subs.forEach(([rotulo, unidade, valor, consumoNo], i) => {
+        // Consumo só nos produtos (Plantio e Colheita: vazio)
+        const consumo = consumoNo ? esc(textoConsumo(consumoNo, unidade, visiveis)) : '';
         linhas.push(`
-          <tr class="cal-piv__linha ${i ? '' : 'cal-piv__linha--inicio'}">${i ? '' : celulasOp}${linhaFixa({ prod: esc(rotulo), unid: unidade === 'data' ? '' : esc(unidade) })}
+          <tr class="cal-piv__linha ${i ? '' : 'cal-piv__linha--inicio'}">${i ? '' : celulasOp}${linhaFixa({ prod: esc(rotulo), consumo, unid: unidade === 'data' ? '' : esc(unidade) })}
             ${visiveis.map((t) => {
               if (talhaoOculto(t)) return celTalhaoOculto;
               const v = valor(t);
@@ -468,8 +518,9 @@ window.Telas.calendario = (function () {
       </div>`;
   }
 
-  // ----- Filtros (Grupo de operação e Talhão): caixa com Pesquisar, "Todos" e uma marcação por opção -----
-  // estado.talhao / estado.grupo: 'todos' ou a lista dos valores marcados; estado.busca: texto pesquisado em cada caixa
+  // ----- Filtros (Grupo de operação, Operação e Talhão): caixa com Pesquisar, "Todos" e uma marcação por opção -----
+  // estado.talhao / estado.grupo / estado.operacao: 'todos' ou a lista dos valores marcados; estado.busca: texto
+  // pesquisado em cada caixa
   function marcado(estado, chave, valor) {
     const v = estado[chave];
     return v === undefined || v === 'todos' || (Array.isArray(v) && v.includes(valor));
@@ -885,12 +936,14 @@ window.Telas.calendario = (function () {
     }
     if (e.target.dataset.campo !== 'cal-filtro') return false;
     const chave = e.target.dataset.filtro;
-    const valores = (chave === 'talhao' ? opcoesTalhao(ctx.talhoes) : opcoesGrupo(ctx.plano)).map((o) => o.valor);
+    const valores = (chave === 'talhao' ? opcoesTalhao(ctx.talhoes) : chave === 'operacao' ? opcoesOperacao(ctx) : opcoesGrupo(ctx.plano)).map((o) => o.valor);
     let marcados = valores.filter((v) => marcado(est, chave, v));
     if (e.target.value === 'todos') marcados = e.target.checked ? [...valores] : [];
     else if (e.target.checked) marcados.push(e.target.value);
     else marcados = marcados.filter((n) => n !== e.target.value);
     est[chave] = marcados.length === valores.length ? 'todos' : marcados;
+    // Trocar os grupos refaz a lista de operações: o filtro Operação volta para Todas
+    if (chave === 'grupo') est.operacao = 'todos';
     est.filtroAberto = chave;
     redesenhar(`[data-campo="cal-filtro"][data-filtro="${chave}"][value="${CSS.escape(e.target.value)}"]`);
     return true;

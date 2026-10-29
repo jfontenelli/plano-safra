@@ -2307,6 +2307,8 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 /* Operação, Produto e Data prevista estreitas, com quebra de linha */
 .cal-piv__tabela .cal-piv__nome, .cal-piv__tabela .cal-piv__produto, .cal-piv__tabela .cal-piv__data { white-space: normal; overflow-wrap: anywhere; }
 .cal-piv__tabela thead th.cal-piv__fixa { white-space: normal; }
+/* Colunas fixas com largura fixa: o texto quebra a linha em vez de ser cortado (ex.: DAP da colheita "104 a 116") */
+.cal-piv__tabela tbody td.cal-piv__fixa { white-space: normal; overflow-wrap: anywhere; }
 /* Cabeçalho da coluna: o botão direito abre o menu Ocultar coluna */
 .cal-piv__tabela thead th.cal-piv__th-menu { cursor: context-menu; }
 /* Nomes das colunas fixas (DAP até Unid.) centralizados na horizontal e na vertical */
