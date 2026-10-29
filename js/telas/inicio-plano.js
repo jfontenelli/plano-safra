@@ -1,7 +1,7 @@
 /*
  * Modal "Como deseja iniciar o plano?"
  * Abre por cima da Visão Geral ao abrir um plano ainda não iniciado (só a versão 0.1, vazia: Versoes.aIniciar).
- * Opções: Usar modelo · Começar do zero · Importar XLSX · Copiar plano existente.
+ * Opções: Usar modelo de operações · Importar planilha Excel · Copiar outro plano de safra (uma embaixo da outra).
  * "Começar o planejamento" cria a 0.2 em construção com esse conteúdo (Versoes.comecar) e abre o plano no Planejamento.
  * Cancelar ou X: fecha sem iniciar (o plano continua não iniciado).
  */
@@ -11,14 +11,12 @@ window.Telas.inicioPlano = (function () {
   const esc = Util.escapar;
 
   const OPCOES = [
-    { valor: 'modelo', titulo: 'Usar modelo', icone: Icones.lista,
-      texto: 'Use uma estrutura pronta de operações e ajuste conforme necessário.' },
-    { valor: 'importar', titulo: 'Importar XLSX', icone: Icones.planilha,
-      texto: 'Continue um plano exportado por este sistema (.xlsx).' },
-    { valor: 'copiar', titulo: 'Copiar plano existente', icone: Icones.copiar,
-      texto: 'Copie um plano de safra da mesma cultura.' },
-    { valor: 'zero', titulo: 'Começar do zero', icone: Icones.mais,
-      texto: 'Cadastre suas operações.' }
+    { valor: 'modelo', titulo: 'Usar modelo de operações', icone: Icones.lista,
+      texto: 'Use uma lista de operações e ajuste conforme necessário.' },
+    { valor: 'importar', titulo: 'Importar planilha Excel', icone: Icones.planilha,
+      texto: 'Continue um plano exportado por este sistema.' },
+    { valor: 'copiar', titulo: 'Copiar outro plano de safra', icone: Icones.copiar,
+      texto: 'Copie um plano de safra da mesma cultura.' }
   ];
   const CAMPOS = [['safra', 'Safra'], ['empresa', 'Empresa'], ['fazenda', 'Fazenda'], ['cultura', 'Cultura']];
 
@@ -46,7 +44,7 @@ window.Telas.inicioPlano = (function () {
     return `
         <fieldset class="inicios">
           <legend class="so-leitor">Como deseja iniciar o plano?</legend>
-          <div class="inicios__grade inicios__grade--quatro">
+          <div class="inicios__grade inicios__grade--lista">
             ${OPCOES.map((o) => `
               <label class="card-inicio">
                 <input class="card-inicio__radio" type="radio" name="ini-opcao" value="${o.valor}" ${o.valor === e.opcao ? 'checked' : ''}>
@@ -159,10 +157,8 @@ window.Telas.inicioPlano = (function () {
 
   function comecar(plano, e, el, { aoComecar, redesenhar }) {
     e.tentou = true;
-    // Usar modelo e Começar do zero: pelo modelo da cultura do plano (milho tem o seu)
-    const modelo = Planos.modeloDaCultura(plano.cultura);
-    if (e.opcao === 'modelo') return fim(Planos.gruposModelo(modelo), '');
-    if (e.opcao === 'zero') return fim(Planos.gruposFixos(modelo), '');
+    // Usar modelo: pelo modelo da cultura do plano (milho tem o seu)
+    if (e.opcao === 'modelo') return fim(Planos.gruposModelo(Planos.modeloDaCultura(plano.cultura)), '');
     if (e.opcao === 'importar') {
       if (!e.importado) {
         if (!e.erroArquivo) e.erroArquivo = 'Escolha o arquivo exportado pelo Plano de Safra.';

@@ -36,6 +36,7 @@ window.Telas.painelPlanos = (function () {
       .filter((l) => (!f.safra || l.safra === f.safra) && (!f.empresa || l.empresa === f.empresa) && (!f.fazenda || l.fazenda === f.fazenda)
         && (!f.atividade || l.atividade === f.atividade) && (!f.cultura || l.cultura === f.cultura))
       .map((l) => ({ ...l, status: statusDe(l.plano), area: Util.areaCultivo(l.plano, Versoes.deTrabalho(l.plano)) }))
+      .filter((l) => !f.statusPlano || l.status === f.statusPlano)
       .sort((a, b) => ORDEM_STATUS.indexOf(a.status) - ORDEM_STATUS.indexOf(b.status)
         || texto(`${a.ciclo} ${a.safra}`, `${b.ciclo} ${b.safra}`) || texto(a.empresa, b.empresa)
         || texto(a.fazenda, b.fazenda) || texto(a.cultura, b.cultura));

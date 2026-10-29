@@ -130,7 +130,7 @@ window.Telas.abrirModalCriarPlano = function ({ aoCriar, inicial = {} }) {
             <p class="erro-campo" data-erro-fazenda hidden></p>
           </div>
           <div class="campo cp-talhoes">
-            <span class="campo__rotulo" id="cp-talhoes-rot-${b.chave}">Talhões (opcional)</span>
+            <span class="campo__rotulo" id="cp-talhoes-rot-${b.chave}">Talhões</span>
             <button class="campo__controle cp-talhoes__botao" type="button" data-acao="cp-talhoes"
                     aria-haspopup="true" aria-expanded="${aberto}" aria-labelledby="cp-talhoes-rot-${b.chave}"
                     ${b.fazenda ? '' : 'disabled'}><span>${resumo}</span>${Icones.abaixo}</button>

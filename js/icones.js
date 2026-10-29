@@ -34,6 +34,9 @@ window.Icones = (function () {
     ampliar: svg('<path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>'),
     reduzir: svg('<path d="M4 14h6v6M20 10h-6V4M14 10l7-7M3 21l7-7"/>'),
     certo:  svg('<path d="M5 12l5 5 9-10"/>'),
+    carregando: svg('<path d="M12 3a9 9 0 1 0 9 9"/>'),
+    // Disquete em dois tons: corpo com preenchimento claro (classe icone-disquete__fundo), tampa e etiqueta
+    disquete: svg('<path class="icone-disquete__fundo" d="M5 3h11l4 4v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 1-2Z"/><path d="M8 3v5h7V3M13 5v1"/><rect x="7" y="12" width="10" height="8" rx="1"/><path d="M9.5 15h5M9.5 17.5h5"/>'),
     cadeado: svg('<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>'),
     casa:   svg('<path d="M3 20h18"/><path d="M5 20V9l7-5 7 5v11"/><path d="M10 20v-6h4v6"/>'),
     copiar: svg('<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/>'),

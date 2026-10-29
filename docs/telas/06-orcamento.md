@@ -57,7 +57,7 @@ Fertilizantes · Defensivos · Sementes · Corretivos · Tratamento de semente �
 
 ### Cálculos
 - **Necessidade** = dose do talhão × área do talhão, somada por produto, na unidade do cadastro (t, kg, L, g).
-- **Sementes**: população × área ÷ germinação, na embalagem da cultura: soja em **bag (5 milhões de sementes)**, milho em **saco (60 mil sementes)**; preço por embalagem, de cada variedade.
+- **Sementes**: população × área ÷ germinação, na embalagem da cultura: soja em **bag (5 milhões de sementes)**, milho em **saco de 20 kg (60 mil sementes)**; preço por embalagem, de cada variedade.
 - **Custo** = necessidade × valor unitário (base histórica; no protótipo, valores de exemplo). Cada insumo tem moeda própria (R$ ou US$).
 - **A comprar** = necessidade − estoque, **fazenda a fazenda** (nunca negativo), somado. Estoque **por fazenda**.
 - **Área produtiva** = soma das áreas dos talhões incluídos de cada plano no filtro (com Talhão, só os escolhidos). Com Safra "Todas", soma a safra e a safrinha.

@@ -868,7 +868,7 @@ select.campo__controle option { color: var(--texto); }
 
 .tabela__numero { text-align: right !important; font-variant-numeric: tabular-nums; }
 /* Título de coluna com explicação ao passar o mouse (ex.: "1 bag = 5 milhões de sementes") */
-.titulo-dica { cursor: help; text-decoration: underline dotted; text-underline-offset: 3px; }
+.titulo-dica { cursor: help; } /* título com tooltip: sem sublinhado pontilhado */
 
 .tabela__acao { width: 1%; text-align: right; padding-right: 12px !important; }
 
@@ -1776,13 +1776,15 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
 /* Modal "Definir variedade e plantio" (talhões marcados) */
 .definir--estreito { max-width: 620px; }
 /* Definir plantio (em massa): composição de variedades, com a % de cada uma, a data e a população */
-.definir--composicao { max-width: 780px; }
+.definir--composicao { max-width: 920px; } /* largo: a Germinação é uma coluna da variedade */
 .composicao { display: flex; flex-direction: column; gap: 8px; }
 /* Títulos numa linha só, em cima; cada variedade numa linha, com os campos na mesma altura */
-.composicao__linha { display: grid; grid-template-columns: minmax(160px, 1fr) 84px 168px 150px 32px; gap: 10px; align-items: center; }
+.composicao__linha { display: grid; grid-template-columns: minmax(170px, 1fr) 84px 168px 150px 110px 32px; gap: 10px; align-items: start; }
+.composicao__cab { align-items: end; }
+.composicao__ciclo { display: block; margin-top: 4px; font-size: 12px; color: var(--texto-suave); }
 .composicao__linha .campo { margin: 0; min-width: 0; }
 .composicao__linha .campo__controle { height: 40px; }
-.composicao__cab { font-size: 13px; font-weight: 600; color: var(--texto); white-space: nowrap; }
+.composicao__cab { font-size: 13px; font-weight: 600; color: var(--texto); white-space: normal; line-height: 1.25; }
 .composicao__remover { justify-self: center; }
 .composicao__rodape { display: flex; align-items: center; justify-content: space-between; margin: 10px 0 14px; }
 .composicao__adicionar { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; }
@@ -2400,8 +2402,15 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .plano__acoes-versao { position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; padding: 4px 0; }
 .plano__acoes-versao .estado-salvo { margin-left: 6px; }
 
-.estado-salvo { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; color: var(--texto-suave); white-space: nowrap; }
-.estado-salvo .icone { width: 15px; height: 15px; stroke-width: 2.2; }
+/* Salvamento automático em destaque: disquete verde em dois tons e o texto na cor do texto (preto no claro) */
+.estado-salvo { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 600; color: var(--texto); white-space: nowrap; }
+.estado-salvo .icone { width: 20px; height: 20px; stroke-width: 1.6; color: var(--verde-600); }
+.estado-salvo .icone-disquete__fundo { fill: var(--verde-100); }
+/* Depois de uma alteração: "Salvando alterações…" com o círculo girando e, em seguida, de volta a "Alterações salvas" */
+.estado-salvo--salvando .icone { width: 18px; height: 18px; stroke-width: 2; }
+.estado-salvo--salvando .icone { animation: salvando-girar .8s linear infinite; }
+@keyframes salvando-girar { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .estado-salvo--salvando .icone { animation: none; } }
 
 .versoes { position: relative; }
 /* "Mais ações ▾": menu e lista de versões alinhados pela direita do botão */
@@ -2544,7 +2553,7 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 }
 
 /* ===== Modal "Como deseja iniciar o plano?" ===== */
-.inicios__grade--quatro { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.inicios__grade--lista { grid-template-columns: 1fr; }
 .inicio-plano__copiar { max-width: 100%; }
 .inicio-plano__nota { margin: 0; font-size: 13px; color: var(--texto-suave); }
 
@@ -3312,7 +3321,11 @@ html[data-tema="escuro"] .pt-var__cab { background: #1C2F2A; }
    abaixo disso, rola). Mais baixo e com um respiro embaixo, longe dos campos */
 .painel-talhao--resumido .grafico-historico { flex: 1 1 190px; max-height: 210px; min-height: 100px; margin: 0 0 14px; }
 .painel-talhao--resumido .painel-talhao__rolagem > :not(.grafico-historico) { flex-shrink: 0; }
-.pt-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 14px; }
+.pt-form { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px 14px; }
+/* Duas linhas, para o gráfico não encolher: Variedade (larga) e Área (%); Data de plantio, Pop. mil/ha e Germinação (%) */
+.pt-form > .pt-form__campo:nth-child(1) { grid-column: span 4; }
+.pt-form > .pt-form__campo:nth-child(2) { grid-column: span 2; }
+.pt-form > .pt-form__campo:nth-child(n+3) { grid-column: span 2; }
 .pt-form__campo { margin: 0; }
 .pt-form__campo .combo { width: 100%; }
 .pt-form__valor { margin: 0; min-height: 40px; display: flex; align-items: center; font-weight: 600; }
@@ -3324,7 +3337,7 @@ html[data-tema="escuro"] .pt-var__cab { background: #1C2F2A; }
    tabela com borda e cabeçalho cinza-claro, campos sem borda (aparece ao passar o mouse); setas no rodapé */
 .painel-talhao--expandido .painel-talhao__topo { border-bottom: 1px solid var(--borda); }
 .painel-talhao--expandido .painel-talhao__titulo { flex: 1; font-size: 22px; }
-.painel-talhao--expandido .painel-talhao__rolagem { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0 28px; padding-top: 0; }
+.painel-talhao--expandido .painel-talhao__rolagem { grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); gap: 0 28px; padding-top: 0; } /* gráfico menor: espaço para a Germinação nas variedades */
 .painel-talhao--expandido .pt-secao { padding: 18px 0; }
 .pt-secao__titulo { margin: 0; font-size: 17px; font-weight: 700; }
 .painel-talhao--expandido .pt-secao--historico .grafico-historico { flex: none; height: 360px; min-height: 0; margin-top: 14px; }
@@ -3339,13 +3352,13 @@ html[data-tema="escuro"] .pt-var__cab { background: #1C2F2A; }
 .painel-talhao--expandido .pt-germ__campo { width: 64px; height: 36px; padding: 0 10px; border: 1px solid var(--borda-forte); border-radius: 8px; background: var(--superficie); text-align: right; }
 .painel-talhao--expandido .pt-var { border: 1px solid var(--borda); border-radius: var(--raio); overflow: clip; }
 .painel-talhao--expandido .pt-var__cab { border-radius: 0; background: var(--superficie-2); padding: 12px 14px; font-size: 13px; color: var(--texto); align-items: center; }
-.painel-talhao--expandido .pt-var__cab, .painel-talhao--expandido .pt-var__linha { grid-template-columns: minmax(150px, 2fr) 0.8fr 1.2fr 0.9fr 36px; gap: 8px; }
+.painel-talhao--expandido .pt-var__cab, .painel-talhao--expandido .pt-var__linha { grid-template-columns: minmax(150px, 2fr) 0.8fr minmax(130px, 1.3fr) 0.9fr 0.9fr 36px; gap: 8px; }
 .painel-talhao--expandido .pt-var__linha { padding: 8px 14px; border-bottom: 1px dashed var(--borda); }
 .painel-talhao--expandido .pt-var__linha:last-child { border-bottom: 0; }
 .painel-talhao--expandido .pt-var__linha--edicao .celula:not(.celula--erro) { border-color: transparent; background: transparent; }
 .painel-talhao--expandido .pt-var__linha--edicao .celula:not(.celula--erro):hover,
 .painel-talhao--expandido .pt-var__linha--edicao .celula:focus { border-color: var(--borda-forte); background: var(--superficie); }
-.painel-talhao--expandido .pt-var__campo-data .celula { padding-right: 8px; }
+.painel-talhao--expandido .pt-var__campo-data .celula { padding-right: 30px; } /* espaço do botão do calendário */
 .painel-talhao--expandido .pt-var__adicionar { height: 44px; min-height: 44px; margin-top: 0; border: 1px solid var(--borda); border-radius: var(--raio); }
 .painel-talhao--expandido .painel-talhao__botoes { margin-top: 0; }
 .botao--texto { border: 0; background: none; color: var(--texto); font-weight: 600; }

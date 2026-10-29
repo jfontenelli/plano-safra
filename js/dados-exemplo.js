@@ -263,11 +263,12 @@ window.DADOS = {
   },
 
   // Sementes: embalagem de compra por cultura e valor por embalagem de cada variedade (R$).
-  // Soja em bag de 5 milhões de sementes; milho em saco de 60 mil sementes. Estimativas para 26/27, a conferir:
+  // Soja em bag de 5 milhões de sementes; milho em saco de 20 kg (60 mil sementes). "descricao": como aparece na
+  // coluna Embalagem do Plantio. Estimativas para 26/27, a conferir:
   // soja ≈ R$ 450/ha e milho safrinha ≈ R$ 1.300/ha de semente, nas populações dos planos.
   embalagemSemente: {
-    'Soja': { nome: 'bag', sementes: 5000000, texto: 'bag (5 milhões de sementes)' },
-    'Milho': { nome: 'saco', sementes: 60000, texto: 'saco (60 mil sementes)' }
+    'Soja': { nome: 'bag', sementes: 5000000, texto: 'bag (5 milhões de sementes)', descricao: 'Bag de 5 milhões de sementes' },
+    'Milho': { nome: 'saco', sementes: 60000, texto: 'saco de 20 kg (60 mil sementes)', descricao: 'Saco de 20 kg' }
   },
   precosSementes: {
     'BMX Foco IPRO': 7400, 'NS 7709 IPRO': 7100, 'BMX Olimpo IPRO': 7600, 'TMG 2383 IPRO': 6800,
@@ -454,9 +455,9 @@ window.DADOS = {
   },
 
   // Planos carregados ao abrir o protótipo: ano agrícola 2025, soja 25/26 e milho safrinha 26/26 da Santa Clara;
-  // ano agrícola 2026, soja 26/27 e milho safrinha 27/27 da Boa Vista (publicados) e soja 26/27 da São José, em
-  // construção: iniciado pelo "Usar modelo" (inicio: 'modelo'), com as operações do modelo e ainda sem planejamento.
-  // A Primavera fica sem plano. "operacoes" detalha, por nome de operação do modelo: fenologia, produtos [nome, dose],
+  // ano agrícola 2026, soja 26/27 e milho safrinha 27/27 da Boa Vista (publicados) e milho 26/27 da Primavera, em
+  // construção: iniciado pelo "Usar modelo de operações" (inicio: 'modelo'), com as operações do modelo e ainda sem
+  // planejamento. A São José fica sem plano. "operacoes" detalha, por nome de operação do modelo: fenologia, produtos [nome, dose],
   // talhões que recebem e ajustes por talhão. Operações não listadas ficam sem recomendação e sem talhões.
   planosExemplo: [
     {
@@ -618,9 +619,9 @@ window.DADOS = {
       })()
     },
     {
-      // Soja 26/27 da São José (Empresa A): em construção, iniciado pelo "Usar modelo" (0.1 e 0.2 em construção, com as
-      // operações do modelo da cultura e ainda sem planejamento), como se o usuário tivesse escolhido essa opção
-      safra: '26/27', empresa: 'Empresa A', atividade: 'Agricultura', fazenda: 'São José', cultura: 'Soja',
+      // Milho 26/27 da Primavera (Empresa C): em construção, iniciado pelo "Usar modelo de operações" (0.1 e 0.2 em
+      // construção, com as operações do modelo do milho e ainda sem planejamento), para chegar direto ao Planejamento
+      safra: '26/27', empresa: 'Empresa C', atividade: 'Agricultura', fazenda: 'Primavera', cultura: 'Milho',
       inicio: 'modelo',
       versoes: { criadaEm: '2026-10-15T09:30' },
       custo: null, receita: null,

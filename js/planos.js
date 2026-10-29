@@ -232,9 +232,10 @@ window.Planos = (function () {
     if (a !== null && a !== undefined && a !== '') return Number(a);
     return linhas.length === 1 ? areaTalhao : null;
   }
-  // Germinação da linha: a dela, a do talhão (planos antigos) ou a geral do plano
+  // Germinação da linha: a dela, a do talhão, a geral do plano ou, sem nenhuma, a padrão (95%)
+  const GERMINACAO_PADRAO = 95;
   function germinacaoLinha(op, talhao, linha) {
-    return (linha && linha.germinacao) || ((op && op.germinacoes) || {})[talhao] || (op && op.germinacao) || null;
+    return (linha && linha.germinacao) || ((op && op.germinacoes) || {})[talhao] || (op && op.germinacao) || GERMINACAO_PADRAO;
   }
   // Primeira data de plantio do talhão: dela partem as outras operações do talhão (DAP), na área inteira
   function dataPlantioTalhao(op, talhao) {
@@ -251,6 +252,6 @@ window.Planos = (function () {
     linhaPreenchida, chaveLinha, composicao, receitaDoTalhao, talhoesDaReceita,
     linhasTalhao, doseTalhao, temAjuste, statusTalhao, resumo,
     colunasDose, linhaNoTalhao, unidadeDose, nomeLinha,
-    linhasPlantio, areaLinhaPlantio, germinacaoLinha, dataPlantioTalhao, temVariedadePlantio
+    linhasPlantio, areaLinhaPlantio, germinacaoLinha, GERMINACAO_PADRAO, dataPlantioTalhao, temVariedadePlantio
   };
 })();

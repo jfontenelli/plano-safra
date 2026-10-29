@@ -17,7 +17,7 @@ Identificar os novos planos: informações gerais (safra, empresa, atividade, cu
   - Cultura: Soja e Milho (nenhuma vem escolhida).
 - **Fazendas**: um bloco por fazenda, com o título "Fazenda 1", "Fazenda 2"… e três campos:
   - **Fazenda** (obrigatória): só as fazendas da **empresa escolhida** (cada empresa tem as suas; nos dados de exemplo, `fazendasPorEmpresa`). Sem empresa, a lista fica desabilitada, com "Escolha a empresa". Trocar a empresa desmarca a fazenda que não é dela (e os talhões).
-  - **Talhões (opcional)**: lista com caixas de marcar ("Todos" e cada talhão com a área). O campo mostra "Todos os talhões (12)", "9 de 10 talhões" ou "Selecionar talhões".
+  - **Talhões** (opcional; o rótulo não diz "(opcional)", 29/10/2026): lista com caixas de marcar ("Todos" e cada talhão com a área). O campo mostra "Todos os talhões (12)", "9 de 10 talhões" ou "Selecionar talhões".
   - **Área de cultivo**: calculada (fundo cinza), soma dos talhões marcados; sem talhões, "Pendente".
   - Sem talhões marcados, embaixo: "A área de cultivo será calculada automaticamente quando houver talhões selecionados."
   - Com mais de um bloco, cada um tem a lixeira para remover.
@@ -53,19 +53,18 @@ Identificar os novos planos: informações gerais (safra, empresa, atividade, cu
 
 ## Conteúdo
 - Título "Como deseja iniciar o plano?"; subtítulo só com o plano: "Safra 26/27 · Empresa A · Fazenda São José · Soja" (19/10/2026). Ao começar, o plano passa para a versão 0.2, em construção, e abre na aba Planejamento.
-- Quatro cards (um escolhido por vez; Usar modelo já vem marcado), em duas colunas, nesta ordem:
+- Três cards (um escolhido por vez; Usar modelo de operações já vem marcado), um embaixo do outro, na largura do modal, nesta ordem (29/10/2026: nomes e textos novos; saiu Começar do zero):
 
 | Card | Texto | Comportamento |
 |---|---|---|
-| Usar modelo | Use uma estrutura pronta de operações e ajuste conforme necessário. | Grupos e operações do modelo da cultura do plano (Soja ou Milho). |
-| Importar XLSX | Continue um plano exportado por este sistema (.xlsx). | Campo do arquivo (obrigatório). Ver as regras abaixo. |
-| Copiar plano existente | Copie um plano de safra da mesma cultura. | Lista "Plano para copiar" (obrigatória). Ver as regras abaixo. |
-| Começar do zero | Cadastre suas operações. | Só as operações fixas: Plantio e Colheita (do modelo da cultura do plano). |
+| Usar modelo de operações | Use uma lista de operações e ajuste conforme necessário. | Grupos e operações do modelo da cultura do plano (Soja ou Milho). |
+| Importar planilha Excel | Continue um plano exportado por este sistema. | Campo do arquivo (obrigatório). Ver as regras abaixo. |
+| Copiar outro plano de safra | Copie um plano de safra da mesma cultura. | Lista "Plano para copiar" (obrigatória). Ver as regras abaixo. |
 
 - Rodapé: "Cancelar" e "Começar o planejamento".
 
 ## Regras
-- **Importar XLSX** (só o arquivo exportado pelo Plano de Safra): ao carregar, mostra de qual plano é ("Planejamento da safra 26/27 · Empresa A · Fazenda São José · Soja"). Safra, Empresa, Fazenda e Cultura do plano são conferidas com as do arquivo; se forem diferentes, quadro amarelo "O arquivo é de outro plano" com as diferenças e o botão **Importar mesmo assim**. Talhões do arquivo que não estão no plano ficam de fora, com aviso. Arquivo que não é do sistema: "Este arquivo não foi exportado pelo Plano de Safra…". Sem arquivo: "Escolha o arquivo exportado pelo Plano de Safra."
-- **Copiar plano existente**: a lista mostra só os planos **da mesma cultura** (qualquer fazenda e safra) **já publicados**, como "Safra 26/27 · Empresa A · Fazenda Santa Clara · versão 0.2". Copia sempre a **última versão publicada**: grupos de operação, operações e recomendações com produtos e doses padrão. **Não copia** talhões, áreas, plantio, germinação nem doses próprias de talhão. Sem plano publicado: "Ainda não há plano de Soja publicado para copiar."
+- **Importar planilha Excel** (só o .xlsx exportado pelo Plano de Safra): ao carregar, mostra de qual plano é ("Planejamento da safra 26/27 · Empresa A · Fazenda São José · Soja"). Safra, Empresa, Fazenda e Cultura do plano são conferidas com as do arquivo; se forem diferentes, quadro amarelo "O arquivo é de outro plano" com as diferenças e o botão **Importar mesmo assim**. Talhões do arquivo que não estão no plano ficam de fora, com aviso. Arquivo que não é do sistema: "Este arquivo não foi exportado pelo Plano de Safra…". Sem arquivo: "Escolha o arquivo exportado pelo Plano de Safra."
+- **Copiar outro plano de safra**: a lista mostra só os planos **da mesma cultura** (qualquer fazenda e safra) **já publicados**, como "Safra 26/27 · Empresa A · Fazenda Santa Clara · versão 0.2". Copia sempre a **última versão publicada**: grupos de operação, operações e recomendações com produtos e doses padrão. **Não copia** talhões, áreas, plantio, germinação nem doses próprias de talhão. Sem plano publicado: "Ainda não há plano de Soja publicado para copiar."
 - "Começar o planejamento" cria a **0.2 em construção** com o conteúdo escolhido e abre o plano na aba Planejamento, com aviso quando importado ou copiado ("Copiado do plano da Fazenda Santa Clara (safra 26/27, versão 0.2)").
-- Cancelar ou X: fecha; o plano continua não iniciado. Cada vez que o modal abre, começa em "Usar modelo".
+- Cancelar ou X: fecha; o plano continua não iniciado. Cada vez que o modal abre, começa em "Usar modelo de operações".
