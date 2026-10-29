@@ -1313,12 +1313,15 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
 .op-cabecalho__fenologia { width: 130px; height: 38px; }
 .campo__ajuda { margin: 4px 0 0; font-size: 13px; color: var(--texto-suave); }
 .no-dap { max-width: 160px; }
-/* Anterior / próxima operação: sempre na ponta direita, na altura dos campos DAP e Fenologia */
-.op-navegacao { display: flex; gap: 8px; align-self: flex-end; margin-left: auto; }
-.op-navegar { width: 38px; height: 38px; padding: 0; }
-.op-navegar { border-color: var(--verde-700); color: var(--verde-700); gap: 4px; }
-.op-navegar:hover { background: var(--verde-100); }
-.op-navegar .icone { width: 18px; height: 18px; }
+/* Anterior / próxima operação: as setas ‹ › antes do nome ("‹ › 1ª Fungicida"), sempre no mesmo lugar */
+.op-cabecalho__titulo { display: flex; align-items: center; gap: 8px; align-self: center; min-width: 0; }
+/* Nome longo: reticências (o nome completo ao passar o mouse) */
+.op-cabecalho__titulo .op-cabecalho__nome { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.op-navegacao { display: flex; gap: 2px; }
+.op-navegar { width: 32px; height: 32px; padding: 0; color: var(--verde-700); }
+.op-navegar:hover:not(:disabled) { background: var(--verde-100); }
+.op-navegar:disabled { color: var(--texto-fraco); opacity: .45; cursor: default; }
+.op-navegar .icone { width: 20px; height: 20px; stroke-width: 2.2; }
 .op-navegar:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 2px; }
 .op-cabecalho__fenologia:disabled { background-color: var(--fundo); color: var(--texto-fraco); cursor: not-allowed; }
 
@@ -1676,7 +1679,8 @@ select.campo--compacto { padding-right: 32px; background-position: right 8px cen
 /* Tabela do passo Variedade */
 .tabela-variedade tr.linha--aberta > * { background: var(--verde-100); }
 /* A linha inteira abre o painel do talhão */
-.tabela-variedade tr.linha--clicavel { cursor: pointer; }
+.tabela-variedade tr.linha--clicavel, .tabela-doses tr.linha--clicavel { cursor: pointer; }
+.tabela-doses tr.linha--clicavel:hover > :not(.tabela__editavel) { background: var(--superficie-2); }
 .tabela-variedade tr.linha--clicavel:hover > * { background: var(--superficie-2); }
 .tabela-variedade tr.linha--clicavel.linha--aberta:hover > * { background: var(--verde-100); }
 .tabela-variedade tr.linha--aberta > :first-child { box-shadow: inset 3px 0 0 var(--verde-700); }

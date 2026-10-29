@@ -617,9 +617,9 @@ window.Telas.planoOperacoes = (function () {
       return `<input class="campo__controle op-cabecalho__nome-campo" data-campo="nome-op" value="${esc(op.nome)}"
                      aria-label="Nome da operação" data-foco-inicial>`;
     }
-    if (somenteLeitura) return `<h2 class="op-cabecalho__nome">${esc(op.nome)}</h2>`;
+    if (somenteLeitura) return `<h2 class="op-cabecalho__nome" title="${esc(op.nome)}">${esc(op.nome)}</h2>`;
     return `<h2 class="op-cabecalho__nome op-cabecalho__nome--editavel" tabindex="0" data-renomear-op="${op.id}"
-                title="Clique duas vezes para renomear">${esc(op.nome)}</h2>`;
+                title="${esc(op.nome)} · clique duas vezes para renomear">${esc(op.nome)}</h2>`;
   }
 
   function aoDuploClique(e) {
@@ -687,27 +687,28 @@ window.Telas.planoOperacoes = (function () {
     // Nome, DAP e fenologia. Renomear e excluir ficam na lista de operações.
     return `
       <div class="op-cabecalho__linha">
-        ${nomeOperacao(op)}
+        <div class="op-cabecalho__titulo">${navegacaoOperacoes(op)}${nomeOperacao(op)}</div>
         <div class="op-cabecalho__campos">
           <div class="campo campo--inline"><label class="campo__rotulo" for="op-dap">DAP</label>${dap}</div>
           ${semFenologia ? '' : `<div class="campo campo--inline"><label class="campo__rotulo" for="op-fenologia">Fenologia</label>${fenologia}</div>`}
         </div>
-        ${navegacaoOperacoes(op)}
       </div>`;
   }
 
-  // Anterior e próxima operação do grupo, na ordem do DAP (a mesma da lista): só as setas ← →.
-  // Primeira operação: só →; última: só ←. O nome e o DAP do destino aparecem ao passar o mouse.
+  // Anterior e próxima operação do grupo, na ordem do DAP (a mesma da lista): as setas ‹ › antes do nome
+  // ("‹ › 1ª Fungicida"), sempre no mesmo lugar. Na primeira, ‹ fica apagada; na última, ›. O nome e o DAP do destino aparecem ao passar o mouse.
   function navegacaoOperacoes(op) {
     const ops = operacoesOrdenadas(grupoAtual());
     const i = ops.indexOf(op);
     const botao = (destino, sentido) => {
-      if (!destino) return '';
+      const rotulo = sentido === 'anterior' ? 'Operação anterior' : 'Próxima operação';
+      const icone = sentido === 'anterior' ? Icones.anterior : Icones.proxima;
+      if (!destino) return `<button class="botao-icone op-navegar" type="button" disabled title="${rotulo}" aria-label="${rotulo}">${icone}</button>`;
       const dap = destino.dap !== null && destino.dap !== undefined ? ` (DAP ${destino.dap})` : '';
-      const dica = `${sentido === 'anterior' ? 'Operação anterior' : 'Próxima operação'}: ${esc(destino.nome)}${dap}`;
+      const dica = `${rotulo}: ${esc(destino.nome)}${dap}`;
       return `
-        <button class="botao botao--secundario botao--p op-navegar" type="button" data-acao="navegar-op" data-op="${destino.id}"
-                title="${dica}" aria-label="${dica}">${sentido === 'anterior' ? Icones.voltar : Icones.seta}</button>`;
+        <button class="botao-icone op-navegar" type="button" data-acao="navegar-op" data-op="${destino.id}"
+                title="${dica}" aria-label="${dica}">${icone}</button>`;
     };
     if (ops.length < 2) return '';
     return `<div class="op-navegacao">${botao(ops[i - 1], 'anterior')}${botao(ops[i + 1], 'proxima')}</div>`;
@@ -887,7 +888,7 @@ window.Telas.planoOperacoes = (function () {
 
   // Produto comercial ou princípio ativo repetido, em vermelho:
   //  - na mesma recomendação: "já está nesta recomendação" (bloqueia o aplicar);
-  //  - em outra recomendação da operação: "também na Rec 1", com a dose de lá (só avisa).
+  //  - em outra recomendação da operação: sem aviso (o "Também na Rec 1 · 2,00 L/ha" saiu em 29/10/2026).
   const mesmo = (campo) => (a, b) => a[campo] && b[campo] && Util.normalizar(a[campo]) === Util.normalizar(b[campo]);
   const mesmoProduto = mesmo('produto');
   const mesmoPA = mesmo('principioAtivo');
@@ -910,17 +911,8 @@ window.Telas.planoOperacoes = (function () {
         ? `<p class="aviso-repetido">${Icones.alerta} ${coluna === 'produto' ? 'Produto' : T().pa} já está nesta ${T().nome}</p>`
         : '';
     }
-    const dose = (x) => `${formatarDose(x.dose) || '—'} ${Planos.unidadeDose(x)}`;
-    const outras = op.receitas.filter((r) => r !== atual).map((r) => {
-      if (coluna === 'produto') {
-        const igual = r.produtos.find((x) => mesmoProduto(x, l));
-        return igual ? `${esc(nomeCurto(r))} · ${dose(igual)}` : null;
-      }
-      // Princípio ativo: só quando o produto não é o mesmo (senão o aviso já está no produto)
-      const igual = r.produtos.find((x) => mesmoPA(x, l) && !mesmoProduto(x, l));
-      return igual ? `${esc(nomeCurto(r))} (${esc(igual.produto || igual.principioAtivo)} · ${dose(igual)})` : null;
-    }).filter(Boolean);
-    return outras.length ? `<p class="aviso-repetido">${Icones.alerta} Também na ${outras.join(' e na ')}</p>` : '';
+    // Em outra recomendação da operação, o mesmo produto não avisa (29/10/2026): só dentro da mesma recomendação
+    return '';
   }
 
   // Campo de busca com o texto digitado que não foi encontrado no cadastro (mantém o texto e mostra o erro)
@@ -1009,7 +1001,7 @@ window.Telas.planoOperacoes = (function () {
         </td>
         <td></td>
         <td>
-          <label class="pre-cadastro__rotulo" for="${id('unidade')}">Unidade *</label>
+          <label class="pre-cadastro__rotulo" for="${id('unidade')}">Unidade do produto *</label>
           <select class="campo__controle campo--compacto ${erros.unidade ? 'campo__controle--erro' : ''}" id="${id('unidade')}" data-pre="unidade" required
                   ${erros.unidade ? 'aria-invalid="true"' : ''}>
             <option value="" ${pc.unidade ? '' : 'selected'} disabled>Unidade</option>
@@ -1090,7 +1082,8 @@ window.Telas.planoOperacoes = (function () {
     return `${esc(Planos.nomeLinha(l))}${u ? ` (${u})` : ''}`;
   }
 
-  // Filtros dos talhões (todos os grupos): etiquetas "Todos os talhões: 12", "Não planejados: 8", "● Rec 1".
+  // Filtros dos talhões (todos os grupos): etiquetas "Todos os talhões: 12" e "Não planejados: 8" (as etiquetas
+  // "● Rec 1", "● Rec 2" e a bolinha da recomendação na tabela saíram em 29/10/2026).
   // Selecionada: fundo verde-claro e borda verde (não o verde sólido das abas, para não competir com elas).
   // Só aparecem com duas etiquetas ou mais: "Todos os talhões" sozinha não filtra nada (ex.: antes da 1ª definição)
   function filtrosTalhoes(itens) {
@@ -1132,8 +1125,7 @@ window.Telas.planoOperacoes = (function () {
         </div>` : ''}
       ${filtrosTalhoes([
         { valor: 'todos', rotulo: `Todos os talhões: ${talhoesFazenda.length}` },
-        ...(comNaoPlanejados ? [{ valor: 'nao-planejados', rotulo: `Não planejados: ${naoPlanejados}` }] : []),
-        ...recsAplicadas(op).map((r) => ({ valor: `rec:${r.id}`, rotulo: `${pontoRec(op, r)}${esc(nomeCurto(r))}` }))
+        ...(comNaoPlanejados ? [{ valor: 'nao-planejados', rotulo: `Não planejados: ${naoPlanejados}` }] : [])
       ])}
       ${rec ? quadroRec(op, rec) : ''}
       <div class="talhoes-rolagem">
@@ -1162,12 +1154,14 @@ window.Telas.planoOperacoes = (function () {
                 if (!editar) return `<td class="tabela__numero">${d === null || d === undefined ? '—' : formatarDose(d)}</td>`;
                 return `<td class="tabela__numero tabela__editavel">${campoDose(op, t, ajuste, l, r)}</td>`;
               }).join('');
+              // Em construção: clicar na linha abre o Definir recomendação só com este talhão
+              const abre = editar && marcavel(op, t);
               return `
-                <tr>
+                <tr data-talhao="${esc(t.nome)}" ${abre ? `class="linha--clicavel" title="Clique para definir a recomendação do ${esc(t.nome)}"` : ''}>
                   ${marcar ? `<td class="tabela__marcar">${marcavel(op, t)
                       ? `<input type="checkbox" data-acao="marcar" data-talhao="${esc(t.nome)}" aria-label="Marcar ${esc(t.nome)}" ${ui.marcados.has(t.nome) ? 'checked' : ''}>`
                       : `<input type="checkbox" disabled aria-label="${esc(t.nome)} sem variedade: defina a variedade antes da TSI" title="Defina a variedade antes da TSI">`}</td>` : ''}
-                  <th scope="row" class="tabela__talhao">${r ? `${pontoRec(op, r)}<span class="so-leitor">${esc(r.nome)}: </span>` : ''}${esc(t.nome)}</th>
+                  <th scope="row" class="tabela__talhao">${esc(t.nome)}</th>
                   <td class="tabela__numero${editar ? ' tabela__calculada' : ''}">${Util.area(t.area).replace(' ha', '')}</td>
                   ${tsi ? `<td${cinza}>${temVariedade(t.nome) ? esc(variedadesTexto(opPlantio(), t.nome)) : '<span class="tabela__nao-recebe">Sem variedade</span>'}</td>`
                     : `<td class="tabela__numero${editar ? ' tabela__calculada' : ''}">${historicoLeitura(t.nome)}</td>
@@ -1399,11 +1393,8 @@ window.Telas.planoOperacoes = (function () {
             <button class="botao-icone" type="button" data-acao="fechar-definir" aria-label="Fechar">${Icones.fechar}</button>
           </div>
           <div class="definir__corpo">
-            ${r && !somenteLeitura ? `
-              <div class="definir__linha-nome">
-                ${campoNome(op)}
-                ${!editando && !Planos.talhoesDaReceita(op, r).length ? campoCopiar(op, r) : ''}
-              </div>` : ''}
+            ${r && !somenteLeitura && !editando && !Planos.talhoesDaReceita(op, r).length && campoCopiar(op, r) ? `
+              <div class="definir__linha-nome">${campoCopiar(op, r)}</div>` : ''}
             ${r ? corpoReceita(op, r) : `
               <p class="recomendacao__vazia">Nenhuma ${T().nome} nesta operação.</p>`}
           </div>
@@ -1418,17 +1409,8 @@ window.Telas.planoOperacoes = (function () {
       </div>`;
   }
 
-  // Nome da recomendação num campo visível (no teste, ninguém achou o renomear por duplo clique)
-  function campoNome(op) {
-    const nome = rascunho(op).nome;
-    return `
-      <div class="campo definir__nome">
-        <label class="campo__rotulo" for="rec-nome">Nome da ${T().nome}</label>
-        <input class="campo__controle ${ui.erroNome ? 'campo__controle--erro' : ''}" id="rec-nome" data-campo="nome-rec"
-               value="${esc(nome)}" autocomplete="off" ${ui.erroNome ? 'aria-invalid="true" aria-describedby="rec-nome-erro"' : ''}>
-        ${ui.erroNome ? `<p class="erro-campo" id="rec-nome-erro">${ui.erroNome}</p>` : ''}
-      </div>`;
-  }
+  // O nome da recomendação é automático (Recomendação 1, 2…): o campo "Nome da recomendação" saiu do modal
+  // (29/10/2026; confundia os usuários). O nome curto ("Rec 1") aparece no "Copiar produtos de".
 
 
   // ================= Grupo Tratamento de semente (TSI) =================
@@ -3377,6 +3359,18 @@ window.Telas.planoOperacoes = (function () {
     if (linhaPlantio && !e.target.closest('input, button, select, label, a, .combo')) {
       const t = linhaPlantio.dataset.talhao;
       if (ui.painelTalhao !== t) confirmarDescartePainel(() => abrirPainel(t));
+      return;
+    }
+    // Defensivo e Fertilidade (em construção): clicar na linha abre o Definir recomendação só com o talhão clicado
+    // (fora da caixa de marcar e das células de dose). Os outros talhões marcados são desmarcados: o clicado passa a
+    // ser o único marcado.
+    const linhaDose = e.target.closest('.tabela-doses tbody tr.linha--clicavel[data-talhao]');
+    // A célula da caixa de marcar não abre o modal: clicar em volta da caixa marca ou desmarca o talhão
+    const celulaMarcar = e.target.closest('.tabela-doses td.tabela__marcar');
+    if (celulaMarcar && e.target.tagName !== 'INPUT') { celulaMarcar.querySelector('input:not(:disabled)')?.click(); return; }
+    if (linhaDose && !e.target.closest('input, button, select, label, a, .combo, .tabela__editavel')) {
+      ui.marcados = new Set([linhaDose.dataset.talhao]);
+      abrirDefinir(opAtual());
       return;
     }
     const alvo = e.target.closest('[data-acao]');

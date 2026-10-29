@@ -455,7 +455,7 @@ window.DADOS = {
   },
 
   // Planos carregados ao abrir o protótipo: ano agrícola 2025, soja 25/26 e milho safrinha 26/26 da Santa Clara;
-  // ano agrícola 2026, soja 26/27 e milho safrinha 27/27 da Boa Vista (publicados) e milho 26/27 da Primavera, em
+  // ano agrícola 2026, soja 26/27 e milho safrinha 27/27 da Boa Vista (publicados) e soja 26/27 da Primavera, em
   // construção: iniciado pelo "Usar modelo de operações" (inicio: 'modelo'), com as operações do modelo e ainda sem
   // planejamento. A São José fica sem plano. "operacoes" detalha, por nome de operação do modelo: fenologia, produtos [nome, dose],
   // talhões que recebem e ajustes por talhão. Operações não listadas ficam sem recomendação e sem talhões.
@@ -619,9 +619,9 @@ window.DADOS = {
       })()
     },
     {
-      // Milho 26/27 da Primavera (Empresa C): em construção, iniciado pelo "Usar modelo de operações" (0.1 e 0.2 em
-      // construção, com as operações do modelo do milho e ainda sem planejamento), para chegar direto ao Planejamento
-      safra: '26/27', empresa: 'Empresa C', atividade: 'Agricultura', fazenda: 'Primavera', cultura: 'Milho',
+      // Soja 26/27 da Primavera (Empresa C): em construção, iniciado pelo "Usar modelo de operações" (0.1 e 0.2 em
+      // construção, com as operações do modelo da soja e ainda sem planejamento), para chegar direto ao Planejamento
+      safra: '26/27', empresa: 'Empresa C', atividade: 'Agricultura', fazenda: 'Primavera', cultura: 'Soja',
       inicio: 'modelo',
       versoes: { criadaEm: '2026-10-15T09:30' },
       custo: null, receita: null,
