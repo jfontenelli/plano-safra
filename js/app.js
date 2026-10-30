@@ -41,7 +41,8 @@
   const estado = {
     menuRecolhido: false, // menu começa expandido
     gruposFechados: new Set(), // grupos do menu (Plano de Safra, Gestão da Lavoura) começam abertos; a setinha minimiza
-    proximoIdPlano: 1
+    proximoIdPlano: 1,
+    menuAntesDoPlano: null // menu recolhido ou não antes de abrir o plano (ao abrir, ele recolhe; ao sair, volta assim)
   };
 
   const menu = document.getElementById('menu');
@@ -79,6 +80,15 @@
   function mostrarTela() {
     const { nome, parametro, extra } = rotaAtual();
     const rota = ROTAS[nome];
+
+    hashAtual = location.hash;
+    // Plano aberto: o menu recolhe para o trilho de ícones (mais espaço para as tabelas). Ao sair, volta como estava
+    // antes de abrir; aberto pela pessoa dentro do plano, vale só até sair.
+    if (nome === 'plano' && estado.menuAntesDoPlano === null) {
+      estado.menuAntesDoPlano = estado.menuRecolhido; estado.menuRecolhido = true; aplicarEstadoMenu();
+    } else if (nome !== 'plano' && estado.menuAntesDoPlano !== null) {
+      estado.menuRecolhido = estado.menuAntesDoPlano; estado.menuAntesDoPlano = null; aplicarEstadoMenu();
+    }
 
     document.querySelector('.aviso')?.remove();
     conteudo.innerHTML = rota.desenhar(parametro, extra);
@@ -267,7 +277,18 @@
   // Abre o modal Criar Plano; inicial: { safra, empresa, fazenda } já preenchidos (ex.: Painel, fazenda sem plano)
   Telas.criarPlano = (inicial = {}) => Telas.abrirModalCriarPlano({ aoCriar: criarPlanos, inicial });
 
-  window.addEventListener('hashchange', mostrarTela);
+  // Voltar e Avançar do navegador: com alteração não salva no painel do talhão, o endereço volta para o plano e a
+  // pergunta aparece; "Descartar" segue para onde a pessoa ia. (Os links e botões da tela já perguntam antes.)
+  let hashAtual = location.hash;
+  window.addEventListener('hashchange', () => {
+    const destino = location.hash;
+    if (hashAtual.startsWith('#/plano/') && Telas.planoOperacoes.temAlteracaoPendente()) {
+      history.pushState(null, '', hashAtual);
+      Telas.planoOperacoes.confirmarSaida(() => { location.hash = destino; });
+      return;
+    }
+    mostrarTela();
+  });
 
   desenharUsuario();
   aplicarEstadoMenu();

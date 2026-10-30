@@ -8,7 +8,7 @@ Acompanhar o planejamento das fazendas no ano agrícola, filtrar e abrir ou cria
 
 ## Quando aparece
 - Ao clicar em "Planos" (dentro de Plano de Safra; antes "Visão Geral") ou em "Plano de Safra" no menu, quando existe ao menos um plano.
-- Ao clicar em "‹ Voltar para Planos de Safra" no cabeçalho de um plano aberto (30/10/2026). Os filtros escolhidos antes continuam; depois de criar planos, voltam ao começo, no Ano Agrícola dos planos criados.
+- Ao clicar em "‹ Planos de Safra" no cabeçalho de um plano aberto (30/10/2026). Os filtros escolhidos antes continuam; depois de criar planos, voltam ao começo, no Ano Agrícola dos planos criados.
 - Ao abrir o protótipo: ele já vem com os planos de exemplo, só publicados (ano agrícola 2025: soja 25/26 e milho safrinha 26/26 da Santa Clara, publicados; ano agrícola 2026: soja 26/27 e milho safrinha 27/27 da Boa Vista, publicados, e soja 26/27 da Primavera, em construção, iniciada pelo "Usar modelo de operações"; São José sem plano, 29/10/2026).
 
 ## Conteúdo

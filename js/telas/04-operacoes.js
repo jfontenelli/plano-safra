@@ -33,8 +33,8 @@ window.Telas.planoOperacoes = (function () {
     somenteLeitura = Versoes.somenteLeitura(plano);
     talhoesFazenda = Util.talhoesPlano(plano); // só os talhões incluídos no plano (modal Criar Plano)
     ui = estados[plano.id] = estados[plano.id] || {
-      // Abre no primeiro grupo das guias (Plantio vem antes de Defensivo)
-      grupoId: (plano.grupos[0] || {}).id || null,
+      // Abre no grupo Plantio; sem ele, no primeiro grupo das guias
+      grupoId: (plano.grupos.find(ehSemente) || plano.grupos[0] || {}).id || null,
       opPorGrupo: {},          // operação aberta em cada grupo
       listaRecolhidaPorGrupo: {}, // lista de operações minimizada em cada grupo (Plantio começa minimizada)
       marcados: new Set(),     // talhões marcados na tabela
@@ -310,18 +310,21 @@ window.Telas.planoOperacoes = (function () {
     raiz.querySelector(seletor)?.focus({ preventScroll: true });
   }
 
-  // Cabeçalho fixo: "‹ Voltar para Planos de Safra | contexto | Versão 0.2 [status]" e, embaixo, as abas e, à direita,
+  // Cabeçalho fixo: a trilha "‹ Planos de Safra › Safra 26/27 · Empresa C · Fazenda Primavera · Cultura Soja" (só o
+  // primeiro item é link: volta à lista, com os filtros como estavam) | Versão 0.2 [status] e, embaixo, as abas e, à direita,
   // "Salvo às…", o botão da versão (Publicar versão ou Criar nova versão) e "Mais ações" (DECISOES 4.1.1)
   function cabecalho() {
-    const contexto = [`Safra ${plano.safra}`, plano.empresa, `Fazenda ${plano.fazenda}`, `Cultura ${plano.cultura}`];
+    const contexto = [`Safra ${plano.safra}`, plano.empresa, `Fazenda ${plano.fazenda}`, `Cultura ${plano.cultura}`].join(' · ');
     const v = Versoes.aberta(plano);
     return `
       <header class="plano__cabecalho">
         <div class="plano__linha plano__linha--versao">
           <div class="plano__identificacao">
-            <a class="plano__titulo" href="#/plano-safra" title="Voltar para a lista de planos (para trocar de plano)">‹ Voltar para Planos de Safra</a>
-            <span class="plano__barra" aria-hidden="true">|</span>
-            <p class="plano__contexto">${contexto.map(esc).join('<span class="plano__ponto">›</span>')}</p>
+            <nav class="plano__trilha" aria-label="Caminho">
+              <a class="plano__voltar" href="#/plano-safra" title="Voltar para a lista de planos">${Icones.anterior}Planos de Safra</a>
+              <span class="plano__seta" aria-hidden="true">›</span>
+              <p class="plano__contexto" title="${esc(contexto)}">${esc(contexto)}</p>
+            </nav>
             <span class="plano__barra" aria-hidden="true">|</span>
             <span class="plano__versao">Versão ${esc(v.num)}
               <span class="status status--${{ construcao: 'construcao', publicada: 'aprovado', revisada: 'revisada' }[Versoes.statusExibido(plano, v)]}">${Versoes.rotuloStatus(plano, v)}</span></span>
@@ -633,12 +636,13 @@ window.Telas.planoOperacoes = (function () {
   }
 
   // ----- Lista lateral -----
+  // Título: o nome do grupo aberto ("DEFENSIVO"), cortado com "…" quando é longo (o nome inteiro ao passar o mouse)
   function listaOperacoes(grupo) {
     const atual = opAtual();
     // Minimizada: só os DAPs; o nome da operação aparece ao passar o mouse
     if (listaRecolhida()) {
       return `
-        <aside class="cartao ops-lista ops-lista--recolhida" aria-label="Operações do grupo (só DAP)">
+        <aside class="cartao ops-lista ops-lista--recolhida" aria-label="Operações do grupo ${esc(grupo.nome)} (só DAP)">
           <button class="botao-icone" type="button" data-acao="alternar-lista" title="Mostrar operações"
                   aria-label="Mostrar lista de operações">${Icones.expandir}</button>
           <span class="ops-lista__rotulo-dap">DAP</span>
@@ -660,9 +664,9 @@ window.Telas.planoOperacoes = (function () {
     }
     const ops = operacoesOrdenadas(grupo);
     return `
-      <aside class="cartao ops-lista" aria-label="Operações do grupo">
+      <aside class="cartao ops-lista" aria-label="Operações do grupo ${esc(grupo.nome)}">
         <div class="ops-lista__topo">
-          <h2 class="rotulo-secao">Operações</h2>
+          <h2 class="rotulo-secao ops-lista__grupo" title="${esc(grupo.nome)}">${esc(grupo.nome)}</h2>
           <span class="ops-lista__rotulo-dap">DAP</span>
           <button class="botao-icone" type="button" data-acao="alternar-lista" title="Recolher lista"
                   aria-label="Recolher lista de operações">${Icones.recolher}</button>
@@ -1206,8 +1210,8 @@ window.Telas.planoOperacoes = (function () {
     const editar = !somenteLeitura;
     const marcaveis = visiveis.filter((t) => marcavel(op, t));
     const todos = marcaveis.length > 0 && marcaveis.every((t) => ui.marcados.has(t.nome));
-    // Uma coluna por produto: os da recomendação filtrada, ou os de todas as recomendações aplicadas
-    const colunas = rec ? rec.produtos.filter(Planos.linhaPreenchida) : Planos.colunasDose(op);
+    // Uma coluna por produto: os de todas as recomendações aplicadas na operação
+    const colunas = Planos.colunasDose(op);
     const vazio = !talhoesFazenda.length ? `Nenhum talhão cadastrado na fazenda ${esc(plano.fazenda)}.`
       : !visiveis.length ? `Todos os talhões ${tsi ? 'com variedade ' : ''}já têm ${T().nome}.` : '';
     const nColunas = colunas.length + (marcar ? 3 : 2) + (tsi ? 1 : 2); // + Variedade (TSI) ou Produtividade histórica e Variedade planejada
@@ -1230,7 +1234,7 @@ window.Telas.planoOperacoes = (function () {
           <thead><tr>
             ${marcar ? `<th class="tabela__marcar"><input type="checkbox" data-acao="marcar-todos" aria-label="Marcar todos"
                  ${todos ? 'checked' : ''} ${marcaveis.length ? '' : 'disabled'}></th>` : ''}
-            <th>Talhão</th><th class="tabela__numero">Área (ha)</th>${tsi ? '<th>Variedade</th>' : `<th class="tabela__numero" title="${esc(textoSafrasMedia())}">Produtividade histórica (${unidadeProdutividade()})</th><th>Variedade planejada</th>`}
+            <th>Talhão</th><th class="tabela__numero">Área (ha)</th>${tsi ? '<th>Variedade</th>' : `<th class="tabela__numero tabela__th-quebra" title="${esc(textoSafrasMedia())}">Produtividade histórica (${unidadeProdutividade()})</th><th>Variedade planejada</th>`}
             ${colunas.map((l) => `<th class="tabela__numero">${rotuloProduto(l)} ${etiquetaPre(l)}${seloTipo(l)}</th>`).join('')}
           </tr></thead>
           <tbody>
@@ -1372,7 +1376,7 @@ window.Telas.planoOperacoes = (function () {
             <button class="botao botao--perigo-leve barra-definir__excluir" type="button" data-acao="excluir-marcados">${Icones.lixeira} Excluir ${T().nome}</button>` : ''}
           <button class="botao botao--secundario barra-definir__limpar" type="button" data-acao="limpar-selecao"
                   title="Desmarcar todos os talhões" aria-label="Limpar seleção: desmarcar todos os talhões">Limpar</button>`
-        : `<span class="barra-definir__texto">${Icones.info} Edite os dados na tabela ou selecione vários talhões para planejar em lote</span>`}
+        : `<span class="barra-definir__texto">${Icones.info} Selecione vários talhões para planejar em lote</span>`}
         <button class="botao botao--primario" type="button" data-acao="definir-recomendacao" ${n ? '' : 'disabled'}>Planejar</button>
       </div>`;
   }
@@ -2396,8 +2400,8 @@ window.Telas.planoOperacoes = (function () {
     if (!n) {
       return `
       <div class="barra-acao barra-acao--vazia" role="region" aria-label="Planejar plantio">
-        <p class="barra-acao__selecao">${Icones.info} Edite os dados na tabela ou selecione vários talhões para planejar em lote</p>
-        <button class="botao botao--primario barra-acao__definir" type="button" disabled>${Icones.broto} Planejar</button>
+        <p class="barra-acao__selecao">${Icones.info} Selecione vários talhões para planejar em lote</p>
+        <button class="botao botao--primario barra-acao__definir" type="button" disabled>Planejar</button>
       </div>`;
     }
     // Área das linhas marcadas: a de aplicação de cada variedade (linha vazia: o talhão inteiro)
@@ -2412,7 +2416,7 @@ window.Telas.planoOperacoes = (function () {
           <button class="botao botao--perigo-leve barra-definir__excluir" type="button" data-acao="excluir-plantio">${Icones.lixeira} Excluir plantio</button>` : ''}
         <button class="botao botao--secundario barra-definir__limpar" type="button" data-acao="limpar-selecao"
                 title="Desmarcar todos os talhões" aria-label="Limpar seleção: desmarcar todos os talhões">Limpar</button>
-        <button class="botao botao--primario barra-acao__definir" type="button" data-acao="definir-plantio">${Icones.broto} Planejar</button>
+        <button class="botao botao--primario barra-acao__definir" type="button" data-acao="definir-plantio">Planejar</button>
       </div>`;
   }
 
@@ -3639,9 +3643,10 @@ window.Telas.planoOperacoes = (function () {
   function rodapeGrupos() {
     const atual = grupoAtual();
     return `
-      <footer class="grupos" aria-label="Grupos de operações">
-        <span class="grupos__rotulo">Grupo de operações</span>
-        <div class="grupos__guias" role="tablist">
+      <footer class="grupos">
+        <!-- O leitor de tela ouve o nome pelo aria-label das guias (o rótulo visual não é lido duas vezes) -->
+        <span class="grupos__rotulo" aria-hidden="true">Grupo de operações</span>
+        <div class="grupos__guias" role="tablist" aria-label="Grupo de operações">
           ${gruposPlanejamento().map((g) => {
             const ativo = atual && g.id === atual.id;
             if (ui.renomeandoGrupo === g.id) {
@@ -5063,5 +5068,8 @@ window.Telas.planoOperacoes = (function () {
     alterou(); desenharTudo();
   }
 
-  return { desenhar, aoMostrar };
+  // Voltar e Avançar do navegador (a troca de endereço não dá para impedir): a casca pergunta antes de sair
+  const temAlteracaoPendente = () => !!(ui && ui.painelEdicao && ui.painelEdicao.alterado && raiz && raiz.isConnected);
+
+  return { desenhar, aoMostrar, temAlteracaoPendente, confirmarSaida: (seguir) => confirmarDescartePainel(seguir) };
 })();
