@@ -3,7 +3,8 @@
  * Na v1, o importar aceita só o arquivo exportado por este protótipo (aba "plano" com o formato abaixo).
  * Abas e colunas seguem a planilha de rascunho do cliente (plano_safra_piccini_rascunho.xlsx), sem custos:
  *   plano · operacoes · cultura_variedade · tratamento_sementes · corretivo_fertilizante · aplicacao_defensivo
- * Uma linha por talhão × operação × produto. A coluna "recomendacao" (Rec 1, TSI 2…) remonta as receitas.
+ * Uma linha por talhão × operação × produto. Sem coluna de recomendação (o nome "Rec 1" confundia os usuários):
+ * no importar, talhões da mesma operação com os mesmos produtos voltam a formar uma recomendação só.
  */
 window.ArquivoPlano = (function () {
   const FORMATO = 'plano-safra-prototipo';
@@ -73,7 +74,7 @@ window.ArquivoPlano = (function () {
     const abasRec = {};
     ABAS_REC.forEach((nome) => {
       abasRec[nome] = [['fazenda', 'talhao', 'area_talhao', 'area_aplicacao', 'unidade_area', 'cultura', 'variedade',
-        'grupo_operacao', 'operacao', 'fenologia', 'dap', 'recomendacao',
+        'grupo_operacao', 'operacao', 'fenologia', 'dap',
         nome === 'corretivo_fertilizante' ? 'materia_prima' : 'principio_ativo', 'nome_produto_comercial',
         'unidade_produto', 'dose_padrao', 'dose_ha', 'volume']];
     });
@@ -89,7 +90,7 @@ window.ArquivoPlano = (function () {
           r.produtos.filter(Planos.linhaPreenchida).forEach((l) => {
             const dose = Planos.doseTalhao(op, ajuste, l);
             aba.push([plano.fazenda, t.nome, t.area, t.area, 'ha', plano.cultura, variedade, g.nome, op.nome,
-              op.fenologia || '', op.dap ?? '', r.nome, l.principioAtivo || '', l.produto || '', l.unidade || '',
+              op.fenologia || '', op.dap ?? '', l.principioAtivo || '', l.produto || '', l.unidade || '',
               l.dose ?? '', dose ?? '', dose !== null && dose !== undefined ? Math.round(dose * t.area * 100) / 100 : '']);
           });
         });
@@ -178,34 +179,44 @@ window.ArquivoPlano = (function () {
         ...(x.pop_plantas_planejada !== '' ? { populacao: Number(x.pop_plantas_planejada) } : {}), germinacao: germinacao || null });
     });
 
+    // Recomendações: as linhas de cada talhão × operação dão os produtos dele; talhões com a mesma composição
+    // (os mesmos produtos) ficam na mesma recomendação, e a dose diferente da padrão vira dose própria do talhão.
+    // Arquivo antigo, com a coluna "recomendacao": ela é ignorada.
     ABAS_REC.forEach((aba) => {
+      const porTalhao = new Map(); // "op.id|talhao" → { op, talhao, linhas }
       dados.abas[aba].forEach((x) => {
         const op = acharOp(x.grupo_operacao, x.operacao);
         const talhao = String(x.talhao);
         if (!op || !daFazenda.has(talhao) || !x.nome_produto_comercial) return;
-        const nome = String(x.recomendacao || 'Recomendação 1');
-        let r = op.receitas.find((y) => y.nome === nome);
-        if (!r) {
-          const numero = Number((/(\d+)$/.exec(nome) || [])[1]) || op.receitas.length + 1;
-          r = { id: Planos.novoId('r'), numero, nome, produtos: [] };
-          op.receitas.push(r);
-        }
-        const produto = String(x.nome_produto_comercial);
-        const pa = String(x.materia_prima ?? x.principio_ativo ?? '');
-        let l = r.produtos.find((y) => y.produto === produto);
-        if (!l) {
+        const chave = `${op.id}|${talhao}`;
+        if (!porTalhao.has(chave)) porTalhao.set(chave, { op, talhao, linhas: [] });
+        porTalhao.get(chave).linhas.push(x);
+      });
+      porTalhao.forEach(({ op, talhao, linhas }) => {
+        const produtos = linhas.map((x) => {
+          const produto = String(x.nome_produto_comercial);
+          const pa = String(x.materia_prima ?? x.principio_ativo ?? '');
+          // Produto fora do cadastro entra como pré-cadastro (uma vez; nos outros talhões ele já está lá)
           const doCadastro = Planos.produtoDoCadastro(produto);
           if (!doCadastro) {
             DADOS.defensivos.push({ classe: '', produto, principioAtivo: pa, unidade: String(x.unidade_produto), preCadastro: true,
               ...(aba === 'tratamento_sementes' ? { tsi: true } : aba === 'corretivo_fertilizante' ? { fertilidade: true } : {}) });
           }
-          l = Planos.novaLinha({ principioAtivo: pa, produto, unidade: String(x.unidade_produto),
-            dose: x.dose_padrao === '' ? null : Number(x.dose_padrao), preCadastro: !doCadastro });
-          r.produtos.push(l);
+          return Planos.novaLinha({ principioAtivo: pa, produto, unidade: String(x.unidade_produto),
+            dose: x.dose_padrao === '' ? null : Number(x.dose_padrao), preCadastro: !doCadastro || !!doCadastro.preCadastro });
+        });
+        const composicao = Planos.composicao(produtos);
+        let r = op.receitas.find((y) => Planos.composicao(y.produtos) === composicao);
+        if (!r) {
+          r = Planos.novaReceita(op, produtos, aba === 'tratamento_sementes' ? 'TSI' : 'Recomendação');
+          op.receitas.push(r);
         }
-        if (!op.talhoes[talhao]) op.talhoes[talhao] = Planos.novoAjuste(r.id);
-        const dose = x.dose_ha === '' ? null : Number(x.dose_ha);
-        if (dose !== l.dose) op.talhoes[talhao].doses[l.id] = dose;
+        const ajuste = op.talhoes[talhao] = Planos.novoAjuste(r.id);
+        linhas.forEach((x, k) => {
+          const l = r.produtos.find((y) => Planos.chaveLinha(y) === Planos.chaveLinha(produtos[k]));
+          const dose = x.dose_ha === '' ? null : Number(x.dose_ha);
+          if (l && dose !== l.dose) ajuste.doses[l.id] = dose;
+        });
       });
     });
     return grupos;

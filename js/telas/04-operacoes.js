@@ -10,8 +10,8 @@ window.Telas.planoOperacoes = (function () {
   const esc = Util.escapar;
   const ETAPAS = [
     { id: 'planejamento', nome: 'Planejamento' }, // talhão a talhão, por grupo (esta tela)
-    { id: 'calendario',  nome: 'Programação' }, // Calendário Agrícola do plano (Tela 05), com o nome Programação (antes Resumo) dentro do plano
-    { id: 'revisao',     nome: 'Revisão' }      // estrutura do plano, com talhões e área de cada operação (Tela 04.0, antes aba Operações)
+    { id: 'calendario',  nome: 'Resumo' },    // Calendário Agrícola do plano (Tela 05), com o nome Resumo (antes Programação) dentro do plano
+    { id: 'revisao',     nome: 'Validação' }  // estrutura do plano, com talhões e área de cada operação (Tela 04.0, antes Revisão)
   ];
   const UNIDADES = ['L', 'mL', 'kg', 'g', 't'];
   // TSI: a dose é por quantidade de semente (a unidade usada pelos clientes fica para os testes)
@@ -38,11 +38,10 @@ window.Telas.planoOperacoes = (function () {
       opPorGrupo: {},          // operação aberta em cada grupo
       listaRecolhidaPorGrupo: {}, // lista de operações minimizada em cada grupo (Plantio começa minimizada)
       marcados: new Set(),     // talhões marcados na tabela
-      filtroTalhoes: 'todos',  // todos | nao-planejados | rec:<id da recomendação>
-      quadroAberto: false,     // quadro da recomendação filtrada: lista de produtos aberta
+      filtroTalhoes: 'todos',  // todos | nao-planejados
       erroNome: null,          // modal: nome da recomendação repetido
       naoEncontrado: {},       // texto digitado sem escolher na lista e que não está no cadastro: { 'linhaId:pa|produto': texto }
-      definindo: null,         // modal "Definir recomendação" aberto: { talhoes, editando }
+      definindo: null,         // modal "Definir recomendação" aberto: { talhoes }
       novasOps: null,          // modal "Nova operação" (grupo Operação de campo): { linhas: [{ nome, dap, fenologia }], erros }
       campo: null,             // modal "Definir operação" (grupo Operação de campo): { grupoId, talhoes, linhas: [{ nome, dap, pct }], iniciais, erros }
       plantando: null,         // modal "Definir plantio" (grupo Plantio): { talhoes, linhas: [{ variedade, pct, data, populacao }], germinacao, datasTexto, erros }
@@ -77,6 +76,8 @@ window.Telas.planoOperacoes = (function () {
     raiz.addEventListener('mousedown', (e) => { if (e.target.closest('[data-acao="pt-germinacao-todos"]')) e.preventDefault(); });
     raiz.addEventListener('contextmenu', aoMenuContexto);
     raiz.addEventListener('dblclick', aoDuploClique);
+    // Anotados antes dos tratadores (fase de captura): o campo que vai gravar ("✓ Salvo" ao lado dele)
+    ['change', 'focusout', 'keydown', 'click'].forEach((tipo) => raiz.addEventListener(tipo, anotarCampo, true));
     raiz.addEventListener('change', aoMudar);
     raiz.addEventListener('input', aoDigitar);
     raiz.addEventListener('paste', aoColar);
@@ -153,6 +154,68 @@ window.Telas.planoOperacoes = (function () {
     plano.atualizadoPor = DADOS.usuario.nome;
     if (!somenteLeitura) Versoes.salvar(plano);
     avisarSalvamento();
+    // Gravação vinda de um campo da tela: "✓ Salvo" ao lado dele, depois do redesenho
+    if (campoGravando) { const seletor = campoGravando; campoGravando = null; setTimeout(() => mostrarSalvoCampo(seletor), 30); }
+  }
+
+  // ----- "✓ Salvo" ao lado do campo (campos que gravam sozinhos: nome, DAP e fenologia da operação, células das
+  // tabelas, campos da aba Validação) -----
+  // O evento do campo (sair dele, Enter, escolher na lista) fica anotado por um instante; se a gravação (alterou)
+  // acontece nesse instante, o valor mudou e o "✓ Salvo" aparece ao lado do campo por 2,5 s. Fica por cima (posição
+  // fixa, acompanha a rolagem), sem empurrar a tabela; o leitor de tela ouve "Salvo" pela região de status, sem
+  // perder o foco. Campos do painel do talhão e dos modais não contam: eles têm o botão Salvar.
+  let campoGravando = null;
+  function anotarCampo(e) {
+    let el = e.target;
+    if (!el || !el.closest) return;
+    if (e.type === 'click') {
+      // Escolha numa lista de busca (variedade): vale o campo da lista
+      if (!el.closest('.combo__lista')) return;
+      el = el.closest('.combo').querySelector('input');
+    }
+    if (!el || !el.matches('input, select, textarea') || el.closest('[role="dialog"], .painel-talhao, .definir-fundo, .modal-fundo')) return;
+    const seletor = seletorDoCampo(el);
+    if (!seletor) return;
+    campoGravando = seletor;
+    setTimeout(() => { if (campoGravando === seletor) campoGravando = null; }, 0);
+  }
+
+  // Como achar o campo de novo depois do redesenho: pelo id ou pelos atributos data-*. Nome da operação: o campo
+  // some depois de gravar, e o "✓ Salvo" fica ao lado do nome (no cabeçalho ou na lista)
+  function seletorDoCampo(el) {
+    if (el.dataset.campo === 'nome-op') return '.op-cabecalho__nome';
+    if (el.dataset.campo === 'lista-nome') return `.ops-item__nome[data-op="${CSS.escape(el.dataset.op)}"]`;
+    if (el.dataset.campo === 'est-nome-op') return `[data-est-renomear-op="${CSS.escape(el.dataset.op)}"]`;
+    if (el.id) return `#${CSS.escape(el.id)}`;
+    const dados = [...el.attributes].filter((a) => a.name.startsWith('data-') && a.name !== 'data-foco-inicial');
+    if (!dados.length) return null;
+    return el.tagName.toLowerCase() + dados.map((a) => `[${a.name}="${CSS.escape(a.value)}"]`).join('');
+  }
+
+  function mostrarSalvoCampo(seletor) {
+    Aviso.anunciar('Salvo');
+    const achar = () => raiz && raiz.isConnected && raiz.querySelector(seletor);
+    const el = achar();
+    if (!el || !el.getClientRects().length) return;
+    document.querySelector('.salvo-campo')?.remove();
+    const selo = document.createElement('span');
+    selo.className = 'salvo-campo';
+    selo.setAttribute('aria-hidden', 'true');
+    selo.innerHTML = `${Icones.certo} Salvo`;
+    document.body.appendChild(selo);
+    // Logo à direita do campo; sem espaço na tela, por dentro dele, no canto direito
+    const posicionar = () => {
+      const alvo = achar();
+      if (!alvo || !alvo.getClientRects().length) { tirar(); return; }
+      const r = alvo.getBoundingClientRect();
+      const largura = selo.offsetWidth;
+      selo.style.left = `${r.right + 6 + largura <= window.innerWidth - 4 ? r.right + 6 : r.right - largura - 4}px`;
+      selo.style.top = `${r.top + (r.height - selo.offsetHeight) / 2}px`;
+    };
+    const tirar = () => { selo.remove(); window.removeEventListener('scroll', posicionar, true); };
+    posicionar();
+    window.addEventListener('scroll', posicionar, true);
+    setTimeout(() => { selo.classList.add('salvo-campo--sumindo'); setTimeout(tirar, 300); }, 2500);
   }
 
   // ----- Estado de salvamento (versão em construção): disquete e "Alterações salvas"; quando e por quem, ao passar
@@ -166,11 +229,17 @@ window.Telas.planoOperacoes = (function () {
     relogioSalvo = setTimeout(() => { salvando = false; atualizarEstadoSalvo(); }, 700);
   }
 
+  // "Alterações salvas · 09:57" (horário da última gravação). Painel do talhão com alteração pendente:
+  // "Alterações não salvas", em âmbar, até Salvar ou Cancelar.
   function estadoSalvo() {
     const v = Versoes.aberta(plano);
     if (somenteLeitura || !v) return '';
-    const [icone, texto] = salvando ? [Icones.carregando, 'Salvando alterações…'] : [Icones.disquete, 'Alterações salvas'];
-    return `<span class="estado-salvo ${salvando ? 'estado-salvo--salvando' : ''}" data-salvo role="status" title="${esc(Versoes.detalhe(v))}">${icone} ${texto}</span>`;
+    const pendente = ui && ui.painelEdicao && ui.painelEdicao.alterado;
+    const hora = v.salvaEm ? ` · ${new Date(v.salvaEm).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}` : '';
+    const [icone, texto, classe] = pendente ? [Icones.alerta, 'Alterações não salvas', 'estado-salvo--pendente']
+      : salvando ? [Icones.carregando, 'Salvando alterações…', 'estado-salvo--salvando']
+        : [Icones.disquete, `Alterações salvas${hora}`, ''];
+    return `<span class="estado-salvo ${classe}" data-salvo role="status" title="${esc(Versoes.detalhe(v))}">${icone} ${texto}</span>`;
   }
 
   // Troca só o texto (sem redesenhar a tela)
@@ -241,7 +310,7 @@ window.Telas.planoOperacoes = (function () {
     raiz.querySelector(seletor)?.focus({ preventScroll: true });
   }
 
-  // Cabeçalho fixo: "Plano de Safra › contexto | Versão 0.2 [status]" e, embaixo, as abas e, à direita,
+  // Cabeçalho fixo: "‹ Voltar para Planos de Safra | contexto | Versão 0.2 [status]" e, embaixo, as abas e, à direita,
   // "Salvo às…", o botão da versão (Publicar versão ou Criar nova versão) e "Mais ações" (DECISOES 4.1.1)
   function cabecalho() {
     const contexto = [`Safra ${plano.safra}`, plano.empresa, `Fazenda ${plano.fazenda}`, `Cultura ${plano.cultura}`];
@@ -250,8 +319,8 @@ window.Telas.planoOperacoes = (function () {
       <header class="plano__cabecalho">
         <div class="plano__linha plano__linha--versao">
           <div class="plano__identificacao">
-            <a class="plano__titulo" href="#/plano-safra" title="Voltar para a Visão Geral (para trocar de plano)">Plano de Safra</a>
-            <span class="plano__seta" aria-hidden="true">›</span>
+            <a class="plano__titulo" href="#/plano-safra" title="Voltar para a lista de planos (para trocar de plano)">‹ Voltar para Planos de Safra</a>
+            <span class="plano__barra" aria-hidden="true">|</span>
             <p class="plano__contexto">${contexto.map(esc).join('<span class="plano__ponto">›</span>')}</p>
             <span class="plano__barra" aria-hidden="true">|</span>
             <span class="plano__versao">Versão ${esc(v.num)}
@@ -273,7 +342,7 @@ window.Telas.planoOperacoes = (function () {
     `;
   }
 
-  // Botão da versão: em construção, "Salvo às…" e Publicar versão (só na aba Revisão); publicada, Criar nova
+  // Botão da versão: em construção, "Salvo às…" e Publicar versão (só na aba Validação); publicada, Criar nova
   // versão, em todas as abas (com o aviso quando já existe outra em construção)
   function acoesVersao() {
     if (somenteLeitura) {
@@ -506,7 +575,16 @@ window.Telas.planoOperacoes = (function () {
   // Calendário Agrícola (Tela 05): desenhado aqui dentro, com o mesmo cabeçalho do plano
   function ctxCalendario() {
     ui.calendario = ui.calendario || { visao: 'tabela', talhao: 'todos' };
-    return { plano, somenteLeitura, talhoes: talhoesFazenda, estado: ui.calendario };
+    return { plano, somenteLeitura, talhoes: talhoesFazenda, estado: ui.calendario, abrirOperacao: abrirNoPlanejamento };
+  }
+
+  // Resumo › Tabela: o nome da operação abre a aba Planejamento no grupo dela, com ela aberta
+  function abrirNoPlanejamento(id) {
+    const g = gruposPlanejamento().find((x) => x.operacoes.some((o) => o.id === id));
+    if (!g) return;
+    ui.grupoId = g.id; ui.opPorGrupo[g.id] = id; ui.renomeandoOp = null; ui.filtroTalhoes = 'todos';
+    limparSelecao();
+    location.hash = `#/plano/${plano.id}/planejamento`;
   }
   const acoesCalendario = { redesenhar: (foco) => (foco ? desenharMantendoFoco(foco) : desenharTudo()), alterou: () => alterou() };
 
@@ -599,7 +677,9 @@ window.Telas.planoOperacoes = (function () {
     `;
   }
 
-  // Clique abre a operação; duplo clique (ou F2) renomeia; botão direito abre Inserir · Excluir · Renomear
+  // Clique abre a operação; duplo clique (ou F2) renomeia; o ⋯ e o botão direito abrem o mesmo menu
+  // (Renomear · Copiar para outras operações · Inserir operação · Excluir). O ⋯ fica sempre à vista na operação
+  // aberta; nas outras, ao passar o mouse ou com o foco do teclado. Na versão publicada, não aparece.
   function itemOperacao(op, ativo) {
     const nome = ui.renomeandoNaLista === op.id
       // Área de texto que cresce com o nome, para mostrá-lo inteiro (sem truncar); Enter não quebra linha
@@ -607,11 +687,15 @@ window.Telas.planoOperacoes = (function () {
                    aria-label="Nome da operação" data-foco-inicial>${esc(op.nome)}</textarea>`
       : `<button class="ops-item__nome" type="button" data-acao="abrir-op" data-op="${op.id}"
                  ${ativo ? 'aria-current="true"' : ''}
-                 title="${somenteLeitura ? esc(op.nome) : `${esc(op.nome)} · clique duas vezes para renomear, botão direito para mais opções`}">${esc(op.nome)}</button>`;
+                 title="${somenteLeitura ? esc(op.nome) : `${esc(op.nome)} · clique duas vezes para renomear`}">${esc(op.nome)}</button>`;
     return `
       <li class="ops-item ${ativo ? 'ops-item--ativo' : ''}">
         ${nome}
         <span class="ops-item__dap">${op.dap ?? '—'}</span>
+        ${somenteLeitura || ui.renomeandoNaLista === op.id ? '' : `
+          <button class="botao-icone ops-item__mais" type="button" data-acao="menu-op" data-op="${op.id}"
+                  aria-haspopup="menu" aria-expanded="false" aria-label="Mais opções de ${esc(op.nome)}"
+                  title="Mais opções">${Icones.mais_opcoes}</button>`}
       </li>`;
   }
 
@@ -840,7 +924,7 @@ window.Telas.planoOperacoes = (function () {
     };
     if (!rascunhoAlterado(op)) { seguir(); return; }
     Modal.confirmar({
-      titulo: `Descartar as alterações de ${esc(r.nome)}?`,
+      titulo: `Descartar as alterações da ${T().nome}?`,
       texto: 'As alterações não salvas na recomendação serão perdidas.',
       botoes: [{ rotulo: 'Continuar editando' }, { rotulo: 'Descartar', classe: 'perigo', acao: seguir }]
     });
@@ -1063,10 +1147,8 @@ window.Telas.planoOperacoes = (function () {
   }
 
   // ----- Talhões da operação -----
-  // Filtros Todos · Não planejados · recomendações; tabela Talhão · Área · produtos; marcar e "Definir recomendação"
+  // Filtros Todos · Não planejados; tabela Talhão · Área · produtos; marcar e "Definir recomendação"
   function talhoesVisiveis(op) {
-    const rec = recFiltrada(op);
-    if (rec) return talhoesFazenda.filter((t) => op.talhoes[t.nome] && op.talhoes[t.nome].receitaId === rec.id);
     return ui.filtroTalhoes === 'nao-planejados' ? talhoesFazenda.filter((t) => naoPlanejado(op, t)) : talhoesFazenda;
   }
 
@@ -1086,34 +1168,11 @@ window.Telas.planoOperacoes = (function () {
     return naoPlanejados > 0 && naoPlanejados < planejaveis;
   }
 
-  // Recomendações já aplicadas em algum talhão (as que ganham etiqueta nos filtros)
-  function recsAplicadas(op) {
-    return op.receitas.filter((r) => Planos.talhoesDaReceita(op, r).length);
-  }
-
-  // Filtro de uma recomendação que deixou de existir (ou ficou sem talhões) volta para Todos
-  function recFiltrada(op) {
-    if (!ui.filtroTalhoes.startsWith('rec:')) return null;
-    const r = recsAplicadas(op).find((x) => `rec:${x.id}` === ui.filtroTalhoes);
-    if (!r) ui.filtroTalhoes = 'todos';
-    return r || null;
-  }
-
-  // "Rec 1" enquanto tiver o nome padrão; renomeada, o nome dado
-  function nomeCurto(r) {
-    const m = /^Recomendação (\d+)$/.exec(r.nome);
-    return m ? `Rec ${m[1]}` : r.nome;
-  }
-
-  // Cor de cada recomendação (bolinha na etiqueta e no talhão). Fora das cores dos tipos de insumo
-  // (Herbicida roxo, Inseticida vermelho, Fungicida azul) para não confundir.
-  const CORES_REC = ['#0f766e', '#be185d', '#8a6a2f', '#4d7c0f', '#475569'];
-  function corRec(op, r) {
-    return CORES_REC[op.receitas.indexOf(r) % CORES_REC.length];
-  }
-
-  function pontoRec(op, r) {
-    return `<span class="rec-ponto" style="background: ${corRec(op, r)}" aria-hidden="true"></span>`;
+  // A recomendação não mostra nome nem número na tela ("Rec 1" confundia os usuários): ela aparece pelo que
+  // tem, os produtos e os talhões. O nome automático ("Recomendação 1") fica só no dado (Exportar e Importar).
+  // Até 3 itens; o resto resumido: "Fox Xpro, Engeo Pleno S, Nimbus + 2"
+  function resumoLista(itens) {
+    return itens.slice(0, 3).join(', ') + (itens.length > 3 ? ` + ${itens.length - 3}` : '');
   }
 
   // "DMA 806 BR (L/ha)"; sem produto comercial, só o princípio ativo (não há unidade)
@@ -1137,7 +1196,6 @@ window.Telas.planoOperacoes = (function () {
   }
 
   function painelTalhoes(op) {
-    const rec = recFiltrada(op);
     const naoPlanejados = talhoesFazenda.filter((t) => naoPlanejado(op, t)).length;
     const comNaoPlanejados = etiquetaNaoPlanejados(talhoesFazenda.filter((t) => marcavel(op, t)).length, naoPlanejados);
     const tsi = ehTsi();
@@ -1167,7 +1225,6 @@ window.Telas.planoOperacoes = (function () {
         { valor: 'todos', rotulo: `Todos os talhões: ${talhoesFazenda.length}` },
         ...(comNaoPlanejados ? [{ valor: 'nao-planejados', rotulo: `Não planejados: ${naoPlanejados}` }] : [])
       ])}
-      ${rec ? quadroRec(op, rec) : ''}
       <div class="talhoes-rolagem">
         <table class="tabela tabela--compacta tabela-talhoes tabela-doses">
           <thead><tr>
@@ -1194,10 +1251,10 @@ window.Telas.planoOperacoes = (function () {
                 if (!editar) return `<td class="tabela__numero">${d === null || d === undefined ? '—' : formatarDose(d)}</td>`;
                 return `<td class="tabela__numero tabela__editavel">${campoDose(op, t, ajuste, l, r)}</td>`;
               }).join('');
-              // Em construção: clicar na linha abre o Definir recomendação só com este talhão
+              // Em construção: clicar na linha abre o Planejar só com este talhão (com talhões marcados, marca ou desmarca)
               const abre = editar && marcavel(op, t);
               return `
-                <tr data-talhao="${esc(t.nome)}" ${abre ? `class="linha--clicavel" title="Clique para planejar a ${T().nome} do ${esc(t.nome)}"` : ''}>
+                <tr data-talhao="${esc(t.nome)}" ${abre ? `class="linha--clicavel" title="${tituloLinha(esc(t.nome), t.nome, 'planejar')}"` : ''}>
                   ${marcar ? `<td class="tabela__marcar">${marcavel(op, t)
                       ? `<input type="checkbox" data-acao="marcar" data-talhao="${esc(t.nome)}" aria-label="Marcar ${esc(t.nome)}" ${ui.marcados.has(t.nome) ? 'checked' : ''}>`
                       : `<input type="checkbox" disabled aria-label="${esc(t.nome)} sem variedade: defina a variedade antes da TSI" title="Defina a variedade antes da TSI">`}</td>` : ''}
@@ -1220,7 +1277,7 @@ window.Telas.planoOperacoes = (function () {
     const d = Planos.doseTalhao(op, ajuste, l);
     const u = Planos.unidadeDose(l);
     const propria = l.id in ajuste.doses && d !== l.dose;
-    const dica = r ? (propria ? `Dose deste talhão · padrão da ${nomeCurto(r)}: ${formatarDose(l.dose)} ${u}` : `Dose padrão da ${nomeCurto(r)}`) : '';
+    const dica = r ? (propria ? `Dose deste talhão · padrão da ${T().nome}: ${formatarDose(l.dose)} ${u}` : `Dose padrão da ${T().nome}`) : '';
     return `<input class="celula celula--numero" data-campo="tb-dose" data-talhao="${esc(t.nome)}" data-linha="${esc(l.id)}" type="text"
                    inputmode="decimal" autocomplete="off" placeholder="—" value="${d === null || d === undefined ? '' : formatarDose(d)}"
                    title="${esc(dica)}" aria-label="Dose de ${esc(Planos.nomeLinha(l))} no ${esc(t.nome)}">`;
@@ -1248,8 +1305,8 @@ window.Telas.planoOperacoes = (function () {
     el.defaultValue = el.value;
     const r = Planos.receitaDoTalhao(op, ajuste);
     const propria = l.id in ajuste.doses;
-    if (r) el.title = propria ? `Dose deste talhão · padrão da ${nomeCurto(r)}: ${formatarDose(l.dose)} ${Planos.unidadeDose(l)}` : `Dose padrão da ${nomeCurto(r)}`;
-    if (g.vazia) Aviso.mostrar(`${esc(el.dataset.talhao)} volta à dose padrão da ${esc(nomeCurto(r))}`);
+    if (r) el.title = propria ? `Dose deste talhão · padrão da ${T().nome}: ${formatarDose(l.dose)} ${Planos.unidadeDose(l)}` : `Dose padrão da ${T().nome}`;
+    if (g.vazia) Aviso.mostrar(`${esc(el.dataset.talhao)} volta à dose padrão da ${T().nome}`);
   }
 
   // ----- Colar várias linhas (e colunas) copiadas do Excel -----
@@ -1298,29 +1355,6 @@ window.Telas.planoOperacoes = (function () {
     if (erros.length) partes.push(`${erros.length} não ${erros.length === 1 ? 'entrou' : 'entraram'} (valor inválido: ${[...new Set(erros)].map(esc).join(', ')})`);
     if (sobraram) partes.push(`${sobraram} ${sobraram === 1 ? 'linha sobrou' : 'linhas sobraram'} (não há mais talhões abaixo)`);
     Aviso.mostrar(partes.join(' · '));
-  }
-
-  // Quadro da recomendação filtrada: nome · talhões · área, "Editar" e "Ver produtos" (começa recolhido)
-  function quadroRec(op, r) {
-    const talhoes = Planos.talhoesDaReceita(op, r);
-    const area = talhoesFazenda.filter((t) => talhoes.includes(t.nome)).reduce((s, t) => s + t.area, 0);
-    const aberto = ui.quadroAberto;
-    const produtos = r.produtos.filter(Planos.linhaPreenchida);
-    return `
-      <section class="quadro-rec" aria-label="${esc(r.nome)}">
-        <div class="quadro-rec__topo">
-          ${pontoRec(op, r)}
-          <p class="quadro-rec__titulo"><strong>${esc(nomeCurto(r))}</strong> · ${talhoes.length} ${talhoes.length === 1 ? 'talhão' : 'talhões'} · ${Util.area(area)}</p>
-          ${somenteLeitura ? '' : `
-            <button class="botao botao--secundario botao--p" type="button" data-acao="editar-rec" data-rec="${r.id}">${Icones.lapis} Editar</button>`}
-          <button class="botao botao--secundario botao--p quadro-rec__alternar" type="button" data-acao="alternar-quadro"
-                  aria-expanded="${aberto}" aria-controls="quadro-produtos">${aberto ? 'Ocultar produtos' : 'Ver produtos'} ${Icones.abaixo}</button>
-        </div>
-        ${aberto ? `
-          <ul class="quadro-rec__produtos" id="quadro-produtos">
-            ${produtos.map((l) => `<li>${[l.principioAtivo, l.produto].filter(Boolean).map(esc).join(' · ')} · <strong>${formatarDose(l.dose) || '—'} ${Planos.unidadeDose(l)}</strong></li>`).join('')}
-          </ul>` : ''}
-      </section>`;
   }
 
   // Sem talhão marcado: orientação em destaque e botão desabilitado.
@@ -1385,28 +1419,16 @@ window.Telas.planoOperacoes = (function () {
     return true;
   }
 
-  // "Editar" no quadro: abre o modal na recomendação, valendo para os talhões dela (sem as outras guias)
-  function abrirEditar(op, id) {
-    const r = op.receitas.find((x) => x.id === id);
-    if (!r || semDap(op)) return;
-    ui.rascunho = null; ui.preCadastro = null; ui.validarOp = null; ui.erroNome = null; ui.naoEncontrado = {}; ui.copiadoDe = null;
-    ui.receitaPorOp[op.id] = r.id;
-    const talhoes = talhoesFazenda.map((t) => t.nome).filter((t) => op.talhoes[t] && op.talhoes[t].receitaId === r.id);
-    ui.definindo = { talhoes, editando: true };
-    desenharMantendoFoco('.definir');
-  }
-
   // Cancelar, X ou Esc: descarta o que foi feito no modal (sem perguntar) e mantém os talhões marcados
   function fecharDefinir() {
     const op = opAtual();
-    const editando = ui.definindo && ui.definindo.editando;
     ui.rascunho = null; ui.preCadastro = null; ui.validarOp = null; ui.erroNome = null; ui.naoEncontrado = {}; ui.copiadoDe = null;
     ui.definindo = null;
     if (op) {
       op.receitas.filter((r) => receitaVazia(op, r)).forEach((r) => op.receitas.splice(op.receitas.indexOf(r), 1));
       if (!op.receitas.some((r) => r.id === ui.receitaPorOp[op.id])) delete ui.receitaPorOp[op.id];
     }
-    desenharMantendoFoco(editando ? '[data-acao="editar-rec"]' : '[data-acao="definir-recomendacao"]');
+    desenharMantendoFoco('[data-acao="definir-recomendacao"]');
   }
 
   // Cabeçalho dos modais Definir recomendação e Definir plantio: um talhão, o nome dele ("T04 · 128 ha");
@@ -1417,7 +1439,7 @@ window.Telas.planoOperacoes = (function () {
   }
 
   function modalDefinir(op) {
-    const { talhoes, editando } = ui.definindo;
+    const { talhoes } = ui.definindo;
     const n = talhoes.length;
     const area = talhoesFazenda.filter((t) => talhoes.includes(t.nome)).reduce((s, t) => s + t.area, 0);
     const r = receitaAtual(op);
@@ -1426,14 +1448,14 @@ window.Telas.planoOperacoes = (function () {
         <div class="definir" role="dialog" aria-modal="true" aria-labelledby="definir-titulo" tabindex="-1">
           <div class="definir__topo">
             <div class="definir__titulos">
-              <h2 class="definir__titulo" id="definir-titulo">${editando ? 'Editar' : 'Planejar'} ${T().nome}</h2>
+              <h2 class="definir__titulo" id="definir-titulo">Planejar ${T().nome}</h2>
               <p class="definir__op">${esc(op.nome)} · ${ehTsi() ? 'Tratamento de sementes industrial' : `DAP ${op.dap}`}</p>
               <p class="definir__alvo">${alvoDefinir(talhoes, area)}</p>
             </div>
             <button class="botao-icone" type="button" data-acao="fechar-definir" aria-label="Fechar">${Icones.fechar}</button>
           </div>
           <div class="definir__corpo">
-            ${r && !somenteLeitura && !editando && !Planos.talhoesDaReceita(op, r).length && campoCopiar(op, r) ? `
+            ${r && !somenteLeitura && !Planos.talhoesDaReceita(op, r).length && campoCopiar(op, r) ? `
               <div class="definir__linha-nome">${campoCopiar(op, r)}</div>` : ''}
             ${r ? corpoReceita(op, r) : `
               <p class="recomendacao__vazia">Nenhuma ${T().nome} nesta operação.</p>`}
@@ -1449,7 +1471,7 @@ window.Telas.planoOperacoes = (function () {
   }
 
   // O nome da recomendação é automático (Recomendação 1, 2…): o campo "Nome da recomendação" saiu do modal
-  // (29/10/2026; confundia os usuários). O nome curto ("Rec 1") aparece no "Copiar produtos de".
+  // (29/10/2026; confundia os usuários). O nome não aparece na tela (30/10/2026).
 
 
   // ================= Grupo Tratamento de semente (TSI) =================
@@ -1958,7 +1980,7 @@ window.Telas.planoOperacoes = (function () {
               </tr></thead>
               <tbody>
                 ${talhoesFazenda.length ? talhoesFazenda.map((t) => `
-                  <tr data-talhao="${esc(t.nome)}" ${marcar ? `class="linha--clicavel" title="Clique para planejar a operação do ${esc(t.nome)}"` : ''}>
+                  <tr data-talhao="${esc(t.nome)}" ${marcar ? `class="linha--clicavel" title="${tituloLinha(esc(t.nome), t.nome, 'planejar')}"` : ''}>
                     ${marcar ? `<td class="tabela__marcar"><input type="checkbox" data-acao="marcar" data-talhao="${esc(t.nome)}"
                         aria-label="Marcar ${esc(t.nome)}" ${ui.marcados.has(t.nome) ? 'checked' : ''}></td>` : ''}
                     <th scope="row" class="tabela__talhao">${esc(t.nome)}</th>
@@ -2320,7 +2342,7 @@ window.Telas.planoOperacoes = (function () {
     const dicaCalc = editar ? ' title="Campo calculado"' : '';
     return `
         <tr class="linha--clicavel ${aberto ? 'linha--aberta' : ''} ${i > 0 ? 'linha--variedade' : ''}" data-talhao="${nome}" data-var="${i}"
-            title="Clique na linha para abrir o histórico e as variedades do ${nome}">
+            title="${tituloLinha(nome, chaveLinha(t.nome, i), 'abrir')}">
           ${marcar ? `<td class="tabela__marcar"><input type="checkbox" data-acao="marcar" data-talhao="${nome}" data-chave="${esc(chaveLinha(t.nome, i))}"
               aria-label="Marcar ${nome}${l.variedade ? ` · ${esc(l.variedade)}` : ''}" ${ui.marcados.has(chaveLinha(t.nome, i)) ? 'checked' : ''}></td>` : ''}
           <th scope="row" class="tabela__talhao"><span class="tabela__talhao-nome">${nome}${acoes}</span></th>
@@ -2449,7 +2471,6 @@ window.Telas.planoOperacoes = (function () {
           <button class="botao-icone painel-talhao__tamanho" type="button" data-acao="expandir-painel" aria-pressed="true"
                   title="Reduzir o painel" aria-label="Reduzir o painel">${Icones.reduzir}</button>
           <h3 class="painel-talhao__titulo">${esc(talhao)} · ${Util.area(total)}</h3>
-          ${ui.painelSalvo === talhao ? `<span class="painel-talhao__salvo" role="status">${Icones.certo} Salvo</span>` : ''}
           <button class="botao-icone" type="button" data-acao="fechar-painel" aria-label="Fechar o painel" title="Fechar">${Icones.fechar}</button>
         </div>
         <div class="painel-talhao__rolagem">
@@ -2475,6 +2496,7 @@ window.Telas.planoOperacoes = (function () {
             ${somenteLeitura ? '' : `
               <button class="botao pt-var__adicionar" type="button" data-acao="pt-adicionar-variedade">${Icones.mais} Adicionar variedade</button>
               <div class="painel-talhao__botoes">
+                ${estadoPainel(ed, talhao)}
                 <button class="botao botao--texto" type="button" data-acao="pt-cancelar" ${ed.alterado ? '' : 'disabled'}
                         title="Descartar as alterações e voltar ao que está salvo">Cancelar</button>
                 <button class="botao botao--primario pt-salvar" type="button" data-acao="pt-salvar" ${ed.alterado ? '' : 'disabled'}>Salvar</button>
@@ -2510,7 +2532,6 @@ window.Telas.planoOperacoes = (function () {
           <button class="botao-icone painel-talhao__tamanho" type="button" data-acao="expandir-painel" aria-pressed="false"
                   title="Expandir o painel" aria-label="Expandir o painel">${Icones.ampliar}</button>
           <h3 class="painel-talhao__titulo">${esc(talhao)} · ${Util.area(total)}</h3>
-          ${ui.painelSalvo === talhao ? `<span class="painel-talhao__salvo" role="status">${Icones.certo} Salvo</span>` : ''}
           <button class="botao-icone" type="button" data-acao="fechar-painel" aria-label="Fechar o painel" title="Fechar">${Icones.fechar}</button>
         </div>
         <div class="painel-talhao__rolagem">
@@ -2561,6 +2582,7 @@ window.Telas.planoOperacoes = (function () {
           ${somenteLeitura ? '' : `
             <button class="botao pt-var__adicionar" type="button" data-acao="pt-adicionar-variedade">${Icones.mais} Adicionar variedade</button>
             <div class="painel-talhao__botoes">
+              ${estadoPainel(ed, talhao)}
               <button class="botao botao--secundario" type="button" data-acao="pt-cancelar" ${ed.alterado ? '' : 'disabled'}
                       title="Descartar as alterações e voltar ao que está salvo">Cancelar</button>
               <button class="botao botao--primario" type="button" data-acao="pt-salvar" ${ed.alterado ? '' : 'disabled'}>Salvar</button>
@@ -2667,14 +2689,45 @@ window.Telas.planoOperacoes = (function () {
     alterou(); marcarSalvoPainel(); desenharMantendoFoco('[data-acao="pt-salvar"], [data-acao="pt-adicionar-variedade"]');
   }
 
-  // Trocar de talhão ou fechar com alterações não salvas: pergunta antes de descartar
+  // Painel do talhão com alteração não salva: qualquer saída pergunta antes de descartar ("Continuar editando" ou
+  // "Descartar"): trocar de talhão ou fechar o painel (nos próprios botões) e, pelos ouvintes abaixo, trocar de guia
+  // de grupo, de operação, de aba do plano, de visão (Tabela/Mapa), marcar talhões, editar uma célula da tabela,
+  // o "Voltar para Planos de Safra" e o menu lateral. Filtrar, ordenar e recolher a lista não saem do painel.
+  const NAO_SAI_DO_PAINEL = new Set(['filtro-talhoes', 'ordenar-semente', 'alternar-lista']);
+  function saidaDoPainel(alvo) {
+    if (!ui || !ui.painelEdicao || !ui.painelEdicao.alterado || !raiz || !raiz.isConnected || !alvo || !alvo.closest) return null;
+    if (alvo.closest('.painel-talhao, .modal-fundo, .definir-fundo, .menu-contexto, [role="dialog"]')) return null;
+    const el = raiz.contains(alvo) ? alvo.closest('a[href], button, input, select, textarea, [data-acao], [tabindex]') : alvo.closest('a[href]');
+    return el && !NAO_SAI_DO_PAINEL.has(el.dataset.acao) ? el : null;
+  }
+  const campoDeTexto = (el) => el.matches('input:not([type="checkbox"]):not([type="radio"]), select, textarea');
+  // Respondido "Descartar", a ação segue: o campo recebe o foco; o resto, o clique
+  const seguirSaida = (el) => () => { if (!el.isConnected) return; if (campoDeTexto(el)) el.focus(); else el.click(); };
+  // Ligados uma vez só (o painel é redesenhado a cada mudança); valem só com o plano na tela e o painel pendente
+  document.addEventListener('mousedown', (e) => {
+    const el = e.button === 0 && saidaDoPainel(e.target);
+    if (el && campoDeTexto(el)) e.preventDefault(); // o campo não pega o foco antes da resposta
+  }, true);
+  document.addEventListener('click', (e) => {
+    const el = saidaDoPainel(e.target);
+    if (!el) return;
+    e.preventDefault(); e.stopPropagation();
+    confirmarDescartePainel(seguirSaida(el));
+  }, true);
+  document.addEventListener('focusin', (e) => {
+    const el = saidaDoPainel(e.target);
+    if (!el || !campoDeTexto(el)) return;
+    el.blur();
+    confirmarDescartePainel(seguirSaida(el));
+  }, true);
+
   function confirmarDescartePainel(seguir) {
     const ed = ui.painelEdicao;
     if (!ed || !ed.alterado) { seguir(); return; }
     Modal.confirmar({
       titulo: `Descartar as alterações do ${esc(ed.talhao)}?`,
       texto: 'As mudanças nas variedades deste talhão ainda não foram salvas.',
-      botoes: [{ rotulo: 'Continuar editando' }, { rotulo: 'Descartar', classe: 'perigo', acao: () => { ui.painelEdicao = null; seguir(); } }]
+      botoes: [{ rotulo: 'Continuar editando' }, { rotulo: 'Descartar', classe: 'perigo', acao: () => { ui.painelEdicao = null; atualizarEstadoSalvo(); seguir(); } }]
     });
   }
 
@@ -2685,6 +2738,7 @@ window.Telas.planoOperacoes = (function () {
     Object.assign(ed.linhas[vi], mudanca);
     ed.alterado = true;
     delete ed.erros[vi];
+    atualizarEstadoSalvo();
   }
 
   // Produtividade (linha, sc/ha) e chuva acumulada no ciclo (barras, mm) por safra.
@@ -3029,19 +3083,26 @@ window.Telas.planoOperacoes = (function () {
     desenharMantendoFoco(`[data-acao="marcar"][data-talhao="${t}"]`);
   }
 
-  // Painel do talhão: cada campo grava sozinho (salvamento automático). Logo depois de gravar, "✓ Salvo" aparece no
-  // topo do painel por alguns segundos, para a pessoa ver que o que digitou ficou gravado.
+  // Painel do talhão: a edição fica no rascunho até Salvar. Ao lado dos botões, "Alterações não salvas" (âmbar)
+  // enquanto houver mudança e, depois de Salvar, "✓ Salvo" (verde) por 2,5 s.
+  function estadoPainel(ed, talhao) {
+    const conteudo = ed.alterado ? `<span class="pt-estado__pendente">${Icones.alerta} Alterações não salvas</span>`
+      : ui.painelSalvo === talhao ? `<span class="pt-estado__salvo">${Icones.certo} Salvo</span>` : '';
+    return `<span class="pt-estado">${conteudo}</span>`;
+  }
+
   let timerSalvoPainel = null;
   function marcarSalvoPainel() {
     ui.painelSalvo = ui.painelTalhao;
+    Aviso.anunciar('Salvo');
     clearTimeout(timerSalvoPainel);
     timerSalvoPainel = setTimeout(() => {
       ui.painelSalvo = null;
-      const aviso = raiz && raiz.querySelector('.painel-talhao__salvo');
+      const aviso = raiz && raiz.querySelector('.pt-estado__salvo');
       if (!aviso) return;
-      aviso.classList.add('painel-talhao__salvo--sumindo');
-      setTimeout(() => aviso.remove(), 400);
-    }, 3000);
+      aviso.classList.add('pt-estado__salvo--sumindo');
+      setTimeout(() => aviso.remove(), 300);
+    }, 2500);
   }
 
   // Muda variedade, área, data ou população de uma variedade do talhão do painel (vale na hora)
@@ -3385,20 +3446,10 @@ window.Telas.planoOperacoes = (function () {
   }
 
   // ----- Edição na célula da tabela do Plantio -----
-  // Data na célula: "dd/mm" (o ano vem da safra: julho a dezembro no 1º ano, janeiro a junho no 2º) ou "dd/mm/aaaa"
-  function dataDaCelula(texto) {
-    const d = String(texto || '').replace(/\D/g, '');
-    if (d.length === 8) return dataDeTexto(d);
-    if (d.length !== 4) return null;
-    const mes = Number(d.slice(2, 4));
-    const ano = mes >= 7 ? anoPlantio() : anoPlantio() + 1;
-    return dataDeTexto(`${d}${ano}`);
-  }
-
   // Grava área de aplicação, data, população ou germinação de uma variedade do talhão (vi). Devolve { erro } (inválido) ou { mostrar }
   function gravarCampoPlantio(op, t, vi, campo, texto) {
     if (campo === 'tb-data') {
-      const iso = texto ? dataDaCelula(texto) : '';
+      const iso = texto ? dataDeTexto(texto) : ''; // só a data completa, dd/mm/aaaa
       if (iso === null) return { erro: 'Data inválida. Use dd/mm/aaaa.' };
       mudarLinha(op, t, vi, { data: iso });
       return { mostrar: iso ? dataCompleta(iso) : '' };
@@ -3563,10 +3614,11 @@ window.Telas.planoOperacoes = (function () {
         <select class="campo__controle" id="rec-copiar" data-campo="copiar-de">
           <option value="">Escolha uma ${T().nome}</option>
           ${origens.map((x) => {
-            // "Rec 1 (Fox Xpro, Engeo Pleno S, Nimbus + 2)": até 3 nomes comerciais, o resto resumido
-            const nomes = x.produtos.filter(Planos.linhaPreenchida).map(Planos.nomeLinha);
-            const lista = nomes.slice(0, 3).join(', ') + (nomes.length > 3 ? ` + ${nomes.length - 3}` : '');
-            return `<option value="${x.id}" ${ui.copiadoDe === x.id ? 'selected' : ''}>${esc(nomeCurto(x))} (${esc(lista)})</option>`;
+            // "Fox Xpro, Engeo Pleno S, Nimbus + 2 · T01, T02, T05 + 4": os produtos e os talhões em que ela está
+            const produtos = resumoLista(x.produtos.filter(Planos.linhaPreenchida).map(Planos.nomeLinha));
+            const talhoes = Planos.talhoesDaReceita(op, x);
+            const texto = talhoes.length ? `${produtos} · ${resumoLista(talhoes)}` : produtos;
+            return `<option value="${x.id}" ${ui.copiadoDe === x.id ? 'selected' : ''}>${esc(texto)}</option>`;
           }).join('')}
         </select>
       </div>`;
@@ -3580,7 +3632,7 @@ window.Telas.planoOperacoes = (function () {
     rascunho(op).produtos = origem.produtos.filter(Planos.linhaPreenchida).map((l) => Planos.novaLinha({
       principioAtivo: l.principioAtivo, produto: l.produto, unidade: l.unidade, dose: l.dose, preCadastro: l.preCadastro }));
     desenharMantendoFoco('#rec-copiar');
-    Aviso.mostrar(`Produtos de ${esc(nomeCurto(origem))} copiados`);
+    Aviso.mostrar('Produtos copiados');
   }
 
   // ----- Guias de grupo (rodapé) -----
@@ -3688,22 +3740,37 @@ window.Telas.planoOperacoes = (function () {
   }
 
   // ================= Ações =================
+  // Com talhões (ou linhas do Plantio) marcados, o clique na linha marca ou desmarca pela caixa dela (a mesma ação
+  // da caixa: a barra de baixo se atualiza); caixa desabilitada não muda. Desmarcada a última, volta ao estado sem
+  // seleção. Devolve true quando há seleção (o clique não abre o Planejar nem o painel).
+  function alternarPelaLinha(linha) {
+    if (!ui.marcados.size) return false;
+    linha.querySelector('input[data-acao="marcar"]:not(:disabled)')?.click();
+    return true;
+  }
+
+  // Título da linha: sem seleção, "Clique para planejar o T03" (Plantio: "abrir"); com seleção, marcar ou desmarcar
+  function tituloLinha(nome, chave, semSelecao) {
+    if (!ui.marcados.size) return `Clique para ${semSelecao} o ${nome}`;
+    return `Clique para ${ui.marcados.has(chave) ? 'desmarcar' : 'marcar'} o ${nome}`;
+  }
+
   function aoClicar(e) {
     if (etapa === 'revisao' && Telas.operacoesPlano.aoClicar(e, ctxEstrutura(), acoesEstrutura)) return;
     if (etapa === 'calendario' && Telas.calendario.aoClicar(e, ctxCalendario(), acoesCalendario)) return;
-    // Plantio: clicar em qualquer lugar da linha abre o painel do talhão (menos na caixa de marcar, no "+" e nos campos)
+    // Tabelas de talhões: sem seleção, o clique na linha (fora da caixa de marcar e das células editáveis) abre o
+    // Planejar só com o talhão clicado ou, no Plantio, o painel do talhão. Com talhões (ou linhas) marcados, o clique
+    // na linha marca ou desmarca, sem abrir nada (alternarPelaLinha).
     const linhaPlantio = e.target.closest('.tabela-variedade tbody tr[data-talhao]');
     if (linhaPlantio && !e.target.closest('input, button, select, label, a, .combo')) {
+      if (alternarPelaLinha(linhaPlantio)) return;
       const t = linhaPlantio.dataset.talhao;
       if (ui.painelTalhao !== t) confirmarDescartePainel(() => abrirPainel(t));
       return;
     }
-    // Defensivo e Fertilidade (em construção): clicar na linha abre o Definir recomendação só com o talhão clicado
-    // (fora da caixa de marcar e das células de dose). Os outros talhões marcados são desmarcados: o clicado passa a
-    // ser o único marcado.
-    // Operação de campo: o clique na linha abre o Definir operação só com o talhão clicado (a mesma regra)
     const linhaCampo = e.target.closest('.tabela-campo tbody tr.linha--clicavel[data-talhao]');
     if (linhaCampo && !e.target.closest('input, button, select, label, a, .tabela__editavel')) {
+      if (alternarPelaLinha(linhaCampo)) return;
       ui.marcados = new Set([linhaCampo.dataset.talhao]);
       abrirDefinirCampo(grupoAtual());
       return;
@@ -3713,6 +3780,7 @@ window.Telas.planoOperacoes = (function () {
     const celulaMarcar = e.target.closest('.tabela-doses td.tabela__marcar, .tabela-campo td.tabela__marcar');
     if (celulaMarcar && e.target.tagName !== 'INPUT') { celulaMarcar.querySelector('input:not(:disabled)')?.click(); return; }
     if (linhaDose && !e.target.closest('input, button, select, label, a, .combo, .tabela__editavel')) {
+      if (alternarPelaLinha(linhaDose)) return;
       ui.marcados = new Set([linhaDose.dataset.talhao]);
       abrirDefinir(opAtual());
       return;
@@ -3728,6 +3796,14 @@ window.Telas.planoOperacoes = (function () {
       case 'alternar-lista':
         ui.listaRecolhidaPorGrupo[grupo.id] = !listaRecolhida(); desenharTudo(); break;
 
+      case 'menu-op': {
+        const grupo = grupoAtual();
+        const op = grupo.operacoes.find((o) => o.id === alvo.dataset.op);
+        if (!op) break;
+        const caixa = alvo.getBoundingClientRect();
+        abrirMenuContexto(alvo, caixa.left, caixa.bottom + 4, op.nome, itensMenuOperacao(grupo, op), caixa.top - 4);
+        break;
+      }
       case 'abrir-op': {
         const id = alvo.dataset.op;
         // Dois cliques seguidos no nome = renomear (como nas guias). Feito à mão porque
@@ -3779,7 +3855,7 @@ window.Telas.planoOperacoes = (function () {
       case 'salvar-pre': salvarPreCadastro(op); break;
 
       case 'filtro-talhoes':
-        ui.filtroTalhoes = alvo.dataset.filtro; ui.marcados = new Set(); ui.quadroAberto = false;
+        ui.filtroTalhoes = alvo.dataset.filtro; ui.marcados = new Set();
         desenharMantendoFoco(`[data-filtro="${alvo.dataset.filtro}"]`); break;
 
       // Plantio: marcar talhão (trabalho em lote) fecha o painel do talhão (trabalho talhão a talhão)
@@ -3858,7 +3934,7 @@ window.Telas.planoOperacoes = (function () {
         const g = grupoSementes();
         if (!g) break;
         sairDaReceita(() => {
-          ui.grupoId = g.id; ui.renomeandoOp = null; ui.filtroTalhoes = 'todos'; ui.quadroAberto = false;
+          ui.grupoId = g.id; ui.renomeandoOp = null; ui.filtroTalhoes = 'todos';
           limparSelecao(); pararRenomearNaLista(); desenharTudo();
         });
         break;
@@ -3916,15 +3992,10 @@ window.Telas.planoOperacoes = (function () {
       case 'dc-remover': ui.campo.linhas.splice(Number(alvo.dataset.var), 1); ui.campo.erros = {}; desenharMantendoFoco('[data-acao="dc-adicionar"]'); break;
       case 'dc-fechar': ui.campo = null; desenharMantendoFoco('[data-acao="campo-definir"]'); break;
       case 'dc-salvar': salvarCampo(grupo); break;
-      case 'editar-rec': abrirEditar(op, alvo.dataset.rec); break;
-      // Pelo "Editar" (a recomendação inteira): exclui a recomendação. Pelo "Definir recomendação"
-      // (talhões marcados): tira a recomendação só desses talhões.
+      // Pelo "Planejar" (talhões marcados): tira a recomendação só desses talhões
       case 'excluir-rec':
-        if (ui.definindo && ui.definindo.editando) excluirReceita(op, receitaAtual(op));
-        else excluirDosTalhoes(op, receitaAtual(op), ui.definindo ? ui.definindo.talhoes : []);
+        excluirDosTalhoes(op, receitaAtual(op), ui.definindo ? ui.definindo.talhoes : []);
         break;
-      case 'alternar-quadro':
-        ui.quadroAberto = !ui.quadroAberto; desenharMantendoFoco('[data-acao="alternar-quadro"]'); break;
       case 'fechar-definir': fecharDefinir(); break;
       case 'aplicar-definicao': aplicarDefinicao(op); break;
 
@@ -3940,7 +4011,7 @@ window.Telas.planoOperacoes = (function () {
         if (ui.grupoId === id) break;
         sairDaReceita(() => {
           // Cada guia abre em Todos os talhões ("Não planejados" muda de sentido entre os grupos)
-          ui.grupoId = id; ui.renomeandoOp = null; ui.filtroTalhoes = 'todos'; ui.quadroAberto = false;
+          ui.grupoId = id; ui.renomeandoOp = null; ui.filtroTalhoes = 'todos';
           limparSelecao(); pararRenomearNaLista(); desenharTudo();
         });
         break;
@@ -4414,7 +4485,7 @@ window.Telas.planoOperacoes = (function () {
         });
         // Com a nova, abre nela, com o nome em edição na lista; senão, no primeiro destino
         ui.opPorGrupo[grupo.id] = nova ? nova.id : destinos[0].id;
-        ui.filtroTalhoes = 'todos'; ui.quadroAberto = false;
+        ui.filtroTalhoes = 'todos';
         limparSelecao(); alterou();
         if (nova) renomearNaLista(nova.id); else desenharTudo();
         const todos = [...destinos, ...(nova ? [{ nome: 'uma operação nova' }] : [])];
@@ -4519,43 +4590,6 @@ window.Telas.planoOperacoes = (function () {
   }
 
   // ----- Excluir receita -----
-  // Com talhões: confirmação com o impacto (os talhões ficam sem operação). Sem talhões: na hora, com Desfazer.
-  function excluirReceita(op, r) {
-    if (!r) return;
-    const talhoes = Planos.talhoesDaReceita(op, r);
-    const remover = () => {
-      const indice = op.receitas.indexOf(r);
-      op.receitas.splice(indice, 1);
-      talhoes.forEach((t) => { delete op.talhoes[t]; });
-      delete ui.receitaPorOp[op.id];
-      ui.rascunho = null; ui.validarOp = null; ui.preCadastro = null; ui.erroNome = null;
-      // O modal fecha (a recomendação aberta nele deixou de existir) e a tabela volta para Todos os talhões
-      ui.definindo = null;
-      ui.filtroTalhoes = 'todos'; ui.quadroAberto = false;
-      alterou(); desenharTudo();
-      const rolagem = raiz.querySelector('.talhoes-rolagem');
-      if (rolagem) rolagem.scrollTop = 0;
-      return indice;
-    };
-    const n = talhoes.length;
-    if (n) {
-      Modal.confirmar({
-        titulo: `Excluir ${esc(r.nome)}?`,
-        texto: `${n === 1 ? 'O talhão ficará' : `Os ${n} talhões ficarão`} sem ${T().nome}. Essa ação não pode ser desfeita.`,
-        botoes: [{ rotulo: 'Cancelar' }, { rotulo: `Excluir ${T().nome}`, classe: 'perigo', acao: () => {
-          remover(); Aviso.mostrar(`${esc(nomeCurto(r))} excluída`);
-        } }]
-      });
-    } else {
-      const indice = remover();
-      Aviso.mostrar(`${esc(r.nome)} excluída`, { acao: 'Desfazer', aoAgir: () => {
-        op.receitas.splice(Math.min(indice, op.receitas.length), 0, r);
-        ui.receitaPorOp[op.id] = r.id; ui.rascunho = null;
-        if (raiz.isConnected) desenharTudo();
-      } });
-    }
-  }
-
   // Tira a recomendação só dos talhões marcados; ela continua nos outros.
   // Se não sobrar nenhum talhão, a recomendação deixa de existir.
   function excluirDosTalhoes(op, r, marcados) {
@@ -4564,28 +4598,27 @@ window.Telas.planoOperacoes = (function () {
     const n = alvo.length;
     if (!n) return;
     const restam = Planos.talhoesDaReceita(op, r).length - n;
-    const nome = esc(nomeCurto(r));
     Modal.confirmar({
-      titulo: `Excluir ${esc(r.nome)} de ${n} ${n === 1 ? 'talhão' : 'talhões'}?`,
-      texto: textoRestam(nome, restam) + ' Essa ação não pode ser desfeita.',
+      titulo: `Excluir a ${T().nome} de ${n} ${n === 1 ? 'talhão' : 'talhões'}?`,
+      texto: textoRestam(restam) + ' Essa ação não pode ser desfeita.',
       botoes: [{ rotulo: 'Cancelar' }, { rotulo: `Excluir ${T().nome}`, classe: 'perigo', acao: () => {
         alvo.forEach((t) => { delete op.talhoes[t]; });
         if (!restam) { op.receitas.splice(op.receitas.indexOf(r), 1); delete ui.receitaPorOp[op.id]; }
         ui.rascunho = null; ui.validarOp = null; ui.preCadastro = null; ui.erroNome = null;
         // Depois de excluir, a tabela volta para Todos os talhões
-        ui.filtroTalhoes = 'todos'; ui.quadroAberto = false;
+        ui.filtroTalhoes = 'todos';
         limparSelecao(); alterou(); desenharTudo();
         const rolagem = raiz.querySelector('.talhoes-rolagem');
         if (rolagem) rolagem.scrollTop = 0;
-        Aviso.mostrar(restam ? `${nome} excluída de ${n} ${n === 1 ? 'talhão' : 'talhões'}` : `${nome} excluída`);
+        Aviso.mostrar(restam ? `${T().Nome} excluída de ${n} ${n === 1 ? 'talhão' : 'talhões'}` : `${T().Nome} excluída`);
       } }]
     });
   }
 
-  // "Rec 1 continua nos outros 11 talhões." / "Rec 1 deixa de existir."
-  function textoRestam(nome, restam) {
-    if (!restam) return `${nome} deixa de existir.`;
-    return `${nome} continua ${restam === 1 ? 'no outro talhão' : `nos outros ${restam} talhões`}.`;
+  // "A recomendação continua nos outros 11 talhões." / "A recomendação deixa de existir."
+  function textoRestam(restam) {
+    if (!restam) return `A ${T().nome} deixa de existir.`;
+    return `A ${T().nome} continua ${restam === 1 ? 'no outro talhão' : `nos outros ${restam} talhões`}.`;
   }
 
   // "Excluir recomendação" no rodapé da tabela: tira a recomendação dos talhões marcados (podem ser de
@@ -4598,16 +4631,10 @@ window.Telas.planoOperacoes = (function () {
     const recs = op.receitas.map((r) => ({ r, n: alvo.filter((t) => op.talhoes[t].receitaId === r.id).length }))
       .filter((x) => x.n);
     const plural = (q) => `${q} ${q === 1 ? 'talhão' : 'talhões'}`;
-    let titulo; let detalhe;
-    if (recs.length === 1) {
-      const { r } = recs[0];
-      const restam = Planos.talhoesDaReceita(op, r).length - n;
-      titulo = `Excluir ${esc(r.nome)} de ${plural(n)}?`;
-      detalhe = textoRestam(esc(nomeCurto(r)), restam);
-    } else {
-      titulo = `Excluir a ${T().nome} de ${plural(n)}?`;
-      detalhe = recs.map((x) => `${esc(nomeCurto(x.r))} sai de ${plural(x.n)}`).join(', ').replace(/, ([^,]*)$/, ' e $1') + '.';
-    }
+    // Uma recomendação só: diz se ela continua em outros talhões; mais de uma: só que os talhões ficam sem
+    const titulo = `Excluir a ${T().nome} de ${plural(n)}?`;
+    const detalhe = recs.length === 1 ? textoRestam(Planos.talhoesDaReceita(op, recs[0].r).length - n)
+      : `Os ${n} talhões ficarão sem ${T().nome}.`;
     const aviso = ignorados ? ` ${ignorados === 1 ? '1 talhão marcado já não tem' : `${ignorados} talhões marcados já não têm`} ${T().nome}.` : '';
     Modal.confirmar({
       titulo,
@@ -4616,7 +4643,7 @@ window.Telas.planoOperacoes = (function () {
         alvo.forEach((t) => { delete op.talhoes[t]; });
         recs.filter((x) => !Planos.talhoesDaReceita(op, x.r).length)
           .forEach((x) => op.receitas.splice(op.receitas.indexOf(x.r), 1));
-        ui.filtroTalhoes = 'todos'; ui.quadroAberto = false;
+        ui.filtroTalhoes = 'todos';
         limparSelecao(); alterou(); desenharTudo();
         const rolagem = raiz.querySelector('.talhoes-rolagem');
         if (rolagem) rolagem.scrollTop = 0;
@@ -4653,13 +4680,13 @@ window.Telas.planoOperacoes = (function () {
       ui.erroNome = `Já existe uma ${T().nome} com esse nome`; desenharMantendoFoco('#rec-nome'); return;
     }
     const novas = rascunho(op).produtos.filter(Planos.linhaPreenchida).map((l) => ({ ...l }));
-    const { talhoes, editando } = ui.definindo;
+    const { talhoes } = ui.definindo;
     const daRec = Planos.talhoesDaReceita(op, r);
-    if (!editando && daRec.some((t) => !talhoes.includes(t))) { aplicarEmParte(op, r, talhoes, novas, nome); return; }
+    if (daRec.some((t) => !talhoes.includes(t))) { aplicarEmParte(op, r, talhoes, novas, nome); return; }
     // Recomendação nova com os mesmos produtos de outra (ex.: copiados dela pelo "Copiar produtos de"):
     // a composição é a identidade, então os talhões entram na que já existe e a dose diferente
     // da padrão dela fica como dose própria do talhão
-    const igual = !editando && !daRec.length &&
+    const igual = !daRec.length &&
       op.receitas.find((x) => x !== r && Planos.composicao(x.produtos) === Planos.composicao(novas));
     if (igual) {
       op.receitas.splice(op.receitas.indexOf(r), 1);
@@ -4672,7 +4699,7 @@ window.Telas.planoOperacoes = (function () {
         });
       });
       const n = talhoes.length;
-      concluirAplicacao(op, igual, `${esc(nomeCurto(igual))} aplicada em ${n} ${n === 1 ? 'talhão' : 'talhões'}`);
+      concluirAplicacao(op, igual, `${T().Nome} aplicada em ${n} ${n === 1 ? 'talhão' : 'talhões'}`);
       return;
     }
     r.nome = nome;
@@ -4690,13 +4717,13 @@ window.Telas.planoOperacoes = (function () {
       if (!a || a.receitaId !== r.id) op.talhoes[t] = Planos.novoAjuste(r.id);
     });
     const n = talhoes.length;
-    concluirAplicacao(op, r, editando ? `${esc(r.nome)} salva` : `${esc(r.nome)} aplicada em ${n} ${n === 1 ? 'talhão' : 'talhões'}`);
+    concluirAplicacao(op, r, `${T().Nome} aplicada em ${n} ${n === 1 ? 'talhão' : 'talhões'}`);
   }
 
   // Depois de aplicar, a tela volta para "Todos os talhões" (a pessoa escolhe a etiqueta, se quiser)
   function concluirAplicacao(op, destino, mensagem) {
     ui.rascunho = null; ui.validarOp = null; ui.preCadastro = null; ui.erroNome = null;
-    ui.filtroTalhoes = 'todos'; ui.quadroAberto = false;
+    ui.filtroTalhoes = 'todos';
     limparSelecao(); alterou(); desenharTudo();
     const rolagem = raiz.querySelector('.talhoes-rolagem');
     if (rolagem) rolagem.scrollTop = 0;
@@ -4726,7 +4753,7 @@ window.Telas.planoOperacoes = (function () {
     if (composicao === Planos.composicao(r.produtos)) {
       if (nome !== r.nome) r.nome = nome; // o nome é da recomendação: vale para todos os talhões dela
       talhoes.forEach((t) => dosesProprias(r, op.talhoes[t], true));
-      concluirAplicacao(op, r, `${esc(nomeCurto(r))} aplicada em ${plural} · doses só desses talhões`);
+      concluirAplicacao(op, r, `${T().Nome} aplicada em ${plural} · doses só desses talhões`);
       return;
     }
 
@@ -4744,8 +4771,8 @@ window.Telas.planoOperacoes = (function () {
       if (!criada) dosesProprias(destino, op.talhoes[t], false);
     });
     concluirAplicacao(op, destino, criada
-      ? `${esc(nomeCurto(destino))} criada para ${plural} · ${esc(nomeCurto(r))} continua em ${restam} ${restam === 1 ? 'talhão' : 'talhões'}`
-      : `${plural} ${n === 1 ? 'passou' : 'passaram'} para ${esc(nomeCurto(destino))}`);
+      ? `Nova ${T().nome} criada para ${plural} · a anterior continua em ${restam} ${restam === 1 ? 'talhão' : 'talhões'}`
+      : `${plural} ${n === 1 ? 'passou' : 'passaram'} para a ${T().nome} que já tinha esses produtos`);
   }
 
   // ----- Grupos -----
@@ -4873,8 +4900,21 @@ window.Telas.planoOperacoes = (function () {
   let ultimoCliqueOp = { id: null, quando: 0 };
 
   // Botão direito (ou tecla de menu / Shift+F10) na guia de grupo ou no nome da operação:
-  // Inserir · Excluir · Renomear, como no Excel
+  // Inserir · Excluir · Renomear, como no Excel. Na operação, o mesmo menu do ⋯ (itensMenuOperacao).
   let menuContexto = null;
+
+  // Menu da operação na lista (⋯ e botão direito), nesta ordem, com ícones; Excluir separado, em vermelho
+  function itensMenuOperacao(grupo, op) {
+    return [
+      { id: 'renomear', rotulo: 'Renomear', icone: Icones.lapis, acao: () => sairDaReceita(() => {
+        ui.opPorGrupo[grupo.id] = op.id;
+        limparSelecao(); renomearNaLista(op.id);
+      }) },
+      { id: 'copiar', rotulo: 'Copiar para outras operações', icone: Icones.copiar, acao: () => sairDaReceita(() => copiarParaOperacao(grupo, op)) },
+      { id: 'inserir', rotulo: 'Inserir operação', icone: Icones.inserir, acao: () => sairDaReceita(() => criarOperacao(grupo)) },
+      { id: 'excluir', rotulo: 'Excluir', icone: Icones.lixeira, perigo: true, separar: true, acao: () => sairDaReceita(() => excluirOperacao(grupo, op)) }
+    ];
+  }
 
   function aoMenuContexto(e) {
     if (somenteLeitura) return;
@@ -4887,10 +4927,10 @@ window.Telas.planoOperacoes = (function () {
       const op = opAtual();
       const existe = !!Planos.linhasPlantio(op, t)[vi];
       const caixaLinha = linhaPl.getBoundingClientRect();
-      const itens = { inserir: () => adicionarVariedade(op, t, 'tb', existe ? vi : null) };
+      const itens = [{ id: 'inserir', rotulo: 'Inserir', acao: () => adicionarVariedade(op, t, 'tb', existe ? vi : null) }];
       if (existe) {
-        itens.excluir = () => removerVariedade(op, t, vi, 'tb');
-        itens.limpar = () => limparLinhaPlantio(op, t, vi);
+        itens.push({ id: 'excluir', rotulo: 'Excluir', acao: () => removerVariedade(op, t, vi, 'tb') },
+          { id: 'limpar', rotulo: 'Limpar conteúdo', acao: () => limparLinhaPlantio(op, t, vi) });
       }
       abrirMenuContexto(linhaPl, e.clientX || caixaLinha.left + 24, e.clientY || caixaLinha.bottom, `Linha do ${t}`, itens);
       return;
@@ -4908,49 +4948,43 @@ window.Telas.planoOperacoes = (function () {
     if (guia) {
       const grupo = plano.grupos.find((g) => g.id === guia.dataset.grupo);
       if (!grupo) return;
-      abrirMenuContexto(ancora, x, y, `Grupo ${grupo.nome}`, {
-        inserir: () => sairDaReceita(novoGrupo),
-        excluir: () => sairDaReceita(() => excluirGrupo(grupo)),
-        renomear: () => sairDaReceita(() => {
+      abrirMenuContexto(ancora, x, y, `Grupo ${grupo.nome}`, [
+        { id: 'inserir', rotulo: 'Inserir', acao: () => sairDaReceita(novoGrupo) },
+        { id: 'excluir', rotulo: 'Excluir', acao: () => sairDaReceita(() => excluirGrupo(grupo)) },
+        { id: 'renomear', rotulo: 'Renomear', acao: () => sairDaReceita(() => {
           ui.grupoId = grupo.id; ui.renomeandoOp = null;
           limparSelecao(); pararRenomearNaLista();
           ui.renomeandoGrupo = grupo.id;
           desenharTudo();
-        })
-      });
+        }) }
+      ]);
     } else {
       const grupo = grupoAtual();
       const op = grupo.operacoes.find((o) => o.id === nomeOp.dataset.op);
       if (!op) return;
-      abrirMenuContexto(ancora, x, y, op.nome, {
-        inserir: () => sairDaReceita(() => criarOperacao(grupo)),
-        copiar: () => sairDaReceita(() => copiarParaOperacao(grupo, op)),
-        excluir: () => sairDaReceita(() => excluirOperacao(grupo, op)),
-        renomear: () => sairDaReceita(() => {
-          ui.opPorGrupo[grupo.id] = op.id;
-          limparSelecao(); renomearNaLista(op.id);
-        })
-      });
+      abrirMenuContexto(ancora, x, y, op.nome, itensMenuOperacao(grupo, op));
     }
   }
 
-  function abrirMenuContexto(ancora, x, y, rotulo, acoes) {
+  // itens: [{ id, rotulo, icone, perigo, separar, acao }], na ordem do menu. yAcima: onde o menu termina quando
+  // sobe (o ⋯ passa o topo dele; no botão direito, o ponto do clique)
+  function abrirMenuContexto(ancora, x, y, rotulo, itensMenu, yAcima = y) {
     fecharMenuContexto();
     const menu = document.createElement('div');
     menu.className = 'menu-contexto';
     menu.setAttribute('role', 'menu');
     menu.setAttribute('aria-label', rotulo);
-    // Copiar só existe para operações (não para grupos)
-    menu.innerHTML = [['inserir', 'Inserir'], ['excluir', 'Excluir'], ['renomear', 'Renomear'], ['copiar', 'Copiar'], ['limpar', 'Limpar conteúdo']]
-      .filter(([item]) => acoes[item])
-      .map(([item, rotulo]) => `<button class="menu-contexto__item" type="button" role="menuitem" data-item="${item}">${rotulo}</button>`)
-      .join('');
+    menu.innerHTML = itensMenu.map((i) => `
+      ${i.separar ? '<hr class="menu-contexto__separador" role="separator">' : ''}
+      <button class="menu-contexto__item ${i.perigo ? 'menu-contexto__item--perigo' : ''}" type="button" role="menuitem"
+              data-item="${i.id}">${i.icone || ''}${i.rotulo}</button>`).join('');
     document.body.appendChild(menu);
 
-    // Abre no ponto do clique; sobe quando não cabe embaixo (caso das guias, no rodapé)
+    // Abre no ponto do clique (ou logo abaixo do ⋯); sobe quando não cabe embaixo (caso das guias, no rodapé)
     const { width, height } = menu.getBoundingClientRect();
     menu.style.left = `${Math.max(8, Math.min(x, window.innerWidth - width - 8))}px`;
-    menu.style.top = `${y + height + 8 > window.innerHeight ? Math.max(8, y - height) : y}px`;
+    menu.style.top = `${y + height + 8 > window.innerHeight ? Math.max(8, yAcima - height) : y}px`;
+    if (ancora.hasAttribute('aria-haspopup')) ancora.setAttribute('aria-expanded', 'true');
 
     const itens = [...menu.querySelectorAll('.menu-contexto__item')];
     const fecharFora = (ev) => { if (!menu.contains(ev.target)) fecharMenuContexto(); };
@@ -4960,7 +4994,7 @@ window.Telas.planoOperacoes = (function () {
       const item = ev.target.closest('[data-item]');
       if (!item) return;
       fecharMenuContexto();
-      acoes[item.dataset.item]();
+      itensMenu.find((i) => i.id === item.dataset.item).acao();
     });
     menu.addEventListener('keydown', (ev) => {
       const i = itens.indexOf(document.activeElement);
@@ -4975,7 +5009,7 @@ window.Telas.planoOperacoes = (function () {
     window.addEventListener('resize', fecharSemFoco);
     window.addEventListener('scroll', fecharSemFoco, true);
 
-    menuContexto = { menu, fecharFora, fecharSemFoco };
+    menuContexto = { menu, ancora, fecharFora, fecharSemFoco };
     itens[0].focus();
   }
 
@@ -4985,6 +5019,7 @@ window.Telas.planoOperacoes = (function () {
     window.removeEventListener('resize', menuContexto.fecharSemFoco);
     window.removeEventListener('scroll', menuContexto.fecharSemFoco, true);
     menuContexto.menu.remove();
+    if (menuContexto.ancora.hasAttribute('aria-haspopup')) menuContexto.ancora.setAttribute('aria-expanded', 'false');
     menuContexto = null;
   }
 

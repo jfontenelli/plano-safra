@@ -27,18 +27,19 @@ window.Telas.painelPlanos = (function () {
   }
 
   // Planos do ano agrícola (em "Todas", de todos os anos), com os filtros. Ordem padrão: status (Não iniciado,
-  // Em construção, Publicado) e, no mesmo status, Safra, Empresa, Fazenda e Cultura em ordem alfabética
+  // Em construção, Publicado) e, no mesmo status, Safra (na ordem do cadastro), Empresa, Fazenda e Cultura em ordem alfabética
+  const posicaoSafra = (safra) => Util.posicaoSafra(safra, DADOS.planos.map((p) => p.safra));
   function linhas(f) {
     const texto = (a, b) => String(a || '').localeCompare(String(b || ''), 'pt-BR');
     return DADOS.planos
       .filter((p) => !f.anoAgricola || String(Util.anoAgricola(p.safra)) === f.anoAgricola)
-      .map((p) => ({ plano: p, empresa: p.empresa, fazenda: p.fazenda, ciclo: cicloDe(p), safra: p.safra, cultura: p.cultura, atividade: p.atividade }))
+      .map((p) => ({ plano: p, empresa: p.empresa, fazenda: p.fazenda, safra: p.safra, cultura: p.cultura, atividade: p.atividade }))
       .filter((l) => (!f.safra || l.safra === f.safra) && (!f.empresa || l.empresa === f.empresa) && (!f.fazenda || l.fazenda === f.fazenda)
         && (!f.atividade || l.atividade === f.atividade) && (!f.cultura || l.cultura === f.cultura))
       .map((l) => ({ ...l, status: statusDe(l.plano), area: Util.areaCultivo(l.plano, Versoes.deTrabalho(l.plano)) }))
       .filter((l) => !f.statusPlano || l.status === f.statusPlano)
       .sort((a, b) => ORDEM_STATUS.indexOf(a.status) - ORDEM_STATUS.indexOf(b.status)
-        || texto(`${a.ciclo} ${a.safra}`, `${b.ciclo} ${b.safra}`) || texto(a.empresa, b.empresa)
+        || posicaoSafra(a.safra) - posicaoSafra(b.safra) || texto(a.empresa, b.empresa)
         || texto(a.fazenda, b.fazenda) || texto(a.cultura, b.cultura));
   }
 
@@ -103,7 +104,7 @@ window.Telas.painelPlanos = (function () {
   const COLUNAS = [
     ['empresa', 'Empresa', (l) => l.empresa],
     ['fazenda', 'Fazenda', (l) => l.fazenda],
-    ['safra', 'Safra', (l) => `${l.safra} ${l.ciclo}`],
+    ['safra', 'Safra', (l) => posicaoSafra(l.safra)],
     ['cultura', 'Cultura', (l) => l.cultura || null],
     ['area', 'Área (ha)', (l) => l.area || null, 'tabela__numero', 'Área de cultivo: talhões incluídos no plano'],
     ['status', 'Status', (l) => ORDEM_STATUS.indexOf(l.status)]
@@ -153,13 +154,13 @@ window.Telas.painelPlanos = (function () {
           aria-label="Abrir plano ${novo ? 'novo ' : ''}${esc(p.safra)} · ${esc(p.fazenda)} · ${esc(p.cultura)}">
         <td>${esc(l.empresa)}</td>
         <td>${esc(l.fazenda)}${novo ? ' <span class="lista-planos__novo">Novo</span>' : ''}</td>
-        <td>${esc(l.ciclo)} ${esc(l.safra)}</td>
+        <td>${esc(l.safra)}</td>
         <td>${esc(p.cultura)}</td>
         <td class="tabela__numero">${l.area ? ha(l.area) : '<span class="painel-tabela__vazio">—</span>'}</td>
         <td><span class="status ${classe}">${rotulo}</span></td>
         <td class="lista-planos__menu">
           <button class="botao-icone" type="button" data-menu-plano="${p.id}" title="Mais ações"
-                  aria-haspopup="menu" aria-label="Mais ações · ${esc(l.fazenda)}, ${esc(l.ciclo)} ${esc(l.safra)}">${Icones.mais_opcoes}</button>
+                  aria-haspopup="menu" aria-label="Mais ações · ${esc(l.fazenda)}, ${esc(l.safra)}">${Icones.mais_opcoes}</button>
         </td>
       </tr>`;
   }

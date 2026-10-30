@@ -258,7 +258,7 @@ window.Telas.operacoesPlano = (function () {
     if (!n) { excluir(); return; }
     Modal.confirmar({
       titulo: `Excluir o grupo ${esc(g.nome)}?`,
-      texto: `${n === 1 ? 'A operação continua' : `As ${n} operações continuam`} no plano, sem grupo de operação. Escolha o grupo de cada uma depois, na aba Revisão.`,
+      texto: `${n === 1 ? 'A operação continua' : `As ${n} operações continuam`} no plano, sem grupo de operação. Escolha o grupo de cada uma depois, na aba Validação.`,
       botoes: [{ rotulo: 'Cancelar' }, { rotulo: 'Excluir grupo', classe: 'perigo', acao: excluir }]
     });
   }

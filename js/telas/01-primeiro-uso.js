@@ -7,7 +7,7 @@ window.Telas = window.Telas || {};
 window.Telas.primeiroUso = function () {
   return `
     <header class="cabecalho">
-      <h1 class="cabecalho__titulo">Visão Geral</h1>
+      <h1 class="cabecalho__titulo">Planos de Safra</h1>
     </header>
     <section class="primeiro-uso">
       ${ilustracao()}

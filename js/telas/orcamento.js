@@ -428,7 +428,7 @@ window.Telas.orcamento = (function () {
       ['custo', 'Custo total', (l) => l.custo, true]
     ],
     talhao: [
-      ['safra', 'Safra', (l) => `${l.plano.safra} ${cicloDe(l.plano)}`],
+      ['safra', 'Safra', (l) => Util.posicaoSafra(l.plano.safra, DADOS.planos.map((p) => p.safra))],
       ['empresa', 'Empresa', (l) => l.plano.empresa],
       ['fazenda', 'Fazenda', (l) => l.plano.fazenda],
       ['cultura', 'Cultura', (l) => l.plano.cultura],
@@ -506,7 +506,7 @@ window.Telas.orcamento = (function () {
       <div class="tabela-rolagem"><table class="tabela orc-tabela">
         <thead>${cabecalhoDetalhe()}</thead>
         <tbody>${ls.length ? daPagina(ls).map((l) => `<tr>
-          <td>${esc(cicloDe(l.plano))} ${esc(l.plano.safra)}</td><td>${esc(l.plano.empresa)}</td><td>${esc(l.plano.fazenda)}</td>
+          <td>${esc(l.plano.safra)}</td><td>${esc(l.plano.empresa)}</td><td>${esc(l.plano.fazenda)}</td>
           <td>${esc(l.plano.cultura)}</td><td>${esc(l.talhao)}</td><td class="tabela__numero">${fmt(l.area)}</td>
           <td class="tabela__numero">${dinheiro(l.custo)}</td><td class="tabela__numero">${dinheiro(l.custo / l.area)}</td>
           <td class="tabela__numero">${textoSacas(emSacas(l.custo, l.area, l.plano.cultura), l.plano.cultura)}</td></tr>`).join('') : vazio(9)}</tbody>
@@ -526,7 +526,7 @@ window.Telas.orcamento = (function () {
       : [['Safra', 'Empresa', 'Fazenda', 'Cultura', 'Talhão', 'Hectares', `Custo total (${m})`, `${m}/ha`, 'Custo em sacas (por ha)'],
         ...ordenadas(doTalhao(itens)).map((l) => {
           const s = emSacas(l.custo, l.area, l.plano.cultura);
-          return [`${cicloDe(l.plano)} ${l.plano.safra}`, l.plano.empresa, l.plano.fazenda, l.plano.cultura, l.talhao, l.area,
+          return [l.plano.safra, l.plano.empresa, l.plano.fazenda, l.plano.cultura, l.talhao, l.area,
             dois(exibir(l.custo)), dois(exibir(l.custo / l.area)), s === null ? '' : +s.toFixed(1)];
         })];
     const livro = XLSX.utils.book_new();

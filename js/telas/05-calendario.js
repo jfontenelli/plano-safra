@@ -203,7 +203,7 @@ window.Telas.calendario = (function () {
     return `
       <section class="calendario">
         <div class="calendario__barra">
-          <div class="resumo-guias" role="tablist" aria-label="Visão da Programação">
+          <div class="resumo-guias" role="tablist" aria-label="Visão do Resumo">
             ${[['tabela', Icones.lista, 'Tabela'], ['infografico', Icones.grafico, 'Ciclo Produtivo']].map(([v, icone, rotulo]) => `
               <button class="resumo-guias__guia ${estado.visao === v ? 'resumo-guias__guia--ativa' : ''}" type="button" role="tab" data-acao="cal-visao"
                       data-visao="${v}" aria-selected="${estado.visao === v}">${icone}${rotulo}</button>`).join('')}
@@ -445,7 +445,11 @@ window.Telas.calendario = (function () {
         fen: () => esc(it.fenologia || '—'),
         data: () => dataPrevista(it, visiveis, pl),
         area: () => (it.area ? Util.area(it.area).replace(' ha', '') : '—'),
-        op: () => `<strong>${esc(nome)}</strong><span class="cal-piv__chip">${esc(it.colheita ? it.grupo.nome : nomeGrupo(it.grupo))}</span>`
+        // Dentro do plano, o nome é um link que abre a operação no Planejamento (Colheita e "Sem grupo" não estão lá)
+        op: () => `${ctx.abrirOperacao && !it.colheita && it.grupo.tipo !== 'Colheita' && !it.grupo.semGrupo
+          ? `<button class="link-acao cal-piv__op-link" type="button" data-acao="cal-abrir-op" data-op="${esc(it.op.id)}"
+                     title="Abrir ${esc(nome)} no Planejamento">${esc(nome)}</button>`
+          : `<strong>${esc(nome)}</strong>`}<span class="cal-piv__chip">${esc(it.colheita ? it.grupo.nome : nomeGrupo(it.grupo))}</span>`
       };
       const celulasOp = COLUNAS.filter((c) => c.nivel === 'op').map((c) => (ocultas.has(c.id) ? celOculta(c, n)
         : `<td ${fixa(c, c.classe)} rowspan="${n}">${conteudoOp[c.id]()}</td>`)).join('');
@@ -858,6 +862,8 @@ window.Telas.calendario = (function () {
 
   // ----- Eventos (repassados pela Tela 04). Devolvem true quando o evento era daqui. -----
   function aoClicar(e, ctx, { redesenhar }) {
+    const abrirOp = e.target.closest('[data-acao="cal-abrir-op"]');
+    if (abrirOp && ctx.abrirOperacao) { ctx.abrirOperacao(abrirOp.dataset.op); return true; }
     // Clique fora de uma caixa de filtro aberta: fecha
     document.querySelectorAll('.cal-filtro[open]').forEach((caixa) => {
       if (!caixa.contains(e.target)) { caixa.open = false; if (ctx.estado.filtroAberto === caixa.dataset.filtro) ctx.estado.filtroAberto = null; }

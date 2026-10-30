@@ -31,7 +31,6 @@ window.Telas.osCalendario = (function () {
     cultura: 'todos', operacao: 'todos', talhao: 'todos', grupo: 'todos' });
   let est = null;
 
-  const cicloDe = (p) => p.ciclo || 'Safra';
   // Grupo de operação (ou operação do Ano, que traz o tipo) → a chave da cor
   const tipoDe = (grupo) => Util.normalizar(grupo.tipo || 'outro').replace(/\s+/g, '-');
   const nomeOp = (it) => (it.colheita ? 'Colheita' : it.op.nome || 'Sem operação');
@@ -83,7 +82,7 @@ window.Telas.osCalendario = (function () {
         : est.talhao.filter((x) => x.startsWith(`${p.fazenda}|`)).map((x) => x.slice(p.fazenda.length + 1));
       const ctx = { plano: { grupos: Versoes.grupos(p, v) }, talhoes: Util.talhoesPlano(p, v), estado: { talhao } };
       const lista = Cal().itens(ctx).filter((it) => (it.colheita ? !it.aguardando : it.talhoes.length > 0));
-      const local = `${p.fazenda} · ${cicloDe(p)} ${p.safra}`;
+      const local = `${p.fazenda} · ${p.safra}`;
       lista.forEach((it) => itens.push({ it, local }));
       const visiveis = lista.filter(visivel);
       Cal().eventos(ctx, visiveis).forEach((ev) => eventos.push({ ...ev, local,

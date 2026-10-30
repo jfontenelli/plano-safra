@@ -174,7 +174,7 @@ window.Telas.calendarioAgricola = (function () {
           const lista = ops.get(p);
           linhas.push(`
             <div class="cag__linha cag__linha--safra" role="row">
-              <span role="cell">${esc(cicloDe(p))} ${esc(p.safra)}</span>
+              <span role="cell">${esc(p.safra)}</span>
               <span role="cell">${esc(p.cultura)}</span>
               <span role="cell" class="cag__num">${area ? Util.area(area) : '<span class="cag__pendente">Pendente</span>'}</span>
               <span role="cell" class="cag__tempo cag__tempo--faixas" style="${fundo}">${lista.length ? barras(lista, j, { empresa: e, fazenda: f, safra: p.safra })

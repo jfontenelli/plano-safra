@@ -1,6 +1,6 @@
 /*
- * Tela 03 — Visão Geral, lista de planos (docs/telas/03-lista-planos.md)
- * Aparece no menu Plano de Safra › Visão Geral quando existe ao menos um plano.
+ * Tela 03 — Planos de Safra, lista de planos (docs/telas/03-lista-planos.md)
+ * Aparece no menu Plano de Safra › Planos quando existe ao menos um plano.
  * Duas guias com os mesmos filtros: Planos de Safra (o Painel: Telas.painelPlanos, uma linha por fazenda e safra)
  * e Histórico de versões (uma linha por versão de cada plano).
  */
@@ -74,7 +74,9 @@ window.Telas.listaPlanos = (function () {
   const statusVersao = (p, v) => (Versoes.aIniciar(p) ? 'nao-iniciado' : Versoes.statusExibido(p, v));
 
   function desenhar() {
-    filtros = filtrosIniciais();
+    // Os filtros se mantêm ao voltar para a lista; depois de criar planos, voltam ao começo no ano agrícola deles
+    // (para o plano novo aparecer)
+    if (!filtros.anoAgricola || safraPedida) filtros = filtrosIniciais();
     if (safraPedida) { filtros.anoAgricola = String(Util.anoAgricola(safraPedida)); safraPedida = null; }
 
     return `
@@ -82,11 +84,11 @@ window.Telas.listaPlanos = (function () {
         <!-- Fundo do campo no topo: só aparece no modo escuro -->
         <span class="vg-cabecalho__fundo" style="background-image: url('img/fundo-plano-safra.jpg')" aria-hidden="true"></span>
         <div class="vg-cabecalho__titulo">
-          <h1 class="cabecalho__titulo">Visão Geral</h1>
-          <nav class="caminho" aria-label="Caminho"><span>Plano de Safra</span><span aria-hidden="true">›</span><span class="caminho__atual">Visão Geral</span></nav>
+          <h1 class="cabecalho__titulo">Planos de Safra</h1>
+          <nav class="caminho" aria-label="Caminho"><span>Plano de Safra</span><span aria-hidden="true">›</span><span class="caminho__atual">Planos</span></nav>
         </div>
         <div class="vg-cabecalho__guias">
-          <nav class="etapas" aria-label="Guias da Visão Geral">
+          <nav class="etapas" aria-label="Guias dos Planos de Safra">
             ${GUIAS.map(([id, nome]) => `
               <button class="etapa ${id === guia ? 'etapa--ativa' : ''}" type="button" data-guia="${id}"
                       ${id === guia ? 'aria-current="page"' : ''}>${nome}</button>`).join('')}
@@ -131,6 +133,8 @@ window.Telas.listaPlanos = (function () {
 
   // Depois que o HTML está na página: liga os filtros e desenha números e lista
   function aoMostrar(conteudo) {
+    // Filtro guardado que não está mais entre as opções (ex.: plano excluído) volta para Todas
+    conteudo.querySelectorAll('[data-filtro]').forEach((select) => { filtros[select.dataset.filtro] = select.value; });
     conteudo.querySelectorAll('[data-filtro]').forEach((select) => {
       select.addEventListener('change', () => {
         filtros[select.dataset.filtro] = select.value;

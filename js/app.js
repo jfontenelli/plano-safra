@@ -7,20 +7,15 @@
   // Rotas. "menu" diz qual item do menu fica destacado.
   // "desenhar" devolve o HTML da tela; "aoMostrar" (opcional) roda depois que ele está na página.
   const ROTAS = {
-    // Visão Geral. Sem planos: Tela 01. Com planos: Tela 03.
-    'plano-safra':    { titulo: 'Visão Geral', menu: 'visao-geral',
+    // Planos (lista de planos). Sem planos: Tela 01. Com planos: Tela 03.
+    'plano-safra':    { titulo: 'Planos de Safra', menu: 'planos',
                         desenhar: () => temPlanos() ? Telas.listaPlanos.desenhar() : Telas.primeiroUso(),
                         aoMostrar: (conteudo) => { if (temPlanos()) Telas.listaPlanos.aoMostrar(conteudo); } },
-    // Menu Planejamento: abre o plano mais recente (ver rotaAtual); sem planos, o convite para criar o primeiro
-    'planejamento':   { titulo: 'Planejamento', menu: 'planejamento',
-                        desenhar: () => Telas.semPlanos('planejamento') },
-    // Plano aberto: #/plano/<id>/<aba>. Abre no Planejamento (Tela 04); Programação = Tela 05; Revisão = Tela 04.0.
-    'plano':          { titulo: 'Planejamento', menu: 'planejamento',
+    // Plano aberto: #/plano/<id>/<aba>, só pela lista de planos. Abre no Planejamento (Tela 04); Resumo = Tela 05
+    // (aba calendario); Validação = Tela 04.0 (aba revisao). No menu, fica destacado o item Planos.
+    'plano':          { titulo: 'Planejamento', menu: 'planos',
                         desenhar: () => Telas.planoOperacoes.desenhar(),
-                        aoMostrar: (conteudo, id, etapa) => {
-                          estado.ultimoPlanoId = Number(id);
-                          Telas.planoOperacoes.aoMostrar(conteudo, buscarPlano(id), etapa);
-                        } },
+                        aoMostrar: (conteudo, id, etapa) => Telas.planoOperacoes.aoMostrar(conteudo, buscarPlano(id), etapa) },
     // Orçamento de Insumos do menu (antes Suprimentos): vários planos somados, guias Safra e Safrinha
     'orcamento':      { titulo: 'Orçamento de Insumos', menu: 'orcamento',
                         desenhar: () => temPlanos() ? Telas.orcamento.desenhar() : Telas.semPlanos('orcamento'),
@@ -46,8 +41,7 @@
   const estado = {
     menuRecolhido: false, // menu começa expandido
     gruposFechados: new Set(), // grupos do menu (Plano de Safra, Gestão da Lavoura) começam abertos; a setinha minimiza
-    proximoIdPlano: 1,
-    ultimoPlanoId: null   // último plano aberto (o menu Planejamento abre nele)
+    proximoIdPlano: 1
   };
 
   const menu = document.getElementById('menu');
@@ -65,29 +59,13 @@
     return DADOS.planos.find((p) => String(p.id) === id);
   }
 
-  // Plano mais recente para o menu Planejamento: o último aberto ou, se nenhum foi aberto, o atualizado por último,
-  // entre os planos já iniciados (com a forma de iniciar escolhida: modelo, planilha, cópia ou do zero).
-  // Plano não iniciado só abre pela linha dele na Visão Geral. Nenhum iniciado: null.
-  function planoMaisRecente() {
-    const iniciados = DADOS.planos.filter((p) => !Versoes.aIniciar(p));
-    return iniciados.find((p) => p.id === estado.ultimoPlanoId)
-      || iniciados.sort((a, b) => a.atualizadoEm.localeCompare(b.atualizadoEm)).pop() || null;
-  }
-
   function rotaAtual() {
-    let [nome, parametro, extra] = location.hash.replace(/^#\/?/, '').split('/');
+    const [nome, parametro, extra] = location.hash.replace(/^#\/?/, '').split('/');
+    // Endereço desconhecido (inclusive o antigo #/planejamento): a lista de planos; nenhum plano abre sozinho
     if (!ROTAS[nome]) return { nome: ROTA_INICIAL };
-    // Menu Planejamento com planos: abre o plano mais recente já iniciado, na versão em que ele está;
-    // sem nenhum iniciado, a Visão Geral (sem o modal de início)
-    if (nome === 'planejamento' && temPlanos()) {
-      const recente = planoMaisRecente();
-      if (!recente) { history.replaceState(null, '', `#/${ROTA_INICIAL}`); return { nome: ROTA_INICIAL }; }
-      [nome, parametro, extra] = ['plano', String(recente.id), undefined];
-      history.replaceState(null, '', `#/plano/${parametro}`);
-    }
     // Plano que não existe mais (ex.: página recarregada) volta para a lista
     if (nome === 'plano' && !buscarPlano(parametro)) return { nome: ROTA_INICIAL };
-    // Endereço de um plano ainda não iniciado (ex.: página atualizada: os dados voltam ao exemplo inicial): Visão Geral,
+    // Endereço de um plano ainda não iniciado (ex.: página atualizada: os dados voltam ao exemplo inicial): lista de planos,
     // no ano agrícola dele, sem abrir o modal de início (ele só abre ao clicar na linha do plano)
     if (nome === 'plano' && Versoes.aIniciar(buscarPlano(parametro))) {
       const plano = buscarPlano(parametro);
@@ -143,9 +121,10 @@
   }
 
   // Cria um plano por fazenda do modal (Safra + Empresa + Fazenda + Cultura identificam o plano) e volta para a
-  // Visão Geral, com o filtro na safra dos planos criados (uma linha por fazenda).
-  // Cada plano nasce só com a versão 0.1, vazia e publicada (DECISOES 4.1.1): ao abrir, o Planejamento mostra
-  // as opções de início (modelo, do zero, importar XLSX, copiar plano existente).
+  // lista de planos, com o filtro na safra dos planos criados (uma linha por fazenda, com a etiqueta "Novo").
+  // Cada plano nasce só com a versão 0.1, vazia e publicada (DECISOES 4.1.1). Uma fazenda só: abre direto o
+  // "Como deseja iniciar o plano?" dele, pelo mesmo caminho do clique na linha (cancelado, fica na lista).
+  // Várias fazendas: o aviso pede para clicar na linha de cada uma.
   // O primeiro plano criado (a partir do primeiro uso) entra na lista junto com os planos de exemplo.
   // talhoes: os talhões incluídos (pode ser vazio: Área de cultivo "Pendente").
   function criarPlanos({ fazendas, ...contexto }) {
@@ -166,13 +145,13 @@
       return plano;
     });
     const nomes = criados.map((p) => Util.escapar(p.fazenda)).join(', ');
-    const aviso = () => Aviso.mostrar(criados.length === 1 ? `Plano criado: Fazenda ${nomes}. Clique na linha para começar.`
-      : `${criados.length} planos criados (${nomes}). Clique na linha de cada um para começar.`);
     Telas.listaPlanos.mostrarSafra(contexto.safra);
-    // O aviso entra depois de desenhar a lista (mostrarTela apaga o aviso anterior); a tabela rola até o plano novo
+    // Depois de desenhar a lista (mostrarTela apaga o aviso anterior): a tabela rola até o plano novo e, com uma
+    // fazenda, abre o modal de início; com várias, o aviso
     const depois = () => {
-      aviso();
       document.querySelector('.lista-planos__linha--novo')?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      if (criados.length === 1) Telas.listaPlanos.abrirPlano(criados[0]);
+      else Aviso.mostrar(`${criados.length} planos criados (${nomes}). Clique na linha de cada um para começar.`);
     };
     if (location.hash === '#/plano-safra') { mostrarTela(); depois(); }
     else { window.addEventListener('hashchange', depois, { once: true }); location.hash = '#/plano-safra'; }

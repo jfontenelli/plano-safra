@@ -87,6 +87,19 @@ window.Modal = {
  * com ação opcional (ex.: Desfazer). Some sozinha depois de alguns segundos.
  */
 window.Aviso = {
+  // Só para o leitor de tela (ex.: "Salvo"), sem mostrar nada nem tirar o foco. A região fica sempre na página;
+  // o texto é trocado depois de um instante para ser lido de novo quando repete.
+  anunciar(texto) {
+    let regiao = document.getElementById('anuncio-leitor');
+    if (!regiao) {
+      regiao = document.createElement('div');
+      regiao.id = 'anuncio-leitor'; regiao.className = 'so-leitor'; regiao.setAttribute('role', 'status');
+      document.body.appendChild(regiao);
+    }
+    regiao.textContent = '';
+    setTimeout(() => { regiao.textContent = texto; }, 50);
+  },
+
   mostrar(texto, { acao, aoAgir } = {}) {
     document.querySelector('.aviso')?.remove();
     const aviso = document.createElement('div');

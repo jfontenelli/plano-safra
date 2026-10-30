@@ -61,6 +61,12 @@ window.Util = {
       || safrinha(b) - safrinha(a) || b.localeCompare(a));
   },
 
+  // Posição da safra na ordem de ordenarSafras (mais recente primeiro; no mesmo ano, a safrinha antes da safra),
+  // para ordenar tabelas pela coluna Safra: a safra aparece só pelo número ("26/27"), sem Safra/Safrinha na frente
+  posicaoSafra(safra, todas) {
+    return Util.ordenarSafras(todas).indexOf(safra);
+  },
+
   // Anos agrícolas dos planos, do mais antigo ao mais recente, em texto ("2026"), como nos filtros
   anosAgricolas(planos) {
     return [...new Set(planos.map((p) => Util.anoAgricola(p.safra)).filter(Boolean).map(String))].sort();

@@ -42,7 +42,9 @@ Identificar os novos planos: informações gerais (safra, empresa, atividade, cu
 ## Navegação
 - "Cancelar" ou X → fecha o modal e volta à tela de origem, sem criar nada.
 - A lista de talhões abre por cima do modal (abaixo do campo ou, sem espaço, acima) e não é cortada pela rolagem do formulário.
-- "Criar Plano de Safra" → **volta para a Visão Geral** (Tela 03, guia Planos de Safra), com o filtro Ano Agrícola no da safra dos planos criados e o aviso "Plano criado: Fazenda X. Clique na linha para começar." (ou "2 planos criados (…). Clique na linha de cada um para começar.").
+- "Criar Plano de Safra" → vai para a lista de planos (Tela 03, guia Planos de Safra), com o filtro Ano Agrícola no da safra dos planos criados e as linhas novas com a etiqueta "Novo".
+  - **Uma fazenda só:** abre direto o modal "Como deseja iniciar o plano?" daquele plano (o mesmo do clique na linha), sem aviso. Ao escolher como começar, nasce a versão 0.2 em construção e o plano abre no Planejamento. Cancelado ou fechado, fica na lista, com a linha "Novo" à vista.
+  - **Várias fazendas:** fica na lista, com o aviso "2 planos criados (…). Clique na linha de cada um para começar."
 
 ---
 

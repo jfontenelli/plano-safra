@@ -19,7 +19,7 @@
       </div>
 
       <nav class="menu__nav" aria-label="Menu principal">
-        <!-- Plano de Safra: três itens (Visão Geral, Planejamento, Orçamento) -->
+        <!-- Plano de Safra: dois itens (Planos, Orçamento); o plano abre pela lista -->
         <div class="menu__grupo">
           <a class="menu__item menu__pai" href="#/plano-safra" title="Plano de Safra">
             <svg class="menu__icone" viewBox="0 0 24 24" aria-hidden="true">
@@ -30,25 +30,18 @@
             </svg>
             <span class="menu__texto">Plano de Safra</span>
           </a>
-          <!-- Setinha: abre e fecha a lista do grupo (o nome continua levando à Visão Geral) -->
+          <!-- Setinha: abre e fecha a lista do grupo (o nome continua levando à lista de planos) -->
           <button class="menu__grupo-alternar" type="button" data-grupo="Plano de Safra"
                   aria-controls="menu-subitens" aria-expanded="true" title="Minimizar Plano de Safra">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
           </button>
           <div class="menu__subitens" id="menu-subitens">
-            <a class="menu__item menu__sub" href="#/plano-safra" data-rota="visao-geral" title="Visão Geral">
+            <a class="menu__item menu__sub" href="#/plano-safra" data-rota="planos" title="Planos">
               <svg class="menu__icone" viewBox="0 0 24 24" aria-hidden="true">
                 <rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/>
                 <rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>
               </svg>
-              <span class="menu__texto">Visão Geral</span>
-            </a>
-            <a class="menu__item menu__sub" href="#/planejamento" data-rota="planejamento" title="Planejamento">
-              <svg class="menu__icone" viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
-                <rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12l2 2 4-4"/><path d="M9 17h6"/>
-              </svg>
-              <span class="menu__texto">Planejamento</span>
+              <span class="menu__texto">Planos</span>
             </a>
             <a class="menu__item menu__sub" href="#/orcamento" data-rota="orcamento" title="Orçamento">
               <svg class="menu__icone" viewBox="0 0 24 24" aria-hidden="true">

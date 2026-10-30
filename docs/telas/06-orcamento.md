@@ -40,7 +40,7 @@ Título, guias **Por produto · Por talhão**, busca e **Exportar XLSX** (botão
   - Custo digitado: etiqueta **"Manual"** (azul) **embaixo do valor, na mesma célula** (a linha fica mais alta).
   - **Data da compra** (coluna logo depois do Custo unitário): no custo do cadastro, uma data **simulada** (entre 1 e 4 meses antes de hoje, fixa por produto); no custo digitado, **a data do dia em que foi digitado**. Sem preço: "—". Ordena pela seta, como as outras.
   - Como o resto do protótipo, o custo digitado fica só na memória do navegador.
-- **Por talhão**: Safra · Empresa · Fazenda · Cultura · Talhão · Hectares · Custo total · R$/ha (na moeda escolhida) · Custo em sacas. Busca por fazenda, talhão ou cultura.
+- **Por talhão**: Safra (só o número: 26/27, 27/27; também no Exportar) · Empresa · Fazenda · Cultura · Talhão · Hectares · Custo total · R$/ha (na moeda escolhida) · Custo em sacas. Busca por fazenda, talhão ou cultura.
 - Sem linha de Total.
 - **Ordenar** por qualquer coluna: seta no título (1º clique crescente, 2º decrescente; vazios sempre no fim), como na Visão Geral. Cada guia guarda a sua ordenação.
 - **Paginação** embaixo: "Itens por página" (10, 20, 50, 100; começa em 10), "1–10 de 52", "Página 1 de 6" e as setas. Filtrar, buscar, ordenar ou trocar de guia volta à página 1.
