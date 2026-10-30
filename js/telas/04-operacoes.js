@@ -185,7 +185,6 @@ window.Telas.planoOperacoes = (function () {
   function seletorDoCampo(el) {
     if (el.dataset.campo === 'nome-op') return '.op-cabecalho__nome';
     if (el.dataset.campo === 'lista-nome') return `.ops-item__nome[data-op="${CSS.escape(el.dataset.op)}"]`;
-    if (el.dataset.campo === 'est-nome-op') return `[data-est-renomear-op="${CSS.escape(el.dataset.op)}"]`;
     if (el.id) return `#${CSS.escape(el.id)}`;
     const dados = [...el.attributes].filter((a) => a.name.startsWith('data-') && a.name !== 'data-foco-inicial');
     if (!dados.length) return null;
@@ -274,7 +273,7 @@ window.Telas.planoOperacoes = (function () {
     raiz.innerHTML = `
       ${cabecalho()}
       <div class="plano__rolagem">
-        ${etapa === 'revisao' ? Telas.operacoesPlano.desenhar(ctxEstrutura())
+        ${etapa === 'revisao' ? Telas.validacao.desenhar(ctxEstrutura())
           : etapa === 'planejamento' ? corpoOperacoes()
           : etapa === 'calendario' ? Telas.calendario.desenhar(ctxCalendario()) : etapaEmConstrucao()}
       </div>
@@ -457,10 +456,14 @@ window.Telas.planoOperacoes = (function () {
         ui.versoes = null; ui.jaExiste = false; desenharTudo(); break;
       case 'ver-publicar': {
         const num = plano.versaoAberta;
+        // Pendências da Validação que não foram corrigidas nem ignoradas: não impedem; o título diz quantas são
+        // ("Publicar versão 0.2 com 22 pendências?") e o botão vira "Publicar mesmo assim"
+        const { total } = Telas.validacao.naoTratadas(ctxEstrutura());
         Modal.confirmar({
-          titulo: `Publicar versão ${esc(num)}?`,
-          texto: 'A versão será registrada no histórico e não poderá mais ser editada. Para realizar novas alterações, será necessário criar uma nova versão.',
-          botoes: [{ rotulo: 'Cancelar' }, { rotulo: 'Publicar versão', classe: 'primario', acao: () => {
+          titulo: total ? `Publicar versão ${esc(num)} com ${total} ${total === 1 ? 'pendência' : 'pendências'}?` : `Publicar versão ${esc(num)}?`,
+          texto: total ? 'A versão não poderá mais ser editada após a publicação. Para fazer alterações, será necessário criar uma nova versão.'
+            : 'A versão será registrada no histórico e não poderá mais ser editada. Para realizar novas alterações, será necessário criar uma nova versão.',
+          botoes: [{ rotulo: 'Cancelar' }, { rotulo: total ? 'Publicar mesmo assim' : 'Publicar versão', classe: 'primario', acao: () => {
             Versoes.publicar(plano);
             abrirVersao(num);
             Aviso.mostrar(`Versão ${esc(num)} publicada`);
@@ -589,25 +592,28 @@ window.Telas.planoOperacoes = (function () {
     location.hash = `#/plano/${plano.id}/planejamento`;
   }
 
-  // Resumo › Tabela: o nome da operação abre a aba Planejamento no grupo dela, com ela aberta
-  function abrirNoPlanejamento(id) {
+  // Resumo › Tabela (nome da operação) e Validação (Corrigir): abre a aba Planejamento no grupo da operação, com ela
+  // aberta (naoPlanejados: com o filtro Não planejados, para ver os talhões que faltam)
+  function abrirNoPlanejamento(id, naoPlanejados = false) {
     const g = gruposPlanejamento().find((x) => x.operacoes.some((o) => o.id === id));
     if (!g) return;
-    ui.grupoId = g.id; ui.opPorGrupo[g.id] = id; ui.renomeandoOp = null; ui.filtroTalhoes = 'todos';
+    ui.grupoId = g.id; ui.opPorGrupo[g.id] = id; ui.renomeandoOp = null; ui.filtroTalhoes = naoPlanejados ? 'nao-planejados' : 'todos';
     limparSelecao();
     location.hash = `#/plano/${plano.id}/planejamento`;
   }
   const acoesCalendario = { redesenhar: (foco) => (foco ? desenharMantendoFoco(foco) : desenharTudo()), alterou: () => alterou() };
 
-  // Operações do plano (Tela 04.0, etapa 1): desenhada aqui dentro, com o mesmo cabeçalho do plano
+  // Validação (Tela 04.0): desenhada aqui dentro, com o mesmo cabeçalho do plano. Estado: grupos abertos e
+  // pendências ignoradas (por versão), mantidos ao navegar
   function ctxEstrutura() {
-    ui.estrutura = ui.estrutura || { renomeandoOp: null };
+    ui.estrutura = ui.estrutura || {};
     return { plano, somenteLeitura, talhoesFazenda, estado: ui.estrutura };
   }
   const acoesEstrutura = {
     redesenhar: (foco) => (foco ? desenharMantendoFoco(foco) : desenharTudo()),
     alterou: () => alterou(),
-    nomeOperacaoRepetido: (nome, op) => nomeOperacaoRepetido(nome, op)
+    // Corrigir: abre o Planejamento na operação (talhões que faltam: com o filtro Não planejados)
+    abrirOperacao: (id, { naoPlanejados } = {}) => abrirNoPlanejamento(id, naoPlanejados)
   };
 
   function etapaEmConstrucao() {
@@ -734,7 +740,6 @@ window.Telas.planoOperacoes = (function () {
   }
 
   function aoDuploClique(e) {
-    if (etapa === 'revisao' && Telas.operacoesPlano.aoDuploClique(e, ctxEstrutura(), acoesEstrutura)) return;
     const nome = e.target.closest('[data-renomear-op]');
     if (!nome || somenteLeitura) return;
     ui.renomeandoOp = nome.dataset.renomearOp; desenharTudo();
@@ -3769,7 +3774,7 @@ window.Telas.planoOperacoes = (function () {
   }
 
   function aoClicar(e) {
-    if (etapa === 'revisao' && Telas.operacoesPlano.aoClicar(e, ctxEstrutura(), acoesEstrutura)) return;
+    if (etapa === 'revisao' && Telas.validacao.aoClicar(e, ctxEstrutura(), acoesEstrutura)) return;
     if (etapa === 'calendario' && Telas.calendario.aoClicar(e, ctxCalendario(), acoesCalendario)) return;
     // Tabelas de talhões: sem seleção, o clique na linha (fora da caixa de marcar e das células editáveis) abre o
     // Planejar só com o talhão clicado ou, no Plantio, o painel do talhão. Com talhões (ou linhas) marcados, o clique
@@ -4035,7 +4040,6 @@ window.Telas.planoOperacoes = (function () {
   }
 
   function aoMudar(e) {
-    if (etapa === 'revisao' && Telas.operacoesPlano.aoMudar(e, ctxEstrutura(), acoesEstrutura)) return;
     if (etapa === 'calendario' && Telas.calendario.aoMudar(e, ctxCalendario(), acoesCalendario)) return;
     const campo = e.target.dataset.campo;
     // Nova operação (Operação de campo): a fenologia escolhida na linha
@@ -4149,7 +4153,6 @@ window.Telas.planoOperacoes = (function () {
     // Nova operação (Operação de campo): idem
     const noCampo = { 'no-nome': 'nome', 'no-dap': 'dap' }[e.target.dataset.campo];
     if (noCampo && ui.novasOps) { ui.novasOps.linhas[Number(e.target.dataset.var)][noCampo] = e.target.value; return; }
-    if (etapa === 'revisao' && Telas.operacoesPlano.aoDigitar(e, ctxEstrutura())) return;
     // Doses: registradas enquanto se digita, sem redesenhar
     if (e.target.dataset.campo === 'linha-dose') {
       // Só números e uma vírgula decimal; o ponto digitado vira vírgula
@@ -4198,7 +4201,6 @@ window.Telas.planoOperacoes = (function () {
   }
 
   function aoDesfocar(e) {
-    if (etapa === 'revisao' && Telas.operacoesPlano.aoDesfocar(e, ctxEstrutura(), acoesEstrutura)) return;
     const el = e.target;
     if (el.dataset.variedade) {
       // Sem escolher uma opção: nome igual a uma variedade vale (ex.: colado); senão, volta ao que estava
@@ -4249,7 +4251,6 @@ window.Telas.planoOperacoes = (function () {
   }
 
   function aoTeclar(e) {
-    if (etapa === 'revisao' && Telas.operacoesPlano.aoTeclar(e, ctxEstrutura(), acoesEstrutura)) return;
     const el = e.target;
     if (el.dataset.variedade) { teclaBuscaVariedade(e); return; }
     if (el.dataset.campo && el.dataset.campo.startsWith('tb-') && el.dataset.talhao && teclaCelulaPlantio(e)) return;
@@ -4890,8 +4891,8 @@ window.Telas.planoOperacoes = (function () {
     form.elements.nome.focus();
   }
 
-  // Excluir grupo (botão direito na guia): a mesma regra da aba Revisão — as operações continuam no plano,
-  // "Sem grupo", até o usuário escolher o grupo de cada uma (na aba Revisão). Se era a guia aberta, abre a vizinha.
+  // Excluir grupo (botão direito na guia): sai com as operações dele (confirma; depois, Desfazer).
+  // Se era a guia aberta, abre a vizinha.
   function excluirGrupo(grupo) {
     const indice = gruposPlanejamento().indexOf(grupo);
     const acoes = {
@@ -4905,7 +4906,7 @@ window.Telas.planoOperacoes = (function () {
         if (raiz.isConnected) desenharTudo();
       }
     };
-    Telas.operacoesPlano.excluirGrupo(grupo, ctxEstrutura(), acoes);
+    Telas.validacao.excluirGrupo(grupo, ctxEstrutura(), acoes);
   }
 
   let ultimoCliqueGuia = { id: null, quando: 0 };

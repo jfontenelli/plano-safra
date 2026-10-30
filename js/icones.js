@@ -40,6 +40,12 @@ window.Icones = (function () {
     disquete: svg('<path class="icone-disquete__fundo" d="M5 3h11l4 4v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 1-2Z"/><path d="M8 3v5h7V3M13 5v1"/><rect x="7" y="12" width="10" height="8" rx="1"/><path d="M9.5 15h5M9.5 17.5h5"/>'),
     cadeado: svg('<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>'),
     casa:   svg('<path d="M3 20h18"/><path d="M5 20V9l7-5 7 5v11"/><path d="M10 20v-6h4v6"/>'),
+    // Validação: Resumo da validação (prancheta com o visto)
+    prancheta: svg('<rect x="5" y="4.5" width="14" height="16.5" rx="2"/><path d="M9 3h6v3H9z"/><path d="M9 13l2 2 4-4"/>'),
+    // Validação: Ignorar (círculo cortado), pendência ignorada (olho fechado) e Desfazer (seta que volta)
+    proibido: svg('<circle cx="12" cy="12" r="8.5"/><path d="M6 6l12 12"/>'),
+    olhoFechado: svg('<path d="M3 12s3.5-6 9-6c1.6 0 3 .5 4.2 1.2M21 12s-3.5 6-9 6c-1.6 0-3-.5-4.2-1.2"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2M4 4l16 16"/>'),
+    desfazer: svg('<path d="M9 14L4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/>'),
     inserir: svg('<path d="M4 5h16M4 19h16"/><path d="M12 8.5v7M8.5 12h7"/>'),
     copiar: svg('<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/>'),
     // Monitoramento › Aplicações: aplicação pendente (exclamação no círculo) e futura (calendário com relógio)
