@@ -193,13 +193,18 @@ window.Telas.calendario = (function () {
     const planejados = itens({ ...ctx, estado: { ...estado, talhao: 'todos' } }).filter(foiPlanejado);
     const lista = itens(ctx).filter(foiPlanejado).filter((it) => marcado(estado, 'grupo', chaveGrupo(it)))
       .filter((it) => marcado(estado, 'operacao', chaveOperacao(it)));
-    const vazio = `
-        <div class="estrutura__aviso calendario__vazio" role="note">${Icones.info}
-          <p><strong>Nenhuma operação planejada ainda.</strong> As operações planejadas aparecem aqui com datas e doses por talhão.</p>
-        </div>`;
     // A Programação ocupa a área logo abaixo das abas. Em cima, as visões em guias (Tabela · Ciclo Produtivo);
     // embaixo, os filtros Grupo de operação, Operação e Talhão.
     if (estado.visao !== 'infografico') estado.visao = 'tabela';
+    // Sem nada planejado: estado vazio no centro (o ícone da visão, título, texto) e o botão que leva ao Planejamento,
+    // na guia Plantio. Não é um aviso: não há nada errado, só falta planejar.
+    const vazio = `
+        <div class="resumo-vazio">
+          <span class="resumo-vazio__icone" aria-hidden="true">${estado.visao === 'tabela' ? Icones.lista : Icones.grafico}</span>
+          <h3 class="resumo-vazio__titulo">Nenhuma operação planejada ainda</h3>
+          <p class="resumo-vazio__texto">As operações planejadas aparecem aqui com datas e doses por talhão.</p>
+          ${ctx.irParaPlanejamento ? `<button class="botao botao--primario" type="button" data-acao="cal-ir-planejamento">Ir para o Planejamento ${Icones.seta}</button>` : ''}
+        </div>`;
     return `
       <section class="calendario">
         <div class="calendario__barra">
@@ -862,6 +867,7 @@ window.Telas.calendario = (function () {
 
   // ----- Eventos (repassados pela Tela 04). Devolvem true quando o evento era daqui. -----
   function aoClicar(e, ctx, { redesenhar }) {
+    if (e.target.closest('[data-acao="cal-ir-planejamento"]') && ctx.irParaPlanejamento) { ctx.irParaPlanejamento(); return true; }
     const abrirOp = e.target.closest('[data-acao="cal-abrir-op"]');
     if (abrirOp && ctx.abrirOperacao) { ctx.abrirOperacao(abrirOp.dataset.op); return true; }
     // Clique fora de uma caixa de filtro aberta: fecha

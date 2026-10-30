@@ -578,7 +578,15 @@ window.Telas.planoOperacoes = (function () {
   // Calendário Agrícola (Tela 05): desenhado aqui dentro, com o mesmo cabeçalho do plano
   function ctxCalendario() {
     ui.calendario = ui.calendario || { visao: 'tabela', talhao: 'todos' };
-    return { plano, somenteLeitura, talhoes: talhoesFazenda, estado: ui.calendario, abrirOperacao: abrirNoPlanejamento };
+    return { plano, somenteLeitura, talhoes: talhoesFazenda, estado: ui.calendario, abrirOperacao: abrirNoPlanejamento,
+      irParaPlanejamento };
+  }
+
+  // Resumo sem nada planejado: "Ir para o Planejamento" abre a aba na guia Plantio (sem ela, na primeira guia)
+  function irParaPlanejamento() {
+    const g = gruposPlanejamento().find(ehSemente) || gruposPlanejamento()[0];
+    if (g) { ui.grupoId = g.id; ui.filtroTalhoes = 'todos'; limparSelecao(); }
+    location.hash = `#/plano/${plano.id}/planejamento`;
   }
 
   // Resumo › Tabela: o nome da operação abre a aba Planejamento no grupo dela, com ela aberta

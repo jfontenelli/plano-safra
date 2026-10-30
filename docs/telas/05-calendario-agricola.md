@@ -73,7 +73,7 @@ Ver **todas as operações do plano juntas**, de todos os grupos (Plantio, Defen
 ## 8. Regras
 
 - **Só as operações já planejadas** aparecem (com produto e dose; no Plantio, variedade), na ordem do DAP, **em construção e no aprovado**. Operação ainda sem recomendação não aparece em nenhuma das visões. Qualquer mudança em Operações ou no Planejamento aparece ao voltar ao Calendário. (Antes, em construção, todas as operações cadastradas apareciam como "Sem recomendação"; testado e trocado.)
-- **Nada planejado ainda:** no lugar das visões, um aviso (amarelo-claro): "**Nenhuma operação planejada ainda.** As operações planejadas aparecem aqui com datas e doses por talhão." As guias continuam na barra. Com operações planejadas (em qualquer talhão, sem olhar o filtro de talhão), o aviso não aparece e os filtros ficam sempre à vista; se os filtros esconderem tudo (ex.: nenhum talhão marcado), a Programação e o Ciclo Produtivo dizem "Nenhuma operação com os filtros escolhidos" (20/10/2026).
+- **Nada planejado ainda: estado vazio centralizado** (não é aviso: não há nada errado), abaixo das guias Tabela | Ciclo Produtivo, que continuam na barra: o ícone da visão (tabela ou gráfico) num círculo verde-claro de 52 px, o título "**Nenhuma operação planejada ainda**" (16 px), o texto "As operações planejadas aparecem aqui com datas e doses por talhão." (14 px, cinza) e o botão verde **"Ir para o Planejamento →"**, que abre a aba Planejamento na guia **Plantio** (sem ela, na primeira guia), como o clique na aba (pergunta antes, se houver alteração não salva). Largura máxima de 420 px, texto centralizado. Igual na versão publicada (o Planejamento abre para consulta). Com operações planejadas (em qualquer talhão, sem olhar o filtro de talhão), o estado vazio não aparece e os filtros ficam sempre à vista; se os filtros esconderem tudo (ex.: nenhum talhão marcado), a Programação e o Ciclo Produtivo dizem "Nenhuma operação com os filtros escolhidos" (20/10/2026).
 
 - A colheita vem do Plantio: previsão = data de plantio + ciclo da variedade; talhão com variedade sem ciclo fica fora da colheita.
 - **A Colheita aparece no fim, depois que houver plantio** (variedade, data e ciclo), com a previsão de colheita.
@@ -84,7 +84,7 @@ Ver **todas as operações do plano juntas**, de todos os grupos (Plantio, Defen
 ## 9. Para testar
 
 - **Santa Clara, soja 25/26** (publicado): fases Pré-plantio · Plantio · 1 DAP (sem fenologia) · V2 · V4 · R1 · R3 · R4 · R5 · R7 · Colheita (104 a 118 DAP). Fenologia do exemplo: Pré-emergente sem fenologia (antes da emergência), 1ª Pós V2, 2ª Pós V4, 1ª Fungicida R1, 2ª R3, 3ª R4, 4ª R5, Desfolha R7; adubações de 25 DAP em V4 e 2ª foliar em R3 (do modelo).
-- **Plano criado na hora** (em construção): o que já estiver planejado; sem nada planejado, o aviso "Nenhuma operação planejada ainda".
+- **Plano criado na hora** (em construção): o que já estiver planejado; sem nada planejado, o estado vazio "Nenhuma operação planejada ainda", com o botão "Ir para o Planejamento".
 
 ## 10. Sugestões em teste (não validadas)
 

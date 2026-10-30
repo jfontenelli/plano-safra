@@ -2157,7 +2157,13 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .calendario__visoes .visoes__botao { height: 38px; }
 .calendario { padding-top: 10px; gap: 10px; }
 .calendario__visoes .visoes__botao--ativo { background: var(--verde-100); color: var(--verde-800); box-shadow: inset 0 0 0 1px var(--verde-600); }
-.calendario__vazio { margin: 24px 0; color: var(--texto-suave); }
+/* Resumo sem nada planejado: estado vazio centralizado, com o botão para o Planejamento */
+.resumo-vazio { display: flex; flex-direction: column; align-items: center; gap: 8px; max-width: 420px; margin: 0 auto; padding: 72px 16px; text-align: center; }
+.resumo-vazio__icone { display: grid; place-items: center; width: 52px; height: 52px; margin-bottom: 6px; border-radius: 50%; background: var(--verde-100); color: var(--verde-700); }
+.resumo-vazio__icone .icone { width: 24px; height: 24px; }
+.resumo-vazio__titulo { margin: 0; font-size: 16px; font-weight: 500; color: var(--texto); }
+.resumo-vazio__texto { margin: 0 0 10px; font-size: 14px; color: var(--texto-suave); }
+.resumo-vazio .botao .icone { width: 16px; height: 16px; }
 
 /* ===== Resumo · Calendário (mês, semana, dia) ===== */
 .cal-mes { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; align-items: start; }
@@ -6656,13 +6662,18 @@ window.Telas.calendario = (function () {
     const planejados = itens({ ...ctx, estado: { ...estado, talhao: 'todos' } }).filter(foiPlanejado);
     const lista = itens(ctx).filter(foiPlanejado).filter((it) => marcado(estado, 'grupo', chaveGrupo(it)))
       .filter((it) => marcado(estado, 'operacao', chaveOperacao(it)));
-    const vazio = `
-        <div class="estrutura__aviso calendario__vazio" role="note">${Icones.info}
-          <p><strong>Nenhuma operação planejada ainda.</strong> As operações planejadas aparecem aqui com datas e doses por talhão.</p>
-        </div>`;
     // A Programação ocupa a área logo abaixo das abas. Em cima, as visões em guias (Tabela · Ciclo Produtivo);
     // embaixo, os filtros Grupo de operação, Operação e Talhão.
     if (estado.visao !== 'infografico') estado.visao = 'tabela';
+    // Sem nada planejado: estado vazio no centro (o ícone da visão, título, texto) e o botão que leva ao Planejamento,
+    // na guia Plantio. Não é um aviso: não há nada errado, só falta planejar.
+    const vazio = `
+        <div class="resumo-vazio">
+          <span class="resumo-vazio__icone" aria-hidden="true">${estado.visao === 'tabela' ? Icones.lista : Icones.grafico}</span>
+          <h3 class="resumo-vazio__titulo">Nenhuma operação planejada ainda</h3>
+          <p class="resumo-vazio__texto">As operações planejadas aparecem aqui com datas e doses por talhão.</p>
+          ${ctx.irParaPlanejamento ? `<button class="botao botao--primario" type="button" data-acao="cal-ir-planejamento">Ir para o Planejamento ${Icones.seta}</button>` : ''}
+        </div>`;
     return `
       <section class="calendario">
         <div class="calendario__barra">
@@ -7325,6 +7336,7 @@ window.Telas.calendario = (function () {
 
   // ----- Eventos (repassados pela Tela 04). Devolvem true quando o evento era daqui. -----
   function aoClicar(e, ctx, { redesenhar }) {
+    if (e.target.closest('[data-acao="cal-ir-planejamento"]') && ctx.irParaPlanejamento) { ctx.irParaPlanejamento(); return true; }
     const abrirOp = e.target.closest('[data-acao="cal-abrir-op"]');
     if (abrirOp && ctx.abrirOperacao) { ctx.abrirOperacao(abrirOp.dataset.op); return true; }
     // Clique fora de uma caixa de filtro aberta: fecha
@@ -11259,7 +11271,15 @@ window.Telas.planoOperacoes = (function () {
   // Calendário Agrícola (Tela 05): desenhado aqui dentro, com o mesmo cabeçalho do plano
   function ctxCalendario() {
     ui.calendario = ui.calendario || { visao: 'tabela', talhao: 'todos' };
-    return { plano, somenteLeitura, talhoes: talhoesFazenda, estado: ui.calendario, abrirOperacao: abrirNoPlanejamento };
+    return { plano, somenteLeitura, talhoes: talhoesFazenda, estado: ui.calendario, abrirOperacao: abrirNoPlanejamento,
+      irParaPlanejamento };
+  }
+
+  // Resumo sem nada planejado: "Ir para o Planejamento" abre a aba na guia Plantio (sem ela, na primeira guia)
+  function irParaPlanejamento() {
+    const g = gruposPlanejamento().find(ehSemente) || gruposPlanejamento()[0];
+    if (g) { ui.grupoId = g.id; ui.filtroTalhoes = 'todos'; limparSelecao(); }
+    location.hash = `#/plano/${plano.id}/planejamento`;
   }
 
   // Resumo › Tabela: o nome da operação abre a aba Planejamento no grupo dela, com ela aberta
