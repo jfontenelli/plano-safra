@@ -60,7 +60,7 @@ Menu lateral **Gestão da Lavoura › Operações Agrícolas**, o primeiro item 
 
 ## Para testar
 - Dados em `js/dados-exemplo.js`, `monitoramento`: por talhão, o estande (`plantasM`, plantas por metro, inteiro) e, por operação, o deslocamento da execução em dias (positivo = atraso, negativo = antecipação, `null` = não executada); sem deslocamento próprio, a sequência `deslocamentos`. As datas planejadas vêm dos planos de exemplo.
-- **O exemplo anda com o dia** (`dataReferencia`, 25/11/2026; DECISOES 4.0): hoje é o dia em que o protótipo é aberto, e a página abre sempre no mesmo ponto da safra: na Boa Vista 26/27, a 1ª Fungicida quase toda executada (T06 pendente), a 2ª em parte (T02 pendente), a 3ª e a 4ª planejadas.
+- **O exemplo anda com o ano agrícola** (`dataReferencia`, 25/11/2026; DECISOES 4.0; 03/11/2026, antes andava com o dia): as datas mantêm o dia e o mês, para o plantio e a colheita ficarem na época certa. O que aparece executado depende do dia em que o protótipo é aberto: em 25/11, na Boa Vista 26/27, a 1ª Fungicida quase toda executada (T06 pendente), a 2ª em parte (T02 pendente), a 3ª e a 4ª planejadas; antes disso, menos aplicações executadas.
 - Legenda Atrasada → T02 (2ª Fungicida) e T06 (1ª Fungicida).
 - Safra 27/27 com Cultura Milho → as operações de Defensivo do milho, todas planejadas.
 

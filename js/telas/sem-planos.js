@@ -9,7 +9,7 @@ window.Telas.semPlanos = function (item) {
     + 'a partir da versão publicada, cria automaticamente as Ordens de Serviço.';
   const ITENS = {
     planejamento: { titulo: 'Planejamento', alvo: 'o planejamento', texto: TEXTO_PLANO, icone: Icones.lista },
-    calendario:   { titulo: 'Calendário Agrícola', alvo: 'o Calendário Agrícola', texto: TEXTO_PLANO, icone: Icones.calendario },
+    calendario:   { titulo: 'Planejamento Operacional', alvo: 'o Planejamento Operacional', texto: TEXTO_PLANO, icone: Icones.calendario },
     'central-os': { titulo: 'Central OS', alvo: 'a Central OS', texto: TEXTO_PLANO, icone: Icones.documento },
     'planejado-executado': { titulo: 'Operações Agrícolas', alvo: 'as Operações Agrícolas', texto: TEXTO_PLANO, icone: Icones.calendario },
     orcamento:    { titulo: 'Orçamento de Insumos', alvo: 'o Orçamento de Insumos',

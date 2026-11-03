@@ -241,7 +241,7 @@ window.Telas.monitoramentoAplicacoes = (function () {
   // filtros), Executadas (tabela) e Planejadas × Executadas (desvio por operação). A guia Duração da Operação saiu em
   // 29/10/2026 (os usuários não quiseram acompanhar essa métrica); o código dela continua aqui, sem a guia
   const GUIAS = [
-    ['calendario', 'Calendário Agrícola', 'As operações planejadas de todas as fazendas: o ano agrícola por empresa e fazenda, e o dia a dia no mês, na semana e no dia.'],
+    ['calendario', 'Planejamento Operacional', 'As operações planejadas de todas as fazendas: o ano agrícola por empresa e fazenda, e o dia a dia no mês, na semana e no dia.'],
     ['tabela', 'Executadas', 'Consulte as datas de execução e o status das operações por talhão.'],
     ['linha', 'Planejadas × Executadas', 'Compare as datas planejadas e executadas das operações por talhão.']
   ];

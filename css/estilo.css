@@ -3659,3 +3659,29 @@ html[data-tema="escuro"] .ind-ponto--oleo { --c: #e2b93b; }
 .ind-tabela .titulo-coluna > span { max-width: none; white-space: nowrap; }
 .ind-tabela th { vertical-align: middle; }
 @media (max-width: 900px) { .ind-cartoes { grid-template-columns: 1fr; } }
+
+/* ===== Calendário Agrícola › Mês: tabela Operação × semanas do mês ===== */
+.cal-mestab { flex: 0 1 auto; min-height: 0; overflow: auto; border: 1px solid var(--borda); border-radius: 8px; }
+.cal-mestab__tabela { width: 100%; border-collapse: separate; border-spacing: 0; table-layout: fixed; }
+.cal-mestab__tabela th, .cal-mestab__tabela td { padding: 8px 10px; border-bottom: 1px solid var(--borda); border-left: 1px solid var(--borda); text-align: center; font-size: 14px; }
+.cal-mestab__tabela tr > :first-child { border-left: 0; }
+.cal-mestab__tabela tbody tr:last-child > * { border-bottom: 0; }
+.cal-mestab__tabela thead th { position: sticky; top: 0; z-index: 1; padding: 10px; background: var(--superficie-2); font-weight: 700; color: var(--texto); white-space: nowrap; }
+.cal-mestab__tabela td { height: 66px; padding: 6px 8px; vertical-align: middle; }
+/* Cartão da operação na semana: bolinha e nome em negrito; a área embaixo, sem negrito */
+.cal-mestab__area { display: flex; justify-content: center; padding: 8px 12px; border-radius: 6px; background: var(--f); color: var(--texto); text-align: left; }
+.cal-mestab__nome { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 700; line-height: 1.3; }
+.cal-mestab__ha { display: block; padding-left: 18px; font-size: 14px; font-weight: 400; color: var(--texto-suave); font-variant-numeric: tabular-nums; }
+/* Título da semana: o botão ocupa a célula cinza inteira (clicar em qualquer lugar abre a Semana) */
+.cal-mestab__tabela thead th { padding: 0; }
+.cal-mestab__semana { display: flex; align-items: center; justify-content: center; width: 100%; min-height: 50px; padding: 8px 10px; border: 0; background: none; font: inherit; font-weight: 700; color: inherit; cursor: pointer; }
+.cal-mestab__semana:hover { background: var(--verde-100); color: var(--verde-700); }
+.cal-mestab__rotulo { padding: 4px 10px; }
+/* Semana de hoje: o título num fundo verde, como o número do dia de hoje no calendário */
+.cal-mestab__rotulo--atual { border-radius: 999px; background: var(--verde-700); color: #fff; } /* como o dia de hoje na Semana */
+.cal-mestab__semana:focus-visible { outline: 2px solid var(--verde-600); outline-offset: -2px; }
+.cal-mestab ~ .cal-rodape { margin-top: auto; } /* o rodapé fica no fim da tela, como no Mês de antes */
+.cal-mestab--passado .cal-mestab__area { opacity: .55; }
+.cal-mestab__tabela thead th.cal-mestab--passado { color: var(--texto-suave); }
+.cal-ponto--corretivos { --c: #3b74d6; --f: #e6eefb; }
+html[data-tema="escuro"] .cal-mestab__area { --f: color-mix(in srgb, var(--c) 24%, #15232D); }

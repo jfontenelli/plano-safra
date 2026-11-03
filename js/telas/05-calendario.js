@@ -725,6 +725,61 @@ window.Telas.calendario = (function () {
       </aside>`;
   }
 
+  // ----- Mês: tabela das semanas do mês, uma linha por operação (sem coluna de nome: o nome vai em cada cartão) -----
+  // Colunas: as semanas do calendário (domingo a sábado) cortadas no começo e no fim do mês: "01–07 nov"
+  // (a última, "29–30 nov"; um dia só, "31 mai").
+  // Linhas: uma por nome de operação (vários planos e fazendas com o mesmo nome somam numa linha), pelo DAP (o menor
+  // entre os planos; a Colheita, sem DAP, no fim); no mesmo DAP, o Plantio primeiro e depois a primeira área no mês. Célula: a área das operações que começam nos dias da semana
+  // (a mesma conta do rodapé), num cartão com a bolinha, o nome e a área; sem área, vazia. Clicar em qualquer lugar do título de uma semana (a célula cinza inteira) abre a Semana (domingo a sábado), com todas as
+  // operações; a semana de hoje tem o título num fundo verde. Ao passar o mouse na área: de onde vem. Semanas que já passaram ficam esmaecidas.
+  function semanasDoMes(de, ate) {
+    const lista = [];
+    for (let ini = de; ini <= ate;) {
+      const fimSemana = periodo('semana', ini).ate;
+      const fim = fimSemana < ate ? fimSemana : ate;
+      lista.push({ de: ini, ate: fim, rotulo: `${ini.slice(8)}${fim !== ini ? `–${fim.slice(8)}` : ''} ${MESES_CURTOS[dataDe(ini).getMonth()]}` });
+      ini = somaDias(fim, 1);
+    }
+    return lista;
+  }
+  function tabelaMes(evs, de, ate) {
+    const semanas = semanasDoMes(de, ate);
+    const linhas = new Map();
+    evs.forEach((ev) => {
+      const dap = ev.it.colheita || ev.it.dap === null || ev.it.dap === undefined || ev.it.dap === '' ? Infinity : Number(ev.it.dap);
+      const l = linhas.get(ev.nome) || { nome: ev.nome, tipo: ev.tipo, primeiro: ev.inicio, dap, celulas: semanas.map(() => ({ area: 0, locais: new Map() })) };
+      const c = l.celulas[semanas.findIndex((s) => s.de <= ev.inicio && ev.inicio <= s.ate)];
+      c.area += ev.area;
+            const local = ev.local || '';
+      c.locais.set(local, (c.locais.get(local) || 0) + ev.area);
+      if (ev.inicio < l.primeiro) l.primeiro = ev.inicio;
+      if (dap < l.dap) l.dap = dap;
+      linhas.set(ev.nome, l);
+    });
+    const plantioPrimeiro = (l) => (l.tipo === 'sementes' ? 0 : 1);
+    const ordem = [...linhas.values()].sort((a, b) => (a.dap === b.dap ? 0 : a.dap < b.dap ? -1 : 1) || plantioPrimeiro(a) - plantioPrimeiro(b)
+      || a.primeiro.localeCompare(b.primeiro)
+      || a.nome.localeCompare(b.nome, 'pt-BR', { numeric: true }));
+    const hoje = hojeIso();
+    const dica = (l, s, c) => `${l.nome} · ${s.rotulo}: ${[...c.locais].map(([local, area]) => (local ? `${local}: ${Util.area(area)}` : Util.area(area))).join(' · ')}`;
+    return `
+      ${!ordem.length ? '<p class="cal-painel__vazio">Nenhuma operação neste mês.</p>' : `
+      <div class="cal-mestab">
+        <table class="cal-mestab__tabela">
+          <thead><tr>${semanas.map((s) => `<th scope="col" class="${s.ate < hoje ? 'cal-mestab--passado' : ''}">
+            <button class="cal-mestab__semana" type="button" data-acao="cal-semana" data-dia="${s.de}"
+                    title="Ver a semana de ${s.rotulo}${s.de <= hoje && hoje <= s.ate ? ' (semana atual)' : ''}"><span class="cal-mestab__rotulo ${s.de <= hoje && hoje <= s.ate ? 'cal-mestab__rotulo--atual' : ''}">${s.rotulo}</span></button></th>`).join('')}</tr></thead>
+          <tbody>${ordem.map((l) => `
+            <tr>
+              ${l.celulas.map((c, i) => `<td class="${semanas[i].ate < hoje ? 'cal-mestab--passado' : ''}">${c.area ? `
+                <span class="cal-mestab__area cal-ponto--${l.tipo}" title="${esc(dica(l, semanas[i], c))}"><span>
+                  <span class="cal-mestab__nome"><span class="cal-ponto cal-ponto--${l.tipo}"></span>${esc(l.nome)}</span>
+                  <span class="cal-mestab__ha">${Util.area(c.area)}</span></span></span>` : ''}</td>`).join('')}
+            </tr>`).join('')}</tbody>
+        </table>
+      </div>`}`;
+  }
+
   // todos: os eventos (eventos()); filtros: HTML da linha acima da grade; semData: operações planejadas sem data
   function calendarioMes({ est, todos, filtros = '', semData = 0 }) {
     const escala = est.escala || 'mes';
@@ -733,7 +788,9 @@ window.Telas.calendario = (function () {
     const doPeriodo = todos.filter((ev) => ev.inicio >= de && ev.inicio <= ate);
     const aberto = escala === 'dia' ? '' : est.diaAberto || '';
     let corpo;
-    if (escala === 'dia') {
+    if (escala === 'mes') {
+      corpo = tabelaMes(doPeriodo, de, ate);
+    } else if (escala === 'dia') {
       const d = dataDe(ref);
       corpo = `
         <div class="cal-dia-unico ${ref === hojeIso() ? 'cal-dia--hoje' : ''}">
@@ -916,6 +973,13 @@ window.Telas.calendario = (function () {
       redesenhar(`[data-acao="cal-talhoes"][data-op="${CSS.escape(tal.dataset.op)}"]`);
       return true;
     }
+    // Mês: clicar no título de uma semana abre a Semana (domingo a sábado), com todas as operações
+    const sem = e.target.closest('[data-acao="cal-semana"]');
+    if (sem) {
+      est.escala = 'semana'; est.dataRef = sem.dataset.dia; est.diaAberto = null;
+      redesenhar('[data-campo="cal-escala"]');
+      return true;
+    }
     const cal = e.target.closest('[data-acao="cal-hoje"], [data-acao="cal-nav"], [data-acao="cal-dia"], [data-acao="cal-dia-fechar"]');
     if (cal) {
       const acao = cal.dataset.acao;
@@ -995,5 +1059,5 @@ window.Telas.calendario = (function () {
 
   // Para a Agenda Agrícola (Operações Agrícolas): itens e eventos de um plano, a grade e a barra de navegação, os filtros com caixas
   return { desenhar, aoClicar, aoMudar, aoDigitar, prazoDe,
-    itens, eventos, calendarioMes, navCalendario, seletorEscala, filtroCaixa, marcado, hojeIso };
+    itens, eventos, calendarioMes, navCalendario, seletorEscala, filtroCaixa, marcado, hojeIso, periodo };
 })();

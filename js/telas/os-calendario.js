@@ -16,7 +16,8 @@ window.Telas.osCalendario = (function () {
   const esc = Util.escapar;
   const Cal = () => Telas.calendario;
   // Grupos de operação pelo tipo (os nomes de cada plano podem mudar; a cor segue o tipo), nesta ordem na legenda
-  const ORDEM_TIPO = ['sementes', 'fertilidade', 'defensivos', 'colheita'];
+  // (03/11/2026: Corretivos, do tipo Aplicação de insumos, primeiro)
+  const ORDEM_TIPO = ['aplicacao-de-insumos', 'sementes', 'fertilidade', 'defensivos', 'colheita'];
   const FILTROS = [
     ['safra', 'Safra', ['Todas', 'Nenhuma', 'selecionadas']],
     ['cultura', 'Cultura', ['Todas', 'Nenhuma', 'culturas']],
@@ -27,7 +28,8 @@ window.Telas.osCalendario = (function () {
   ];
 
   // Estado da tela: período, dia aberto e filtros ('todos' ou a lista do que está marcado). Mantém-se ao navegar.
-  const novoEstado = () => ({ escala: 'ano', anoAgricola: anoInicial(), dataRef: Cal().hojeIso(), safra: 'todos', empresa: 'todos', fazenda: 'todos',
+  // Abre no Mês de hoje (03/11/2026; antes no Ano)
+  const novoEstado = () => ({ escala: 'mes', anoAgricola: anoInicial(), dataRef: Cal().hojeIso(), safra: 'todos', empresa: 'todos', fazenda: 'todos',
     cultura: 'todos', operacao: 'todos', talhao: 'todos', grupo: 'todos' });
   let est = null;
 
@@ -85,7 +87,8 @@ window.Telas.osCalendario = (function () {
       const local = `${p.fazenda} · ${p.safra}`;
       lista.forEach((it) => itens.push({ it, local }));
       const visiveis = lista.filter(visivel);
-      Cal().eventos(ctx, visiveis).forEach((ev) => eventos.push({ ...ev, local,
+      const ano = String(Util.anoAgricola(p.safra));
+      Cal().eventos(ctx, visiveis).forEach((ev) => eventos.push({ ...ev, local, ano,
         chave: `${p.id}:${ev.it.colheita ? 'colheita' : ev.it.op.id}` }));
     });
     eventos.sort((a, b) => a.inicio.localeCompare(b.inicio));
@@ -93,7 +96,7 @@ window.Telas.osCalendario = (function () {
     return { itens, eventos, semData };
   }
 
-  // Grupos da legenda: os tipos que têm operação, na ordem Plantio, Fertilidade, Defensivo, Colheita (outros no fim)
+  // Grupos da legenda: os tipos que têm operação, na ordem Corretivos, Plantio, Fertilidade, Defensivo, Colheita (outros no fim)
   function gruposLegenda(itens) {
     const mapa = new Map();
     itens.forEach(({ it }) => { const t = tipoDe(it.grupo); if (!mapa.has(t)) mapa.set(t, it.grupo.nome); });
@@ -287,11 +290,15 @@ window.Telas.osCalendario = (function () {
         redesenhar(`[data-campo="cal-filtro"][data-filtro="${chave}"][value="${CSS.escape(e.target.value)}"]`);
         return;
       }
-      // Escala: para o Ano, o ano agrícola do dia mostrado (se tiver plano); do Ano para Mês, Semana ou Dia, o dia
-      // mostrado antes, se estiver no ano agrícola; senão, hoje (no ano de hoje) ou o começo do ano agrícola
+      // Escala: para o Ano, o ano agrícola dos planos com operação no período mostrado (com os filtros; com mais de um,
+      // o mais recente: em maio de 2026, a calagem do 26/27 abre 2026); sem operação no período, o do dia mostrado (se
+      // tiver plano). Do Ano para Mês, Semana ou Dia, o dia mostrado antes, se estiver no ano agrícola; senão, hoje (no
+      // ano de hoje) ou o começo do ano agrícola
       if (e.target.dataset.campo === 'cal-escala' && (e.target.value === 'ano' || est.escala === 'ano')) {
         if (e.target.value === 'ano') {
-          const a = anoDe(est.diaAberto || est.dataRef);
+          const { de, ate } = Cal().periodo(est.escala, est.dataRef);
+          const doPeriodo = calcular().eventos.filter((ev) => ev.inicio >= de && ev.inicio <= ate).map((ev) => ev.ano).sort();
+          const a = doPeriodo.length ? doPeriodo[doPeriodo.length - 1] : anoDe(est.diaAberto || est.dataRef);
           if (anos().includes(a)) est.anoAgricola = a;
           // O ano agrícola inteiro, no nível Empresa (como ao abrir)
           Telas.calendarioAgricola.recolherTudo();

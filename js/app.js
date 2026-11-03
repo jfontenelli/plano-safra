@@ -167,30 +167,30 @@
     else { window.addEventListener('hashchange', depois, { once: true }); location.hash = '#/plano-safra'; }
   }
 
-  // O exemplo anda com o dia (DADOS.dataReferencia): todas as datas do exemplo andam a diferença entre hoje e a data de
-  // referência, e hoje cai sempre no mesmo ponto da safra. Os nomes das safras andam os anos agrícolas entre as duas
-  // datas (o ano agrícola vira em 01/09; ex.: 26/27 → 27/28), inclusive no cadastro de safras, que anda em anos (a safra
-  // começa sempre em 01/09): assim, a safra do exemplo é sempre a safra atual. Uma vez, ao abrir.
+  // O exemplo anda com o ano agrícola (DADOS.dataReferencia): as datas do exemplo andam os anos agrícolas entre hoje e a
+  // data de referência (o ano agrícola vira em 01/09), mantendo o dia e o mês: o plantio e a colheita ficam sempre na
+  // época certa (soja de 20/09 a 10/10, milho safrinha de 08/01 a 05/02; 03/11/2026, antes andavam os dias e saíam da
+  // janela). Os nomes das safras andam os mesmos anos (26/27 → 27/28), inclusive no cadastro de safras (a safra começa
+  // sempre em 01/09): assim, a safra do exemplo é sempre a safra atual. Uma vez, ao abrir.
   function ajustarCenario() {
     const ref = DADOS.dataReferencia;
     if (!ref) return;
     const hoje = Util.hojeISO();
-    const dias = Math.round((Date.parse(hoje) - Date.parse(ref)) / 86400000);
-    if (!dias) return;
     const anoAgricola = (iso) => (+iso.slice(5, 7) >= 9 ? +iso.slice(0, 4) : +iso.slice(0, 4) - 1);
     const anos = anoAgricola(hoje) - anoAgricola(ref);
+    if (!anos) return;
     const dois = (n) => String(n).padStart(2, '0');
     const data = (iso) => {
       const [d, hora] = iso.split('T');
       const [a, m, dd] = d.split('-').map(Number);
-      const dt = new Date(a, m - 1, dd + dias);
+      const dt = new Date(a + anos, m - 1, dd);
       const nova = `${dt.getFullYear()}-${dois(dt.getMonth() + 1)}-${dois(dt.getDate())}`;
       return hora ? `${nova}T${hora}` : nova;
     };
     const safra = (nome) => nome.replace(/(\d\d)\/(\d\d)/, (_, a, b) => `${dois((+a + anos) % 100)}/${dois((+b + anos) % 100)}`);
     const ISO = /^\d{4}-\d{2}-\d{2}(T[\d:]+)?$/;
     const SAFRA = /^\d\d\/\d\d$/;
-    // Percorre o dado: datas andam os dias; nomes de safra (também nas chaves, ex.: "Boa Vista 26/27") andam os anos
+    // Percorre o dado: datas andam os anos; nomes de safra (também nas chaves, ex.: "Boa Vista 26/27") andam os anos
     const andar = (v) => {
       if (typeof v === 'string') return ISO.test(v) ? data(v) : anos && SAFRA.test(v) ? safra(v) : v;
       if (Array.isArray(v)) return v.map(andar);

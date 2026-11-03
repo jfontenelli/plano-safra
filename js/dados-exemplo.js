@@ -427,10 +427,12 @@ window.DADOS = {
   executores: ['Equipe Alpha', 'Equipe Beta', 'Equipe Ceta', 'Equipe Ômega'],
 
   // ----- Data de referência do exemplo -----
-  // O "hoje" para o qual as datas deste arquivo foram escritas: dentro da janela das fungicidas da soja 26/27, para a
-  // página Aplicações ter aplicações executadas, pendentes e planejadas. Ao abrir o protótipo, todas as datas do
-  // exemplo (plantio, versões, OS, justificativas) andam a diferença entre hoje e esta data, e hoje cai sempre no mesmo
-  // ponto da safra. Os nomes das safras andam os anos agrícolas entre as duas datas (26/27 → 27/28) (js/app.js, ajustarCenario).
+  // O ano agrícola para o qual as datas deste arquivo foram escritas (2026: soja 26/27 e milho safrinha 27/27). Ao abrir
+  // o protótipo, as datas do exemplo (plantio, versões, OS, justificativas) andam os anos agrícolas entre hoje e esta
+  // data, mantendo o dia e o mês, para ficarem na época certa do médio-norte do MT (revisão de 03/11/2026: vazio
+  // sanitário 08/06–06/09, plantio da soja de setembro a outubro e colheita em janeiro e fevereiro; milho safrinha
+  // plantado em janeiro e fevereiro e colhido de maio a agosto; MAPA, Imea, Embrapa). Os nomes das safras andam os mesmos
+  // anos (26/27 → 27/28) (js/app.js, ajustarCenario).
   dataReferencia: '2026-11-25',
 
   // ----- Monitoramento › Aplicações: dados SIMULADOS -----
