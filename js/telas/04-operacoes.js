@@ -45,7 +45,7 @@ window.Telas.planoOperacoes = (function () {
       novasOps: null,          // modal "Nova operação" (grupo Operação de campo): { linhas: [{ nome, dap, fenologia }], erros }
       campo: null,             // modal "Definir operação" (grupo Operação de campo): { grupoId, talhoes, linhas: [{ nome, dap, pct }], iniciais, erros }
       plantando: null,         // modal "Definir plantio" (grupo Plantio): { talhoes, linhas: [{ variedade, pct, data, populacao }], germinacao, datasTexto, erros }
-      visaoSemente: 'talhoes', // passo Plantio, "Exibir": talhoes (tabela) | mapa (a Previsão de colheita está pausada)
+      visaoSemente: 'talhoes', // passo Plantio, "Exibir": talhoes (tabela) | mapa | indicadores (a Previsão de colheita está pausada)
       painelTalhao: null,      // talhão aberto no painel lateral (passo Variedade)
       prePainel: null,         // painel: nome da variedade em pré-cadastro
       erroPrePainel: null,
@@ -601,6 +601,14 @@ window.Telas.planoOperacoes = (function () {
     limparSelecao();
     location.hash = `#/plano/${plano.id}/planejamento`;
   }
+  // Plantio › Indicadores: o plano aberto inteiro (estado guardado ao navegar). Sem plantio planejado, "Ir para o
+  // Planejamento" leva à Tabela do Plantio
+  function ctxIndicadores() {
+    ui.indicadores = ui.indicadores || {};
+    return { plano, talhoes: talhoesFazenda, estado: ui.indicadores,
+      irParaTabela: () => { ui.visaoSemente = 'talhoes'; desenharMantendoFoco('[data-visao="talhoes"]'); } };
+  }
+
   const acoesCalendario = { redesenhar: (foco) => (foco ? desenharMantendoFoco(foco) : desenharTudo()), alterou: () => alterou() };
 
   // Validação (Tela 04.0): desenhada aqui dentro, com o mesmo cabeçalho do plano. Estado: grupos abertos e
@@ -1953,7 +1961,7 @@ window.Telas.planoOperacoes = (function () {
           <div class="semente-cabecalho">
             <div class="semente-cabecalho__titulos">
               ${cabecalhoPaginaInteira(op)}
-              <p class="semente-cabecalho__sub">Selecione um talhão para definir a variedade de plantio.</p>
+              ${ui.visaoSemente === 'indicadores' ? '' : '<p class="semente-cabecalho__sub">Selecione um talhão para definir a variedade de plantio.</p>'}
             </div>
             ${visoesVariedade()}
           </div>
@@ -2257,10 +2265,10 @@ window.Telas.planoOperacoes = (function () {
   }
 
   // ----- Passo Plantio (variedade, data de plantio e população) -----
-  // "Exibir" (à direita dos passos): Tabela · Mapa. A Previsão de colheita está pausada (29/10/2026): o código
+  // "Exibir" (à direita dos passos): Tabela · Mapa · Indicadores. A Previsão de colheita está pausada (29/10/2026): o código
   // (visaoColheita) continua aqui, só sem o botão
   function visoesVariedade() {
-    const visao = ui.visaoSemente === 'mapa' ? 'mapa' : 'talhoes';
+    const visao = ['mapa', 'indicadores'].includes(ui.visaoSemente) ? ui.visaoSemente : 'talhoes';
     // No mesmo estilo do "+ Criar Plano Safra": a escolhida é o botão principal (verde); a outra, o botão com borda
     const botao = (valor, rotulo, icone) => `
       <button class="botao ${visao === valor ? 'botao--primario' : 'botao--secundario'} semente-visao" type="button" data-acao="visao-semente"
@@ -2268,12 +2276,13 @@ window.Telas.planoOperacoes = (function () {
     return `
       <div class="exibir">
         <div class="semente-visoes" role="group" aria-label="Visualização do plantio">
-          ${botao('talhoes', 'Tabela', Icones.tabela)}${botao('mapa', 'Mapa', Icones.mapa)}
+          ${botao('talhoes', 'Tabela', Icones.tabela)}${botao('mapa', 'Mapa', Icones.mapa)}${botao('indicadores', 'Indicadores', Icones.pizza)}
         </div>
       </div>`;
   }
 
   function passoVariedade(op) {
+    if (ui.visaoSemente === 'indicadores') return Telas.indicadores.desenhar(ctxIndicadores());
     return ui.visaoSemente === 'mapa' ? `${visaoMapa()}${legendaMapa(op)}` : tabelaVariedade(op);
   }
 
@@ -3776,6 +3785,7 @@ window.Telas.planoOperacoes = (function () {
   function aoClicar(e) {
     if (etapa === 'revisao' && Telas.validacao.aoClicar(e, ctxEstrutura(), acoesEstrutura)) return;
     if (etapa === 'calendario' && Telas.calendario.aoClicar(e, ctxCalendario(), acoesCalendario)) return;
+    if (etapa !== 'calendario' && ui.visaoSemente === 'indicadores' && Telas.indicadores.aoClicar(e, ctxIndicadores(), acoesCalendario)) return;
     // Tabelas de talhões: sem seleção, o clique na linha (fora da caixa de marcar e das células editáveis) abre o
     // Planejar só com o talhão clicado ou, no Plantio, o painel do talhão. Com talhões (ou linhas) marcados, o clique
     // na linha marca ou desmarca, sem abrir nada (alternarPelaLinha).
@@ -4041,6 +4051,7 @@ window.Telas.planoOperacoes = (function () {
 
   function aoMudar(e) {
     if (etapa === 'calendario' && Telas.calendario.aoMudar(e, ctxCalendario(), acoesCalendario)) return;
+    if (etapa !== 'calendario' && ui.visaoSemente === 'indicadores' && Telas.indicadores.aoMudar(e, ctxIndicadores(), acoesCalendario)) return;
     const campo = e.target.dataset.campo;
     // Nova operação (Operação de campo): a fenologia escolhida na linha
     if (campo === 'no-fenologia' && ui.novasOps) { ui.novasOps.linhas[Number(e.target.dataset.var)].fenologia = e.target.value; return; }

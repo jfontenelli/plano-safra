@@ -112,8 +112,18 @@ window.Telas.orcamento = (function () {
     const itens = [];
     planosFiltrados().forEach((p) => {
       const v = Versoes.ultimaPublicada(p);
-      const talhoes = talhoesDe(p).filter((t) => passa('talhao', t.nome));
-      Versoes.grupos(p, v).forEach((g) => g.operacoes.forEach((op) => talhoes.forEach((t) => {
+      itens.push(...consumoDoPlano(p, Versoes.grupos(p, v), talhoesDe(p).filter((t) => passa('talhao', t.nome))));
+    });
+    return itens
+      .filter((i) => passa('insumo', i.grupo))
+      .map((i) => ({ ...i, custo: i.preco === null ? 0 : emReais(i.quantidade * i.preco, i.moedaPreco) }));
+  }
+
+  // Consumo de insumos de um plano (grupos de uma versão, nos talhões dados), talhão a talhão: sementes (uma por
+  // variedade) e os produtos das recomendações. Também usado nos Indicadores do plano (Resumo), para os números baterem.
+  function consumoDoPlano(p, grupos, talhoes) {
+    const itens = [];
+    grupos.forEach((g) => g.operacoes.forEach((op) => talhoes.forEach((t) => {
         const base = { plano: p, talhao: t.nome, area: t.area };
         // Sementes, uma por variedade do talhão: população × área de aplicação ÷ germinação, na embalagem da cultura
         const linhasPl = Planos.linhasPlantio(op, t.nome);
@@ -135,10 +145,7 @@ window.Telas.orcamento = (function () {
             quantidade: Planos.doseTalhao(op, ajuste, linha) * t.area, moedaPreco, preco });
         });
       })));
-    });
-    return itens
-      .filter((i) => passa('insumo', i.grupo))
-      .map((i) => ({ ...i, custo: i.preco === null ? 0 : emReais(i.quantidade * i.preco, i.moedaPreco) }));
+    return itens;
   }
 
   // Área de cada plano no filtro (talhões incluídos; com Talhão, só ele), por cultura
@@ -763,5 +770,5 @@ window.Telas.orcamento = (function () {
     atualizar();
   }
 
-  return { desenhar, aoMostrar };
+  return { desenhar, aoMostrar, consumoDoPlano };
 })();

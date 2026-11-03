@@ -18,7 +18,7 @@ Ver **todas as operações do plano juntas**, de todos os grupos (Plantio, Defen
 
 ## 3. Barra de cima
 
-- **Duas visões em guias**, à esquerda, numa linha própria com uma linha embaixo: **Tabela** (antes Programação; 20/10/2026) · **Ciclo Produtivo** (antes Infográfico) (ícone e nome; a ativa em verde-claro com traço verde embaixo). **Abre na Programação.**
+- **Três visões em guias**, à esquerda, numa linha própria com uma linha embaixo: **Tabela** · **Ciclo Produtivo** · **Produtos** (ícone e nome; a ativa em verde-claro com traço verde embaixo). **Abre na Tabela.** Os filtros Grupo de operação, Operação e Talhão valem para a Tabela e o Ciclo Produtivo; Produtos tem a sua legenda de grupos de insumo.
 - Embaixo, os filtros **Grupo de operação**, **Operação** e **Talhão**.
 - **Uma superfície só**: o Resumo tem fundo branco e as partes se integram à tela (sem caixas soltas sobre fundo cinza).
 - Sem "Visão consolidada" e sem "Agenda de atividades" (estão na imagem, mas foram retirados).
@@ -59,6 +59,19 @@ Ver **todas as operações do plano juntas**, de todos os grupos (Plantio, Defen
 - **Dose do talhão diferente da padrão da receita**: sem destaque de cor por enquanto (o amarelo foi testado e retirado); ao passar o mouse, a dose padrão. **Talhão que não recebe** o produto: "—" em cinza.
 - A **previsão de conclusão** não aparece nem se edita aqui (vale o padrão do modelo; DECISOES 4.3).
 - Fenologia da linha: a escolhida na operação; "—" no pré-plantio (DAP negativo), no plantio (DAP 0), na colheita e sem fenologia. Colheita: DAP em faixa ("104 a 118").
+
+## 6.2 Produtos
+
+Necessidade de consumo de insumos do plano aberto (a versão aberta, em construção ou publicada), sem os cartões e sem o gráfico (os Indicadores estão no Planejamento, guia Plantio: Tela 04.2; 03/11/2026).
+
+- Título **"Planejamento de produto"** e o texto "Necessidade de consumo de insumos considerando todas as operações do plano."; à direita, **Exportar Excel**.
+- **Legenda dos grupos de insumo**, aberta, embaixo do texto (o único filtro de Produtos; sem os filtros Grupo de operação, Operação e Talhão): só os grupos que o plano tem, na ordem do cadastro (Fertilizantes, Defensivos, Sementes, Corretivos, Tratamento de semente, Adjuvantes, Biológicos, Óleo), cada um com a sua bolinha colorida. Filtra **um grupo por vez**, como a legenda do Calendário Agrícola: clicar num grupo mostra só ele; clicar nele de novo, ou em "Mostrar todos", volta a todos.
+  - Cores: as dos grupos de operação onde combinam (Sementes verde, Fertilizantes roxo, Defensivos laranja, Corretivos azul) e cores próprias para os outros (Tratamento de semente marrom, Adjuvantes rosa, Biológicos verde-água, Óleo amarelo), conferidas no claro e no escuro.
+- Tabela **Grupo de insumo · Produto · Necessidade de consumo · Unidade**, com todos os insumos do plano, sementes incluídas: **a mesma conta e os mesmos grupos do Orçamento** (dose × área de cada talhão; sementes pela população, área e germinação, na embalagem da cultura), somados por produto.
+  - Abre por grupo de insumo e produto, em ordem alfabética; seta no título de cada coluna para ordenar (1º clique crescente, 2º decrescente).
+  - 10 itens por página (10, 25 ou 50), com "1–10 de 29" e as setas de página.
+  - **Exportar Excel** (verde, contorno): a tabela inteira (todas as páginas, no grupo à mostra), na ordem da tela, no arquivo "planejamento-produto_26-27_boa-vista.xlsx".
+- Sem nada planejado no plano: o mesmo estado vazio das outras visões ("Nenhuma operação planejada ainda"), com o ícone de Produtos (caixa), o texto "Os volumes de produtos aparecem aqui após o planejamento." e o botão "Ir para o Planejamento".
 
 ## 6.1 Calendário (saiu do Resumo)
 

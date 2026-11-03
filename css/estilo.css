@@ -2817,7 +2817,7 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 
 /* Custo por tipo de insumo: barra cinza até 100% e verde UniSystem até o % */
 .orc-tipo__barra-col { width: 38%; min-width: 160px; }
-.orc-barra { display: block; height: 10px; border-radius: 5px; background: var(--superficie-3); overflow: hidden; }
+.orc-barra { display: block; height: 8px; border-radius: 4px; background: var(--superficie-3); overflow: hidden; }
 .orc-barra > span { display: block; height: 100%; border-radius: 5px; background: var(--verde-600); }
 
 /* Detalhamento: título, guias, busca e Exportar XLSX numa linha */
@@ -3580,3 +3580,82 @@ html[data-tema="escuro"] .val-grupo__icone--defensivos { background: rgba(240, 1
 html[data-tema="escuro"] .val-grupo__icone--fertilidade { background: rgba(192, 139, 224, .14); }
 html[data-tema="escuro"] .val-grupo__icone--insumos { background: rgba(47, 191, 113, .14); }
 html[data-tema="escuro"] .val-grupo__icone--campo, html[data-tema="escuro"] .val-grupo__icone--outro { background: rgba(120, 170, 220, .14); color: #9cc3ea; }
+
+/* ===== Resumo › Indicadores do planejamento ===== */
+.ind { display: flex; flex-direction: column; gap: 10px; }
+/* No Plantio, os Indicadores rolam dentro do cartão da operação (o cartão branco envolve tudo, sem o gráfico sair por baixo) */
+/* Plantio › Indicadores sem plantio planejado: uma linha separa o cabeçalho, e o aviso fica no centro do cartão */
+.ind-sem-plantio { flex: 1; justify-content: center; gap: 10px; max-width: none; min-height: 360px; margin: 0; padding: 48px 16px; border-top: 1px solid var(--borda); }
+.ind-sem-plantio .resumo-vazio__icone { width: 72px; height: 72px; margin-bottom: 8px; }
+.ind-sem-plantio .resumo-vazio__icone .icone { width: 30px; height: 30px; }
+.ind-sem-plantio .resumo-vazio__titulo { font-size: 20px; font-weight: 700; }
+.ind-sem-plantio .resumo-vazio__texto { max-width: 720px; margin-bottom: 14px; font-size: 15px; line-height: 1.5; }
+.ind-sem-plantio .botao { height: 44px; padding: 0 22px; font-size: 15px; }
+.op-painel > .ind { flex: 1; min-height: 0; overflow-y: auto; margin: 0 -8px -6px; padding: 0 8px 6px; }
+.ind__titulo { margin: 0; font-size: 19px; font-weight: 700; color: var(--texto); }
+.ind__sub { margin: -6px 0 0; font-size: 14px; color: var(--texto-suave); }
+.ind-cartoes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.ind-cartao { display: flex; align-items: flex-start; gap: 14px; padding: 10px 16px; }
+.ind-cartao__icone .icone { width: 22px; height: 22px; color: var(--verde-700); }
+.ind-cartao__titulo { margin: 0; font-size: 15px; font-weight: 700; color: var(--texto); }
+.ind-cartao__rotulo { margin: 0; font-size: 13px; color: var(--texto-suave); }
+.ind-cartao__valor { margin: 2px 0 0; font-size: 16px; font-weight: 700; color: var(--texto); font-variant-numeric: tabular-nums; }
+.ind-cartao__detalhe { margin: 0; font-size: 13px; color: var(--texto-suave); }
+.ind-tempo { display: flex; align-items: center; gap: 6px; margin-left: auto; }
+.ind-tempo__rotulo { margin-right: 4px; font-size: 14px; color: var(--texto-suave); }
+.ind-tempo__gran { width: 140px; }
+.ind-secao { padding: 16px 20px; }
+.ind-secao__topo { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 24px; margin-bottom: 12px; }
+.ind-secao__titulo { margin: 0; font-size: 17px; font-weight: 700; color: var(--texto); }
+.ind-secao__sub { margin: 2px 0 0; font-size: 13px; color: var(--texto-suave); }
+.ind-exportar { margin-left: auto; }
+.ind-vazio { margin: 8px 0; font-size: 14px; color: var(--texto-suave); }
+
+/* Gráfico de barras (uma série: área em ha). Cor da série validada para o claro e o escuro; barras finas com o topo
+   arredondado, grade recessiva, o valor em cima de cada barra e o período embaixo */
+.ind-grafico { --rodape: 26px; --serie-1: var(--verde-700); position: relative; display: flex; gap: 8px; padding: 8px 0 0 4px; }
+.ind-grafico__eixo-titulo { align-self: center; writing-mode: vertical-rl; transform: rotate(180deg); font-size: 12px; font-weight: 700; color: var(--texto-suave); }
+.ind-grafico__plot { position: relative; flex: 1; min-width: 0; height: 240px; margin: 18px 0 var(--rodape) 34px;
+  border-left: 2px solid var(--texto-suave); border-bottom: 2px solid var(--texto-suave); } /* eixos Y e X, mais grossos, em cinza-escuro */
+.ind-grafico__grade { position: absolute; left: 0; right: 0; height: 0; border-top: 1px solid var(--borda); }
+.ind-grafico__grade > span { position: absolute; right: calc(100% + 10px); top: -8px; font-size: 12px; font-weight: 700; color: var(--texto-suave); font-variant-numeric: tabular-nums; }
+.ind-grafico__barras { position: absolute; inset: 0; display: flex; align-items: stretch; gap: 2px; }
+.ind-grafico__coluna { position: relative; display: flex; flex: 1; flex-direction: column; min-width: 0; }
+.ind-grafico__barra-area { position: relative; flex: 1; }
+.ind-grafico__barra { position: absolute; bottom: 0; left: 50%; width: min(64%, 72px); transform: translateX(-50%); border-radius: 4px 4px 0 0; background: var(--serie-1); }
+.ind-grafico__coluna:hover .ind-grafico__barra { filter: brightness(1.1); }
+.ind-grafico__valor { position: absolute; left: 0; right: 0; margin-bottom: 4px; font-size: 13px; font-weight: 600; text-align: center; color: var(--texto); font-variant-numeric: tabular-nums; }
+.ind-grafico__rotulo { position: absolute; top: calc(100% + 6px); left: 0; right: 0; font-size: 12px; font-weight: 700; text-align: center; color: var(--texto-suave); white-space: nowrap; }
+/* Dia: uma coluna por dia, com largura mínima; o que não couber rola na horizontal (a área de rolagem inclui o valor em
+   cima e a data embaixo, e a grade e o eixo ficam parados atrás) */
+.ind-grafico--dia .ind-grafico__plot { margin-bottom: calc(var(--rodape) + 12px); }
+.ind-grafico--dia .ind-grafico__barras { top: -18px; bottom: calc(-12px - var(--rodape)); padding: 18px 0 calc(var(--rodape) + 12px); overflow-x: auto; overflow-y: hidden; }
+.ind-grafico--dia .ind-grafico__barras { align-items: flex-start; }
+.ind-grafico--dia .ind-grafico__coluna { flex: 1 0 46px; height: 240px; } /* a altura do gráfico (a barra de rolagem não a encurta) */
+.ind-grafico--dia .ind-grafico__rotulo { font-size: 11px; }
+.ind-grafico--dia .ind-grafico__valor { font-size: 12px; }
+/* Data girada 90° (quinzena e dia apertados): lida de baixo para cima, com o fim encostado no eixo */
+.ind-grafico--girado { --rodape: 74px; }
+.ind-grafico--girado .ind-grafico__rotulo { left: 50%; right: auto; writing-mode: vertical-rl; transform: translateX(-50%) rotate(180deg); text-align: left; }
+.ind-tabela td, .ind-tabela th { padding: 7px 12px; }
+/* Resumo › Produtos: legenda dos grupos de insumo (cores dos grupos de operação onde combinam) */
+.ind-legenda { margin: -4px 0 12px; }
+.ind-ponto--sementes { --c: #1f9d55; }
+.ind-ponto--fertilizantes { --c: #8e44ad; }
+.ind-ponto--defensivos { --c: #e8772e; }
+.ind-ponto--corretivos { --c: #3b74d6; }
+.ind-ponto--tratamento-de-semente { --c: #8a4b2a; }
+.ind-ponto--adjuvantes { --c: #d6457a; }
+.ind-ponto--biologicos { --c: #13a3a0; }
+.ind-ponto--oleo { --c: #d4a017; }
+html[data-tema="escuro"] .ind-ponto--sementes { --c: #4fd28a; }
+html[data-tema="escuro"] .ind-ponto--fertilizantes { --c: #c08be0; }
+html[data-tema="escuro"] .ind-ponto--defensivos { --c: #f0995a; }
+html[data-tema="escuro"] .ind-ponto--corretivos { --c: #6c9cf0; }
+html[data-tema="escuro"] .ind-ponto--tratamento-de-semente { --c: #c98a63; }
+html[data-tema="escuro"] .ind-ponto--adjuvantes { --c: #ef7aa4; }
+html[data-tema="escuro"] .ind-ponto--biologicos { --c: #3fcfcb; }
+html[data-tema="escuro"] .ind-ponto--oleo { --c: #e2b93b; }
+.ind-tabela .titulo-coluna > span { max-width: none; white-space: nowrap; }
+.ind-tabela th { vertical-align: middle; }
+@media (max-width: 900px) { .ind-cartoes { grid-template-columns: 1fr; } }
