@@ -20,16 +20,15 @@
     'orcamento':      { titulo: 'Orçamento de Insumos', menu: 'orcamento',
                         desenhar: () => temPlanos() ? Telas.orcamento.desenhar() : Telas.semPlanos('orcamento'),
                         aoMostrar: (conteudo) => { if (temPlanos()) Telas.orcamento.aoMostrar(conteudo); } },
-    // Gestão da Lavoura (vários planos somados): Calendário Agrícola (Ano, Mês, Semana, Dia), Central OS e
-    // Operações Agrícolas (antes Planejado x Executado e, antes ainda, Monitoramento › Aplicações)
-    // Calendário Agrícola: a primeira guia do Planejado x Executado (o menu e o nome do grupo levam a ela)
-    'calendario-agricola': { titulo: 'Operações Agrícolas', menu: 'planejado-executado',
-                        desenhar: () => temPlanos() ? Telas.osCalendario.desenhar() : Telas.semPlanos('planejado-executado'),
+    // Gestão da Lavoura (vários planos somados), três itens no menu (03/11/2026): Calendário (antes
+    // Operações Agrícolas; Ano, Mês, Semana, Dia; o nome do grupo leva a ele), Operações (antes Planejadas × Executadas) e Central OS
+    'calendario-agricola': { titulo: 'Calendário', menu: 'calendario-agricola',
+                        desenhar: () => temPlanos() ? Telas.osCalendario.desenhar() : Telas.semPlanos('calendario'),
                         aoMostrar: (conteudo) => { if (temPlanos()) Telas.osCalendario.aoMostrar(conteudo); } },
     'central-os':     { titulo: 'Central OS', menu: 'central-os',
                         desenhar: () => temPlanos() ? Telas.centralCorp.desenhar() : Telas.semPlanos('central-os'),
                         aoMostrar: (conteudo) => { if (temPlanos()) Telas.centralCorp.aoMostrar(conteudo); } },
-    'planejado-executado': { titulo: 'Operações Agrícolas', menu: 'planejado-executado',
+    'planejado-executado': { titulo: 'Operações', menu: 'planejado-executado',
                         desenhar: () => temPlanos() ? Telas.monitoramentoAplicacoes.desenhar() : Telas.semPlanos('planejado-executado'),
                         aoMostrar: (conteudo, guia) => { if (temPlanos()) Telas.monitoramentoAplicacoes.aoMostrar(conteudo, guia); } },
     'cadastros':      { titulo: 'Cadastros', menu: 'cadastros',

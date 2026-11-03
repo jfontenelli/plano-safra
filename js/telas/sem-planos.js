@@ -9,9 +9,9 @@ window.Telas.semPlanos = function (item) {
     + 'a partir da versão publicada, cria automaticamente as Ordens de Serviço.';
   const ITENS = {
     planejamento: { titulo: 'Planejamento', alvo: 'o planejamento', texto: TEXTO_PLANO, icone: Icones.lista },
-    calendario:   { titulo: 'Planejamento Operacional', alvo: 'o Planejamento Operacional', texto: TEXTO_PLANO, icone: Icones.calendario },
+    calendario:   { titulo: 'Calendário', alvo: 'o Calendário', texto: TEXTO_PLANO, icone: Icones.calendario },
     'central-os': { titulo: 'Central OS', alvo: 'a Central OS', texto: TEXTO_PLANO, icone: Icones.documento },
-    'planejado-executado': { titulo: 'Operações Agrícolas', alvo: 'as Operações Agrícolas', texto: TEXTO_PLANO, icone: Icones.calendario },
+    'planejado-executado': { titulo: 'Operações', alvo: 'as Operações', texto: TEXTO_PLANO, icone: Icones.prancheta },
     orcamento:    { titulo: 'Orçamento de Insumos', alvo: 'o Orçamento de Insumos',
                     icone: '<svg viewBox="0 0 24 24"><path d="M21 8 12 3 3 8v8l9 5 9-5Z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg>',
                     texto: 'O plano organiza a necessidade de insumos por safra, empresa, fazenda e cultura. Depois de criado, ele abre aqui automaticamente.' }

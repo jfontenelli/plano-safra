@@ -1,6 +1,6 @@
-# Tela 07 — Gestão da Lavoura › Operações Agrícolas › Calendário Agrícola
+# Tela 07 — Gestão da Lavoura › Calendário (antes Planejamento Operacional e Operações Agrícolas › Calendário Agrícola)
 
-Atualizado em 03/11/2026 (a guia passa a se chamar **Planejamento Operacional**, antes Calendário Agrícola; Mês vira a tabela Operação × semanas do mês). Antes, em 29/10/2026 (o item Planejado x Executado passa a se chamar Operações Agrícolas). Antes, em 27/10/2026 (vira a primeira guia do Planejado x Executado, com os seus próprios filtros; barras do Ano clicáveis; voltar a todos não muda o período; trocar para o Ano volta ao nível Empresa). Antes, em 26/10/2026 (juntou o Calendário Agrícola do menu Plano de Safra, que virou a escala Ano, e a Agenda Agrícola, que ficou com Mês, Semana e Dia; página própria em Gestão da Lavoura, sem as abas de Operações Agrícolas). Este doc mostra só o estado atual da tela. Decisão alterada é reescrita, não acumulada.
+Atualizado em 03/11/2026 (vira o item **Calendário** do menu (no mesmo dia chamado Planejamento Operacional; o nome ficou grande no menu), com o ícone do calendário, Gestão da Lavoura, antes a guia Calendário Agrícola do Operações Agrícolas, sem guias no cabeçalho; Mês vira a tabela Operação × semanas do mês). Antes, em 29/10/2026 (o item Planejado x Executado passa a se chamar Operações Agrícolas). Antes, em 27/10/2026 (vira a primeira guia do Planejado x Executado, com os seus próprios filtros; barras do Ano clicáveis; voltar a todos não muda o período; trocar para o Ano volta ao nível Empresa). Antes, em 26/10/2026 (juntou o Calendário Agrícola do menu Plano de Safra, que virou a escala Ano, e a Agenda Agrícola, que ficou com Mês, Semana e Dia; página própria em Gestão da Lavoura, sem as abas de Operações Agrícolas). Este doc mostra só o estado atual da tela. Decisão alterada é reescrita, não acumulada.
 Origem: reunião com stakeholders de 19/10/2026: a guia **Calendário** do Resumo do plano (Tela 05) foi migrada para fora do plano, sem a associação a um plano, como Agenda Agrícola. Em 26/10/2026, a Agenda Agrícola e o Calendário Agrícola do menu viraram uma página só, trocada pela lista suspensa de escala. O refinamento para a programação das OS vem depois.
 Imagens: `referencias/05.3-resumo-calendario.png` (Mês, Semana e Dia: a do Calendário do Resumo, de onde veio); Ano: canvas de design (Claude Design, 16/10/2026) e, no escuro, imagem da usuária (19/10/2026). Quando imagem e documento divergirem, vale este documento.
 **Situação no protótipo:** construída.
@@ -9,12 +9,12 @@ Imagens: `referencias/05.3-resumo-calendario.png` (Mês, Semana e Dia: a do Cale
 Ver as operações planejadas de todas as fazendas (vários planos somados): no **ano agrícola**, por empresa e fazenda, para enxergar o ciclo das culturas; e **dia a dia**, para programar as Ordens de Serviço.
 
 ## Quando aparece
-- **Primeira guia** da página **Operações Agrícolas** (Tela 10): **Calendário Agrícola** · Executadas · Planejadas × Executadas (a Duração da Operação saiu em 29/10/2026). O menu lateral **Gestão da Lavoura** (o nome do grupo e o item Operações Agrícolas) e o caminho "⌂ Gestão da Lavoura" levam a esta guia (`#/calendario-agricola`).
-- Sem nenhum plano cadastrado: o convite "Crie seu primeiro plano para visualizar o Operações Agrícolas" com "+ Criar Plano de Safra" (como Planejamento e Orçamento).
+- **Primeiro item** do menu **Gestão da Lavoura** (Calendário · Operações · Central OS; 03/11/2026). O nome do grupo, o item e o caminho "⌂ Gestão da Lavoura" levam a esta página (`#/calendario-agricola`).
+- Sem nenhum plano cadastrado: o convite "Crie seu primeiro plano para visualizar o Calendário" com "+ Criar Plano de Safra" (como Planejamento e Orçamento).
 
 ## Conteúdo
-- **Cabeçalho** (o do Operações Agrícolas): caminho no topo "⌂ Gestão da Lavoura › Operações Agrícolas", título "Operações Agrícolas", subtítulo "As operações planejadas de todas as fazendas: o ano agrícola por empresa e fazenda, e o dia a dia no mês, na semana e no dia.", a etiqueta "Últimas versões publicadas ⓘ" à direita (só nesta guia) e as guias, com Calendário Agrícola escolhida.
-- **Os filtros são desta guia:** as outras guias do Operações Agrícolas têm os delas (Tela 10); trocar de guia não leva os filtros de uma para a outra.
+- **Cabeçalho:** caminho no topo "⌂ Gestão da Lavoura › Calendário", título "Calendário", subtítulo "As operações planejadas de todas as fazendas: o ano agrícola por empresa e fazenda, e o dia a dia no mês, na semana e no dia.", a etiqueta "Últimas versões publicadas ⓘ" à direita (só nesta página). Sem guias (03/11/2026).
+- **Os filtros são desta página:** a página Operações tem os dela (Tela 10); ir de uma para a outra não leva os filtros.
 - **Filtros** num cartão compacto, os mesmos em todas as escalas, todos com **várias escolhas** (caixa com Pesquisar, "Todas"/"Todos" e uma marcação por opção): **Safra** (as safras do cadastro: 27/27, 26/27, 26/26, 25/26…, da mais recente para a mais antiga), **Cultura**, **Empresa**, **Fazenda**, **Talhão** e **Operação**, nesta ordem; **Limpar filtros** à direita. As opções são as que existem nos planos com versão publicada. No Talhão, os talhões dos planos que passam pelos outros filtros, com a fazenda junto ("Santa Clara · T01"), porque o nome se repete entre fazendas.
 - **Operação:** as operações dos grupos à mostra na legenda, pelo nome (o mesmo nome em vários planos é uma opção só, ex.: Adubação de plantio da soja e do milho), na ordem da legenda (Plantio, Fertilidade, Defensivo, Colheita) e, dentro do grupo, na ordem do plano; o grupo aparece ao lado.
 - **Sem filtro de Ano Agrícola:** o tempo anda pelas setas do calendário.
@@ -57,8 +57,8 @@ Ver as operações planejadas de todas as fazendas (vários planos somados): no 
 - Com uma caixa de filtro aberta, **Esc** fecha a caixa.
 
 ## Navegação
-- Menu Gestão da Lavoura, Gestão da Lavoura › Operações Agrícolas, o caminho "⌂ Gestão da Lavoura" ou a guia Calendário Agrícola → esta guia (`#/calendario-agricola`).
-- Guias Executadas · Planejadas × Executadas → o Operações Agrícolas nessa guia (Tela 10).
+- Menu Gestão da Lavoura (o nome ou o item Calendário) ou o caminho "⌂ Gestão da Lavoura" → esta página (`#/calendario-agricola`).
+- Item Operações → a Tela 10.
 - Ano › clique numa barra → Mês, no começo da operação.
 - "+ Criar Plano de Safra" (sem planos) → modal Criar Plano (Tela 02).
 

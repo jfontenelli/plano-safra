@@ -2403,7 +2403,9 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
   padding-left: 10px;
   border-left: 1px solid rgba(255, 255, 255, .18);
 }
-.menu__sub { height: 40px; gap: 12px; padding: 0 10px; font-size: 14px; }
+.menu__sub { height: auto; min-height: 40px; gap: 12px; padding: 6px 10px; font-size: 14px; }
+/* Nome longo (Planejamento Operacional, Planejadas × Executadas): quebra em duas linhas, sem cortar */
+.menu__sub .menu__texto { white-space: normal; line-height: 1.25; overflow: visible; text-overflow: clip; }
 .menu__sub .menu__icone { width: 19px; height: 19px; }
 .menu--recolhido .menu__subitens {
   margin: 0 0 8px;
@@ -3066,9 +3068,6 @@ html[data-tema="escuro"] .grafico-historico__valor { fill: #5FD896; }
 .ma-tabela .ma-vazio { color: var(--texto-fraco); }
 /* Cabeçalho: caminho, título, subtítulo e as guias no formato das abas do plano (ativa em preto, com o traço verde) */
 .ma-cabecalho { padding-bottom: 0; }
-.ma-guias .etapa { border: 0; background: none; font: inherit; font-weight: 500; cursor: pointer; }
-.ma-guias .etapa--ativa { color: var(--texto); font-weight: 700; }
-.ma-guias .etapa:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 2px; }
 .ma-construcao { margin: 0; padding: 48px 20px; text-align: center; color: var(--texto-suave); }
 /* Duração da Operação: legenda e chave Por talhão | Por operação; gráficos de barras verdes com o prazo tracejado */
 .ma-lista { --md-prazo: #34405a; }
@@ -3667,14 +3666,14 @@ html[data-tema="escuro"] .ind-ponto--oleo { --c: #e2b93b; }
 .cal-mestab__tabela tr > :first-child { border-left: 0; }
 .cal-mestab__tabela tbody tr:last-child > * { border-bottom: 0; }
 .cal-mestab__tabela thead th { position: sticky; top: 0; z-index: 1; padding: 10px; background: var(--superficie-2); font-weight: 700; color: var(--texto); white-space: nowrap; }
-.cal-mestab__tabela td { height: 66px; padding: 6px 8px; vertical-align: middle; }
+.cal-mestab__tabela td { height: 48px; padding: 4px 6px; vertical-align: middle; }
 /* Cartão da operação na semana: bolinha e nome em negrito; a área embaixo, sem negrito */
-.cal-mestab__area { display: flex; justify-content: center; padding: 8px 12px; border-radius: 6px; background: var(--f); color: var(--texto); text-align: left; }
-.cal-mestab__nome { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 700; line-height: 1.3; }
-.cal-mestab__ha { display: block; padding-left: 18px; font-size: 14px; font-weight: 400; color: var(--texto-suave); font-variant-numeric: tabular-nums; }
+.cal-mestab__area { display: flex; justify-content: center; padding: 4px 10px; border-radius: 6px; background: var(--f); color: var(--texto); text-align: left; }
+.cal-mestab__nome { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; line-height: 1.25; }
+.cal-mestab__ha { display: block; padding-left: 16px; font-size: 12px; line-height: 1.25; font-weight: 400; color: var(--texto-suave); font-variant-numeric: tabular-nums; }
 /* Título da semana: o botão ocupa a célula cinza inteira (clicar em qualquer lugar abre a Semana) */
 .cal-mestab__tabela thead th { padding: 0; }
-.cal-mestab__semana { display: flex; align-items: center; justify-content: center; width: 100%; min-height: 50px; padding: 8px 10px; border: 0; background: none; font: inherit; font-weight: 700; color: inherit; cursor: pointer; }
+.cal-mestab__semana { display: flex; align-items: center; justify-content: center; width: 100%; min-height: 42px; padding: 8px 10px; border: 0; background: none; font: inherit; font-weight: 700; color: inherit; cursor: pointer; }
 .cal-mestab__semana:hover { background: var(--verde-100); color: var(--verde-700); }
 .cal-mestab__rotulo { padding: 4px 10px; }
 /* Semana de hoje: o título num fundo verde, como o número do dia de hoje no calendário */
@@ -3685,3 +3684,27 @@ html[data-tema="escuro"] .ind-ponto--oleo { --c: #e2b93b; }
 .cal-mestab__tabela thead th.cal-mestab--passado { color: var(--texto-suave); }
 .cal-ponto--corretivos { --c: #3b74d6; --f: #e6eefb; }
 html[data-tema="escuro"] .cal-mestab__area { --f: color-mix(in srgb, var(--c) 24%, #15232D); }
+
+/* ===== Operações Agrícolas › Planejadas × Executadas: tabela com o cartão do talhão ===== */
+.ma-barra { justify-content: space-between; }
+.ma-legenda__titulo { font-weight: 700; color: var(--texto); }
+.ma-modo { display: flex; align-items: center; gap: 12px; padding-left: 20px; border-left: 1px solid var(--borda); font-size: 14px; }
+.ma-modo__titulo { font-weight: 700; color: var(--texto); white-space: nowrap; }
+.ma-modo .semente-visao { height: 36px; padding: 0 16px; font-size: 14px; }
+.ma-tabela--pxe td { vertical-align: middle; }
+.ma-tabela--pxe .ma-th-talhao .titulo-coluna { justify-content: flex-start; }
+.ma-tabela--pxe th.ma-th-talhao { text-align: left !important; }
+.ma-tabela--pxe .ma-td-talhao { padding: 6px 10px; }
+.ma-cartao { width: 280px; padding: 8px 12px; border: 1px solid var(--borda); border-right: 1px solid var(--borda); border-radius: 8px; background: var(--superficie); }
+.ma-cartao__corpo { display: flex; gap: 16px; }
+.ma-cartao__local { flex: 1; min-width: 0; }
+.ma-cartao__local .mt-talhao__var { white-space: normal; }
+.ma-cartao__ops { flex: none; width: 140px; margin-top: -18px; }
+.ma-cartao .mt-talhao__ops { margin-top: 0 !important; }
+.ma-tabela--pxe td.ma-estande, .ma-tabela--pxe td.ma-dias-sem { font-weight: 700; text-align: center !important; }
+/* Seta de ordenar discreta (aparece ao passar o mouse no título); a da coluna ordenada fica visível */
+.ma-tabela--pxe th .titulo-ordenar:not(.titulo-ordenar--ativo) { opacity: .3; }
+.ma-tabela--pxe th:hover .titulo-ordenar, .ma-tabela--pxe th .titulo-ordenar:focus-visible { opacity: 1; }
+.ma-tabela--pxe .ma-quebra { min-width: 132px; } /* colunas das operações com a mesma largura em Datas e em Dias */
+.ma-etiqueta--neutra { background: var(--superficie-2); color: var(--texto); font-weight: 400; }
+.ma-etiqueta--dias { min-width: 120px; padding: 6px 12px; font-weight: 500; }

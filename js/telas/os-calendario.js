@@ -208,12 +208,6 @@ window.Telas.osCalendario = (function () {
     const ctx = { estado: est };
     const acoes = { redesenhar };
 
-    // Guias de Planejado x Executado: as outras guias são a página Planejado x Executado
-    conteudo.querySelector('[data-os-cabecalho]').addEventListener('click', (e) => {
-      const g = e.target.closest('[data-ma-visao]');
-      if (g && g.dataset.maVisao !== 'calendario') location.hash = `#/planejado-executado/${g.dataset.maVisao}`;
-    });
-
     raiz.addEventListener('click', (e) => {
       if (e.target.closest('[data-acao="os-limpar"]')) {
         est = Object.assign(novoEstado(), { escala: est.escala, dataRef: est.dataRef, anoAgricola: est.anoAgricola });
