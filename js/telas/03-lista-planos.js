@@ -85,7 +85,6 @@ window.Telas.listaPlanos = (function () {
         <span class="vg-cabecalho__fundo" style="background-image: url('img/fundo-plano-safra.jpg')" aria-hidden="true"></span>
         <div class="vg-cabecalho__titulo">
           <h1 class="cabecalho__titulo">Planos de Safra</h1>
-          <nav class="caminho" aria-label="Caminho"><span>Plano de Safra</span><span aria-hidden="true">›</span><span class="caminho__atual">Planos</span></nav>
         </div>
         <div class="vg-cabecalho__guias">
           <nav class="etapas" aria-label="Guias dos Planos de Safra">

@@ -13,7 +13,7 @@ Ver as operações planejadas de todas as fazendas (vários planos somados): no 
 - Sem nenhum plano cadastrado: o convite "Crie seu primeiro plano para visualizar o Calendário" com "+ Criar Plano de Safra" (como Planejamento e Orçamento).
 
 ## Conteúdo
-- **Cabeçalho:** caminho no topo "⌂ Gestão da Lavoura › Calendário", título "Calendário", subtítulo "As operações planejadas de todas as fazendas: o ano agrícola por empresa e fazenda, e o dia a dia no mês, na semana e no dia.", a etiqueta "Últimas versões publicadas ⓘ" à direita (só nesta página). Sem guias (03/11/2026).
+- **Cabeçalho:** sem caminho no topo (03/11/2026), título "Calendário", subtítulo "As operações planejadas de todas as fazendas: o ano agrícola por empresa e fazenda, e o dia a dia no mês, na semana e no dia.", a etiqueta "Últimas versões publicadas ⓘ" à direita (só nesta página). Sem guias (03/11/2026).
 - **Os filtros são desta página:** a página Operações tem os dela (Tela 10); ir de uma para a outra não leva os filtros.
 - **Filtros** num cartão compacto, os mesmos em todas as escalas, todos com **várias escolhas** (caixa com Pesquisar, "Todas"/"Todos" e uma marcação por opção): **Safra** (as safras do cadastro: 27/27, 26/27, 26/26, 25/26…, da mais recente para a mais antiga), **Cultura**, **Empresa**, **Fazenda**, **Talhão** e **Operação**, nesta ordem; **Limpar filtros** à direita. As opções são as que existem nos planos com versão publicada. No Talhão, os talhões dos planos que passam pelos outros filtros, com a fazenda junto ("Santa Clara · T01"), porque o nome se repete entre fazendas.
 - **Operação:** as operações dos grupos à mostra na legenda, pelo nome (o mesmo nome em vários planos é uma opção só, ex.: Adubação de plantio da soja e do milho), na ordem da legenda (Plantio, Fertilidade, Defensivo, Colheita) e, dentro do grupo, na ordem do plano; o grupo aparece ao lado.
@@ -57,7 +57,7 @@ Ver as operações planejadas de todas as fazendas (vários planos somados): no 
 - Com uma caixa de filtro aberta, **Esc** fecha a caixa.
 
 ## Navegação
-- Menu Gestão da Lavoura (o nome ou o item Calendário) ou o caminho "⌂ Gestão da Lavoura" → esta página (`#/calendario-agricola`).
+- Menu Gestão da Lavoura (o nome ou o item Calendário) → esta página (`#/calendario-agricola`).
 - Item Operações → a Tela 10.
 - Ano › clique numa barra → Mês, no começo da operação.
 - "+ Criar Plano de Safra" (sem planos) → modal Criar Plano (Tela 02).

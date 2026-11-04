@@ -12,13 +12,8 @@ window.Telas.gestaoLavoura = (function () {
   const PAGINAS = {
     central: ['Central OS', '#/central-os', 'Acompanhe as ordens de serviço, recomendações e execução das operações agrícolas.']
   };
-  // Caminho "⌂ Gestão da Lavoura › Página" (a casa e o nome do grupo levam ao Planejado x Executado, na guia Calendário Agrícola)
-  const caminho = (titulo) => `
-        <nav class="oa-caminho" aria-label="Caminho">
-          <a class="oa-caminho__casa" href="#/calendario-agricola" aria-label="Gestão da Lavoura">${Icones.casa}</a>
-          <a href="#/calendario-agricola">Gestão da Lavoura</a><span aria-hidden="true">›</span>
-          <span class="caminho__atual" aria-current="page">${titulo}</span>
-        </nav>`;
+  // Sem o caminho "⌂ Gestão da Lavoura › Página" no topo (03/11/2026: mais espaço no cabeçalho de todas as páginas)
+  const caminho = () => '';
   function cabecalho(pagina) {
     const [titulo, , subtitulo] = PAGINAS[pagina];
     return `

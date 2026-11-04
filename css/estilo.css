@@ -3706,5 +3706,151 @@ html[data-tema="escuro"] .cal-mestab__area { --f: color-mix(in srgb, var(--c) 24
 .ma-tabela--pxe th .titulo-ordenar:not(.titulo-ordenar--ativo) { opacity: .3; }
 .ma-tabela--pxe th:hover .titulo-ordenar, .ma-tabela--pxe th .titulo-ordenar:focus-visible { opacity: 1; }
 .ma-tabela--pxe .ma-quebra { min-width: 132px; } /* colunas das operações com a mesma largura em Datas e em Dias */
+/* Estande: só a largura do título em duas linhas ("Estande" / "(plantas/m)") */
+.ma-tabela--pxe th.ma-quebra[data-fixa="1"], .ma-tabela--pxe td.ma-estande { width: 96px; min-width: 96px; max-width: 96px; padding-left: 6px; padding-right: 6px; }
 .ma-etiqueta--neutra { background: var(--superficie-2); color: var(--texto); font-weight: 400; }
 .ma-etiqueta--dias { min-width: 120px; padding: 6px 12px; font-weight: 500; }
+
+/* ===== Planejado × Executado: guias (botões) ===== */
+.ma-guias { display: flex; flex-wrap: wrap; gap: 8px; margin: 6px 0 12px; } /* inteiras no fundo branco do cabeçalho, sem encostar na linha de baixo */
+.ma-guia { text-decoration: none; }
+
+/* ===== Desvios de Recomendação ===== */
+/* Fundo da página branco (o do tema no escuro), como uma superfície só */
+.conteudo:has(.dr) { background: var(--superficie); }
+/* Parte de cima congelada (cabeçalho, filtros e Analisar por), como no Orçamento; o alfinete solta */
+/* Barra congelada: só o cartão dos filtros (o título e as guias rolam e saem da tela), com o alfinete fora dele, à direita.
+   Embaixo, uma linha reta e um respiro antes dos cartões, que passam por baixo sem corte */
+.dr-fixo { position: sticky; top: 0; z-index: 1; /* acima do conteúdo que rola, abaixo da seta do menu (z-index 2) */
+  display: flex; align-items: flex-start; gap: 8px; padding: 12px 40px 12px; border-bottom: 1px solid var(--borda); background: var(--superficie); }
+.dr-fixo--solto { position: static; border-bottom: 0; }
+.dr-fixo .dr-filtros { flex: 1; min-width: 0; }
+.dr-fixo .dr-filtros > .campo:not(.dr-data) { max-width: 200px; }
+.dr-congelar { flex: none; margin: 0; }
+.dr-raiz .pagina.ma { padding-top: 16px; }
+.dr-ancora { scroll-margin-top: calc(var(--dr-fixo-h, 0px) + 16px); }
+/* Base do cartão dos filtros: Analisar por à esquerda e os atalhos das seções à direita, separados por um traço */
+.dr-filtros__base { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; flex-basis: 100%;
+  margin-top: 2px; padding-top: 10px; border-top: 1px solid var(--borda); }
+.dr-atalhos { display: flex; flex-wrap: wrap; align-items: center; gap: 2px; margin-left: auto; font-size: 13px; }
+/* Mais filtros e Limpar filtros na base, à direita dos atalhos (a linha de cima fica só com os campos) */
+.dr-filtros__base .dr-filtros__acoes { margin-left: 0; padding-left: 12px; border-left: 1px solid var(--borda); align-items: center; }
+.dr-filtros__base .dr-mais { height: 32px; }
+.dr-atalhos__titulo { margin-right: 6px; color: var(--texto-suave); }
+.dr-atalho { padding: 5px 10px; border: 0; border-radius: 999px; background: none; font: inherit; font-weight: 600; color: var(--texto-suave); cursor: pointer; }
+.dr-atalho:hover { background: var(--superficie-2); color: var(--texto); }
+.dr-atalho--ativo { background: var(--verde-100); color: var(--verde-700); }
+.dr-atalho:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 1px; }
+.dr { display: flex; flex-direction: column; gap: 14px; }
+.dr-filtros .dr-data input { min-width: 160px; }
+/* Mais filtros: o botão e o Limpar filtros à direita; os filtros extras numa linha embaixo, separada por um traço */
+.dr-filtros { flex-wrap: wrap; margin-bottom: 0; }
+.dr-filtros__acoes { position: relative; display: flex; align-items: flex-end; gap: 12px; margin-left: auto; }
+.dr-filtros__acoes .filtros__limpar { margin: 0; padding: 8px 0 8px 16px; }
+.dr-mais { display: inline-flex; align-items: center; gap: 8px; height: 38px; padding: 0 14px; font-weight: 600; }
+.dr-mais .icone { width: 17px; height: 17px; }
+.dr-mais__seta { display: inline-flex; transition: transform .15s; }
+.dr-mais__seta--aberta { transform: rotate(180deg); }
+.dr-mais--aberto { border-color: var(--verde-700); }
+/* Com o menu lateral expandido (menos espaço), Mais filtros e Limpar filtros só com os ícones, para caberem na linha
+   dos filtros; com o menu recolhido, com os nomes. O nome fica na dica (title) e no leitor de tela */
+html:has(.menu:not(.menu--recolhido)) .dr-filtros .dr-acao-texto { display: none; }
+html:has(.menu:not(.menu--recolhido)) .dr-mais { gap: 4px; padding: 0 10px; }
+html:has(.menu:not(.menu--recolhido)) .dr-filtros__acoes { gap: 4px; }
+html:has(.menu:not(.menu--recolhido)) .dr-filtros__acoes .filtros__limpar { padding: 8px 4px 8px 12px; }
+.dr-filtros__acoes .filtros__limpar .icone { width: 18px; height: 18px; }
+/* Painel "Filtros adicionais": abre embaixo do botão, por cima da página; fecha no X, no Esc ou clicando fora */
+.dr-pop { position: absolute; top: calc(100% + 8px); right: 0; z-index: 30; display: flex; flex-direction: column; gap: 12px; width: 320px;
+  padding: 14px 16px 16px; border: 1px solid var(--borda-forte); border-radius: 12px; background: var(--superficie); box-shadow: var(--sombra); }
+.dr-pop__cab { display: flex; align-items: center; justify-content: space-between; }
+.dr-pop__titulo { margin: 0; font-size: 15px; font-weight: 700; color: var(--texto); }
+.dr-pop .campo { flex: none; width: 100%; max-width: none; } /* um embaixo do outro, sem esticar na altura */
+/* Safra e Cultura mais estreitas (textos curtos: "26/27", "Soja"); sobra espaço para os nomes dos outros filtros */
+.dr-filtros > .campo:nth-child(-n+2) { flex: 0 0 116px; }
+/* Data inicial e Data final: calendário, data e setinha */
+.dr-filtros .dr-data { flex: none; width: 150px; max-width: none; }
+.dr-data__controle { position: relative; display: flex; align-items: center; gap: 8px; padding: 0 10px; cursor: pointer; }
+.dr-data__controle > .icone { width: 16px; height: 16px; flex: none; color: var(--texto-suave); }
+.dr-data__texto { flex: 1; font-variant-numeric: tabular-nums; }
+.dr-data__texto--vazio { color: var(--texto-fraco); }
+.dr-data__seta { display: inline-flex; color: var(--texto-suave); }
+.dr-data__seta .icone { width: 16px; height: 16px; }
+.dr-data__nativo { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; pointer-events: none; }
+.dr-data__controle:focus-within { border-color: var(--verde-600); box-shadow: 0 0 0 1px var(--verde-600); }
+.dr-pop .cal-filtro, .dr-pop .cal-filtro__botao { width: 100%; }
+.dr-analisar { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+.dr-analisar__titulo { margin-right: 4px; font-weight: 700; color: var(--texto); }
+.dr-analisar__botao { display: inline-flex; align-items: center; gap: 6px; }
+.dr-graficos { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; }
+.dr-secao { padding: 16px 20px; }
+.dr-secao__topo { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 10px 20px; margin-bottom: 10px; }
+.dr-secao__titulo { display: flex; align-items: center; gap: 6px; margin: 0; font-size: 16px; font-weight: 700; color: var(--texto); }
+.dr-secao__sub { margin: 2px 0 10px; font-size: 13px; color: var(--texto-suave); }
+.dr-secao__topo .dr-secao__sub { margin-bottom: 0; }
+/* As faixas se espalham pela altura do cartão (a mesma do gráfico ao lado) */
+.dr-dist { display: flex; flex-direction: column; }
+.dr-faixas { flex: 1; display: flex; flex-direction: column; justify-content: space-around; gap: 6px; margin: 6px 0 0; padding: 0; list-style: none; }
+.dr-dist .dr-faixa { padding-top: 10px; padding-bottom: 10px; }
+.dr-dist .dr-faixa__trilho { height: 10px; border-radius: 5px; }
+.dr-faixa { display: grid; grid-template-columns: 110px minmax(0, 1fr) 48px 56px; align-items: center; gap: 12px; width: 100%; padding: 6px 8px;
+  border: 1px solid transparent; border-radius: 8px; background: none; font: inherit; font-size: 14px; color: var(--texto); text-align: left; cursor: pointer; }
+.dr-faixa:hover { background: var(--superficie-2); }
+.dr-faixa[aria-pressed="true"] { border-color: var(--borda-forte); background: var(--superficie-2); }
+.dr-faixa--apagada { opacity: .45; }
+.dr-faixa__rotulo { font-weight: 700; }
+.dr-faixa__trilho { height: 8px; border-radius: 4px; background: var(--superficie-3); overflow: hidden; }
+.dr-faixa__barra { display: block; height: 100%; border-radius: 4px; background: var(--dr-c); }
+.dr-faixa__pct { font-weight: 700; text-align: right; font-variant-numeric: tabular-nums; }
+.dr-faixa__n { color: var(--texto-suave); font-variant-numeric: tabular-nums; }
+.dr-todas { margin-top: 8px; }
+.dr-cor--ate10 { --dr-c: var(--verde-700); --dr-f: var(--verde-100); --dr-t: var(--verde-700); }
+.dr-cor--10a20 { --dr-c: #2a78d6; --dr-f: var(--info-fundo); --dr-t: #1a5bb0; }
+.dr-cor--20a30 { --dr-c: #e8772e; --dr-f: #fdebdc; --dr-t: #b9560f; }
+.dr-cor--acima30 { --dr-c: #d93a2b; --dr-f: #f6cfca; --dr-t: var(--erro); }
+html[data-tema="escuro"] .dr-cor--10a20 { --dr-t: #8fbcef; }
+html[data-tema="escuro"] .dr-cor--20a30 { --dr-f: #3d2817; --dr-t: #f0995a; }
+html[data-tema="escuro"] .dr-cor--acima30 { --dr-f: #5a2626; --dr-t: #ff8a80; }
+.dr-etiqueta { display: inline-block; min-width: 64px; padding: 2px 8px; border-radius: 999px; background: var(--dr-f); color: var(--dr-t);
+  font-size: 13px; font-weight: 700; text-align: center; font-variant-numeric: tabular-nums; }
+.dr-secao__topo > div:first-child { flex: 1; min-width: 0; }
+.dr-nivel .dr-secao__topo { flex-wrap: nowrap; }
+.dr-nivel__campo { flex: none; width: 196px; } /* cabe "Grupo de operação" */
+.dr-nivel__campo .campo__rotulo { margin-bottom: 2px; font-size: 12px; color: var(--texto-suave); }
+.dr-nivel__campo .campo__controle { height: 34px; }
+.dr-nivel .ind-grafico__plot { height: 200px; }
+/* Desvios por nível como a imagem da usuária: título maior; eixos finos e claros; números e nomes em cinza, negrito;
+   barra com cantos de cima arredondados e o valor maior, em negrito */
+.dr-nivel__cab { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+.dr-nivel .dr-secao__titulo { font-size: 18px; }
+.dr-nivel__select { width: 196px; height: 36px; font-size: 14px; } /* cabe "Grupo de operação" */
+.dr-nivel .dr-secao__sub { margin-top: 4px; }
+.dr-nivel .ind-grafico__plot { border-left: 1px solid var(--borda-forte); border-bottom: 1px solid var(--borda-forte); }
+.dr-nivel .ind-grafico__grade > span { font-size: 13px; color: var(--texto-suave); }
+.dr-nivel .ind-grafico__barra { width: min(56%, 96px); border-radius: 8px 8px 0 0; }
+.dr-nivel .ind-grafico__valor { margin-bottom: 8px; font-size: 16px; font-weight: 700; }
+.dr-nivel .ind-grafico__rotulo { top: calc(100% + 8px); font-size: 14px; color: var(--texto-suave); }
+.dr-nivel .ind-grafico__eixo-titulo { font-size: 13px; color: var(--texto-suave); }
+/* Com rolagem (mais de 8 barras): a coluna com a altura deste gráfico (não a dos Indicadores) e largura para o nome */
+.dr-nivel .ind-grafico--dia .ind-grafico__coluna { flex: 1 0 64px; height: 200px; }
+.dr-nivel .dr-rotulos-longos { --rodape: 50px; }
+.dr-nivel .dr-rotulos-longos .ind-grafico__coluna { flex-basis: 96px; min-width: 96px; }
+.dr-nivel .dr-rotulos-longos .ind-grafico__rotulo { left: 4px; right: 4px; font-size: 11px; line-height: 1.2; white-space: normal;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.dr-tabela td, .dr-tabela th { padding: 7px 10px; font-size: 13px; }
+/* Top 10 e Detalhamento: rolagem vertical por dentro, com o cabeçalho da tabela parado */
+#dr-sec-top .tabela-rolagem { max-height: 300px; overflow: auto; }
+#dr-sec-det .tabela-rolagem { max-height: 440px; overflow: auto; }
+.dr-tabela thead th { position: sticky; top: 0; z-index: 1; background: var(--superficie-2); }
+.dr-tabela .dr-centro { text-align: center; }
+.dr-top__linha { cursor: pointer; }
+.dr-top__linha:hover td { background: var(--superficie-2); }
+.dr-top__linha--ativa td { background: var(--verde-100); }
+.dr-top__linha--apagada td { opacity: .5; }
+.dr-top__linha:focus-visible { outline: 2px solid var(--verde-600); outline-offset: -2px; }
+.dr-det__acoes { display: flex; align-items: center; gap: 10px; }
+.dr-busca { position: relative; display: flex; align-items: center; }
+.dr-busca .icone { position: absolute; left: 10px; width: 16px; height: 16px; color: var(--texto-suave); pointer-events: none; }
+.dr-busca input { width: 260px; padding-left: 34px; }
+.dr-det__conta { margin-right: auto; }
+.dr-det__por { margin-left: 12px; margin-right: 0; } /* Itens por página à direita de "‹ Página 1 de 3 ›", encostado na borda */
+@media (max-width: 1100px) { .dr-graficos { grid-template-columns: 1fr; } }

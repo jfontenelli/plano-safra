@@ -1,0 +1,576 @@
+/*
+ * Gestão da Lavoura › Operações › Desvios de Recomendação (docs/telas/10-aplicacoes.md): os desvios entre o recomendado
+ * e o executado, por produto, operação e nível de análise. Desenhada dentro da página Operações
+ * (js/telas/monitoramento-aplicacoes.js), que monta o cabeçalho e as guias.
+ *
+ * Registro: um produto de uma OS fechada (a OS é uma operação num talhão de um plano publicado). A dose e a área
+ * executadas são simuladas (DADOS.monitoramento.desviosDose e desviosArea, em sequência); a data de fechamento vem da
+ * mesma simulação das Operações. Desvio = aplicado ÷ recomendado − 1 (Dose: a dose; Quantidade: dose × área).
+ * Na tela, o registro se chama "OS" (03/11/2026: "% de OS", "Nº de OS", "1–10 de 101 OS").
+ */
+window.Telas = window.Telas || {};
+
+window.Telas.desviosRecomendacao = (function () {
+  const Cal = () => Telas.calendario;
+  const MA = () => Telas.monitoramentoAplicacoes;
+  const esc = Util.escapar;
+  const fmt = (n, casas = 0) => n.toLocaleString('pt-BR', { minimumFractionDigits: casas, maximumFractionDigits: casas });
+  const pct = (d) => `${d > 0 ? '+' : d < 0 ? '−' : ''}${fmt(Math.abs(d * 100), 1)}%`;
+  const POR_PAGINA = [10, 25, 50];
+  // Filtros: à mostra, Safra, Cultura, Fazenda, Talhão e as datas de fechamento; em "Mais filtros", o painel "Filtros
+  // adicionais" com Empresa, Grupo de operação e Executor
+  const FILTROS = [
+    ['safra', 'Safra', ['Todas', 'Nenhuma', 'selecionadas']],
+    ['cultura', 'Cultura', ['Todas', 'Nenhuma', 'culturas']],
+    ['fazenda', 'Fazenda', ['Todas', 'Nenhuma', 'fazendas']],
+    ['talhao', 'Talhão', ['Todos', 'Nenhum', 'talhões']]
+  ];
+  const MAIS_FILTROS = [
+    ['empresa', 'Empresa', ['Todas', 'Nenhuma', 'empresas']],
+    ['grupo', 'Grupo de operação', ['Todos', 'Nenhum', 'grupos']],
+    ['executor', 'Executor', ['Todos', 'Nenhum', 'executores']]
+  ];
+  // Faixas pelo desvio absoluto, com a cor de cada uma (a mesma das etiquetas de desvio)
+  const FAIXAS = [
+    ['ate10', 'Até 10%', (d) => d <= 0.10],
+    ['10a20', '10% a 20%', (d) => d > 0.10 && d <= 0.20],
+    ['20a30', '20% a 30%', (d) => d > 0.20 && d <= 0.30],
+    ['acima30', 'Acima de 30%', (d) => d > 0.30]
+  ];
+  const faixaDe = (d) => FAIXAS.find(([, , f]) => f(Math.abs(d)))[0];
+  // Níveis do gráfico Desvios por nível (03/11/2026: sem Talhão; Grupo de operação no lugar da Operação)
+  const NIVEIS = [['empresa', 'Empresa'], ['fazenda', 'Fazenda'], ['grupo', 'Grupo de operação'], ['executor', 'Executor']];
+
+  let est = null;
+  // Cabeçalho, filtros e Analisar por fixos no topo ao rolar (o alfinete solta e prende, como no Orçamento). Mantém-se ao navegar
+  let congelado = true;
+  let ouvinteRolagem = null;
+  // Abre (e Limpar filtros volta) na safra atual, com os demais filtros em Todos/Todas (03/11/2026); Data inicial = o
+  // início da safra atual e Data final = hoje; Analisar por Dose; nível Empresa
+  function novoEstado() {
+    const base = MA().estadoInicial();
+    const inicio = base.safra === 'todos' ? null : Util.cadastroSafra(base.safra[0]).inicio;
+    return { safra: base.safra, cultura: 'todos', empresa: 'todos', fazenda: 'todos', grupo: 'todos',
+      talhao: 'todos', executor: 'todos', de: inicio || Util.hojeISO().slice(0, 4) + '-01-01', ate: Util.hojeISO(),
+      modo: est ? est.modo : 'dose', nivel: est ? est.nivel : 'empresa', maisFiltros: false, faixa: null, produto: null, busca: '', pagina: 1, porPagina: 10 };
+  }
+
+  // ----- Registros -----
+  const comPublicada = () => DADOS.planos.filter((p) => Versoes.publicadaComPlanejamento(p));
+  const valorDe = { safra: (p) => p.safra, cultura: (p) => p.cultura, empresa: (p) => p.empresa, fazenda: (p) => p.fazenda };
+  const marcado = (chave, valor) => Cal().marcado(est, chave, valor);
+  const planosFiltrados = () => comPublicada().filter((p) => Object.keys(valorDe).every((c) => marcado(c, valorDe[c](p))));
+  const unidadeDe = (linha) => linha.unidade || (DADOS.defensivos.find((d) => d.produto === linha.produto) || {}).unidade || '';
+
+  // Todos os registros dos planos filtrados (sem os filtros Grupo, Executor e Período, que entram em filtrados())
+  function todosRegistros() {
+    const sim = DADOS.monitoramento || {};
+    const seqDose = sim.desviosDose || [0];
+    const seqArea = sim.desviosArea || [0];
+    const saida = [];
+    let nOS = 0;
+    let k = 0;
+    planosFiltrados().forEach((p) => {
+      const v = Versoes.ultimaPublicada(p);
+      const grupos = Versoes.grupos(p, v);
+      const plantio = (grupos.find((g) => g.tipo === 'Sementes') || { operacoes: [] }).operacoes[0];
+      if (!plantio) return;
+      Util.talhoesPlano(p, v).forEach((t, iT) => {
+        const base = Planos.dataPlantioTalhao(plantio, t.nome);
+        if (!base) return;
+        grupos.filter((g) => !['Sementes', 'Colheita'].includes(g.tipo)).forEach((g) => g.operacoes.forEach((op, iOp) => {
+          const ajuste = op.talhoes && op.talhoes[t.nome];
+          if (!ajuste || op.dap === null || op.dap === undefined || op.dap === '') return;
+          const planejado = MA().somaDias(base, Number(op.dap));
+          const { executada, fechamento, os } = MA().execucao(p, t.nome, op, g, planejado, iT, iT * 3 + iOp);
+          if (!fechamento) return;
+          nOS += 1;
+          const numero = os ? os.numero : 14500 + nOS;
+          const executor = os && os.executor ? os.executor : DADOS.executores[nOS % DADOS.executores.length];
+          const dArea = seqArea[nOS % seqArea.length];
+          Planos.linhasTalhao(op, ajuste).forEach((linha) => {
+            const doseRec = Planos.doseTalhao(op, ajuste, linha);
+            if (!doseRec) return;
+            const dDose = seqDose[k % seqDose.length];
+            k += 1;
+            const doseApl = doseRec * (1 + dDose);
+            const areaExec = t.area * (1 + dArea);
+            saida.push({ os: `OS-${numero}`, plano: p, safra: p.safra, empresa: p.empresa, fazenda: p.fazenda, talhao: t.nome,
+              grupo: g.nome, operacao: op.nome, produto: linha.produto, unidade: unidadeDe(linha), executor, executada, fechamento,
+              doseRec, doseApl, qtdRec: doseRec * t.area, qtdApl: doseApl * areaExec });
+          });
+        }));
+      });
+    });
+    return saida;
+  }
+  const desvioDe = (r) => (est.modo === 'quantidade' ? r.qtdApl / r.qtdRec - 1 : r.doseApl / r.doseRec - 1);
+  // Talhão, Grupo de operação, Executor e Período (data de fechamento da OS)
+  const filtrados = (todos = todosRegistros()) => todos.filter((r) => marcado('talhao', `${r.fazenda}|${r.talhao}`)
+    && marcado('grupo', r.grupo) && marcado('executor', r.executor)
+    && (!est.de || r.fechamento >= est.de) && (!est.ate || r.fechamento <= est.ate));
+
+  function opcoes(chave, todos) {
+    // Talhão: os dos planos que passam por Safra, Cultura, Empresa e Fazenda, com a fazenda junto ("Boa Vista · T01")
+    if (chave === 'talhao') {
+      const vistos = new Map();
+      planosFiltrados().forEach((p) => Util.talhoesPlano(p, Versoes.ultimaPublicada(p)).forEach((t) => {
+        const valor = `${p.fazenda}|${t.nome}`;
+        if (!vistos.has(valor)) vistos.set(valor, { valor, nome: `${p.fazenda} · ${t.nome}`, extra: Util.area(t.area) });
+      }));
+      return [...vistos.values()].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR', { numeric: true }));
+    }
+    if (chave === 'grupo') {
+      const nomes = [];
+      planosFiltrados().forEach((p) => Versoes.grupos(p, Versoes.ultimaPublicada(p))
+        .filter((g) => !['Sementes', 'Colheita'].includes(g.tipo))
+        .forEach((g) => { if (!nomes.includes(g.nome)) nomes.push(g.nome); }));
+      return nomes.map((n) => ({ valor: n, nome: n }));
+    }
+    if (chave === 'executor') {
+      const presentes = new Set(todos.map((r) => r.executor));
+      return DADOS.executores.filter((x) => presentes.has(x)).map((x) => ({ valor: x, nome: x }));
+    }
+    const presentes = new Set(comPublicada().map(valorDe[chave]));
+    if (chave === 'safra') return Util.ordenarSafras([...presentes]).map((x) => ({ valor: x, nome: x }));
+    const ordem = { cultura: DADOS.culturasPlanos, empresa: DADOS.empresas, fazenda: DADOS.fazendas }[chave];
+    return ordem.filter((x) => presentes.has(x)).map((x) => ({ valor: x, nome: x }));
+  }
+
+  // ----- Desenho -----
+  // cab: o cabeçalho da página (título e guias), que rola e sai da tela. Fica congelada só a barra: o cartão dos filtros
+  // (com o Analisar por e os atalhos das seções embaixo) e, fora dele, à direita, o alfinete
+  function desenhar(cab = '') {
+    est = est || novoEstado();
+    return `
+      <div class="dr-raiz">
+        ${cab}
+        <div class="dr-fixo ${congelado ? '' : 'dr-fixo--solto'}">
+          <section class="cartao filtros dr-filtros" aria-label="Filtrar os desvios" data-dr-filtros></section>
+          <span data-dr-alfinete>${alfinete()}</span>
+        </div>
+        <div class="pagina ma dr"><div class="dr" data-dr-corpo></div></div>
+      </div>`;
+  }
+  function alfinete() {
+    const texto = congelado ? 'Descongelar filtros' : 'Congelar filtros';
+    return `<button class="botao-icone orc-congelar dr-congelar ${congelado ? 'orc-congelar--ativo' : ''}" type="button" data-dr-acao="congelar"
+                title="${texto}" aria-label="${texto}" aria-pressed="${congelado}">${Icones.alfinete}</button>`;
+  }
+  // Atalhos das seções (rolam até elas; o da seção à mostra fica destacado)
+  const SECOES = [['dist', 'Distribuição'], ['nivel', 'Por nível'], ['top', 'Top 10'], ['det', 'Detalhamento']];
+
+  function filtros(todos) {
+    const campo = ([chave, rotulo, textos]) => `
+        <div class="campo">
+          <span class="campo__rotulo">${rotulo}</span>
+          ${Cal().filtroCaixa(est, chave, opcoes(chave, todos), textos, rotulo)}
+        </div>`;
+    return `
+      ${FILTROS.map(campo).join('')}
+      ${periodo()}
+      <div class="dr-filtros__base">
+        <div class="dr-analisar">${analisar()}</div>
+        <nav class="dr-atalhos" aria-label="Ir para a seção">
+          <span class="dr-atalhos__titulo">Ir para:</span>
+          ${SECOES.map(([id, rot]) => `<button class="dr-atalho" type="button" data-dr-ir="${id}">${rot}</button>`).join('')}
+        </nav>
+        <div class="dr-filtros__acoes">
+          <button class="botao botao--secundario dr-mais ${est.maisFiltros ? 'dr-mais--aberto' : ''}" type="button" data-dr-acao="mais-filtros"
+                  aria-expanded="${est.maisFiltros}" aria-controls="dr-mais-filtros" title="Mais filtros" aria-label="Mais filtros">${Icones.ajustes}<span class="dr-acao-texto">Mais filtros</span>
+            <span class="dr-mais__seta ${est.maisFiltros ? 'dr-mais__seta--aberta' : ''}" aria-hidden="true">${Icones.abaixo}</span></button>
+          <button class="link-acao filtros__limpar" type="button" data-dr-acao="limpar" title="Limpar filtros" aria-label="Limpar filtros">${Icones.limpar}<span class="dr-acao-texto">Limpar filtros</span></button>
+          ${est.maisFiltros ? `
+          <div class="dr-pop" id="dr-mais-filtros" role="dialog" aria-labelledby="dr-pop-titulo">
+            <div class="dr-pop__cab">
+              <h3 class="dr-pop__titulo" id="dr-pop-titulo">Filtros adicionais</h3>
+              <button class="botao-icone" type="button" data-dr-acao="fechar-mais" aria-label="Fechar" title="Fechar">${Icones.fechar}</button>
+            </div>
+            ${MAIS_FILTROS.map(campo).join('')}
+          </div>` : ''}
+        </div>
+      </div>`;
+  }
+
+  // Data inicial e Data final (de fechamento da OS), cada uma com o calendário, a data (dd/mm/aa) e a setinha; clicar no
+  // campo abre o calendário do navegador (o campo de data fica escondido por baixo)
+  const dataCurta = (iso) => (iso ? `${iso.slice(8, 10)}/${iso.slice(5, 7)}/${iso.slice(2, 4)}` : 'dd/mm/aa');
+  function periodo() {
+    const campo = (chave, rotulo) => `
+          <div class="campo dr-data">
+            <span class="campo__rotulo" id="dr-rot-${chave}">${rotulo}</span>
+            <div class="campo__controle dr-data__controle" data-dr-abrir="${chave}">
+              ${Icones.calendario}<span class="dr-data__texto ${est[chave] ? '' : 'dr-data__texto--vazio'}">${dataCurta(est[chave])}</span>
+              <span class="dr-data__seta" aria-hidden="true">${Icones.abaixo}</span>
+              <input class="dr-data__nativo" type="date" data-dr-data="${chave}" value="${esc(est[chave] || '')}"
+                     aria-labelledby="dr-rot-${chave}">
+            </div>
+          </div>`;
+    return `${campo('de', 'Data inicial')}${campo('ate', 'Data final')}`;
+  }
+
+  const nomeModo = () => (est.modo === 'quantidade' ? 'Quantidade' : 'Dose');
+  // Analisar por: Dose · Quantidade (na base do cartão dos filtros)
+  function analisar() {
+    return `
+        <span class="dr-analisar__titulo">Analisar por:</span>
+        ${[['dose', 'Dose'], ['quantidade', 'Quantidade']].map(([v, rot]) => `
+          <button class="botao botao--p ${est.modo === v ? 'botao--primario' : 'botao--secundario'} dr-analisar__botao" type="button"
+                  data-dr-modo="${v}" aria-pressed="${est.modo === v}">${rot}</button>`).join('')}`;
+  }
+  function corpo(regs) {
+    return `
+      ${!regs.length ? '<section class="cartao dr-secao"><p class="ma-construcao">Nenhuma OS fechada com esses filtros no período.</p></section>' : `
+      <div class="dr-graficos">
+        ${distribuicao(regs)}
+        ${porNivel(regs)}
+      </div>
+      ${topProdutos(regs)}
+      ${detalhamento(regs)}`}`;
+  }
+
+  // Distribuição: % de registros por faixa de desvio (absoluto). Clicar numa faixa filtra só o gráfico Desvios por nível
+  function distribuicao(regs) {
+    const n = regs.length;
+    const cont = Object.fromEntries(FAIXAS.map(([id]) => [id, 0]));
+    regs.forEach((r) => { cont[faixaDe(desvioDe(r))] += 1; });
+    return `
+      <section class="cartao dr-secao dr-dist dr-ancora" id="dr-sec-dist" aria-labelledby="dr-dist-titulo">
+        <h3 class="dr-secao__titulo" id="dr-dist-titulo">${est.modo === 'quantidade' ? 'Distribuição dos desvios por Quantidade de Produto' : 'Distribuição dos desvios de Dose de Produto'}</h3>
+        <p class="dr-secao__sub">% de OS por faixa de desvio do aplicado x recomendado.</p>
+        <ul class="dr-faixas">
+          ${FAIXAS.map(([id, rot]) => {
+            const p = n ? cont[id] / n : 0;
+            const ativa = est.faixa === id;
+            return `<li><button class="dr-faixa ${est.faixa && !ativa ? 'dr-faixa--apagada' : ''}" type="button" data-dr-faixa="${id}" aria-pressed="${ativa}"
+                title="${ativa ? 'Mostrar todas as faixas no gráfico' : `Ver só ${rot.toLowerCase()} no gráfico Desvios por nível`}">
+              <span class="dr-faixa__rotulo">${rot}</span>
+              <span class="dr-faixa__trilho"><span class="dr-faixa__barra dr-cor--${id}" style="width:${p * 100}%"></span></span>
+              <span class="dr-faixa__pct">${fmt(Math.round(p * 100))}%</span>
+              <span class="dr-faixa__n">(${fmt(cont[id])})</span></button></li>`;
+          }).join('')}
+        </ul>
+        ${est.faixa ? '<button class="link-acao dr-todas" type="button" data-dr-acao="todas-faixas">Mostrar todas</button>' : ''}
+      </section>`;
+  }
+
+  // Desvios por nível: o desvio médio (absoluto) dos registros de cada grupo, sempre do maior para o menor (empate: o nome)
+  function porNivel(regs) {
+    if (!NIVEIS.some(([v]) => v === est.nivel)) est.nivel = 'empresa';
+    const lista = regs.filter((r) => !est.faixa || faixaDe(desvioDe(r)) === est.faixa);
+    const chave = { empresa: (r) => r.empresa, fazenda: (r) => r.fazenda, grupo: (r) => r.grupo, executor: (r) => r.executor }[est.nivel];
+    const grupos = new Map();
+    lista.forEach((r) => { const g = grupos.get(chave(r)) || []; g.push(Math.abs(desvioDe(r))); grupos.set(chave(r), g); });
+    let barras = [...grupos].map(([nome, xs]) => ({ nome, valor: xs.reduce((s, x) => s + x, 0) / xs.length * 100 }));
+    barras = barras.sort((a, b) => b.valor - a.valor || a.nome.localeCompare(b.nome, 'pt-BR', { numeric: true }));
+    const topo = Math.max(5, Math.ceil(Math.max(0, ...barras.map((b) => b.valor)) / 5) * 5);
+    const marcas = [];
+    for (let v = 0; v <= topo; v += topo / 5) marcas.push(v);
+    const faixa = est.faixa ? FAIXAS.find(([id]) => id === est.faixa)[1] : '';
+    // Nomes longos ("Aplicação de insumos"): quebram em até três linhas embaixo da barra, numa coluna mais larga
+    const rotulo = (nome) => nome;
+    const longos = barras.some((b) => b.nome.length > 10);
+    return `
+      <section class="cartao dr-secao dr-nivel dr-ancora" id="dr-sec-nivel" aria-labelledby="dr-nivel-titulo">
+        <!-- O título termina em "por:" e segue com a lista do nível, na mesma linha -->
+        <div class="dr-nivel__cab">
+          <h3 class="dr-secao__titulo" id="dr-nivel-titulo">${est.modo === 'quantidade' ? 'Desvio de quantidade de produto por:' : 'Desvio de dose de produto por:'}</h3>
+          <select class="campo__controle dr-nivel__select" data-dr-nivel aria-label="Nível">
+            ${NIVEIS.map(([v, rot]) => `<option value="${v}" ${est.nivel === v ? 'selected' : ''}>${rot}</option>`).join('')}
+          </select>
+        </div>
+        <p class="dr-secao__sub">Comparativo entre os grupos conforme a métrica selecionada${faixa ? ` · faixa ${faixa.toLowerCase()}` : ''}.</p>
+        ${!barras.length ? '<p class="ind-vazio">Nenhuma OS nesta faixa.</p>' : `
+        <div class="ind-grafico ${barras.length > (longos ? 6 : 8) ? 'ind-grafico--dia' : ''} ${longos ? 'dr-rotulos-longos' : ''}" role="img"
+             aria-label="Desvio médio por ${NIVEIS.find(([v]) => v === est.nivel)[1].toLowerCase()}: ${barras.map((b) => `${b.nome}, ${fmt(b.valor, 1)}%`).join('; ')}">
+          <span class="ind-grafico__eixo-titulo">Desvio (%)</span>
+          <div class="ind-grafico__plot dr-nivel__plot">
+            ${marcas.map((v) => `<span class="ind-grafico__grade" style="bottom: ${v / topo * 100}%"><span>${fmt(v)}%</span></span>`).join('')}
+            <div class="ind-grafico__barras">
+              ${barras.map((b) => `
+                <div class="ind-grafico__coluna" title="${esc(b.nome)}: ${fmt(b.valor, 1)}%">
+                  <div class="ind-grafico__barra-area">
+                    <span class="ind-grafico__valor" style="bottom: ${b.valor / topo * 100}%">${fmt(b.valor, 1)}%</span>
+                    <span class="ind-grafico__barra" style="height: ${b.valor / topo * 100}%"></span>
+                  </div>
+                  <span class="ind-grafico__rotulo">${esc(rotulo(b.nome))}</span>
+                </div>`).join('')}
+            </div>
+          </div>
+        </div>`}
+      </section>`;
+  }
+
+  // Etiqueta do desvio, na cor da faixa (pelo valor absoluto), com o sinal
+  const etiqueta = (d) => `<span class="dr-etiqueta dr-cor--${faixaDe(d)}">${pct(d)}</span>`;
+  const dose = (n, unidade) => `${fmt(n, 2)} ${esc(unidade)}/ha`;
+  const qtd = (n, unidade) => `${fmt(Math.round(n))} ${esc(unidade)}`;
+
+  // Top 10 produtos: o desvio do produto (aplicado médio ÷ recomendado médio − 1; em Quantidade, as somas), do maior para o
+  // menor em valor absoluto. Clicar num produto filtra o Detalhamento por OS. Grupo de insumo: o do cadastro do produto
+  // (os mesmos grupos do Orçamento: Defensivos, Adjuvantes, Biológicos…)
+  const grupoInsumo = (produto) => {
+    const cad = DADOS.defensivos.find((d) => d.produto === produto) || {};
+    return DADOS.grupoInsumoPorClasse[cad.classe] || (cad.fertilidade ? 'Fertilizantes' : 'Defensivos');
+  };
+  function produtos(regs) {
+    const mapa = new Map();
+    regs.forEach((r) => {
+      const x = mapa.get(r.produto) || { produto: r.produto, unidade: r.unidade, grupos: new Map(), n: 0, doseRec: 0, doseApl: 0, qtdRec: 0, qtdApl: 0 };
+      x.n += 1; x.doseRec += r.doseRec; x.doseApl += r.doseApl; x.qtdRec += r.qtdRec; x.qtdApl += r.qtdApl;
+      x.grupos.set(r.grupo, (x.grupos.get(r.grupo) || 0) + 1);
+      mapa.set(r.produto, x);
+    });
+    return [...mapa.values()].map((x) => ({ ...x, grupo: [...x.grupos].sort((a, b) => b[1] - a[1])[0][0], grupoInsumo: grupoInsumo(x.produto),
+      desvio: est.modo === 'quantidade' ? x.qtdApl / x.qtdRec - 1 : x.doseApl / x.doseRec - 1 }))
+      .sort((a, b) => Math.abs(b.desvio) - Math.abs(a.desvio) || a.produto.localeCompare(b.produto, 'pt-BR'));
+  }
+  function topProdutos(regs) {
+    const top = produtos(regs).slice(0, 10);
+    const q = est.modo === 'quantidade';
+    return `
+      <section class="cartao dr-secao dr-ancora" id="dr-sec-top" aria-labelledby="dr-top-titulo">
+        <div class="dr-secao__topo">
+          <div>
+            <h3 class="dr-secao__titulo" id="dr-top-titulo">Top 10 produtos com maior desvio de ${nomeModo()}</h3>
+            <p class="dr-secao__sub">Clique em produto para selecionar as OS na tabela abaixo.</p>
+          </div>
+          ${est.produto ? '<button class="link-acao" type="button" data-dr-acao="todos-produtos">Mostrar todos os produtos</button>' : ''}
+        </div>
+        <div class="tabela-rolagem"><table class="tabela dr-tabela dr-top">
+          <thead><tr><th>Grupo de insumo</th><th>Produto</th>
+            <th class="tabela__numero">${q ? 'Quantidade recomendada' : 'Dose recomendada'}</th>
+            <th class="tabela__numero">${q ? 'Quantidade aplicada' : 'Dose aplicada'}</th>
+            <th class="dr-centro">Desvio</th><th class="tabela__numero">Nº de OS</th></tr></thead>
+          <tbody>${top.map((x) => `
+            <tr class="dr-top__linha ${est.produto === x.produto ? 'dr-top__linha--ativa' : ''} ${est.produto && est.produto !== x.produto ? 'dr-top__linha--apagada' : ''}"
+                data-dr-produto="${esc(x.produto)}" tabindex="0" title="${est.produto === x.produto ? 'Mostrar todos os produtos' : `Ver só as OS de ${esc(x.produto)}`}">
+              <td>${esc(x.grupoInsumo)}</td><td><strong>${esc(x.produto)}</strong></td>
+              <td class="tabela__numero">${q ? qtd(x.qtdRec, x.unidade) : dose(x.doseRec / x.n, x.unidade)}</td>
+              <td class="tabela__numero">${q ? qtd(x.qtdApl, x.unidade) : dose(x.doseApl / x.n, x.unidade)}</td>
+              <td class="dr-centro">${etiqueta(x.desvio)}</td><td class="tabela__numero">${fmt(x.n)}</td></tr>`).join('')}</tbody>
+        </table></div>
+      </section>`;
+  }
+
+  // Detalhamento por OS: um registro por linha, do maior desvio absoluto para o menor; busca por OS, produto ou talhão
+  function linhasDetalhe(regs) {
+    const q = Util.normalizar((est.busca || '').trim());
+    return regs.filter((r) => (!est.produto || r.produto === est.produto)
+      && (!q || [r.os, r.produto, r.talhao].some((x) => Util.normalizar(x).includes(q))))
+      .sort((a, b) => Math.abs(desvioDe(b)) - Math.abs(desvioDe(a)) || a.os.localeCompare(b.os, 'pt-BR', { numeric: true }));
+  }
+  function detalhamento(regs) {
+    return `
+      <section class="cartao dr-secao dr-ancora" id="dr-sec-det" aria-labelledby="dr-det-titulo" data-dr-detalhe>${tabelaDetalhe(regs)}</section>`;
+  }
+  function tabelaDetalhe(regs) {
+    const ls = linhasDetalhe(regs);
+    const paginas = Math.max(1, Math.ceil(ls.length / est.porPagina));
+    est.pagina = Math.min(Math.max(1, est.pagina), paginas);
+    const pagina = ls.slice((est.pagina - 1) * est.porPagina, est.pagina * est.porPagina);
+    const de = ls.length ? (est.pagina - 1) * est.porPagina + 1 : 0;
+    const ate = Math.min(est.pagina * est.porPagina, ls.length);
+    const dDose = (r) => r.doseApl / r.doseRec - 1;
+    const dQtd = (r) => r.qtdApl / r.qtdRec - 1;
+    return `
+        <div class="dr-secao__topo">
+          <div>
+            <h3 class="dr-secao__titulo" id="dr-det-titulo">Detalhamento por OS${est.produto ? ` · ${esc(est.produto)}` : ''}</h3>
+            <p class="dr-secao__sub">OS filtradas conforme os critérios selecionados.</p>
+          </div>
+          <div class="dr-det__acoes">
+            <label class="dr-busca">${Icones.busca}<input type="search" class="campo__controle" data-dr-busca placeholder="Buscar OS, produto ou talhão"
+              value="${esc(est.busca || '')}" aria-label="Buscar OS, produto ou talhão" autocomplete="off"></label>
+            <button class="botao orc-exportar" type="button" data-dr-acao="exportar" ${ls.length ? '' : 'disabled'}>${Icones.baixar} Exportar</button>
+          </div>
+        </div>
+        <div class="tabela-rolagem"><table class="tabela dr-tabela dr-det">
+          <thead><tr><th>Nº OS</th><th>Safra</th><th>Empresa</th><th>Fazenda</th><th>Talhão</th><th>Operação</th><th>Produto</th>
+            <th class="tabela__numero">Dose recomendada</th><th class="tabela__numero">Dose aplicada</th><th class="dr-centro">Desvio (%)</th>
+            <th class="tabela__numero">Quantidade recomendada</th><th class="tabela__numero">Quantidade aplicada</th><th class="dr-centro">Desvio (%)</th></tr></thead>
+          <tbody>${pagina.length ? pagina.map((r) => `
+            <tr title="Fechada em ${Util.data(r.fechamento)} · ${esc(r.executor)}">
+              <td>${esc(r.os)}</td><td>${esc(r.safra)}</td><td>${esc(r.empresa)}</td><td>${esc(r.fazenda)}</td><td>${esc(r.talhao)}</td>
+              <td>${esc(r.operacao)}</td><td>${esc(r.produto)}</td>
+              <td class="tabela__numero">${dose(r.doseRec, r.unidade)}</td><td class="tabela__numero">${dose(r.doseApl, r.unidade)}</td>
+              <td class="dr-centro">${etiqueta(dDose(r))}</td>
+              <td class="tabela__numero">${qtd(r.qtdRec, r.unidade)}</td><td class="tabela__numero">${qtd(r.qtdApl, r.unidade)}</td>
+              <td class="dr-centro">${etiqueta(dQtd(r))}</td></tr>`).join('')
+            : '<tr><td class="tabela__vazia" colspan="13">Nenhuma OS encontrada.</td></tr>'}</tbody>
+        </table></div>
+        <div class="orc-paginacao">
+          <span class="orc-paginacao__texto dr-det__conta">${fmt(de)}–${fmt(ate)} de ${fmt(ls.length)} OS</span>
+          <button class="botao-icone" type="button" data-dr-pagina="${est.pagina - 1}" ${est.pagina <= 1 ? 'disabled' : ''} aria-label="Página anterior">${Icones.anterior}</button>
+          <span class="orc-paginacao__texto">Página ${est.pagina} de ${paginas}</span>
+          <button class="botao-icone" type="button" data-dr-pagina="${est.pagina + 1}" ${est.pagina >= paginas ? 'disabled' : ''} aria-label="Próxima página">${Icones.proxima}</button>
+          <label class="orc-paginacao__por dr-det__por">Itens por página
+            <select class="campo__controle" data-dr-por-pagina>
+              ${POR_PAGINA.map((n) => `<option ${n === est.porPagina ? 'selected' : ''}>${n}</option>`).join('')}
+            </select></label>
+        </div>`;
+  }
+
+  // Exportar: o detalhamento inteiro (todas as páginas, com a busca e o produto escolhido), na ordem da tela
+  function exportar(regs) {
+    const linhas = [['Nº OS', 'Safra', 'Empresa', 'Fazenda', 'Talhão', 'Operação', 'Produto', 'Unidade', 'Dose recomendada (/ha)',
+      'Dose aplicada (/ha)', 'Desvio dose (%)', 'Quantidade recomendada', 'Quantidade aplicada', 'Desvio quantidade (%)', 'Executor', 'Fechamento'],
+    ...linhasDetalhe(regs).map((r) => [r.os, r.safra, r.empresa, r.fazenda, r.talhao, r.operacao, r.produto, r.unidade,
+      +r.doseRec.toFixed(3), +r.doseApl.toFixed(3), +((r.doseApl / r.doseRec - 1) * 100).toFixed(1),
+      +r.qtdRec.toFixed(1), +r.qtdApl.toFixed(1), +((r.qtdApl / r.qtdRec - 1) * 100).toFixed(1), r.executor, Util.data(r.fechamento)])];
+    const livro = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(livro, XLSX.utils.aoa_to_sheet(linhas), 'desvios');
+    XLSX.writeFile(livro, `desvios-recomendacao_${Util.hojeISO()}.xlsx`);
+  }
+
+  // ----- Eventos -----
+  function aoMostrar(conteudo) {
+    est = est || novoEstado();
+    const raiz = conteudo.querySelector('.dr-raiz');
+    const caixaFiltros = raiz.querySelector('[data-dr-filtros]');
+    const caixaAlfinete = raiz.querySelector('[data-dr-alfinete]');
+    const rolagem = conteudo.closest('.conteudo') || conteudo;
+    const caixaCorpo = raiz.querySelector('[data-dr-corpo]');
+    const ctx = { estado: est };
+    let regs = [];
+    const redesenhar = (foco) => {
+      const todos = todosRegistros();
+      regs = filtrados(todos);
+      caixaFiltros.innerHTML = filtros(todos);
+      caixaCorpo.innerHTML = corpo(regs);
+      medirBarra();
+      marcarAtalho();
+      if (foco) raiz.querySelector(foco)?.focus();
+    };
+    // Altura da barra congelada: as seções param logo abaixo dela ao usar os atalhos
+    const medirBarra = () => {
+      const h = congelado ? raiz.querySelector('.dr-fixo').getBoundingClientRect().height : 0;
+      raiz.style.setProperty('--dr-fixo-h', `${Math.round(h)}px`);
+    };
+    // Atalho da seção à mostra: a última cujo topo já passou da barra congelada (Distribuição e Por nível ficam na mesma
+    // linha: com o mesmo topo, vale a primeira)
+    const marcarAtalho = () => {
+      const limite = raiz.querySelector('.dr-fixo').getBoundingClientRect().bottom + 24;
+      let atual = SECOES[0][0];
+      let topoAnterior = -Infinity;
+      SECOES.forEach(([id]) => {
+        const s = raiz.querySelector(`#dr-sec-${id}`);
+        if (!s) return;
+        const topo = Math.round(s.getBoundingClientRect().top);
+        if (topo > topoAnterior + 1 && topo <= limite) atual = id;
+        topoAnterior = Math.max(topoAnterior, topo);
+      });
+      raiz.querySelectorAll('[data-dr-ir]').forEach((b) => {
+        const ativo = b.dataset.drIr === atual;
+        b.classList.toggle('dr-atalho--ativo', ativo);
+        if (ativo) b.setAttribute('aria-current', 'true'); else b.removeAttribute('aria-current');
+      });
+    };
+    // Um ouvinte de rolagem só (o da visita anterior sai)
+    if (ouvinteRolagem) ouvinteRolagem.alvo.removeEventListener('scroll', ouvinteRolagem.fn);
+    ouvinteRolagem = { alvo: rolagem, fn: () => { if (raiz.isConnected) marcarAtalho(); } };
+    rolagem.addEventListener('scroll', ouvinteRolagem.fn, { passive: true });
+    const redesenharDetalhe = () => {
+      const caixa = raiz.querySelector('[data-dr-detalhe]');
+      if (caixa) caixa.innerHTML = tabelaDetalhe(regs);
+    };
+
+    raiz.addEventListener('click', (e) => {
+      // Clique fora do painel Filtros adicionais (e fora do botão): fecha
+      if (est.maisFiltros && !e.target.closest('.dr-pop, [data-dr-acao="mais-filtros"]')) { est.maisFiltros = false; redesenhar(); }
+      const acao = e.target.closest('[data-dr-acao]');
+      if (acao) {
+        const a = acao.dataset.drAcao;
+        if (a === 'limpar') { est = novoEstado(); ctx.estado = est; redesenhar('[data-dr-acao="limpar"]'); }
+        else if (a === 'mais-filtros') { est.maisFiltros = !est.maisFiltros; redesenhar(est.maisFiltros ? '.dr-pop .cal-filtro__botao' : '[data-dr-acao="mais-filtros"]'); }
+        else if (a === 'congelar') {
+          congelado = !congelado;
+          raiz.querySelector('.dr-fixo').classList.toggle('dr-fixo--solto', !congelado);
+          caixaAlfinete.innerHTML = alfinete();
+          medirBarra();
+          raiz.querySelector('[data-dr-acao="congelar"]').focus();
+        }
+        else if (a === 'fechar-mais') { est.maisFiltros = false; redesenhar('[data-dr-acao="mais-filtros"]'); }
+        else if (a === 'todas-faixas') { est.faixa = null; redesenhar('[data-dr-faixa]'); }
+        else if (a === 'todos-produtos') { est.produto = null; est.pagina = 1; redesenhar('[data-dr-produto]'); }
+        else if (a === 'exportar') exportar(regs);
+        return;
+      }
+      // Atalhos: rolam até a seção, logo abaixo da barra congelada
+      const ir = e.target.closest('[data-dr-ir]');
+      if (ir) {
+        const secao = raiz.querySelector(`#dr-sec-${ir.dataset.drIr}`);
+        if (secao) {
+          // Com a barra congelada, a seção para logo abaixo dela já grudada no topo (a altura dela, a partir do topo da área)
+          const barra = rolagem.getBoundingClientRect().top + (congelado ? raiz.querySelector('.dr-fixo').offsetHeight : 0);
+          rolagem.scrollTop += secao.getBoundingClientRect().top - barra - 16;
+          marcarAtalho();
+        }
+        return;
+      }
+      // Período: clicar no campo abre o calendário do navegador
+      const abrir = e.target.closest('[data-dr-abrir]');
+      if (abrir) {
+        const nativo = abrir.querySelector('.dr-data__nativo');
+        try { nativo.showPicker(); } catch (erro) { nativo.focus(); }
+        return;
+      }
+      const modo = e.target.closest('[data-dr-modo]');
+      if (modo) { est.modo = modo.dataset.drModo; redesenhar(`[data-dr-modo="${est.modo}"]`); return; }
+      const faixa = e.target.closest('[data-dr-faixa]');
+      if (faixa) {
+        est.faixa = est.faixa === faixa.dataset.drFaixa ? null : faixa.dataset.drFaixa;
+        redesenhar(`[data-dr-faixa="${faixa.dataset.drFaixa}"]`);
+        return;
+      }
+      const prod = e.target.closest('[data-dr-produto]');
+      if (prod) {
+        est.produto = est.produto === prod.dataset.drProduto ? null : prod.dataset.drProduto;
+        est.pagina = 1;
+        redesenhar(`[data-dr-produto="${CSS.escape(prod.dataset.drProduto)}"]`);
+        return;
+      }
+      const pag = e.target.closest('[data-dr-pagina]');
+      if (pag) { est.pagina = Number(pag.dataset.drPagina); redesenharDetalhe(); raiz.querySelector('[data-dr-pagina]:not([disabled])')?.focus(); return; }
+      Cal().aoClicar(e, ctx, { redesenhar });
+    });
+    raiz.addEventListener('keydown', (e) => {
+      // Esc no painel Filtros adicionais (sem caixa de filtro aberta): fecha e volta ao botão
+      if (e.key === 'Escape' && est.maisFiltros && !raiz.querySelector('.dr-pop .cal-filtro[open]')) {
+        est.maisFiltros = false; redesenhar('[data-dr-acao="mais-filtros"]'); return;
+      }
+      const prod = e.target.closest('[data-dr-produto]');
+      if (prod && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); prod.click(); }
+    });
+    raiz.addEventListener('change', (e) => {
+      if (e.target.dataset.drData) { est[e.target.dataset.drData] = e.target.value || null; est.pagina = 1; redesenhar(`[data-dr-data="${e.target.dataset.drData}"]`); return; }
+      if (e.target.matches('[data-dr-nivel]')) { est.nivel = e.target.value; redesenhar('[data-dr-nivel]'); return; }
+      if (e.target.matches('[data-dr-por-pagina]')) { est.porPagina = Number(e.target.value); est.pagina = 1; redesenharDetalhe(); raiz.querySelector('[data-dr-por-pagina]')?.focus(); return; }
+      if (e.target.dataset.campo !== 'cal-filtro') return;
+      const chave = e.target.dataset.filtro;
+      const valores = opcoes(chave, todosRegistros()).map((o) => o.valor);
+      let marcados = valores.filter((v) => marcado(chave, v));
+      if (e.target.value === 'todos') marcados = e.target.checked ? [...valores] : [];
+      else if (e.target.checked) marcados.push(e.target.value);
+      else marcados = marcados.filter((n) => n !== e.target.value);
+      est[chave] = marcados.length === valores.length ? 'todos' : marcados;
+      est.filtroAberto = chave;
+      est.pagina = 1;
+      redesenhar(`[data-campo="cal-filtro"][data-filtro="${chave}"][value="${CSS.escape(e.target.value)}"]`);
+    });
+    // Busca: redesenha só o detalhamento e devolve o foco ao campo, com o cursor no fim
+    raiz.addEventListener('input', (e) => {
+      if (e.target.matches('[data-dr-busca]')) {
+        est.busca = e.target.value; est.pagina = 1;
+        redesenharDetalhe();
+        const campo = raiz.querySelector('[data-dr-busca]');
+        campo.focus(); campo.setSelectionRange(campo.value.length, campo.value.length);
+        return;
+      }
+      Cal().aoDigitar(e, ctx);
+    });
+    redesenhar();
+  }
+
+  return { desenhar, aoMostrar };
+})();

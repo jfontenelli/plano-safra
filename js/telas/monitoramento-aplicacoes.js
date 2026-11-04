@@ -226,25 +226,34 @@ window.Telas.monitoramentoAplicacoes = (function () {
   }
 
   // ----- Desenho -----
-  function desenhar() {
+  // guia: a do endereço (#/planejado-executado/desvios). Desvios de Recomendação: js/telas/desvios-recomendacao.js;
+  // Previsão de Falta de Produtos: provisória ("Em construção")
+  function desenhar(guia) {
     est = est || novoEstado();
+    if (guia && guia !== 'calendario') irParaGuia(guia);
+    const cab = `<header class="cabecalho oa-cabecalho ma-cabecalho" data-ma-cabecalho>${cabecalho()}</header>`;
+    if (est.visao === 'desvios') return Telas.desviosRecomendacao.desenhar(cab);
+    if (est.visao === 'falta') return `${cab}<div class="pagina">${blocoEmConstrucao()}</div>`;
     return `
-      <header class="cabecalho oa-cabecalho ma-cabecalho" data-ma-cabecalho>${cabecalho()}</header>
+      ${cab}
       <div class="pagina ma">
         <section class="cartao filtros" aria-label="Filtrar o monitoramento" data-ma-filtros></section>
         <section class="cartao oc-lista ma-lista" aria-label="Aplicações por talhão" data-ma-tabela></section>
       </div>`;
   }
 
-  // Cabeçalho: caminho, título e subtítulo da página. Desde 03/11/2026 são dois itens do menu Gestão da Lavoura, sem
-  // guias: Calendário (outra página: js/telas/os-calendario.js, com os seus filtros) e Operações (antes
-  // Planejadas × Executadas; a tabela por talhão; juntou as antigas guias Executadas e Planejadas × Executadas). A Duração da Operação
-  // saiu em 29/10/2026 (os usuários não quiseram acompanhar essa métrica); o código dela continua aqui, sem a guia
+  // Cabeçalho: caminho, título e subtítulo. O Calendário (outra página: js/telas/os-calendario.js) só usa o cabeçalho.
+  // O item Operações do menu abre a página Planejado × Executado (03/11/2026), com as guias Planejado × Executado (a
+  // tabela por talhão), Desvios de Recomendação e Previsão de Falta de Produtos: o título da guia (sem o caminho no topo,
+  // desde 03/11/2026). A Duração da Operação saiu em 29/10/2026; o código dela continua aqui
   const GUIAS = [
     ['calendario', 'Calendário', 'As operações planejadas de todas as fazendas: o ano agrícola por empresa e fazenda, e o dia a dia no mês, na semana e no dia.'],
-    ['tabela', 'Operações', 'Compare as datas planejadas e executadas das operações por talhão.']
+    ['tabela', 'Planejado × Executado', 'Compare as datas planejadas e executadas das operações por talhão.'],
+    ['desvios', 'Desvios de Recomendação', 'Analise os desvios entre o recomendado e o executado por produto, operação e nível de análise.'],
+    ['falta', 'Previsão de Falta de Produtos', 'Estime a falta de produtos para as operações planejadas.']
   ];
-  // visao: a página (o Calendário chama com 'calendario'). Só nele, a etiqueta das versões publicadas.
+  const GUIAS_PAGINA = ['tabela', 'desvios', 'falta'];
+  // visao: a guia (o Calendário chama com 'calendario'). Só no Calendário, a etiqueta das versões publicadas.
   function cabecalho(visao = est.visao) {
     const [, nome, subtitulo] = GUIAS.find(([id]) => id === visao);
     const titulo = `
@@ -252,9 +261,15 @@ window.Telas.monitoramentoAplicacoes = (function () {
           <h1 class="cabecalho__titulo">${nome}</h1>
           <p class="cabecalho__subtitulo">${subtitulo}</p>
         </div>`;
+    if (visao === 'calendario') {
+      return `${Telas.gestaoLavoura.caminho(nome)}<div class="oa-cabecalho__abas">${titulo}${Telas.gestaoLavoura.etiquetaPublicadas()}</div>`;
+    }
     return `
-      ${Telas.gestaoLavoura.caminho(nome)}
-      ${visao === 'calendario' ? `<div class="oa-cabecalho__abas">${titulo}${Telas.gestaoLavoura.etiquetaPublicadas()}</div>` : titulo}`;
+      ${titulo}
+      <nav class="ma-guias" aria-label="Guias de Planejado × Executado">
+        ${GUIAS_PAGINA.map((id) => `<a class="botao botao--p ${id === visao ? 'botao--primario' : 'botao--secundario'} ma-guia" href="#/planejado-executado/${id}"
+          ${id === visao ? 'aria-current="page"' : ''}>${GUIAS.find(([x]) => x === id)[1]}</a>`).join('')}
+      </nav>`;
   }
   // Guia escolhida: o Calendário Agrícola é outra página; as demais, esta (vindo do Calendário: #/planejado-executado/tabela)
   function irParaGuia(visao) {
@@ -583,6 +598,8 @@ window.Telas.monitoramentoAplicacoes = (function () {
   function aoMostrar(conteudo, guia) {
     est = est || novoEstado();
     if (guia && guia !== 'calendario') irParaGuia(guia);
+    if (est.visao === 'desvios') { Telas.desviosRecomendacao.aoMostrar(conteudo); return; }
+    if (est.visao === 'falta') return;
     // Os eventos ficam na página da tela (a área de conteúdo é a mesma para todas as telas)
     const raiz = conteudo.querySelector('.ma');
     const caixaFiltros = raiz.querySelector('[data-ma-filtros]');
@@ -686,5 +703,14 @@ window.Telas.monitoramentoAplicacoes = (function () {
     aberta.querySelector('.cal-filtro__botao').focus();
   });
 
-  return { desenhar, aoMostrar, cabecalho };
+  // Para os Desvios de Recomendação: o estado inicial dos filtros (safra atual etc.), somar dias e a execução simulada de
+  // uma operação num talhão (data executada, fechamento da OS e a OS escrita nos dados, se houver)
+  const estadoInicial = () => novoEstado();
+  function execucao(p, talhao, op, g, planejado, iT, i) {
+    const s = (sim().talhoes[`${p.fazenda} ${p.safra}`] || {})[talhao] || {};
+    const exec = executada(p, talhao, op.nome, planejado, s, i);
+    return { executada: exec, fechamento: fechamento(p, talhao, op.nome, exec, Cal().prazoDe(op, g), i), os: osDe(p, talhao, op.nome) || null };
+  }
+
+  return { desenhar, aoMostrar, cabecalho, estadoInicial, execucao, somaDias };
 })();

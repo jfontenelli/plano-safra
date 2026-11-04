@@ -445,6 +445,10 @@ window.DADOS = {
   // (inclusive 'Plantio'), o deslocamento em dias; null = não executada (pendente, se a data planejada já passou).
   monitoramento: {
     deslocamentos: [0, 2, -1, 5, 1, -3, 0, 3, 7, -2, 1, 4],
+    // Desvios de Recomendação (simulados): a dose aplicada = recomendada × (1 + desvio), um por produto de OS fechada, em
+    // sequência (de −15% a +40%); a área executada = área do talhão × (1 + desvio), um por OS (até ±3%)
+    desviosDose: [0.02, -0.04, 0.08, 0.12, -0.06, 0.03, 0.18, 0.25, -0.09, 0.05, 0.36, 0.01, -0.13, 0.07, 0.22, 0.04, -0.02, 0.31, 0.09, 0.15, -0.15, 0.06, 0.40, 0.0],
+    desviosArea: [0, 0.02, -0.01, 0.03, -0.02, 0.01, 0, -0.03],
     duracoes: [0, 2, -1, 3, 0, 1, 4, -1, 0, 2, 5, 1, 0],
     talhoes: {
       'Santa Clara 25/26': {
