@@ -188,7 +188,13 @@ window.BarraFiltros = (function () {
         if (acao && acao.dataset.bf === 'mais') { aberto = !aberto; redesenhar(aberto ? '.bf__pop .cal-filtro__botao' : '[data-bf="mais"]'); return; }
         if (acao && acao.dataset.bf === 'fechar') { aberto = false; redesenhar('[data-bf="mais"]'); return; }
         if (acao && acao.dataset.bf === 'limpar') { limpar(); return; }
-        if (aberto && !e.target.closest('.bf__pop')) { aberto = false; redesenhar(); return; }
+        // Clique fora do painel (numa caixa da linha de cima…): fecha o painel sem redesenhar a barra, para o clique
+        // continuar valendo (abrir a caixa, marcar a opção)
+        if (aberto && !e.target.closest('.bf__pop')) {
+          aberto = false;
+          caixa.querySelector('.bf__pop')?.remove();
+          caixa.querySelector('[data-bf="mais"]')?.setAttribute('aria-expanded', 'false');
+        }
         Cal().aoClicar(e, ctx, { redesenhar: (foco) => redesenhar(foco) });
       });
 
@@ -231,12 +237,14 @@ window.BarraFiltros = (function () {
       observador.observe(caixa);
     }
 
-    // Clique fora da barra com o painel aberto (no cabeçalho, no menu…): fecha. Na captura: antes de a página se
-    // redesenhar (depois, o elemento clicado já saiu da página)
+    // Clique fora da barra (nos cartões, no cabeçalho, no menu…): fecha a caixa de filtro aberta e o painel Filtros
+    // adicionais. Na captura: antes de a página se redesenhar (depois, o elemento clicado já saiu da página)
     document.addEventListener('click', (e) => {
-      if (!aberto || !caixa || !caixa.isConnected || caixa.contains(e.target)) return;
-      aberto = false;
-      redesenhar();
+      if (!caixa || !caixa.isConnected || caixa.contains(e.target)) return;
+      const abertas = caixa.querySelectorAll('.cal-filtro[open]');
+      abertas.forEach((c) => { c.open = false; });
+      if (abertas.length && est()) est().filtroAberto = null;
+      if (aberto) { aberto = false; redesenhar(); }
     }, true);
 
     return { ligar, redesenhar: () => { validar(); redesenhar(); encaixar(); }, validar };

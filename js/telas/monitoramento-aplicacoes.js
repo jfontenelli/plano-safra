@@ -257,13 +257,13 @@ window.Telas.monitoramentoAplicacoes = (function () {
 
   // ----- Desenho -----
   // guia: a do endereço (#/planejado-executado/desvios). Desvios de Recomendação: js/telas/desvios-recomendacao.js;
-  // Previsão de Falta de Produtos: provisória ("Em construção")
+  // Previsão de Falta de Produtos: js/telas/falta-produtos.js (por enquanto, os filtros e "Em construção")
   function desenhar(guia) {
     est = est || novoEstado();
     if (guia && guia !== 'calendario') irParaGuia(guia);
     const cab = `<header class="cabecalho oa-cabecalho ma-cabecalho" data-ma-cabecalho>${cabecalho()}</header>`;
     if (est.visao === 'desvios') return Telas.desviosRecomendacao.desenhar(cab);
-    if (est.visao === 'falta') return `${cab}<div class="pagina">${blocoEmConstrucao()}</div>`;
+    if (est.visao === 'falta') return Telas.faltaProdutos.desenhar(cab);
     return `
       ${cab}
       <div class="pagina ma">
@@ -644,7 +644,7 @@ window.Telas.monitoramentoAplicacoes = (function () {
     est = est || novoEstado();
     if (guia && guia !== 'calendario') irParaGuia(guia);
     if (est.visao === 'desvios') { Telas.desviosRecomendacao.aoMostrar(conteudo); return; }
-    if (est.visao === 'falta') return;
+    if (est.visao === 'falta') { Telas.faltaProdutos.aoMostrar(conteudo); return; }
     // Os eventos ficam na página da tela (a área de conteúdo é a mesma para todas as telas)
     const raiz = conteudo.querySelector('.ma');
     const caixaFiltros = raiz.querySelector('[data-ma-filtros]');

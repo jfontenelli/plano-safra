@@ -58,7 +58,7 @@ Menu "Gestão da Lavoura" (o nome leva ao Calendário; vários planos, última v
  ├─ 10 Operações (página Planejado × Executado)
  │   ├─ Planejado × Executado (tabela por talhão; Visualizar por Datas · Dias)
  │   ├─ Desvios de Recomendação (Dose · Quantidade: distribuição, por nível, Top 10, detalhamento por OS)
- │   └─ Previsão de Falta de Produtos (em construção)
+ │   └─ Previsão de Falta de Produtos
  └─ 09 Central OS (Visão geral, gráficos e tabela Ordens de Serviço)
 ```
 

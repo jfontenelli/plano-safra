@@ -87,14 +87,15 @@ window.Telas.desviosRecomendacao = (function () {
   const unidadeDe = (linha) => linha.unidade || (DADOS.defensivos.find((d) => d.produto === linha.produto) || {}).unidade || '';
 
   // Todos os registros dos planos filtrados (sem os filtros Grupo, Executor e Período, que entram em filtrados())
-  function todosRegistros() {
+  // planos: os da página (os filtrados) ou, para a Previsão de Falta de Produtos, os dela
+  function todosRegistros(planos = planosFiltrados()) {
     const sim = DADOS.monitoramento || {};
     const seqDose = sim.desviosDose || [0];
     const seqArea = sim.desviosArea || [0];
     const saida = [];
     let nOS = 0;
     let k = 0;
-    planosFiltrados().forEach((p) => {
+    planos.forEach((p) => {
       const v = Versoes.ultimaPublicada(p);
       const grupos = Versoes.grupos(p, v);
       const plantio = (grupos.find((g) => g.tipo === 'Sementes') || { operacoes: [] }).operacoes[0];
@@ -115,8 +116,10 @@ window.Telas.desviosRecomendacao = (function () {
           Planos.linhasTalhao(op, ajuste).forEach((linha) => {
             const doseRec = Planos.doseTalhao(op, ajuste, linha);
             if (!doseRec) return;
-            const dDose = seqDose[k % seqDose.length];
-            k += 1;
+            // Desvio fixo do produto no plano (DADOS.monitoramento.desviosProduto), sem avançar a sequência
+            const fixo = ((sim.desviosProduto || {})[`${p.fazenda} ${p.safra}`] || {})[linha.produto];
+            const dDose = fixo ?? seqDose[k % seqDose.length];
+            if (fixo === undefined) k += 1;
             const doseApl = doseRec * (1 + dDose);
             const areaExec = t.area * (1 + dArea);
             saida.push({ os: `OS-${numero}`, plano: p, safra: p.safra, empresa: p.empresa, fazenda: p.fazenda, talhao: t.nome,
@@ -582,5 +585,6 @@ window.Telas.desviosRecomendacao = (function () {
     redesenhar();
   }
 
-  return { desenhar, aoMostrar };
+  // Para a Previsão de Falta de Produtos: os registros (produto de OS fechada) dos planos dados
+  return { desenhar, aoMostrar, registros: (planos) => todosRegistros(planos) };
 })();

@@ -425,6 +425,20 @@ window.DADOS = {
   justificativasOperacoes: [],
   // Executores das OS geradas para o exemplo (Central de Operações, Tela 09)
   executores: ['Equipe Alpha', 'Equipe Beta', 'Equipe Ceta', 'Equipe Ômega'],
+  // Estoque por fazenda e produto, na unidade do produto (Previsão de Falta de Produtos, 04/11/2026). Simulado para dar
+  // uma mistura das três situações: na safra 26/27, 6 com estoque suficiente, 2 com falta se o desvio continuar
+  // (Áureo, Finale) e 1 com falta mesmo sem desvio (Elatus). Produto sem estoque aqui: estoque zero
+  estoques: {
+    'Boa Vista': {
+      // Soja 26/27
+      'Priori Xtra': 400, 'Unizeb Gold': 3500, 'Assist': 1100, 'Elatus': 150, 'Premio': 200, 'Áureo': 420,
+      'Cypress': 400, 'Finale': 2100, 'Fox Xpro': 400,
+      // Milho safrinha 27/27
+      'AG 8700 PRO3': 500, 'Formulado 02-20-18': 250000, 'KCl 00-00-60': 75000, 'Ureia 45%': 150000, 'Engeo Pleno': 300,
+      'Agral': 60, 'Connect': 1000, 'Primóleo': 3000, 'Callisto': 320, 'Dipel WG': 500, 'P3707VYH': 260,
+      'DKB 360 PRO3': 100, 'FS 575 PWU': 220
+    }
+  },
 
   // ----- Data de referência do exemplo -----
   // O ano agrícola para o qual as datas deste arquivo foram escritas (2026: soja 26/27 e milho safrinha 27/27). Ao abrir
@@ -449,6 +463,9 @@ window.DADOS = {
     // sequência (de −15% a +40%); a área executada = área do talhão × (1 + desvio), um por OS (até ±3%)
     desviosDose: [0.02, -0.04, 0.08, 0.12, -0.06, 0.03, 0.18, 0.25, -0.09, 0.05, 0.36, 0.01, -0.13, 0.07, 0.22, 0.04, -0.02, 0.31, 0.09, 0.15, -0.15, 0.06, 0.40, 0.0],
     desviosArea: [0, 0.02, -0.01, 0.03, -0.02, 0.01, 0, -0.03],
+    // Desvio fixo de um produto num plano ('Fazenda safra'), no lugar da sequência (que segue igual para os outros):
+    // o Elatus da soja 26/27 da Boa Vista com +15% (Previsão de Falta de Produtos, 04/11/2026)
+    desviosProduto: { 'Boa Vista 26/27': { 'Elatus': 0.15 } },
     duracoes: [0, 2, -1, 3, 0, 1, 4, -1, 0, 2, 5, 1, 0],
     talhoes: {
       'Santa Clara 25/26': {
@@ -597,7 +614,7 @@ window.DADOS = {
           'Pré-emergente': op([['Spider', 30]]),
           '1ª Pós-emergente': op([['Roundup WG', 1.5]], 'V2'),
           '2ª Pós-emergente': op([['Roundup Original DI', 2.0], ['Engeo Pleno', 0.20]], 'V4'),
-          '1ª Fungicida': op([['Fox Xpro', 0.50], ['Áureo', 0.25]], 'R1'),
+          '1ª Fungicida': op([['Fox Xpro', 0.50], ['Áureo', 0.25], ['Elatus', 0.10]], 'R1'),
           '2ª Fungicida': op([['Priori Xtra', 0.30], ['Unizeb Gold', 1.5], ['Assist', 0.50]], 'R3'),
           '3ª Fungicida': op([['Elatus', 0.20], ['Premio', 0.05], ['Áureo', 0.25]], 'R4'),
           '4ª Fungicida': op([['Cypress', 0.30], ['Unizeb Gold', 1.5]], 'R5'),

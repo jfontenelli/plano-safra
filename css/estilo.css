@@ -3922,3 +3922,237 @@ html:has(.menu) .bf__acoes.bf__acoes--texto .bf__botao { gap: 8px; padding: 0 14
 /* Desvios: o cartão dos filtros na largura dos cartões de baixo; o alfinete no canto superior direito dele (04/11/2026) */
 .dr-fixo [data-dr-alfinete] { position: absolute; top: 16px; right: 44px; z-index: 1; }
 .dr-fixo .dr-congelar { width: 28px; height: 28px; }
+
+/* Previsão de Falta de Produtos (04/11/2026): três cartões lado a lado, título colorido, número grande e o % */
+.fp { display: flex; flex-direction: column; gap: 14px; }
+.fp-cartoes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.fp-cartao { position: relative; overflow: hidden; padding: 14px 20px 14px 24px; }
+/* Faixa pintada à esquerda, na cor da situação; título, número e texto neutros (como o exemplo da usuária, 04/11/2026) */
+.fp-cartao::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 6px; background: var(--fp-c); }
+.fp-cartao__titulo { margin: 0 0 6px; font-size: 15px; font-weight: 700; color: var(--texto); }
+.fp-cartao__numero { margin: 0 0 6px; font-size: 26px; font-weight: 400; line-height: 1.1; color: var(--texto); font-variant-numeric: tabular-nums; }
+.fp-cartao__texto { margin: 0; font-size: 14px; color: var(--texto-suave); }
+.fp-cartao--suficiente { --fp-c: var(--verde-700); }
+.fp-cartao--desvio { --fp-c: #e8772e; }
+.fp-cartao--falta { --fp-c: #d93a2b; }
+html[data-tema="escuro"] .fp-cartao--suficiente { --fp-c: #5FD896; }
+@media (max-width: 760px) { .fp-cartoes { grid-template-columns: 1fr; } }
+/* Simulação das próximas aplicações: título, Aplicar dose recomendada · Manter desvio médio e a tabela; a Situação na cor
+   do cartão */
+.fp-secao { padding: 16px 20px; }
+.fp-secao__titulo { margin: 0 0 12px; font-size: 16px; font-weight: 700; color: var(--texto); }
+.fp-modo { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.fp-tabela td, .fp-tabela th { padding: 9px 12px; font-size: 14px; }
+.fp-tabela thead th { background: var(--superficie-2); }
+.fp-sit { font-weight: 600; }
+.fp-sit--suficiente { color: var(--verde-700); }
+.fp-sit--desvio { color: #c4601a; }
+.fp-sit--falta { color: var(--erro); }
+html[data-tema="escuro"] .fp-sit--suficiente { color: #5FD896; }
+html[data-tema="escuro"] .fp-sit--desvio { color: #f0995a; }
+html[data-tema="escuro"] .fp-sit--falta { color: #ff8a80; }
+.fp-titulo { margin: 4px 0 -4px; font-size: 16px; font-weight: 700; color: var(--texto); } /* "Resumo da situação dos produtos", antes dos cartões */
+.fp [data-fp-corpo] { display: flex; flex-direction: column; gap: 14px; } /* título, cartões e simulação, com o mesmo respiro */
+.conteudo:has(.fp) { background: var(--superficie); } /* Previsão de Falta de Produtos: fundo branco, como os Desvios */
+/* Previsão de Falta: linha da tabela clicável e o modal do produto, na tela toda (04/11/2026) */
+.fp-linha { cursor: pointer; }
+.fp-linha:hover td { background: var(--superficie-2); }
+.fp-linha:focus-visible { outline: 2px solid var(--verde-600); outline-offset: -2px; }
+.modal.modal--tela { width: 100%; max-width: none; height: calc(100vh - 48px); }
+.modal--tela .fp-modal { flex: 1; overflow: auto; display: flex; flex-direction: column; gap: 16px; padding: 22px 28px; }
+.fp-modal__titulo { margin: 0 0 6px; font-size: 26px; font-weight: 700; color: var(--texto); }
+.fp-modal__insumo { display: inline-block; padding: 3px 12px; border-radius: 999px; background: var(--verde-100); color: var(--verde-700); font-size: 13px; font-weight: 600; }
+.fp-modal__contexto { margin: 8px 0 0; color: var(--texto-suave); font-size: 14px; }
+.fp-modal__cab { padding-bottom: 14px; border-bottom: 1px solid var(--borda); }
+.fp-modal__cab + .fp-cartoes .fp-cartao--suficiente { --fp-c: var(--verde-700); }
+.fp-modal .fp-cartao--desvio { --fp-c: #f0a020; } /* laranja-claro, como no exemplo */
+.fp-modal__sub { margin: -6px 0 10px; color: var(--texto-suave); font-size: 14px; }
+.fp-modal__aviso { display: flex; align-items: center; gap: 10px; margin: 8px 0 0; padding: 10px 14px; border-radius: 8px;
+  background: #fdf3cf; color: #7a5a00; font-size: 14px; } /* aviso da falta: fundo amarelo-claro, texto amarelo-escuro (04/11/2026) */
+html[data-tema="escuro"] .fp-modal__aviso { background: #3a3113; color: #e8c35a; }
+.fp-modal__aviso-icone { display: inline-flex; flex: none; color: currentColor; }
+.fp-modal__aviso-icone .icone { width: 18px; height: 18px; }
+.fp-modal__rodape { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 28px; border-top: 1px solid var(--borda); color: var(--texto); }
+/* Legenda e gráfico: Recomendado verde, Aplicado azul, Previsto com desvio azul tracejado, Falta prevista vermelha.
+   Cores validadas (dataviz): claro #1f9d55 / #2a78d6, escuro #22a35c / #4a8ae0 */
+.fp-modal { --fp-rec: #1f9d55; --fp-apl: #2a78d6; --fp-falta: #d93a2b; }
+html[data-tema="escuro"] .fp-modal { --fp-rec: #22a35c; --fp-apl: #4a8ae0; --fp-falta: #ff6b5e; }
+.fp-legenda { display: flex; flex-wrap: wrap; gap: 6px 22px; margin: 0 0 6px; padding: 0; list-style: none; font-size: 13px; color: var(--texto); }
+.fp-legenda li { display: inline-flex; align-items: center; gap: 8px; }
+.fp-legenda__traco { display: inline-block; width: 26px; height: 0; border-top: 2px solid var(--fp-rec); }
+.fp-legenda__traco--apl { border-top-color: var(--fp-apl); }
+.fp-legenda__traco--prev { border-top: 2px dashed var(--fp-apl); }
+.fp-legenda__traco--falta { border-top: 2px dashed var(--fp-falta); }
+.fp-graf { display: block; width: 100%; height: auto; overflow: visible; } /* na largura toda */
+.fp-graf__grade { stroke: var(--borda); stroke-width: 1; }
+.fp-graf__marca, .fp-graf__data { font-size: 12px; fill: var(--texto-suave); font-variant-numeric: tabular-nums; }
+.fp-graf__data { font-weight: 700; fill: var(--texto); }
+.fp-graf__op { font-size: 12px; fill: var(--texto-suave); }
+.fp-graf__eixo-titulo { font-size: 12px; font-weight: 700; fill: var(--texto); }
+.fp-graf__linha { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.fp-graf__linha--rec { stroke: var(--fp-rec); }
+.fp-graf__linha--apl { stroke: var(--fp-apl); }
+.fp-graf__linha--prev { stroke: var(--fp-apl); stroke-dasharray: 7 6; }
+.fp-graf__falta { stroke: var(--fp-falta); stroke-width: 2; stroke-dasharray: 6 5; }
+.fp-graf__selo rect { fill: var(--superficie); stroke: var(--fp-falta); stroke-width: 1; }
+.fp-graf__selo text { font-size: 12px; font-weight: 700; fill: var(--fp-falta); }
+.fp-graf__mk { stroke: var(--superficie); stroke-width: 2; }
+.fp-graf__mk--rec { fill: var(--fp-rec); }
+.fp-graf__mk--apl { fill: var(--fp-apl); }
+.fp-graf__mk--prev { fill: var(--superficie); stroke: var(--fp-apl); stroke-width: 2; }
+.fp-graf__alvo { fill: transparent; }
+.fp-graf__ponto:hover .fp-graf__mk { r: 6; }
+@media (max-width: 760px) { .modal--tela .fp-modal { padding: 16px; } }
+/* Previsão de Falta: cartões no formato do Resumo do orçamento, ícone na cor da situação (04/11/2026) */
+.fp-cards { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.fp-card { align-items: center; }
+.fp-card__texto { font-size: 13px; color: var(--texto-suave); }
+.fp-card--suficiente .orc-card__icone { background: var(--verde-100); color: var(--verde-700); }
+.fp-card--desvio .orc-card__icone { background: #fdebdc; color: #b9560f; }
+.fp-card--falta .orc-card__icone { background: #fbe1de; color: var(--erro); }
+html[data-tema="escuro"] .fp-card--desvio .orc-card__icone { background: #3d2817; color: #f0995a; }
+html[data-tema="escuro"] .fp-card--falta .orc-card__icone { background: #5a2626; color: #ff8a80; }
+@media (max-width: 760px) { .fp-cards { grid-template-columns: 1fr; } }
+.fp-card .orc-card__rotulo { font-size: 15px; font-weight: 700; color: var(--texto); } /* título dos cartões maior e em negrito */
+/* Modal do produto: tudo na tela, sem rolar (04/11/2026). Cabeçalho e cartões compactos; o gráfico ocupa a altura que
+   sobra (desenhado no tamanho medido da área). Valores dos cartões sem negrito; Fechar em verde */
+.modal--tela .fp-modal { gap: 12px; padding: 16px 24px; overflow: auto; }
+.fp-modal__cab { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; padding-bottom: 10px; }
+.fp-modal__titulo { margin: 0; font-size: 22px; }
+.fp-modal__contexto { flex-basis: 100%; margin: 0; }
+.fp-modal .orc-card { min-height: 0; padding: 10px 16px; }
+.fp-modal .orc-card__icone { width: 40px; height: 40px; }
+.fp-modal .orc-card__numero { font-weight: 400; font-size: 20px; }
+.fp-modal__grafico { flex: 1; min-height: 0; display: flex; flex-direction: column; padding: 12px 20px 14px; }
+.fp-modal__grafico .fp-secao__titulo { margin-bottom: 8px; }
+.fp-modal__grafico .fp-modal__sub { margin: -4px 0 8px; }
+.fp-modal__grafico .fp-modo { margin-bottom: 8px; }
+.fp-graf-area { flex: 1; min-height: 150px; overflow: hidden; }
+.fp-graf-area .fp-graf { width: 100%; height: 100%; }
+.fp-modal__aviso { margin-top: 6px; padding: 8px 14px; }
+.fp-modal__rodape { padding: 10px 24px; }
+.fp-fechar { background: var(--verde-100); border-color: var(--verde-700); color: var(--verde-700); font-weight: 600; }
+.fp-fechar:hover { background: var(--verde-100); filter: brightness(.96); }
+/* Telas baixas: sem o subtítulo do gráfico e com menos respiro, para o modal caber sem rolar */
+@media (max-height: 760px) {
+  .modal--tela .fp-modal { gap: 8px; padding-top: 12px; padding-bottom: 12px; }
+  .fp-modal__grafico .fp-modal__sub { display: none; }
+  .fp-modal__cab { padding-bottom: 6px; }
+  .fp-modal .orc-card { padding: 8px 14px; }
+}
+@media (max-height: 720px) { .fp-modal .fp-legenda { font-size: 12px; margin-bottom: 2px; } .fp-modal__grafico .fp-modo { margin-bottom: 4px; } .fp-modal__aviso { padding: 6px 12px; } }
+/* Modal: os cartões das previsões são clicáveis e escolhem o gráfico; o escolhido fica destacado (04/11/2026) */
+.fp-card--botao { width: 100%; font: inherit; text-align: left; color: inherit; background: var(--superficie); cursor: pointer; }
+.fp-card--botao:hover { background: var(--superficie-2); }
+.fp-card--botao:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 2px; }
+.fp-card--botao.fp-card--ativo { border-color: var(--verde-700); box-shadow: 0 0 0 1px var(--verde-700); } /* selecionado: contorno verde */
+/* Modal: cartões como no Orçamento — título discreto (13 px, cinza), valor em destaque (20 px, semi-negrito) */
+.fp-modal .fp-card .orc-card__rotulo { font-size: 13px; font-weight: 400; color: var(--texto-suave); }
+.fp-modal .fp-card .orc-card__numero { font-size: 20px; font-weight: 600; }
+/* Gráfico do estoque (modal): até hoje verde cheio; previsões tracejadas, dose recomendada azul e com desvio vermelho
+   (traços diferentes, além da cor). Cores validadas (dataviz) */
+.fp-modal { --fp-est-atual: #1f9d55; --fp-est-rec: #2a78d6; --fp-est-desv: #d93a2b; }
+html[data-tema="escuro"] .fp-modal { --fp-est-atual: #22a35c; --fp-est-rec: #4a8ae0; --fp-est-desv: #ff6b5e; }
+.fp-graf__linha--est-atual { stroke: var(--fp-est-atual); }
+.fp-graf__linha--est-rec { stroke: var(--fp-est-rec); stroke-dasharray: 7 6; }
+.fp-graf__linha--est-desv { stroke: var(--fp-est-desv); stroke-dasharray: 2 5; stroke-width: 2.5; }
+.fp-graf__mk--est-atual { fill: var(--fp-est-atual); }
+.fp-legenda__traco--est-atual { border-top: 2px solid var(--fp-est-atual); }
+.fp-legenda__traco--est-rec { border-top: 2px dashed var(--fp-est-rec); }
+.fp-legenda__traco--est-desv { border-top: 2.5px dotted var(--fp-est-desv); }
+/* Modal: Fechar como X no canto superior direito; no rodapé, ‹ Produto 1 de 9 › (como o painel do talhão) */
+.modal--tela { position: relative; }
+.fp-modal__x { position: absolute; top: 12px; right: 14px; z-index: 2; }
+.fp-modal__cab { padding-right: 44px; }
+.fp-modal__navegar { display: flex; align-items: center; gap: 10px; }
+.fp-graf__mk--est-rec { fill: var(--fp-est-rec); }
+.fp-graf__mk--est-desv { fill: var(--fp-est-desv); }
+/* Modal (teste de 04/11/2026): etiqueta da classe neutra; cartões com faixa à esquerda, seta e "Selecionado";
+   linhas de falta no gráfico do estoque */
+.fp-modal__insumo { background: var(--superficie-2); color: var(--texto); }
+.fp-modal .fp-card--botao { position: relative; overflow: hidden; padding-left: 20px; padding-right: 40px; }
+.fp-modal .fp-card--botao::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 6px; background: var(--fp-faixa); }
+.fp-modal .fp-card--suficiente { --fp-faixa: var(--fp-est-atual); }
+.fp-modal .fp-card--desvio { --fp-faixa: var(--fp-est-rec); }
+.fp-modal .fp-card--falta { --fp-faixa: var(--fp-est-desv); }
+.fp-modal .fp-card--desvio .orc-card__icone { background: var(--info-fundo); color: #1a5bb0; }
+html[data-tema="escuro"] .fp-modal .fp-card--desvio .orc-card__icone { color: #8fbcef; }
+.fp-modal .fp-card--botao.fp-card--ativo { border-color: var(--fp-faixa); box-shadow: 0 0 0 1px var(--fp-faixa); }
+.fp-card__seta { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); display: inline-flex; color: var(--texto-suave); }
+.fp-card__seta .icone { width: 18px; height: 18px; }
+.fp-card__selecionado { position: absolute; top: 8px; right: 34px; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 600;
+  background: var(--verde-100); color: var(--verde-700); }
+.fp-card__selecionado[hidden] { display: none; }
+.fp-graf__falta--rec { stroke: var(--fp-est-rec); }
+.fp-graf__falta--desv { stroke: var(--fp-est-desv); }
+.fp-graf__falta--meio { stroke-dashoffset: 5.5; } /* na mesma data: azul e vermelho alternados */
+.fp-graf__selo--rec rect { stroke: var(--fp-est-rec); }
+.fp-graf__selo--rec text { fill: var(--fp-est-rec); }
+.fp-graf__selo--ambas rect { stroke: var(--borda-forte); }
+.fp-graf__selo--ambas text { fill: var(--texto); }
+.fp-legenda__traco--falta-rec { border-top: 2px dashed var(--fp-est-rec); }
+/* "Selecionado" na cor do cartão: verde no Estoque, azul na dose recomendada, vermelho no desvio; sem a seta › */
+.fp-modal .fp-card--botao { padding-right: 20px; }
+.fp-card__selecionado { right: 12px; }
+.fp-card--desvio .fp-card__selecionado { background: var(--info-fundo); color: #1a5bb0; }
+.fp-card--falta .fp-card__selecionado { background: #fbe1de; color: var(--erro); }
+html[data-tema="escuro"] .fp-card--desvio .fp-card__selecionado { color: #8fbcef; }
+html[data-tema="escuro"] .fp-card--falta .fp-card__selecionado { background: #5a2626; color: #ff8a80; }
+/* Seleção: no cartão da dose recomendada, contorno e "Selecionado" em azul; no do desvio, em vermelho */
+.fp-modal .fp-card--desvio.fp-card--ativo { border-color: #2a78d6; box-shadow: 0 0 0 1px #2a78d6; }
+.fp-modal .fp-card--falta.fp-card--ativo { border-color: #d93a2b; box-shadow: 0 0 0 1px #d93a2b; }
+/* Modal (04/11/2026): Recomendado em cinza (a referência); o aplicado e a previsão mudam de cor com o cartão escolhido:
+   azul com a dose recomendada (sem desvio), vermelho mantendo o desvio */
+.fp-modal { --fp-rec: #9aa1a9; }
+html[data-tema="escuro"] .fp-modal { --fp-rec: #7d858e; }
+.fp-modal__grafico--desvio { --fp-apl: #d93a2b; }
+html[data-tema="escuro"] .fp-modal__grafico--desvio { --fp-apl: #ff6b5e; }
+/* Todos os cartões da Previsão de Falta (página e modal): título em negrito e preto; valor sem negrito (04/11/2026) */
+.fp-card .orc-card__rotulo, .fp-modal .fp-card .orc-card__rotulo { font-weight: 700; color: var(--texto); }
+.fp-modal .fp-card .orc-card__rotulo { font-size: 14px; }
+.fp-card .orc-card__numero, .fp-modal .fp-card .orc-card__numero { font-weight: 400; }
+/* Modal (04/11/2026): tudo o que é "desvio" em laranja: o cartão Se o desvio continuar (faixa, ícone, seleção), o
+   aplicado e a previsão com desvio, a previsão do estoque mantendo o desvio e a falta com desvio. O pontilhado da
+   previsão com desvio continua diferenciando-a das linhas cheias, além da cor */
+.fp-modal { --fp-est-desv: #e8772e; }
+html[data-tema="escuro"] .fp-modal { --fp-est-desv: #f0995a; }
+.fp-modal__grafico--desvio { --fp-apl: #e8772e; }
+html[data-tema="escuro"] .fp-modal__grafico--desvio { --fp-apl: #f0995a; }
+.fp-modal .fp-card--falta .orc-card__icone { background: #fdebdc; color: #b9560f; }
+html[data-tema="escuro"] .fp-modal .fp-card--falta .orc-card__icone { background: #3d2817; color: #f0995a; }
+.fp-modal .fp-card--falta.fp-card--ativo { border-color: #e8772e; box-shadow: 0 0 0 1px #e8772e; }
+.fp-modal .fp-card--falta .fp-card__selecionado { background: #fdebdc; color: #b9560f; }
+html[data-tema="escuro"] .fp-modal .fp-card--falta .fp-card__selecionado { background: #3d2817; color: #f0995a; }
+.fp-modal .fp-graf__selo--desv rect { stroke: var(--fp-est-desv); }
+.fp-modal .fp-graf__selo--desv text { fill: var(--fp-est-desv); }
+.fp-legenda__traco--falta-desv { border-top: 2px dashed var(--fp-est-desv); }
+/* Modal (04/11/2026): só o gráfico do estoque; cartões no padrão da página (sem clicar). Ícones na cor das linhas:
+   Estoque verde, Se o desvio continuar laranja, Aplicando a dose recomendada azul */
+.fp-modal .fp-card--m-desvio .orc-card__icone { background: #fdebdc; color: #b9560f; }
+.fp-modal .fp-card--m-rec .orc-card__icone { background: var(--info-fundo); color: #1a5bb0; }
+html[data-tema="escuro"] .fp-modal .fp-card--m-desvio .orc-card__icone { background: #3d2817; color: #f0995a; }
+html[data-tema="escuro"] .fp-modal .fp-card--m-rec .orc-card__icone { color: #8fbcef; }
+.fp-modal { --fp-est-rec: #2a78d6; }
+html[data-tema="escuro"] .fp-modal { --fp-est-rec: #4a8ae0; }
+/* Eixo: a data em todo ponto; a operação uma vez por sequência, com o traço que agrupa as datas */
+.fp-graf__data--p { font-size: 11px; font-weight: 600; }
+.fp-graf__grupo { fill: none; stroke: var(--borda-forte); stroke-width: 1; }
+/* Gráfico do estoque (04/11/2026): Estoque verde; previsão com desvio laranja e falta com desvio vermelha; previsão e
+   falta sem desvio azuis */
+.fp-modal { --fp-falta-desv: #d93a2b; }
+html[data-tema="escuro"] .fp-modal { --fp-falta-desv: #ff6b5e; }
+.fp-modal .fp-graf__falta--desv { stroke: var(--fp-falta-desv); }
+.fp-modal .fp-graf__selo--desv rect { stroke: var(--fp-falta-desv); }
+.fp-modal .fp-graf__selo--desv text { fill: var(--fp-falta-desv); }
+.fp-modal .fp-legenda__traco--falta-desv { border-top-color: var(--fp-falta-desv); }
+/* Previsão com desvio: linha vermelha tracejada (04/11/2026; antes laranja pontilhada) */
+.fp-modal { --fp-est-desv: #d93a2b; }
+html[data-tema="escuro"] .fp-modal { --fp-est-desv: #ff6b5e; }
+.fp-modal .fp-graf__linha--est-desv { stroke-dasharray: 7 6; stroke-width: 2; }
+.fp-modal .fp-legenda__traco--est-desv { border-top: 2px dashed var(--fp-est-desv); }
+/* Eixo: data e operação inclinadas em todo ponto */
+.fp-graf__eixo { font-size: 11px; fill: var(--texto-suave); }
+.fp-graf__eixo-data { font-weight: 700; fill: var(--texto); }
+/* Eixo (opção 2): data em negrito e a operação abreviada embaixo, retas */
+.fp-graf__eixo .fp-graf__eixo-data { font-size: 11px; font-weight: 700; fill: var(--texto); }
+.fp-graf__eixo .fp-graf__eixo-op { font-size: 11px; fill: var(--texto-suave); }
