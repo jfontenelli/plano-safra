@@ -31,13 +31,12 @@ window.Telas.painelPlanos = (function () {
   const posicaoSafra = (safra) => Util.posicaoSafra(safra, DADOS.planos.map((p) => p.safra));
   function linhas(f) {
     const texto = (a, b) => String(a || '').localeCompare(String(b || ''), 'pt-BR');
+    // f.passa: os filtros-base; f.passaStatus: a Situação do plano (Telas.listaPlanos, 04/11/2026)
     return DADOS.planos
-      .filter((p) => !f.anoAgricola || String(Util.anoAgricola(p.safra)) === f.anoAgricola)
+      .filter(f.passa)
       .map((p) => ({ plano: p, empresa: p.empresa, fazenda: p.fazenda, safra: p.safra, cultura: p.cultura, atividade: p.atividade }))
-      .filter((l) => (!f.safra || l.safra === f.safra) && (!f.empresa || l.empresa === f.empresa) && (!f.fazenda || l.fazenda === f.fazenda)
-        && (!f.atividade || l.atividade === f.atividade) && (!f.cultura || l.cultura === f.cultura))
       .map((l) => ({ ...l, status: statusDe(l.plano), area: Util.areaCultivo(l.plano, Versoes.deTrabalho(l.plano)) }))
-      .filter((l) => !f.statusPlano || l.status === f.statusPlano)
+      .filter((l) => f.passaStatus(l.status))
       .sort((a, b) => ORDEM_STATUS.indexOf(a.status) - ORDEM_STATUS.indexOf(b.status)
         || posicaoSafra(a.safra) - posicaoSafra(b.safra) || texto(a.empresa, b.empresa)
         || texto(a.fazenda, b.fazenda) || texto(a.cultura, b.cultura));

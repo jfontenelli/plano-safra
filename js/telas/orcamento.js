@@ -227,7 +227,11 @@ window.Telas.orcamento = (function () {
       ${multi('talhao', 'Talhão', 'Todos', 'selecionados')}
       ${multi('cultura', 'Cultura', 'Todas', 'selecionadas')}
       ${multi('insumo', 'Insumos', 'Todos', 'selecionados')}
-      <button class="link-acao filtros__limpar" type="button" data-acao="orc-limpar">${Icones.limpar} Limpar filtros</button>`;
+      <div class="bf__acoes">
+        <!-- Limpar filtros padronizado (04/11/2026): contorno cinza, texto e ícone pretos; menu expandido, só o ícone -->
+        <button class="botao botao--secundario bf__botao bf__limpar bf__limpar--so" type="button" data-acao="orc-limpar"
+                title="Limpar filtros" aria-label="Limpar filtros">${Icones.limpar}<span class="bf__texto">Limpar filtros</span></button>
+      </div>`;
   }
 
   // Filtro de várias escolhas: botão com o resumo ("Todas", o nome ou "2 selecionadas") e lista com caixas de marcar

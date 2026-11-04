@@ -121,7 +121,7 @@ window.Telas.indicadores = (function () {
   const quantidade = (n) => fmt(n, n >= 100 ? 0 : 1);
 
   function estadoPadrao(ctx) {
-    ctx.estado.ind = ctx.estado.ind || { serie: 'plantio', gran: 'mes', grupo: null, ordem: null, pagina: 1, porPagina: 10 };
+    ctx.estado.ind = ctx.estado.ind || { serie: 'plantio', gran: 'mes', insumo: 'todos', produto: 'todos', ordem: null, pagina: 1, porPagina: 10 };
     return ctx.estado.ind;
   }
 
@@ -154,30 +154,41 @@ window.Telas.indicadores = (function () {
   }
 
   // ----- Desenho: Produtos (no Resumo) -----
+  // Guia Produtos (04/11/2026): filtros Insumos (os grupos de insumo, como no Orçamento) e Produto (os dos insumos
+  // marcados), caixas de várias escolhas com Pesquisar, e Limpar filtros (no lugar da legenda colorida, que filtrava)
   function desenharProdutos(ctx) {
-    return `<section class="ind">${tabelaProdutos(ctx, estadoPadrao(ctx))}</section>`;
+    const est = estadoPadrao(ctx);
+    const todos = produtos(ctx);
+    // A busca e a caixa aberta ficam no estado do Resumo (é ele que o Calendário atualiza ao digitar e ao abrir)
+    const caixa = { ...est, busca: ctx.estado.busca || {}, filtroAberto: ctx.estado.filtroAberto };
+    const campo = (chave, rotulo, textos) => `
+            <div class="campo">
+              <span class="campo__rotulo">${rotulo}</span>
+              ${Telas.calendario.filtroCaixa(caixa, chave, opcoesProdutos(todos, est, chave), textos, rotulo)}
+            </div>`;
+    return `
+      ${todos.length ? `
+      <div class="cartao filtros filtros--plano ind-filtros">
+        ${campo('insumo', 'Insumos', ['Todos', 'Nenhum', 'insumos'])}
+        ${campo('produto', 'Produto', ['Todos', 'Nenhum', 'produtos'])}
+        <div class="bf__acoes bf__acoes--texto">
+          <button class="botao botao--secundario bf__botao bf__limpar bf__limpar--so" type="button" data-acao="ind-limpar"
+                  title="Limpar filtros" aria-label="Limpar filtros">${Icones.limpar}<span class="bf__texto">Limpar filtros</span></button>
+        </div>
+      </div>` : ''}
+      <section class="ind">${tabelaProdutos(ctx, est)}</section>`;
   }
+  // Opções: Insumos na ordem do cadastro de grupos de insumo; Produto, os dos insumos marcados, em ordem alfabética
+  function opcoesProdutos(todos, est, chave) {
+    if (chave === 'insumo') return [...new Set(todos.map((l) => l.grupo))].sort((a, b) => posGrupo(a) - posGrupo(b)).map((g) => ({ valor: g, nome: g }));
+    return [...new Set(todos.filter((l) => Telas.calendario.marcado(est, 'insumo', l.grupo)).map((l) => l.produto))]
+      .sort((a, b) => a.localeCompare(b, 'pt-BR')).map((n) => ({ valor: n, nome: n }));
+  }
+  const passaProduto = (est) => (l) => Telas.calendario.marcado(est, 'insumo', l.grupo) && Telas.calendario.marcado(est, 'produto', l.produto);
 
   // Grupos de insumo na ordem do cadastro (os que não estão no cadastro, no fim) e a classe da cor de cada um
   const posGrupo = (g) => { const i = DADOS.gruposInsumo.indexOf(g); return i < 0 ? 99 : i; };
   const classeGrupo = (g) => Util.normalizar(g).replace(/[^a-z0-9]+/g, '-');
-  // Legenda que filtra, como a do Calendário Agrícola: clicar num grupo mostra só ele (outro grupo substitui o
-  // anterior); clicar no grupo à mostra, ou em Mostrar todos, volta a todos. Só os grupos que o plano tem.
-  function legendaGrupos(todos, est) {
-    const grupos = [...new Set(todos.map((l) => l.grupo))].sort((a, b) => posGrupo(a) - posGrupo(b));
-    return `
-      <div class="cal-legenda ind-legenda" role="group" aria-label="Filtrar por grupo de insumo">
-        ${grupos.map((g) => {
-          const ligado = !est.grupo || est.grupo === g;
-          return `
-            <button class="cal-leg ${ligado ? '' : 'cal-leg--desligado'}" type="button" data-acao="ind-leg" data-grupo="${esc(g)}" aria-pressed="${est.grupo === g}"
-                    title="${est.grupo === g ? 'Mostrar todos' : `Mostrar só ${esc(g)}`}">
-              <span class="cal-ponto ind-ponto--${classeGrupo(g)}"></span>${esc(g)}</button>`;
-        }).join('')}
-        ${est.grupo ? '<button class="link-acao cal-legenda__todos" type="button" data-acao="ind-leg-todos">Mostrar todos</button>' : ''}
-      </div>`;
-  }
-
   // Plantio e Colheita: o período previsto e a duração; sem datas, um traço e o motivo
   function cartao(icone, titulo, per, semDatas) {
     return `
@@ -247,8 +258,7 @@ window.Telas.indicadores = (function () {
 
   function tabelaProdutos(ctx, est) {
     const todos = produtos(ctx);
-    if (est.grupo && !todos.some((l) => l.grupo === est.grupo)) est.grupo = null;
-    const ls = ordenados(todos.filter((l) => !est.grupo || l.grupo === est.grupo), est.ordem);
+    const ls = ordenados(todos.filter(passaProduto(est)), est.ordem);
     const paginas = Math.max(1, Math.ceil(ls.length / est.porPagina));
     est.pagina = Math.min(Math.max(1, est.pagina), paginas);
     const pagina = ls.slice((est.pagina - 1) * est.porPagina, est.pagina * est.porPagina);
@@ -268,8 +278,7 @@ window.Telas.indicadores = (function () {
           </div>
           ${ls.length ? `<button class="botao orc-exportar ind-exportar" type="button" data-acao="ind-exportar">${Icones.baixar} Exportar Excel</button>` : ''}
         </div>
-        ${todos.length ? legendaGrupos(todos, est) : ''}
-        ${!ls.length ? '<p class="ind-vazio">Nenhum insumo planejado (produto com dose ou variedade com população).</p>' : `
+        ${!ls.length ? `<p class="ind-vazio">${todos.length ? 'Nenhum produto com esses filtros.' : 'Nenhum insumo planejado (produto com dose ou variedade com população).'}</p>` : `
         <div class="tabela-rolagem"><table class="tabela orc-tabela ind-tabela">
           <thead><tr>${COLUNAS.map(([id, rot, , numero]) => `
             <th class="${numero ? 'tabela__numero' : ''}"><span class="titulo-coluna"><span>${rot}</span>${seta(id)}</span></th>`).join('')}</tr></thead>
@@ -295,7 +304,7 @@ window.Telas.indicadores = (function () {
     const est = estadoPadrao(ctx);
     const p = ctx.plano;
     const linhas = [['Grupo de insumo', 'Produto', 'Necessidade de consumo', 'Unidade'],
-      ...ordenados(produtos(ctx).filter((l) => !est.grupo || l.grupo === est.grupo), est.ordem).map((l) => [l.grupo, l.produto, +l.necessidade.toFixed(2), l.unidade])];
+      ...ordenados(produtos(ctx).filter(passaProduto(est)), est.ordem).map((l) => [l.grupo, l.produto, +l.necessidade.toFixed(2), l.unidade])];
     const limpo = (t) => Util.normalizar(t).replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
     const livro = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(livro, XLSX.utils.aoa_to_sheet(linhas), 'planejamento_produto');
@@ -316,13 +325,11 @@ window.Telas.indicadores = (function () {
         redesenhar(`[data-acao="ind-ordenar"][data-coluna="${c}"]`);
         break;
       }
-      case 'ind-leg': {
-        const g = alvo.dataset.grupo;
-        est.grupo = est.grupo === g ? null : g; est.pagina = 1;
-        redesenhar(`[data-acao="ind-leg"][data-grupo="${CSS.escape(g)}"]`);
+      case 'ind-limpar':
+        est.insumo = 'todos'; est.produto = 'todos'; est.pagina = 1;
+        ctx.estado.busca = {}; ctx.estado.filtroAberto = null;
+        redesenhar('[data-acao="ind-limpar"]');
         break;
-      }
-      case 'ind-leg-todos': est.grupo = null; est.pagina = 1; redesenhar('[data-acao="ind-leg"]'); break;
       case 'ind-pagina': est.pagina = Number(alvo.dataset.pagina); redesenhar(`[data-acao="ind-pagina"]:not([disabled])`); break;
       case 'ind-exportar': exportar(ctx); break;
       case 'ind-ir-tabela': if (ctx.irParaTabela) ctx.irParaTabela(); break;
@@ -333,6 +340,27 @@ window.Telas.indicadores = (function () {
 
   function aoMudar(e, ctx, { redesenhar }) {
     const est = estadoPadrao(ctx);
+    // Filtros Insumos e Produto: "Todos" marca ou desmarca tudo; cada caixa liga ou desliga a opção. Trocar os insumos
+    // tira do Produto os que não são mais opção (sem nenhum, Todos)
+    if (e.target.dataset.campo === 'cal-filtro' && ['insumo', 'produto'].includes(e.target.dataset.filtro)) {
+      const chave = e.target.dataset.filtro;
+      const todos = produtos(ctx);
+      const valores = opcoesProdutos(todos, est, chave).map((o) => o.valor);
+      let marcados = valores.filter((v) => Telas.calendario.marcado(est, chave, v));
+      if (e.target.value === 'todos') marcados = e.target.checked ? [...valores] : [];
+      else if (e.target.checked) marcados.push(e.target.value);
+      else marcados = marcados.filter((n) => n !== e.target.value);
+      est[chave] = marcados.length === valores.length ? 'todos' : marcados;
+      if (chave === 'insumo' && Array.isArray(est.produto) && est.produto.length) {
+        const prods = opcoesProdutos(todos, est, 'produto').map((o) => o.valor);
+        const ficam = est.produto.filter((n) => prods.includes(n));
+        est.produto = ficam.length && ficam.length < prods.length ? ficam : 'todos';
+      }
+      est.pagina = 1;
+      ctx.estado.filtroAberto = chave;
+      redesenhar(`[data-campo="cal-filtro"][data-filtro="${chave}"][value="${CSS.escape(e.target.value)}"]`);
+      return true;
+    }
     if (e.target.dataset.campo === 'ind-gran') {
       est.gran = e.target.value;
       redesenhar('[data-campo="ind-gran"]');

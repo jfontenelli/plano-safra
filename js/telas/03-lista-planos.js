@@ -9,56 +9,67 @@ window.Telas = window.Telas || {};
 window.Telas.listaPlanos = (function () {
   const esc = Util.escapar;
 
-  // Filtros, os mesmos nas duas guias, menos o Status: o de cada guia (statusPlano no Planos de Safra, status no
-  // Histórico de versões), independentes. Ano Agrícola (junta as safras e
-  // safrinhas do ano) começa no de hoje, ou no mais recente com planos; os demais em "Todas"/"Todos" ('').
-  // Safra: as safras do cadastro (26/27, 27/27…) dos planos do ano agrícola escolhido
-  const CAMPOS_FILTRO = ['anoAgricola', 'atividade', 'safra', 'empresa', 'fazenda', 'cultura', 'status'];
-  // Status do plano (guia Planos de Safra): as três opções sempre, na ordem da tabela
+  // Filtros (04/11/2026, padronizados: js/barra-filtros.js): os seis filtros-base (Ano agrícola, Atividade produtiva,
+  // Safra, Cultura, Empresa e Fazenda), compartilhados com as outras páginas, e o filtro de cada guia: Situação do plano
+  // (Planos de Safra) e Status do plano (Histórico de versões, o status de cada versão). Caixas de várias escolhas;
+  // o que não cabe na linha vai para o Mais filtros. Dependentes: Ano agrícola e Atividade limitam Safra e Cultura;
+  // Empresa limita Fazenda (as da empresa, mesmo sem plano)
+  // Situação do plano (guia Planos de Safra): as três opções sempre, na ordem da tabela
   const STATUS_PLANO = [['nao-iniciado', 'Não iniciado'], ['construcao', 'Em construção'], ['publicada', 'Publicado']];
   const STATUS = [['nao-iniciado', 'Não iniciado'], ['construcao', 'Em construção'], ['publicada', 'Publicada'], ['revisada', 'Revisada']];
-  let filtros = {};
-  const filtrosIniciais = () => ({ anoAgricola: Util.anoAgricolaInicial(Telas.painelPlanos.anos()), atividade: '', safra: '', empresa: '', fazenda: '', cultura: '', statusPlano: '', status: '' });
+  const filtros = { statusPlano: 'todos', status: 'todos', busca: {}, filtroAberto: null };
+  const BASE = [
+    ['ano', 'Ano agrícola', ['Todos', 'Nenhum', 'anos'], 104],
+    ['atividade', 'Atividade produtiva', ['Todas', 'Nenhuma', 'atividades'], 140],
+    ['safra', 'Safra', ['Todas', 'Nenhuma', 'safras'], 92],
+    ['cultura', 'Cultura', ['Todas', 'Nenhuma', 'culturas'], 104],
+    ['empresa', 'Empresa', ['Todas', 'Nenhuma', 'empresas'], 124],
+    ['fazenda', 'Fazenda', ['Todas', 'Nenhuma', 'fazendas'], 124]
+  ];
+  const DEPENDE = { safra: ['ano', 'atividade'], cultura: ['ano', 'atividade'], fazenda: ['empresa'] };
+  const marcado = (chave, valor) => Telas.calendario.marcado(filtros, chave, valor);
 
-  // Opções de cada filtro: só os valores que aparecem nos planos da lista (na ordem do cadastro)
-  const valorDe = (p, campo) => (campo === 'anoAgricola' ? String(Util.anoAgricola(p.safra))
+  const valorDe = (p, campo) => (campo === 'ano' ? String(Util.anoAgricola(p.safra))
     : campo !== 'status' ? p[campo] : Versoes.aIniciar(p) ? 'nao-iniciado' : Versoes.deTrabalho(p).status);
-  function presentes(campo, cadastro) {
-    const naLista = new Set(DADOS.planos.map((p) => valorDe(p, campo)));
+  // Planos que passam pelos filtros de que a chave depende
+  const planosPara = (chave) => DADOS.planos.filter((p) => (DEPENDE[chave] || []).every((c) => marcado(c, valorDe(p, c))));
+  const comoOpcoes = (lista) => lista.map((x) => (Array.isArray(x) ? { valor: x[0], nome: x[1] } : { valor: x, nome: x }));
+  // Opções de cada filtro: só os valores que aparecem nos planos da lista (na ordem do cadastro)
+  function opcoes(chave) {
+    if (chave === 'ano') return comoOpcoes([...Telas.painelPlanos.anos()].reverse());
+    if (chave === 'statusPlano') return comoOpcoes(STATUS_PLANO);
+    if (chave === 'status') {
+      const naLista = new Set();
+      DADOS.planos.forEach((p) => Versoes.lista(p).forEach((v) => naLista.add(statusVersao(p, v))));
+      return comoOpcoes(STATUS.filter(([v]) => naLista.has(v)));
+    }
+    const naLista = new Set(planosPara(chave).map((p) => valorDe(p, chave)));
+    if (chave === 'safra') return comoOpcoes(Util.ordenarSafras([...naLista]));
     // Empresa e Fazenda: também as fazendas de cada empresa, que aparecem no Painel ainda sem plano
-    const extras = Telas.painelPlanos.empresasEFazendas();
-    if (campo === 'empresa') extras.empresas.forEach((e) => naLista.add(e));
-    if (campo === 'fazenda') extras.fazendas.forEach((f) => naLista.add(f));
-    // Status: também os das versões antigas (aparecem na guia Histórico de versões)
-    if (campo === 'status') DADOS.planos.forEach((p) => Versoes.lista(p).forEach((v) => naLista.add(statusVersao(p, v))));
-    return cadastro.filter((item) => naLista.has(Array.isArray(item) ? item[0] : item));
+    const porEmpresa = DADOS.fazendasPorEmpresa || {};
+    if (chave === 'empresa') Object.keys(porEmpresa).forEach((e) => naLista.add(e));
+    if (chave === 'fazenda') Object.entries(porEmpresa).forEach(([e, fs]) => { if (marcado('empresa', e)) fs.forEach((f) => naLista.add(f)); });
+    const cadastro = { atividade: DADOS.atividades, cultura: DADOS.culturasPlanos, empresa: DADOS.empresas, fazenda: DADOS.fazendas }[chave];
+    return comoOpcoes(cadastro.filter((x) => naLista.has(x)));
   }
+  const passa = (p) => FiltrosBase.CHAVES.every((c) => marcado(c, valorDe(p, c)));
+  // Para o Painel: o filtro dos planos e do status, e os valores únicos (para o modal Criar Plano do aviso sem plano)
+  const unico = (c) => (Array.isArray(filtros[c]) && filtros[c].length === 1 ? filtros[c][0] : '');
+  const paraPainel = () => ({ passa, passaStatus: (s) => marcado('statusPlano', s),
+    anoAgricola: unico('ano'), safra: unico('safra'), empresa: unico('empresa'), fazenda: unico('fazenda') });
 
-  // Fazendas do filtro: com uma empresa escolhida, só as dela (cada empresa tem as suas fazendas)
-  function fazendasDoFiltro() {
-    const lista = presentes('fazenda', DADOS.fazendas);
-    if (!filtros.empresa) return lista;
-    const daEmpresa = new Set([...((DADOS.fazendasPorEmpresa || {})[filtros.empresa] || []),
-      ...DADOS.planos.filter((p) => p.empresa === filtros.empresa).map((p) => p.fazenda)]);
-    return lista.filter((f) => daEmpresa.has(f));
-  }
-  // Safras do filtro: as dos planos do ano agrícola escolhido (em "Todas", de todos os anos), na ordem do cadastro
-  const safrasDoFiltro = () => Util.ordenarSafras(DADOS.planos
-    .filter((p) => !filtros.anoAgricola || String(Util.anoAgricola(p.safra)) === filtros.anoAgricola).map((p) => p.safra));
-  // Trocar o ano agrícola refaz a lista de safras; a safra que não é do ano volta para "Todas"
-  function atualizarSafras(conteudo) {
-    const select = conteudo.querySelector('[data-filtro="safra"]');
-    const lista = safrasDoFiltro();
-    if (filtros.safra && !lista.includes(filtros.safra)) filtros.safra = '';
-    select.innerHTML = `<option value="">Todas</option>${lista.map((s) => `<option value="${esc(s)}" ${s === filtros.safra ? 'selected' : ''}>${esc(s)}</option>`).join('')}`;
-  }
-  // Trocar a empresa refaz a lista de fazendas; a fazenda que não é da empresa volta para "Todas"
-  function atualizarFazendas(conteudo) {
-    const select = conteudo.querySelector('[data-filtro="fazenda"]');
-    const lista = fazendasDoFiltro();
-    if (filtros.fazenda && !lista.includes(filtros.fazenda)) filtros.fazenda = '';
-    select.innerHTML = `<option value="">Todas</option>${lista.map((f) => `<option value="${esc(f)}" ${f === filtros.fazenda ? 'selected' : ''}>${esc(f)}</option>`).join('')}`;
-  }
+  const barra = BarraFiltros.criar({
+    id: 'lp',
+    estado: () => filtros,
+    campos: () => [...BASE, guia === 'painel'
+      ? ['statusPlano', 'Situação do plano', ['Todas', 'Nenhuma', 'situações'], 150]
+      : ['status', 'Status do plano', ['Todos', 'Nenhum', 'status'], 140]],
+    mais: () => [],
+    opcoes,
+    depende: DEPENDE,
+    padrao: () => ({ statusPlano: 'todos', status: 'todos' }),
+    aoMudar: () => atualizar(document.getElementById('conteudo'))
+  });
 
   // Safra que a lista deve mostrar na próxima vez que for desenhada (ex.: a dos planos recém-criados): o filtro
   // vai para o ano agrícola dela, na guia Planos de Safra
@@ -74,10 +85,14 @@ window.Telas.listaPlanos = (function () {
   const statusVersao = (p, v) => (Versoes.aIniciar(p) ? 'nao-iniciado' : Versoes.statusExibido(p, v));
 
   function desenhar() {
-    // Os filtros se mantêm ao voltar para a lista; depois de criar planos, voltam ao começo no ano agrícola deles
-    // (para o plano novo aparecer)
-    if (!filtros.anoAgricola || safraPedida) filtros = filtrosIniciais();
-    if (safraPedida) { filtros.anoAgricola = String(Util.anoAgricola(safraPedida)); safraPedida = null; }
+    // Os filtros-base vêm das outras páginas; depois de criar planos, vão para o ano agrícola e a safra deles, com o
+    // resto em Todas (para o plano novo aparecer)
+    if (safraPedida) {
+      FiltrosBase.gravar({ ...FiltrosBase.padrao(), ano: [String(Util.anoAgricola(safraPedida))], safra: [safraPedida] });
+      Object.assign(filtros, { statusPlano: 'todos', status: 'todos' });
+      safraPedida = null;
+    }
+    FiltrosBase.ler(filtros);
 
     return `
       <header class="cabecalho cabecalho--guias vg-cabecalho">
@@ -96,17 +111,7 @@ window.Telas.listaPlanos = (function () {
       </header>
 
       <div class="pagina">
-        <section class="cartao filtros" aria-label="Filtrar planos">
-          ${filtro('anoAgricola', 'Ano Agrícola', Telas.painelPlanos.anos())}
-          ${filtro('atividade', 'Atividade produtiva', presentes('atividade', DADOS.atividades))}
-          ${filtro('safra', 'Safra', safrasDoFiltro())}
-          ${filtro('empresa', 'Empresa', presentes('empresa', DADOS.empresas))}
-          ${filtro('fazenda', 'Fazenda', fazendasDoFiltro())}
-          ${filtro('cultura', 'Cultura', presentes('cultura', DADOS.culturasPlanos))}
-          ${filtro('statusPlano', 'Status', STATUS_PLANO, 'Todos')}
-          ${filtro('status', 'Status', presentes('status', STATUS), 'Todos')}
-          <button class="link-acao filtros__limpar" type="button" data-acao="lp-limpar">${Icones.limpar} Limpar filtros</button>
-        </section>
+        <section class="cartao filtros" aria-label="Filtrar planos" data-lp-filtros></section>
 
         ${Telas.painelPlanos.desenhar()}
 
@@ -132,24 +137,7 @@ window.Telas.listaPlanos = (function () {
 
   // Depois que o HTML está na página: liga os filtros e desenha números e lista
   function aoMostrar(conteudo) {
-    // Filtro guardado que não está mais entre as opções (ex.: plano excluído) volta para Todas
-    conteudo.querySelectorAll('[data-filtro]').forEach((select) => { filtros[select.dataset.filtro] = select.value; });
-    conteudo.querySelectorAll('[data-filtro]').forEach((select) => {
-      select.addEventListener('change', () => {
-        filtros[select.dataset.filtro] = select.value;
-        if (select.dataset.filtro === 'empresa') atualizarFazendas(conteudo);
-        if (select.dataset.filtro === 'anoAgricola') atualizarSafras(conteudo);
-        atualizar(conteudo);
-      });
-    });
-    // Limpar filtros: volta ao começo (Ano Agrícola de hoje; os demais em Todas/Todos)
-    conteudo.querySelector('[data-acao="lp-limpar"]').addEventListener('click', () => {
-      filtros = filtrosIniciais();
-      atualizarSafras(conteudo);
-      atualizarFazendas(conteudo);
-      conteudo.querySelectorAll('[data-filtro]').forEach((select) => { select.value = filtros[select.dataset.filtro]; });
-      atualizar(conteudo);
-    });
+    barra.ligar(conteudo.querySelector('[data-lp-filtros]'));
     atualizar(conteudo);
     trocarGuia(conteudo, guia);
     Telas.painelPlanos.ligar(conteudo, { abrirPlano, abrirMenuPlano });
@@ -246,20 +234,18 @@ window.Telas.listaPlanos = (function () {
       if (ativa) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
     });
     conteudo.querySelectorAll('[data-guia-painel]').forEach((painel) => { painel.hidden = painel.dataset.guiaPainel !== guia; });
-    // Cada guia mostra o seu filtro Status: o do plano no Planos de Safra, o da versão no Histórico
-    conteudo.querySelector('[data-filtro="statusPlano"]').closest('.campo').hidden = guia !== 'painel';
-    conteudo.querySelector('[data-filtro="status"]').closest('.campo').hidden = guia === 'painel';
+    // Cada guia mostra o seu filtro: Situação do plano no Planos de Safra, Status do plano no Histórico
+    barra.redesenhar();
   }
 
   // "Histórico de versões" do menu ⋯: a guia Histórico, com os filtros naquele plano
   function verHistorico(p) {
     const conteudo = document.getElementById('conteudo');
-    filtros = { anoAgricola: valorDe(p, 'anoAgricola'), atividade: p.atividade || '', safra: p.safra, empresa: p.empresa, fazenda: p.fazenda, cultura: p.cultura, statusPlano: '', status: '' };
-    atualizarSafras(conteudo);
-    atualizarFazendas(conteudo);
-    conteudo.querySelectorAll('[data-filtro]').forEach((select) => { select.value = filtros[select.dataset.filtro]; });
-    atualizar(conteudo);
+    Object.assign(filtros, { ano: [valorDe(p, 'ano')], atividade: p.atividade ? [p.atividade] : 'todos', safra: [p.safra],
+      cultura: [p.cultura], empresa: [p.empresa], fazenda: [p.fazenda], statusPlano: 'todos', status: 'todos' });
+    FiltrosBase.gravar(filtros);
     trocarGuia(conteudo, 'historico');
+    atualizar(conteudo);
   }
 
   // Abrir uma versão pelo Histórico. Plano não iniciado: o modal de início.
@@ -330,19 +316,18 @@ window.Telas.listaPlanos = (function () {
     conteudo.querySelector('#lp-historico').innerHTML = versoes.length
       ? versoes.map(linhaVersao).join('')
       : `<tr><td class="tabela__vazia" colspan="9">Nenhuma versão encontrada com esses filtros.</td></tr>`;
-    Telas.painelPlanos.atualizar(conteudo, filtros);
+    Telas.painelPlanos.atualizar(conteudo, paraPainel());
   }
 
   // ----- Histórico de versões -----
   // Uma linha por versão. Planos na ordem Safra (mais recente primeiro), Fazenda e Cultura; versões da mais nova
   // para a mais antiga. O filtro Status vale para o status de cada versão.
   function versoesFiltradas() {
-    const campos = CAMPOS_FILTRO.filter((c) => c !== 'status');
     return DADOS.planos
-      .filter((p) => campos.every((campo) => !filtros[campo] || valorDe(p, campo) === filtros[campo]))
+      .filter(passa)
       .sort((a, b) => porTexto(b.safra, a.safra) || porTexto(a.fazenda, b.fazenda) || porTexto(a.cultura, b.cultura))
       .flatMap((p) => [...Versoes.lista(p)].reverse().map((v) => ({ p, v })))
-      .filter(({ p, v }) => !filtros.status || statusVersao(p, v) === filtros.status);
+      .filter(({ p, v }) => marcado('status', statusVersao(p, v)));
   }
 
   // Última atualização da versão: em construção, o último "Salvar alterações"; publicada, a publicação
@@ -366,22 +351,6 @@ window.Telas.listaPlanos = (function () {
         <td>${quando ? new Date(quando).toLocaleDateString('pt-BR') : '—'}</td>
         <td>${esc(quem || '—')}</td>
       </tr>`;
-  }
-
-  // itens: textos ou pares [valor, rótulo]
-  function filtro(nome, rotulo, itens, todos = 'Todas') {
-    return `
-      <div class="campo">
-        <label class="campo__rotulo" for="lp-${nome}">${rotulo}</label>
-        <select class="campo__controle" id="lp-${nome}" data-filtro="${nome}">
-          <option value="">${todos}</option>
-          ${itens.map((item) => {
-            const [valor, texto] = Array.isArray(item) ? item : [item, item];
-            return `<option value="${esc(valor)}" ${valor === filtros[nome] ? 'selected' : ''}>${esc(texto)}</option>`;
-          }).join('')}
-        </select>
-      </div>
-    `;
   }
 
   return { desenhar, aoMostrar, mostrarSafra, abrirPlano };

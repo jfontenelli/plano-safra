@@ -229,6 +229,10 @@ window.Telas.calendario = (function () {
               <span class="campo__rotulo">Talhão</span>
               ${filtroCaixa(estado, 'talhao', opcoesTalhao(talhoes), ['Todos os talhões', 'Nenhum talhão', 'talhões'], 'Talhões')}
             </div>
+            <div class="bf__acoes bf__acoes--texto">
+              <button class="botao botao--secundario bf__botao bf__limpar bf__limpar--so" type="button" data-acao="cal-limpar"
+                      title="Limpar filtros" aria-label="Limpar filtros">${Icones.limpar}<span class="bf__texto">Limpar filtros</span></button>
+            </div>
           </div>`}
         ${!planejados.length ? vazio : estado.visao === 'tabela' ? tabela(ctx, lista)
           : estado.visao === 'produtos' ? Telas.indicadores.desenharProdutos(ctx) : infografico(ctx, lista)}
@@ -927,6 +931,12 @@ window.Telas.calendario = (function () {
   function aoClicar(e, ctx, { redesenhar }) {
     if (ctx.estado.visao === 'produtos' && Telas.indicadores.aoClicar(e, ctx, { redesenhar })) return true;
     if (e.target.closest('[data-acao="cal-ir-planejamento"]') && ctx.irParaPlanejamento) { ctx.irParaPlanejamento(); return true; }
+    // Resumo (Tabela e Ciclo Produtivo): Limpar filtros volta Grupo de operação, Operação e Talhão para Todos (04/11/2026)
+    if (e.target.closest('[data-acao="cal-limpar"]')) {
+      Object.assign(ctx.estado, { grupo: 'todos', operacao: 'todos', talhao: 'todos', busca: {}, filtroAberto: null });
+      redesenhar('[data-acao="cal-limpar"]');
+      return true;
+    }
     const abrirOp = e.target.closest('[data-acao="cal-abrir-op"]');
     if (abrirOp && ctx.abrirOperacao) { ctx.abrirOperacao(abrirOp.dataset.op); return true; }
     // Clique fora de uma caixa de filtro aberta: fecha

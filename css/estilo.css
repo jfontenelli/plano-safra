@@ -3751,7 +3751,8 @@ html[data-tema="escuro"] .cal-mestab__area { --f: color-mix(in srgb, var(--c) 24
 .dr-mais .icone { width: 17px; height: 17px; }
 .dr-mais__seta { display: inline-flex; transition: transform .15s; }
 .dr-mais__seta--aberta { transform: rotate(180deg); }
-.dr-mais--aberto { border-color: var(--verde-700); }
+.dr-mais { color: var(--texto); }
+.dr-mais--aberto { border-color: var(--borda-forte); } /* aberto: borda cinza mais forte (04/11/2026; antes verde) */
 /* Com o menu lateral expandido (menos espaço), Mais filtros e Limpar filtros só com os ícones, para caberem na linha
    dos filtros; com o menu recolhido, com os nomes. O nome fica na dica (title) e no leitor de tela */
 html:has(.menu:not(.menu--recolhido)) .dr-filtros .dr-acao-texto { display: none; }
@@ -3854,3 +3855,64 @@ html[data-tema="escuro"] .dr-cor--acima30 { --dr-f: #5a2626; --dr-t: #ff8a80; }
 .dr-det__conta { margin-right: auto; }
 .dr-det__por { margin-left: 12px; margin-right: 0; } /* Itens por página à direita de "‹ Página 1 de 3 ›", encostado na borda */
 @media (max-width: 1100px) { .dr-graficos { grid-template-columns: 1fr; } }
+
+/* Planejado × Executado: Mais filtros e Limpar filtros à direita dos filtros, separados por traços (04/11/2026) */
+/* Na altura das caixas de filtro (embaixo dos rótulos), com o menu expandido ou recolhido */
+.ma .filtros .ma-filtros__acoes { align-self: flex-end; align-items: center; height: 36px; gap: 0; padding-left: 16px; border-left: 1px solid var(--borda); }
+.ma-filtros__acoes .dr-mais { height: 36px; }
+/* Limpar filtros: botão com contorno cinza, como o Mais filtros, depois de um traço (04/11/2026) */
+.ma-filtros__acoes .ma-limpar { position: relative; margin-left: 16px; }
+.ma-filtros__acoes .ma-limpar::before { content: ''; position: absolute; left: -17px; top: 0; bottom: 0; border-left: 1px solid var(--borda); }
+/* Os filtros dividem a linha (sem quebrar) e Mais filtros e Limpar filtros ficam no fim dela */
+.ma .filtros { flex-wrap: nowrap; }
+.ma .filtros > .campo { flex: 1 1 0; min-width: 0; }
+.ma .filtros .ma-filtros__acoes { flex: none; }
+/* Rótulos e valores numa linha só (cada filtro tem uma largura mínima; o que não couber vai para o Mais filtros) */
+.ma .filtros { gap: 12px 12px; }
+.ma .filtros > .campo .campo__rotulo { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ma .filtros > .campo .cal-filtro__botao { white-space: nowrap; overflow: hidden; }
+.ma .filtros > .campo .cal-filtro__seta { flex: none; }
+/* Com o menu lateral expandido, Mais filtros e Limpar filtros só com os ícones (o nome na dica e no leitor de tela);
+   com o menu recolhido, com os nomes */
+html:has(.menu:not(.menu--recolhido)) .ma-acao-texto, .ma-filtros--compacto .ma-acao-texto { display: none; }
+html:has(.menu:not(.menu--recolhido)) .ma-filtros__acoes .dr-mais, .ma-filtros--compacto .ma-filtros__acoes .dr-mais { gap: 4px; padding: 0 10px; }
+/* Menu recolhido: só com os ícones quando os nomes empurrariam um filtro para o Mais filtros (ma-filtros--compacto) */
+.ma .dr-pop .campo { max-width: none; } /* no painel, as caixas na largura toda */
+
+/* ===== Barra de filtros padronizada (js/barra-filtros.js, 04/11/2026): o visual da Planejado × Executado ===== */
+.filtros.bf { flex-wrap: nowrap; gap: 12px; margin-bottom: 0; padding: 10px 20px; }
+.bf > .campo { flex: 1 1 0; min-width: 0; max-width: 220px; margin-bottom: 0; }
+.bf > .campo .campo__rotulo { margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bf > .campo .cal-filtro__botao { white-space: nowrap; overflow: hidden; }
+.bf > .campo .cal-filtro__seta { flex: none; }
+/* Mais filtros e Limpar filtros: na altura das caixas, depois de um traço; contorno cinza, texto e ícone pretos */
+.bf__acoes { position: relative; display: flex; flex: none; align-self: flex-end; align-items: center; gap: 0; height: 36px;
+  margin-left: auto; padding-left: 16px; border-left: 1px solid var(--borda); }
+.bf__botao { display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 14px; font-weight: 600; color: var(--texto); }
+.bf__botao .icone { width: 17px; height: 17px; }
+.bf__limpar { position: relative; margin-left: 16px; }
+.bf__limpar::before { content: ''; position: absolute; left: -17px; top: 0; bottom: 0; border-left: 1px solid var(--borda); }
+.bf__limpar--so { margin-left: 0; }
+.bf__limpar--so::before { display: none; }
+/* Menu lateral expandido (ou nomes que empurrariam um filtro para o Mais filtros): só os ícones, o nome na dica */
+html:has(.menu:not(.menu--recolhido)) .bf__texto, .bf--compacto .bf__texto { display: none; }
+html:has(.menu:not(.menu--recolhido)) .bf__botao, .bf--compacto .bf__botao { gap: 4px; padding: 0 10px; }
+.bf__pop .campo { flex: none; width: 100%; max-width: none; margin-bottom: 0; }
+.bf__pop .cal-filtro, .bf__pop .cal-filtro__botao { width: 100%; }
+/* Calendário: o Limpar filtros sempre com o nome, também com o menu expandido (04/11/2026) */
+html:has(.menu) .bf__acoes.bf__acoes--texto .bf__texto { display: inline; }
+html:has(.menu) .bf__acoes.bf__acoes--texto .bf__botao { gap: 8px; padding: 0 14px; }
+/* Calendário: as caixas dividem a linha para o Limpar filtros (com o nome) caber ao lado */
+.os-cal .filtros { flex-wrap: nowrap; gap: 12px; }
+.os-cal .filtros > .campo { flex: 1 1 0; min-width: 0; }
+.os-cal .filtros > .campo .campo__rotulo { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.os-cal .filtros > .campo .cal-filtro__botao { white-space: nowrap; overflow: hidden; }
+.os-cal .filtros > .campo .cal-filtro__seta { flex: none; }
+/* Resumo do plano: o Limpar filtros logo depois do último filtro (não no canto direito) */
+.filtros--plano .bf__acoes { margin-left: 0; }
+.filtros--plano .bf__botao { font-weight: 400; } /* Resumo: Limpar filtros sem negrito */
+/* Mais filtros e Limpar filtros sem negrito em todas as páginas (04/11/2026) */
+.bf__botao, .dr-mais, .filtros__limpar, .oc-limpar { font-weight: 400; }
+/* Desvios de Recomendação: a barra padronizada na linha de cima do cartão (sem o próprio contorno); embaixo, Analisar
+   por e Ir para (04/11/2026) */
+.dr-filtros .filtros.dr-bf { flex-basis: 100%; min-width: 0; padding: 0; border: 0; box-shadow: none; background: none; }

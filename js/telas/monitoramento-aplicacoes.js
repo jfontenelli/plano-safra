@@ -1,8 +1,10 @@
 /*
  * Operações Agrícolas (antes Planejado x Executado e, antes ainda, Aplicações do menu Monitoramento), no menu Gestão da Lavoura › Operações Agrícolas.
  * A primeira guia, Calendário Agrícola, é a página de js/telas/os-calendario.js (com o mesmo cabeçalho).
- * Filtros com várias escolhas (as caixas da Agenda Agrícola): Safra (as do cadastro: 26/27, 27/27…), Cultura, Empresa, Fazenda,
- * Talhão, Grupo de operação (abre em Defensivo) e Operação (abre com as fungicidas do modelo), e Limpar filtros.
+ * Filtros com várias escolhas (as caixas da Agenda Agrícola): Safra (as do cadastro dos anos marcados: 26/27, 27/27…),
+ * Cultura, Empresa, Fazenda, Talhão, Grupo de operação (abre em Defensivo) e Operação (abre com as fungicidas do modelo);
+ * em "Mais filtros", o painel "Filtros adicionais" com Ano agrícola e Atividade produtiva (e os que não couberem na
+ * linha); e Limpar filtros (04/11/2026).
  * Tabela com uma linha por talhão: Fazenda, Talhão, Variedade, Plantas/m, Data de plantio, uma coluna por operação
  * marcada (na ordem do DAP), Aplicações executadas e Dias sem aplicação. Botões Planejado e Executado
  * (ao menos um ligado); com os dois, aparece a Dif. (dias). Usa a última versão publicada de cada plano.
@@ -13,6 +15,9 @@ window.Telas = window.Telas || {};
 window.Telas.monitoramentoAplicacoes = (function () {
   const Cal = () => Telas.calendario;
   const esc = Util.escapar;
+  // Base de filtros de todas as páginas (Ano agrícola, Atividade produtiva, Safra, Cultura, Empresa, Fazenda, Talhão), ora
+  // à mostra, ora no Mais filtros. Aqui (04/11/2026): à mostra, de Safra a Talhão, Grupo de operação e Operação; no Mais
+  // filtros, Ano agrícola e Atividade produtiva
   const FILTROS = [
     ['safra', 'Safra', ['Todas', 'Nenhuma', 'selecionadas']],
     ['cultura', 'Cultura', ['Todas', 'Nenhuma', 'culturas']],
@@ -22,20 +27,27 @@ window.Telas.monitoramentoAplicacoes = (function () {
     ['grupo', 'Grupo de operação', ['Todos', 'Nenhum', 'grupos']],
     ['operacao', 'Operação', ['Todas', 'Nenhuma', 'operações']]
   ];
+  // Largura mínima de cada filtro à mostra (o rótulo e o valor inteiros). O que não couber na linha vai para o Mais
+  // filtros, a partir do último (Operação, Grupo de operação…); quantos ficam à mostra depende da largura da tela (04/11/2026)
+  const MINIMO = { safra: 92, cultura: 104, empresa: 124, fazenda: 124, talhao: 104, grupo: 136, operacao: 124 };
+  let visiveis = FILTROS.length;
+  const MAIS_FILTROS = [
+    ['ano', 'Ano agrícola', ['Todos', 'Nenhum', 'anos']],
+    ['atividade', 'Atividade produtiva', ['Todas', 'Nenhuma', 'atividades']]
+  ];
 
   // Padrão: o grupo Defensivo e as fungicidas do modelo de operações (1ª a 4ª Fungicida)
   const fungicidasModelo = () => ((DADOS.modeloOperacoes.find((g) => g.nome === 'Defensivo') || { operacoes: [] }).operacoes)
     .map((op) => op.nome).filter((n) => /fungicida/i.test(n));
   // Estado da tela: filtros ('todos' ou a lista do que está marcado), a visão (Tabela ou Linha do tempo), o status
   // escolhido na legenda e a ordenação. Mantém-se ao navegar.
-  // Abre (e Limpar filtros volta) na safra atual, com marcadas só a Cultura, a Empresa e a Fazenda dos planos dela (as
-  // outras ficam na lista, desmarcadas), Talhão em Todos, o grupo Defensivo e as fungicidas
+  // Abre (e Limpar filtros volta) na safra atual e no ano agrícola dela; Atividade, Cultura, Empresa, Fazenda e Talhão em
+  // Todas/Todos (as opções são só as dos planos com planejado e executado); o grupo Defensivo e as fungicidas (04/11/2026)
   const novoEstado = () => {
     const safra = safraAtual();
-    const daSafra = DADOS.planos.filter((p) => Versoes.publicadaComPlanejamento(p) && p.safra === safra);
-    const valores = (c) => (safra ? [...new Set(daSafra.map((p) => p[c]))] : 'todos');
-    return { safra: safra ? [safra] : 'todos', cultura: valores('cultura'), empresa: valores('empresa'), fazenda: valores('fazenda'),
-      talhao: 'todos', grupo: ['Defensivo'], operacao: fungicidasModelo(), visao: 'tabela', status: null, modo: 'datas' };
+    return { ano: safra ? [String(Util.anoAgricola(safra))] : 'todos', atividade: 'todos', safra: safra ? [safra] : 'todos',
+      cultura: 'todos', empresa: 'todos', fazenda: 'todos',
+      talhao: 'todos', grupo: ['Defensivo'], operacao: fungicidasModelo(), visao: 'tabela', status: null, modo: 'datas', maisFiltros: false };
   };
   // Safra atual: a que contém hoje (pelo cadastro: início e fim), a safra antes da safrinha; sem nenhuma, a mais recente
   function safraAtual() {
@@ -59,11 +71,13 @@ window.Telas.monitoramentoAplicacoes = (function () {
 
   // ----- Planos e opções dos filtros -----
   const comPublicada = () => DADOS.planos.filter((p) => Versoes.publicadaComPlanejamento(p));
-  const valorDe = { safra: (p) => p.safra, cultura: (p) => p.cultura, empresa: (p) => p.empresa, fazenda: (p) => p.fazenda };
+  const valorDe = { ano: (p) => String(Util.anoAgricola(p.safra)), atividade: (p) => p.atividade, safra: (p) => p.safra,
+    cultura: (p) => p.cultura, empresa: (p) => p.empresa, fazenda: (p) => p.fazenda };
   const gruposDe = (p) => Versoes.grupos(p, Versoes.ultimaPublicada(p));
   const marcado = (chave, valor) => Cal().marcado(est, chave, valor);
-  // Planos que passam por Safra, Cultura, Empresa, Fazenda e Talhão (com ao menos um talhão marcado). Esses filtros são
-  // independentes: cada um mostra sempre todas as opções e só muda quando é mexido (ou com Limpar filtros)
+  // Planos que passam por Ano, Atividade, Safra, Cultura, Empresa, Fazenda e Talhão (com ao menos um talhão marcado).
+  // Filtros dependentes (04/11/2026): Ano agrícola e Atividade limitam as opções de Safra e Cultura; Empresa limita
+  // Fazenda; Empresa e Fazenda limitam Talhão (ver DEPENDE)
   function passa(p) {
     if (!Object.keys(valorDe).every((c) => marcado(c, valorDe[c](p)))) return false;
     return est.talhao === 'todos'
@@ -109,10 +123,24 @@ window.Telas.monitoramentoAplicacoes = (function () {
   // Opções de cada filtro. Safra, Cultura, Empresa, Fazenda e Talhão: tudo o que existe nos planos com versão publicada
   // (Talhão com a fazenda junto, "Santa Clara · T01", porque o nome se repete entre fazendas). Grupo de operação e
   // Operação: os dos planos que passam pelos filtros; Operação, só dos grupos marcados, na ordem do DAP.
+  const DEPENDE = { safra: ['ano', 'atividade'], cultura: ['ano', 'atividade'], fazenda: ['empresa'], talhao: ['empresa', 'fazenda'] };
+  // Planos que passam pelos filtros de que a chave depende (para as opções dela)
+  const planosPara = (chave) => comPublicada().filter((p) => (DEPENDE[chave] || []).every((c) => marcado(c, valorDe[c](p))));
+  // Depois de mexer num filtro: nos que dependem dele, as marcadas que não são mais opção saem; sem nenhuma, ou com todas,
+  // volta para Todas/Todos
+  function podarDependentes(mexido) {
+    Object.keys(DEPENDE).filter((c) => DEPENDE[c].includes(mexido)).forEach((c) => {
+      if (!Array.isArray(est[c]) || !est[c].length) return;
+      const valores = opcoes(c).map((o) => o.valor);
+      const ficam = est[c].filter((v) => valores.includes(v));
+      est[c] = ficam.length && ficam.length < valores.length ? ficam : 'todos';
+      podarDependentes(c);
+    });
+  }
   function opcoes(chave) {
     if (chave === 'talhao') {
       const vistos = new Map();
-      comPublicada().forEach((p) => Util.talhoesPlano(p, Versoes.ultimaPublicada(p)).forEach((t) => {
+      planosPara('talhao').forEach((p) => Util.talhoesPlano(p, Versoes.ultimaPublicada(p)).forEach((t) => {
         const valor = `${p.fazenda}|${t.nome}`;
         if (!vistos.has(valor)) vistos.set(valor, { valor, nome: `${p.fazenda} · ${t.nome}`, extra: Util.area(t.area) });
       }));
@@ -124,10 +152,12 @@ window.Telas.monitoramentoAplicacoes = (function () {
       return nomes.map((n) => ({ valor: n, nome: n }));
     }
     if (chave === 'operacao') return operacoes().map((o) => ({ valor: o.nome, nome: o.nome }));
-    const presentes = new Set(comPublicada().map(valorDe[chave]));
-    // Safra: as do cadastro (26/27, 27/27…), na ordem do cadastro
+    const presentes = new Set(planosPara(chave).map(valorDe[chave]));
+    // Ano agrícola: do mais recente para o mais antigo
+    if (chave === 'ano') return [...presentes].sort((a, b) => Number(b) - Number(a)).map((x) => ({ valor: x, nome: x }));
+    // Safra: as do cadastro (26/27, 27/27…) dos anos agrícolas e atividades marcados, na ordem do cadastro
     if (chave === 'safra') return Util.ordenarSafras([...presentes]).map((x) => ({ valor: x, nome: x }));
-    const ordem = { cultura: DADOS.culturasPlanos, empresa: DADOS.empresas, fazenda: DADOS.fazendas }[chave];
+    const ordem = { atividade: DADOS.atividades, cultura: DADOS.culturasPlanos, empresa: DADOS.empresas, fazenda: DADOS.fazendas }[chave];
     return ordem.filter((x) => presentes.has(x)).map((x) => ({ valor: x, nome: x }));
   }
 
@@ -247,7 +277,7 @@ window.Telas.monitoramentoAplicacoes = (function () {
   // tabela por talhão), Desvios de Recomendação e Previsão de Falta de Produtos: o título da guia (sem o caminho no topo,
   // desde 03/11/2026). A Duração da Operação saiu em 29/10/2026; o código dela continua aqui
   const GUIAS = [
-    ['calendario', 'Calendário', 'As operações planejadas de todas as fazendas: o ano agrícola por empresa e fazenda, e o dia a dia no mês, na semana e no dia.'],
+    ['calendario', 'Calendário', 'Consulte as operações agrícolas planejadas por ano, mês, semana ou dia.'],
     ['tabela', 'Planejado × Executado', 'Compare as datas planejadas e executadas das operações por talhão.'],
     ['desvios', 'Desvios de Recomendação', 'Analise os desvios entre o recomendado e o executado por produto, operação e nível de análise.'],
     ['falta', 'Previsão de Falta de Produtos', 'Estime a falta de produtos para as operações planejadas.']
@@ -281,14 +311,29 @@ window.Telas.monitoramentoAplicacoes = (function () {
     }
   }
 
+  // Filtros à mostra; à direita, depois de um traço, Mais filtros (abre o painel "Filtros adicionais", como nos Desvios de
+  // Recomendação) e Limpar filtros (04/11/2026)
   function filtros() {
-    return `
-      ${FILTROS.map(([chave, rotulo, textos]) => `
+    const campo = ([chave, rotulo, textos]) => `
         <div class="campo">
           <span class="campo__rotulo">${rotulo}</span>
           ${Cal().filtroCaixa(est, chave, opcoes(chave), textos, rotulo, { unico: filtroUnico() && UNICOS.includes(chave) })}
-        </div>`).join('')}
-      <button class="link-acao filtros__limpar" type="button" data-acao="ma-limpar">${Icones.limpar} Limpar filtros</button>`;
+        </div>`;
+    return `
+      ${FILTROS.slice(0, visiveis).map((f) => campo(f).replace('class="campo"', `class="campo" style="min-width: ${MINIMO[f[0]]}px"`)).join('')}
+      <div class="dr-filtros__acoes ma-filtros__acoes">
+        <button class="botao botao--secundario dr-mais ${est.maisFiltros ? 'dr-mais--aberto' : ''}" type="button" data-acao="ma-mais"
+                aria-expanded="${!!est.maisFiltros}" aria-controls="ma-mais-filtros" title="Mais filtros" aria-label="Mais filtros">${Icones.ajustes}<span class="ma-acao-texto">Mais filtros</span></button>
+        <button class="botao botao--secundario dr-mais ma-limpar" type="button" data-acao="ma-limpar" title="Limpar filtros" aria-label="Limpar filtros">${Icones.limpar}<span class="ma-acao-texto">Limpar filtros</span></button>
+        ${est.maisFiltros ? `
+        <div class="dr-pop" id="ma-mais-filtros" role="dialog" aria-labelledby="ma-pop-titulo">
+          <div class="dr-pop__cab">
+            <h3 class="dr-pop__titulo" id="ma-pop-titulo">Filtros adicionais</h3>
+            <button class="botao-icone" type="button" data-acao="ma-fechar-mais" aria-label="Fechar" title="Fechar">${Icones.fechar}</button>
+          </div>
+          ${[...MAIS_FILTROS, ...FILTROS.slice(visiveis)].map(campo).join('')}
+        </div>` : ''}
+      </div>`;
   }
 
   // Status da aplicação, mostrado numa etiqueta na célula dela, com a legenda. Nomes desde 29/10/2026: Antecipada (antes
@@ -614,12 +659,52 @@ window.Telas.monitoramentoAplicacoes = (function () {
       congelar(caixaTabela);
       if (foco) conteudo.querySelector(foco)?.focus();
     };
+    // Quantos filtros cabem na linha, ao lado de Mais filtros e Limpar filtros; muda ao redimensionar a janela ou ao
+    // expandir/recolher o menu lateral. Com o menu recolhido, os dois botões mostram o nome; se o nome empurrar um filtro
+    // para o Mais filtros, ficam só com o ícone (o nome na dica)
+    const encaixar = () => {
+      if (!caixaFiltros.isConnected) { observador.disconnect(); return; }
+      const cs = getComputedStyle(caixaFiltros);
+      const base = caixaFiltros.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+      const cabem = (livre) => {
+        let n = 0;
+        let usado = 0;
+        while (n < FILTROS.length && usado + MINIMO[FILTROS[n][0]] + 12 <= livre) { usado += MINIMO[FILTROS[n][0]] + 12; n++; }
+        return n;
+      };
+      const acoes = () => caixaFiltros.querySelector('.ma-filtros__acoes').offsetWidth;
+      caixaFiltros.classList.remove('ma-filtros--compacto');
+      const comNome = cabem(base - acoes());
+      caixaFiltros.classList.add('ma-filtros--compacto');
+      const soIcone = cabem(base - acoes());
+      caixaFiltros.classList.toggle('ma-filtros--compacto', soIcone > comNome);
+      const n = Math.max(comNome, soIcone);
+      if (n !== visiveis) { visiveis = n; caixaFiltros.innerHTML = filtros(); }
+    };
+    const observador = new ResizeObserver(encaixar);
+    observador.observe(caixaFiltros);
     const ctx = { estado: est };
+    fecharMais = () => { est.maisFiltros = false; redesenhar(); };
 
     raiz.addEventListener('click', (e) => {
+      // Mais filtros: abre e fecha o painel Filtros adicionais; o X e o clique fora do painel (e do botão) fecham
+      if (e.target.closest('[data-acao="ma-mais"]')) {
+        est.maisFiltros = !est.maisFiltros;
+        redesenhar(est.maisFiltros ? '.dr-pop .cal-filtro__botao' : '[data-acao="ma-mais"]');
+        return;
+      }
+      if (e.target.closest('[data-acao="ma-fechar-mais"]')) {
+        est.maisFiltros = false;
+        redesenhar('[data-acao="ma-mais"]');
+        return;
+      }
+      if (est.maisFiltros && !e.target.closest('.dr-pop')) { est.maisFiltros = false; redesenhar(); }
       if (e.target.closest('[data-acao="ma-limpar"]')) {
         // Limpar filtros não muda a guia, a ordenação nem o Visualizar por
+        // Os filtros-base voltam ao começo em todas as páginas
+        FiltrosBase.limpar();
         est = { ...novoEstado(), visao: est.visao, ordem: est.ordem, duracao: est.duracao, modo: est.modo };
+        FiltrosBase.ler(est);
         padraoDuracao();
         ctx.estado = est;
         redesenhar('[data-acao="ma-limpar"]');
@@ -680,17 +765,47 @@ window.Telas.monitoramentoAplicacoes = (function () {
       else if (e.target.value === 'todos') marcados = e.target.checked ? [...valores] : [];
       else if (e.target.checked) marcados.push(e.target.value);
       else marcados = marcados.filter((n) => n !== e.target.value);
+      const antes = JSON.stringify(FiltrosBase.CHAVES.map((c) => est[c]));
       est[chave] = marcados.length === valores.length ? 'todos' : marcados;
       // Outro grupo: a Operação volta a todas as operações dos grupos marcados
       if (chave === 'grupo') est.operacao = 'todos';
+      // Filtros dependentes: Ano/Atividade › Safra e Cultura; Empresa › Fazenda › Talhão
+      podarDependentes(chave);
+      // Filtros-base: acompanham para as outras páginas (js/barra-filtros.js)
+      if (JSON.stringify(FiltrosBase.CHAVES.map((c) => est[c])) !== antes) FiltrosBase.gravar(est);
       est.filtroAberto = chave;
       est.ultimo = chave;
       redesenhar(`[data-campo="cal-filtro"][data-filtro="${chave}"][value="${CSS.escape(e.target.value)}"]`);
     });
 
     raiz.addEventListener('input', (e) => Cal().aoDigitar(e, ctx));
+    // Esc no painel Filtros adicionais (sem caixa de filtro aberta): fecha e volta ao botão
+    raiz.addEventListener('keydown', (e) => {
+      if (e.key !== 'Escape' || !est.maisFiltros || raiz.querySelector('.dr-pop .cal-filtro[open]')) return;
+      est.maisFiltros = false;
+      redesenhar('[data-acao="ma-mais"]');
+    });
+    // Filtros-base escolhidos nas outras páginas (js/barra-filtros.js): só os que continuam valendo aqui
+    FiltrosBase.ler(est);
+    validarFiltros();
     redesenhar();
   }
+  // Valores marcados que não são opção aqui (ex.: uma fazenda sem planejado e executado) saem; sem nenhum, Todas
+  function validarFiltros() {
+    [...FiltrosBase.CHAVES, 'talhao'].forEach((c) => {
+      if (!Array.isArray(est[c]) || !est[c].length) return;
+      const valores = opcoes(c).map((o) => o.valor);
+      const ficam = est[c].filter((v) => valores.includes(v));
+      est[c] = ficam.length && ficam.length < valores.length ? ficam : 'todos';
+    });
+  }
+
+  // Clique fora da página (ex.: no cabeçalho ou no menu) com o painel Filtros adicionais aberto: fecha o painel
+  let fecharMais = null;
+  document.addEventListener('click', (e) => {
+    if (!est || !est.maisFiltros || !fecharMais || e.target.closest('.ma')) return;
+    if (document.querySelector('.ma .dr-pop')) fecharMais();
+  }, true); // na captura: antes de a página se redesenhar (depois, o elemento clicado já saiu da página)
 
   // Esc: com uma caixa de filtro aberta, fecha a caixa (não age com modal ou menu aberto, que têm o próprio Esc)
   document.addEventListener('keydown', (e) => {

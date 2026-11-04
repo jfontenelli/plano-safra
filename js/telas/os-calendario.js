@@ -139,7 +139,11 @@ window.Telas.osCalendario = (function () {
           <span class="campo__rotulo">${rotulo}</span>
           ${Cal().filtroCaixa(est, chave, opcoes(chave), textos, rotulo)}
         </div>`).join('')}
-      <button class="link-acao filtros__limpar" type="button" data-acao="os-limpar">${Icones.limpar} Limpar filtros</button>`;
+      <div class="bf__acoes bf__acoes--texto">
+        <!-- Limpar filtros padronizado (04/11/2026): contorno cinza, texto e ícone pretos, sempre com o nome -->
+        <button class="botao botao--secundario bf__botao bf__limpar bf__limpar--so" type="button" data-acao="os-limpar"
+                title="Limpar filtros" aria-label="Limpar filtros">${Icones.limpar}<span class="bf__texto">Limpar filtros</span></button>
+      </div>`;
   }
 
   // Visão Ano: Hoje (o ano agrícola de hoje) · ‹ › (o ano agrícola anterior e o próximo, entre os que têm plano) · o ano ·
