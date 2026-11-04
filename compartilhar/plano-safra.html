@@ -3803,7 +3803,7 @@ html:has(.menu:not(.menu--recolhido)) .dr-filtros__acoes .filtros__limpar { padd
 .dr-faixas { flex: 1; display: flex; flex-direction: column; justify-content: space-around; gap: 6px; margin: 6px 0 0; padding: 0; list-style: none; }
 .dr-dist .dr-faixa { padding-top: 10px; padding-bottom: 10px; }
 .dr-dist .dr-faixa__trilho { height: 10px; border-radius: 5px; }
-.dr-faixa { display: grid; grid-template-columns: 110px minmax(0, 1fr) 48px 56px; align-items: center; gap: 12px; width: 100%; padding: 6px 8px;
+.dr-faixa { display: grid; grid-template-columns: 180px minmax(0, 1fr) 48px 56px; align-items: center; gap: 12px; width: 100%; padding: 6px 8px;
   border: 1px solid transparent; border-radius: 8px; background: none; font: inherit; font-size: 14px; color: var(--texto); text-align: left; cursor: pointer; }
 .dr-faixa:hover { background: var(--superficie-2); }
 .dr-faixa[aria-pressed="true"] { border-color: var(--borda-forte); background: var(--superficie-2); }
@@ -3814,13 +3814,16 @@ html:has(.menu:not(.menu--recolhido)) .dr-filtros__acoes .filtros__limpar { padd
 .dr-faixa__pct { font-weight: 700; text-align: right; font-variant-numeric: tabular-nums; }
 .dr-faixa__n { color: var(--texto-suave); font-variant-numeric: tabular-nums; }
 .dr-todas { margin-top: 8px; }
-.dr-cor--ate10 { --dr-c: var(--verde-700); --dr-f: var(--verde-100); --dr-t: var(--verde-700); }
-.dr-cor--10a20 { --dr-c: #2a78d6; --dr-f: var(--info-fundo); --dr-t: #1a5bb0; }
-.dr-cor--20a30 { --dr-c: #e8772e; --dr-f: #fdebdc; --dr-t: #b9560f; }
-.dr-cor--acima30 { --dr-c: #d93a2b; --dr-f: #f6cfca; --dr-t: var(--erro); }
-html[data-tema="escuro"] .dr-cor--10a20 { --dr-t: #8fbcef; }
-html[data-tema="escuro"] .dr-cor--20a30 { --dr-f: #3d2817; --dr-t: #f0995a; }
-html[data-tema="escuro"] .dr-cor--acima30 { --dr-f: #5a2626; --dr-t: #ff8a80; }
+/* Faixas (04/11/2026): abaixo do recomendado azul, sem desvio verde, até 10% amarelo, 10-20% laranja, acima de 20% vermelho */
+.dr-cor--abaixo { --dr-c: #2a78d6; --dr-f: var(--info-fundo); --dr-t: #1a5bb0; }
+.dr-cor--sem { --dr-c: var(--verde-700); --dr-f: var(--verde-100); --dr-t: var(--verde-700); }
+.dr-cor--ate10 { --dr-c: #d4a72c; --dr-f: #fbf0d0; --dr-t: #8a6a00; }
+.dr-cor--10a20 { --dr-c: #e8772e; --dr-f: #fdebdc; --dr-t: #b9560f; }
+.dr-cor--acima20 { --dr-c: #d93a2b; --dr-f: #f6cfca; --dr-t: var(--erro); }
+html[data-tema="escuro"] .dr-cor--abaixo { --dr-t: #8fbcef; }
+html[data-tema="escuro"] .dr-cor--ate10 { --dr-f: #3a3113; --dr-t: #e8c35a; }
+html[data-tema="escuro"] .dr-cor--10a20 { --dr-f: #3d2817; --dr-t: #f0995a; }
+html[data-tema="escuro"] .dr-cor--acima20 { --dr-f: #5a2626; --dr-t: #ff8a80; }
 .dr-etiqueta { display: inline-block; min-width: 64px; padding: 2px 8px; border-radius: 999px; background: var(--dr-f); color: var(--dr-t);
   font-size: 13px; font-weight: 700; text-align: center; font-variant-numeric: tabular-nums; }
 .dr-secao__topo > div:first-child { flex: 1; min-width: 0; }
@@ -3849,7 +3852,7 @@ html[data-tema="escuro"] .dr-cor--acima30 { --dr-f: #5a2626; --dr-t: #ff8a80; }
   display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .dr-tabela td, .dr-tabela th { padding: 7px 10px; font-size: 13px; }
 /* Top 10 e Detalhamento: rolagem vertical por dentro, com o cabeçalho da tabela parado */
-#dr-sec-top .tabela-rolagem { max-height: 300px; overflow: auto; }
+#dr-sec-top .tabela-rolagem { max-height: none; overflow: visible; } /* Top 10: os 10 produtos abertos, sem rolagem (04/11/2026) */
 #dr-sec-det .tabela-rolagem { max-height: 440px; overflow: auto; }
 .dr-tabela thead th { position: sticky; top: 0; z-index: 1; background: var(--superficie-2); }
 .dr-tabela .dr-centro { text-align: center; }
@@ -3926,6 +3929,9 @@ html:has(.menu) .bf__acoes.bf__acoes--texto .bf__botao { gap: 8px; padding: 0 14
 /* Desvios de Recomendação: a barra padronizada na linha de cima do cartão (sem o próprio contorno); embaixo, Analisar
    por e Ir para (04/11/2026) */
 .dr-filtros .filtros.dr-bf { flex-basis: 100%; min-width: 0; padding: 0; border: 0; box-shadow: none; background: none; }
+/* Desvios: o cartão dos filtros na largura dos cartões de baixo; o alfinete no canto superior direito dele (04/11/2026) */
+.dr-fixo [data-dr-alfinete] { position: absolute; top: 16px; right: 44px; z-index: 1; }
+.dr-fixo .dr-congelar { width: 28px; height: 28px; }
 
 </style>
 </head>
@@ -10167,14 +10173,18 @@ window.Telas.desviosRecomendacao = (function () {
     padrao: () => ({ talhao: 'todos', grupo: 'todos', operacao: 'todos', executor: 'todos', pagina: 1 }),
     aoMudar: () => { est.pagina = 1; aoMudarFiltros(); }
   });
-  // Faixas pelo desvio absoluto, com a cor de cada uma (a mesma das etiquetas de desvio)
+  // Faixas pelo desvio com sinal (04/11/2026), com a cor de cada uma (a mesma das etiquetas de desvio): abaixo do
+  // recomendado (negativo), sem desvio (exatamente 0%, sem tolerância por enquanto; a validar com os usuários), até 10%,
+  // de 10% a 20% e acima de 20%. ZERO só absorve o arredondamento da conta, não é tolerância
+  const ZERO = 1e-9;
   const FAIXAS = [
-    ['ate10', 'Até 10%', (d) => d <= 0.10],
-    ['10a20', '10% a 20%', (d) => d > 0.10 && d <= 0.20],
-    ['20a30', '20% a 30%', (d) => d > 0.20 && d <= 0.30],
-    ['acima30', 'Acima de 30%', (d) => d > 0.30]
+    ['abaixo', 'Abaixo do recomendado', (d) => d < -ZERO],
+    ['sem', 'Sem desvio', (d) => Math.abs(d) <= ZERO],
+    ['ate10', 'Até 10%', (d) => d > ZERO && d <= 0.10],
+    ['10a20', '10-20%', (d) => d > 0.10 && d <= 0.20],
+    ['acima20', 'Acima de 20%', (d) => d > 0.20]
   ];
-  const faixaDe = (d) => FAIXAS.find(([, , f]) => f(Math.abs(d)))[0];
+  const faixaDe = (d) => FAIXAS.find(([, , f]) => f(d))[0];
   // Níveis do gráfico Desvios por nível (03/11/2026: sem Talhão; Grupo de operação no lugar da Operação)
   const NIVEIS = [['empresa', 'Empresa'], ['fazenda', 'Fazenda'], ['grupo', 'Grupo de operação'], ['executor', 'Executor']];
 
@@ -10308,14 +10318,11 @@ window.Telas.desviosRecomendacao = (function () {
   // Atalhos das seções (rolam até elas; o da seção à mostra fica destacado)
   const SECOES = [['dist', 'Distribuição'], ['nivel', 'Por nível'], ['top', 'Top 10'], ['det', 'Detalhamento']];
 
-  // Linha de baixo do cartão dos filtros: Analisar por e os atalhos das seções (fora da barra de filtros)
+  // Linha de baixo do cartão dos filtros: só o Analisar por (fora da barra de filtros). Os atalhos "Ir para:" saíram
+  // em 04/11/2026
   function base() {
     return `
-        <div class="dr-analisar">${analisar()}</div>
-        <nav class="dr-atalhos" aria-label="Ir para a seção">
-          <span class="dr-atalhos__titulo">Ir para:</span>
-          ${SECOES.map(([id, rot]) => `<button class="dr-atalho" type="button" data-dr-ir="${id}">${rot}</button>`).join('')}
-        </nav>`;
+        <div class="dr-analisar">${analisar()}</div>`;
   }
 
   const nomeModo = () => (est.modo === 'quantidade' ? 'Quantidade' : 'Dose');
@@ -10338,7 +10345,7 @@ window.Telas.desviosRecomendacao = (function () {
       ${detalhamento(regs)}`}`;
   }
 
-  // Distribuição: % de registros por faixa de desvio (absoluto). Clicar numa faixa filtra só o gráfico Desvios por nível
+  // Distribuição: % de registros por faixa de desvio (com sinal). Clicar numa faixa filtra só o gráfico Desvios por nível
   function distribuicao(regs) {
     const n = regs.length;
     const cont = Object.fromEntries(FAIXAS.map(([id]) => [id, 0]));
@@ -10346,7 +10353,7 @@ window.Telas.desviosRecomendacao = (function () {
     return `
       <section class="cartao dr-secao dr-dist dr-ancora" id="dr-sec-dist" aria-labelledby="dr-dist-titulo">
         <h3 class="dr-secao__titulo" id="dr-dist-titulo">${est.modo === 'quantidade' ? 'Distribuição dos desvios por Quantidade de Produto' : 'Distribuição dos desvios de Dose de Produto'}</h3>
-        <p class="dr-secao__sub">% de OS por faixa de desvio do aplicado x recomendado.</p>
+        <p class="dr-secao__sub">% de OS por faixa de desvio recomendado x aplicado.</p>
         <ul class="dr-faixas">
           ${FAIXAS.map(([id, rot]) => {
             const p = n ? cont[id] / n : 0;
@@ -10391,15 +10398,15 @@ window.Telas.desviosRecomendacao = (function () {
         <p class="dr-secao__sub">Comparativo entre os grupos conforme a métrica selecionada${faixa ? ` · faixa ${faixa.toLowerCase()}` : ''}.</p>
         ${!barras.length ? '<p class="ind-vazio">Nenhuma OS nesta faixa.</p>' : `
         <div class="ind-grafico ${barras.length > (longos ? 6 : 8) ? 'ind-grafico--dia' : ''} ${longos ? 'dr-rotulos-longos' : ''}" role="img"
-             aria-label="Desvio médio por ${NIVEIS.find(([v]) => v === est.nivel)[1].toLowerCase()}: ${barras.map((b) => `${b.nome}, ${fmt(b.valor, 1)}%`).join('; ')}">
+             aria-label="Desvio médio por ${NIVEIS.find(([v]) => v === est.nivel)[1].toLowerCase()}: ${barras.map((b) => `${b.nome}, ${fmt(Math.round(b.valor))}%`).join('; ')}">
           <span class="ind-grafico__eixo-titulo">Desvio (%)</span>
           <div class="ind-grafico__plot dr-nivel__plot">
             ${marcas.map((v) => `<span class="ind-grafico__grade" style="bottom: ${v / topo * 100}%"><span>${fmt(v)}%</span></span>`).join('')}
             <div class="ind-grafico__barras">
               ${barras.map((b) => `
-                <div class="ind-grafico__coluna" title="${esc(b.nome)}: ${fmt(b.valor, 1)}%">
+                <div class="ind-grafico__coluna" title="${esc(b.nome)}: ${fmt(Math.round(b.valor))}%">
                   <div class="ind-grafico__barra-area">
-                    <span class="ind-grafico__valor" style="bottom: ${b.valor / topo * 100}%">${fmt(b.valor, 1)}%</span>
+                    <span class="ind-grafico__valor" style="bottom: ${b.valor / topo * 100}%">${fmt(Math.round(b.valor))}%</span>
                     <span class="ind-grafico__barra" style="height: ${b.valor / topo * 100}%"></span>
                   </div>
                   <span class="ind-grafico__rotulo">${esc(rotulo(b.nome))}</span>
@@ -10410,7 +10417,7 @@ window.Telas.desviosRecomendacao = (function () {
       </section>`;
   }
 
-  // Etiqueta do desvio, na cor da faixa (pelo valor absoluto), com o sinal
+  // Etiqueta do desvio, na cor da faixa, com o sinal
   const etiqueta = (d) => `<span class="dr-etiqueta dr-cor--${faixaDe(d)}">${pct(d)}</span>`;
   const dose = (n, unidade) => `${fmt(n, 2)} ${esc(unidade)}/ha`;
   const qtd = (n, unidade) => `${fmt(Math.round(n))} ${esc(unidade)}`;
@@ -10434,8 +10441,38 @@ window.Telas.desviosRecomendacao = (function () {
       desvio: est.modo === 'quantidade' ? x.qtdApl / x.qtdRec - 1 : x.doseApl / x.doseRec - 1 }))
       .sort((a, b) => Math.abs(b.desvio) - Math.abs(a.desvio) || a.produto.localeCompare(b.produto, 'pt-BR'));
   }
+  // Ordenar por coluna (04/11/2026), no Top 10 e no Detalhamento: seta no título, 1º clique crescente, 2º decrescente.
+  // Sem escolha, a ordem padrão (do maior desvio absoluto para o menor). No Top 10, reordena os 10 produtos
+  const texto = (a, b) => String(a).localeCompare(String(b), 'pt-BR', { numeric: true });
+  const COLUNAS_TOP = {
+    grupoInsumo: (x) => x.grupoInsumo, produto: (x) => x.produto,
+    rec: (x) => (est.modo === 'quantidade' ? x.qtdRec : x.doseRec / x.n), apl: (x) => (est.modo === 'quantidade' ? x.qtdApl : x.doseApl / x.n),
+    desvio: (x) => x.desvio, n: (x) => x.n
+  };
+  const COLUNAS_DET = {
+    os: (r) => r.os, safra: (r) => r.safra, empresa: (r) => r.empresa, fazenda: (r) => r.fazenda, talhao: (r) => r.talhao,
+    operacao: (r) => r.operacao, produto: (r) => r.produto, doseRec: (r) => r.doseRec, doseApl: (r) => r.doseApl,
+    desvioDose: (r) => r.doseApl / r.doseRec - 1, qtdRec: (r) => r.qtdRec, qtdApl: (r) => r.qtdApl, desvioQtd: (r) => r.qtdApl / r.qtdRec - 1
+  };
+  function ordenar(lista, ordem, colunas) {
+    if (!ordem || !colunas[ordem.coluna]) return lista;
+    const v = colunas[ordem.coluna];
+    const sinal = ordem.sentido === 'asc' ? 1 : -1;
+    return [...lista].sort((a, b) => {
+      const x = v(a); const y = v(b);
+      return sinal * (typeof x === 'number' && typeof y === 'number' ? x - y : texto(x, y));
+    });
+  }
+  // Título da coluna com a seta (tabela: 'top' ou 'det')
+  function titulo(tabela, id, rotulo, classe = '') {
+    const ordem = tabela === 'top' ? est.ordemTop : est.ordemDet;
+    const ativa = ordem && ordem.coluna === id;
+    return `<th class="${classe}"><span class="titulo-coluna"><span>${rotulo}</span><button class="titulo-ordenar ${ativa ? 'titulo-ordenar--ativo' : ''}"
+      type="button" data-dr-ordenar="${tabela}:${id}" aria-label="Ordenar por ${rotulo}">${ativa ? (ordem.sentido === 'asc' ? Icones.acima : Icones.abaixo) : Icones.ordenar}</button></span></th>`;
+  }
+
   function topProdutos(regs) {
-    const top = produtos(regs).slice(0, 10);
+    const top = ordenar(produtos(regs).slice(0, 10), est.ordemTop, COLUNAS_TOP);
     const q = est.modo === 'quantidade';
     return `
       <section class="cartao dr-secao dr-ancora" id="dr-sec-top" aria-labelledby="dr-top-titulo">
@@ -10447,10 +10484,10 @@ window.Telas.desviosRecomendacao = (function () {
           ${est.produto ? '<button class="link-acao" type="button" data-dr-acao="todos-produtos">Mostrar todos os produtos</button>' : ''}
         </div>
         <div class="tabela-rolagem"><table class="tabela dr-tabela dr-top">
-          <thead><tr><th>Grupo de insumo</th><th>Produto</th>
-            <th class="tabela__numero">${q ? 'Quantidade recomendada' : 'Dose recomendada'}</th>
-            <th class="tabela__numero">${q ? 'Quantidade aplicada' : 'Dose aplicada'}</th>
-            <th class="dr-centro">Desvio</th><th class="tabela__numero">Nº de OS</th></tr></thead>
+          <thead><tr>${titulo('top', 'grupoInsumo', 'Grupo de insumo')}${titulo('top', 'produto', 'Produto')}
+            ${titulo('top', 'rec', q ? 'Quantidade recomendada' : 'Dose recomendada', 'tabela__numero')}
+            ${titulo('top', 'apl', q ? 'Quantidade aplicada' : 'Dose aplicada', 'tabela__numero')}
+            ${titulo('top', 'desvio', 'Desvio', 'dr-centro')}${titulo('top', 'n', 'Nº de OS', 'tabela__numero')}</tr></thead>
           <tbody>${top.map((x) => `
             <tr class="dr-top__linha ${est.produto === x.produto ? 'dr-top__linha--ativa' : ''} ${est.produto && est.produto !== x.produto ? 'dr-top__linha--apagada' : ''}"
                 data-dr-produto="${esc(x.produto)}" tabindex="0" title="${est.produto === x.produto ? 'Mostrar todos os produtos' : `Ver só as OS de ${esc(x.produto)}`}">
@@ -10469,12 +10506,13 @@ window.Telas.desviosRecomendacao = (function () {
       && (!q || [r.os, r.produto, r.talhao].some((x) => Util.normalizar(x).includes(q))))
       .sort((a, b) => Math.abs(desvioDe(b)) - Math.abs(desvioDe(a)) || a.os.localeCompare(b.os, 'pt-BR', { numeric: true }));
   }
+  const linhasOrdenadas = (regs) => ordenar(linhasDetalhe(regs), est.ordemDet, COLUNAS_DET);
   function detalhamento(regs) {
     return `
       <section class="cartao dr-secao dr-ancora" id="dr-sec-det" aria-labelledby="dr-det-titulo" data-dr-detalhe>${tabelaDetalhe(regs)}</section>`;
   }
   function tabelaDetalhe(regs) {
-    const ls = linhasDetalhe(regs);
+    const ls = linhasOrdenadas(regs);
     const paginas = Math.max(1, Math.ceil(ls.length / est.porPagina));
     est.pagina = Math.min(Math.max(1, est.pagina), paginas);
     const pagina = ls.slice((est.pagina - 1) * est.porPagina, est.pagina * est.porPagina);
@@ -10495,9 +10533,10 @@ window.Telas.desviosRecomendacao = (function () {
           </div>
         </div>
         <div class="tabela-rolagem"><table class="tabela dr-tabela dr-det">
-          <thead><tr><th>Nº OS</th><th>Safra</th><th>Empresa</th><th>Fazenda</th><th>Talhão</th><th>Operação</th><th>Produto</th>
-            <th class="tabela__numero">Dose recomendada</th><th class="tabela__numero">Dose aplicada</th><th class="dr-centro">Desvio (%)</th>
-            <th class="tabela__numero">Quantidade recomendada</th><th class="tabela__numero">Quantidade aplicada</th><th class="dr-centro">Desvio (%)</th></tr></thead>
+          <thead><tr>${titulo('det', 'os', 'Nº OS')}${titulo('det', 'safra', 'Safra')}${titulo('det', 'empresa', 'Empresa')}${titulo('det', 'fazenda', 'Fazenda')}
+            ${titulo('det', 'talhao', 'Talhão')}${titulo('det', 'operacao', 'Operação')}${titulo('det', 'produto', 'Produto')}
+            ${titulo('det', 'doseRec', 'Dose recomendada', 'tabela__numero')}${titulo('det', 'doseApl', 'Dose aplicada', 'tabela__numero')}${titulo('det', 'desvioDose', 'Desvio Dose (%)', 'dr-centro')}
+            ${titulo('det', 'qtdRec', 'Quantidade recomendada', 'tabela__numero')}${titulo('det', 'qtdApl', 'Quantidade aplicada', 'tabela__numero')}${titulo('det', 'desvioQtd', 'Desvio Qtd (%)', 'dr-centro')}</tr></thead>
           <tbody>${pagina.length ? pagina.map((r) => `
             <tr title="Fechada em ${Util.data(r.fechamento)} · ${esc(r.executor)}">
               <td>${esc(r.os)}</td><td>${esc(r.safra)}</td><td>${esc(r.empresa)}</td><td>${esc(r.fazenda)}</td><td>${esc(r.talhao)}</td>
@@ -10524,7 +10563,7 @@ window.Telas.desviosRecomendacao = (function () {
   function exportar(regs) {
     const linhas = [['Nº OS', 'Safra', 'Empresa', 'Fazenda', 'Talhão', 'Operação', 'Produto', 'Unidade', 'Dose recomendada (/ha)',
       'Dose aplicada (/ha)', 'Desvio dose (%)', 'Quantidade recomendada', 'Quantidade aplicada', 'Desvio quantidade (%)', 'Executor', 'Fechamento'],
-    ...linhasDetalhe(regs).map((r) => [r.os, r.safra, r.empresa, r.fazenda, r.talhao, r.operacao, r.produto, r.unidade,
+    ...linhasOrdenadas(regs).map((r) => [r.os, r.safra, r.empresa, r.fazenda, r.talhao, r.operacao, r.produto, r.unidade,
       +r.doseRec.toFixed(3), +r.doseApl.toFixed(3), +((r.doseApl / r.doseRec - 1) * 100).toFixed(1),
       +r.qtdRec.toFixed(1), +r.qtdApl.toFixed(1), +((r.qtdApl / r.qtdRec - 1) * 100).toFixed(1), r.executor, Util.data(r.fechamento)])];
     const livro = XLSX.utils.book_new();
@@ -10631,6 +10670,16 @@ window.Telas.desviosRecomendacao = (function () {
         est.produto = est.produto === prod.dataset.drProduto ? null : prod.dataset.drProduto;
         est.pagina = 1;
         redesenhar(`[data-dr-produto="${CSS.escape(prod.dataset.drProduto)}"]`);
+        return;
+      }
+      // Ordenar: a mesma coluna inverte o sentido; outra começa do menor para o maior
+      const ord = e.target.closest('[data-dr-ordenar]');
+      if (ord) {
+        const [tabela, coluna] = ord.dataset.drOrdenar.split(':');
+        const chave = tabela === 'top' ? 'ordemTop' : 'ordemDet';
+        est[chave] = { coluna, sentido: est[chave] && est[chave].coluna === coluna && est[chave].sentido === 'asc' ? 'desc' : 'asc' };
+        if (tabela === 'det') { est.pagina = 1; redesenharDetalhe(); } else redesenhar();
+        raiz.querySelector(`[data-dr-ordenar="${CSS.escape(ord.dataset.drOrdenar)}"]`)?.focus();
         return;
       }
       const pag = e.target.closest('[data-dr-pagina]');

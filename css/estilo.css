@@ -3793,7 +3793,7 @@ html:has(.menu:not(.menu--recolhido)) .dr-filtros__acoes .filtros__limpar { padd
 .dr-faixas { flex: 1; display: flex; flex-direction: column; justify-content: space-around; gap: 6px; margin: 6px 0 0; padding: 0; list-style: none; }
 .dr-dist .dr-faixa { padding-top: 10px; padding-bottom: 10px; }
 .dr-dist .dr-faixa__trilho { height: 10px; border-radius: 5px; }
-.dr-faixa { display: grid; grid-template-columns: 110px minmax(0, 1fr) 48px 56px; align-items: center; gap: 12px; width: 100%; padding: 6px 8px;
+.dr-faixa { display: grid; grid-template-columns: 180px minmax(0, 1fr) 48px 56px; align-items: center; gap: 12px; width: 100%; padding: 6px 8px;
   border: 1px solid transparent; border-radius: 8px; background: none; font: inherit; font-size: 14px; color: var(--texto); text-align: left; cursor: pointer; }
 .dr-faixa:hover { background: var(--superficie-2); }
 .dr-faixa[aria-pressed="true"] { border-color: var(--borda-forte); background: var(--superficie-2); }
@@ -3804,13 +3804,16 @@ html:has(.menu:not(.menu--recolhido)) .dr-filtros__acoes .filtros__limpar { padd
 .dr-faixa__pct { font-weight: 700; text-align: right; font-variant-numeric: tabular-nums; }
 .dr-faixa__n { color: var(--texto-suave); font-variant-numeric: tabular-nums; }
 .dr-todas { margin-top: 8px; }
-.dr-cor--ate10 { --dr-c: var(--verde-700); --dr-f: var(--verde-100); --dr-t: var(--verde-700); }
-.dr-cor--10a20 { --dr-c: #2a78d6; --dr-f: var(--info-fundo); --dr-t: #1a5bb0; }
-.dr-cor--20a30 { --dr-c: #e8772e; --dr-f: #fdebdc; --dr-t: #b9560f; }
-.dr-cor--acima30 { --dr-c: #d93a2b; --dr-f: #f6cfca; --dr-t: var(--erro); }
-html[data-tema="escuro"] .dr-cor--10a20 { --dr-t: #8fbcef; }
-html[data-tema="escuro"] .dr-cor--20a30 { --dr-f: #3d2817; --dr-t: #f0995a; }
-html[data-tema="escuro"] .dr-cor--acima30 { --dr-f: #5a2626; --dr-t: #ff8a80; }
+/* Faixas (04/11/2026): abaixo do recomendado azul, sem desvio verde, até 10% amarelo, 10-20% laranja, acima de 20% vermelho */
+.dr-cor--abaixo { --dr-c: #2a78d6; --dr-f: var(--info-fundo); --dr-t: #1a5bb0; }
+.dr-cor--sem { --dr-c: var(--verde-700); --dr-f: var(--verde-100); --dr-t: var(--verde-700); }
+.dr-cor--ate10 { --dr-c: #d4a72c; --dr-f: #fbf0d0; --dr-t: #8a6a00; }
+.dr-cor--10a20 { --dr-c: #e8772e; --dr-f: #fdebdc; --dr-t: #b9560f; }
+.dr-cor--acima20 { --dr-c: #d93a2b; --dr-f: #f6cfca; --dr-t: var(--erro); }
+html[data-tema="escuro"] .dr-cor--abaixo { --dr-t: #8fbcef; }
+html[data-tema="escuro"] .dr-cor--ate10 { --dr-f: #3a3113; --dr-t: #e8c35a; }
+html[data-tema="escuro"] .dr-cor--10a20 { --dr-f: #3d2817; --dr-t: #f0995a; }
+html[data-tema="escuro"] .dr-cor--acima20 { --dr-f: #5a2626; --dr-t: #ff8a80; }
 .dr-etiqueta { display: inline-block; min-width: 64px; padding: 2px 8px; border-radius: 999px; background: var(--dr-f); color: var(--dr-t);
   font-size: 13px; font-weight: 700; text-align: center; font-variant-numeric: tabular-nums; }
 .dr-secao__topo > div:first-child { flex: 1; min-width: 0; }
@@ -3839,7 +3842,7 @@ html[data-tema="escuro"] .dr-cor--acima30 { --dr-f: #5a2626; --dr-t: #ff8a80; }
   display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .dr-tabela td, .dr-tabela th { padding: 7px 10px; font-size: 13px; }
 /* Top 10 e Detalhamento: rolagem vertical por dentro, com o cabeçalho da tabela parado */
-#dr-sec-top .tabela-rolagem { max-height: 300px; overflow: auto; }
+#dr-sec-top .tabela-rolagem { max-height: none; overflow: visible; } /* Top 10: os 10 produtos abertos, sem rolagem (04/11/2026) */
 #dr-sec-det .tabela-rolagem { max-height: 440px; overflow: auto; }
 .dr-tabela thead th { position: sticky; top: 0; z-index: 1; background: var(--superficie-2); }
 .dr-tabela .dr-centro { text-align: center; }
@@ -3916,3 +3919,6 @@ html:has(.menu) .bf__acoes.bf__acoes--texto .bf__botao { gap: 8px; padding: 0 14
 /* Desvios de Recomendação: a barra padronizada na linha de cima do cartão (sem o próprio contorno); embaixo, Analisar
    por e Ir para (04/11/2026) */
 .dr-filtros .filtros.dr-bf { flex-basis: 100%; min-width: 0; padding: 0; border: 0; box-shadow: none; background: none; }
+/* Desvios: o cartão dos filtros na largura dos cartões de baixo; o alfinete no canto superior direito dele (04/11/2026) */
+.dr-fixo [data-dr-alfinete] { position: absolute; top: 16px; right: 44px; z-index: 1; }
+.dr-fixo .dr-congelar { width: 28px; height: 28px; }
