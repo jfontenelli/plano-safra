@@ -278,17 +278,19 @@ window.Telas.monitoramentoAplicacoes = (function () {
   // desde 03/11/2026). A Duração da Operação saiu em 29/10/2026; o código dela continua aqui
   const GUIAS = [
     ['calendario', 'Calendário', 'Consulte as operações agrícolas planejadas por ano, mês, semana ou dia.'],
-    ['tabela', 'Planejado × Executado', 'Compare as datas planejadas e executadas das operações por talhão.'],
-    ['desvios', 'Desvios de Recomendação', 'Analise os desvios entre o recomendado e o executado por produto, operação e nível de análise.'],
+    ['tabela', 'Desvios de data', 'Compare as datas planejadas e executadas das operações por talhão.'],
+    ['desvios', 'Desvios de dose', 'Analise os desvios entre o recomendado e o executado por produto, operação e nível de análise.'],
     ['falta', 'Previsão de Falta de Produtos', 'Estime a falta de produtos para as operações planejadas.']
   ];
   const GUIAS_PAGINA = ['tabela', 'desvios', 'falta'];
   // visao: a guia (o Calendário chama com 'calendario'). Só no Calendário, a etiqueta das versões publicadas.
+  // Título da página (04/11/2026): sempre "Planejado × Executado", em qualquer guia (Desvios de data · Desvios de dose ·
+  // Previsão de Falta de Produtos); o subtítulo é o da guia aberta. No Calendário, o nome dele
   function cabecalho(visao = est.visao) {
     const [, nome, subtitulo] = GUIAS.find(([id]) => id === visao);
     const titulo = `
         <div class="oa-cabecalho__titulo">
-          <h1 class="cabecalho__titulo">${nome}</h1>
+          <h1 class="cabecalho__titulo">${visao === 'calendario' ? nome : 'Planejado × Executado'}</h1>
           <p class="cabecalho__subtitulo">${subtitulo}</p>
         </div>`;
     if (visao === 'calendario') {
@@ -350,18 +352,20 @@ window.Telas.monitoramentoAplicacoes = (function () {
   // etiqueta na cor do status. Datas: o calendário e a data executada; Atrasada, a exclamação e a data planejada; Planejada,
   // o calendário e a data planejada, em cinza. Dias: o desvio ("Postergada 2d"); Atrasada com a exclamação; a Planejada
   // ("Em 4d") como em Datas: o calendário e o texto, em cinza.
-  function celula(a) {
+  // extra: classes e atributos a mais da célula (a Data de plantio é uma coluna parada à esquerda)
+  function celula(a, extra = '') {
     const st = a ? statusDe(a) : null;
     // Status escolhido na legenda: a aplicação em outro status fica vazia
-    if (st && est.status && st !== est.status) return '<td class="ma-ini"></td>';
-    if (!a) return '<td class="ma-ini ma-vazio">—</td>';
+    if (st && est.status && st !== est.status) return `<td class="ma-ini" ${extra}></td>`.replace('class="ma-ini" class="', 'class="ma-ini ');
+    if (!a || !a.planejado) return `<td class="ma-ini ma-vazio" ${extra}>—</td>`.replace('class="ma-ini ma-vazio" class="', 'class="ma-ini ma-vazio ');
     const dica = esc(dicaAplicacao(a, st));
     if (est.modo === 'dias') {
-      if (st === 'futura') return `<td class="ma-ini"><span class="ma-etiqueta ma-st--futura" title="${dica}">${Icones.calendario}${textoDias(a, st)}</span></td>`;
-      return `<td class="ma-ini"><span class="ma-etiqueta ma-etiqueta--dias ma-st--${st}" title="${dica}">${st === 'pendente' ? Icones.pendente : ''}${textoDias(a, st)}</span></td>`;
+      if (st === 'futura') return td(`<span class="ma-etiqueta ma-st--futura" title="${dica}">${Icones.calendario}${textoDias(a, st)}</span>`);
+      return td(`<span class="ma-etiqueta ma-etiqueta--dias ma-st--${st}" title="${dica}">${st === 'pendente' ? Icones.pendente : ''}${textoDias(a, st)}</span>`);
     }
     const texto = `${st === 'pendente' ? Icones.pendente : Icones.calendario}${Util.data(a.executada || a.planejado)}`;
-    return `<td class="ma-ini"><span class="ma-etiqueta ma-st--${st}" title="${dica}">${texto}</span></td>`;
+    return td(`<span class="ma-etiqueta ma-st--${st}" title="${dica}">${texto}</span>`);
+    function td(conteudo) { return `<td class="ma-ini" ${extra}>${conteudo}</td>`.replace('class="ma-ini" class="', 'class="ma-ini '); }
   }
 
   // ----- Ordenação: est.ordem = { coluna, sentido }. Colunas: talhao, plantasM, plantio, ultima e, nas aplicações,
@@ -410,9 +414,11 @@ window.Telas.monitoramentoAplicacoes = (function () {
 
   // Cartão do talhão (coluna Talhão, parada ao rolar para o lado): o nome, a fazenda, as variedades, uma barrinha por
   // operação na cor do status e "2 de 4 executadas 50%"
+  // O plantio entra nas barrinhas e na conta de executadas (04/11/2026), primeiro, na cor do status dele
   function cartaoTalhao(r, cols) {
-    const ops = cols.filter((c) => r.aplic[c.nome]);
-    const aps = ops.map((c) => r.aplic[c.nome]);
+    const comPlantio = r.plantio && r.plantio.planejado;
+    const ops = [...(comPlantio ? [{ nome: 'Plantio' }] : []), ...cols.filter((c) => r.aplic[c.nome])];
+    const aps = [...(comPlantio ? [r.plantio] : []), ...cols.filter((c) => r.aplic[c.nome]).map((c) => r.aplic[c.nome])];
     const sts = aps.map(statusDe);
     const feitas = aps.filter((a) => a.executada).length;
     return `
@@ -546,7 +552,7 @@ window.Telas.monitoramentoAplicacoes = (function () {
     // Duração: sem a legenda de status (não filtra pelo status escolhido nas outras guias)
     if (est.visao === 'duracao') return cols.length ? duracao(linhas(cols), cols) : semOperacao();
     // Status escolhido na legenda: só os talhões com ao menos uma aplicação nesse status
-    const ls = ordenar(linhas(cols).filter((r) => !est.status || Object.values(r.aplic).some((a) => statusDe(a) === est.status)));
+    const ls = ordenar(linhas(cols).filter((r) => !est.status || [r.plantio, ...Object.values(r.aplic)].some((a) => a && a.planejado && statusDe(a) === est.status)));
     // O Plantio marcado não ganha coluna: é a Data de plantio
     const temOperacao = cols.length > 0;
     cols = cols.filter((c) => !c.plantio);
@@ -561,10 +567,9 @@ window.Telas.monitoramentoAplicacoes = (function () {
           type="button" data-ma-ordenar="${esc(id)}" title="Ordenar por ${esc(rotulo.toLowerCase())}" aria-label="Ordenar por ${esc(rotulo.toLowerCase())}">${ativa ? Icones.acima : Icones.ordenar}</button></span></th>`;
     };
     // Colunas: Talhão (resumo), Estande e Data de plantio paradas à esquerda; as operações; Dias sem aplicação.
-    // A Data de plantio é a executada, numa etiqueta neutra (o Plantio marcado não ganha coluna própria)
+    // A Data de plantio também na etiqueta do status da legenda (04/11/2026; antes a executada numa etiqueta neutra; o
+    // Plantio marcado não ganha coluna própria)
     const colunas = 4 + cols.length;
-    const plantio = (r) => (r.plantio.executada
-      ? `<span class="ma-etiqueta ma-etiqueta--neutra">${Icones.calendario}${Util.data(r.plantio.executada)}</span>` : '—');
     return `
       ${barra()}
       <div class="tabela-rolagem ma-tabela__rolagem">
@@ -584,7 +589,7 @@ window.Telas.monitoramentoAplicacoes = (function () {
               <tr>
                 <td class="ma-fixa ma-td-talhao" data-fixa="0">${cartaoTalhao(r, cols)}</td>
                 <td class="ma-ini tabela__numero ma-fixa ma-estande" data-fixa="1">${r.plantasM === null ? '—' : Math.round(r.plantasM).toLocaleString('pt-BR')}</td>
-                <td class="ma-ini ma-fixa ma-fixa--ultima" data-fixa="2">${plantio(r)}</td>
+                ${celula(r.plantio, 'class="ma-fixa ma-fixa--ultima" data-fixa="2"')}
                 ${cols.map((c) => celula(r.aplic[c.nome])).join('')}
                 <td class="ma-ini tabela__numero ma-dias-sem">${r.ultima === null ? '—' : r.ultima}</td>
               </tr>`).join('')

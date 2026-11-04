@@ -56,8 +56,8 @@ Menu "Gestão da Lavoura" (o nome leva ao Calendário; vários planos, última v
  │   ├─ Ano (Empresa › Fazenda › Safra) ──[clique na barra]→ Mês, no começo da operação
  │   └─ Mês · Semana · Dia (a agenda)
  ├─ 10 Operações (página Planejado × Executado)
- │   ├─ Planejado × Executado (tabela por talhão; Visualizar por Datas · Dias)
- │   ├─ Desvios de Recomendação (Dose · Quantidade: distribuição, por nível, Top 10, detalhamento por OS)
+ │   ├─ Desvios de data (antes Planejado × Executado; tabela por talhão; Visualizar por Datas · Dias)
+ │   ├─ Desvios de dose (antes Desvios de Recomendação; Dose · Quantidade: distribuição, por nível, Top 10, detalhamento por OS)
  │   └─ Previsão de Falta de Produtos
  └─ 09 Central OS (Visão geral, gráficos e tabela Ordens de Serviço)
 ```
