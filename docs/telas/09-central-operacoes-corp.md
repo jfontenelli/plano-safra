@@ -12,6 +12,7 @@ Dar ao gestor a visão de todas as OS das fazendas: quantas, em que status, quan
 - Sem nenhum plano cadastrado: "Crie seu primeiro plano para visualizar a Central OS" e o botão "+ Criar Plano de Safra".
 
 ## Conteúdo
+- **Fundo branco** (04/11/2026), como os Desvios de Recomendação e a Previsão de Falta de Produtos; os cartões com a borda e a sombra leve.
 - **Cabeçalho:** sem caminho no topo (03/11/2026), título "Central OS", subtítulo "Acompanhe as ordens de serviço, recomendações e execução das operações agrícolas." e a etiqueta "Últimas versões publicadas ⓘ" à direita.
 - **Filtros:** Safra, Cultura, Empresa, Fazenda, Grupo de operação, Data inicial, Data final e Limpar filtros. O período abre da primeira operação da safra até hoje + 30 dias e considera a data de abertura das OS (nas operações ainda planejadas, a data planejada); o texto embaixo dos filtros diz isso.
 - **Visão geral:** cinco cartões: **Total de OS** (recomendadas, em execução e fechadas; as planejadas ainda não são OS) · **Fechadas** (% do total de OS) · **Em execução** (% do total de OS) · **Atraso médio** (dias, entre as OS em execução) · **Maior atraso** (dias, entre as OS em execução).
