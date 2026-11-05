@@ -4198,6 +4198,14 @@ html[data-tema="escuro"] .fp-modal { --fp-est-desv: #ff6b5e; }
 .cal-tal--dia { grid-template-columns: minmax(200px, max-content) 260px; }
 .cal-tal__dia--fixo { cursor: default; }
 .cal-tal__dia--fixo:hover { background: none; color: inherit; }
+/* Risco de falta de produto › indicadores (05/11/2026): três cartões no padrão do Resumo do orçamento (ícone num
+   círculo, rótulo pequeno, número grande) e o texto de apoio pequeno */
+.fp-inds { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.fp-ind__texto { font-size: 13px; color: var(--texto-suave); }
+.fp-ind .orc-card__rotulo { font-size: 15px; font-weight: 700; color: var(--texto); } /* título do cartão em negrito, maior */
+.fp-ind--falta .orc-card__icone { background: #fbe1de; color: var(--erro); }
+html[data-tema="escuro"] .fp-ind--falta .orc-card__icone { background: #5a2626; color: #ff8a80; }
+@media (max-width: 760px) { .fp-inds { grid-template-columns: 1fr; } }
 
 </style>
 </head>
@@ -5170,6 +5178,10 @@ window.Icones = (function () {
     // Mais filtros (controles deslizantes)
     ajustes: svg('<path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/>'),
     // Resumo › Produtos (caixa)
+    // Estoque suficiente (Risco de falta de produto): a caixa com o check
+    caixaOk: svg('<path d="M21 8 12 3 3 8l9 5 9-5Z"/><path d="M3 8v8l9 5 1.5-.8"/><path d="M21 8v6"/><path d="M12 13v8"/><path d="M15.5 18.5l2 2 4-4"/>'),
+    // Estoque insuficiente (Risco de falta de produto): a caixa com o x
+    caixaX: svg('<path d="M21 8 12 3 3 8l9 5 9-5Z"/><path d="M3 8v8l9 5 1.5-.8"/><path d="M21 8v6"/><path d="M12 13v8"/><path d="M16 16l4.5 4.5M20.5 16 16 20.5"/>'),
     caixa: svg('<path d="M21 8 12 3 3 8l9 5 9-5Z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/>'),
     pizza: svg('<path d="M12 3v9h9"/><path d="M20.5 15A9 9 0 1 1 9 3.5"/>'),
     colheita: svg('<path d="M12 21V9"/><path d="M12 9c-2.5 0-3.5-2-3.5-4 2.5 0 3.5 2 3.5 4Zm0 0c2.5 0 3.5-2 3.5-4-2.5 0-3.5 2-3.5 4Zm0 5c-2.5 0-3.5-2-3.5-4 2.5 0 3.5 2 3.5 4Zm0 0c2.5 0 3.5-2 3.5-4-2.5 0-3.5 2-3.5 4Zm0 5c-2.5 0-3.5-2-3.5-4 2.5 0 3.5 2 3.5 4Zm0 0c2.5 0 3.5-2 3.5-4-2.5 0-3.5 2-3.5 4Z"/>'),
@@ -10028,17 +10040,18 @@ window.Telas.monitoramentoAplicacoes = (function () {
     ['calendario', 'Calendário', 'Consulte as operações agrícolas planejadas por ano, mês, semana ou dia.'],
     ['tabela', 'Desvios de data', 'Compare as datas planejadas e executadas das operações por talhão.'],
     ['desvios', 'Desvios de dose', 'Analise os desvios entre o recomendado e o executado por produto, operação e nível de análise.'],
-    ['falta', 'Previsão de Falta de Produtos', 'Estime a falta de produtos para as operações planejadas.']
+    ['falta', 'Risco de falta de produto', 'Estime a falta de produtos para as operações planejadas.']
   ];
   const GUIAS_PAGINA = ['tabela', 'desvios', 'falta'];
   // visao: a guia (o Calendário chama com 'calendario'). Só no Calendário, a etiqueta das versões publicadas.
-  // Título da página (04/11/2026): sempre "Planejado × Executado", em qualquer guia (Desvios de data · Desvios de dose ·
-  // Previsão de Falta de Produtos); o subtítulo é o da guia aberta. No Calendário, o nome dele
+  // Título da página (05/11/2026; antes "Planejado × Executado"): sempre "Operações", em qualquer guia (Desvios de data ·
+  // Desvios de dose · Risco de falta de produto, antes Previsão de Falta de Produtos); o subtítulo é o da guia aberta.
+  // No Calendário, o nome dele
   function cabecalho(visao = est.visao) {
     const [, nome, subtitulo] = GUIAS.find(([id]) => id === visao);
     const titulo = `
         <div class="oa-cabecalho__titulo">
-          <h1 class="cabecalho__titulo">${visao === 'calendario' ? nome : 'Planejado × Executado'}</h1>
+          <h1 class="cabecalho__titulo">${visao === 'calendario' ? nome : 'Operações'}</h1>
           <p class="cabecalho__subtitulo">${subtitulo}</p>
         </div>`;
     if (visao === 'calendario') {
@@ -10046,7 +10059,7 @@ window.Telas.monitoramentoAplicacoes = (function () {
     }
     return `
       ${titulo}
-      <nav class="ma-guias" aria-label="Guias de Planejado × Executado">
+      <nav class="ma-guias" aria-label="Guias de Operações">
         ${GUIAS_PAGINA.map((id) => `<a class="botao botao--p ${id === visao ? 'botao--primario' : 'botao--secundario'} ma-guia" href="#/planejado-executado/${id}"
           ${id === visao ? 'aria-current="page"' : ''}>${GUIAS.find(([x]) => x === id)[1]}</a>`).join('')}
       </nav>`;
@@ -11308,8 +11321,8 @@ window.Telas.faltaProdutos = (function () {
   }
   const CARTOES = [
     ['suficiente', 'Estoque suficiente'],
-    ['desvio', 'Falta se o desvio continuar'],
-    ['falta', 'Falta mesmo sem desvio']
+    ['desvio', 'Falta com desvio'],
+    ['falta', 'Falta sem desvio']
   ];
   function previsao() {
     const desvioDe = desvios();
@@ -11628,19 +11641,33 @@ window.Telas.faltaProdutos = (function () {
     const lista = previsao();
     return `${cartoes(lista)}${tabela(lista)}`;
   }
+  // Indicadores (05/11/2026, imagem da usuária; antes o quadro "Resumo da situação dos produtos" com três cartões):
+  // o título "Risco de falta de produto" e três cartões lado a lado, Total de produtos · Estoque suficiente · Estoque
+  // insuficiente (falta com ou sem desvio: as situações Falta com desvio e Falta sem desvio da tabela juntas), com o
+  // ícone ao lado do título, o número grande e "X% do total" (no Total, "Produtos analisados").
+  const ICONE_IND = { total: () => Icones.caixa, suficiente: () => Icones.caixaOk, desvio: () => Icones.alerta, falta: () => Icones.caixaX };
   function cartoes(lista) {
     const total = lista.length;
+    // No padrão do Resumo do orçamento: ícone num círculo à esquerda, rótulo pequeno em cinza e o número grande; o
+    // texto de apoio ("89% do total") embaixo, pequeno
+    const ind = (id, titulo, n, texto) => `
+            <div class="orc-card fp-ind fp-ind--${id}"><span class="orc-card__icone" aria-hidden="true">${ICONE_IND[id]()}</span>
+              <div class="orc-card__corpo"><span class="orc-card__rotulo">${titulo}</span><strong class="orc-card__numero">${fmt(n)}</strong>
+                <span class="fp-ind__texto">${texto}</span></div></div>`;
     return `
-        <section class="cartao orc-secao fp-resumo" aria-labelledby="fp-titulo-resumo">
-          <h2 class="orc-secao__titulo" id="fp-titulo-resumo">Resumo da situação dos produtos</h2>
-          <div class="orc-cards fp-cards">
-            ${CARTOES.map(([id, titulo]) => {
-              const n = lista.filter((x) => x.situacao === id).length;
-              return cartao(id, titulo, fmt(n), total ? `${fmt(Math.round(n / total * 100))}% de ${fmt(total)} ${total === 1 ? 'produto' : 'produtos'}` : 'Nenhum produto a aplicar');
+        <section class="cartao orc-secao fp-resumo" aria-labelledby="fp-titulo-inds">
+          <h2 class="orc-secao__titulo" id="fp-titulo-inds">Risco de falta de produto</h2>
+          <div class="orc-cards fp-inds">
+            ${ind('total', 'Total de produtos', total, total ? 'Produtos analisados' : 'Nenhum produto a aplicar')}
+            ${[['suficiente', 'Estoque suficiente', (x) => x.situacao === 'suficiente'],
+               ['falta', 'Estoque insuficiente', (x) => x.situacao !== 'suficiente']].map(([id, titulo, conta]) => {
+              const n = lista.filter(conta).length;
+              return ind(id, titulo, n, total ? `${fmt(Math.round(n / total * 100))}% do total` : '—');
             }).join('')}
           </div>
         </section>`;
   }
+
 
   function opcoes(chave) {
     if (chave === 'talhao') {
@@ -11686,7 +11713,7 @@ window.Telas.faltaProdutos = (function () {
     return `
       ${cab}
       <div class="pagina ma fp">
-        <section class="cartao filtros" aria-label="Filtrar a previsão de falta de produtos" data-fp-filtros></section>
+        <section class="cartao filtros" aria-label="Filtrar o risco de falta de produto" data-fp-filtros></section>
         <div data-fp-corpo></div>
       </div>`;
   }
@@ -18522,7 +18549,7 @@ window.Configuracoes = (function () {
     'central-os':     { titulo: 'Central OS', menu: 'central-os',
                         desenhar: () => temPlanos() ? Telas.centralCorp.desenhar() : Telas.semPlanos('central-os'),
                         aoMostrar: (conteudo) => { if (temPlanos()) Telas.centralCorp.aoMostrar(conteudo); } },
-    'planejado-executado': { titulo: 'Planejado × Executado', menu: 'planejado-executado',
+    'planejado-executado': { titulo: 'Operações', menu: 'planejado-executado',
                         desenhar: (guia) => temPlanos() ? Telas.monitoramentoAplicacoes.desenhar(guia) : Telas.semPlanos('planejado-executado'),
                         aoMostrar: (conteudo, guia) => { if (temPlanos()) Telas.monitoramentoAplicacoes.aoMostrar(conteudo, guia); } },
     'cadastros':      { titulo: 'Cadastros', menu: 'cadastros',

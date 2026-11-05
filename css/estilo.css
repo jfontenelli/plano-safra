@@ -4188,3 +4188,11 @@ html[data-tema="escuro"] .fp-modal { --fp-est-desv: #ff6b5e; }
 .cal-tal--dia { grid-template-columns: minmax(200px, max-content) 260px; }
 .cal-tal__dia--fixo { cursor: default; }
 .cal-tal__dia--fixo:hover { background: none; color: inherit; }
+/* Risco de falta de produto › indicadores (05/11/2026): três cartões no padrão do Resumo do orçamento (ícone num
+   círculo, rótulo pequeno, número grande) e o texto de apoio pequeno */
+.fp-inds { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.fp-ind__texto { font-size: 13px; color: var(--texto-suave); }
+.fp-ind .orc-card__rotulo { font-size: 15px; font-weight: 700; color: var(--texto); } /* título do cartão em negrito, maior */
+.fp-ind--falta .orc-card__icone { background: #fbe1de; color: var(--erro); }
+html[data-tema="escuro"] .fp-ind--falta .orc-card__icone { background: #5a2626; color: #ff8a80; }
+@media (max-width: 760px) { .fp-inds { grid-template-columns: 1fr; } }

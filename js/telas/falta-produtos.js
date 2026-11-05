@@ -128,8 +128,8 @@ window.Telas.faltaProdutos = (function () {
   }
   const CARTOES = [
     ['suficiente', 'Estoque suficiente'],
-    ['desvio', 'Falta se o desvio continuar'],
-    ['falta', 'Falta mesmo sem desvio']
+    ['desvio', 'Falta com desvio'],
+    ['falta', 'Falta sem desvio']
   ];
   function previsao() {
     const desvioDe = desvios();
@@ -448,19 +448,33 @@ window.Telas.faltaProdutos = (function () {
     const lista = previsao();
     return `${cartoes(lista)}${tabela(lista)}`;
   }
+  // Indicadores (05/11/2026, imagem da usuária; antes o quadro "Resumo da situação dos produtos" com três cartões):
+  // o título "Risco de falta de produto" e três cartões lado a lado, Total de produtos · Estoque suficiente · Estoque
+  // insuficiente (falta com ou sem desvio: as situações Falta com desvio e Falta sem desvio da tabela juntas), com o
+  // ícone ao lado do título, o número grande e "X% do total" (no Total, "Produtos analisados").
+  const ICONE_IND = { total: () => Icones.caixa, suficiente: () => Icones.caixaOk, desvio: () => Icones.alerta, falta: () => Icones.caixaX };
   function cartoes(lista) {
     const total = lista.length;
+    // No padrão do Resumo do orçamento: ícone num círculo à esquerda, rótulo pequeno em cinza e o número grande; o
+    // texto de apoio ("89% do total") embaixo, pequeno
+    const ind = (id, titulo, n, texto) => `
+            <div class="orc-card fp-ind fp-ind--${id}"><span class="orc-card__icone" aria-hidden="true">${ICONE_IND[id]()}</span>
+              <div class="orc-card__corpo"><span class="orc-card__rotulo">${titulo}</span><strong class="orc-card__numero">${fmt(n)}</strong>
+                <span class="fp-ind__texto">${texto}</span></div></div>`;
     return `
-        <section class="cartao orc-secao fp-resumo" aria-labelledby="fp-titulo-resumo">
-          <h2 class="orc-secao__titulo" id="fp-titulo-resumo">Resumo da situação dos produtos</h2>
-          <div class="orc-cards fp-cards">
-            ${CARTOES.map(([id, titulo]) => {
-              const n = lista.filter((x) => x.situacao === id).length;
-              return cartao(id, titulo, fmt(n), total ? `${fmt(Math.round(n / total * 100))}% de ${fmt(total)} ${total === 1 ? 'produto' : 'produtos'}` : 'Nenhum produto a aplicar');
+        <section class="cartao orc-secao fp-resumo" aria-labelledby="fp-titulo-inds">
+          <h2 class="orc-secao__titulo" id="fp-titulo-inds">Risco de falta de produto</h2>
+          <div class="orc-cards fp-inds">
+            ${ind('total', 'Total de produtos', total, total ? 'Produtos analisados' : 'Nenhum produto a aplicar')}
+            ${[['suficiente', 'Estoque suficiente', (x) => x.situacao === 'suficiente'],
+               ['falta', 'Estoque insuficiente', (x) => x.situacao !== 'suficiente']].map(([id, titulo, conta]) => {
+              const n = lista.filter(conta).length;
+              return ind(id, titulo, n, total ? `${fmt(Math.round(n / total * 100))}% do total` : '—');
             }).join('')}
           </div>
         </section>`;
   }
+
 
   function opcoes(chave) {
     if (chave === 'talhao') {
@@ -506,7 +520,7 @@ window.Telas.faltaProdutos = (function () {
     return `
       ${cab}
       <div class="pagina ma fp">
-        <section class="cartao filtros" aria-label="Filtrar a previsão de falta de produtos" data-fp-filtros></section>
+        <section class="cartao filtros" aria-label="Filtrar o risco de falta de produto" data-fp-filtros></section>
         <div data-fp-corpo></div>
       </div>`;
   }
