@@ -785,15 +785,18 @@ window.Telas.calendario = (function () {
   }
 
   // todos: os eventos (eventos()); filtros: HTML da linha acima da grade; semData: operações planejadas sem data
-  function calendarioMes({ est, todos, filtros = '', semData = 0 }) {
+  // corpoMes (opcional): desenha o Mês, a Semana e o Dia no lugar da tabela por operação e da grade (Gestão da Lavoura ›
+  // Calendário: por talhão)
+  function calendarioMes({ est, todos, filtros = '', semData = 0, corpoMes = null }) {
     const escala = est.escala || 'mes';
     const ref = est.dataRef || hojeIso();
     const { de, ate } = periodo(escala, ref);
     const doPeriodo = todos.filter((ev) => ev.inicio >= de && ev.inicio <= ate);
     const aberto = escala === 'dia' ? '' : est.diaAberto || '';
     let corpo;
-    if (escala === 'mes') {
-      corpo = tabelaMes(doPeriodo, de, ate);
+    if (escala === 'mes' || (corpoMes && (escala === 'semana' || escala === 'dia'))) {
+      // Gestão da Lavoura › Calendário: o Mês, a Semana e o Dia por talhão (corpoMes); no plano, a tabela por operação
+      corpo = corpoMes ? corpoMes(todos, de, ate, escala) : tabelaMes(doPeriodo, de, ate);
     } else if (escala === 'dia') {
       const d = dataDe(ref);
       corpo = `
@@ -993,8 +996,8 @@ window.Telas.calendario = (function () {
     const cal = e.target.closest('[data-acao="cal-hoje"], [data-acao="cal-nav"], [data-acao="cal-dia"], [data-acao="cal-dia-fechar"]');
     if (cal) {
       const acao = cal.dataset.acao;
-      // Hoje: vai para hoje, seleciona o dia e abre o painel com as operações dele (na visão Dia, a lista já é a do dia)
-      if (acao === 'cal-hoje') { est.dataRef = hojeIso(); est.diaAberto = (est.escala || 'mes') === 'dia' ? null : hojeIso(); }
+      // Hoje: só vai para hoje, na escala aberta (05/11/2026: sem abrir o painel do dia à direita)
+      if (acao === 'cal-hoje') { est.dataRef = hojeIso(); est.diaAberto = null; }
       else if (acao === 'cal-nav') { andar(est, Number(cal.dataset.passo)); est.diaAberto = null; }
       else if (acao === 'cal-dia') est.diaAberto = est.diaAberto === cal.dataset.dia && cal.classList.contains('cal-dia') ? null : cal.dataset.dia;
       else est.diaAberto = null;
@@ -1069,5 +1072,5 @@ window.Telas.calendario = (function () {
 
   // Para a Agenda Agrícola (Operações Agrícolas): itens e eventos de um plano, a grade e a barra de navegação, os filtros com caixas
   return { desenhar, aoClicar, aoMudar, aoDigitar, prazoDe,
-    itens, eventos, calendarioMes, navCalendario, seletorEscala, filtroCaixa, marcado, hojeIso, periodo };
+    itens, eventos, calendarioMes, navCalendario, seletorEscala, filtroCaixa, marcado, hojeIso, periodo, semanasDoMes, faixaDias };
 })();

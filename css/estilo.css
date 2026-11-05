@@ -3685,6 +3685,27 @@ html[data-tema="escuro"] .ind-ponto--oleo { --c: #e2b93b; }
 .cal-ponto--corretivos { --c: #3b74d6; --f: #e6eefb; }
 html[data-tema="escuro"] .cal-mestab__area { --f: color-mix(in srgb, var(--c) 24%, #15232D); }
 
+/* ===== Gestão da Lavoura › Calendário › Mês (05/11/2026): talhão × semanas, barras que atravessam as semanas ===== */
+.cal-tal { display: grid; grid-template-columns: minmax(140px, max-content) repeat(var(--semanas), minmax(130px, 1fr)); grid-auto-rows: minmax(44px, auto); min-width: max-content; }
+/* Cabeçalho inteiro em cinza claro (Fazenda · Talhão · Área (ha) · semanas); as células ficam brancas */
+.cal-tal__cab { position: sticky; top: 0; z-index: 3; grid-row: 1; display: flex; border-bottom: 1px solid var(--borda); border-left: 1px solid var(--borda); background: var(--superficie-2); color: var(--texto); }
+.cal-tal__cab:first-child { border-left: 0; }
+.cal-tal__cab--info { align-items: center; justify-content: flex-start; min-height: 42px; padding: 8px 16px; font-weight: 700; white-space: nowrap; } /* como o título das semanas, à esquerda */
+.cal-tal__cab.cal-tal--passado { color: var(--texto-suave); }
+/* Coluna dos talhões: "T01" em negrito e a área ao lado; parada ao rolar para o lado */
+.cal-tal__info { position: sticky; left: 0; z-index: 2; display: flex; flex-direction: column; justify-content: center; padding: 8px 16px; border-bottom: 1px solid var(--borda); background: var(--superficie); color: var(--texto); white-space: nowrap; }
+/* Como o cartão do talhão da Planejado × Executado: T01 em negrito, a fazenda e, embaixo, a variedade em cinza */
+.cal-tal__talhao { font-size: 16px; line-height: 1.25; }
+.cal-tal__fazenda { font-size: 14px; line-height: 1.3; }
+.cal-tal__var { margin-top: 2px; font-size: 13px; line-height: 1.3; color: var(--texto-suave); }
+.cal-tal__cab--info { left: 0; z-index: 4; }
+.cal-tal__cel { border-bottom: 1px solid var(--borda); border-left: 1px solid var(--borda); background: var(--superficie); }
+/* Barra da operação: bolinha e nome em negrito, no fundo claro da cor do grupo */
+.cal-tal__barra { z-index: 1; align-self: center; display: flex; align-items: center; gap: 6px; min-width: 0; margin: 5px 6px; padding: 6px 10px; border-radius: 6px; background: var(--f, #e6eefb); color: var(--texto); font-size: 13px; font-weight: 700; line-height: 1.25; }
+.cal-tal__nome { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cal-tal__barra.cal-tal--passado { opacity: .55; }
+html[data-tema="escuro"] .cal-tal__barra { --f: color-mix(in srgb, var(--c) 24%, #15232D); }
+
 /* ===== Operações Agrícolas › Planejadas × Executadas: tabela com o cartão do talhão ===== */
 .ma-barra { justify-content: space-between; }
 .ma-legenda__titulo { font-weight: 700; color: var(--texto); }
@@ -4157,3 +4178,13 @@ html[data-tema="escuro"] .fp-modal { --fp-est-desv: #ff6b5e; }
 .fp-graf__eixo .fp-graf__eixo-data { font-size: 11px; font-weight: 700; fill: var(--texto); }
 .fp-graf__eixo .fp-graf__eixo-op { font-size: 11px; fill: var(--texto-suave); }
 .conteudo:has(.cc) { background: var(--superficie); } /* Central OS: fundo branco (04/11/2026) */
+.conteudo:has(.os-cal) { background: var(--superficie); } /* Calendário: fundo branco (05/11/2026), como a Central OS */
+/* Semana por talhão (05/11/2026): título do dia em duas linhas, "dom" em cima e "01 nov" embaixo (hoje, no verde) */
+.cal-tal__dia { flex-direction: column; gap: 2px; padding: 6px 10px; }
+.cal-tal__dia-sem { font-size: 13px; font-weight: 600; color: var(--texto-suave); text-transform: lowercase; }
+.cal-tal__dia .cal-mestab__rotulo { padding: 2px 10px; }
+/* Dia por talhão (05/11/2026, imagem da usuária): uma coluna só, a do dia; a tabela fica estreita */
+.cal-mestab:has(.cal-tal--dia) { align-self: flex-start; max-width: 100%; }
+.cal-tal--dia { grid-template-columns: minmax(200px, max-content) 260px; }
+.cal-tal__dia--fixo { cursor: default; }
+.cal-tal__dia--fixo:hover { background: none; color: inherit; }
