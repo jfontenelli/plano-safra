@@ -3963,9 +3963,10 @@ html[data-tema="escuro"] .fp-cartao--suficiente { --fp-c: #5FD896; }
 .fp-secao { padding: 16px 20px; }
 .fp-secao__titulo { margin: 0 0 12px; font-size: 16px; font-weight: 700; color: var(--texto); }
 .fp-modo { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
-.fp-tabela td, .fp-tabela th { padding: 9px 12px; font-size: 14px; }
+/* Tabela de disponibilidade (05/11/2026): a fonte e o tamanho da tabela do Orçamento (.orc-tabela): títulos menores, que
+   quebram em duas linhas, e o Produto em negrito */
 .fp-tabela thead th { background: var(--superficie-2); }
-.fp-sit { font-weight: 600; }
+.fp-sit { font-weight: 400; } /* Situação do estoque sem negrito (05/11/2026), como na imagem da usuária */
 .fp-sit--suficiente { color: var(--verde-700); }
 .fp-sit--desvio { color: #c4601a; }
 .fp-sit--falta { color: var(--erro); }
@@ -4196,3 +4197,26 @@ html[data-tema="escuro"] .fp-modal { --fp-est-desv: #ff6b5e; }
 .fp-ind--falta .orc-card__icone { background: #fbe1de; color: var(--erro); }
 html[data-tema="escuro"] .fp-ind--falta .orc-card__icone { background: #5a2626; color: #ff8a80; }
 @media (max-width: 760px) { .fp-inds { grid-template-columns: 1fr; } }
+/* Modal do Risco de falta de produto (05/11/2026, imagem da usuária): quatro cartões e a Projeção do estoque por operação
+   (Estoque atual verde cheio · Estoque previsto verde pontilhado · Estoque insuficiente vermelho) */
+.fp-mcards { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.fp-mc .orc-card__rotulo { font-size: 14px; }
+.fp-modal .fp-mc .orc-card__numero { font-size: 22px; font-weight: 700; } /* número em negrito, como na imagem */
+.fp-mc--faltante { border-color: #f3b8b1; background: #fdf0ee; }
+.fp-mc--faltante .orc-card__icone { background: #fbe1de; color: var(--erro); }
+.fp-mc--faltante .orc-card__numero { color: var(--erro); }
+.fp-mc--sem-falta .orc-card__numero { color: var(--verde-700); }
+html[data-tema="escuro"] .fp-mc--faltante { border-color: #7a3030; background: #2e1a1a; }
+html[data-tema="escuro"] .fp-mc--faltante .orc-card__icone { background: #5a2626; color: #ff8a80; }
+html[data-tema="escuro"] .fp-mc--faltante .orc-card__numero { color: #ff8a80; }
+html[data-tema="escuro"] .fp-mc--sem-falta .orc-card__numero { color: #5FD896; }
+@media (max-width: 900px) { .fp-mcards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.fp-modal { --fp-insuf: #d93a2b; }
+html[data-tema="escuro"] .fp-modal { --fp-insuf: #ff6b5e; }
+.fp-graf__linha--prevista { stroke: var(--fp-est-atual); stroke-dasharray: 2 5; stroke-width: 2.5; }
+.fp-graf__mk--prevista { fill: var(--fp-est-atual); }
+.fp-legenda__traco--prevista { border-top: 2.5px dotted var(--fp-est-atual); }
+.fp-modal .fp-graf__falta--insuf { stroke: var(--fp-insuf); }
+.fp-modal .fp-graf__selo--insuf rect { stroke: var(--fp-insuf); }
+.fp-modal .fp-graf__selo--insuf text { fill: var(--fp-insuf); font-size: 11.5px; }
+.fp-legenda__traco--insuf { border-top: 2px dashed var(--fp-insuf); }

@@ -49,6 +49,8 @@ window.Icones = (function () {
     caixaOk: svg('<path d="M21 8 12 3 3 8l9 5 9-5Z"/><path d="M3 8v8l9 5 1.5-.8"/><path d="M21 8v6"/><path d="M12 13v8"/><path d="M15.5 18.5l2 2 4-4"/>'),
     // Estoque insuficiente (Risco de falta de produto): a caixa com o x
     caixaX: svg('<path d="M21 8 12 3 3 8l9 5 9-5Z"/><path d="M3 8v8l9 5 1.5-.8"/><path d="M21 8v6"/><path d="M12 13v8"/><path d="M16 16l4.5 4.5M20.5 16 16 20.5"/>'),
+    // Quantidade total planejada (modal do Risco de falta de produto): as camadas
+    camadas: svg('<path d="M12 3 3 8l9 5 9-5-9-5Z"/><path d="M3 12.5l9 5 9-5"/><path d="M3 17l9 5 9-5"/>'),
     caixa: svg('<path d="M21 8 12 3 3 8l9 5 9-5Z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/>'),
     pizza: svg('<path d="M12 3v9h9"/><path d="M20.5 15A9 9 0 1 1 9 3.5"/>'),
     colheita: svg('<path d="M12 21V9"/><path d="M12 9c-2.5 0-3.5-2-3.5-4 2.5 0 3.5 2 3.5 4Zm0 0c2.5 0 3.5-2 3.5-4-2.5 0-3.5 2-3.5 4Zm0 5c-2.5 0-3.5-2-3.5-4 2.5 0 3.5 2 3.5 4Zm0 0c2.5 0 3.5-2 3.5-4-2.5 0-3.5 2-3.5 4Zm0 5c-2.5 0-3.5-2-3.5-4 2.5 0 3.5 2 3.5 4Zm0 0c2.5 0 3.5-2 3.5-4-2.5 0-3.5 2-3.5 4Z"/>'),

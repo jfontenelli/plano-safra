@@ -3973,9 +3973,10 @@ html[data-tema="escuro"] .fp-cartao--suficiente { --fp-c: #5FD896; }
 .fp-secao { padding: 16px 20px; }
 .fp-secao__titulo { margin: 0 0 12px; font-size: 16px; font-weight: 700; color: var(--texto); }
 .fp-modo { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
-.fp-tabela td, .fp-tabela th { padding: 9px 12px; font-size: 14px; }
+/* Tabela de disponibilidade (05/11/2026): a fonte e o tamanho da tabela do Orçamento (.orc-tabela): títulos menores, que
+   quebram em duas linhas, e o Produto em negrito */
 .fp-tabela thead th { background: var(--superficie-2); }
-.fp-sit { font-weight: 600; }
+.fp-sit { font-weight: 400; } /* Situação do estoque sem negrito (05/11/2026), como na imagem da usuária */
 .fp-sit--suficiente { color: var(--verde-700); }
 .fp-sit--desvio { color: #c4601a; }
 .fp-sit--falta { color: var(--erro); }
@@ -4206,6 +4207,29 @@ html[data-tema="escuro"] .fp-modal { --fp-est-desv: #ff6b5e; }
 .fp-ind--falta .orc-card__icone { background: #fbe1de; color: var(--erro); }
 html[data-tema="escuro"] .fp-ind--falta .orc-card__icone { background: #5a2626; color: #ff8a80; }
 @media (max-width: 760px) { .fp-inds { grid-template-columns: 1fr; } }
+/* Modal do Risco de falta de produto (05/11/2026, imagem da usuária): quatro cartões e a Projeção do estoque por operação
+   (Estoque atual verde cheio · Estoque previsto verde pontilhado · Estoque insuficiente vermelho) */
+.fp-mcards { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.fp-mc .orc-card__rotulo { font-size: 14px; }
+.fp-modal .fp-mc .orc-card__numero { font-size: 22px; font-weight: 700; } /* número em negrito, como na imagem */
+.fp-mc--faltante { border-color: #f3b8b1; background: #fdf0ee; }
+.fp-mc--faltante .orc-card__icone { background: #fbe1de; color: var(--erro); }
+.fp-mc--faltante .orc-card__numero { color: var(--erro); }
+.fp-mc--sem-falta .orc-card__numero { color: var(--verde-700); }
+html[data-tema="escuro"] .fp-mc--faltante { border-color: #7a3030; background: #2e1a1a; }
+html[data-tema="escuro"] .fp-mc--faltante .orc-card__icone { background: #5a2626; color: #ff8a80; }
+html[data-tema="escuro"] .fp-mc--faltante .orc-card__numero { color: #ff8a80; }
+html[data-tema="escuro"] .fp-mc--sem-falta .orc-card__numero { color: #5FD896; }
+@media (max-width: 900px) { .fp-mcards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.fp-modal { --fp-insuf: #d93a2b; }
+html[data-tema="escuro"] .fp-modal { --fp-insuf: #ff6b5e; }
+.fp-graf__linha--prevista { stroke: var(--fp-est-atual); stroke-dasharray: 2 5; stroke-width: 2.5; }
+.fp-graf__mk--prevista { fill: var(--fp-est-atual); }
+.fp-legenda__traco--prevista { border-top: 2.5px dotted var(--fp-est-atual); }
+.fp-modal .fp-graf__falta--insuf { stroke: var(--fp-insuf); }
+.fp-modal .fp-graf__selo--insuf rect { stroke: var(--fp-insuf); }
+.fp-modal .fp-graf__selo--insuf text { fill: var(--fp-insuf); font-size: 11.5px; }
+.fp-legenda__traco--insuf { border-top: 2px dashed var(--fp-insuf); }
 
 </style>
 </head>
@@ -5182,6 +5206,8 @@ window.Icones = (function () {
     caixaOk: svg('<path d="M21 8 12 3 3 8l9 5 9-5Z"/><path d="M3 8v8l9 5 1.5-.8"/><path d="M21 8v6"/><path d="M12 13v8"/><path d="M15.5 18.5l2 2 4-4"/>'),
     // Estoque insuficiente (Risco de falta de produto): a caixa com o x
     caixaX: svg('<path d="M21 8 12 3 3 8l9 5 9-5Z"/><path d="M3 8v8l9 5 1.5-.8"/><path d="M21 8v6"/><path d="M12 13v8"/><path d="M16 16l4.5 4.5M20.5 16 16 20.5"/>'),
+    // Quantidade total planejada (modal do Risco de falta de produto): as camadas
+    camadas: svg('<path d="M12 3 3 8l9 5 9-5-9-5Z"/><path d="M3 12.5l9 5 9-5"/><path d="M3 17l9 5 9-5"/>'),
     caixa: svg('<path d="M21 8 12 3 3 8l9 5 9-5Z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/>'),
     pizza: svg('<path d="M12 3v9h9"/><path d="M20.5 15A9 9 0 1 1 9 3.5"/>'),
     colheita: svg('<path d="M12 21V9"/><path d="M12 9c-2.5 0-3.5-2-3.5-4 2.5 0 3.5 2 3.5 4Zm0 0c2.5 0 3.5-2 3.5-4-2.5 0-3.5 2-3.5 4Zm0 5c-2.5 0-3.5-2-3.5-4 2.5 0 3.5 2 3.5 4Zm0 0c2.5 0 3.5-2 3.5-4-2.5 0-3.5 2-3.5 4Zm0 5c-2.5 0-3.5-2-3.5-4 2.5 0 3.5 2 3.5 4Zm0 0c2.5 0 3.5-2 3.5-4-2.5 0-3.5 2-3.5 4Z"/>'),
@@ -11205,10 +11231,10 @@ window.Telas.desviosRecomendacao = (function () {
  *   - estoque: DADOS.estoques (por fazenda e produto; soma das fazendas dos planos filtrados).
  *   Não cobre a restante: Falta mesmo sem desvio; cobre a restante, mas não a com desvio: Falta se o desvio continuar;
  *   senão: Estoque suficiente.
- * Embaixo, o cartão "Simulação das próximas aplicações" (04/11/2026): Aplicar dose recomendada · Manter desvio médio (abre
- * neste) e a tabela Insumo · Produto · Cobertura do estoque (estoque ÷ necessidade restante ou com desvio) · Operação com
- * risco de falta (seguindo as aplicações na ordem da data planejada, a primeira em que o estoque acaba) · Data prevista
- * de falta (a data planejada dela) · Situação (a do cartão; não muda com o botão).
+ * Embaixo, o cartão "Disponibilidade de produtos para as operações planejadas" (05/11/2026; antes Simulação das
+ * próximas aplicações, com os botões, que saíram): a tabela Insumo · Produto · Desvio médio de quantidade · Cobertura do
+ * estoque (estoque ÷ necessidade com desvio) · Operação afetada (seguindo as aplicações na ordem da data planejada, a
+ * primeira em que o estoque acaba) · Data prevista de falta (a data planejada dela) · Situação do estoque.
  * Clicar numa linha abre o modal do produto, na tela toda (04/11/2026): cabeçalho (produto, insumo, safra · cultura ·
  * fazenda), três cartões (Estoque atual · Aplicando a dose recomendada · Se o desvio continuar), o gráfico "Quantidade
  * de produto por operação" (todas as operações que usam o produto: Recomendado verde, Aplicado azul, Previsto com desvio
@@ -11244,7 +11270,7 @@ window.Telas.faltaProdutos = (function () {
   let est = null;
   let caixaCorpo = null;
   const novoEstado = () => {
-    const e = { talhao: 'todos', insumo: 'todos', produto: 'todos', operacao: 'todos', busca: {}, filtroAberto: null, modo: 'desvio' };
+    const e = { talhao: 'todos', insumo: 'todos', produto: 'todos', operacao: 'todos', busca: {}, filtroAberto: null };
     FiltrosBase.ler(e);
     return e;
   };
@@ -11331,7 +11357,8 @@ window.Telas.faltaProdutos = (function () {
       const desvio = desvioDe(n.produto);
       const comDesvio = n.restante * (1 + desvio);
       const estoque = fazendas.reduce((s, f) => s + (((DADOS.estoques || {})[f] || {})[n.produto] || 0), 0);
-      const situacao = estoque < n.restante ? 'falta' : estoque < comDesvio ? 'desvio' : 'suficiente';
+      // Situação com a dose recomendada (05/11/2026): o estoque cobre ou não a necessidade restante
+      const situacao = estoque < n.restante ? 'falta' : 'suficiente';
       return { ...n, desvio, comDesvio, estoque, situacao };
     });
   }
@@ -11353,7 +11380,7 @@ window.Telas.faltaProdutos = (function () {
   // a primeira em que a soma passa do estoque
   function simulacao(lista) {
     return lista.map((x) => {
-      const fator = est.modo === 'recomendada' ? 1 : 1 + x.desvio;
+      const fator = 1; // dose recomendada (05/11/2026; antes mantendo o desvio médio)
       const necessidade = x.restante * fator;
       const cobertura = necessidade > 0 ? x.estoque / necessidade : Infinity;
       const ordem = [...x.aplicacoes].sort((a, b) => (a.data || '9999').localeCompare(b.data || '9999') || a.talhao.localeCompare(b.talhao, 'pt-BR', { numeric: true }));
@@ -11364,28 +11391,35 @@ window.Telas.faltaProdutos = (function () {
       || a.cobertura - b.cobertura || a.produto.localeCompare(b.produto, 'pt-BR'));
   }
   const dataCurta = (iso) => (iso ? `${iso.slice(8, 10)}/${iso.slice(5, 7)}` : '—');
+  // Desvio médio de quantidade do produto nas OS fechadas (aplicado ÷ recomendado − 1, as somas, como o Top 10 dos
+  // Desvios de dose em Quantidade): "+12%" aplicou a mais, "−3%" a menos (sem OS fechada, "0%")
+  const pct = (d) => { const n = Math.round(d * 100); return `${n > 0 ? '+' : n < 0 ? '−' : ''}${fmt(Math.abs(n))}%`; };
+  // Tabela "Disponibilidade de produtos para as operações planejadas" (05/11/2026, imagem da usuária; antes "Simulação
+  // das próximas aplicações", com os botões Aplicar dose recomendada · Manter desvio médio, que saíram): sempre mantendo
+  // o desvio médio do produto. Colunas: Insumo · Produto · Desvio médio de quantidade · Cobertura do estoque · Operação afetada
+  // · Data prevista de falta · Situação do estoque (Suficiente ou Insuficiente; insuficiente = falta com ou sem desvio,
+  // em vermelho, também o desvio da linha)
   function tabela(lista) {
     const linhas = simulacao(lista);
     return `
         <section class="cartao fp-secao" aria-labelledby="fp-sim-titulo">
-          <h3 class="fp-secao__titulo" id="fp-sim-titulo">Simulação das próximas aplicações</h3>
-          <div class="fp-modo" role="group" aria-label="Simulação">
-            ${[['recomendada', 'Aplicar dose recomendada'], ['desvio', 'Manter desvio médio']].map(([v, rot]) => `
-              <button class="botao botao--p ${est.modo === v ? 'botao--primario' : 'botao--secundario'}" type="button" data-fp-modo="${v}"
-                      aria-pressed="${est.modo === v}">${rot}</button>`).join('')}
-          </div>
+          <h3 class="fp-secao__titulo" id="fp-sim-titulo">Disponibilidade de produtos para as operações planejadas</h3>
           ${!linhas.length ? '<p class="ind-vazio">Nenhum produto a aplicar com esses filtros.</p>' : `
-          <div class="tabela-rolagem"><table class="tabela fp-tabela">
-            <thead><tr><th>Insumo</th><th>Produto</th><th class="tabela__numero">Cobertura do estoque</th>
-              <th>Operação com risco de falta</th><th>Data prevista de falta</th><th>Situação</th></tr></thead>
-            <tbody>${linhas.map((x) => `
+          <div class="tabela-rolagem"><table class="tabela orc-tabela fp-tabela">
+            <thead><tr><th>Insumo</th><th>Produto</th><th class="tabela__numero">Desvio médio de quantidade</th><th class="tabela__numero">Cobertura do estoque</th>
+              <th>Operação afetada</th><th>Data prevista de falta</th><th>Situação do estoque</th></tr></thead>
+            <tbody>${linhas.map((x) => {
+              const ok = x.situacao === 'suficiente';
+              return `
               <tr class="fp-linha" data-fp-produto="${Util.escapar(x.produto)}" tabindex="0" title="Ver a previsão de ${Util.escapar(x.produto)}">
-                <td>${Util.escapar(classeDe(x))}</td><td>${Util.escapar(x.produto)}</td>
+                <td>${Util.escapar(classeDe(x))}</td><td class="orc-tabela__grupo">${Util.escapar(x.produto)}</td>
+                <td class="tabela__numero ${ok ? '' : 'fp-sit--falta'}">${pct(x.desvio)}</td>
                 <td class="tabela__numero">${Number.isFinite(x.cobertura) ? `${fmt(Math.round(x.cobertura * 100))}%` : '—'}</td>
                 <td ${x.risco ? `title="${Util.escapar(`${x.risco.fazenda} · ${x.risco.talhao}`)}"` : ''}>${x.risco ? Util.escapar(x.risco.operacao) : '—'}</td>
                 <td>${x.risco ? dataCurta(x.risco.data) : '—'}</td>
-                <td class="fp-sit fp-sit--${x.situacao}">${nomeSituacao[x.situacao]}</td>
-              </tr>`).join('')}</tbody>
+                <td class="fp-sit fp-sit--${ok ? 'suficiente' : 'falta'}">${ok ? 'Suficiente' : 'Insuficiente'}</td>
+              </tr>`;
+            }).join('')}</tbody>
           </table></div>`}
         </section>`;
   }
@@ -11478,34 +11512,27 @@ window.Telas.faltaProdutos = (function () {
         <text class="fp-graf__eixo-data" x="${x(i)}" y="${base + 18}" text-anchor="middle">${dataCurta(o.data)}</text>
         <text class="fp-graf__eixo-op" x="${x(i)}" y="${base + 33}" text-anchor="middle">${Util.escapar(abreviar(o.operacao, max))}</text></g>`).join('');
   }
-  // Gráfico do estoque (o único do modal, 04/11/2026): a mesma linha do tempo; o estoque até hoje em linha
-  // cheia (reconstruído: o atual + o que foi aplicado depois de cada data) e as duas previsões tracejadas (dose
-  // recomendada e mantendo o desvio), caindo a cada aplicação até zerar. Cores validadas: verde, azul e vermelho
-  // faltas: { rec, desv } as datas (planejadas) em que o estoque acaba com a dose recomendada e mantendo o desvio
-  function graficoEstoque(ops, un, x0, L = 1200, A = 300, faltas = {}) {
-    const datasFalta = [faltas.rec, faltas.desv].filter(Boolean);
-    const esq = 56; const dir = 24; const topo = 40; const base = A - alturaEixo(ops);
+  // Gráfico "Projeção do estoque por operação" (05/11/2026, imagem da usuária; antes as previsões com desvio e com a dose
+  // recomendada): a mesma linha do tempo; o Estoque atual até hoje em linha verde cheia (reconstruído: o atual + o que
+  // foi aplicado depois de cada data) e o Estoque previsto em verde pontilhado, com a dose recomendada, caindo a cada
+  // aplicação até zerar; na data planejada em que ele acaba, a linha vertical vermelha com o selo "Estoque insuficiente
+  // a partir de 05/12". dataFalta: a data (planejada) em que o estoque acaba com a dose recomendada (ou null)
+  function graficoEstoque(ops, un, x0, L = 1200, A = 300, dataFalta = null) {
+    const esq = 56; const dir = 24; const topo = 52; const base = A - alturaEixo(ops);
     const ini = esq + 20;
     const x = (i) => (ops.length === 1 ? (esq + L - dir) / 2 : ini + i * ((L - dir - 20 - ini) / (ops.length - 1)));
     const comAplicado = ops.map((o, i) => (o.aplicado > 0 ? i : -1)).filter((i) => i >= 0);
     const ultimaFeita = comAplicado.length ? comAplicado[comAplicado.length - 1] : -1;
     // Até hoje: depois de cada aplicação feita, o atual + o aplicado nas datas seguintes
     const ate = comAplicado.map((i) => [i, x0.estoque + ops.slice(i + 1).reduce((t, o) => t + o.aplicado, 0)]);
-    const previsao = (fator) => {
-      let usado = 0;
-      const pts = ultimaFeita >= 0 ? [[ultimaFeita, x0.estoque]] : [];
-      let zera = null;
-      ops.forEach((o, i) => {
-        if (!o.aFazer || i <= ultimaFeita && ultimaFeita >= 0 && !o.aFazer) return;
-        usado += o.aFazer * fator;
-        const v = x0.estoque - usado;
-        if (v < 0 && !zera) zera = o.data;
-        pts.push([i, Math.max(0, v)]);
-      });
-      return { pts, zera };
-    };
-    const rec = previsao(1);
-    const desv = previsao(1 + x0.desvio);
+    // Previsto (dose recomendada): a partir do estoque atual, menos o recomendado de cada próxima aplicação
+    let usado = 0;
+    const prev = ultimaFeita >= 0 ? [[ultimaFeita, x0.estoque]] : [];
+    ops.forEach((o, i) => {
+      if (!o.aFazer) return;
+      usado += o.aFazer;
+      prev.push([i, Math.max(0, x0.estoque - usado)]);
+    });
     const max = Math.max(1, x0.estoque, ...ate.map(([, v]) => v));
     const passo = [1, 2, 2.5, 5, 10].map((m) => m * 10 ** Math.floor(Math.log10(max / 4))).find((v) => max / v <= 5) || max / 4;
     const teto = Math.ceil(max / passo) * passo;
@@ -11514,45 +11541,29 @@ window.Telas.faltaProdutos = (function () {
     for (let v = 0; v <= teto + 1e-9; v += passo) marcas.push(v);
     const linha = (pts) => pts.map(([i, v], k) => `${k ? 'L' : 'M'}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
     const ponto = (cls, [i, v], dica) => `<circle class="fp-graf__mk ${cls}" cx="${x(i)}" cy="${y(v)}" r="3.5"><title>${Util.escapar(dica)}</title></circle>`;
+    // Linha vertical vermelha na data da falta, com o selo em duas linhas, centrado nela (sem sair do gráfico)
+    const iFalta = dataFalta ? ops.findIndex((o) => o.data === dataFalta) : -1;
+    const falta = () => {
+      if (iFalta < 0) return '';
+      const larg = 132; const alt = 34;
+      const cx = Math.max(esq + larg / 2, Math.min(x(iFalta), L - dir - larg / 2));
+      return `<line class="fp-graf__falta fp-graf__falta--insuf" x1="${x(iFalta)}" x2="${x(iFalta)}" y1="${topo - 8}" y2="${base}"/>
+        <g class="fp-graf__selo fp-graf__selo--insuf"><rect x="${cx - larg / 2}" y="${topo - 8 - alt}" width="${larg}" height="${alt}" rx="6"/>
+          <text x="${cx}" y="${topo - 8 - alt + 14}" text-anchor="middle">Estoque insuficiente</text>
+          <text x="${cx}" y="${topo - 8 - alt + 28}" text-anchor="middle">a partir de ${dataCurta(dataFalta)}</text></g>`;
+    };
     return `
-      <svg class="fp-graf" viewBox="0 0 ${L} ${A}" width="${L}" height="${A}" role="img" aria-label="Estoque de ${Util.escapar(x0.produto)}">
-        <text class="fp-graf__eixo-titulo" x="${esq - 44}" y="${topo - 18}">Estoque (${Util.escapar(un)})</text>
+      <svg class="fp-graf" viewBox="0 0 ${L} ${A}" width="${L}" height="${A}" role="img" aria-label="Projeção do estoque de ${Util.escapar(x0.produto)}">
+        <text class="fp-graf__eixo-titulo" x="${esq - 44}" y="${topo - 22}">Estoque (${Util.escapar(un)})</text>
         ${marcas.map((v) => `<line class="fp-graf__grade" x1="${esq}" x2="${L - dir}" y1="${y(v)}" y2="${y(v)}"/>
           <text class="fp-graf__marca" x="${esq - 10}" y="${y(v) + 4}" text-anchor="end">${fmt(v)}</text>`).join('')}
         ${ate.length > 1 ? `<path class="fp-graf__linha fp-graf__linha--est-atual" d="${linha(ate)}"/>` : ''}
-        ${rec.pts.length > 1 ? `<path class="fp-graf__linha fp-graf__linha--est-rec" d="${linha(rec.pts)}"/>` : ''}
-        ${desv.pts.length > 1 ? `<path class="fp-graf__linha fp-graf__linha--est-desv" d="${linha(desv.pts)}"/>` : ''}
+        ${prev.length > 1 ? `<path class="fp-graf__linha fp-graf__linha--prevista" d="${linha(prev)}"/>` : ''}
         ${ate.map((pt) => ponto('fp-graf__mk--est-atual', pt, `${dataCurta(ops[pt[0]].data)}: ${qtd(pt[1], un)} em estoque`)).join('')}
-        ${rec.pts.slice(ultimaFeita >= 0 ? 1 : 0).map((pt) => ponto('fp-graf__mk--est-rec', pt, `${dataCurta(ops[pt[0]].data)} · com a dose recomendada: ${pt[1] > 0 ? `${qtd(pt[1], un)} em estoque` : 'sem estoque'}`)).join('')}
-        ${desv.pts.slice(ultimaFeita >= 0 ? 1 : 0).map((pt) => ponto('fp-graf__mk--est-desv', pt, `${dataCurta(ops[pt[0]].data)} · com desvio: ${pt[1] > 0 ? `${qtd(pt[1], un)} em estoque` : 'sem estoque'}`)).join('')}
-        ${linhasFalta()}
+        ${prev.slice(ultimaFeita >= 0 ? 1 : 0).map((pt) => ponto('fp-graf__mk--prevista', pt, `${dataCurta(ops[pt[0]].data)} · previsto: ${pt[1] > 0 ? `${qtd(pt[1], un)} em estoque` : 'sem estoque'}`)).join('')}
+        ${falta()}
         ${eixoDatas(ops, x, base)}
       </svg>`;
-    // Linhas verticais tracejadas na data planejada em que o estoque acaba: azul = sem desvio (dose recomendada),
-    // vermelha = com desvio. Na mesma data, uma linha só, tracejada em azul e vermelho, "Falta com e sem desvio"
-    function linhasFalta() {
-      const iRec = faltas.rec ? ops.findIndex((o) => o.data === faltas.rec) : -1;
-      const iDesv = faltas.desv ? ops.findIndex((o) => o.data === faltas.desv) : -1;
-      // lado: 'centro' (centrado na linha), 'esq' (termina na linha) ou 'dir' (começa na linha)
-      const selo = (i, texto, cls, linhaY, lado = 'centro') => {
-        const larg = texto.length * 6.6 + 20;
-        const alvo = lado === 'esq' ? x(i) - 4 - larg / 2 : lado === 'dir' ? x(i) + 4 + larg / 2 : x(i);
-        const cx = Math.max(esq + larg / 2, Math.min(alvo, L - dir - larg / 2));
-        return `<g class="fp-graf__selo ${cls}"><rect x="${cx - larg / 2}" y="${linhaY}" width="${larg}" height="22" rx="6"/>
-          <text x="${cx}" y="${linhaY + 15}" text-anchor="middle">${texto}</text></g>`;
-      };
-      const vertical = (i, cls) => `<line class="fp-graf__falta ${cls}" x1="${x(i)}" x2="${x(i)}" y1="${topo - 6}" y2="${base}"/>`;
-      if (iRec >= 0 && iRec === iDesv) {
-        return `${vertical(iRec, 'fp-graf__falta--rec')}${vertical(iRec, 'fp-graf__falta--desv fp-graf__falta--meio')}
-          ${selo(iRec, `Falta com e sem desvio · ${dataCurta(faltas.rec)}`, 'fp-graf__selo--ambas', topo - 32)}`;
-      }
-      // Rótulos na mesma altura: com duas linhas, o da esquerda termina encostado na sua linha e o da direita começa
-      // encostado na sua (não se cobrem); com uma linha, centrado nela
-      const ordem = [[iDesv, 'desv', `Falta com desvio · ${dataCurta(faltas.desv)}`], [iRec, 'rec', `Falta sem desvio · ${dataCurta(faltas.rec)}`]]
-        .filter(([i]) => i >= 0).sort((a, b) => a[0] - b[0]);
-      return ordem.map(([i, cls, texto], n) => `${vertical(i, `fp-graf__falta--${cls}`)}
-          ${selo(i, texto, `fp-graf__selo--${cls}`, topo - 32, ordem.length > 1 ? (n ? 'dir' : 'esq') : 'centro')}`).join('');
-    }
   }
 
   // Etiqueta ao lado do nome do produto e coluna Insumo da tabela: a classe do cadastro (Fungicida, Herbicida, Inseticida, Micronutriente…);
@@ -11570,15 +11581,21 @@ window.Telas.faltaProdutos = (function () {
         <button class="botao-icone painel-talhao__seta" type="button" data-fp-ir="${alvo ? Util.escapar(alvo) : ''}" data-fp-passo="${passo}" ${alvo ? '' : 'disabled'}
                 title="${alvo ? `${rotulo}: ${Util.escapar(alvo)}` : rotulo}" aria-label="${rotulo}${alvo ? `: ${Util.escapar(alvo)}` : ''}">${icone}</button>`;
     const un = x.unidade;
+    // Com a dose recomendada (05/11/2026): a operação em que o estoque acaba e quanto falta
     const rRec = risco(x, 1);
-    const rDesv = risco(x, 1 + x.desvio);
-    const faltaRec = Math.max(0, x.restante - x.estoque);
-    const faltaDesv = Math.max(0, x.comDesvio - x.estoque);
+    const faltante = Math.max(0, x.restante - x.estoque);
     const ops = operacoesDoProduto(x);
+    const totalPlanejado = ops.reduce((t, o) => t + o.rec, 0);
     const planos = planosFiltrados().filter((p) => x.porFazenda[p.fazenda]);
     const contexto = [...new Set(planos.map((p) => `Safra ${p.safra} · ${p.cultura} · Fazenda ${p.fazenda}`))].join(' | ');
-    const fazendas = Object.keys(x.porFazenda).length;
     const sinal = (d) => `${d > 0 ? '+' : d < 0 ? '−' : ''}${fmt(Math.round(Math.abs(d * 100)))}%`;
+    const daRestante = (v) => (x.restante > 0 ? `${fmt(Math.round(v / x.restante * 100))}% da necessidade restante` : '—');
+    // Cartões (05/11/2026, imagem da usuária): Quantidade total planejada · Necessidade restante · Estoque disponível ·
+    // Quantidade faltante (em vermelho; sem falta, "Sem falta" em verde), no padrão dos cartões da página
+    const cartaoModal = (id, icone, titulo, valor, texto) => `
+          <div class="orc-card fp-ind fp-mc fp-mc--${id}"><span class="orc-card__icone" aria-hidden="true">${icone}</span>
+            <div class="orc-card__corpo"><span class="orc-card__rotulo">${titulo}</span><strong class="orc-card__numero">${valor}</strong>
+              <span class="fp-ind__texto">${texto}</span></div></div>`;
     const { elemento, fechar } = Modal.abrir(`
       <div class="modal__corpo fp-modal">
         <button class="botao-icone fp-modal__x" type="button" data-fechar aria-label="Fechar" title="Fechar">${Icones.fechar}</button>
@@ -11587,23 +11604,20 @@ window.Telas.faltaProdutos = (function () {
           <span class="fp-modal__insumo">${Util.escapar(classeDe(x))}</span>
           <p class="fp-modal__contexto">${Util.escapar(contexto)}</p>
         </header>
-        <div class="orc-cards fp-cards">
-          ${cartao('suficiente', 'Estoque', qtd(x.estoque, un), fazendas > 1 ? 'Disponível nas fazendas' : 'Disponível na fazenda')}
-          ${cartao('m-desvio', 'Se o desvio continuar', faltaDesv > 0 ? `Faltarão ${qtd(faltaDesv, un)}` : 'Sem falta prevista',
-            rDesv ? `${Util.escapar(rDesv.operacao)} · ${dataLonga(rDesv.data)}` : 'O estoque cobre as próximas aplicações')}
-          ${cartao('m-rec', 'Aplicando a dose recomendada', faltaRec > 0 ? `Faltarão ${qtd(faltaRec, un)}` : 'Sem falta prevista',
-            rRec ? `${Util.escapar(rRec.operacao)} · ${dataLonga(rRec.data)}` : 'O estoque cobre as próximas aplicações')}
+        <div class="orc-cards fp-mcards">
+          ${cartaoModal('total', Icones.camadas, 'Quantidade total planejada', qtd(totalPlanejado, un), 'Todas as operações do plano')}
+          ${cartaoModal('restante', Icones.calendario, 'Necessidade restante', qtd(x.restante, un), 'Para concluir as operações planejadas')}
+          ${cartaoModal('estoque', Icones.caixa, 'Estoque disponível', qtd(x.estoque, un), daRestante(x.estoque))}
+          ${faltante > 0 ? cartaoModal('faltante', Icones.alerta, 'Quantidade faltante', qtd(faltante, un), daRestante(faltante))
+            : cartaoModal('sem-falta', Icones.caixaOk, 'Quantidade faltante', 'Sem falta', 'O estoque cobre a necessidade restante')}
         </div>
-        <section class="cartao fp-secao fp-modal__grafico" aria-labelledby="fp-graf-titulo">
-          <h3 class="fp-secao__titulo" id="fp-graf-titulo">Estoque do produto</h3>
-          <p class="fp-modal__sub">Estoque até hoje e previsão para as próximas aplicações.</p>
+        <section class="fp-secao fp-modal__grafico" aria-labelledby="fp-graf-titulo">
+          <h3 class="fp-secao__titulo" id="fp-graf-titulo">Projeção do estoque por operação</h3>
+          <p class="fp-modal__sub">Saldo estimado de estoque após cada aplicação, conforme o planejamento.</p>
           <ul class="fp-legenda">
-            <!-- Ordem (04/11/2026): Estoque · Previsão com desvio · Falta com desvio · Previsão com a dose recomendada · Falta sem desvio -->
-            <li><span class="fp-legenda__traco fp-legenda__traco--est-atual"></span>Estoque</li>
-            <li><span class="fp-legenda__traco fp-legenda__traco--est-desv"></span>Previsão com desvio</li>
-            ${rDesv ? '<li><span class="fp-legenda__traco fp-legenda__traco--falta-desv"></span>Falta com desvio</li>' : ''}
-            <li><span class="fp-legenda__traco fp-legenda__traco--est-rec"></span>Previsão com a dose recomendada</li>
-            ${rRec ? '<li><span class="fp-legenda__traco fp-legenda__traco--falta-rec"></span>Falta sem desvio</li>' : ''}
+            <li><span class="fp-legenda__traco fp-legenda__traco--est-atual"></span>Estoque atual</li>
+            <li><span class="fp-legenda__traco fp-legenda__traco--prevista"></span>Estoque previsto</li>
+            ${rRec ? '<li><span class="fp-legenda__traco fp-legenda__traco--insuf"></span>Estoque insuficiente</li>' : ''}
           </ul>
           ${ops.length ? '<div class="fp-graf-area" data-fp-graf></div>' : '<p class="ind-vazio">Nenhuma operação com esse produto nos filtros.</p>'}
         </section>
@@ -11622,7 +11636,7 @@ window.Telas.faltaProdutos = (function () {
       if (!area) return;
       const L = Math.max(320, Math.floor(area.clientWidth));
       const A = Math.max(150, Math.floor(area.clientHeight));
-      area.innerHTML = graficoEstoque(ops, un, x, L, A, { rec: rRec && rRec.data, desv: rDesv && rDesv.data });
+      area.innerHTML = graficoEstoque(ops, un, x, L, A, rRec && rRec.data);
     };
     desenharGrafico();
     const observador = new ResizeObserver(() => { if (!elemento.isConnected) observador.disconnect(); else desenharGrafico(); });
@@ -11724,19 +11738,14 @@ window.Telas.faltaProdutos = (function () {
     barra.ligar(conteudo.querySelector('[data-fp-filtros]'));
     caixaCorpo = conteudo.querySelector('[data-fp-corpo]');
     caixaCorpo.innerHTML = corpo();
-    // Aplicar dose recomendada · Manter desvio médio; clicar na linha (ou Enter) abre o modal do produto
+    // Clicar na linha (ou Enter) abre o modal do produto
     caixaCorpo.addEventListener('keydown', (e) => {
       const tr = e.target.closest('[data-fp-produto]');
       if (tr && e.target === tr && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); abrirProduto(tr.dataset.fpProduto); }
     });
     caixaCorpo.addEventListener('click', (e) => {
       const tr = e.target.closest('[data-fp-produto]');
-      if (tr) { abrirProduto(tr.dataset.fpProduto); return; }
-      const b = e.target.closest('[data-fp-modo]');
-      if (!b) return;
-      est.modo = b.dataset.fpModo;
-      caixaCorpo.innerHTML = corpo();
-      caixaCorpo.querySelector(`[data-fp-modo="${est.modo}"]`)?.focus();
+      if (tr) abrirProduto(tr.dataset.fpProduto);
     });
   }
 
