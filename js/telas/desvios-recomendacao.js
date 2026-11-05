@@ -179,11 +179,10 @@ window.Telas.desviosRecomendacao = (function () {
       <div class="dr-raiz">
         ${cab}
         <div class="dr-fixo ${congelado ? '' : 'dr-fixo--solto'}">
+          <!-- 05/11/2026: sem o alfinete (os filtros ficam sempre parados no topo) e sem o Analisar por (Dose · Quantidade) -->
           <section class="cartao filtros dr-filtros" aria-label="Filtrar os desvios">
             <div class="filtros dr-bf" data-dr-barra></div>
-            <div class="dr-filtros__base" data-dr-base></div>
           </section>
-          <span data-dr-alfinete>${alfinete()}</span>
         </div>
         <div class="pagina ma dr"><div class="dr" data-dr-corpo></div></div>
       </div>`;
@@ -212,14 +211,11 @@ window.Telas.desviosRecomendacao = (function () {
           <button class="botao botao--p ${est.modo === v ? 'botao--primario' : 'botao--secundario'} dr-analisar__botao" type="button"
                   data-dr-modo="${v}" aria-pressed="${est.modo === v}">${rot}</button>`).join('')}`;
   }
+  // 05/11/2026: só o Detalhamento por OS (a Distribuição, o Por nível e o Top 10 saíram; o código continua aqui, adormecido;
+  // a versão completa está na marca desvios-dose-05-11-2026)
   function corpo(regs) {
     return `
       ${!regs.length ? '<section class="cartao dr-secao"><p class="ma-construcao">Nenhuma OS fechada com esses filtros.</p></section>' : `
-      <div class="dr-graficos">
-        ${distribuicao(regs)}
-        ${porNivel(regs)}
-      </div>
-      ${topProdutos(regs)}
       ${detalhamento(regs)}`}`;
   }
 
@@ -328,7 +324,7 @@ window.Telas.desviosRecomendacao = (function () {
     desvio: (x) => x.desvio, n: (x) => x.n
   };
   const COLUNAS_DET = {
-    os: (r) => r.os, safra: (r) => r.safra, empresa: (r) => r.empresa, fazenda: (r) => r.fazenda, talhao: (r) => r.talhao,
+    os: (r) => r.os, criacao: (r) => r.executada || '', fechamento: (r) => r.fechamento || '', safra: (r) => r.safra, empresa: (r) => r.empresa, fazenda: (r) => r.fazenda, talhao: (r) => r.talhao,
     operacao: (r) => r.operacao, produto: (r) => r.produto, doseRec: (r) => r.doseRec, doseApl: (r) => r.doseApl,
     desvioDose: (r) => r.doseApl / r.doseRec - 1, qtdRec: (r) => r.qtdRec, qtdApl: (r) => r.qtdApl, desvioQtd: (r) => r.qtdApl / r.qtdRec - 1
   };
@@ -411,19 +407,19 @@ window.Telas.desviosRecomendacao = (function () {
           </div>
         </div>
         <div class="tabela-rolagem"><table class="tabela dr-tabela dr-det">
-          <thead><tr>${titulo('det', 'os', 'Nº OS')}${titulo('det', 'safra', 'Safra')}${titulo('det', 'empresa', 'Empresa')}${titulo('det', 'fazenda', 'Fazenda')}
+          <thead><tr>${titulo('det', 'os', 'Nº OS')}${titulo('det', 'criacao', 'Data de criação')}${titulo('det', 'fechamento', 'Data de fechamento')}${titulo('det', 'safra', 'Safra')}${titulo('det', 'empresa', 'Empresa')}${titulo('det', 'fazenda', 'Fazenda')}
             ${titulo('det', 'talhao', 'Talhão')}${titulo('det', 'operacao', 'Operação')}${titulo('det', 'produto', 'Produto')}
             ${titulo('det', 'doseRec', 'Dose recomendada', 'tabela__numero')}${titulo('det', 'doseApl', 'Dose aplicada', 'tabela__numero')}${titulo('det', 'desvioDose', 'Desvio Dose (%)', 'dr-centro')}
             ${titulo('det', 'qtdRec', 'Quantidade recomendada', 'tabela__numero')}${titulo('det', 'qtdApl', 'Quantidade aplicada', 'tabela__numero')}${titulo('det', 'desvioQtd', 'Desvio Qtd (%)', 'dr-centro')}</tr></thead>
           <tbody>${pagina.length ? pagina.map((r) => `
             <tr title="Fechada em ${Util.data(r.fechamento)} · ${esc(r.executor)}">
-              <td>${esc(r.os)}</td><td>${esc(r.safra)}</td><td>${esc(r.empresa)}</td><td>${esc(r.fazenda)}</td><td>${esc(r.talhao)}</td>
+              <td>${esc(r.os)}</td><td>${r.executada ? Util.data(r.executada) : '—'}</td><td>${r.fechamento ? Util.data(r.fechamento) : '—'}</td><td>${esc(r.safra)}</td><td>${esc(r.empresa)}</td><td>${esc(r.fazenda)}</td><td>${esc(r.talhao)}</td>
               <td>${esc(r.operacao)}</td><td>${esc(r.produto)}</td>
               <td class="tabela__numero">${dose(r.doseRec, r.unidade)}</td><td class="tabela__numero">${dose(r.doseApl, r.unidade)}</td>
               <td class="dr-centro">${etiqueta(dDose(r))}</td>
               <td class="tabela__numero">${qtd(r.qtdRec, r.unidade)}</td><td class="tabela__numero">${qtd(r.qtdApl, r.unidade)}</td>
               <td class="dr-centro">${etiqueta(dQtd(r))}</td></tr>`).join('')
-            : '<tr><td class="tabela__vazia" colspan="13">Nenhuma OS encontrada.</td></tr>'}</tbody>
+            : '<tr><td class="tabela__vazia" colspan="15">Nenhuma OS encontrada.</td></tr>'}</tbody>
         </table></div>
         <div class="orc-paginacao">
           <span class="orc-paginacao__texto dr-det__conta">${fmt(de)}–${fmt(ate)} de ${fmt(ls.length)} OS</span>
@@ -439,11 +435,11 @@ window.Telas.desviosRecomendacao = (function () {
 
   // Exportar: o detalhamento inteiro (todas as páginas, com a busca e o produto escolhido), na ordem da tela
   function exportar(regs) {
-    const linhas = [['Nº OS', 'Safra', 'Empresa', 'Fazenda', 'Talhão', 'Operação', 'Produto', 'Unidade', 'Dose recomendada (/ha)',
-      'Dose aplicada (/ha)', 'Desvio dose (%)', 'Quantidade recomendada', 'Quantidade aplicada', 'Desvio quantidade (%)', 'Executor', 'Fechamento'],
-    ...linhasOrdenadas(regs).map((r) => [r.os, r.safra, r.empresa, r.fazenda, r.talhao, r.operacao, r.produto, r.unidade,
+    const linhas = [['Nº OS', 'Data de criação', 'Data de fechamento', 'Safra', 'Empresa', 'Fazenda', 'Talhão', 'Operação', 'Produto', 'Unidade', 'Dose recomendada (/ha)',
+      'Dose aplicada (/ha)', 'Desvio dose (%)', 'Quantidade recomendada', 'Quantidade aplicada', 'Desvio quantidade (%)', 'Executor'],
+    ...linhasOrdenadas(regs).map((r) => [r.os, r.executada ? Util.data(r.executada) : '', r.fechamento ? Util.data(r.fechamento) : '', r.safra, r.empresa, r.fazenda, r.talhao, r.operacao, r.produto, r.unidade,
       +r.doseRec.toFixed(3), +r.doseApl.toFixed(3), +((r.doseApl / r.doseRec - 1) * 100).toFixed(1),
-      +r.qtdRec.toFixed(1), +r.qtdApl.toFixed(1), +((r.qtdApl / r.qtdRec - 1) * 100).toFixed(1), r.executor, Util.data(r.fechamento)])];
+      +r.qtdRec.toFixed(1), +r.qtdApl.toFixed(1), +((r.qtdApl / r.qtdRec - 1) * 100).toFixed(1), r.executor])];
     const livro = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(livro, XLSX.utils.aoa_to_sheet(linhas), 'desvios');
     XLSX.writeFile(livro, `desvios-recomendacao_${Util.hojeISO()}.xlsx`);
@@ -452,9 +448,9 @@ window.Telas.desviosRecomendacao = (function () {
   // ----- Eventos -----
   function aoMostrar(conteudo) {
     est = est || novoEstado();
+    est.produto = null; // sem o Top 10 (05/11/2026), nenhum produto escolhido filtra o Detalhamento
     FiltrosBase.ler(est);
     const raiz = conteudo.querySelector('.dr-raiz');
-    const caixaBase = raiz.querySelector('[data-dr-base]');
     const caixaAlfinete = raiz.querySelector('[data-dr-alfinete]');
     const rolagem = conteudo.closest('.conteudo') || conteudo;
     const caixaCorpo = raiz.querySelector('[data-dr-corpo]');
@@ -463,7 +459,6 @@ window.Telas.desviosRecomendacao = (function () {
     const redesenhar = (foco) => {
       const todos = todosRegistros();
       regs = filtrados(todos);
-      caixaBase.innerHTML = base();
       caixaCorpo.innerHTML = corpo(regs);
       medirBarra();
       marcarAtalho();

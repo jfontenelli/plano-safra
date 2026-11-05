@@ -3963,9 +3963,10 @@ html[data-tema="escuro"] .fp-cartao--suficiente { --fp-c: #5FD896; }
 .fp-secao { padding: 16px 20px; }
 .fp-secao__titulo { margin: 0 0 12px; font-size: 16px; font-weight: 700; color: var(--texto); }
 .fp-modo { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
-.fp-tabela td, .fp-tabela th { padding: 9px 12px; font-size: 14px; }
+/* Tabela de disponibilidade (05/11/2026): a fonte e o tamanho da tabela do Orçamento (.orc-tabela): títulos menores, que
+   quebram em duas linhas, e o Produto em negrito */
 .fp-tabela thead th { background: var(--superficie-2); }
-.fp-sit { font-weight: 600; }
+.fp-sit { font-weight: 400; } /* Situação do estoque sem negrito (05/11/2026), como na imagem da usuária */
 .fp-sit--suficiente { color: var(--verde-700); }
 .fp-sit--desvio { color: #c4601a; }
 .fp-sit--falta { color: var(--erro); }
@@ -4188,3 +4189,108 @@ html[data-tema="escuro"] .fp-modal { --fp-est-desv: #ff6b5e; }
 .cal-tal--dia { grid-template-columns: minmax(200px, max-content) 260px; }
 .cal-tal__dia--fixo { cursor: default; }
 .cal-tal__dia--fixo:hover { background: none; color: inherit; }
+/* Risco de falta de produto › indicadores (05/11/2026): três cartões no padrão do Resumo do orçamento (ícone num
+   círculo, rótulo pequeno, número grande) e o texto de apoio pequeno */
+.fp-inds { grid-template-columns: repeat(3, minmax(0, 1fr)); } /* 05/11/2026: três (o Operações afetadas saiu) */
+.fp-ind__texto { font-size: 13px; color: var(--texto-suave); }
+.fp-ind .orc-card__rotulo { font-size: 15px; font-weight: 700; color: var(--texto); } /* título do cartão em negrito, maior */
+.fp-ind--falta .orc-card__icone { background: #fbe1de; color: var(--erro); }
+html[data-tema="escuro"] .fp-ind--falta .orc-card__icone { background: #5a2626; color: #ff8a80; }
+@media (max-width: 760px) { .fp-inds { grid-template-columns: 1fr; } }
+/* Modal do Risco de falta de produto (05/11/2026, imagem da usuária): quatro cartões e a Projeção do estoque por operação
+   (Estoque atual verde cheio · Estoque previsto verde pontilhado · Estoque insuficiente vermelho) */
+.fp-mcards { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.fp-mc .orc-card__rotulo { font-size: 14px; }
+.fp-modal .fp-mc .orc-card__numero { font-size: 22px; font-weight: 700; } /* número em negrito, como na imagem */
+.fp-mc--faltante { border-color: #f3b8b1; background: #fdf0ee; }
+.fp-mc--faltante .orc-card__icone { background: #fbe1de; color: var(--erro); }
+.fp-mc--faltante .orc-card__numero { color: var(--erro); }
+.fp-mc--sem-falta .orc-card__numero { color: var(--verde-700); }
+html[data-tema="escuro"] .fp-mc--faltante { border-color: #7a3030; background: #2e1a1a; }
+html[data-tema="escuro"] .fp-mc--faltante .orc-card__icone { background: #5a2626; color: #ff8a80; }
+html[data-tema="escuro"] .fp-mc--faltante .orc-card__numero { color: #ff8a80; }
+html[data-tema="escuro"] .fp-mc--sem-falta .orc-card__numero { color: #5FD896; }
+@media (max-width: 900px) { .fp-mcards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.fp-modal { --fp-insuf: #d93a2b; }
+html[data-tema="escuro"] .fp-modal { --fp-insuf: #ff6b5e; }
+.fp-graf__linha--prevista { stroke: var(--fp-est-atual); stroke-dasharray: 2 5; stroke-width: 2.5; }
+.fp-graf__mk--prevista { fill: var(--fp-est-atual); }
+.fp-legenda__traco--prevista { border-top: 2.5px dotted var(--fp-est-atual); }
+.fp-modal .fp-graf__falta--insuf { stroke: var(--fp-insuf); stroke-dasharray: none; } /* linha cheia (05/11/2026) */
+.fp-modal .fp-graf__selo--insuf rect { stroke: var(--fp-insuf); fill: var(--fp-insuf); } /* caixa vermelha, letra branca (05/11/2026) */
+.fp-modal .fp-graf__selo--insuf text { fill: #fff; font-size: 11.5px; }
+.fp-legenda__traco--insuf { border-top: 2px solid var(--fp-insuf); }
+/* Ação sugerida (05/11/2026): "Comprar 95 kg até 06/12/2026"; sem falta, "Nenhuma" em cinza claro */
+.fp-acao { white-space: nowrap; }
+.fp-acao--nenhuma { color: var(--texto-suave); opacity: .7; }
+.fp-ind--afetadas .orc-card__icone { background: #fdebdc; color: #b9560f; }
+html[data-tema="escuro"] .fp-ind--afetadas .orc-card__icone { background: #3d2817; color: #f0995a; }
+/* Situação do estoque na tabela (05/11/2026): selo com o fundo claro da cor do texto (Suficiente verde, Insuficiente vermelho) */
+.fp-selo { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 13px; line-height: 1.5; white-space: nowrap; }
+.fp-selo.fp-sit--suficiente { background: var(--verde-100); }
+.fp-selo.fp-sit--falta { background: #fbe1de; }
+html[data-tema="escuro"] .fp-selo.fp-sit--suficiente { background: #173a28; }
+html[data-tema="escuro"] .fp-selo.fp-sit--falta { background: #4a2222; }
+/* Modal do Risco de falta de produto › OS do produto (05/11/2026): o gráfico fica mais baixo e, embaixo, a tabela das
+   OS (5 por página), no formato do Detalhamento por OS; o modal continua cabendo na tela */
+.fp-modal__grafico { flex: 1 1 0; }
+.fp-modal__grafico .fp-graf-area { min-height: 140px; }
+.fp-modal__os { flex: none; padding: 4px 20px 0; }
+.fp-modal__os .fp-secao__titulo { margin-bottom: 6px; }
+.fp-modal__os .tabela-rolagem { margin: 0; }
+.fp-os td, .fp-os th { padding-top: 6px; padding-bottom: 6px; }
+.fp-os__pag { justify-content: flex-end; padding-top: 6px; }
+/* Modal do Risco de falta de produto (05/11/2026, ajuste): objetos menores, o gráfico com altura mínima legível e
+   separações visíveis: os cartões, o gráfico e a tabela de OS em blocos com borda. Se a tela for baixa, o modal rola
+   (o gráfico não encolhe abaixo do legível) */
+.modal--tela .fp-modal { gap: 12px; padding: 14px 24px; }
+.fp-modal .fp-mc { padding: 8px 14px; gap: 12px; }
+.fp-modal .fp-mc .orc-card__icone { width: 34px; height: 34px; }
+.fp-modal .fp-mc .orc-card__icone .icone { width: 18px; height: 18px; }
+.fp-modal .fp-mc .orc-card__numero { font-size: 19px; }
+.fp-modal .fp-mc .orc-card__rotulo { font-size: 13px; }
+.fp-modal .fp-mc .fp-ind__texto { font-size: 12px; }
+.fp-modal__grafico, .fp-modal__os { border: 1px solid var(--borda-forte); border-radius: var(--raio); background: var(--superficie); }
+.fp-modal__grafico { flex: none; padding: 10px 16px 8px; }
+/* Altura do gráfico: o que sobra da tela depois dos cartões e da tabela de 5 OS, entre 220 e 380 px */
+/* O gráfico ocupa todo o espaço que sobra (o bloco cresce até a barra do Histórico de OS do produto encostar no
+   rodapé); ao expandir o histórico, o gráfico fica com a altura que tinha e o modal rola até a tabela (05/11/2026) */
+.fp-modal__grafico { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+.fp-modal__grafico .fp-graf-area { flex: 1 1 auto; height: auto; min-height: 220px; }
+.fp-modal__os { padding: 10px 16px 6px; }
+.fp-modal .fp-secao__titulo { font-size: 15px; }
+.fp-modal .fp-legenda { font-size: 13px; margin-bottom: 0; }
+.fp-os td, .fp-os th { padding: 5px 10px; font-size: 13px; }
+.fp-os .dr-etiqueta { font-size: 12px; }
+.fp-os__pag { padding-top: 4px; font-size: 13px; }
+.fp-modal__navegar { margin-left: auto; } /* sem o desvio médio, as setas ficam à direita */
+.fp-os__cab { margin: 0; }
+/* Título que abre e fecha: a seta verde à esquerda (› fechada, ⌄ aberta) */
+.fp-os__alternar { display: inline-flex; align-items: center; gap: 8px; padding: 2px 0; border: 0; background: none; font: inherit; font-weight: 700; color: var(--texto); cursor: pointer; }
+.fp-os__alternar:disabled { cursor: default; color: var(--texto-suave); }
+.fp-os__alternar:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 2px; border-radius: 4px; }
+.fp-os__seta { display: inline-flex; color: var(--verde-700); }
+.fp-os__seta .icone { width: 18px; height: 18px; stroke-width: 2.4; }
+.fp-modal__os { padding-bottom: 10px; }
+.fp-modal--com-os .fp-modal__os [data-fp-os] { margin-top: 8px; }
+/* Depois da data da falta, o estoque previsto (no zero) em vermelho pontilhado (05/11/2026) */
+.fp-graf__linha--sem-estoque { stroke: var(--fp-insuf); stroke-dasharray: 2 5; stroke-width: 2.5; }
+.fp-graf__mk--sem-estoque { fill: var(--fp-insuf); }
+.fp-legenda__traco--sem-estoque { border-top: 2.5px dotted var(--fp-insuf); }
+/* Projeção abaixo do zero e rolagem horizontal (05/11/2026, teste): a linha do zero mais forte; o eixo do estoque parado
+   à esquerda, sobre o gráfico que rola */
+.fp-graf__grade--zero { stroke: var(--borda-forte); stroke-width: 1.5; }
+.fp-graf-area { position: relative; }
+.fp-graf-rolagem { height: 100%; overflow-x: auto; overflow-y: hidden; }
+.fp-graf-rolagem .fp-graf { width: auto; height: auto; display: block; }
+.fp-graf__eixo-y { position: absolute; top: 0; bottom: 14px; left: 0; width: 56px; background: var(--superficie); pointer-events: none; }
+.fp-graf__eixo-y-marca { position: absolute; right: 10px; font-size: 12px; line-height: 16px; color: var(--texto-suave); font-variant-numeric: tabular-nums; }
+.fp-graf__eixo-y-titulo { position: absolute; left: 12px; font-size: 12px; font-weight: 700; color: var(--texto); white-space: nowrap; }
+
+/* X do modal do produto sempre à mostra (05/11/2026): fica parado no topo quando o modal rola (ex.: com o Histórico de
+   OS aberto); não ocupa espaço no fluxo */
+.fp-modal__x { position: sticky; top: 0; right: auto; align-self: flex-end; flex: none; margin: -2px -8px -40px 0; z-index: 5; background: var(--superficie); }
+/* Cabeçalho do modal do produto travado no topo ao rolar (05/11/2026): o nome, a classe, a safra e o X continuam à
+   mostra com o Histórico de OS aberto */
+.modal--tela .fp-modal__cab { position: sticky; top: -14px; z-index: 4; margin-top: -14px; padding-top: 14px; background: var(--superficie); }
+.fp-modal__x { top: -2px; z-index: 6; background: transparent; }
