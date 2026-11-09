@@ -116,6 +116,8 @@ window.Telas.indicadores = (function () {
     ['produto', 'Produto', (l) => l.produto],
     ['necessidade', 'Necessidade de consumo', (l) => l.necessidade, true],
     ['unidade', 'Unidade do produto', (l) => l.unidade],
+    // Área de aplicação (09/11/2026): a área planejada do produto (a soma das áreas de cada aplicação), a base da dose média
+    ['area', 'Área de aplicação (ha)', (l) => l.area, true],
     ['doseMedia', 'Dose média', (l) => l.doseMedia ?? -1, true],
     ['unidadeDose', 'Unidade da dose', (l) => l.unidadeDose]
   ];
@@ -335,6 +337,7 @@ window.Telas.indicadores = (function () {
           <tbody>${pagina.map((l) => `<tr>
             <td>${esc(l.grupo)}</td><td>${esc(l.produto)}</td>
             <td class="tabela__numero">${quantidade(l.necessidade)}</td><td>${esc(l.unidade)}</td>
+            <td class="tabela__numero">${l.area ? fmt(l.area, l.area >= 100 ? 0 : 1) : '—'}</td>
             <td class="tabela__numero" title="${l.area ? `${esc(quantidade(l.necessidade))} ${esc(l.unidade)} ÷ ${esc(fmt(l.area, l.area >= 100 ? 0 : 1))} ha planejados` : ''}">${textoDose(l.doseMedia)}</td>
             <td>${esc(l.unidadeDose)}</td></tr>`).join('')}</tbody>
         </table></div>
@@ -355,8 +358,8 @@ window.Telas.indicadores = (function () {
   function exportar(ctx) {
     const est = estadoPadrao(ctx);
     const p = ctx.plano;
-    const linhas = [['Grupo de insumo', 'Produto', 'Necessidade de consumo', 'Unidade do produto', 'Dose média', 'Unidade da dose'],
-      ...ordenados(produtos(ctx).filter(passaProduto(est)), est.ordem).map((l) => [l.grupo, l.produto, +l.necessidade.toFixed(2), l.unidade,
+    const linhas = [['Grupo de insumo', 'Produto', 'Necessidade de consumo', 'Unidade do produto', 'Área de aplicação (ha)', 'Dose média', 'Unidade da dose'],
+      ...ordenados(produtos(ctx).filter(passaProduto(est)), est.ordem).map((l) => [l.grupo, l.produto, +l.necessidade.toFixed(2), l.unidade, +l.area.toFixed(2),
         l.doseMedia === null ? '' : +l.doseMedia.toFixed(3), l.unidadeDose])];
     const limpo = (t) => Util.normalizar(t).replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
     const livro = XLSX.utils.book_new();
