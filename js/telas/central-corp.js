@@ -22,7 +22,8 @@ window.Telas.centralCorp = (function () {
     : [[`${id}-atraso`, `${nome} · Em atraso`], [`${id}-prazo`, `${nome} · No prazo`]]))
     .map(([id, nome]) => [id, NOMES_RECOMENDADA[id] || nome]);
   const nomeStatus = (k) => STATUS_TODOS.find(([id]) => id === k)[1];
-  const NIVEIS = [['empresa', 'Empresa'], ['fazenda', 'Fazenda'], ['executor', 'Executor']];
+  // Sem o nível Empresa (Util.comEmpresa): sem o filtro, a coluna e o nível Empresa; o gráfico abre por Fazenda
+  const NIVEIS = Util.semEmpresa([['empresa', 'Empresa'], ['fazenda', 'Fazenda'], ['executor', 'Executor']]);
   const ACOES = [['pendente', 'Pendente de notificação'], ['enviada', 'Notificação enviada']];
 
   // Número fixo a partir de um texto (executor e atraso das OS geradas, sem sorteio)
@@ -88,7 +89,7 @@ window.Telas.centralCorp = (function () {
     const { safraInicial, primeiraData, somaDias, hoje } = B();
     const safra = safraInicial();
     return { safra, cultura: '', empresa: '', fazenda: '', grupo: '', de: primeiraData(safra), ate: somaDias(hoje(), 30),
-      status: null, nivel: 'empresa', barra: null, busca: '', statusOS: '', acao: '',
+      status: null, nivel: NIVEIS[0][0], barra: null, busca: '', statusOS: '', acao: '',
       ordem: { coluna: 'atraso', sentido: 'desc' }, selecao: new Set() };
   }
 
@@ -127,7 +128,7 @@ window.Telas.centralCorp = (function () {
       <div class="filtros oc-filtros__campos">
         ${opcoesSelect('safra', 'Safra', safras().map((s) => [s.nome, s.nome]), '', est.safra)}
         ${opcoesSelect('cultura', 'Cultura', presentes('cultura', DADOS.culturasPlanos), 'Todas', est.cultura)}
-        ${opcoesSelect('empresa', 'Empresa', presentes('empresa', DADOS.empresas), 'Todas', est.empresa)}
+        ${Util.comEmpresa() ? opcoesSelect('empresa', 'Empresa', presentes('empresa', DADOS.empresas), 'Todas', est.empresa) : ''}
         ${opcoesSelect('fazenda', 'Fazenda', presentes('fazenda', fazendas), 'Todas', est.fazenda)}
         ${opcoesSelect('grupo', 'Grupo de operação', gruposDaSafra(daSafra), 'Todos', est.grupo)}
         <div class="campo">
@@ -250,7 +251,7 @@ window.Telas.centralCorp = (function () {
 
   // ----- Tabela Ordens de Serviço -----
   const dataBR = (iso) => (iso ? Util.data(iso) : '—');
-  const COL = [
+  const COL = Util.semEmpresa([
     ['numero', 'Nº OS', (r) => r.numero, true, (r) => r.numero ?? '—'],
     ['safra', 'Safra', (r) => r.plano.safra],
     ['empresa', 'Empresa', (r) => r.plano.empresa],
@@ -266,7 +267,7 @@ window.Telas.centralCorp = (function () {
     ['atraso', 'Dias de atraso', (r) => r.atraso, true],
     ['status', 'Status OS', (r) => STATUS_TODOS.findIndex(([id]) => id === r.situacao), false, (r) => nomeStatus(r.situacao)],
     ['acao', 'Status da ação', (r) => r.acao, false, (r) => (r.acao ? ACOES.find(([id]) => id === r.acao)[1] : '—')]
-  ];
+  ]);
   const QUEBRA = ['grupo'];
   const texto = (c, r) => { const v = c[4] ? c[4](r) : c[2](r); return v === null || v === undefined ? '—' : v; };
 

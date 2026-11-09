@@ -18,7 +18,8 @@ window.Telas.monitoramentoAplicacoes = (function () {
   // Base de filtros de todas as páginas (Ano agrícola, Atividade produtiva, Safra, Cultura, Empresa, Fazenda, Talhão), ora
   // à mostra, ora no Mais filtros. Aqui (04/11/2026): à mostra, de Safra a Talhão, Grupo de operação e Operação; no Mais
   // filtros, Ano agrícola e Atividade produtiva
-  const FILTROS = [
+  // Sem o nível Empresa (Util.comEmpresa), sem o filtro Empresa (fica em Todas)
+  const FILTROS = Util.semEmpresa([
     ['safra', 'Safra', ['Todas', 'Nenhuma', 'selecionadas']],
     ['cultura', 'Cultura', ['Todas', 'Nenhuma', 'culturas']],
     ['empresa', 'Empresa', ['Todas', 'Nenhuma', 'empresas']],
@@ -26,7 +27,7 @@ window.Telas.monitoramentoAplicacoes = (function () {
     ['talhao', 'Talhão', ['Todos', 'Nenhum', 'talhões']],
     ['grupo', 'Grupo de operação', ['Todos', 'Nenhum', 'grupos']],
     ['operacao', 'Operação', ['Todas', 'Nenhuma', 'operações']]
-  ];
+  ]);
   // Largura mínima de cada filtro à mostra (o rótulo e o valor inteiros). O que não couber na linha vai para o Mais
   // filtros, a partir do último (Operação, Grupo de operação…); quantos ficam à mostra depende da largura da tela (04/11/2026)
   const MINIMO = { safra: 92, cultura: 104, empresa: 124, fazenda: 124, talhao: 104, grupo: 136, operacao: 124 };
@@ -103,7 +104,7 @@ window.Telas.monitoramentoAplicacoes = (function () {
     const ops = opcoes('operacao');
     if (ops.length && !ops.some((o) => v.includes(o.valor))) est.operacao = 'todos';
   }
-  const UNICOS = ['safra', 'empresa', 'fazenda'];
+  const UNICOS = Util.semEmpresa(['safra', 'empresa', 'fazenda']);
   // Duração › Por talhão: abre (e Limpar filtros volta) com todos os grupos e todas as operações, na primeira operação
   // pela ordem do DAP; depois, obedece aos filtros
   function padraoDuracao() {
@@ -165,13 +166,15 @@ window.Telas.monitoramentoAplicacoes = (function () {
   function operacoes() {
     const porNome = new Map();
     const plantios = new Set();
+    const colheitas = new Set();
     planosFiltrados().forEach((p) => gruposDe(p).filter((g) => Cal().marcado(est, 'grupo', g.nome))
       .forEach((g) => g.operacoes.forEach((op) => {
         if (!op.nome) return;
         porNome.set(op.nome, Math.min(porNome.get(op.nome) ?? Infinity, dapDe(g, op)));
         if (g.tipo === 'Sementes') plantios.add(op.nome);
+        if (g.tipo === 'Colheita') colheitas.add(op.nome);
       })));
-    const todas = [...porNome].map(([nome, dap]) => ({ nome, dap, plantio: plantios.has(nome) }))
+    const todas = [...porNome].map(([nome, dap]) => ({ nome, dap, plantio: plantios.has(nome), colheita: colheitas.has(nome) }))
       .sort((a, b) => a.dap - b.dap || a.nome.localeCompare(b.nome, 'pt-BR', { numeric: true }));
     // Só as planejadas em ao menos um talhão filtrado (ex.: a Gessagem do modelo, sem talhões no plano da Boa Vista, fica
     // de fora: sem coluna, sem opção no filtro Operação e sem gráfico)
@@ -224,6 +227,19 @@ window.Telas.monitoramentoAplicacoes = (function () {
         const prazoPlantio = Cal().prazoDe(plantio, gPlantio);
         const dataPlantio = { planejado: base, executada: execPlantio, prazo: prazoPlantio,
           fechamento: fechamento(p, t.nome, 'Plantio', execPlantio, prazoPlantio, iT) };
+        // Colheita (09/11/2026): sempre, como a Data de plantio, qualquer que seja o filtro: plantio + ciclo da
+        // primeira variedade; sem ciclo, "—"
+        const gColheita = grupos.find((g) => g.tipo === 'Colheita');
+        const opColheita = gColheita && gColheita.operacoes[0];
+        const cicloColheita = (DADOS.variedades.find((x) => x.nome === variedades[0]) || {}).ciclo;
+        let dataColheita = null;
+        if (opColheita && cicloColheita) {
+          const planejado = somaDias(base, cicloColheita);
+          const iC = iT * 3 + 2;
+          const exec = executada(p, t.nome, opColheita.nome, planejado, s, iC);
+          const prazo = Cal().prazoDe(opColheita, gColheita);
+          dataColheita = { planejado, executada: exec, prazo, fechamento: fechamento(p, t.nome, opColheita.nome, exec, prazo, iC) };
+        }
         const aplic = {};
         grupos.filter((g) => Cal().marcado(est, 'grupo', g.nome)).forEach((g) => g.operacoes.forEach((op) => {
           if (!nomes.includes(op.nome)) return;
@@ -246,7 +262,7 @@ window.Telas.monitoramentoAplicacoes = (function () {
         const total = Object.keys(aplic).length;
         if (!total) return;
         const feitas = Object.values(aplic).map((a) => a.executada).filter(Boolean).sort();
-        saida.push({ plano: p, talhao: t.nome, variedades, plantio: dataPlantio,
+        saida.push({ plano: p, talhao: t.nome, variedades, plantio: dataPlantio, colheita: dataColheita,
           plantasM: s.plantasM ?? null, aplic, total, feitas: feitas.length,
           ultima: feitas.length ? diasEntre(feitas[feitas.length - 1], hoje()) : null });
       });
@@ -279,7 +295,7 @@ window.Telas.monitoramentoAplicacoes = (function () {
   const GUIAS = [
     ['calendario', 'Calendário', 'Consulte as operações agrícolas planejadas por ano, mês, semana ou dia.'],
     ['tabela', 'Desvios de data', 'Compare as datas planejadas e executadas das operações por talhão.'],
-    ['desvios', 'Desvios de dose', 'Analise os desvios entre o recomendado e o executado por produto, operação e nível de análise.'],
+    ['desvios', 'Desvios de dose', 'Analise os desvios entre o recomendado e o executado nas Ordens de Serviço, por produto, operação e nível de análise.'],
     ['falta', 'Risco de falta de produto', 'Estime a falta de produtos para as operações planejadas.']
   ];
   const GUIAS_PAGINA = ['tabela', 'desvios', 'falta'];
@@ -383,7 +399,7 @@ window.Telas.monitoramentoAplicacoes = (function () {
   // (fazenda, safra e talhão). -----
   function valorOrdem(r, coluna) {
     const fixos = { fazenda: r.plano.fazenda, talhao: r.talhao, variedade: r.variedades.join(', ') || null, plantasM: r.plantasM,
-      plantio: r.plantio.executada, feitas: r.total ? r.feitas / r.total : null, ultima: r.ultima };
+      plantio: r.plantio.executada, colheita: r.colheita ? (est.modo === 'dias' ? desvioDias(r.colheita) : r.colheita.executada || r.colheita.planejado) : null, feitas: r.total ? r.feitas / r.total : null, ultima: r.ultima };
     if (coluna in fixos) return fixos[coluna];
     const a = r.aplic[coluna.slice(3)];
     if (!a) return null;
@@ -562,10 +578,11 @@ window.Telas.monitoramentoAplicacoes = (function () {
     // Duração: sem a legenda de status (não filtra pelo status escolhido nas outras guias)
     if (est.visao === 'duracao') return cols.length ? duracao(linhas(cols), cols) : semOperacao();
     // Status escolhido na legenda: só os talhões com ao menos uma aplicação nesse status
-    const ls = ordenar(linhas(cols).filter((r) => !est.status || [r.plantio, ...Object.values(r.aplic)].some((a) => a && a.planejado && statusDe(a) === est.status)));
+    const ls = ordenar(linhas(cols).filter((r) => !est.status || [r.plantio, r.colheita, ...Object.values(r.aplic)].some((a) => a && a.planejado && statusDe(a) === est.status)));
     // O Plantio marcado não ganha coluna: é a Data de plantio
     const temOperacao = cols.length > 0;
-    cols = cols.filter((c) => !c.plantio);
+    // A Colheita também não: tem a coluna própria, sempre no fim (09/11/2026)
+    cols = cols.filter((c) => !c.plantio && !c.colheita);
     // Com um status escolhido, só as operações que têm aplicação nesse status
     if (est.status) cols = cols.filter((c) => ls.some((r) => r.aplic[c.nome] && statusDe(r.aplic[c.nome]) === est.status));
     // Título com a seta de ordenar (como nas outras tabelas)
@@ -576,10 +593,11 @@ window.Telas.monitoramentoAplicacoes = (function () {
         <span class="titulo-coluna"><span>${esc(rotulo)}</span><button class="titulo-ordenar ${ativa ? 'titulo-ordenar--ativo' : ''} ${ativa && o.sentido === 'desc' ? 'titulo-ordenar--desc' : ''}"
           type="button" data-ma-ordenar="${esc(id)}" title="Ordenar por ${esc(rotulo.toLowerCase())}" aria-label="Ordenar por ${esc(rotulo.toLowerCase())}">${ativa ? Icones.acima : Icones.ordenar}</button></span></th>`;
     };
-    // Colunas: Talhão (resumo), Estande e Data de plantio paradas à esquerda; as operações; Dias sem aplicação.
+    // Colunas: Talhão (resumo), Estande e Data de plantio paradas à esquerda; as operações; Colheita (sempre, como a
+    // Data de plantio; 09/11/2026); Dias sem aplicação.
     // A Data de plantio também na etiqueta do status da legenda (04/11/2026; antes a executada numa etiqueta neutra; o
     // Plantio marcado não ganha coluna própria)
-    const colunas = 4 + cols.length;
+    const colunas = 5 + cols.length;
     return `
       ${barra()}
       <div class="tabela-rolagem ma-tabela__rolagem">
@@ -590,6 +608,7 @@ window.Telas.monitoramentoAplicacoes = (function () {
               ${th('plantasM', 'Estande (plantas/m)', 'ma-ini ma-fixa ma-quebra tabela__numero', 'data-fixa="1"')}
               ${th('plantio', 'Data de plantio', 'ma-ini ma-fixa ma-fixa--ultima', 'data-fixa="2"')}
               ${cols.map((c) => th(`op|${c.nome}`, c.nome, 'ma-ini ma-quebra')).join('')}
+              ${th('colheita', 'Colheita', 'ma-ini ma-quebra')}
               ${th('ultima', 'Dias sem aplicação', 'ma-ini ma-quebra tabela__numero')}
             </tr>
           </thead>
@@ -601,6 +620,7 @@ window.Telas.monitoramentoAplicacoes = (function () {
                 <td class="ma-ini tabela__numero ma-fixa ma-estande" data-fixa="1">${r.plantasM === null ? '—' : Math.round(r.plantasM).toLocaleString('pt-BR')}</td>
                 ${celula(r.plantio, 'class="ma-fixa ma-fixa--ultima" data-fixa="2"')}
                 ${cols.map((c) => celula(r.aplic[c.nome])).join('')}
+                ${celula(r.colheita)}
                 <td class="ma-ini tabela__numero ma-dias-sem">${r.ultima === null ? '—' : r.ultima}</td>
               </tr>`).join('')
               : `<tr><td class="tabela__vazia" colspan="${colunas}">${est.status ? `Nenhum talhão com aplicação ${STATUS.find(([x]) => x === est.status)[1].toLowerCase()}.` : 'Nenhum talhão com essas operações planejadas.'}</td></tr>`}

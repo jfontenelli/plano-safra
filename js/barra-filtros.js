@@ -68,6 +68,9 @@ window.BarraFiltros = (function () {
     let observador = null;
     const est = () => cfg.estado();
     const pop = () => `${cfg.id}-mais-filtros`;
+    // Sem o nível Empresa (Util.comEmpresa), o filtro Empresa não aparece (fica em Todas)
+    const semEmpresa = (lista) => lista.filter(([c]) => c !== 'empresa' || Util.comEmpresa());
+    const camposDe = () => semEmpresa(cfg.campos());
 
     function campo([chave, rotulo, textos, minimo]) {
       return `
@@ -77,9 +80,9 @@ window.BarraFiltros = (function () {
         </div>`;
     }
     function html() {
-      const campos = cfg.campos();
+      const campos = camposDe();
       const n = Math.min(visiveis, campos.length);
-      const noPainel = [...cfg.mais(), ...campos.slice(n)];
+      const noPainel = [...semEmpresa(cfg.mais()), ...campos.slice(n)];
       if (!noPainel.length) aberto = false;
       return `
         ${campos.slice(0, n).map(campo).join('')}
@@ -109,7 +112,7 @@ window.BarraFiltros = (function () {
     // Quantos campos cabem na linha, ao lado das ações; muda com a largura da janela e ao expandir/recolher o menu
     function encaixar() {
       if (!caixa || !caixa.isConnected) { if (observador) observador.disconnect(); return; }
-      const campos = cfg.campos();
+      const campos = camposDe();
       const cs = getComputedStyle(caixa);
       const base = caixa.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
       const cabem = (livre) => {
@@ -143,7 +146,8 @@ window.BarraFiltros = (function () {
     // Valores guardados que não são mais opção (ex.: de outra página, ou plano excluído) saem; sem nenhum, Todas
     function validar() {
       const e = est();
-      [...cfg.campos(), ...cfg.mais()].forEach(([c]) => {
+      if (!Util.comEmpresa() && 'empresa' in e) e.empresa = 'todos';
+      [...camposDe(), ...semEmpresa(cfg.mais())].forEach(([c]) => {
         if (!Array.isArray(e[c]) || !e[c].length) return;
         const valores = cfg.opcoes(c).map((o) => o.valor);
         const ficam = e[c].filter((v) => valores.includes(v));

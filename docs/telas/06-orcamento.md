@@ -1,6 +1,6 @@
 # Tela 06 — Orçamento de Insumos
 
-Atualizado em 29/10/2026 (Por produto: custo unitário editável, etiqueta Manual e coluna Data da compra). Antes, em 16/10/2026. Este doc mostra só o estado atual da tela. Decisão alterada é reescrita, não acumulada.
+Atualizado em 09/11/2026 (Por produto: coluna Fornecedor, editável, com etiqueta Manual; Por talhão: coluna Produtividade histórica no fim; Empresa só com o nível Empresa). Antes, em 29/10/2026 (Por produto: custo unitário editável, etiqueta Manual e coluna Data da compra). Antes, em 16/10/2026. Este doc mostra só o estado atual da tela. Decisão alterada é reescrita, não acumulada.
 Tudo é **Definido**, exceto as seções "Em aberto" e "Sugestões".
 Imagem: `referencias/suprimentos.png` e a referência enviada pela usuária em 16/10 (dashboard "Orçamento de Insumos"), como inspiração de organização e hierarquia. Quando imagem e documento divergirem, vale este documento.
 **Situação no protótipo:** construída (`js/telas/orcamento.js`).
@@ -35,16 +35,17 @@ Uma linha por grupo de insumo, do mais caro ao mais barato: Tipo de insumo · ba
 
 ### Detalhamento do orçamento
 Título, guias **Por produto · Por talhão**, busca e **Exportar XLSX** (botão com contorno verde e a seta para baixo).
-- **Por produto** (uma linha por produto, sem setas de abrir): Grupo de insumo · Produto · Necessidade de consumo · Volume em estoque · Volume a ser comprado · Unidade · Custo unitário · **Data da compra** · Custo total. Busca por produto ou grupo.
+- **Por produto** (uma linha por produto, sem setas de abrir): Grupo de insumo · Produto · Necessidade de consumo · Volume em estoque · Volume a ser comprado · Unidade · **Fornecedor** · Custo unitário · **Data da compra** · Custo total. Busca por produto ou grupo.
+  - **Fornecedor** (09/11/2026): a empresa da **última compra** do produto (nos exemplos, revendas fictícias fixas por produto: `fornecedores` em js/dados-exemplo.js); sem preço, vazio. **Editável na célula** (Enter ou sair grava; Esc desiste; vazio volta ao anterior), com o aviso "Fornecedor de Ureia 45% atualizado". Com o custo **ou** o fornecedor digitado, os dois mostram a etiqueta **"Manual"** e a Data da compra passa a ser a de hoje; até digitar o fornecedor, fica o da última compra.
   - **Custo unitário editável** (29/10/2026), direto na célula, na moeda à mostra (R$ ou US$; nas sementes, guardado em reais pela PTAX). Grava ao sair do campo ou com Enter; Esc desiste; valor zero, negativo ou inválido volta ao anterior, com aviso. Recalcula na hora o Custo total, o Resumo do orçamento e os gráficos, com o aviso "Custo de Fox Xpro atualizado". Produto sem preço: campo vazio, com "Sem preço", para digitar.
-  - Custo digitado: etiqueta **"Manual"** (azul) **embaixo do valor, na mesma célula** (a linha fica mais alta).
+  - Custo digitado: etiqueta **"Manual"** (azul) **embaixo do valor, na mesma célula** (a linha fica mais alta), também no Fornecedor.
   - **Data da compra** (coluna logo depois do Custo unitário): no custo do cadastro, uma data **simulada** (entre 1 e 4 meses antes de hoje, fixa por produto); no custo digitado, **a data do dia em que foi digitado**. Sem preço: "—". Ordena pela seta, como as outras.
   - Como o resto do protótipo, o custo digitado fica só na memória do navegador.
-- **Por talhão**: Safra (só o número: 26/27, 27/27; também no Exportar) · Empresa · Fazenda · Cultura · Talhão · Hectares · Custo total · R$/ha (na moeda escolhida) · Custo em sacas. Busca por fazenda, talhão ou cultura.
+- **Por talhão**: Safra (só o número: 26/27, 27/27; também no Exportar) · Fazenda (com o nível Empresa, a Empresa antes) · Cultura · Talhão · Hectares · Custo total · R$/ha (na moeda escolhida) · Custo em sacas · **Produtividade histórica (sc/ha)** (09/11/2026: a mesma do Planejamento, média das últimas 3 safras do talhão; no título, a dica "Média das safras 23/24, 24/25 e 25/26"; na célula, safra a safra com a variedade de cada ano). Busca por fazenda, talhão ou cultura.
 - Sem linha de Total.
 - **Ordenar** por qualquer coluna: seta no título (1º clique crescente, 2º decrescente; vazios sempre no fim), como na Visão Geral. Cada guia guarda a sua ordenação.
 - **Paginação** embaixo: "Itens por página" (10, 20, 50, 100; começa em 10), "1–10 de 52", "Página 1 de 6" e as setas. Filtrar, buscar, ordenar ou trocar de guia volta à página 1.
-- **Exportar XLSX**: a guia aberta, com filtros, busca e ordenação, na moeda de exibição, com os valores exatos. Por produto também com **Data da compra** e **Custo manual** (Sim).
+- **Exportar XLSX**: a guia aberta, com filtros, busca e ordenação, na moeda de exibição, com os valores exatos. Por produto também com **Fornecedor**, **Data da compra** e **Custo manual** (Sim); Por talhão, com a Produtividade histórica.
 
 ### Modal Editar parâmetros
 Título "Estimativas de comercialização"; "Ano Agrícola 2026. Usadas no custo em sacas e na receita estimada."
@@ -85,7 +86,7 @@ Fertilizantes · Defensivos · Sementes · Corretivos · Tratamento de semente �
 ## Para testar
 - Planos de exemplo publicados: ano agrícola 2025, soja 25/26 e milho safrinha 26/26 da Santa Clara; ano agrícola 2026, soja 26/27 e milho safrinha 27/27 da Boa Vista. A soja 26/27 da São José (em construção) não entra. Primavera sem plano.
 - Dados de exemplo em `js/dados-exemplo.js`: `precosInsumos` (moeda e valor), `embalagemSemente`, `precosSementes`, `estoqueInsumos` (por fazenda), `gruposInsumo`, `grupoInsumoPorClasse`, `ptaxReferencia`, `comercializacao`. Preços estimados para o médio-norte do MT, safra 26/27 (pesquisa de 16/10/2026; a conferir).
-- Para ter os 8 grupos, os exemplos têm produtos de Tratamento de semente, Biológicos, Adjuvantes e Óleo. O tratamento de semente on farm entra como operação "Tratamento de sementes" no grupo Defensivo, no dia do plantio, **só nos planos de exemplo** (o TSI continua fora do protótipo; o "Usar modelo" não mudou).
+- Para ter os 8 grupos, os exemplos têm produtos de Tratamento de semente, Biológicos, Adjuvantes e Óleo. O tratamento de semente on farm entra como operação "Tratamento de sementes" no grupo Defensivo, no dia do plantio (o TSI continua fora do protótipo). Desde 09/11/2026 ela está também no modelo de operações da soja (DAP 0, sem produtos; DECISOES 4.3).
 
 ## Em aberto
 1. **Custos operacionais e adicionais** (custo operacional, combustível, seguro, frete…): fora por enquanto (decidido em 15/10; ver rascunhos/orcamento/README.md).

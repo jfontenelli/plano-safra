@@ -129,41 +129,32 @@
     `;
   }
 
-  // Cria um plano por fazenda do modal (Safra + Empresa + Fazenda + Cultura identificam o plano) e volta para a
-  // lista de planos, com o filtro na safra dos planos criados (uma linha por fazenda, com a etiqueta "Novo").
-  // Cada plano nasce só com a versão 0.1, vazia e publicada (DECISOES 4.1.1). Uma fazenda só: abre direto o
-  // "Como deseja iniciar o plano?" dele, pelo mesmo caminho do clique na linha (cancelado, fica na lista).
-  // Várias fazendas: o aviso pede para clicar na linha de cada uma.
-  // O primeiro plano criado (a partir do primeiro uso) entra na lista junto com os planos de exemplo.
-  // talhoes: os talhões incluídos (pode ser vazio: Área de cultivo "Pendente").
-  function criarPlanos({ fazendas, ...contexto }) {
+  // Cria o plano do Criar Plano de Safra (09/11/2026: tela inteira, uma fazenda, duas etapas). Safra + Fazenda + Cultura
+  // identificam o plano. Nasce já iniciado, pela opção da etapa 2 (Como iniciar): a 0.1 publicada (registro inicial) e
+  // a 0.2 em construção com o conteúdo escolhido (DECISOES 4.1.1), e abre no Planejamento.
+  // talhoes: os talhões incluídos (pode ser vazio: Área de cultivo "Pendente"); areas: as áreas planejadas diferentes
+  // da cadastrada ({ T02: 60 }). O primeiro plano criado (a partir do primeiro uso) entra junto com os planos de exemplo.
+  function criarPlanos({ fazenda, talhoes, areas, grupos, aviso, ...contexto }) {
     if (!temPlanos()) carregarPlanosExemplo();
-    const criados = fazendas.map(({ fazenda, talhoes }) => {
-      const plano = {
-        id: estado.proximoIdPlano++,
-        ...contexto,
-        fazenda,
-        talhoes,
-        custo: null,
-        receita: null,
-        atualizadoEm: Util.hojeISO(),
-        atualizadoPor: DADOS.usuario.nome
-      };
-      Versoes.iniciar(plano, []);
-      DADOS.planos.push(plano);
-      return plano;
-    });
-    const nomes = criados.map((p) => Util.escapar(p.fazenda)).join(', ');
-    Telas.listaPlanos.mostrarSafra(contexto.safra);
-    // Depois de desenhar a lista (mostrarTela apaga o aviso anterior): a tabela rola até o plano novo e, com uma
-    // fazenda, abre o modal de início; com várias, o aviso
-    const depois = () => {
-      document.querySelector('.lista-planos__linha--novo')?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-      if (criados.length === 1) Telas.listaPlanos.abrirPlano(criados[0]);
-      else Aviso.mostrar(`${criados.length} planos criados (${nomes}). Clique na linha de cada um para começar.`);
+    const plano = {
+      id: estado.proximoIdPlano++,
+      ...contexto,
+      // Sem o nível Empresa no modal (Util.comEmpresa), a empresa da fazenda
+      empresa: contexto.empresa || Util.empresaDaFazenda(fazenda),
+      fazenda,
+      talhoes,
+      areas: areas && Object.keys(areas).length ? { ...areas } : null,
+      custo: null,
+      receita: null,
+      atualizadoEm: Util.hojeISO(),
+      atualizadoPor: DADOS.usuario.nome
     };
-    if (location.hash === '#/plano-safra') { mostrarTela(); depois(); }
-    else { window.addEventListener('hashchange', depois, { once: true }); location.hash = '#/plano-safra'; }
+    Versoes.iniciar(plano, []);
+    DADOS.planos.push(plano);
+    Versoes.comecar(plano, grupos || []);
+    // O aviso entra depois da troca de tela (a troca apaga o aviso anterior)
+    window.addEventListener('hashchange', () => Aviso.mostrar(aviso ? `Plano criado · ${aviso}` : 'Plano criado'), { once: true });
+    location.hash = `#/plano/${plano.id}`;
   }
 
   // O exemplo anda com o ano agrícola (DADOS.dataReferencia): as datas do exemplo andam os anos agrícolas entre hoje e a

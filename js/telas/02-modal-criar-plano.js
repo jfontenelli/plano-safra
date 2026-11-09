@@ -1,229 +1,196 @@
 /*
- * Tela 02 — Modal Criar Plano de Safra (docs/telas/02-modal-criar-plano.md)
- * Abre por cima da tela de origem. Só identifica o plano: informações gerais (Safra, Empresa, Atividade, Cultura)
- * e uma ou mais fazendas, cada uma com os talhões incluídos. Cria um plano por fazenda.
- * Ao criar, chama aoCriar({ safra, empresa, atividade, cultura, fazendas: [{ fazenda, talhoes }] }).
- * inicial: { safra, empresa, fazenda } já escolhidos ao abrir (a fazenda com todos os talhões).
- * Como começar o plano (modelo, do zero, XLSX, copiar) fica no Planejamento (Telas.inicioPlano).
+ * Tela 02 — Criar Plano de Safra (docs/telas/02-modal-criar-plano.md)
+ * Desde 09/11/2026: ocupa a tela inteira e tem duas etapas, com o indicador "1 Definir o plano ── 2 Como iniciar".
+ *  1. Definir o plano: informações gerais (Safra, Empresa (só com o nível Empresa), Atividade, Cultura) e uma fazenda,
+ *     com a tabela de talhões (TabelaAreas: Área cadastrada e Área planejada, editável). Próximo →.
+ *  2. Como iniciar: as opções do "Como deseja iniciar o plano?" (Telas.inicioPlano.embutir). ‹ Voltar e
+ *     Começar o planejamento.
+ * O plano só passa a existir em "Começar o planejamento"; fechar descarta tudo. Uma fazenda por vez.
+ * Ao criar, chama aoCriar({ safra, empresa, atividade, cultura, fazenda, talhoes, areas, grupos, aviso }).
+ * inicial: { safra, safras, empresa, fazenda } já escolhidos ao abrir (a fazenda com todos os talhões).
  */
 window.Telas = window.Telas || {};
 
 window.Telas.abrirModalCriarPlano = function ({ aoCriar, inicial = {} }) {
   const esc = Util.escapar;
   const NOVA_SAFRA = '__nova-safra__';
-  const GERAIS = ['safra', 'empresa', 'atividade', 'cultura'];
+  // Sem o nível Empresa (Util.comEmpresa, 09/11/2026), o campo Empresa não aparece: a lista de fazendas tem todas e
+  // o plano fica com a empresa da sua fazenda (app.js, criarPlanos)
+  const GERAIS = ['safra', 'empresa', 'atividade', 'cultura'].filter((c) => c !== 'empresa' || Util.comEmpresa());
 
-  // Blocos de fazenda: { chave, fazenda, talhoes (nomes incluídos) }
-  let proximaChave = 1;
-  const blocos = [novoBloco()];
-  if (inicial.fazenda) Object.assign(blocos[0], { fazenda: inicial.fazenda, talhoes: (DADOS.talhoes[inicial.fazenda] || []).map((t) => t.nome) });
-  let tentouCriar = false;      // os avisos de obrigatório só aparecem depois de tentar criar
-  let talhoesAbertos = null;    // chave do bloco com a lista de talhões aberta
-
-  function novoBloco() { return { chave: proximaChave++, fazenda: '', talhoes: [] }; }
+  let etapa = 1;
+  let tentou = false; // os avisos de obrigatório só aparecem depois de tentar seguir
+  // Fazenda e talhões (TabelaAreas): marcados e áreas planejadas
+  let fazenda = '';
+  const tabela = { todos: [], marcados: new Set(), areas: {}, editando: null, erro: '' };
+  function escolherFazenda(f) {
+    fazenda = f;
+    tabela.todos = DADOS.talhoes[f] || [];
+    // Fazenda escolhida: todos os talhões já vêm incluídos (a pessoa desmarca os que não quer), com a área cadastrada
+    tabela.marcados = new Set(tabela.todos.map((t) => t.nome));
+    tabela.areas = {}; tabela.editando = null; tabela.erro = '';
+  }
+  if (inicial.fazenda) escolherFazenda(inicial.fazenda);
+  // O plano que vai nascer (para a etapa 2: importar confere safra, fazenda e cultura; copiar usa a cultura)
+  const rascunho = { id: '__novo__' };
 
   const modal = Modal.abrir(`
-    <form class="formulario" novalidate>
-      <div class="modal__corpo">
-        <button class="modal__fechar" type="button" aria-label="Fechar" data-fechar>${Icones.fechar}</button>
-        <h2 class="modal__titulo" id="modal-titulo">Criar Plano de Safra</h2>
-        <p class="modal__subtitulo">Defina as informações gerais do plano e selecione as fazendas que farão parte da criação.</p>
+    <div class="cp-tela">
+      <header class="cp-tela__topo">
+        <ol class="cp-etapas" aria-label="Etapas">
+          <li class="cp-etapas__item" data-cp-etapa="1"><span class="cp-etapas__num">1</span> Definir o plano</li>
+          <li class="cp-etapas__linha" aria-hidden="true"></li>
+          <li class="cp-etapas__item" data-cp-etapa="2"><span class="cp-etapas__num">2</span> Como iniciar</li>
+        </ol>
+        <button class="modal__fechar cp-tela__fechar" type="button" aria-label="Fechar" data-fechar>${Icones.fechar}</button>
+      </header>
 
-        <h3 class="cp-secao">Informações gerais</h3>
-        <div class="cp-gerais">
-          <div class="campo">
-            <label class="campo__rotulo" for="cp-safra">Safra ${asterisco()}</label>
-            <select class="campo__controle" id="cp-safra" name="safra" required></select>
-            ${erroObrigatorio('safra')}
+      <form class="formulario cp-tela__corpo" novalidate data-cp-passo="1">
+        <div class="cp-tela__miolo">
+          <h2 class="modal__titulo" id="modal-titulo">Criar Plano de Safra</h2>
+          <p class="modal__subtitulo">Defina as informações gerais e selecione as áreas que farão parte do plano.</p>
+
+          <h3 class="cp-secao">Informações gerais</h3>
+          <!-- Safra · (Empresa) · Atividade · Cultura · Fazenda numa linha; embaixo, só os talhões (09/11/2026) -->
+          <div class="cp-gerais ${Util.comEmpresa() ? 'cp-gerais--5' : ''}">
+            <div class="campo">
+              <label class="campo__rotulo" for="cp-safra">Safra ${asterisco()}</label>
+              <select class="campo__controle" id="cp-safra" name="safra" required></select>
+              ${erroObrigatorio('safra')}
+            </div>
+            ${Util.comEmpresa() ? campoLista('empresa', 'Empresa', 'Selecione', DADOS.empresas, [], inicial.empresa)
+              : '<input type="hidden" name="empresa" value="">'}
+            ${campoLista('atividade', 'Atividade', 'Selecione', DADOS.atividades, DADOS.atividadesEmBreve, 'Agricultura')}
+            ${campoLista('cultura', 'Cultura', 'Selecione', DADOS.culturas)}
+            <div class="campo">
+              <label class="campo__rotulo" for="cp-fazenda">Fazenda ${asterisco()}</label>
+              <select class="campo__controle" id="cp-fazenda" name="fazenda"></select>
+              <p class="erro-campo" id="cp-erro-fazenda" hidden></p>
+            </div>
           </div>
-          ${campoLista('empresa', 'Empresa', 'Selecione', DADOS.empresas, [], inicial.empresa)}
-          ${campoLista('atividade', 'Atividade', 'Selecione', DADOS.atividades, DADOS.atividadesEmBreve, 'Agricultura')}
-          ${campoLista('cultura', 'Cultura', 'Selecione', DADOS.culturas)}
+
+          <h3 class="cp-secao cp-secao--linha">Talhões</h3>
+          <p class="cp-secao__sub">Selecione os talhões e ajuste a área planejada quando necessário.</p>
+          <div class="cp-talhoes-area" data-cp-talhoes></div>
         </div>
+      </form>
 
-        <h3 class="cp-secao cp-secao--linha">Fazendas</h3>
-        <div class="cp-fazendas" id="cp-fazendas"></div>
-        <button class="botao botao--secundario cp-adicionar" type="button" data-acao="cp-adicionar">${Icones.mais} Adicionar fazenda</button>
+      <div class="cp-tela__corpo" data-cp-passo="2" hidden>
+        <div class="cp-tela__miolo">
+          <h2 class="modal__titulo">Como deseja iniciar o plano?</h2>
+          <p class="modal__subtitulo" data-cp-contexto></p>
+          <div data-ini-corpo></div>
+        </div>
       </div>
 
-      <div class="modal__rodape">
+      <div class="modal__rodape cp-tela__rodape">
         <p class="modal__rodape-erro" id="cp-erro-criar" role="alert" hidden></p>
-        <button class="botao botao--secundario" type="button" data-fechar>Cancelar</button>
-        <button class="botao botao--primario" type="submit" aria-disabled="true">Criar Plano de Safra</button>
+        <button class="botao botao--secundario" type="button" data-fechar data-cp-so="1">Cancelar</button>
+        <button class="botao botao--primario" type="button" data-acao="cp-proximo" data-cp-so="1" aria-disabled="true">Próximo ${Icones.proxima}</button>
+        <button class="botao botao--secundario cp-tela__voltar" type="button" data-acao="cp-voltar" data-cp-so="2" hidden>${Icones.anterior} Voltar</button>
+        <button class="botao botao--primario" type="button" data-ini="comecar" data-cp-so="2" hidden>Começar o planejamento</button>
       </div>
-    </form>
-  `, { classe: 'modal--formulario modal--largo' });
+    </div>
+  `, { classe: 'modal--tela modal--criar-plano' });
 
-  const form = modal.elemento.querySelector('form');
+  const el = modal.elemento;
+  const form = el.querySelector('form');
   const selectSafra = form.elements.safra;
-  const caixaFazendas = form.querySelector('#cp-fazendas');
-  const botaoCriar = form.querySelector('[type="submit"]');
-  const erroCriar = form.querySelector('#cp-erro-criar');
+  const selectFazenda = form.elements.fazenda;
+  const caixaTalhoes = form.querySelector('[data-cp-talhoes]');
+  const botaoProximo = el.querySelector('[data-acao="cp-proximo"]');
+  const erroCriar = el.querySelector('#cp-erro-criar');
   let safraAnterior = '';
 
-  // Lista de safras: as do cadastro ou, vindo da Visão Geral, só as do Ano Agrícola do filtro (inicial.safras)
+  // Lista de safras: as do cadastro ou, vindo da lista de planos, só as do Ano Agrícola do filtro (inicial.safras)
   const listaSafras = inicial.safras ? [...inicial.safras] : DADOS.safras;
   preencherSafras(inicial.safra && listaSafras.includes(inicial.safra) ? inicial.safra : '');
-  desenharFazendas();
+  preencherFazendas();
+  desenharTalhoes();
+  mostrarEtapa();
   selectSafra.focus();
 
-  // ----- Fazendas -----
-  // Cada empresa tem as suas fazendas (DADOS.fazendasPorEmpresa): a lista de fazendas segue a empresa escolhida.
-  // Sem empresa, a lista fica desabilitada. Trocar a empresa tira as fazendas que não são dela.
-  function fazendasDaEmpresa() { return (DADOS.fazendasPorEmpresa || {})[form.elements.empresa.value] || []; }
-  form.elements.empresa.addEventListener('change', () => {
-    const daEmpresa = fazendasDaEmpresa();
-    blocos.forEach((b) => { if (b.fazenda && !daEmpresa.includes(b.fazenda)) { b.fazenda = ''; b.talhoes = []; } });
-    talhoesAbertos = null;
-    desenharFazendas();
-  });
+  // ----- Fazenda -----
+  // Com o nível Empresa, cada empresa tem as suas fazendas (DADOS.fazendasPorEmpresa): a lista segue a empresa
+  // escolhida (desabilitada sem empresa). Sem o nível, todas as fazendas.
+  function fazendasDaEmpresa() {
+    if (!Util.comEmpresa()) return DADOS.fazendas;
+    return (DADOS.fazendasPorEmpresa || {})[form.elements.empresa.value] || [];
+  }
+  function comEmpresaEscolhida() { return !Util.comEmpresa() || !!form.elements.empresa.value; }
+  function preencherFazendas() {
+    const lista = fazendasDaEmpresa();
+    if (fazenda && !lista.includes(fazenda)) escolherFazenda('');
+    selectFazenda.disabled = !comEmpresaEscolhida();
+    selectFazenda.innerHTML = opcoes(comEmpresaEscolhida() ? 'Selecione' : 'Escolha a empresa', lista, fazenda);
+  }
+  form.elements.empresa.addEventListener('change', () => { preencherFazendas(); desenharTalhoes(); });
+  selectFazenda.addEventListener('change', () => { escolherFazenda(selectFazenda.value); desenharTalhoes(); });
 
-  function desenharFazendas() {
-    caixaFazendas.innerHTML = blocos.map(blocoFazenda).join('');
-    posicionarLista();
+  // Tabela de talhões da fazenda escolhida (sem fazenda, só a dica)
+  function desenharTalhoes(foco) {
+    caixaTalhoes.innerHTML = fazenda
+      ? (tabela.todos.length ? TabelaAreas.html(tabela) : '<p class="cp-fazenda__dica">Esta fazenda não tem talhões cadastrados.</p>')
+      : `<p class="cp-fazenda__dica">${Icones.info} Escolha a fazenda para ver os talhões.</p>`;
+    TabelaAreas.depois(caixaTalhoes);
+    if (foco) caixaTalhoes.querySelector(foco)?.focus();
     atualizar();
   }
+  TabelaAreas.ligar(caixaTalhoes, tabela, desenharTalhoes);
 
-  // A lista de talhões fica por cima do modal (posição fixa), para não ser cortada pela rolagem do formulário:
-  // abaixo do botão, ou acima quando falta espaço embaixo; a altura cabe na tela
-  function posicionarLista() {
-    const lista = caixaFazendas.querySelector('.cp-talhoes__lista');
-    if (!lista || !lista.isConnected) return;
-    const botao = lista.previousElementSibling.getBoundingClientRect();
-    const margem = 12;
-    const abaixo = window.innerHeight - botao.bottom - margem;
-    const acima = botao.top - margem;
-    const altura = Math.min(320, lista.scrollHeight);
-    const emCima = abaixo < altura && acima > abaixo;
-    lista.style.left = `${botao.left}px`;
-    lista.style.width = `${botao.width}px`;
-    lista.style.maxHeight = `${Math.max(120, Math.min(320, emCima ? acima : abaixo))}px`;
-    lista.style.top = emCima ? '' : `${botao.bottom + 4}px`;
-    lista.style.bottom = emCima ? `${window.innerHeight - botao.top + 4}px` : '';
-  }
-  // Rolou o formulário ou mudou o tamanho da janela: a lista acompanha o botão
-  modal.elemento.querySelector('.modal__corpo').addEventListener('scroll', posicionarLista);
-  window.addEventListener('resize', posicionarLista);
-
-  function blocoFazenda(b, i) {
-    const todos = DADOS.talhoes[b.fazenda] || [];
-    const incluidos = todos.filter((t) => b.talhoes.includes(t.nome));
-    const area = incluidos.reduce((s, t) => s + t.area, 0);
-    const resumo = !b.fazenda ? 'Escolha a fazenda'
-      : !incluidos.length ? 'Selecionar talhões'
-      : incluidos.length === todos.length ? `Todos os talhões (${todos.length})`
-      : `${incluidos.length} de ${todos.length} talhões`;
-    const aberto = talhoesAbertos === b.chave;
-    return `
-      <section class="cp-fazenda" data-bloco="${b.chave}" aria-label="Fazenda ${i + 1}">
-        <header class="cp-fazenda__topo">
-          <span>Fazenda ${i + 1}</span>
-          ${blocos.length > 1 ? `<button class="botao-icone" type="button" data-acao="cp-remover" title="Remover esta fazenda"
-                                        aria-label="Remover Fazenda ${i + 1}">${Icones.lixeira}</button>` : ''}
-        </header>
-        <div class="cp-fazenda__campos">
-          <div class="campo">
-            <label class="campo__rotulo" for="cp-fazenda-${b.chave}">Fazenda ${asterisco()}</label>
-            <select class="campo__controle" id="cp-fazenda-${b.chave}" data-campo="fazenda" ${form.elements.empresa.value ? '' : 'disabled'}>
-              ${opcoes(form.elements.empresa.value ? 'Selecione' : 'Escolha a empresa', fazendasDaEmpresa(), b.fazenda)}
-            </select>
-            <p class="erro-campo" data-erro-fazenda hidden></p>
-          </div>
-          <div class="campo cp-talhoes">
-            <span class="campo__rotulo" id="cp-talhoes-rot-${b.chave}">Talhões</span>
-            <button class="campo__controle cp-talhoes__botao" type="button" data-acao="cp-talhoes"
-                    aria-haspopup="true" aria-expanded="${aberto}" aria-labelledby="cp-talhoes-rot-${b.chave}"
-                    ${b.fazenda ? '' : 'disabled'}><span>${resumo}</span>${Icones.abaixo}</button>
-            ${aberto ? listaTalhoes(b, todos) : ''}
-          </div>
-          <div class="campo">
-            <span class="campo__rotulo">Área de cultivo</span>
-            <p class="campo__controle cp-area" aria-live="polite">${incluidos.length ? Util.area(area) : 'Pendente'}</p>
-          </div>
-        </div>
-        ${b.fazenda && !incluidos.length ? `<p class="cp-fazenda__dica">${Icones.info} A área de cultivo será calculada automaticamente quando houver talhões selecionados.</p>` : ''}
-      </section>`;
+  // ----- Etapas -----
+  function mostrarEtapa() {
+    el.querySelectorAll('[data-cp-passo]').forEach((p) => { p.hidden = Number(p.dataset.cpPasso) !== etapa; });
+    el.querySelectorAll('[data-cp-so]').forEach((b) => { b.hidden = Number(b.dataset.cpSo) !== etapa; });
+    el.querySelectorAll('[data-cp-etapa]').forEach((li) => {
+      const n = Number(li.dataset.cpEtapa);
+      li.classList.toggle('cp-etapas__item--ativa', n === etapa);
+      li.classList.toggle('cp-etapas__item--feita', n < etapa);
+      if (n === etapa) li.setAttribute('aria-current', 'step'); else li.removeAttribute('aria-current');
+    });
+    erroCriar.hidden = etapa !== 1 || erroCriar.hidden;
   }
 
-  // Lista de talhões com caixas de marcar; "Todos" marca ou desmarca tudo
-  function listaTalhoes(b, todos) {
-    const tudo = todos.length && todos.every((t) => b.talhoes.includes(t.nome));
-    return `
-      <div class="cp-talhoes__lista" role="group" aria-label="Talhões da Fazenda ${esc(b.fazenda)}">
-        <label class="cp-talhoes__item cp-talhoes__item--todos">
-          <input type="checkbox" data-talhao="__todos__" ${tudo ? 'checked' : ''}> Todos
-        </label>
-        ${todos.map((t) => `
-          <label class="cp-talhoes__item">
-            <input type="checkbox" data-talhao="${esc(t.nome)}" ${b.talhoes.includes(t.nome) ? 'checked' : ''}>
-            ${esc(t.nome)} <span class="cp-talhoes__area">${Util.area(t.area)}</span>
-          </label>`).join('')}
-      </div>`;
+  // Etapa 2 (Como iniciar): as opções do modal de início, para o plano que vai nascer
+  const desenharInicio = Telas.inicioPlano.embutir(el, el.querySelector('[data-ini-corpo]'), rascunho, {
+    aoComecar: (grupos, aviso) => {
+      const f = form.elements;
+      modal.fechar();
+      aoCriar({ safra: f.safra.value, empresa: f.empresa.value, atividade: f.atividade.value, cultura: f.cultura.value,
+        fazenda, talhoes: talhoesEscolhidos(), areas: { ...tabela.areas }, grupos, aviso });
+    }
+  });
+  const talhoesEscolhidos = () => tabela.todos.filter((t) => tabela.marcados.has(t.nome)).map((t) => t.nome);
+
+  function irParaInicio() {
+    const f = form.elements;
+    Object.assign(rascunho, { safra: f.safra.value, empresa: f.empresa.value || Util.empresaDaFazenda(fazenda),
+      fazenda, cultura: f.cultura.value, atividade: f.atividade.value, talhoes: talhoesEscolhidos(), areas: { ...tabela.areas } });
+    el.querySelector('[data-cp-contexto]').textContent =
+      `Safra ${rascunho.safra} · ${Util.comEmpresa() ? `${rascunho.empresa} · ` : ''}Fazenda ${fazenda} · ${rascunho.cultura}`;
+    desenharInicio();
+    etapa = 2;
+    mostrarEtapa();
+    (el.querySelector('[name="ini-opcao"]:checked') || el.querySelector('[data-acao="cp-voltar"]')).focus();
   }
 
-  function blocoDe(el) {
-    const sec = el.closest('[data-bloco]');
-    return sec ? blocos.find((b) => b.chave === Number(sec.dataset.bloco)) : null;
-  }
-
-  // Redesenha as fazendas e devolve o foco ao controle equivalente
-  function redesenhar(chave, seletor) {
-    desenharFazendas();
-    caixaFazendas.querySelector(`[data-bloco="${chave}"] ${seletor}`)?.focus();
-  }
-
-  form.addEventListener('click', (e) => {
+  el.addEventListener('click', (e) => {
     const acao = e.target.closest('[data-acao]')?.dataset.acao;
-    const b = blocoDe(e.target);
-    if (acao === 'cp-adicionar') {
-      const novo = novoBloco();
-      blocos.push(novo);
-      talhoesAbertos = null;
-      redesenhar(novo.chave, '[data-campo="fazenda"]');
-    } else if (acao === 'cp-remover') {
-      blocos.splice(blocos.indexOf(b), 1);
-      talhoesAbertos = null;
-      desenharFazendas();
-      form.querySelector('[data-acao="cp-adicionar"]').focus();
-    } else if (acao === 'cp-talhoes') {
-      talhoesAbertos = talhoesAbertos === b.chave ? null : b.chave;
-      redesenhar(b.chave, talhoesAbertos ? '.cp-talhoes__lista input' : '[data-acao="cp-talhoes"]');
+    if (acao === 'cp-proximo') {
+      tentou = true;
+      const { faltando, fazendaErro } = atualizar();
+      if (faltando.length) { form.elements[faltando[0]].focus(); return; }
+      if (fazendaErro) { selectFazenda.focus(); return; }
+      if (tabela.editando) return; // a área em edição está com erro
+      irParaInicio();
+    } else if (acao === 'cp-voltar') {
+      etapa = 1;
+      mostrarEtapa();
+      botaoProximo.focus();
     }
   });
-
-  // Clicar fora da lista de talhões fecha a lista
-  modal.elemento.addEventListener('mousedown', (e) => {
-    if (talhoesAbertos && !e.target.closest('.cp-talhoes')) { talhoesAbertos = null; desenharFazendas(); }
-  });
-  // Esc na lista de talhões fecha só a lista (não o modal)
-  form.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && talhoesAbertos && e.target.closest('.cp-talhoes')) {
-      e.stopPropagation();
-      const chave = talhoesAbertos;
-      talhoesAbertos = null;
-      redesenhar(chave, '[data-acao="cp-talhoes"]');
-    }
-  });
-
-  form.addEventListener('change', (e) => {
-    const b = blocoDe(e.target);
-    if (b && e.target.dataset.campo === 'fazenda') {
-      // Fazenda escolhida: todos os talhões já vêm incluídos (a pessoa desmarca os que não quer)
-      b.fazenda = e.target.value;
-      b.talhoes = (DADOS.talhoes[b.fazenda] || []).map((t) => t.nome);
-      redesenhar(b.chave, '[data-campo="fazenda"]');
-      return;
-    }
-    if (b && e.target.dataset.talhao) {
-      const todos = (DADOS.talhoes[b.fazenda] || []).map((t) => t.nome);
-      const nome = e.target.dataset.talhao;
-      if (nome === '__todos__') b.talhoes = e.target.checked ? todos : [];
-      else b.talhoes = e.target.checked ? todos.filter((t) => t === nome || b.talhoes.includes(t)) : b.talhoes.filter((t) => t !== nome);
-      redesenhar(b.chave, `[data-talhao="${CSS.escape(nome)}"]`);
-      return;
-    }
-    atualizar();
-  });
+  form.addEventListener('submit', (e) => e.preventDefault());
+  form.addEventListener('change', (e) => { if (e.target.name && GERAIS.includes(e.target.name)) atualizar(); });
 
   // ----- Criar nova safra (última opção da lista de safras) -----
   function preencherSafras(selecionada = '') {
@@ -282,76 +249,52 @@ window.Telas.abrirModalCriarPlano = function ({ aoCriar, inicial = {} }) {
       if (!listaSafras.includes(nome)) listaSafras.push(nome);
       preencherSafras(nome);
       janela.fechar();
-      form.elements.empresa.focus();
+      form.elements[GERAIS[1]].focus();
       atualizar();
     });
     input.focus();
   }
 
   // ----- Validação -----
-  // Informações gerais e a fazenda de cada bloco são obrigatórias; talhões, não.
-  // Um único plano por safra e fazenda: não pode repetir fazenda entre os blocos nem criar um plano que já existe.
+  // Informações gerais e a fazenda são obrigatórias; talhões, não (sem talhões, a área fica "Pendente").
+  // Um único plano por safra, fazenda e cultura (09/11/2026): não deixa criar um plano que já existe
+  // (ex.: com a soja 27/27 da Boa Vista, o milho 27/27 da Boa Vista pode).
   function problemas() {
     const f = form.elements;
     const faltando = GERAIS.filter((nome) => !f[nome].value);
-    const porBloco = blocos.map((b, i) => {
-      if (!b.fazenda) return 'Preenchimento obrigatório';
-      if (blocos.findIndex((x) => x.fazenda === b.fazenda) < i) return `A Fazenda ${b.fazenda} já está em outro bloco.`;
-      if (f.safra.value && DADOS.planos.some((p) => p.safra === f.safra.value && p.fazenda === b.fazenda)) {
-        return `Já existe um plano da safra ${f.safra.value} para a Fazenda ${b.fazenda}.`;
-      }
-      return '';
-    });
-    return { faltando, porBloco };
+    let fazendaErro = '';
+    if (!fazenda) fazendaErro = 'Preenchimento obrigatório';
+    else if (f.safra.value && f.cultura.value && DADOS.planos.some((p) => p.safra === f.safra.value && p.fazenda === fazenda
+      && p.cultura === f.cultura.value)) {
+      fazendaErro = `Já existe um plano de ${f.cultura.value} da safra ${f.safra.value} para a Fazenda ${fazenda}.`;
+    }
+    return { faltando, fazendaErro };
   }
 
   function atualizar() {
-    const { faltando, porBloco } = problemas();
-    const bloqueado = faltando.length || porBloco.some(Boolean);
+    const { faltando, fazendaErro } = problemas();
+    const bloqueado = faltando.length || fazendaErro;
     // O botão parece desabilitado, mas continua clicável para explicar o que falta
-    botaoCriar.setAttribute('aria-disabled', bloqueado ? 'true' : 'false');
+    botaoProximo.setAttribute('aria-disabled', bloqueado ? 'true' : 'false');
     GERAIS.forEach((nome) => {
-      const vazio = tentouCriar && faltando.includes(nome);
+      const vazio = tentou && faltando.includes(nome);
       form.querySelector(`#cp-erro-${nome}`).hidden = !vazio;
       form.elements[nome].toggleAttribute('aria-invalid', vazio);
     });
-    caixaFazendas.querySelectorAll('[data-bloco]').forEach((sec, i) => {
-      const msg = porBloco[i];
-      // Fazenda vazia só é cobrada depois de tentar criar; fazenda repetida ou plano existente, na hora
-      const mostrar = msg && (tentouCriar || msg !== 'Preenchimento obrigatório');
-      const erro = sec.querySelector('[data-erro-fazenda]');
-      erro.textContent = mostrar ? msg : ''; // textContent: não precisa escapar
-      erro.hidden = !mostrar;
-      sec.querySelector('[data-campo="fazenda"]').classList.toggle('campo__controle--erro', !!mostrar && msg !== 'Preenchimento obrigatório');
-    });
-    erroCriar.hidden = !(tentouCriar && bloqueado);
-    erroCriar.textContent = faltando.length || porBloco.includes('Preenchimento obrigatório')
-      ? 'Preencha os campos obrigatórios.' : 'Confira as fazendas.';
-    return { faltando, porBloco };
+    // Fazenda vazia só é cobrada depois de tentar seguir; plano existente, na hora
+    const mostrar = fazendaErro && (tentou || fazendaErro !== 'Preenchimento obrigatório');
+    const erro = form.querySelector('#cp-erro-fazenda');
+    erro.textContent = mostrar ? fazendaErro : '';
+    erro.hidden = !mostrar;
+    selectFazenda.classList.toggle('campo__controle--erro', !!mostrar && fazendaErro !== 'Preenchimento obrigatório');
+    erroCriar.hidden = !(tentou && bloqueado) || etapa !== 1;
+    erroCriar.textContent = faltando.length || fazendaErro === 'Preenchimento obrigatório'
+      ? 'Preencha os campos obrigatórios.' : 'Confira a fazenda.';
+    return { faltando, fazendaErro };
   }
 
-  // ----- Criar Plano de Safra -----
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    tentouCriar = true;
-    const { faltando, porBloco } = atualizar();
-    if (faltando.length) { form.elements[faltando[0]].focus(); return; }
-    const i = porBloco.findIndex(Boolean);
-    if (i >= 0) { caixaFazendas.querySelectorAll('[data-campo="fazenda"]')[i].focus(); return; }
-    const f = form.elements;
-    modal.fechar();
-    aoCriar({
-      safra: f.safra.value,
-      empresa: f.empresa.value,
-      atividade: f.atividade.value,
-      cultura: f.cultura.value,
-      fazendas: blocos.map((b) => ({ fazenda: b.fazenda, talhoes: [...b.talhoes] }))
-    });
-  });
-
   // ----- Pedaços de HTML -----
-  // Com uma opção só (ex.: cultura, por enquanto só Soja), ela já vem escolhida.
-  // emBreve: opções que aparecem desabilitadas, com "(Em breve)".
+  // Com uma opção só, ela já vem escolhida. emBreve: opções que aparecem desabilitadas, com "(Em breve)".
   function campoLista(nome, rotulo, textoVazio, itens, emBreve = [], padrao = '') {
     const disponiveis = itens.filter((x) => !emBreve.includes(x));
     const escolhido = padrao || (disponiveis.length === 1 ? disponiveis[0] : '');

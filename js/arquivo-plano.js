@@ -28,7 +28,8 @@ window.ArquivoPlano = (function () {
       Aviso.mostrar('Não foi possível exportar: sem conexão com a internet para carregar o gerador de planilhas.');
       return;
     }
-    const talhoes = DADOS.talhoes[plano.fazenda] || [];
+    // Área planejada do talhão no plano (a cadastrada, se não foi mudada)
+    const talhoes = Util.talhoesPlano(plano);
     const area = (nome) => (talhoes.find((t) => t.nome === nome) || {}).area ?? null;
     const sementes = plano.grupos.find((g) => g.tipo === 'Sementes');
     const plantio = sementes && sementes.operacoes[0];
@@ -36,7 +37,8 @@ window.ArquivoPlano = (function () {
     const abaPlano = [
       ['campo', 'valor'],
       ['formato', FORMATO], ['versao', VERSAO],
-      ['safra', plano.safra], ['empresa', plano.empresa], ['fazenda', plano.fazenda], ['cultura', plano.cultura],
+      // Sem o nível Empresa (Util.comEmpresa), a planilha sai sem a linha empresa
+      ['safra', plano.safra], ...(Util.comEmpresa() ? [['empresa', plano.empresa]] : []), ['fazenda', plano.fazenda], ['cultura', plano.cultura],
       ['versao_plano', `${plano.versaoAberta} · ${Versoes.rotuloStatus(plano, Versoes.aberta(plano))}`],
       ['exportado_em', Util.hojeISO()], ['exportado_por', DADOS.usuario.nome]
     ];
@@ -123,7 +125,7 @@ window.ArquivoPlano = (function () {
         const campos = Object.fromEntries(linhas('plano').map((x) => [x.campo, x.valor]));
         if (campos.formato !== FORMATO) { resolver(naoEhDoSistema); return; }
         resolver({
-          contexto: { safra: String(campos.safra), empresa: String(campos.empresa), fazenda: String(campos.fazenda), cultura: String(campos.cultura) },
+          contexto: { safra: String(campos.safra), empresa: String(campos.empresa ?? ''), fazenda: String(campos.fazenda), cultura: String(campos.cultura) },
           // Arquivos antigos tinham uma germinação média do plano; vale para os talhões sem germinação na linha
           germinacao: campos.germinacao_media === '' || campos.germinacao_media === undefined ? null : Number(campos.germinacao_media),
           prazoColheita: campos.prazo_colheita ? Number(campos.prazo_colheita) : null,

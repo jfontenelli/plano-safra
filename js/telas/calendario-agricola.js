@@ -140,17 +140,21 @@ window.Telas.calendarioAgricola = (function () {
     const seta = (aberto) => `<span class="cag__seta ${aberto ? '' : 'cag__seta--fechada'}" aria-hidden="true">${Icones.abaixo}</span>`;
     const areaDe = (lista) => lista.reduce((s, p) => s + (Util.areaCultivo(p, Versoes.ultimaPublicada(p)) || 0), 0);
 
-    // Agrupado por empresa (na ordem do cadastro); dentro, por fazenda, e a safra antes da safrinha
+    // Agrupado por empresa (na ordem do cadastro); dentro, por fazenda, e a safra antes da safrinha.
+    // Sem o nível Empresa (Util.comEmpresa, 09/11/2026): sem a linha da empresa; começa pelas fazendas (fechadas)
     const linhas = [];
-    DADOS.empresas.filter((e) => planos.some((p) => p.empresa === e)).forEach((e) => {
-      const daEmpresa = planos.filter((p) => p.empresa === e);
-      const ce = `e:${e}`; const abertaE = empresasAbertas.has(ce);
-      linhas.push(`
+    const porEmpresa = Util.comEmpresa()
+      ? DADOS.empresas.filter((e) => planos.some((p) => p.empresa === e)).map((e) => [e, planos.filter((p) => p.empresa === e)])
+      : [[null, planos]];
+    porEmpresa.forEach(([e, daEmpresa]) => {
+      const ce = `e:${e}`; const abertaE = e === null || empresasAbertas.has(ce);
+      const daLinha = (extra) => ({ ...(e === null ? {} : { empresa: e }), ...extra });
+      if (e !== null) linhas.push(`
         <div class="cag__linha cag__linha--empresa" role="row">
           <span role="cell"><button class="cag__abrir" type="button" data-cag-recolher="${esc(ce)}" aria-expanded="${abertaE}">${seta(abertaE)}<strong>${esc(e)}</strong></button></span>
           <span role="cell"></span><span role="cell" class="cag__num"><strong>${Util.area(areaDe(daEmpresa))}</strong></span>
           ${abertaE ? `<span role="cell" class="cag__tempo cag__tempo--vazio" style="${fundo}">${marcaHoje}</span>`
-            : `<span role="cell" class="cag__tempo cag__tempo--faixas" style="${fundo}">${barras(juntar(daEmpresa.map((p) => ops.get(p))), j, { empresa: e })}${marcaHoje}</span>`}
+            : `<span role="cell" class="cag__tempo cag__tempo--faixas" style="${fundo}">${barras(juntar(daEmpresa.map((p) => ops.get(p))), j, daLinha({}))}${marcaHoje}</span>`}
         </div>`);
       if (!abertaE) return;
       [...new Set(daEmpresa.map((p) => p.fazenda))].sort((a, b) => a.localeCompare(b, 'pt-BR')).forEach((f) => {
@@ -165,7 +169,7 @@ window.Telas.calendarioAgricola = (function () {
             <span role="cell">${[...new Set(daFazenda.map((p) => p.cultura))].map(esc).join(' → ')}</span>
             <span role="cell" class="cag__num"><strong>${Util.area(areaF)}</strong></span>
             ${abertaF ? `<span role="cell" class="cag__tempo cag__tempo--vazio" style="${fundo}">${marcaHoje}</span>`
-              : `<span role="cell" class="cag__tempo cag__tempo--faixas" style="${fundo}">${barras(juntar(daFazenda.map((p) => ops.get(p))), j, { empresa: e, fazenda: f })}${marcaHoje}</span>`}
+              : `<span role="cell" class="cag__tempo cag__tempo--faixas" style="${fundo}">${barras(juntar(daFazenda.map((p) => ops.get(p))), j, daLinha({ fazenda: f }))}${marcaHoje}</span>`}
           </div>`);
         if (!abertaF) return;
         daFazenda.forEach((p) => {
@@ -177,7 +181,7 @@ window.Telas.calendarioAgricola = (function () {
               <span role="cell">${esc(p.safra)}</span>
               <span role="cell">${esc(p.cultura)}</span>
               <span role="cell" class="cag__num">${area ? Util.area(area) : '<span class="cag__pendente">Pendente</span>'}</span>
-              <span role="cell" class="cag__tempo cag__tempo--faixas" style="${fundo}">${lista.length ? barras(lista, j, { empresa: e, fazenda: f, safra: p.safra })
+              <span role="cell" class="cag__tempo cag__tempo--faixas" style="${fundo}">${lista.length ? barras(lista, j, daLinha({ fazenda: f, safra: p.safra }))
                 : `<span class="cag__sem">${Versoes.aIniciar(p) ? 'Plano ainda não iniciado' : v ? 'Nenhuma operação com data na versão publicada' : 'Plano ainda sem versão publicada'}</span>`}${marcaHoje}</span>
             </div>`);
         });
@@ -186,7 +190,7 @@ window.Telas.calendarioAgricola = (function () {
 
     return { temHoje, html: `
       <div class="cag__rolagem">
-        <div class="cag__tabela" role="table" aria-label="Operações por empresa, fazenda e safra">
+        <div class="cag__tabela" role="table" aria-label="Operações por ${Util.comEmpresa() ? 'empresa, ' : ''}fazenda e safra">
           <div class="cag__linha cag__linha--cab" role="row">
             <span role="columnheader">Fazenda / Safra</span><span role="columnheader">Cultura</span>
             <span role="columnheader" class="cag__num">Área</span>

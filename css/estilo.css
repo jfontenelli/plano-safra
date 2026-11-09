@@ -2537,26 +2537,66 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .cp-secao { margin: 4px 0 10px; font-size: 16px; font-weight: 700; }
 .cp-secao--linha { margin-top: 8px; padding-top: 18px; border-top: 1px solid var(--borda); }
 .cp-gerais { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0 16px; }
-.cp-fazendas { display: flex; flex-direction: column; gap: 12px; }
-.cp-fazenda { border: 1px solid var(--borda); border-radius: 10px; }
-.cp-fazenda__topo { display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 4px 8px 4px 16px;
-  border-bottom: 1px solid var(--borda); border-radius: 10px 10px 0 0; background: var(--superficie-2); font-weight: 600; }
-.cp-fazenda__campos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 16px; padding: 14px 16px 0; }
-.cp-fazenda__dica { display: flex; align-items: center; gap: 6px; margin: -6px 16px 14px; font-size: 13px; color: var(--texto-suave); }
+.cp-gerais--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.cp-fazenda__dica { display: flex; align-items: center; gap: 6px; margin: 4px 0 0; font-size: 13px; color: var(--texto-suave); }
 .cp-fazenda__dica .icone { width: 15px; height: 15px; flex-shrink: 0; }
-.cp-area { display: flex; align-items: center; margin: 0; background: var(--superficie-2); color: var(--texto-suave); }
-.cp-talhoes { position: relative; }
-.cp-talhoes__botao { display: flex; align-items: center; justify-content: space-between; gap: 8px; text-align: left; cursor: pointer; }
-.cp-talhoes__botao:disabled { background: var(--superficie-2); color: var(--texto-suave); cursor: not-allowed; }
-.cp-talhoes__botao .icone { width: 16px; height: 16px; flex-shrink: 0; }
-/* Posição fixa, calculada no JS (posicionarLista), para a lista não ser cortada pela rolagem do modal */
-.cp-talhoes__lista { position: fixed; z-index: 1000; max-height: 320px; overflow: auto; padding: 6px 0;
-  border: 1px solid var(--borda); border-radius: 8px; background: var(--superficie); box-shadow: 0 8px 24px rgba(0, 0, 0, .12); }
-.cp-talhoes__item { display: flex; align-items: center; gap: 8px; padding: 6px 12px; font-size: 14px; cursor: pointer; }
-.cp-talhoes__item:hover { background: var(--verde-100); }
-.cp-talhoes__item input { width: 16px; height: 16px; accent-color: var(--verde-700); }
-.cp-talhoes__item--todos { border-bottom: 1px solid var(--borda); font-weight: 600; }
-.cp-talhoes__area { margin-left: auto; color: var(--texto-suave); }
+
+/* Criar Plano de Safra na tela inteira, em duas etapas (09/11/2026) */
+.modal.modal--criar-plano { height: calc(100vh - 48px); }
+.cp-tela { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+.cp-tela__topo { position: relative; display: flex; align-items: center; min-height: 64px; padding: 12px 72px 12px 32px; border-bottom: 1px solid var(--borda); }
+.cp-tela__fechar { top: 14px; }
+.cp-tela__corpo { flex: 1; min-height: 0; overflow: auto; }
+/* O conteúdo ocupa a largura toda. Na etapa 1, a tabela de talhões aparece inteira e o modal rola (barra de rolagem
+   do modal; o título da tabela fica preso no topo ao rolar) */
+.cp-tela__miolo { padding: 24px 32px 20px; }
+.cp-talhoes-area .ta__rolagem { max-height: none; overflow: visible; }
+.cp-gerais--5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.cp-tela__rodape { align-items: center; }
+.cp-tela [hidden] { display: none !important; }
+.cp-tela__rodape .modal__rodape-erro { margin-right: auto; }
+.cp-tela__voltar { margin-right: auto; }
+.cp-tela__rodape .botao .icone { width: 16px; height: 16px; }
+.cp-etapas { display: flex; align-items: center; gap: 14px; width: 100%; margin: 0; padding: 0; list-style: none; }
+.cp-etapas__item { display: flex; align-items: center; gap: 10px; flex-shrink: 0; color: var(--texto-suave); font-weight: 600; font-size: 14px; }
+.cp-etapas__num { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--borda);
+  color: var(--texto-suave); font-size: 14px; }
+.cp-etapas__item--ativa { color: var(--texto); }
+.cp-etapas__item--ativa .cp-etapas__num, .cp-etapas__item--feita .cp-etapas__num { border-color: var(--verde-700); background: var(--verde-700); color: #fff; }
+/* As duas etapas próximas: linha curta entre elas (09/11/2026) */
+.cp-etapas__linha { flex: 0 0 72px; height: 1px; background: var(--borda); }
+.cp-secao__sub { margin: -4px 0 14px; font-size: 14px; color: var(--texto-suave); }
+
+/* Tabela de talhões com a área planejada (Criar Plano e Editar talhões; js/tabela-areas.js) */
+.ta { border: 1px solid var(--borda); border-radius: 10px; }
+.ta__rolagem { max-height: 52vh; overflow: auto; }
+.ta__tabela { width: 100%; border-collapse: collapse; font-size: 14px; }
+.ta__tabela th { position: sticky; top: 0; z-index: 1; padding: 10px 16px; border-bottom: 1px solid var(--borda); background: var(--superficie-2);
+  text-align: left; font-weight: 600; }
+.ta__tabela td { padding: 8px 16px; border-bottom: 1px solid var(--borda); vertical-align: middle; }
+.ta__tabela tbody tr:last-child td { border-bottom: 0; }
+.ta__num { text-align: right !important; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.ta__marcar { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
+.ta__marcar input { width: 16px; height: 16px; accent-color: var(--verde-700); }
+.ta__linha--fora td:not(:first-child) { color: var(--texto-suave); }
+.ta__fora { color: var(--texto-suave); }
+.ta__editar { display: inline-flex; align-items: center; gap: 6px; padding: 4px 6px; border: 0; border-radius: 6px; background: transparent;
+  color: var(--texto); font: inherit; cursor: pointer; }
+.ta__editar:hover, .ta__editar:focus-visible { background: var(--verde-100); }
+.ta__editar .icone { width: 14px; height: 14px; color: var(--texto-suave); }
+.ta__editar--alterada strong { color: var(--verde-700); }
+.ta__antes { display: block; font-size: 12px; color: var(--texto-suave); }
+.ta__edicao { display: inline-flex; align-items: center; gap: 6px; }
+.ta__entrada { width: 96px; height: 34px; padding: 4px 8px; text-align: right; }
+.ta__erro { display: block; margin-top: 4px; font-size: 12px; color: var(--erro); white-space: normal; }
+.ta__planejado { padding: 1px 6px; border-radius: 999px; background: var(--superficie-2); color: var(--verde-700); font-size: 11px; font-weight: 600; }
+.ta__linha--sai td:first-child { color: var(--erro); text-decoration: line-through; }
+.ta__linha--entra td { background: var(--verde-100); }
+.ta__total { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px;
+  border-top: 1px solid var(--borda); }
+.ta__total-valor { display: flex; flex-direction: column; align-items: flex-end; }
+.ta__total-valor strong { font-size: 16px; }
+.ta__total-valor small { font-size: 12px; color: var(--texto-suave); }
 
 /* ===== Editar talhões (Mais ações do plano) ===== */
 .et-lista { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); max-height: 340px; overflow: auto; margin-top: 4px;
@@ -2576,7 +2616,6 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .cp-adicionar { margin: 14px 0 18px; }
 @media (max-width: 760px) {
   .cp-gerais { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .cp-fazenda__campos { grid-template-columns: 1fr; }
 }
 
 /* ===== Modal "Como deseja iniciar o plano?" ===== */
@@ -2808,6 +2847,8 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .orc-custo__valor { display: inline-flex; align-items: center; gap: 6px; }
 .orc-custo__moeda { color: var(--texto-suave); }
 .orc-custo__campo { width: 92px; text-align: right; }
+.orc-fornecedor { align-items: flex-start; }
+.orc-fornecedor__campo { width: 150px; }
 .orc-custo__manual { padding: 1px 7px; border-radius: 999px; background: var(--info-fundo); color: var(--info); font-size: 11px; font-weight: 600; }
 .orc-tabela__compra { white-space: nowrap; color: var(--texto-suave); }
 [data-orc-tabela-detalhe] .orc-tabela th.tabela__numero { min-width: 124px; text-align: center !important; }
@@ -3593,7 +3634,17 @@ html[data-tema="escuro"] .val-grupo__icone--campo, html[data-tema="escuro"] .val
 .op-painel > .ind { flex: 1; min-height: 0; overflow-y: auto; margin: 0 -8px -6px; padding: 0 8px 6px; }
 .ind__titulo { margin: 0; font-size: 19px; font-weight: 700; color: var(--texto); }
 .ind__sub { margin: -6px 0 0; font-size: 14px; color: var(--texto-suave); }
-.ind-cartoes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.ind-cartoes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.ind-cartao__valor.ind-cartao__valor--grande { margin: 6px 0 2px; font-size: 22px; }
+.ind-cartao__corpo { flex: 1; min-width: 0; }
+.ind-cartao.ind-cartao--area { flex-direction: column; align-items: stretch; gap: 4px; }
+.ind-area__titulo { display: flex; align-items: center; gap: 10px; }
+.ind-area__linha { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
+.ind-area__valor { margin: 0; font-size: 22px; font-weight: 700; color: var(--texto); font-variant-numeric: tabular-nums; }
+.ind-area__pct { text-align: right; }
+.ind-area__pct-valor { margin: 0; font-size: 20px; font-weight: 700; color: var(--verde-700); font-variant-numeric: tabular-nums; }
+.ind-progresso { height: 8px; margin: 2px 0 2px; border-radius: 999px; background: var(--superficie-2); box-shadow: 0 0 0 1px var(--borda) inset; overflow: hidden; }
+.ind-progresso > span { display: block; height: 100%; border-radius: 999px; background: var(--verde-700); }
 .ind-cartao { display: flex; align-items: flex-start; gap: 14px; padding: 10px 16px; }
 .ind-cartao__icone .icone { width: 22px; height: 22px; color: var(--verde-700); }
 .ind-cartao__titulo { margin: 0; font-size: 15px; font-weight: 700; color: var(--texto); }
@@ -3623,6 +3674,15 @@ html[data-tema="escuro"] .val-grupo__icone--campo, html[data-tema="escuro"] .val
 .ind-grafico__barra-area { position: relative; flex: 1; }
 .ind-grafico__barra { position: absolute; bottom: 0; left: 50%; width: min(64%, 72px); transform: translateX(-50%); border-radius: 4px 4px 0 0; background: var(--serie-1); }
 .ind-grafico__coluna:hover .ind-grafico__barra { filter: brightness(1.1); }
+/* Barra dividida pelas variedades (09/11/2026), com as cores do Mapa; a primeira variedade embaixo */
+.ind-grafico__barra--pilha { display: flex; flex-direction: column-reverse; overflow: hidden; background: none; }
+.ind-grafico__parte { display: block; width: 100%; flex: none; }
+.ind-grafico__parte + .ind-grafico__parte { box-shadow: 0 -1px 0 var(--superficie) inset; }
+/* Legenda das variedades, embaixo das datas do eixo X */
+.ind-var-legenda { display: flex; flex-wrap: wrap; justify-content: flex-start; gap: 6px 18px; margin: 36px 0 0; padding: 0; list-style: none;
+  font-size: 13px; color: var(--texto); }
+.ind-var-legenda li { display: inline-flex; align-items: center; gap: 6px; }
+.ind-var-legenda__cor { width: 12px; height: 12px; border-radius: 3px; flex: none; }
 .ind-grafico__valor { position: absolute; left: 0; right: 0; margin-bottom: 4px; font-size: 13px; font-weight: 600; text-align: center; color: var(--texto); font-variant-numeric: tabular-nums; }
 .ind-grafico__rotulo { position: absolute; top: calc(100% + 6px); left: 0; right: 0; font-size: 12px; font-weight: 700; text-align: center; color: var(--texto-suave); white-space: nowrap; }
 /* Dia: uma coluna por dia, com largura mínima; o que não couber rola na horizontal (a área de rolagem inclui o valor em
@@ -3631,6 +3691,12 @@ html[data-tema="escuro"] .val-grupo__icone--campo, html[data-tema="escuro"] .val
 .ind-grafico--dia .ind-grafico__barras { top: -18px; bottom: calc(-12px - var(--rodape)); padding: 18px 0 calc(var(--rodape) + 12px); overflow-x: auto; overflow-y: hidden; }
 .ind-grafico--dia .ind-grafico__barras { align-items: flex-start; }
 .ind-grafico--dia .ind-grafico__coluna { flex: 1 0 46px; height: 240px; } /* a altura do gráfico (a barra de rolagem não a encurta) */
+/* Plantio › Indicadores (09/11/2026): o gráfico ocupa a altura que sobra na tela (de 120 a 320 px), para os cartões,
+   o gráfico, as datas e a legenda caberem sem rolar */
+.ind-secao--area { display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; }
+.ind-secao--area .ind-grafico { flex: 1; min-height: 0; }
+.ind-secao--area .ind-grafico__plot { height: auto; min-height: 120px; max-height: 320px; }
+.ind-secao--area .ind-grafico--dia .ind-grafico__coluna { height: 100%; }
 .ind-grafico--dia .ind-grafico__rotulo { font-size: 11px; }
 .ind-grafico--dia .ind-grafico__valor { font-size: 12px; }
 /* Data girada 90° (quinzena e dia apertados): lida de baixo para cima, com o fim encostado no eixo */
@@ -3745,6 +3811,9 @@ html[data-tema="escuro"] .cal-tal__barra { --f: color-mix(in srgb, var(--c) 24%,
 .dr-fixo { position: sticky; top: 0; z-index: 1; /* acima do conteúdo que rola, abaixo da seta do menu (z-index 2) */
   display: flex; align-items: flex-start; gap: 8px; padding: 12px 40px 12px; border-bottom: 1px solid var(--borda); background: var(--superficie); }
 .dr-fixo--solto { position: static; border-bottom: 0; }
+/* Com um filtro aberto (lista ou Mais filtros), a barra fica acima do título da tabela, que também é fixo ao rolar:
+   a lista não fica atrás da coluna (09/11/2026) */
+.dr-fixo:has(.cal-filtro[open], .dr-pop:not([hidden])), .dr-fixo:focus-within { z-index: 3; }
 .dr-fixo .dr-filtros { flex: 1; min-width: 0; }
 .dr-fixo .dr-filtros > .campo:not(.dr-data) { max-width: 200px; }
 .dr-congelar { flex: none; margin: 0; }

@@ -92,19 +92,32 @@ window.Telas.orcamento = (function () {
   // ----- Compra do insumo: data da compra e custo digitado (só na memória, como o resto do protótipo) -----
   // Custo do cadastro: data simulada, entre 30 e 119 dias antes de hoje (fixa por produto). Custo digitado na tabela
   // (Por produto): etiqueta "Manual" e a data do dia em que foi digitado.
-  const compras = {}; // produto → { data: 'aaaa-mm-dd', manual: true }
+  // Fornecedor (09/11/2026): o da última compra (simulado, fixo por produto); com custo ou fornecedor digitado, o digitado
+  // (até digitar, fica o da última compra) e os dois com a etiqueta "Manual".
+  const compras = {}; // produto → { data: 'aaaa-mm-dd', manual: true, fornecedor }
   function dataSimulada(produto) {
     const n = [...produto].reduce((s, c) => (s * 31 + c.charCodeAt(0)) % 9973, 7);
     const d = new Date(`${Util.hojeISO()}T12:00`);
     d.setDate(d.getDate() - (30 + (n % 90)));
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   }
-  const compraDe = (produto) => compras[produto] || { data: dataSimulada(produto), manual: false };
+  function fornecedorSimulado(produto) {
+    const lista = DADOS.fornecedores || [];
+    const n = [...produto].reduce((s, c) => (s * 17 + c.charCodeAt(0)) % 7919, 3);
+    return lista.length ? lista[n % lista.length] : '';
+  }
+  const compraDe = (produto) => compras[produto] || { data: dataSimulada(produto), manual: false, fornecedor: fornecedorSimulado(produto) };
+  // Fornecedor da linha: sem preço (nenhuma compra) e sem digitar, vazio
+  const fornecedorDe = (l) => (compraDe(l.produto).manual || l.unitario !== null ? compraDe(l.produto).fornecedor : '');
+  // Fornecedor digitado: etiqueta Manual (no custo também) e a data de hoje
+  function gravarFornecedor(produto, nome) {
+    compras[produto] = { ...compraDe(produto), fornecedor: nome, data: Util.hojeISO(), manual: true };
+  }
   // Grava o custo unitário digitado, na moeda que está à mostra (sementes: em reais, como no cadastro)
   function gravarCusto(produto, grupo, valor) {
     if (grupo === 'Sementes') DADOS.precosSementes[produto] = emReais(valor, moeda);
     else DADOS.precosInsumos[produto] = [moeda, valor];
-    compras[produto] = { data: Util.hojeISO(), manual: true };
+    compras[produto] = { data: Util.hojeISO(), manual: true, fornecedor: compraDe(produto).fornecedor };
   }
   const grupoDe = (cad) => DADOS.grupoInsumoPorClasse[cad.classe] || (cad.fertilidade ? 'Fertilizantes' : 'Defensivos');
 
@@ -133,7 +146,7 @@ window.Telas.orcamento = (function () {
           const germ = (Planos.germinacaoLinha(op, t.nome, pl) || 100) / 100;
           const emb = DADOS.embalagemSemente[p.cultura] || DADOS.embalagemSemente.Soja;
           const preco = DADOS.precosSementes[pl.variedade];
-          itens.push({ ...base, produto: pl.variedade, grupo: 'Sementes', unidade: emb.texto,
+          itens.push({ ...base, produto: pl.variedade, grupo: 'Sementes', unidade: emb.texto, unidadeDose: `${emb.nome}/ha`, areaAplicada: areaVar,
             quantidade: pl.populacao * 1000 * areaVar / germ / emb.sementes, moedaPreco: 'R$', preco: preco ?? null });
         });
         const ajuste = op.talhoes && op.talhoes[t.nome];
@@ -141,7 +154,7 @@ window.Telas.orcamento = (function () {
         Planos.linhasTalhao(op, ajuste).forEach((linha) => {
           const cad = cadastroDe(linha.produto);
           const [moedaPreco, preco] = DADOS.precosInsumos[linha.produto] || ['R$', null];
-          itens.push({ ...base, produto: linha.produto, grupo: grupoDe(cad), unidade: linha.unidade || cad.unidade || '',
+          itens.push({ ...base, produto: linha.produto, grupo: grupoDe(cad), unidade: linha.unidade || cad.unidade || '', areaAplicada: t.area,
             quantidade: Planos.doseTalhao(op, ajuste, linha) * t.area, moedaPreco, preco });
         });
       })));
@@ -222,7 +235,7 @@ window.Telas.orcamento = (function () {
         </select>
       </div>
       ${multi('safra', 'Safra', 'Todas', 'selecionadas')}
-      ${multi('empresa', 'Empresa', 'Todas', 'selecionadas')}
+      ${Util.comEmpresa() ? multi('empresa', 'Empresa', 'Todas', 'selecionadas') : ''}
       ${multi('fazenda', 'Fazenda', 'Todas', 'selecionadas')}
       ${multi('talhao', 'Talhão', 'Todos', 'selecionados')}
       ${multi('cultura', 'Cultura', 'Todas', 'selecionadas')}
@@ -374,7 +387,7 @@ window.Telas.orcamento = (function () {
       x.custo += i.custo;
       mapa.set(chave, x);
     });
-    return [...mapa.values()].sort((a, b) => DADOS.empresas.indexOf(a.plano.empresa) - DADOS.empresas.indexOf(b.plano.empresa)
+    return [...mapa.values()].sort((a, b) => (Util.comEmpresa() ? DADOS.empresas.indexOf(a.plano.empresa) - DADOS.empresas.indexOf(b.plano.empresa) : 0)
       || a.plano.fazenda.localeCompare(b.plano.fazenda, 'pt-BR') || (cicloDe(a.plano) === 'Safrinha') - (cicloDe(b.plano) === 'Safrinha')
       || a.talhao.localeCompare(b.talhao, 'pt-BR', { numeric: true }));
   }
@@ -434,11 +447,13 @@ window.Telas.orcamento = (function () {
       ['estoque', 'Volume em estoque', (l) => l.estoque || null, true],
       ['comprar', 'Volume a ser comprado', (l) => l.comprar, true],
       ['unidade', 'Unidade', (l) => l.unidade],
+      ['fornecedor', 'Fornecedor', (l) => fornecedorDe(l) || null],
       ['unitario', 'Custo unitário', (l) => l.unitario, true],
       ['compra', 'Data da compra', (l) => (l.unitario === null ? null : compraDe(l.produto).data)],
       ['custo', 'Custo total', (l) => l.custo, true]
     ],
-    talhao: [
+    // Sem o nível Empresa (Util.comEmpresa), sem a coluna Empresa
+    talhao: Util.semEmpresa([
       ['safra', 'Safra', (l) => Util.posicaoSafra(l.plano.safra, DADOS.planos.map((p) => p.safra))],
       ['empresa', 'Empresa', (l) => l.plano.empresa],
       ['fazenda', 'Fazenda', (l) => l.plano.fazenda],
@@ -447,9 +462,29 @@ window.Telas.orcamento = (function () {
       ['area', 'Hectares', (l) => l.area, true],
       ['custo', 'Custo total', (l) => l.custo, true],
       ['porHa', `${moeda}/ha`, (l) => l.custo / l.area, true],
-      ['sacas', 'Custo em sacas', (l) => emSacas(l.custo, l.area, l.plano.cultura), true]
-    ]
+      ['sacas', 'Custo em sacas', (l) => emSacas(l.custo, l.area, l.plano.cultura), true],
+      // Última coluna (09/11/2026): a produtividade histórica do Planejamento, com as mesmas dicas
+      ['produtividade', 'Produtividade histórica (sc/ha)', (l) => mediaHistorica(historicoDe(l)), true, () => textoSafrasMedia()]
+    ])
   };
+
+  // ----- Produtividade histórica do talhão (a mesma do Planejamento): média das últimas 3 safras -----
+  const historicoDe = (l) => ((DADOS.historico || {})[l.plano.fazenda] || {})[l.talhao] || [];
+  const mediaHistorica = (h) => (h.length ? h.reduce((s, x) => s + x[2], 0) / h.length : null);
+  // Dica do título: as safras que entram na média ("Média das safras 23/24, 24/25 e 25/26")
+  function textoSafrasMedia() {
+    const safras = [...new Set(Object.values(DADOS.historico || {}).flatMap((f) => Object.values(f).flatMap((h) => h.map(([safra]) => safra))))].sort();
+    if (!safras.length) return 'Sem histórico de produtividade';
+    const lista = safras.length > 1 ? `${safras.slice(0, -1).join(', ')} e ${safras[safras.length - 1]}` : safras[0];
+    return `Média ${safras.length > 1 ? 'das safras' : 'da safra'} ${lista}`;
+  }
+  // Célula: a média, só o número; ao passar o mouse, safra a safra com a variedade de cada ano
+  function celulaHistorico(l) {
+    const h = historicoDe(l);
+    if (!h.length) return '—';
+    const safras = h.map(([safra, variedade, sc]) => `${safra} · ${variedade} · ${Math.round(sc)} sc/ha`).join('\n');
+    return `<span title="${esc(safras)}">${Math.round(mediaHistorica(h))}<span class="so-leitor"> (${esc(safras)})</span></span>`;
+  }
   // 1º clique crescente, 2º decrescente; vazios sempre no fim
   function ordenadas(ls) {
     const o = ordem[guiaDetalhe];
@@ -465,12 +500,12 @@ window.Telas.orcamento = (function () {
   }
   function cabecalhoDetalhe() {
     const o = ordem[guiaDetalhe];
-    return `<tr>${COLUNAS[guiaDetalhe].map(([coluna, rotulo, , num]) => {
+    return `<tr>${COLUNAS[guiaDetalhe].map(([coluna, rotulo, , num, dica]) => {
       const ativa = o && o.coluna === coluna;
       const sentido = ativa ? o.sentido : null;
       return `
         <th class="${num ? 'tabela__numero' : ''}" ${ativa ? `aria-sort="${sentido === 'asc' ? 'ascending' : 'descending'}"` : ''}>
-          <span class="titulo-coluna"><span>${rotulo}</span>
+          <span class="titulo-coluna"><span ${dica ? `title="${esc(dica())}"` : ''}>${rotulo}</span>
             <button class="titulo-ordenar ${ativa ? 'titulo-ordenar--ativo' : ''} ${sentido === 'desc' ? 'titulo-ordenar--desc' : ''}" type="button"
                     data-orc-ordenar="${coluna}" title="Ordenar por ${rotulo.toLowerCase()}"
                     aria-label="Ordenar por ${rotulo.toLowerCase()}${ativa ? (sentido === 'asc' ? ', crescente' : ', decrescente') : ''}">${ativa ? Icones.acima : Icones.ordenar}</button>
@@ -494,6 +529,17 @@ window.Telas.orcamento = (function () {
       </span>`;
   }
 
+  // Fornecedor editável na célula (como o custo); digitado ou com o custo digitado: etiqueta "Manual"
+  function celulaFornecedor(l) {
+    const manual = compraDe(l.produto).manual;
+    return `<span class="orc-custo orc-fornecedor">
+        <input class="celula orc-fornecedor__campo" type="text" autocomplete="off" maxlength="60"
+               data-orc-fornecedor="${esc(l.produto)}" placeholder="Fornecedor"
+               value="${esc(fornecedorDe(l))}" aria-label="Fornecedor de ${esc(l.produto)}">
+        ${manual ? '<span class="orc-custo__manual" title="Informado no orçamento">Manual</span>' : ''}
+      </span>`;
+  }
+
   function tabelaDetalhe(itens) {
     const vazio = (n) => `<tr><td class="tabela__vazia" colspan="${n}">Nada encontrado.</td></tr>`;
     if (guiaDetalhe === 'produto') {
@@ -507,9 +553,10 @@ window.Telas.orcamento = (function () {
             <td class="tabela__numero">${l.estoque ? quantidade(l.estoque) : '—'}</td>
             <td class="tabela__numero">${quantidade(l.comprar)}</td>
             <td class="orc-tabela__unidade">${esc(l.unidade)}</td>
+            <td class="tabela__editavel">${celulaFornecedor(l)}</td>
             <td class="tabela__numero tabela__editavel">${celulaCusto(l)}</td>
             <td class="orc-tabela__compra">${l.unitario === null ? '—' : Util.data(compraDe(l.produto).data)}</td>
-            <td class="tabela__numero">${dinheiro(l.custo)}</td></tr>`).join('') : vazio(9)}</tbody>
+            <td class="tabela__numero">${dinheiro(l.custo)}</td></tr>`).join('') : vazio(COLUNAS.produto.length)}</tbody>
         </table></div>${paginacao(ls.length)}`;
     }
     const ls = ordenadas(doTalhao(itens));
@@ -517,10 +564,11 @@ window.Telas.orcamento = (function () {
       <div class="tabela-rolagem"><table class="tabela orc-tabela">
         <thead>${cabecalhoDetalhe()}</thead>
         <tbody>${ls.length ? daPagina(ls).map((l) => `<tr>
-          <td>${esc(l.plano.safra)}</td><td>${esc(l.plano.empresa)}</td><td>${esc(l.plano.fazenda)}</td>
+          <td>${esc(l.plano.safra)}</td>${Util.comEmpresa() ? `<td>${esc(l.plano.empresa)}</td>` : ''}<td>${esc(l.plano.fazenda)}</td>
           <td>${esc(l.plano.cultura)}</td><td>${esc(l.talhao)}</td><td class="tabela__numero">${fmt(l.area)}</td>
           <td class="tabela__numero">${dinheiro(l.custo)}</td><td class="tabela__numero">${dinheiro(l.custo / l.area)}</td>
-          <td class="tabela__numero">${textoSacas(emSacas(l.custo, l.area, l.plano.cultura), l.plano.cultura)}</td></tr>`).join('') : vazio(9)}</tbody>
+          <td class="tabela__numero">${textoSacas(emSacas(l.custo, l.area, l.plano.cultura), l.plano.cultura)}</td>
+          <td class="tabela__numero">${celulaHistorico(l)}</td></tr>`).join('') : vazio(COLUNAS.talhao.length)}</tbody>
       </table></div>${paginacao(ls.length)}`;
   }
 
@@ -530,18 +578,19 @@ window.Telas.orcamento = (function () {
     const m = moeda;
     const dois = (n) => +n.toFixed(2);
     const linhas = guiaDetalhe === 'produto'
-      ? [['Grupo de insumo', 'Produto', 'Necessidade de consumo', 'Volume em estoque', 'Volume a ser comprado', 'Unidade', `Custo unitário (${m})`, 'Data da compra', 'Custo manual', `Custo total (${m})`],
-        ...ordenadas(doProduto(itens)).map((l) => [l.grupo, l.produto, dois(l.necessidade), dois(l.estoque), dois(l.comprar), l.unidade,
+      ? [['Grupo de insumo', 'Produto', 'Necessidade de consumo', 'Volume em estoque', 'Volume a ser comprado', 'Unidade', 'Fornecedor', `Custo unitário (${m})`, 'Data da compra', 'Custo manual', `Custo total (${m})`],
+        ...ordenadas(doProduto(itens)).map((l) => [l.grupo, l.produto, dois(l.necessidade), dois(l.estoque), dois(l.comprar), l.unidade, fornecedorDe(l),
           l.unitario === null ? '' : dois(exibir(l.unitario)), l.unitario === null ? '' : Util.data(compraDe(l.produto).data),
           compraDe(l.produto).manual ? 'Sim' : '', dois(exibir(l.custo))])]
-      : [['Safra', 'Empresa', 'Fazenda', 'Cultura', 'Talhão', 'Hectares', `Custo total (${m})`, `${m}/ha`, 'Custo em sacas (por ha)'],
+      : [['Safra', 'Empresa', 'Fazenda', 'Cultura', 'Talhão', 'Hectares', `Custo total (${m})`, `${m}/ha`, 'Custo em sacas (por ha)', 'Produtividade histórica (sc/ha)'],
         ...ordenadas(doTalhao(itens)).map((l) => {
           const s = emSacas(l.custo, l.area, l.plano.cultura);
           return [l.plano.safra, l.plano.empresa, l.plano.fazenda, l.plano.cultura, l.talhao, l.area,
-            dois(exibir(l.custo)), dois(exibir(l.custo / l.area)), s === null ? '' : +s.toFixed(1)];
+            dois(exibir(l.custo)), dois(exibir(l.custo / l.area)), s === null ? '' : +s.toFixed(1),
+            historicoDe(l).length ? Math.round(mediaHistorica(historicoDe(l))) : ''];
         })];
     const livro = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(livro, XLSX.utils.aoa_to_sheet(linhas), guiaDetalhe === 'produto' ? 'por_produto' : 'por_talhao');
+    XLSX.utils.book_append_sheet(livro, XLSX.utils.aoa_to_sheet(Util.semColunaEmpresa(linhas)), guiaDetalhe === 'produto' ? 'por_produto' : 'por_talhao');
     XLSX.writeFile(livro, `orcamento-insumos-${filtros.anoAgricola}-${guiaDetalhe === 'produto' ? 'por-produto' : 'por-talhao'}.xlsx`);
   }
 
@@ -754,9 +803,22 @@ window.Telas.orcamento = (function () {
       corpo.querySelector(`[data-orc-custo="${CSS.escape(produto)}"]`)?.focus();
       Aviso.mostrar(`Custo de ${esc(produto)} atualizado`);
     });
+    // Fornecedor digitado: grava ao sair do campo (ou Enter); vazio volta ao que estava
+    corpo.addEventListener('change', (e) => {
+      const campo = e.target.closest('[data-orc-fornecedor]');
+      if (!campo) return;
+      const nome = campo.value.trim();
+      if (!nome) { campo.value = campo.defaultValue; return; }
+      const produto = campo.dataset.orcFornecedor;
+      gravarFornecedor(produto, nome);
+      atualizarCorpo();
+      corpo.querySelector(`[data-orc-fornecedor="${CSS.escape(produto)}"]`)?.focus();
+      Aviso.mostrar(`Fornecedor de ${esc(produto)} atualizado`);
+    });
     corpo.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && e.target.matches('[data-orc-custo]')) { e.preventDefault(); e.target.blur(); }
-      if (e.key === 'Escape' && e.target.matches('[data-orc-custo]')) { e.target.value = e.target.defaultValue; e.target.blur(); }
+      const editavel = e.target.matches('[data-orc-custo], [data-orc-fornecedor]');
+      if (e.key === 'Enter' && editavel) { e.preventDefault(); e.target.blur(); }
+      if (e.key === 'Escape' && editavel) { e.target.value = e.target.defaultValue; e.target.blur(); }
     });
     corpo.addEventListener('change', (e) => {
       if (!e.target.matches('[data-orc-por-pagina]')) return;

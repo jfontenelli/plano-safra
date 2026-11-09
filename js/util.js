@@ -2,12 +2,36 @@
  * Cálculos e formatação usados por várias telas.
  */
 window.Util = {
+  // Nível Empresa à mostra? (DADOS.usaEmpresa; escondido no protótipo desde 09/11/2026)
+  comEmpresa() { return DADOS.usaEmpresa !== false; },
+  // Listas de filtros, colunas e níveis ([chave, rótulo, ...]): sem o nível Empresa, tira a entrada 'empresa'
+  semEmpresa(lista) { return lista.filter((x) => (Array.isArray(x) ? x[0] : x) !== 'empresa' || Util.comEmpresa()); },
+  // Planilha (linhas, com o título na primeira): sem o nível Empresa, tira a coluna "Empresa"
+  semColunaEmpresa(linhas) {
+    const i = Util.comEmpresa() ? -1 : linhas[0].indexOf('Empresa');
+    return i < 0 ? linhas : linhas.map((l) => l.filter((_, j) => j !== i));
+  },
+  // Cor da variedade (Mapa do Plantio e gráfico dos Indicadores): paleta categórica, uma cor por variedade, na ordem
+  // do cadastro da cultura (a cor segue a variedade, não a posição); fora da paleta, cinza-azulado
+  CORES_VARIEDADE: ['#2a78d6', '#eb6834', '#1baf7a', '#eda100', '#e87ba4', '#008300', '#4a3aa7', '#e34948'],
+  corVariedade(nome, cultura) {
+    const i = DADOS.variedades.filter((v) => v.cultura === cultura).findIndex((v) => v.nome === nome);
+    return i >= 0 && i < Util.CORES_VARIEDADE.length ? Util.CORES_VARIEDADE[i] : '#6b7c8f';
+  },
+  // Empresa de uma fazenda (DADOS.fazendasPorEmpresa); sem cadastro, ''
+  empresaDaFazenda(fazenda) {
+    return Object.keys(DADOS.fazendasPorEmpresa || {}).find((e) => DADOS.fazendasPorEmpresa[e].includes(fazenda)) || '';
+  },
+
   // Talhões incluídos no plano (Criar Plano; depois, Editar talhões), da versão aberta ou da versão indicada.
-  // Sem a lista: todos os da fazenda.
+  // Sem a lista: todos os da fazenda. A área é a planejada no plano (09/11/2026: Criar Plano e Editar talhões; vale
+  // em tudo: quantidades, Orçamento, OS); a do cadastro fica em areaCadastrada.
   talhoesPlano(plano, versao) {
     const todos = DADOS.talhoes[plano.fazenda] || [];
     const nomes = versao && window.Versoes ? Versoes.talhoes(plano, versao) : plano.talhoes;
-    return nomes ? todos.filter((t) => nomes.includes(t.nome)) : todos;
+    const areas = (versao && window.Versoes ? Versoes.areas(plano, versao) : plano.areas) || {};
+    return (nomes ? todos.filter((t) => nomes.includes(t.nome)) : todos)
+      .map((t) => (areas[t.nome] !== undefined && areas[t.nome] !== null ? { ...t, area: areas[t.nome], areaCadastrada: t.area } : t));
   },
 
   // Área de cultivo = soma das áreas dos talhões incluídos no plano (ha); sem talhões, null ("Pendente")

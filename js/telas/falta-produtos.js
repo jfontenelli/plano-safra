@@ -409,13 +409,14 @@ window.Telas.faltaProdutos = (function () {
   // aplicada · Desvio Qtd (%)), no formato do Detalhamento por OS dos Desvios de dose. Abre do maior para o menor
   // desvio; todas as colunas ordenam (1º clique crescente, 2º decrescente); 5 OS por página.
   const OS_POR_PAGINA = 5;
-  const COLUNAS_OS = [
+  // Sem o nível Empresa (Util.comEmpresa), sem a coluna Empresa
+  const COLUNAS_OS = Util.semEmpresa([
     ['os', 'Nº OS', (r) => r.os], ['criacao', 'Data de criação', (r) => r.executada || ''], ['fechamento', 'Data de fechamento', (r) => r.fechamento || ''],
     ['safra', 'Safra', (r) => r.safra], ['empresa', 'Empresa', (r) => r.empresa],
     ['fazenda', 'Fazenda', (r) => r.fazenda], ['talhao', 'Talhão', (r) => r.talhao], ['operacao', 'Operação', (r) => r.operacao],
     ['produto', 'Produto', (r) => r.produto], ['qtdRec', 'Quantidade recomendada', (r) => r.qtdRec, 'tabela__numero'],
     ['qtdApl', 'Quantidade aplicada', (r) => r.qtdApl, 'tabela__numero'], ['desvio', 'Desvio Qtd (%)', (r) => r.qtdApl / r.qtdRec - 1, 'dr-centro']
-  ];
+  ]);
   // Cor do desvio: as faixas dos Desvios de dose (abaixo do recomendado, sem desvio, até 10%, 10-20%, acima de 20%)
   const faixaOS = (d) => (d < -1e-9 ? 'abaixo' : Math.abs(d) <= 1e-9 ? 'sem' : d <= 0.10 ? 'ate10' : d <= 0.20 ? '10a20' : 'acima20');
   // Quantidade da OS: abaixo de 100, com uma casa (6,3 kg e 7,2 kg; sem ela, as duas apareceriam como 6 kg)
@@ -446,7 +447,7 @@ window.Telas.faltaProdutos = (function () {
             const d = r.qtdApl / r.qtdRec - 1;
             return `
             <tr title="Fechada em ${Util.data(r.fechamento)} · ${Util.escapar(r.executor)}">
-              <td>${Util.escapar(r.os)}</td><td>${r.executada ? Util.data(r.executada) : '—'}</td><td>${r.fechamento ? Util.data(r.fechamento) : '—'}</td><td>${Util.escapar(r.safra)}</td><td>${Util.escapar(r.empresa)}</td><td>${Util.escapar(r.fazenda)}</td>
+              <td>${Util.escapar(r.os)}</td><td>${r.executada ? Util.data(r.executada) : '—'}</td><td>${r.fechamento ? Util.data(r.fechamento) : '—'}</td><td>${Util.escapar(r.safra)}</td>${Util.comEmpresa() ? `<td>${Util.escapar(r.empresa)}</td>` : ''}<td>${Util.escapar(r.fazenda)}</td>
               <td>${Util.escapar(r.talhao)}</td><td>${Util.escapar(r.operacao)}</td><td>${Util.escapar(r.produto)}</td>
               <td class="tabela__numero">${qtdOS(r.qtdRec, r.unidade)}</td><td class="tabela__numero">${qtdOS(r.qtdApl, r.unidade)}</td>
               <td class="dr-centro"><span class="dr-etiqueta dr-cor--${faixaOS(d)}">${pctOS(d)}</span></td></tr>`;

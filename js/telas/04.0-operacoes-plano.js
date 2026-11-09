@@ -95,6 +95,15 @@ window.Telas.validacao = (function () {
         const k = talhoes.filter((t) => recebe(g, op, t) && falta(t)).length;
         if (k) lista.push({ chave: `${versao}|${chave}|${op.id}`, nome: op.nome, texto: medida(k, problema), corrigir: { op } });
       });
+      // 5. Área do talhão alterada no Editar talhões (09/11/2026), com o plantio já feito: as variedades foram
+      // ajustadas na mesma proporção; uma pendência por talhão, até ser ignorada (a revisão foi feita)
+      if (g.tipo === 'Sementes' && op.areaAlterada) {
+        talhoes.filter((t) => op.areaAlterada[t.nome] && recebe(g, op, t)).forEach((t) => {
+          const { de, para } = op.areaAlterada[t.nome];
+          lista.push({ chave: `${versao}|area|${op.id}|${t.nome}|${para}`, nome: `${op.nome} · ${t.nome}`,
+            texto: `área alterada de ${TabelaAreas.fmt(de)} para ${TabelaAreas.fmt(para)}. Revise as áreas das variedades.`, corrigir: { op } });
+        });
+      }
       // 4. Operação sem DAP, com recomendação em algum talhão (o DAP é da operação; no Plantio é sempre 0)
       if (n && semDap(op) && g.tipo !== 'Sementes') {
         lista.push({ chave: `${versao}|sem-dap|${op.id}`, nome: op.nome, texto: medida(n, 'sem DAP'), corrigir: { op } });

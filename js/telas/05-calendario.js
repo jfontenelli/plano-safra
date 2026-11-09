@@ -368,7 +368,7 @@ window.Telas.calendario = (function () {
       ];
     }
     const op = it.op;
-    // Produto: o quarto item dá a dose do talhão em número, para o Consumo (dose × área do talhão)
+    // Produto: a dose do talhão
     const doseNo = (col, t) => {
       const ajuste = op.talhoes[t.nome];
       const l = ajuste ? Planos.linhaNoTalhao(op, ajuste, col) : null;
@@ -379,16 +379,7 @@ window.Telas.calendario = (function () {
       if (!x) return { texto: '—', classe: 'cal-piv__nao' };
       const ajustada = x.l.id in x.ajuste.doses && x.d !== x.l.dose;
       return { texto: textoDose(x.d, it.grupo), titulo: ajustada ? `Dose do talhão; padrão da receita: ${textoDose(x.l.dose, it.grupo)}` : '' };
-    }, (t) => { const x = doseNo(col, t); return x && x.d ? x.d * t.area : 0; }]);
-  }
-
-  // Consumo do produto na operação: soma de dose × área nos talhões do filtro, na unidade sem o "/ha"
-  // ("0,40 L/ha" em 435 ha → "174 L"). Sem dose em nenhum talhão: "—"
-  function textoConsumo(consumoNo, unidade, talhoes) {
-    const total = talhoes.reduce((s, t) => s + consumoNo(t), 0);
-    if (!total) return '—';
-    const u = String(unidade || '').replace(/\/ha$/, '');
-    return `${total.toLocaleString('pt-BR', { maximumFractionDigits: total < 10 ? 2 : 1 })}${u ? ` ${u}` : ''}`;
+    }]);
   }
 
   function diaMes(iso) { const { m, d } = partes(iso); return `${String(d).padStart(2, '0')}/${String(m).padStart(2, '0')}`; }
@@ -414,7 +405,7 @@ window.Telas.calendario = (function () {
     { id: 'op', rotulo: 'Operação', largura: 170, nivel: 'op', classe: 'cal-piv__nome' },
     { id: 'area', rotulo: 'Área (ha)', largura: 84, nivel: 'op', classe: 'cal-piv__area' },
     { id: 'prod', rotulo: 'Produto', largura: 150, nivel: 'linha', classe: 'cal-piv__produto' },
-    { id: 'consumo', rotulo: 'Consumo', largura: 104, nivel: 'linha', classe: 'cal-piv__num' },
+    // Consumo saiu em 09/11/2026 (pedido da usuária)
     { id: 'unid', rotulo: 'Dose', largura: 96, nivel: 'linha', classe: 'cal-piv__unid' }
   ];
   const LARGURA_OCULTA = 14;
@@ -470,16 +461,14 @@ window.Telas.calendario = (function () {
         const texto = `<span class="cal-piv__sem">${it.grupo.tipo === 'Sementes' ? 'Sem variedade' : 'Sem recomendação'}</span>`;
         const naProd = !ocultas.has('prod');
         linhas.push(`
-          <tr class="cal-piv__linha cal-piv__linha--inicio">${celulasOp}${linhaFixa({ prod: naProd ? texto : '', consumo: '', unid: naProd ? '' : texto })}
+          <tr class="cal-piv__linha cal-piv__linha--inicio">${celulasOp}${linhaFixa({ prod: naProd ? texto : '', unid: naProd ? '' : texto })}
             ${visiveis.map((t) => (talhaoOculto(t) ? celTalhaoOculto : '<td></td>')).join('')}
           </tr>`);
         return;
       }
-      subs.forEach(([rotulo, unidade, valor, consumoNo], i) => {
-        // Consumo só nos produtos (Plantio e Colheita: vazio)
-        const consumo = consumoNo ? esc(textoConsumo(consumoNo, unidade, visiveis)) : '';
+      subs.forEach(([rotulo, unidade, valor], i) => {
         linhas.push(`
-          <tr class="cal-piv__linha ${i ? '' : 'cal-piv__linha--inicio'}">${i ? '' : celulasOp}${linhaFixa({ prod: esc(rotulo), consumo, unid: unidade === 'data' ? '' : esc(unidade) })}
+          <tr class="cal-piv__linha ${i ? '' : 'cal-piv__linha--inicio'}">${i ? '' : celulasOp}${linhaFixa({ prod: esc(rotulo), unid: unidade === 'data' ? '' : esc(unidade) })}
             ${visiveis.map((t) => {
               if (talhaoOculto(t)) return celTalhaoOculto;
               const v = valor(t);

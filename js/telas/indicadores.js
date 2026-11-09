@@ -18,16 +18,13 @@ window.Telas.indicadores = (function () {
   const data = (iso) => new Date(`${iso}T12:00`);
   const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   const somaDias = (i, n) => { const d = data(i); d.setDate(d.getDate() + n); return iso(d); };
-  const dias = (a, b) => Math.round((data(b) - data(a)) / 86400000);
   const diaMes = (i) => { const d = data(i); return `${String(d.getDate()).padStart(2, '0')}/${MESES[d.getMonth()]}`; };
   const diaMesAno = (i) => `${diaMes(i)}/${data(i).getFullYear()}`;
-  // Período previsto: { datas: "17/dez/2026 – 14/jan/2027", duracao: "Duração: 29 dias" } (contando os dois dias)
+  // Período previsto: { datas: "17/dez/2026 – 14/jan/2027" }
   function periodo(datas) {
     if (!datas.length) return null;
     const ord = [...datas].sort();
-    const [ini, fim] = [ord[0], ord[ord.length - 1]];
-    const n = dias(ini, fim) + 1;
-    return { datas: `${diaMesAno(ini)} – ${diaMesAno(fim)}`, duracao: `Duração: ${fmt(n)} ${n === 1 ? 'dia' : 'dias'}` };
+    return { datas: `${diaMesAno(ord[0])} – ${diaMesAno(ord[ord.length - 1])}` };
   }
 
   // ----- Plantio e colheita: uma linha por variedade de cada talhão (área, data de plantio, previsão de colheita) -----
@@ -40,7 +37,7 @@ window.Telas.indicadores = (function () {
         if (!l.variedade) return null;
         const v = DADOS.variedades.find((x) => x.nome === l.variedade);
         const area = Planos.areaLinhaPlantio(linhas, i, t.area) || 0;
-        return { area, plantio: l.data || null, colheita: l.data && v && v.ciclo ? somaDias(l.data, v.ciclo) : null };
+        return { variedade: l.variedade, area, plantio: l.data || null, colheita: l.data && v && v.ciclo ? somaDias(l.data, v.ciclo) : null };
       }).filter(Boolean);
     });
   }
@@ -72,14 +69,21 @@ window.Telas.indicadores = (function () {
   function barras(linhas, campo, gran) {
     const comData = linhas.filter((l) => l[campo]);
     if (!comData.length) return [];
+    // Por período, a área total e a de cada variedade (a barra se divide pelas variedades; 09/11/2026)
     const soma = new Map();
-    comData.forEach((l) => { const k = inicioPeriodo(l[campo], gran); soma.set(k, (soma.get(k) || 0) + l.area); });
+    const partes = new Map();
+    comData.forEach((l) => {
+      const k = inicioPeriodo(l[campo], gran);
+      soma.set(k, (soma.get(k) || 0) + l.area);
+      const p = partes.get(k) || new Map();
+      p.set(l.variedade, (p.get(l.variedade) || 0) + l.area);
+      partes.set(k, p);
+    });
     const chaves = [...soma.keys()].sort();
-    if (gran === 'dia') return chaves.map((k) => ({ inicio: k, rotulo: rotuloPeriodo(k, gran), area: soma.get(k) }));
+    const item = (k) => ({ inicio: k, rotulo: rotuloPeriodo(k, gran), area: soma.get(k) || 0, partes: partes.get(k) || new Map() });
+    if (gran === 'dia') return chaves.map(item);
     const lista = [];
-    for (let k = chaves[0]; k <= chaves[chaves.length - 1]; k = proximoPeriodo(k, gran)) {
-      lista.push({ inicio: k, rotulo: rotuloPeriodo(k, gran), area: soma.get(k) || 0 });
-    }
+    for (let k = chaves[0]; k <= chaves[chaves.length - 1]; k = proximoPeriodo(k, gran)) lista.push(item(k));
     return lista;
   }
 
@@ -97,19 +101,26 @@ window.Telas.indicadores = (function () {
     const mapa = new Map();
     Telas.orcamento.consumoDoPlano(ctx.plano, ctx.plano.grupos, ctx.talhoes).forEach((i) => {
       if (!i.quantidade) return;
-      const x = mapa.get(i.produto) || { grupo: i.grupo, produto: i.produto, unidade: i.unidade, necessidade: 0 };
+      const x = mapa.get(i.produto) || { grupo: i.grupo, produto: i.produto, unidade: i.unidade, necessidade: 0, area: 0,
+        unidadeDose: i.unidadeDose || (String(i.unidade).includes('/') ? i.unidade : `${i.unidade}/ha`) };
       x.necessidade += i.quantidade;
+      x.area += i.areaAplicada || 0;
       mapa.set(i.produto, x);
     });
-    return [...mapa.values()];
+    // Dose média (09/11/2026): a necessidade de consumo ÷ a área planejada do produto (a soma das áreas de cada aplicação)
+    return [...mapa.values()].map((x) => ({ ...x, doseMedia: x.area ? x.necessidade / x.area : null }));
   }
   // Colunas: [id, título, valor para ordenar, número?]. Sem escolha: na ordem dos grupos de insumo e do produto
   const COLUNAS = [
     ['grupo', 'Grupo de insumo', (l) => l.grupo],
     ['produto', 'Produto', (l) => l.produto],
     ['necessidade', 'Necessidade de consumo', (l) => l.necessidade, true],
-    ['unidade', 'Unidade', (l) => l.unidade]
+    ['unidade', 'Unidade do produto', (l) => l.unidade],
+    ['doseMedia', 'Dose média', (l) => l.doseMedia ?? -1, true],
+    ['unidadeDose', 'Unidade da dose', (l) => l.unidadeDose]
   ];
+  // Dose: duas casas ("0,40"); de 100 para cima, sem casas
+  const textoDose = (n) => (n === null ? '—' : fmt(n, n >= 100 ? 0 : 2));
   function ordenados(ls, ordem) {
     const texto = (a, b) => String(a).localeCompare(String(b), 'pt-BR', { numeric: true });
     if (!ordem) return [...ls].sort((a, b) => texto(a.grupo, b.grupo) || texto(a.produto, b.produto));
@@ -143,13 +154,13 @@ window.Telas.indicadores = (function () {
     }
     return `
       <section class="ind">
-        <h2 class="ind__titulo">Indicadores do planejamento</h2>
-        <p class="ind__sub">Visão consolidada da área e dos períodos previstos do plano de safra.</p>
+        <!-- Sem o título "Indicadores do planejamento" e o subtítulo (09/11/2026): tudo cabe na tela, sem rolar -->
         <div class="ind-cartoes">
+          ${cartaoArea(linhas, ctx)}
           ${cartao(Icones.broto, 'Plantio', periodo(plantadas.map((l) => l.plantio)), 'Nenhum talhão com data de plantio ainda.')}
           ${cartao(Icones.colheita, 'Colheita', periodo(comColheita.map((l) => l.colheita)), 'Sem previsão: falta a data de plantio ou o ciclo da variedade.')}
         </div>
-        ${grafico(linhas, est)}
+        ${grafico(linhas, est, ctx.plano.cultura)}
       </section>`;
   }
 
@@ -189,7 +200,35 @@ window.Telas.indicadores = (function () {
   // Grupos de insumo na ordem do cadastro (os que não estão no cadastro, no fim) e a classe da cor de cada um
   const posGrupo = (g) => { const i = DADOS.gruposInsumo.indexOf(g); return i < 0 ? 99 : i; };
   const classeGrupo = (g) => Util.normalizar(g).replace(/[^a-z0-9]+/g, '-');
-  // Plantio e Colheita: o período previsto e a duração; sem datas, um traço e o motivo
+  // Área planejada (09/11/2026): a área com variedade no Plantio, de quanto é a área de cultivo do plano (os talhões
+  // incluídos, na área planejada de cada um) e o percentual. Ex.: "650 ha" · "de 983 ha · 66,1%"
+  function cartaoArea(linhas, ctx) {
+    const planejada = linhas.reduce((s, l) => s + l.area, 0);
+    const total = ctx.talhoes.reduce((s, t) => s + t.area, 0);
+    const ha = (n) => `${n.toLocaleString('pt-BR', { maximumFractionDigits: 1 })} ha`;
+    const fracao = total ? Math.min(1, planejada / total) : 0;
+    const pct = (fracao * 100).toLocaleString('pt-BR', { maximumFractionDigits: 1 });
+    // Organização (09/11/2026, imagem da usuária): ícone e título em cima; a área à esquerda e o % à direita; a barra
+    // de 0 a 100% embaixo, na largura toda
+    return `
+      <div class="cartao ind-cartao ind-cartao--area">
+        <h3 class="ind-cartao__titulo ind-area__titulo"><span class="ind-cartao__icone" aria-hidden="true">${Icones.pizza}</span>Área planejada</h3>
+        <div class="ind-area__linha">
+          <div>
+            <p class="ind-area__valor" title="Área com variedade no Plantio">${ha(planejada)}</p>
+            <p class="ind-cartao__detalhe">de ${ha(total)} previstos no plano</p>
+          </div>
+          <div class="ind-area__pct">
+            <p class="ind-area__pct-valor">${pct}%</p>
+            <p class="ind-cartao__detalhe">planejado</p>
+          </div>
+        </div>
+        <div class="ind-progresso" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(fracao * 100)}"
+             aria-label="Área planejada: ${pct}% da área prevista no plano"><span style="width: ${fracao * 100}%"></span></div>
+      </div>`;
+  }
+
+  // Plantio e Colheita: o período previsto (sem a duração em dias, 09/11/2026); sem datas, um traço e o motivo
   function cartao(icone, titulo, per, semDatas) {
     return `
       <div class="cartao ind-cartao">
@@ -198,7 +237,7 @@ window.Telas.indicadores = (function () {
           <h3 class="ind-cartao__titulo">${titulo}</h3>
           <p class="ind-cartao__rotulo">Período previsto</p>
           <p class="ind-cartao__valor">${per ? per.datas : '—'}</p>
-          <p class="ind-cartao__detalhe">${per ? per.duracao : semDatas}</p>
+          ${per ? '' : `<p class="ind-cartao__detalhe">${semDatas}</p>`}
         </div>
       </div>`;
   }
@@ -207,8 +246,16 @@ window.Telas.indicadores = (function () {
   // mouse, o período e a área. Plantio | Colheita no estilo das guias do Detalhamento do orçamento (texto sublinhado).
   // À direita, "Nível" e a lista Mês · Quinzena · Dia; o gráfico mostra o período inteiro. No Dia, só os dias com área,
   // cada um com a sua data; se não couberem na largura, as barras rolam na horizontal
-  function grafico(linhas, est) {
+  function grafico(linhas, est, cultura) {
     const lista = barras(linhas, est.serie, est.gran);
+    // Variedades do gráfico, na ordem do cadastro (a mesma da cor), para a pilha e a legenda
+    const ordemVar = DADOS.variedades.filter((v) => v.cultura === cultura).map((v) => v.nome);
+    const posVar = (n) => { const i = ordemVar.indexOf(n); return i < 0 ? 999 : i; };
+    const variedades = [...new Set(lista.flatMap((b) => [...b.partes.keys()]))].sort((a, b) => posVar(a) - posVar(b) || a.localeCompare(b, 'pt-BR'));
+    const cor = (v) => Util.corVariedade(v, cultura);
+    const pilha = (b) => variedades.filter((v) => b.partes.get(v)).map((v) => `
+      <span class="ind-grafico__parte" style="height: ${b.partes.get(v) / b.area * 100}%; background: ${cor(v)}"
+            title="${esc(v)}: ${ha(b.partes.get(v))}"></span>`).join('');
     const { topo, passo } = escala(Math.max(0, ...lista.map((b) => b.area)));
     const marcas = [];
     for (let v = 0; v <= topo + 1e-9; v += passo) marcas.push(v);
@@ -220,7 +267,7 @@ window.Telas.indicadores = (function () {
     const coluna = Math.max(est.gran === 'dia' ? 46 : 0, (area - 110) / Math.max(1, lista.length));
     const girado = lista.some((b) => b.rotulo.length * 6.6 + 8 > coluna);
     return `
-      <section class="cartao ind-secao" aria-labelledby="ind-titulo-tempo">
+      <section class="cartao ind-secao ind-secao--area" aria-labelledby="ind-titulo-tempo">
         <div class="ind-secao__topo">
           <h3 class="ind-secao__titulo" id="ind-titulo-tempo">Distribuição da área planejada</h3>
           <nav class="orc-guias" aria-label="Série do gráfico">
@@ -246,13 +293,16 @@ window.Telas.indicadores = (function () {
                 <div class="ind-grafico__coluna" title="${b.rotulo}: ${ha(b.area)}">
                   <div class="ind-grafico__barra-area">
                     ${b.area ? `<span class="ind-grafico__valor" style="bottom: ${b.area / topo * 100}%">${fmt(Math.round(b.area))}</span>` : ''}
-                    <span class="ind-grafico__barra" style="height: ${b.area / topo * 100}%"></span>
+                    <span class="ind-grafico__barra ind-grafico__barra--pilha" style="height: ${b.area / topo * 100}%">${pilha(b)}</span>
                   </div>
                   <span class="ind-grafico__rotulo">${b.rotulo}</span>
                 </div>`).join('')}
             </div>
           </div>
-        </div>`}
+        </div>
+        <ul class="ind-var-legenda" aria-label="Variedades">
+          ${variedades.map((v) => `<li><span class="ind-var-legenda__cor" style="background: ${cor(v)}" aria-hidden="true"></span>${esc(v)}</li>`).join('')}
+        </ul>`}
       </section>`;
   }
 
@@ -284,7 +334,9 @@ window.Telas.indicadores = (function () {
             <th class="${numero ? 'tabela__numero' : ''}"><span class="titulo-coluna"><span>${rot}</span>${seta(id)}</span></th>`).join('')}</tr></thead>
           <tbody>${pagina.map((l) => `<tr>
             <td>${esc(l.grupo)}</td><td>${esc(l.produto)}</td>
-            <td class="tabela__numero">${quantidade(l.necessidade)}</td><td>${esc(l.unidade)}</td></tr>`).join('')}</tbody>
+            <td class="tabela__numero">${quantidade(l.necessidade)}</td><td>${esc(l.unidade)}</td>
+            <td class="tabela__numero" title="${l.area ? `${esc(quantidade(l.necessidade))} ${esc(l.unidade)} ÷ ${esc(fmt(l.area, l.area >= 100 ? 0 : 1))} ha planejados` : ''}">${textoDose(l.doseMedia)}</td>
+            <td>${esc(l.unidadeDose)}</td></tr>`).join('')}</tbody>
         </table></div>
         <div class="orc-paginacao">
           <label class="orc-paginacao__por">Itens por página
@@ -303,8 +355,9 @@ window.Telas.indicadores = (function () {
   function exportar(ctx) {
     const est = estadoPadrao(ctx);
     const p = ctx.plano;
-    const linhas = [['Grupo de insumo', 'Produto', 'Necessidade de consumo', 'Unidade'],
-      ...ordenados(produtos(ctx).filter(passaProduto(est)), est.ordem).map((l) => [l.grupo, l.produto, +l.necessidade.toFixed(2), l.unidade])];
+    const linhas = [['Grupo de insumo', 'Produto', 'Necessidade de consumo', 'Unidade do produto', 'Dose média', 'Unidade da dose'],
+      ...ordenados(produtos(ctx).filter(passaProduto(est)), est.ordem).map((l) => [l.grupo, l.produto, +l.necessidade.toFixed(2), l.unidade,
+        l.doseMedia === null ? '' : +l.doseMedia.toFixed(3), l.unidadeDose])];
     const limpo = (t) => Util.normalizar(t).replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
     const livro = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(livro, XLSX.utils.aoa_to_sheet(linhas), 'planejamento_produto');

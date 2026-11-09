@@ -24,6 +24,10 @@ window.DADOS = {
     { codigo: 13, nome: '27/27', descricao: '2027/2027', apelido: '2027', inicio: '2026-09-01', fim: '2027-08-31', anoAgricola: 2026, codigoIntegracao: '', dolar: 'DOLAR', valor: null },
     { codigo: 14, nome: '27/28', descricao: '2027/2028', apelido: '2027', inicio: '2027-09-01', fim: '2028-08-31', anoAgricola: 2027, codigoIntegracao: '', dolar: 'DOLAR', valor: null }
   ],
+  // Nível Empresa (09/11/2026): só para clientes organizados em várias empresas. Os clientes de teste não têm esse
+  // nível, então ele fica escondido no protótipo (filtros, colunas, modal Criar Plano, trilha, agrupamentos). Por
+  // dentro, cada fazenda continua com a sua empresa (fazendasPorEmpresa). true mostra a Empresa de novo em tudo.
+  usaEmpresa: false,
   empresas: ['Empresa A', 'Empresa B', 'Empresa C'],
   // Atividade produtiva. Por enquanto só Agricultura (soja); as outras aparecem como "Em breve"
   atividades: ['Agricultura', 'Pecuária', 'Silvicultura'],
@@ -43,6 +47,9 @@ window.DADOS = {
   // Orçamento de Insumos: PTAX de referência (R$ por US$ 1,00) e a estimativa de comercialização por cultura.
   // A unidade de venda vem da cultura (soja e milho em saca, algodão em arroba). Valores iniciais de exemplo.
   ptaxReferencia: 5.2,
+  // Fornecedores da última compra (Orçamento › Por produto, coluna Fornecedor; 09/11/2026). Fictícios, com nomes de
+  // revendas comuns no MT; cada produto fica com um deles (sempre o mesmo). Troque à vontade.
+  fornecedores: ['Agro Amazônia', 'Lavoro Agro', 'Sinagro', 'Agrofel', 'Produtiva Agronegócios', 'Agroterra'],
   comercializacao: {
     'Soja':    { unidade: 'sc', moeda: 'US$', preco: 23, produtividade: 65 },
     'Milho':   { unidade: 'sc', moeda: 'R$', preco: 55, produtividade: 110 },
@@ -350,6 +357,8 @@ window.DADOS = {
     { nome: 'Defensivo', tipo: 'Defensivos', operacoes: [
       { nome: '1ª Dessecação: pré-plantio', dap: -15, prazo: 5 },
       { nome: '2ª Dessecação: pré-plantio', dap: -5 },
+      // Tratamento de sementes on farm, no dia do plantio (09/11/2026)
+      { nome: 'Tratamento de sementes', dap: 0 },
       { nome: 'Pré-emergente', dap: 1 },
       { nome: '1ª Pós-emergente', dap: 15, fenologia: 'V2' },
       { nome: '2ª Pós-emergente', dap: 25, fenologia: 'V4' },
@@ -368,11 +377,10 @@ window.DADOS = {
   // Modelos de operações das outras culturas (só para o plano de exemplo de safrinha, por enquanto).
   // DAP pela prática no médio-norte do MT; sem fenologia (o cadastro de estádios é o da soja).
   modelosCultura: {
-    // Milho safrinha: as sementes já vêm tratadas (sem grupo TSI). Cigarrinha (Dalbulus maidis) no começo do
-    // ciclo, cobertura nitrogenada em V4–V6 (≈ 25 DAP), lagarta-do-cartucho (sem fungicida no modelo).
+    // Milho safrinha: as sementes já vêm tratadas (sem grupo TSI). Sem Preparo do solo e sem Corretivos (09/11/2026).
+    // Cobertura nitrogenada em V4–V6 (≈ 25 DAP). Defensivo (09/11/2026): 1ª Inseticida, Pós-emergente, 2ª Inseticida
+    // e 1ª Fungicida.
     'Milho': [
-      { nome: 'Preparo do solo', tipo: 'Operação de campo', operacoes: [] },
-      { nome: 'Corretivos', tipo: 'Aplicação de insumos', operacoes: [] },
       { nome: 'Plantio', tipo: 'Sementes', operacoes: [{ nome: 'Plantio', dap: 0, prazo: 3 }] },
       { nome: 'Fertilidade', tipo: 'Fertilidade', operacoes: [
         { nome: 'Adubação de plantio', dap: 0 },
@@ -380,10 +388,10 @@ window.DADOS = {
         { nome: 'Cobertura nitrogenada', dap: 25 }
       ] },
       { nome: 'Defensivo', tipo: 'Defensivos', operacoes: [
-        { nome: '1ª Inseticida: cigarrinha', dap: 7 },
-        { nome: '2ª Inseticida: cigarrinha', dap: 15 },
-        { nome: 'Herbicida pós-emergente', dap: 20 },
-        { nome: 'Inseticida: lagarta-do-cartucho', dap: 30 }
+        { nome: '1ª Inseticida', dap: 8 },
+        { nome: 'Pós-emergente', dap: 18 },
+        { nome: '2ª Inseticida', dap: 30 },
+        { nome: '1ª Fungicida', dap: 55 }
       ] },
       { nome: 'Colheita', tipo: 'Colheita', operacoes: [{ nome: 'Colheita', prazo: 10 }] }
     ]
@@ -572,10 +580,10 @@ window.DADOS = {
           'Adubação de plantio': op([['MAP 11-52-00', 120]]),
           'Adubação potássica': op([['KCl 00-00-60', 80]]),
           'Cobertura nitrogenada': op([['Ureia 45%', 150]]),
-          '1ª Inseticida: cigarrinha': op([['Engeo Pleno', 0.25]]),
-          '2ª Inseticida: cigarrinha': op([['Connect', 1.0]]),
-          'Herbicida pós-emergente': op([['Primóleo', 3.0], ['Callisto', 0.3]]),
-          'Inseticida: lagarta-do-cartucho': op([['Premio', 0.10]])
+          '1ª Inseticida': op([['Engeo Pleno', 0.25]]),
+          'Pós-emergente': op([['Primóleo', 3.0], ['Callisto', 0.3]]),
+          '2ª Inseticida': op([['Premio', 0.10]]),
+          '1ª Fungicida': op([['Priori Xtra', 0.30]])
         };
       })()
     },
@@ -648,10 +656,10 @@ window.DADOS = {
           'Adubação de plantio': op([['Formulado 02-20-18', 250]]),
           'Adubação potássica': op([['KCl 00-00-60', 70]]),
           'Cobertura nitrogenada': op([['Ureia 45%', 180]]),
-          '1ª Inseticida: cigarrinha': op([['Engeo Pleno', 0.25], ['Agral', 0.05]]),
-          '2ª Inseticida: cigarrinha': op([['Connect', 1.0]]),
-          'Herbicida pós-emergente': op([['Primóleo', 3.0], ['Callisto', 0.3], ['Assist', 0.50]]),
-          'Inseticida: lagarta-do-cartucho': op([['Dipel WG', 0.50], ['Premio', 0.10]])
+          '1ª Inseticida': op([['Engeo Pleno', 0.25], ['Agral', 0.05]]),
+          'Pós-emergente': op([['Primóleo', 3.0], ['Callisto', 0.3], ['Assist', 0.50]]),
+          '2ª Inseticida': op([['Dipel WG', 0.50], ['Premio', 0.10]]),
+          '1ª Fungicida': op([['Priori Xtra', 0.30]])
         };
       })()
     },

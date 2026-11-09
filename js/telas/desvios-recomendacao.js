@@ -61,7 +61,8 @@ window.Telas.desviosRecomendacao = (function () {
   ];
   const faixaDe = (d) => FAIXAS.find(([, , f]) => f(d))[0];
   // Níveis do gráfico Desvios por nível (03/11/2026: sem Talhão; Grupo de operação no lugar da Operação)
-  const NIVEIS = [['empresa', 'Empresa'], ['fazenda', 'Fazenda'], ['grupo', 'Grupo de operação'], ['executor', 'Executor']];
+  // Sem o nível Empresa (Util.comEmpresa): sem o filtro, o nível e a coluna Empresa; o gráfico abre por Fazenda
+  const NIVEIS = Util.semEmpresa([['empresa', 'Empresa'], ['fazenda', 'Fazenda'], ['grupo', 'Grupo de operação'], ['executor', 'Executor']]);
 
   let est = null;
   // Cabeçalho, filtros e Analisar por fixos no topo ao rolar (o alfinete solta e prende, como no Orçamento). Mantém-se ao navegar
@@ -71,7 +72,7 @@ window.Telas.desviosRecomendacao = (function () {
   // os demais em Todos/Todas; Analisar por Dose; nível Empresa
   function novoEstado() {
     const e = { talhao: 'todos', grupo: 'todos', operacao: 'todos', executor: 'todos', busca: {}, filtroAberto: null,
-      modo: est ? est.modo : 'dose', nivel: est ? est.nivel : 'empresa', faixa: null, produto: null, buscaDet: '', pagina: 1, porPagina: 10 };
+      modo: est ? est.modo : 'dose', nivel: est ? est.nivel : NIVEIS[0][0], faixa: null, produto: null, buscaDet: '', pagina: 1, porPagina: 10 };
     FiltrosBase.ler(e);
     return e;
   }
@@ -246,7 +247,7 @@ window.Telas.desviosRecomendacao = (function () {
 
   // Desvios por nível: o desvio médio (absoluto) dos registros de cada grupo, sempre do maior para o menor (empate: o nome)
   function porNivel(regs) {
-    if (!NIVEIS.some(([v]) => v === est.nivel)) est.nivel = 'empresa';
+    if (!NIVEIS.some(([v]) => v === est.nivel)) est.nivel = NIVEIS[0][0];
     const lista = regs.filter((r) => !est.faixa || faixaDe(desvioDe(r)) === est.faixa);
     const chave = { empresa: (r) => r.empresa, fazenda: (r) => r.fazenda, grupo: (r) => r.grupo, executor: (r) => r.executor }[est.nivel];
     const grupos = new Map();
@@ -407,19 +408,19 @@ window.Telas.desviosRecomendacao = (function () {
           </div>
         </div>
         <div class="tabela-rolagem"><table class="tabela dr-tabela dr-det">
-          <thead><tr>${titulo('det', 'os', 'Nº OS')}${titulo('det', 'criacao', 'Data de criação')}${titulo('det', 'fechamento', 'Data de fechamento')}${titulo('det', 'safra', 'Safra')}${titulo('det', 'empresa', 'Empresa')}${titulo('det', 'fazenda', 'Fazenda')}
+          <thead><tr>${titulo('det', 'os', 'Nº OS')}${titulo('det', 'criacao', 'Data de criação')}${titulo('det', 'fechamento', 'Data de fechamento')}${titulo('det', 'safra', 'Safra')}${Util.comEmpresa() ? titulo('det', 'empresa', 'Empresa') : ''}${titulo('det', 'fazenda', 'Fazenda')}
             ${titulo('det', 'talhao', 'Talhão')}${titulo('det', 'operacao', 'Operação')}${titulo('det', 'produto', 'Produto')}
             ${titulo('det', 'doseRec', 'Dose recomendada', 'tabela__numero')}${titulo('det', 'doseApl', 'Dose aplicada', 'tabela__numero')}${titulo('det', 'desvioDose', 'Desvio Dose (%)', 'dr-centro')}
             ${titulo('det', 'qtdRec', 'Quantidade recomendada', 'tabela__numero')}${titulo('det', 'qtdApl', 'Quantidade aplicada', 'tabela__numero')}${titulo('det', 'desvioQtd', 'Desvio Qtd (%)', 'dr-centro')}</tr></thead>
           <tbody>${pagina.length ? pagina.map((r) => `
             <tr title="Fechada em ${Util.data(r.fechamento)} · ${esc(r.executor)}">
-              <td>${esc(r.os)}</td><td>${r.executada ? Util.data(r.executada) : '—'}</td><td>${r.fechamento ? Util.data(r.fechamento) : '—'}</td><td>${esc(r.safra)}</td><td>${esc(r.empresa)}</td><td>${esc(r.fazenda)}</td><td>${esc(r.talhao)}</td>
+              <td>${esc(r.os)}</td><td>${r.executada ? Util.data(r.executada) : '—'}</td><td>${r.fechamento ? Util.data(r.fechamento) : '—'}</td><td>${esc(r.safra)}</td>${Util.comEmpresa() ? `<td>${esc(r.empresa)}</td>` : ''}<td>${esc(r.fazenda)}</td><td>${esc(r.talhao)}</td>
               <td>${esc(r.operacao)}</td><td>${esc(r.produto)}</td>
               <td class="tabela__numero">${dose(r.doseRec, r.unidade)}</td><td class="tabela__numero">${dose(r.doseApl, r.unidade)}</td>
               <td class="dr-centro">${etiqueta(dDose(r))}</td>
               <td class="tabela__numero">${qtd(r.qtdRec, r.unidade)}</td><td class="tabela__numero">${qtd(r.qtdApl, r.unidade)}</td>
               <td class="dr-centro">${etiqueta(dQtd(r))}</td></tr>`).join('')
-            : '<tr><td class="tabela__vazia" colspan="15">Nenhuma OS encontrada.</td></tr>'}</tbody>
+            : '<tr><td class="tabela__vazia" colspan="${Util.comEmpresa() ? 15 : 14}">Nenhuma OS encontrada.</td></tr>'}</tbody>
         </table></div>
         <div class="orc-paginacao">
           <span class="orc-paginacao__texto dr-det__conta">${fmt(de)}–${fmt(ate)} de ${fmt(ls.length)} OS</span>
@@ -441,7 +442,7 @@ window.Telas.desviosRecomendacao = (function () {
       +r.doseRec.toFixed(3), +r.doseApl.toFixed(3), +((r.doseApl / r.doseRec - 1) * 100).toFixed(1),
       +r.qtdRec.toFixed(1), +r.qtdApl.toFixed(1), +((r.qtdApl / r.qtdRec - 1) * 100).toFixed(1), r.executor])];
     const livro = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(livro, XLSX.utils.aoa_to_sheet(linhas), 'desvios');
+    XLSX.utils.book_append_sheet(livro, XLSX.utils.aoa_to_sheet(Util.semColunaEmpresa(linhas)), 'desvios');
     XLSX.writeFile(livro, `desvios-recomendacao_${Util.hojeISO()}.xlsx`);
   }
 

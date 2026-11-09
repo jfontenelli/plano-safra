@@ -1,9 +1,11 @@
 /*
  * Modal "Como deseja iniciar o plano?"
  * Abre por cima da Visão Geral ao abrir um plano ainda não iniciado (só a versão 0.1, vazia: Versoes.aIniciar).
- * Opções: Usar modelo de operações · Importar planilha Excel · Copiar outro plano de safra (uma embaixo da outra).
+ * Opções: Usar modelo de operações · Copiar outro plano de safra · Importar planilha Excel (uma embaixo da outra).
  * "Começar o planejamento" cria a 0.2 em construção com esse conteúdo (Versoes.comecar) e abre o plano no Planejamento.
  * Cancelar ou X: fecha sem iniciar (o plano continua não iniciado).
+ * Também é a etapa 2 do Criar Plano de Safra (09/11/2026; Telas.abrirModalCriarPlano): embutir() desenha as opções
+ * dentro dele, para o plano que ainda vai nascer (rascunho: safra, fazenda, cultura, talhões e áreas).
  */
 window.Telas = window.Telas || {};
 
@@ -13,12 +15,16 @@ window.Telas.inicioPlano = (function () {
   const OPCOES = [
     { valor: 'modelo', titulo: 'Usar modelo de operações', icone: Icones.lista,
       texto: 'Use uma lista de operações e ajuste conforme necessário.' },
-    { valor: 'importar', titulo: 'Importar planilha Excel', icone: Icones.planilha,
-      texto: 'Continue um plano exportado por este sistema.' },
+    // Ordem (09/11/2026): Usar modelo · Copiar outro plano · Importar planilha
     { valor: 'copiar', titulo: 'Copiar outro plano de safra', icone: Icones.copiar,
-      texto: 'Copie um plano de safra da mesma cultura.' }
+      texto: 'Copie um plano de safra da mesma cultura.' },
+    { valor: 'importar', titulo: 'Importar planilha Excel', icone: Icones.planilha,
+      texto: 'Continue um plano exportado por este sistema.' }
   ];
-  const CAMPOS = [['safra', 'Safra'], ['empresa', 'Empresa'], ['fazenda', 'Fazenda'], ['cultura', 'Cultura']];
+  // Sem o nível Empresa (Util.comEmpresa), a Empresa não aparece nem é conferida no arquivo importado
+  const CAMPOS = [['safra', 'Safra'], ['empresa', 'Empresa'], ['fazenda', 'Fazenda'], ['cultura', 'Cultura']]
+    .filter(([c]) => c !== 'empresa' || Util.comEmpresa());
+  const empresaTexto = (empresa) => (Util.comEmpresa() ? `${esc(empresa)} · ` : '');
 
   // Estado da escolha, por plano (só enquanto a página está aberta)
   const estados = {};
@@ -67,7 +73,7 @@ window.Telas.inicioPlano = (function () {
       <div class="modal__corpo">
         <button class="modal__fechar" type="button" aria-label="Fechar" data-fechar>${Icones.fechar}</button>
         <h2 class="modal__titulo" id="modal-titulo">Como deseja iniciar o plano?</h2>
-        <p class="modal__subtitulo">Safra ${esc(plano.safra)} · ${esc(plano.empresa)} · Fazenda ${esc(plano.fazenda)} · ${esc(plano.cultura)}</p>
+        <p class="modal__subtitulo">Safra ${esc(plano.safra)} · ${empresaTexto(plano.empresa)}Fazenda ${esc(plano.fazenda)} · ${esc(plano.cultura)}</p>
         <div data-ini-corpo></div>
       </div>
       <div class="modal__rodape">
@@ -95,7 +101,7 @@ window.Telas.inicioPlano = (function () {
         <label class="campo__rotulo" for="ini-arquivo">Arquivo exportado pelo Plano de Safra (.xlsx) <span class="obrigatorio" aria-hidden="true">*</span></label>
         <input class="importar__arquivo" id="ini-arquivo" type="file" accept=".xlsx" data-ini="arquivo">
         ${e.erroArquivo ? `<p class="erro-campo" role="alert">${esc(e.erroArquivo)}</p>` : ''}
-        ${c ? `<p class="importar__ok">Planejamento da safra ${esc(c.safra)} · ${esc(c.empresa)} · Fazenda ${esc(c.fazenda)} · ${esc(c.cultura)}</p>` : ''}
+        ${c ? `<p class="importar__ok">Planejamento da safra ${esc(c.safra)} · ${empresaTexto(c.empresa)}Fazenda ${esc(c.fazenda)} · ${esc(c.cultura)}</p>` : ''}
         ${dif.length && !e.aceitou ? `
           <div class="importar__diferencas" role="alert">
             <p class="importar__titulo">${Icones.alerta} O arquivo é de outro plano</p>
@@ -120,7 +126,7 @@ window.Telas.inicioPlano = (function () {
             <option value="" disabled ${e.copiarDe ? '' : 'selected'}>Selecione um plano de ${esc(plano.cultura)}</option>
             ${lista.map(({ p, v }) => `
               <option value="${p.id}" ${String(p.id) === e.copiarDe ? 'selected' : ''}>
-                Safra ${esc(p.safra)} · ${esc(p.empresa)} · Fazenda ${esc(p.fazenda)} · versão ${esc(v.num)}
+                Safra ${esc(p.safra)} · ${empresaTexto(p.empresa)}Fazenda ${esc(p.fazenda)} · versão ${esc(v.num)}
               </option>`).join('')}
           </select>
           <p class="inicio-plano__nota">Copia a última versão publicada do plano escolhido: grupos de operação, operações, recomendações com produtos e doses padrão.</p>
@@ -181,5 +187,14 @@ window.Telas.inicioPlano = (function () {
     }
   }
 
-  return { abrir };
+  // Etapa 2 do Criar Plano: desenha as opções em "caixa" e liga os eventos em "el" (que tem o botão
+  // data-ini="comecar"). Devolve desenhar(), para desenhar de novo ao voltar à etapa.
+  function embutir(el, caixa, plano, { aoComecar }) {
+    delete estados[plano.id];
+    const redesenhar = () => { caixa.innerHTML = desenhar(plano); };
+    ligar(el, plano, { redesenhar, aoComecar: (grupos, aviso) => aoComecar(grupos, aviso) });
+    return redesenhar;
+  }
+
+  return { abrir, embutir };
 })();

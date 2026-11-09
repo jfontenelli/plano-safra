@@ -18,14 +18,15 @@ window.Telas.osCalendario = (function () {
   // Grupos de operação pelo tipo (os nomes de cada plano podem mudar; a cor segue o tipo), nesta ordem na legenda
   // (03/11/2026: Corretivos, do tipo Aplicação de insumos, primeiro)
   const ORDEM_TIPO = ['aplicacao-de-insumos', 'sementes', 'fertilidade', 'defensivos', 'colheita'];
-  const FILTROS = [
+  // Sem o nível Empresa (Util.comEmpresa), sem o filtro Empresa (fica em Todas)
+  const FILTROS = Util.semEmpresa([
     ['safra', 'Safra', ['Todas', 'Nenhuma', 'selecionadas']],
     ['cultura', 'Cultura', ['Todas', 'Nenhuma', 'culturas']],
     ['empresa', 'Empresa', ['Todas', 'Nenhuma', 'empresas']],
     ['fazenda', 'Fazenda', ['Todas', 'Nenhuma', 'fazendas']],
     ['talhao', 'Talhão', ['Todos', 'Nenhum', 'talhões']],
     ['operacao', 'Operação', ['Todas', 'Nenhuma', 'operações']]
-  ];
+  ]);
 
   // Estado da tela: período, dia aberto e filtros ('todos' ou a lista do que está marcado). Mantém-se ao navegar.
   // Abre no Mês de hoje (03/11/2026; antes no Ano)
@@ -403,7 +404,7 @@ window.Telas.osCalendario = (function () {
         const d = barra.dataset;
         est.daBarra = { operacao: est.operacao, cultura: est.cultura, empresa: est.empresa, fazenda: est.fazenda, safra: est.safra };
         est.cultura = [d.cagCultura];
-        est.empresa = [d.cagEmpresa];
+        if (d.cagEmpresa) est.empresa = [d.cagEmpresa];
         if (d.cagFazenda) est.fazenda = [d.cagFazenda];
         if (d.cagSafra) est.safra = [d.cagSafra];
         est.dataRef = d.cagOp;

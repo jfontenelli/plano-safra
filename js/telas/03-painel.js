@@ -38,7 +38,7 @@ window.Telas.painelPlanos = (function () {
       .map((l) => ({ ...l, status: statusDe(l.plano), area: Util.areaCultivo(l.plano, Versoes.deTrabalho(l.plano)) }))
       .filter((l) => f.passaStatus(l.status))
       .sort((a, b) => ORDEM_STATUS.indexOf(a.status) - ORDEM_STATUS.indexOf(b.status)
-        || posicaoSafra(a.safra) - posicaoSafra(b.safra) || texto(a.empresa, b.empresa)
+        || posicaoSafra(a.safra) - posicaoSafra(b.safra) || (Util.comEmpresa() ? texto(a.empresa, b.empresa) : 0)
         || texto(a.fazenda, b.fazenda) || texto(a.cultura, b.cultura));
   }
 
@@ -63,7 +63,7 @@ window.Telas.painelPlanos = (function () {
       <div class="painel" data-guia-painel="painel">
         <section class="cartao lista-planos" aria-labelledby="pn-titulo-planos">
           <div class="secao__topo lista-planos__topo">
-            <h2 class="secao__titulo lista-planos__titulo" id="pn-titulo-planos">${Icones.documento} Planos de Safra</h2>
+            <h2 class="secao__titulo lista-planos__titulo" id="pn-titulo-planos">${Icones.documento} Planos de Safra Cadastrados</h2>
             <button class="botao botao--primario" type="button" data-acao="criar-plano" data-pn="criar">${Icones.mais} Criar Plano Safra</button>
           </div>
           <div class="tabela-rolagem" data-pn="tabela">
@@ -100,18 +100,21 @@ window.Telas.painelPlanos = (function () {
   let ordem = null; // { coluna, sentido: 'asc' | 'desc' }
   let ultimo = null; // { conteudo, filtros } do último desenho, para redesenhar ao ordenar
   const ORDEM_STATUS = ['nao-iniciado', 'construcao', 'publicada'];
-  const COLUNAS = [
+  // Sem o nível Empresa (Util.comEmpresa), sem a coluna Empresa
+  // Ordem das colunas (09/11/2026): Safra · (Empresa) · Fazenda · Cultura · Área · Status
+  const TODAS_COLUNAS = [
+    ['safra', 'Safra', (l) => posicaoSafra(l.safra)],
     ['empresa', 'Empresa', (l) => l.empresa],
     ['fazenda', 'Fazenda', (l) => l.fazenda],
-    ['safra', 'Safra', (l) => posicaoSafra(l.safra)],
     ['cultura', 'Cultura', (l) => l.cultura || null],
     ['area', 'Área (ha)', (l) => l.area || null, 'tabela__numero', 'Área de cultivo: talhões incluídos no plano'],
     ['status', 'Status', (l) => ORDEM_STATUS.indexOf(l.status)]
   ];
+  const colunas = () => TODAS_COLUNAS.filter(([c]) => c !== 'empresa' || Util.comEmpresa());
 
   function ordenadas(ls) {
     if (!ordem) return ls;
-    const valor = COLUNAS.find(([c]) => c === ordem.coluna)[2];
+    const valor = TODAS_COLUNAS.find(([c]) => c === ordem.coluna)[2];
     const sinal = ordem.sentido === 'asc' ? 1 : -1;
     return [...ls].sort((a, b) => {
       const va = valor(a); const vb = valor(b);
@@ -122,7 +125,7 @@ window.Telas.painelPlanos = (function () {
   }
 
   function cabecalho() {
-    return `<tr>${COLUNAS.map(([coluna, rotulo, , classe = '', dica = '']) => {
+    return `<tr>${colunas().map(([coluna, rotulo, , classe = '', dica = '']) => {
       const ativa = ordem && ordem.coluna === coluna;
       const sentido = ativa ? ordem.sentido : null;
       return `
@@ -151,9 +154,9 @@ window.Telas.painelPlanos = (function () {
     return `
       <tr class="lista-planos__linha ${novo ? 'lista-planos__linha--novo' : ''}" data-plano="${p.id}" tabindex="0" title="Abrir o plano"
           aria-label="Abrir plano ${novo ? 'novo ' : ''}${esc(p.safra)} · ${esc(p.fazenda)} · ${esc(p.cultura)}">
-        <td>${esc(l.empresa)}</td>
-        <td>${esc(l.fazenda)}${novo ? ' <span class="lista-planos__novo">Novo</span>' : ''}</td>
         <td>${esc(l.safra)}</td>
+        ${Util.comEmpresa() ? `<td>${esc(l.empresa)}</td>` : ''}
+        <td>${esc(l.fazenda)}${novo ? ' <span class="lista-planos__novo">Novo</span>' : ''}</td>
         <td>${esc(p.cultura)}</td>
         <td class="tabela__numero">${l.area ? ha(l.area) : '<span class="painel-tabela__vazio">—</span>'}</td>
         <td><span class="status ${classe}">${rotulo}</span></td>

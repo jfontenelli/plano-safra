@@ -2547,26 +2547,66 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .cp-secao { margin: 4px 0 10px; font-size: 16px; font-weight: 700; }
 .cp-secao--linha { margin-top: 8px; padding-top: 18px; border-top: 1px solid var(--borda); }
 .cp-gerais { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0 16px; }
-.cp-fazendas { display: flex; flex-direction: column; gap: 12px; }
-.cp-fazenda { border: 1px solid var(--borda); border-radius: 10px; }
-.cp-fazenda__topo { display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 4px 8px 4px 16px;
-  border-bottom: 1px solid var(--borda); border-radius: 10px 10px 0 0; background: var(--superficie-2); font-weight: 600; }
-.cp-fazenda__campos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 16px; padding: 14px 16px 0; }
-.cp-fazenda__dica { display: flex; align-items: center; gap: 6px; margin: -6px 16px 14px; font-size: 13px; color: var(--texto-suave); }
+.cp-gerais--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.cp-fazenda__dica { display: flex; align-items: center; gap: 6px; margin: 4px 0 0; font-size: 13px; color: var(--texto-suave); }
 .cp-fazenda__dica .icone { width: 15px; height: 15px; flex-shrink: 0; }
-.cp-area { display: flex; align-items: center; margin: 0; background: var(--superficie-2); color: var(--texto-suave); }
-.cp-talhoes { position: relative; }
-.cp-talhoes__botao { display: flex; align-items: center; justify-content: space-between; gap: 8px; text-align: left; cursor: pointer; }
-.cp-talhoes__botao:disabled { background: var(--superficie-2); color: var(--texto-suave); cursor: not-allowed; }
-.cp-talhoes__botao .icone { width: 16px; height: 16px; flex-shrink: 0; }
-/* Posição fixa, calculada no JS (posicionarLista), para a lista não ser cortada pela rolagem do modal */
-.cp-talhoes__lista { position: fixed; z-index: 1000; max-height: 320px; overflow: auto; padding: 6px 0;
-  border: 1px solid var(--borda); border-radius: 8px; background: var(--superficie); box-shadow: 0 8px 24px rgba(0, 0, 0, .12); }
-.cp-talhoes__item { display: flex; align-items: center; gap: 8px; padding: 6px 12px; font-size: 14px; cursor: pointer; }
-.cp-talhoes__item:hover { background: var(--verde-100); }
-.cp-talhoes__item input { width: 16px; height: 16px; accent-color: var(--verde-700); }
-.cp-talhoes__item--todos { border-bottom: 1px solid var(--borda); font-weight: 600; }
-.cp-talhoes__area { margin-left: auto; color: var(--texto-suave); }
+
+/* Criar Plano de Safra na tela inteira, em duas etapas (09/11/2026) */
+.modal.modal--criar-plano { height: calc(100vh - 48px); }
+.cp-tela { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+.cp-tela__topo { position: relative; display: flex; align-items: center; min-height: 64px; padding: 12px 72px 12px 32px; border-bottom: 1px solid var(--borda); }
+.cp-tela__fechar { top: 14px; }
+.cp-tela__corpo { flex: 1; min-height: 0; overflow: auto; }
+/* O conteúdo ocupa a largura toda. Na etapa 1, a tabela de talhões aparece inteira e o modal rola (barra de rolagem
+   do modal; o título da tabela fica preso no topo ao rolar) */
+.cp-tela__miolo { padding: 24px 32px 20px; }
+.cp-talhoes-area .ta__rolagem { max-height: none; overflow: visible; }
+.cp-gerais--5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.cp-tela__rodape { align-items: center; }
+.cp-tela [hidden] { display: none !important; }
+.cp-tela__rodape .modal__rodape-erro { margin-right: auto; }
+.cp-tela__voltar { margin-right: auto; }
+.cp-tela__rodape .botao .icone { width: 16px; height: 16px; }
+.cp-etapas { display: flex; align-items: center; gap: 14px; width: 100%; margin: 0; padding: 0; list-style: none; }
+.cp-etapas__item { display: flex; align-items: center; gap: 10px; flex-shrink: 0; color: var(--texto-suave); font-weight: 600; font-size: 14px; }
+.cp-etapas__num { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--borda);
+  color: var(--texto-suave); font-size: 14px; }
+.cp-etapas__item--ativa { color: var(--texto); }
+.cp-etapas__item--ativa .cp-etapas__num, .cp-etapas__item--feita .cp-etapas__num { border-color: var(--verde-700); background: var(--verde-700); color: #fff; }
+/* As duas etapas próximas: linha curta entre elas (09/11/2026) */
+.cp-etapas__linha { flex: 0 0 72px; height: 1px; background: var(--borda); }
+.cp-secao__sub { margin: -4px 0 14px; font-size: 14px; color: var(--texto-suave); }
+
+/* Tabela de talhões com a área planejada (Criar Plano e Editar talhões; js/tabela-areas.js) */
+.ta { border: 1px solid var(--borda); border-radius: 10px; }
+.ta__rolagem { max-height: 52vh; overflow: auto; }
+.ta__tabela { width: 100%; border-collapse: collapse; font-size: 14px; }
+.ta__tabela th { position: sticky; top: 0; z-index: 1; padding: 10px 16px; border-bottom: 1px solid var(--borda); background: var(--superficie-2);
+  text-align: left; font-weight: 600; }
+.ta__tabela td { padding: 8px 16px; border-bottom: 1px solid var(--borda); vertical-align: middle; }
+.ta__tabela tbody tr:last-child td { border-bottom: 0; }
+.ta__num { text-align: right !important; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.ta__marcar { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
+.ta__marcar input { width: 16px; height: 16px; accent-color: var(--verde-700); }
+.ta__linha--fora td:not(:first-child) { color: var(--texto-suave); }
+.ta__fora { color: var(--texto-suave); }
+.ta__editar { display: inline-flex; align-items: center; gap: 6px; padding: 4px 6px; border: 0; border-radius: 6px; background: transparent;
+  color: var(--texto); font: inherit; cursor: pointer; }
+.ta__editar:hover, .ta__editar:focus-visible { background: var(--verde-100); }
+.ta__editar .icone { width: 14px; height: 14px; color: var(--texto-suave); }
+.ta__editar--alterada strong { color: var(--verde-700); }
+.ta__antes { display: block; font-size: 12px; color: var(--texto-suave); }
+.ta__edicao { display: inline-flex; align-items: center; gap: 6px; }
+.ta__entrada { width: 96px; height: 34px; padding: 4px 8px; text-align: right; }
+.ta__erro { display: block; margin-top: 4px; font-size: 12px; color: var(--erro); white-space: normal; }
+.ta__planejado { padding: 1px 6px; border-radius: 999px; background: var(--superficie-2); color: var(--verde-700); font-size: 11px; font-weight: 600; }
+.ta__linha--sai td:first-child { color: var(--erro); text-decoration: line-through; }
+.ta__linha--entra td { background: var(--verde-100); }
+.ta__total { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px;
+  border-top: 1px solid var(--borda); }
+.ta__total-valor { display: flex; flex-direction: column; align-items: flex-end; }
+.ta__total-valor strong { font-size: 16px; }
+.ta__total-valor small { font-size: 12px; color: var(--texto-suave); }
 
 /* ===== Editar talhões (Mais ações do plano) ===== */
 .et-lista { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); max-height: 340px; overflow: auto; margin-top: 4px;
@@ -2586,7 +2626,6 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .cp-adicionar { margin: 14px 0 18px; }
 @media (max-width: 760px) {
   .cp-gerais { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .cp-fazenda__campos { grid-template-columns: 1fr; }
 }
 
 /* ===== Modal "Como deseja iniciar o plano?" ===== */
@@ -2818,6 +2857,8 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .orc-custo__valor { display: inline-flex; align-items: center; gap: 6px; }
 .orc-custo__moeda { color: var(--texto-suave); }
 .orc-custo__campo { width: 92px; text-align: right; }
+.orc-fornecedor { align-items: flex-start; }
+.orc-fornecedor__campo { width: 150px; }
 .orc-custo__manual { padding: 1px 7px; border-radius: 999px; background: var(--info-fundo); color: var(--info); font-size: 11px; font-weight: 600; }
 .orc-tabela__compra { white-space: nowrap; color: var(--texto-suave); }
 [data-orc-tabela-detalhe] .orc-tabela th.tabela__numero { min-width: 124px; text-align: center !important; }
@@ -3603,7 +3644,17 @@ html[data-tema="escuro"] .val-grupo__icone--campo, html[data-tema="escuro"] .val
 .op-painel > .ind { flex: 1; min-height: 0; overflow-y: auto; margin: 0 -8px -6px; padding: 0 8px 6px; }
 .ind__titulo { margin: 0; font-size: 19px; font-weight: 700; color: var(--texto); }
 .ind__sub { margin: -6px 0 0; font-size: 14px; color: var(--texto-suave); }
-.ind-cartoes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.ind-cartoes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.ind-cartao__valor.ind-cartao__valor--grande { margin: 6px 0 2px; font-size: 22px; }
+.ind-cartao__corpo { flex: 1; min-width: 0; }
+.ind-cartao.ind-cartao--area { flex-direction: column; align-items: stretch; gap: 4px; }
+.ind-area__titulo { display: flex; align-items: center; gap: 10px; }
+.ind-area__linha { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
+.ind-area__valor { margin: 0; font-size: 22px; font-weight: 700; color: var(--texto); font-variant-numeric: tabular-nums; }
+.ind-area__pct { text-align: right; }
+.ind-area__pct-valor { margin: 0; font-size: 20px; font-weight: 700; color: var(--verde-700); font-variant-numeric: tabular-nums; }
+.ind-progresso { height: 8px; margin: 2px 0 2px; border-radius: 999px; background: var(--superficie-2); box-shadow: 0 0 0 1px var(--borda) inset; overflow: hidden; }
+.ind-progresso > span { display: block; height: 100%; border-radius: 999px; background: var(--verde-700); }
 .ind-cartao { display: flex; align-items: flex-start; gap: 14px; padding: 10px 16px; }
 .ind-cartao__icone .icone { width: 22px; height: 22px; color: var(--verde-700); }
 .ind-cartao__titulo { margin: 0; font-size: 15px; font-weight: 700; color: var(--texto); }
@@ -3633,6 +3684,15 @@ html[data-tema="escuro"] .val-grupo__icone--campo, html[data-tema="escuro"] .val
 .ind-grafico__barra-area { position: relative; flex: 1; }
 .ind-grafico__barra { position: absolute; bottom: 0; left: 50%; width: min(64%, 72px); transform: translateX(-50%); border-radius: 4px 4px 0 0; background: var(--serie-1); }
 .ind-grafico__coluna:hover .ind-grafico__barra { filter: brightness(1.1); }
+/* Barra dividida pelas variedades (09/11/2026), com as cores do Mapa; a primeira variedade embaixo */
+.ind-grafico__barra--pilha { display: flex; flex-direction: column-reverse; overflow: hidden; background: none; }
+.ind-grafico__parte { display: block; width: 100%; flex: none; }
+.ind-grafico__parte + .ind-grafico__parte { box-shadow: 0 -1px 0 var(--superficie) inset; }
+/* Legenda das variedades, embaixo das datas do eixo X */
+.ind-var-legenda { display: flex; flex-wrap: wrap; justify-content: flex-start; gap: 6px 18px; margin: 36px 0 0; padding: 0; list-style: none;
+  font-size: 13px; color: var(--texto); }
+.ind-var-legenda li { display: inline-flex; align-items: center; gap: 6px; }
+.ind-var-legenda__cor { width: 12px; height: 12px; border-radius: 3px; flex: none; }
 .ind-grafico__valor { position: absolute; left: 0; right: 0; margin-bottom: 4px; font-size: 13px; font-weight: 600; text-align: center; color: var(--texto); font-variant-numeric: tabular-nums; }
 .ind-grafico__rotulo { position: absolute; top: calc(100% + 6px); left: 0; right: 0; font-size: 12px; font-weight: 700; text-align: center; color: var(--texto-suave); white-space: nowrap; }
 /* Dia: uma coluna por dia, com largura mínima; o que não couber rola na horizontal (a área de rolagem inclui o valor em
@@ -3641,6 +3701,12 @@ html[data-tema="escuro"] .val-grupo__icone--campo, html[data-tema="escuro"] .val
 .ind-grafico--dia .ind-grafico__barras { top: -18px; bottom: calc(-12px - var(--rodape)); padding: 18px 0 calc(var(--rodape) + 12px); overflow-x: auto; overflow-y: hidden; }
 .ind-grafico--dia .ind-grafico__barras { align-items: flex-start; }
 .ind-grafico--dia .ind-grafico__coluna { flex: 1 0 46px; height: 240px; } /* a altura do gráfico (a barra de rolagem não a encurta) */
+/* Plantio › Indicadores (09/11/2026): o gráfico ocupa a altura que sobra na tela (de 120 a 320 px), para os cartões,
+   o gráfico, as datas e a legenda caberem sem rolar */
+.ind-secao--area { display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; }
+.ind-secao--area .ind-grafico { flex: 1; min-height: 0; }
+.ind-secao--area .ind-grafico__plot { height: auto; min-height: 120px; max-height: 320px; }
+.ind-secao--area .ind-grafico--dia .ind-grafico__coluna { height: 100%; }
 .ind-grafico--dia .ind-grafico__rotulo { font-size: 11px; }
 .ind-grafico--dia .ind-grafico__valor { font-size: 12px; }
 /* Data girada 90° (quinzena e dia apertados): lida de baixo para cima, com o fim encostado no eixo */
@@ -3755,6 +3821,9 @@ html[data-tema="escuro"] .cal-tal__barra { --f: color-mix(in srgb, var(--c) 24%,
 .dr-fixo { position: sticky; top: 0; z-index: 1; /* acima do conteúdo que rola, abaixo da seta do menu (z-index 2) */
   display: flex; align-items: flex-start; gap: 8px; padding: 12px 40px 12px; border-bottom: 1px solid var(--borda); background: var(--superficie); }
 .dr-fixo--solto { position: static; border-bottom: 0; }
+/* Com um filtro aberto (lista ou Mais filtros), a barra fica acima do título da tabela, que também é fixo ao rolar:
+   a lista não fica atrás da coluna (09/11/2026) */
+.dr-fixo:has(.cal-filtro[open], .dr-pop:not([hidden])), .dr-fixo:focus-within { z-index: 3; }
 .dr-fixo .dr-filtros { flex: 1; min-width: 0; }
 .dr-fixo .dr-filtros > .campo:not(.dr-data) { max-width: 200px; }
 .dr-congelar { flex: none; margin: 0; }
@@ -4461,6 +4530,10 @@ window.DADOS = {
     { codigo: 13, nome: '27/27', descricao: '2027/2027', apelido: '2027', inicio: '2026-09-01', fim: '2027-08-31', anoAgricola: 2026, codigoIntegracao: '', dolar: 'DOLAR', valor: null },
     { codigo: 14, nome: '27/28', descricao: '2027/2028', apelido: '2027', inicio: '2027-09-01', fim: '2028-08-31', anoAgricola: 2027, codigoIntegracao: '', dolar: 'DOLAR', valor: null }
   ],
+  // Nível Empresa (09/11/2026): só para clientes organizados em várias empresas. Os clientes de teste não têm esse
+  // nível, então ele fica escondido no protótipo (filtros, colunas, modal Criar Plano, trilha, agrupamentos). Por
+  // dentro, cada fazenda continua com a sua empresa (fazendasPorEmpresa). true mostra a Empresa de novo em tudo.
+  usaEmpresa: false,
   empresas: ['Empresa A', 'Empresa B', 'Empresa C'],
   // Atividade produtiva. Por enquanto só Agricultura (soja); as outras aparecem como "Em breve"
   atividades: ['Agricultura', 'Pecuária', 'Silvicultura'],
@@ -4480,6 +4553,9 @@ window.DADOS = {
   // Orçamento de Insumos: PTAX de referência (R$ por US$ 1,00) e a estimativa de comercialização por cultura.
   // A unidade de venda vem da cultura (soja e milho em saca, algodão em arroba). Valores iniciais de exemplo.
   ptaxReferencia: 5.2,
+  // Fornecedores da última compra (Orçamento › Por produto, coluna Fornecedor; 09/11/2026). Fictícios, com nomes de
+  // revendas comuns no MT; cada produto fica com um deles (sempre o mesmo). Troque à vontade.
+  fornecedores: ['Agro Amazônia', 'Lavoro Agro', 'Sinagro', 'Agrofel', 'Produtiva Agronegócios', 'Agroterra'],
   comercializacao: {
     'Soja':    { unidade: 'sc', moeda: 'US$', preco: 23, produtividade: 65 },
     'Milho':   { unidade: 'sc', moeda: 'R$', preco: 55, produtividade: 110 },
@@ -4787,6 +4863,8 @@ window.DADOS = {
     { nome: 'Defensivo', tipo: 'Defensivos', operacoes: [
       { nome: '1ª Dessecação: pré-plantio', dap: -15, prazo: 5 },
       { nome: '2ª Dessecação: pré-plantio', dap: -5 },
+      // Tratamento de sementes on farm, no dia do plantio (09/11/2026)
+      { nome: 'Tratamento de sementes', dap: 0 },
       { nome: 'Pré-emergente', dap: 1 },
       { nome: '1ª Pós-emergente', dap: 15, fenologia: 'V2' },
       { nome: '2ª Pós-emergente', dap: 25, fenologia: 'V4' },
@@ -4805,11 +4883,10 @@ window.DADOS = {
   // Modelos de operações das outras culturas (só para o plano de exemplo de safrinha, por enquanto).
   // DAP pela prática no médio-norte do MT; sem fenologia (o cadastro de estádios é o da soja).
   modelosCultura: {
-    // Milho safrinha: as sementes já vêm tratadas (sem grupo TSI). Cigarrinha (Dalbulus maidis) no começo do
-    // ciclo, cobertura nitrogenada em V4–V6 (≈ 25 DAP), lagarta-do-cartucho (sem fungicida no modelo).
+    // Milho safrinha: as sementes já vêm tratadas (sem grupo TSI). Sem Preparo do solo e sem Corretivos (09/11/2026).
+    // Cobertura nitrogenada em V4–V6 (≈ 25 DAP). Defensivo (09/11/2026): 1ª Inseticida, Pós-emergente, 2ª Inseticida
+    // e 1ª Fungicida.
     'Milho': [
-      { nome: 'Preparo do solo', tipo: 'Operação de campo', operacoes: [] },
-      { nome: 'Corretivos', tipo: 'Aplicação de insumos', operacoes: [] },
       { nome: 'Plantio', tipo: 'Sementes', operacoes: [{ nome: 'Plantio', dap: 0, prazo: 3 }] },
       { nome: 'Fertilidade', tipo: 'Fertilidade', operacoes: [
         { nome: 'Adubação de plantio', dap: 0 },
@@ -4817,10 +4894,10 @@ window.DADOS = {
         { nome: 'Cobertura nitrogenada', dap: 25 }
       ] },
       { nome: 'Defensivo', tipo: 'Defensivos', operacoes: [
-        { nome: '1ª Inseticida: cigarrinha', dap: 7 },
-        { nome: '2ª Inseticida: cigarrinha', dap: 15 },
-        { nome: 'Herbicida pós-emergente', dap: 20 },
-        { nome: 'Inseticida: lagarta-do-cartucho', dap: 30 }
+        { nome: '1ª Inseticida', dap: 8 },
+        { nome: 'Pós-emergente', dap: 18 },
+        { nome: '2ª Inseticida', dap: 30 },
+        { nome: '1ª Fungicida', dap: 55 }
       ] },
       { nome: 'Colheita', tipo: 'Colheita', operacoes: [{ nome: 'Colheita', prazo: 10 }] }
     ]
@@ -5009,10 +5086,10 @@ window.DADOS = {
           'Adubação de plantio': op([['MAP 11-52-00', 120]]),
           'Adubação potássica': op([['KCl 00-00-60', 80]]),
           'Cobertura nitrogenada': op([['Ureia 45%', 150]]),
-          '1ª Inseticida: cigarrinha': op([['Engeo Pleno', 0.25]]),
-          '2ª Inseticida: cigarrinha': op([['Connect', 1.0]]),
-          'Herbicida pós-emergente': op([['Primóleo', 3.0], ['Callisto', 0.3]]),
-          'Inseticida: lagarta-do-cartucho': op([['Premio', 0.10]])
+          '1ª Inseticida': op([['Engeo Pleno', 0.25]]),
+          'Pós-emergente': op([['Primóleo', 3.0], ['Callisto', 0.3]]),
+          '2ª Inseticida': op([['Premio', 0.10]]),
+          '1ª Fungicida': op([['Priori Xtra', 0.30]])
         };
       })()
     },
@@ -5085,10 +5162,10 @@ window.DADOS = {
           'Adubação de plantio': op([['Formulado 02-20-18', 250]]),
           'Adubação potássica': op([['KCl 00-00-60', 70]]),
           'Cobertura nitrogenada': op([['Ureia 45%', 180]]),
-          '1ª Inseticida: cigarrinha': op([['Engeo Pleno', 0.25], ['Agral', 0.05]]),
-          '2ª Inseticida: cigarrinha': op([['Connect', 1.0]]),
-          'Herbicida pós-emergente': op([['Primóleo', 3.0], ['Callisto', 0.3], ['Assist', 0.50]]),
-          'Inseticida: lagarta-do-cartucho': op([['Dipel WG', 0.50], ['Premio', 0.10]])
+          '1ª Inseticida': op([['Engeo Pleno', 0.25], ['Agral', 0.05]]),
+          'Pós-emergente': op([['Primóleo', 3.0], ['Callisto', 0.3], ['Assist', 0.50]]),
+          '2ª Inseticida': op([['Dipel WG', 0.50], ['Premio', 0.10]]),
+          '1ª Fungicida': op([['Priori Xtra', 0.30]])
         };
       })()
     },
@@ -5110,12 +5187,36 @@ window.DADOS = {
  * Cálculos e formatação usados por várias telas.
  */
 window.Util = {
+  // Nível Empresa à mostra? (DADOS.usaEmpresa; escondido no protótipo desde 09/11/2026)
+  comEmpresa() { return DADOS.usaEmpresa !== false; },
+  // Listas de filtros, colunas e níveis ([chave, rótulo, ...]): sem o nível Empresa, tira a entrada 'empresa'
+  semEmpresa(lista) { return lista.filter((x) => (Array.isArray(x) ? x[0] : x) !== 'empresa' || Util.comEmpresa()); },
+  // Planilha (linhas, com o título na primeira): sem o nível Empresa, tira a coluna "Empresa"
+  semColunaEmpresa(linhas) {
+    const i = Util.comEmpresa() ? -1 : linhas[0].indexOf('Empresa');
+    return i < 0 ? linhas : linhas.map((l) => l.filter((_, j) => j !== i));
+  },
+  // Cor da variedade (Mapa do Plantio e gráfico dos Indicadores): paleta categórica, uma cor por variedade, na ordem
+  // do cadastro da cultura (a cor segue a variedade, não a posição); fora da paleta, cinza-azulado
+  CORES_VARIEDADE: ['#2a78d6', '#eb6834', '#1baf7a', '#eda100', '#e87ba4', '#008300', '#4a3aa7', '#e34948'],
+  corVariedade(nome, cultura) {
+    const i = DADOS.variedades.filter((v) => v.cultura === cultura).findIndex((v) => v.nome === nome);
+    return i >= 0 && i < Util.CORES_VARIEDADE.length ? Util.CORES_VARIEDADE[i] : '#6b7c8f';
+  },
+  // Empresa de uma fazenda (DADOS.fazendasPorEmpresa); sem cadastro, ''
+  empresaDaFazenda(fazenda) {
+    return Object.keys(DADOS.fazendasPorEmpresa || {}).find((e) => DADOS.fazendasPorEmpresa[e].includes(fazenda)) || '';
+  },
+
   // Talhões incluídos no plano (Criar Plano; depois, Editar talhões), da versão aberta ou da versão indicada.
-  // Sem a lista: todos os da fazenda.
+  // Sem a lista: todos os da fazenda. A área é a planejada no plano (09/11/2026: Criar Plano e Editar talhões; vale
+  // em tudo: quantidades, Orçamento, OS); a do cadastro fica em areaCadastrada.
   talhoesPlano(plano, versao) {
     const todos = DADOS.talhoes[plano.fazenda] || [];
     const nomes = versao && window.Versoes ? Versoes.talhoes(plano, versao) : plano.talhoes;
-    return nomes ? todos.filter((t) => nomes.includes(t.nome)) : todos;
+    const areas = (versao && window.Versoes ? Versoes.areas(plano, versao) : plano.areas) || {};
+    return (nomes ? todos.filter((t) => nomes.includes(t.nome)) : todos)
+      .map((t) => (areas[t.nome] !== undefined && areas[t.nome] !== null ? { ...t, area: areas[t.nome], areaCadastrada: t.area } : t));
   },
 
   // Área de cultivo = soma das áreas dos talhões incluídos no plano (ha); sem talhões, null ("Pendente")
@@ -5698,11 +5799,14 @@ window.Planos = (function () {
  * plano.versoes = [versao], da mais antiga para a mais nova
  * versao        = { num: '0.1', status: 'construcao' | 'publicada', grupos (cópia do planejamento),
  *                   talhoes (nomes dos talhões incluídos na versão; null = todos os da fazenda),
+ *                   areas (área planejada dos talhões, só as diferentes da cadastrada: { T02: 60 }; null = todas
+ *                   as cadastradas; 09/11/2026),
  *                   criadaEm, criadaPor, origem ('0.1' | null),
  *                   salvaEm, salvaPor (em construção), publicadaEm, publicadaPor }
  * plano.versaoAberta = número da versão na tela.
  * plano.grupos       = área de trabalho: o planejamento da versão aberta, que as telas leem e alteram.
  * plano.talhoes      = área de trabalho: os talhões da versão aberta (Editar talhões, só na versão em construção).
+ * plano.areas        = área de trabalho: as áreas planejadas da versão aberta (Criar Plano; Editar talhões).
  *                      Na versão em construção, cada alteração é salva na hora (salvamento automático).
  *
  * Versão publicada é imutável. Só pode haver uma versão em construção por plano.
@@ -5711,10 +5815,14 @@ window.Planos = (function () {
 window.Versoes = (function () {
   const copiar = (grupos) => structuredClone(grupos || []);
   const copiarTalhoes = (t) => (t ? [...t] : null);
+  const copiarAreas = (a) => (a ? { ...a } : null);
 
-  // Versões de antes dos talhões por versão: recebem os talhões do plano (os escolhidos no Criar Plano)
+  // Versões de antes dos talhões (e das áreas) por versão: recebem os do plano (os escolhidos no Criar Plano)
   function garantirTalhoes(plano) {
-    lista(plano).forEach((v) => { if (!('talhoes' in v)) v.talhoes = copiarTalhoes(plano.talhoes); });
+    lista(plano).forEach((v) => {
+      if (!('talhoes' in v)) v.talhoes = copiarTalhoes(plano.talhoes);
+      if (!('areas' in v)) v.areas = copiarAreas(plano.areas);
+    });
   }
 
   function agora() { return new Date(); }
@@ -5750,12 +5858,13 @@ window.Versoes = (function () {
    */
   function iniciar(plano, grupos, { quando = agora(), por = usuario() } = {}) {
     const talhoes = copiarTalhoes(plano.talhoes);
-    plano.versoes = [{ num: '0.1', status: 'publicada', grupos: [], talhoes, criadaEm: quando, criadaPor: por,
+    const areas = copiarAreas(plano.areas);
+    plano.versoes = [{ num: '0.1', status: 'publicada', grupos: [], talhoes, areas, criadaEm: quando, criadaPor: por,
                        origem: null, publicadaEm: quando, publicadaPor: por }];
     plano.versaoAberta = '0.1';
     plano.grupos = [];
     if (grupos && grupos.length) {
-      plano.versoes.push({ num: '0.2', status: 'construcao', grupos: copiar(grupos), talhoes: copiarTalhoes(talhoes), criadaEm: quando, criadaPor: por,
+      plano.versoes.push({ num: '0.2', status: 'construcao', grupos: copiar(grupos), talhoes: copiarTalhoes(talhoes), areas: copiarAreas(areas), criadaEm: quando, criadaPor: por,
                            origem: '0.1', salvaEm: quando, salvaPor: por });
       abrir(plano, '0.2');
     }
@@ -5772,7 +5881,7 @@ window.Versoes = (function () {
     const num = proximoNumero(plano);
     garantirTalhoes(plano);
     plano.versoes.push({ num, status: 'construcao', grupos: copiar(grupos), talhoes: copiarTalhoes(buscar(plano, '0.1').talhoes),
-                         criadaEm: agora(), criadaPor: usuario(), origem: '0.1', salvaEm: agora(), salvaPor: usuario() });
+                         areas: copiarAreas(buscar(plano, '0.1').areas), criadaEm: agora(), criadaPor: usuario(), origem: '0.1', salvaEm: agora(), salvaPor: usuario() });
     abrir(plano, num);
     return num;
   }
@@ -5787,6 +5896,7 @@ window.Versoes = (function () {
     plano.versaoAberta = num;
     plano.grupos = copiar(v.grupos);
     plano.talhoes = copiarTalhoes(v.talhoes);
+    plano.areas = copiarAreas(v.areas);
   }
 
   function salvar(plano) {
@@ -5794,6 +5904,7 @@ window.Versoes = (function () {
     if (!v || v.status !== 'construcao') return;
     v.grupos = copiar(plano.grupos);
     v.talhoes = copiarTalhoes(plano.talhoes);
+    v.areas = copiarAreas(plano.areas);
     v.salvaEm = agora();
     v.salvaPor = usuario();
   }
@@ -5814,7 +5925,7 @@ window.Versoes = (function () {
     garantirTalhoes(plano);
     const origem = buscar(plano, origemNum) || ultimaPublicada(plano);
     const num = proximoNumero(plano);
-    plano.versoes.push({ num, status: 'construcao', grupos: copiar(origem.grupos), talhoes: copiarTalhoes(origem.talhoes),
+    plano.versoes.push({ num, status: 'construcao', grupos: copiar(origem.grupos), talhoes: copiarTalhoes(origem.talhoes), areas: copiarAreas(origem.areas),
                          criadaEm: agora(), criadaPor: usuario(),
                          origem: origem.num, salvaEm: agora(), salvaPor: usuario() });
     abrir(plano, num);
@@ -5830,6 +5941,12 @@ window.Versoes = (function () {
   function talhoes(plano, v) {
     if (!v || v.num === plano.versaoAberta) return plano.talhoes;
     return 'talhoes' in v ? v.talhoes : plano.talhoes;
+  }
+
+  // Áreas planejadas da versão (a aberta usa a área de trabalho); null = todas as cadastradas
+  function areas(plano, v) {
+    if (!v || v.num === plano.versaoAberta) return plano.areas || null;
+    return 'areas' in v ? v.areas : plano.areas || null;
   }
 
   // "13/10 às 14:20"
@@ -5856,7 +5973,7 @@ window.Versoes = (function () {
 
   return {
     lista, buscar, aberta, emConstrucao, ultimaPublicada, publicadaComPlanejamento, deTrabalho, somenteLeitura, proximoNumero,
-    iniciar, aIniciar, comecar, abrir, salvar, publicar, criarNova, grupos, talhoes, quando, statusExibido, rotuloStatus, detalhe
+    iniciar, aIniciar, comecar, abrir, salvar, publicar, criarNova, grupos, talhoes, areas, quando, statusExibido, rotuloStatus, detalhe
   };
 })();
 
@@ -5892,7 +6009,8 @@ window.ArquivoPlano = (function () {
       Aviso.mostrar('Não foi possível exportar: sem conexão com a internet para carregar o gerador de planilhas.');
       return;
     }
-    const talhoes = DADOS.talhoes[plano.fazenda] || [];
+    // Área planejada do talhão no plano (a cadastrada, se não foi mudada)
+    const talhoes = Util.talhoesPlano(plano);
     const area = (nome) => (talhoes.find((t) => t.nome === nome) || {}).area ?? null;
     const sementes = plano.grupos.find((g) => g.tipo === 'Sementes');
     const plantio = sementes && sementes.operacoes[0];
@@ -5900,7 +6018,8 @@ window.ArquivoPlano = (function () {
     const abaPlano = [
       ['campo', 'valor'],
       ['formato', FORMATO], ['versao', VERSAO],
-      ['safra', plano.safra], ['empresa', plano.empresa], ['fazenda', plano.fazenda], ['cultura', plano.cultura],
+      // Sem o nível Empresa (Util.comEmpresa), a planilha sai sem a linha empresa
+      ['safra', plano.safra], ...(Util.comEmpresa() ? [['empresa', plano.empresa]] : []), ['fazenda', plano.fazenda], ['cultura', plano.cultura],
       ['versao_plano', `${plano.versaoAberta} · ${Versoes.rotuloStatus(plano, Versoes.aberta(plano))}`],
       ['exportado_em', Util.hojeISO()], ['exportado_por', DADOS.usuario.nome]
     ];
@@ -5987,7 +6106,7 @@ window.ArquivoPlano = (function () {
         const campos = Object.fromEntries(linhas('plano').map((x) => [x.campo, x.valor]));
         if (campos.formato !== FORMATO) { resolver(naoEhDoSistema); return; }
         resolver({
-          contexto: { safra: String(campos.safra), empresa: String(campos.empresa), fazenda: String(campos.fazenda), cultura: String(campos.cultura) },
+          contexto: { safra: String(campos.safra), empresa: String(campos.empresa ?? ''), fazenda: String(campos.fazenda), cultura: String(campos.cultura) },
           // Arquivos antigos tinham uma germinação média do plano; vale para os talhões sem germinação na linha
           germinacao: campos.germinacao_media === '' || campos.germinacao_media === undefined ? null : Number(campos.germinacao_media),
           prazoColheita: campos.prazo_colheita ? Number(campos.prazo_colheita) : null,
@@ -6161,6 +6280,9 @@ window.BarraFiltros = (function () {
     let observador = null;
     const est = () => cfg.estado();
     const pop = () => `${cfg.id}-mais-filtros`;
+    // Sem o nível Empresa (Util.comEmpresa), o filtro Empresa não aparece (fica em Todas)
+    const semEmpresa = (lista) => lista.filter(([c]) => c !== 'empresa' || Util.comEmpresa());
+    const camposDe = () => semEmpresa(cfg.campos());
 
     function campo([chave, rotulo, textos, minimo]) {
       return `
@@ -6170,9 +6292,9 @@ window.BarraFiltros = (function () {
         </div>`;
     }
     function html() {
-      const campos = cfg.campos();
+      const campos = camposDe();
       const n = Math.min(visiveis, campos.length);
-      const noPainel = [...cfg.mais(), ...campos.slice(n)];
+      const noPainel = [...semEmpresa(cfg.mais()), ...campos.slice(n)];
       if (!noPainel.length) aberto = false;
       return `
         ${campos.slice(0, n).map(campo).join('')}
@@ -6202,7 +6324,7 @@ window.BarraFiltros = (function () {
     // Quantos campos cabem na linha, ao lado das ações; muda com a largura da janela e ao expandir/recolher o menu
     function encaixar() {
       if (!caixa || !caixa.isConnected) { if (observador) observador.disconnect(); return; }
-      const campos = cfg.campos();
+      const campos = camposDe();
       const cs = getComputedStyle(caixa);
       const base = caixa.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
       const cabem = (livre) => {
@@ -6236,7 +6358,8 @@ window.BarraFiltros = (function () {
     // Valores guardados que não são mais opção (ex.: de outra página, ou plano excluído) saem; sem nenhum, Todas
     function validar() {
       const e = est();
-      [...cfg.campos(), ...cfg.mais()].forEach(([c]) => {
+      if (!Util.comEmpresa() && 'empresa' in e) e.empresa = 'todos';
+      [...camposDe(), ...semEmpresa(cfg.mais())].forEach(([c]) => {
         if (!Array.isArray(e[c]) || !e[c].length) return;
         const valores = cfg.opcoes(c).map((o) => o.valor);
         const ficam = e[c].filter((v) => valores.includes(v));
@@ -6349,6 +6472,167 @@ window.BarraFiltros = (function () {
 </script>
   <script>
 /*
+ * Tabela de talhões com a área planejada (09/11/2026): Criar Plano de Safra (etapa Definir o plano) e Editar talhões.
+ * Colunas: Talhão (caixa de marcar; no cabeçalho, marca ou desmarca todos) · Área cadastrada · Área planejada (lápis).
+ * A área planejada começa igual à cadastrada; vale de 0,1 ha até a área cadastrada (DECISOES 4.2). Talhão desmarcado
+ * fica fora do plano ("—"). No pé, a Área planejada total: "275 / 300 ha · 91,7% da área cadastrada".
+ *
+ * est = { todos: [{ nome, area }] (cadastro da fazenda), marcados: Set, areas: { nome: ha } (só as diferentes da
+ *         cadastrada), editando: nome | null, erro: '' }
+ * opcoes (Editar talhões): antes (talhões que já estavam no plano), areasAntes, planejado(nome) (já tem planejamento)
+ *
+ * TabelaAreas.html(est, opcoes) desenha; TabelaAreas.ligar(caixa, est, redesenhar) trata cliques, teclas e caixas.
+ */
+window.TabelaAreas = (function () {
+  const esc = Util.escapar;
+  // Área com até uma casa decimal: "120 ha", "58,6 ha"
+  const fmt = (ha) => `${Number(ha).toLocaleString('pt-BR', { maximumFractionDigits: 1 })} ha`;
+  const numero = (ha) => Number(ha).toLocaleString('pt-BR', { maximumFractionDigits: 1 });
+
+  const areaDe = (est, t) => (est.areas[t.nome] ?? t.area);
+  const total = (est) => est.todos.filter((t) => est.marcados.has(t.nome)).reduce((s, t) => s + areaDe(est, t), 0);
+  const cadastrada = (est) => est.todos.reduce((s, t) => s + t.area, 0);
+
+  function html(est, opcoes = {}) {
+    const antes = opcoes.antes || null;
+    const tudo = est.todos.length && est.todos.every((t) => est.marcados.has(t.nome));
+    const parte = est.marcados.size && !tudo;
+    const soma = total(est);
+    const cad = cadastrada(est);
+    return `
+      <div class="ta">
+        <div class="ta__rolagem">
+          <table class="ta__tabela">
+            <thead><tr>
+              <th><label class="ta__marcar"><input type="checkbox" data-ta-todos ${tudo ? 'checked' : ''} ${parte ? 'data-ta-parte' : ''}
+                aria-label="Marcar todos os talhões"> Talhão</label></th>
+              <th class="ta__num">Área cadastrada</th>
+              <th class="ta__num">Área planejada</th>
+            </tr></thead>
+            <tbody>${est.todos.map((t) => linha(est, t, antes, opcoes)).join('')}</tbody>
+          </table>
+        </div>
+        <div class="ta__total">
+          <span>Área planejada total</span>
+          <span class="ta__total-valor"><strong>${numero(soma)} / ${fmt(cad)}</strong>
+            <small>${cad ? `${(soma / cad * 100).toLocaleString('pt-BR', { maximumFractionDigits: 1 })}% da área cadastrada` : ''}</small></span>
+        </div>
+      </div>`;
+  }
+
+  function linha(est, t, antes, opcoes) {
+    const marcado = est.marcados.has(t.nome);
+    const estava = antes ? antes.includes(t.nome) : null;
+    const sai = antes && estava && !marcado;
+    const entra = antes && !estava && marcado;
+    const planejado = antes && estava && opcoes.planejado && opcoes.planejado(t.nome);
+    const area = areaDe(est, t);
+    const alterada = marcado && area !== t.area;
+    // Editar talhões: área diferente da que o plano tinha (a de antes, planejada ou cadastrada)
+    const antesArea = opcoes.areasAntes && estava ? (opcoes.areasAntes[t.nome] ?? t.area) : null;
+    const mudou = antesArea !== null && marcado && area !== antesArea;
+    let celula = '<span class="ta__fora">—</span>';
+    if (marcado && est.editando === t.nome) {
+      celula = `
+        <span class="ta__edicao">
+          <input class="campo__controle ta__entrada ${est.erro ? 'campo__controle--erro' : ''}" type="text" inputmode="decimal"
+            value="${numero(area)}" data-ta-entrada="${esc(t.nome)}" aria-label="Área planejada do ${esc(t.nome)} (ha)"
+            ${est.erro ? `aria-describedby="ta-erro" aria-invalid="true"` : ''}> ha
+        </span>
+        ${est.erro ? `<span class="ta__erro" id="ta-erro" role="alert">${esc(est.erro)}</span>` : ''}`;
+    } else if (marcado) {
+      celula = `
+        <button class="ta__editar ${alterada ? 'ta__editar--alterada' : ''}" type="button" data-ta-editar="${esc(t.nome)}"
+          title="Editar a área planejada" aria-label="Área planejada do ${esc(t.nome)}: ${fmt(area)}. Editar">
+          <strong>${fmt(area)}</strong>${Icones.lapis || '✎'}
+        </button>
+        ${mudou ? `<span class="ta__antes">antes ${fmt(antesArea)}</span>` : ''}`;
+    }
+    return `
+      <tr class="ta__linha ${sai ? 'ta__linha--sai' : ''} ${entra ? 'ta__linha--entra' : ''} ${marcado ? '' : 'ta__linha--fora'}">
+        <td><label class="ta__marcar"><input type="checkbox" data-ta-talhao="${esc(t.nome)}" ${marcado ? 'checked' : ''}>
+          ${esc(t.nome)}${planejado ? ' <span class="ta__planejado" title="Este talhão já tem planejamento">planejado</span>' : ''}</label></td>
+        <td class="ta__num">${fmt(t.area)}</td>
+        <td class="ta__num">${celula}</td>
+      </tr>`;
+  }
+
+  // Confere e grava o valor digitado. Devolve true se gravou.
+  function aplicar(est, nome, texto) {
+    const t = est.todos.find((x) => x.nome === nome);
+    const n = Util.numero(texto);
+    if (n === null || n < 0.1) { est.erro = 'Informe a área, a partir de 0,1 ha.'; return false; }
+    if (n > t.area + 1e-9) { est.erro = `Máximo ${fmt(t.area)} (área cadastrada).`; return false; }
+    const valor = Math.round(n * 10) / 10;
+    if (valor === t.area) delete est.areas[nome]; else est.areas[nome] = valor;
+    est.editando = null; est.erro = '';
+    return true;
+  }
+
+  // redesenhar(seletor para o foco)
+  function ligar(caixa, est, redesenharFora) {
+    // Enquanto redesenha, o campo que sai da tela não conta como "sair do campo"
+    let ocupado = false;
+    const redesenhar = (sel) => { ocupado = true; try { redesenharFora(sel); } finally { ocupado = false; } };
+    caixa.addEventListener('click', (e) => {
+      const b = e.target.closest('[data-ta-editar]');
+      if (!b) return;
+      est.editando = b.dataset.taEditar; est.erro = '';
+      redesenhar(`[data-ta-entrada="${CSS.escape(est.editando)}"]`);
+      const entrada = caixa.querySelector('[data-ta-entrada]');
+      if (entrada) entrada.select();
+    });
+    caixa.addEventListener('keydown', (e) => {
+      const entrada = e.target.closest('[data-ta-entrada]');
+      if (!entrada) return;
+      const nome = entrada.dataset.taEntrada;
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        if (aplicar(est, nome, entrada.value)) redesenhar(`[data-ta-editar="${CSS.escape(nome)}"]`);
+        else { redesenhar(`[data-ta-entrada="${CSS.escape(nome)}"]`); }
+      } else if (e.key === 'Escape') {
+        // Esc desfaz a edição (não fecha o modal)
+        e.preventDefault(); e.stopPropagation();
+        est.editando = null; est.erro = '';
+        redesenhar(`[data-ta-editar="${CSS.escape(nome)}"]`);
+      }
+    });
+    // Sair do campo grava; valor inválido volta ao que estava
+    caixa.addEventListener('focusout', (e) => {
+      const entrada = e.target.closest && e.target.closest('[data-ta-entrada]');
+      if (ocupado || !entrada || !entrada.isConnected) return;
+      const nome = entrada.dataset.taEntrada;
+      if (est.editando !== nome) return;
+      // Grava já (o clique seguinte, ex.: no lápis de outro talhão, vê o valor gravado); redesenha depois do clique
+      if (!aplicar(est, nome, entrada.value)) { est.editando = null; est.erro = ''; }
+      setTimeout(() => { if (!est.editando && entrada.isConnected) redesenhar(null); }, 0);
+    });
+    caixa.addEventListener('change', (e) => {
+      if (e.target.matches('[data-ta-todos]')) {
+        est.marcados = new Set(e.target.checked ? est.todos.map((t) => t.nome) : []);
+        if (!e.target.checked) est.areas = {};
+        est.editando = null; est.erro = '';
+        redesenhar('[data-ta-todos]');
+      } else if (e.target.dataset.taTalhao) {
+        const nome = e.target.dataset.taTalhao;
+        if (e.target.checked) est.marcados.add(nome);
+        else { est.marcados.delete(nome); delete est.areas[nome]; if (est.editando === nome) { est.editando = null; est.erro = ''; } }
+        redesenhar(`[data-ta-talhao="${CSS.escape(nome)}"]`);
+      }
+    });
+  }
+
+  // Depois de desenhar: a caixa "todos" fica parcial quando só parte está marcada
+  function depois(caixa) {
+    caixa.querySelectorAll('[data-ta-parte]').forEach((c) => { c.indeterminate = true; });
+  }
+
+  return { html, ligar, depois, total, fmt };
+})();
+
+</script>
+  <script>
+/*
  * Páginas provisórias para telas que ainda não foram construídas.
  */
 window.Telas = window.Telas || {};
@@ -6413,7 +6697,7 @@ window.Telas.semPlanos = function (item) {
     'planejado-executado': { titulo: 'Operações', alvo: 'as Operações', texto: TEXTO_PLANO, icone: Icones.prancheta },
     orcamento:    { titulo: 'Orçamento de Insumos', alvo: 'o Orçamento de Insumos',
                     icone: '<svg viewBox="0 0 24 24"><path d="M21 8 12 3 3 8v8l9 5 9-5Z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg>',
-                    texto: 'O plano organiza a necessidade de insumos por safra, empresa, fazenda e cultura. Depois de criado, ele abre aqui automaticamente.' }
+                    texto: `O plano organiza a necessidade de insumos por safra, ${Util.comEmpresa() ? 'empresa, ' : ''}fazenda e cultura. Depois de criado, ele abre aqui automaticamente.` }
   };
   const i = ITENS[item];
   return `
@@ -6481,231 +6765,198 @@ window.Telas.primeiroUso = function () {
 </script>
   <script>
 /*
- * Tela 02 — Modal Criar Plano de Safra (docs/telas/02-modal-criar-plano.md)
- * Abre por cima da tela de origem. Só identifica o plano: informações gerais (Safra, Empresa, Atividade, Cultura)
- * e uma ou mais fazendas, cada uma com os talhões incluídos. Cria um plano por fazenda.
- * Ao criar, chama aoCriar({ safra, empresa, atividade, cultura, fazendas: [{ fazenda, talhoes }] }).
- * inicial: { safra, empresa, fazenda } já escolhidos ao abrir (a fazenda com todos os talhões).
- * Como começar o plano (modelo, do zero, XLSX, copiar) fica no Planejamento (Telas.inicioPlano).
+ * Tela 02 — Criar Plano de Safra (docs/telas/02-modal-criar-plano.md)
+ * Desde 09/11/2026: ocupa a tela inteira e tem duas etapas, com o indicador "1 Definir o plano ── 2 Como iniciar".
+ *  1. Definir o plano: informações gerais (Safra, Empresa (só com o nível Empresa), Atividade, Cultura) e uma fazenda,
+ *     com a tabela de talhões (TabelaAreas: Área cadastrada e Área planejada, editável). Próximo →.
+ *  2. Como iniciar: as opções do "Como deseja iniciar o plano?" (Telas.inicioPlano.embutir). ‹ Voltar e
+ *     Começar o planejamento.
+ * O plano só passa a existir em "Começar o planejamento"; fechar descarta tudo. Uma fazenda por vez.
+ * Ao criar, chama aoCriar({ safra, empresa, atividade, cultura, fazenda, talhoes, areas, grupos, aviso }).
+ * inicial: { safra, safras, empresa, fazenda } já escolhidos ao abrir (a fazenda com todos os talhões).
  */
 window.Telas = window.Telas || {};
 
 window.Telas.abrirModalCriarPlano = function ({ aoCriar, inicial = {} }) {
   const esc = Util.escapar;
   const NOVA_SAFRA = '__nova-safra__';
-  const GERAIS = ['safra', 'empresa', 'atividade', 'cultura'];
+  // Sem o nível Empresa (Util.comEmpresa, 09/11/2026), o campo Empresa não aparece: a lista de fazendas tem todas e
+  // o plano fica com a empresa da sua fazenda (app.js, criarPlanos)
+  const GERAIS = ['safra', 'empresa', 'atividade', 'cultura'].filter((c) => c !== 'empresa' || Util.comEmpresa());
 
-  // Blocos de fazenda: { chave, fazenda, talhoes (nomes incluídos) }
-  let proximaChave = 1;
-  const blocos = [novoBloco()];
-  if (inicial.fazenda) Object.assign(blocos[0], { fazenda: inicial.fazenda, talhoes: (DADOS.talhoes[inicial.fazenda] || []).map((t) => t.nome) });
-  let tentouCriar = false;      // os avisos de obrigatório só aparecem depois de tentar criar
-  let talhoesAbertos = null;    // chave do bloco com a lista de talhões aberta
-
-  function novoBloco() { return { chave: proximaChave++, fazenda: '', talhoes: [] }; }
+  let etapa = 1;
+  let tentou = false; // os avisos de obrigatório só aparecem depois de tentar seguir
+  // Fazenda e talhões (TabelaAreas): marcados e áreas planejadas
+  let fazenda = '';
+  const tabela = { todos: [], marcados: new Set(), areas: {}, editando: null, erro: '' };
+  function escolherFazenda(f) {
+    fazenda = f;
+    tabela.todos = DADOS.talhoes[f] || [];
+    // Fazenda escolhida: todos os talhões já vêm incluídos (a pessoa desmarca os que não quer), com a área cadastrada
+    tabela.marcados = new Set(tabela.todos.map((t) => t.nome));
+    tabela.areas = {}; tabela.editando = null; tabela.erro = '';
+  }
+  if (inicial.fazenda) escolherFazenda(inicial.fazenda);
+  // O plano que vai nascer (para a etapa 2: importar confere safra, fazenda e cultura; copiar usa a cultura)
+  const rascunho = { id: '__novo__' };
 
   const modal = Modal.abrir(`
-    <form class="formulario" novalidate>
-      <div class="modal__corpo">
-        <button class="modal__fechar" type="button" aria-label="Fechar" data-fechar>${Icones.fechar}</button>
-        <h2 class="modal__titulo" id="modal-titulo">Criar Plano de Safra</h2>
-        <p class="modal__subtitulo">Defina as informações gerais do plano e selecione as fazendas que farão parte da criação.</p>
+    <div class="cp-tela">
+      <header class="cp-tela__topo">
+        <ol class="cp-etapas" aria-label="Etapas">
+          <li class="cp-etapas__item" data-cp-etapa="1"><span class="cp-etapas__num">1</span> Definir o plano</li>
+          <li class="cp-etapas__linha" aria-hidden="true"></li>
+          <li class="cp-etapas__item" data-cp-etapa="2"><span class="cp-etapas__num">2</span> Como iniciar</li>
+        </ol>
+        <button class="modal__fechar cp-tela__fechar" type="button" aria-label="Fechar" data-fechar>${Icones.fechar}</button>
+      </header>
 
-        <h3 class="cp-secao">Informações gerais</h3>
-        <div class="cp-gerais">
-          <div class="campo">
-            <label class="campo__rotulo" for="cp-safra">Safra ${asterisco()}</label>
-            <select class="campo__controle" id="cp-safra" name="safra" required></select>
-            ${erroObrigatorio('safra')}
+      <form class="formulario cp-tela__corpo" novalidate data-cp-passo="1">
+        <div class="cp-tela__miolo">
+          <h2 class="modal__titulo" id="modal-titulo">Criar Plano de Safra</h2>
+          <p class="modal__subtitulo">Defina as informações gerais e selecione as áreas que farão parte do plano.</p>
+
+          <h3 class="cp-secao">Informações gerais</h3>
+          <!-- Safra · (Empresa) · Atividade · Cultura · Fazenda numa linha; embaixo, só os talhões (09/11/2026) -->
+          <div class="cp-gerais ${Util.comEmpresa() ? 'cp-gerais--5' : ''}">
+            <div class="campo">
+              <label class="campo__rotulo" for="cp-safra">Safra ${asterisco()}</label>
+              <select class="campo__controle" id="cp-safra" name="safra" required></select>
+              ${erroObrigatorio('safra')}
+            </div>
+            ${Util.comEmpresa() ? campoLista('empresa', 'Empresa', 'Selecione', DADOS.empresas, [], inicial.empresa)
+              : '<input type="hidden" name="empresa" value="">'}
+            ${campoLista('atividade', 'Atividade', 'Selecione', DADOS.atividades, DADOS.atividadesEmBreve, 'Agricultura')}
+            ${campoLista('cultura', 'Cultura', 'Selecione', DADOS.culturas)}
+            <div class="campo">
+              <label class="campo__rotulo" for="cp-fazenda">Fazenda ${asterisco()}</label>
+              <select class="campo__controle" id="cp-fazenda" name="fazenda"></select>
+              <p class="erro-campo" id="cp-erro-fazenda" hidden></p>
+            </div>
           </div>
-          ${campoLista('empresa', 'Empresa', 'Selecione', DADOS.empresas, [], inicial.empresa)}
-          ${campoLista('atividade', 'Atividade', 'Selecione', DADOS.atividades, DADOS.atividadesEmBreve, 'Agricultura')}
-          ${campoLista('cultura', 'Cultura', 'Selecione', DADOS.culturas)}
+
+          <h3 class="cp-secao cp-secao--linha">Talhões</h3>
+          <p class="cp-secao__sub">Selecione os talhões e ajuste a área planejada quando necessário.</p>
+          <div class="cp-talhoes-area" data-cp-talhoes></div>
         </div>
+      </form>
 
-        <h3 class="cp-secao cp-secao--linha">Fazendas</h3>
-        <div class="cp-fazendas" id="cp-fazendas"></div>
-        <button class="botao botao--secundario cp-adicionar" type="button" data-acao="cp-adicionar">${Icones.mais} Adicionar fazenda</button>
+      <div class="cp-tela__corpo" data-cp-passo="2" hidden>
+        <div class="cp-tela__miolo">
+          <h2 class="modal__titulo">Como deseja iniciar o plano?</h2>
+          <p class="modal__subtitulo" data-cp-contexto></p>
+          <div data-ini-corpo></div>
+        </div>
       </div>
 
-      <div class="modal__rodape">
+      <div class="modal__rodape cp-tela__rodape">
         <p class="modal__rodape-erro" id="cp-erro-criar" role="alert" hidden></p>
-        <button class="botao botao--secundario" type="button" data-fechar>Cancelar</button>
-        <button class="botao botao--primario" type="submit" aria-disabled="true">Criar Plano de Safra</button>
+        <button class="botao botao--secundario" type="button" data-fechar data-cp-so="1">Cancelar</button>
+        <button class="botao botao--primario" type="button" data-acao="cp-proximo" data-cp-so="1" aria-disabled="true">Próximo ${Icones.proxima}</button>
+        <button class="botao botao--secundario cp-tela__voltar" type="button" data-acao="cp-voltar" data-cp-so="2" hidden>${Icones.anterior} Voltar</button>
+        <button class="botao botao--primario" type="button" data-ini="comecar" data-cp-so="2" hidden>Começar o planejamento</button>
       </div>
-    </form>
-  `, { classe: 'modal--formulario modal--largo' });
+    </div>
+  `, { classe: 'modal--tela modal--criar-plano' });
 
-  const form = modal.elemento.querySelector('form');
+  const el = modal.elemento;
+  const form = el.querySelector('form');
   const selectSafra = form.elements.safra;
-  const caixaFazendas = form.querySelector('#cp-fazendas');
-  const botaoCriar = form.querySelector('[type="submit"]');
-  const erroCriar = form.querySelector('#cp-erro-criar');
+  const selectFazenda = form.elements.fazenda;
+  const caixaTalhoes = form.querySelector('[data-cp-talhoes]');
+  const botaoProximo = el.querySelector('[data-acao="cp-proximo"]');
+  const erroCriar = el.querySelector('#cp-erro-criar');
   let safraAnterior = '';
 
-  // Lista de safras: as do cadastro ou, vindo da Visão Geral, só as do Ano Agrícola do filtro (inicial.safras)
+  // Lista de safras: as do cadastro ou, vindo da lista de planos, só as do Ano Agrícola do filtro (inicial.safras)
   const listaSafras = inicial.safras ? [...inicial.safras] : DADOS.safras;
   preencherSafras(inicial.safra && listaSafras.includes(inicial.safra) ? inicial.safra : '');
-  desenharFazendas();
+  preencherFazendas();
+  desenharTalhoes();
+  mostrarEtapa();
   selectSafra.focus();
 
-  // ----- Fazendas -----
-  // Cada empresa tem as suas fazendas (DADOS.fazendasPorEmpresa): a lista de fazendas segue a empresa escolhida.
-  // Sem empresa, a lista fica desabilitada. Trocar a empresa tira as fazendas que não são dela.
-  function fazendasDaEmpresa() { return (DADOS.fazendasPorEmpresa || {})[form.elements.empresa.value] || []; }
-  form.elements.empresa.addEventListener('change', () => {
-    const daEmpresa = fazendasDaEmpresa();
-    blocos.forEach((b) => { if (b.fazenda && !daEmpresa.includes(b.fazenda)) { b.fazenda = ''; b.talhoes = []; } });
-    talhoesAbertos = null;
-    desenharFazendas();
-  });
+  // ----- Fazenda -----
+  // Com o nível Empresa, cada empresa tem as suas fazendas (DADOS.fazendasPorEmpresa): a lista segue a empresa
+  // escolhida (desabilitada sem empresa). Sem o nível, todas as fazendas.
+  function fazendasDaEmpresa() {
+    if (!Util.comEmpresa()) return DADOS.fazendas;
+    return (DADOS.fazendasPorEmpresa || {})[form.elements.empresa.value] || [];
+  }
+  function comEmpresaEscolhida() { return !Util.comEmpresa() || !!form.elements.empresa.value; }
+  function preencherFazendas() {
+    const lista = fazendasDaEmpresa();
+    if (fazenda && !lista.includes(fazenda)) escolherFazenda('');
+    selectFazenda.disabled = !comEmpresaEscolhida();
+    selectFazenda.innerHTML = opcoes(comEmpresaEscolhida() ? 'Selecione' : 'Escolha a empresa', lista, fazenda);
+  }
+  form.elements.empresa.addEventListener('change', () => { preencherFazendas(); desenharTalhoes(); });
+  selectFazenda.addEventListener('change', () => { escolherFazenda(selectFazenda.value); desenharTalhoes(); });
 
-  function desenharFazendas() {
-    caixaFazendas.innerHTML = blocos.map(blocoFazenda).join('');
-    posicionarLista();
+  // Tabela de talhões da fazenda escolhida (sem fazenda, só a dica)
+  function desenharTalhoes(foco) {
+    caixaTalhoes.innerHTML = fazenda
+      ? (tabela.todos.length ? TabelaAreas.html(tabela) : '<p class="cp-fazenda__dica">Esta fazenda não tem talhões cadastrados.</p>')
+      : `<p class="cp-fazenda__dica">${Icones.info} Escolha a fazenda para ver os talhões.</p>`;
+    TabelaAreas.depois(caixaTalhoes);
+    if (foco) caixaTalhoes.querySelector(foco)?.focus();
     atualizar();
   }
+  TabelaAreas.ligar(caixaTalhoes, tabela, desenharTalhoes);
 
-  // A lista de talhões fica por cima do modal (posição fixa), para não ser cortada pela rolagem do formulário:
-  // abaixo do botão, ou acima quando falta espaço embaixo; a altura cabe na tela
-  function posicionarLista() {
-    const lista = caixaFazendas.querySelector('.cp-talhoes__lista');
-    if (!lista || !lista.isConnected) return;
-    const botao = lista.previousElementSibling.getBoundingClientRect();
-    const margem = 12;
-    const abaixo = window.innerHeight - botao.bottom - margem;
-    const acima = botao.top - margem;
-    const altura = Math.min(320, lista.scrollHeight);
-    const emCima = abaixo < altura && acima > abaixo;
-    lista.style.left = `${botao.left}px`;
-    lista.style.width = `${botao.width}px`;
-    lista.style.maxHeight = `${Math.max(120, Math.min(320, emCima ? acima : abaixo))}px`;
-    lista.style.top = emCima ? '' : `${botao.bottom + 4}px`;
-    lista.style.bottom = emCima ? `${window.innerHeight - botao.top + 4}px` : '';
-  }
-  // Rolou o formulário ou mudou o tamanho da janela: a lista acompanha o botão
-  modal.elemento.querySelector('.modal__corpo').addEventListener('scroll', posicionarLista);
-  window.addEventListener('resize', posicionarLista);
-
-  function blocoFazenda(b, i) {
-    const todos = DADOS.talhoes[b.fazenda] || [];
-    const incluidos = todos.filter((t) => b.talhoes.includes(t.nome));
-    const area = incluidos.reduce((s, t) => s + t.area, 0);
-    const resumo = !b.fazenda ? 'Escolha a fazenda'
-      : !incluidos.length ? 'Selecionar talhões'
-      : incluidos.length === todos.length ? `Todos os talhões (${todos.length})`
-      : `${incluidos.length} de ${todos.length} talhões`;
-    const aberto = talhoesAbertos === b.chave;
-    return `
-      <section class="cp-fazenda" data-bloco="${b.chave}" aria-label="Fazenda ${i + 1}">
-        <header class="cp-fazenda__topo">
-          <span>Fazenda ${i + 1}</span>
-          ${blocos.length > 1 ? `<button class="botao-icone" type="button" data-acao="cp-remover" title="Remover esta fazenda"
-                                        aria-label="Remover Fazenda ${i + 1}">${Icones.lixeira}</button>` : ''}
-        </header>
-        <div class="cp-fazenda__campos">
-          <div class="campo">
-            <label class="campo__rotulo" for="cp-fazenda-${b.chave}">Fazenda ${asterisco()}</label>
-            <select class="campo__controle" id="cp-fazenda-${b.chave}" data-campo="fazenda" ${form.elements.empresa.value ? '' : 'disabled'}>
-              ${opcoes(form.elements.empresa.value ? 'Selecione' : 'Escolha a empresa', fazendasDaEmpresa(), b.fazenda)}
-            </select>
-            <p class="erro-campo" data-erro-fazenda hidden></p>
-          </div>
-          <div class="campo cp-talhoes">
-            <span class="campo__rotulo" id="cp-talhoes-rot-${b.chave}">Talhões</span>
-            <button class="campo__controle cp-talhoes__botao" type="button" data-acao="cp-talhoes"
-                    aria-haspopup="true" aria-expanded="${aberto}" aria-labelledby="cp-talhoes-rot-${b.chave}"
-                    ${b.fazenda ? '' : 'disabled'}><span>${resumo}</span>${Icones.abaixo}</button>
-            ${aberto ? listaTalhoes(b, todos) : ''}
-          </div>
-          <div class="campo">
-            <span class="campo__rotulo">Área de cultivo</span>
-            <p class="campo__controle cp-area" aria-live="polite">${incluidos.length ? Util.area(area) : 'Pendente'}</p>
-          </div>
-        </div>
-        ${b.fazenda && !incluidos.length ? `<p class="cp-fazenda__dica">${Icones.info} A área de cultivo será calculada automaticamente quando houver talhões selecionados.</p>` : ''}
-      </section>`;
+  // ----- Etapas -----
+  function mostrarEtapa() {
+    el.querySelectorAll('[data-cp-passo]').forEach((p) => { p.hidden = Number(p.dataset.cpPasso) !== etapa; });
+    el.querySelectorAll('[data-cp-so]').forEach((b) => { b.hidden = Number(b.dataset.cpSo) !== etapa; });
+    el.querySelectorAll('[data-cp-etapa]').forEach((li) => {
+      const n = Number(li.dataset.cpEtapa);
+      li.classList.toggle('cp-etapas__item--ativa', n === etapa);
+      li.classList.toggle('cp-etapas__item--feita', n < etapa);
+      if (n === etapa) li.setAttribute('aria-current', 'step'); else li.removeAttribute('aria-current');
+    });
+    erroCriar.hidden = etapa !== 1 || erroCriar.hidden;
   }
 
-  // Lista de talhões com caixas de marcar; "Todos" marca ou desmarca tudo
-  function listaTalhoes(b, todos) {
-    const tudo = todos.length && todos.every((t) => b.talhoes.includes(t.nome));
-    return `
-      <div class="cp-talhoes__lista" role="group" aria-label="Talhões da Fazenda ${esc(b.fazenda)}">
-        <label class="cp-talhoes__item cp-talhoes__item--todos">
-          <input type="checkbox" data-talhao="__todos__" ${tudo ? 'checked' : ''}> Todos
-        </label>
-        ${todos.map((t) => `
-          <label class="cp-talhoes__item">
-            <input type="checkbox" data-talhao="${esc(t.nome)}" ${b.talhoes.includes(t.nome) ? 'checked' : ''}>
-            ${esc(t.nome)} <span class="cp-talhoes__area">${Util.area(t.area)}</span>
-          </label>`).join('')}
-      </div>`;
+  // Etapa 2 (Como iniciar): as opções do modal de início, para o plano que vai nascer
+  const desenharInicio = Telas.inicioPlano.embutir(el, el.querySelector('[data-ini-corpo]'), rascunho, {
+    aoComecar: (grupos, aviso) => {
+      const f = form.elements;
+      modal.fechar();
+      aoCriar({ safra: f.safra.value, empresa: f.empresa.value, atividade: f.atividade.value, cultura: f.cultura.value,
+        fazenda, talhoes: talhoesEscolhidos(), areas: { ...tabela.areas }, grupos, aviso });
+    }
+  });
+  const talhoesEscolhidos = () => tabela.todos.filter((t) => tabela.marcados.has(t.nome)).map((t) => t.nome);
+
+  function irParaInicio() {
+    const f = form.elements;
+    Object.assign(rascunho, { safra: f.safra.value, empresa: f.empresa.value || Util.empresaDaFazenda(fazenda),
+      fazenda, cultura: f.cultura.value, atividade: f.atividade.value, talhoes: talhoesEscolhidos(), areas: { ...tabela.areas } });
+    el.querySelector('[data-cp-contexto]').textContent =
+      `Safra ${rascunho.safra} · ${Util.comEmpresa() ? `${rascunho.empresa} · ` : ''}Fazenda ${fazenda} · ${rascunho.cultura}`;
+    desenharInicio();
+    etapa = 2;
+    mostrarEtapa();
+    (el.querySelector('[name="ini-opcao"]:checked') || el.querySelector('[data-acao="cp-voltar"]')).focus();
   }
 
-  function blocoDe(el) {
-    const sec = el.closest('[data-bloco]');
-    return sec ? blocos.find((b) => b.chave === Number(sec.dataset.bloco)) : null;
-  }
-
-  // Redesenha as fazendas e devolve o foco ao controle equivalente
-  function redesenhar(chave, seletor) {
-    desenharFazendas();
-    caixaFazendas.querySelector(`[data-bloco="${chave}"] ${seletor}`)?.focus();
-  }
-
-  form.addEventListener('click', (e) => {
+  el.addEventListener('click', (e) => {
     const acao = e.target.closest('[data-acao]')?.dataset.acao;
-    const b = blocoDe(e.target);
-    if (acao === 'cp-adicionar') {
-      const novo = novoBloco();
-      blocos.push(novo);
-      talhoesAbertos = null;
-      redesenhar(novo.chave, '[data-campo="fazenda"]');
-    } else if (acao === 'cp-remover') {
-      blocos.splice(blocos.indexOf(b), 1);
-      talhoesAbertos = null;
-      desenharFazendas();
-      form.querySelector('[data-acao="cp-adicionar"]').focus();
-    } else if (acao === 'cp-talhoes') {
-      talhoesAbertos = talhoesAbertos === b.chave ? null : b.chave;
-      redesenhar(b.chave, talhoesAbertos ? '.cp-talhoes__lista input' : '[data-acao="cp-talhoes"]');
+    if (acao === 'cp-proximo') {
+      tentou = true;
+      const { faltando, fazendaErro } = atualizar();
+      if (faltando.length) { form.elements[faltando[0]].focus(); return; }
+      if (fazendaErro) { selectFazenda.focus(); return; }
+      if (tabela.editando) return; // a área em edição está com erro
+      irParaInicio();
+    } else if (acao === 'cp-voltar') {
+      etapa = 1;
+      mostrarEtapa();
+      botaoProximo.focus();
     }
   });
-
-  // Clicar fora da lista de talhões fecha a lista
-  modal.elemento.addEventListener('mousedown', (e) => {
-    if (talhoesAbertos && !e.target.closest('.cp-talhoes')) { talhoesAbertos = null; desenharFazendas(); }
-  });
-  // Esc na lista de talhões fecha só a lista (não o modal)
-  form.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && talhoesAbertos && e.target.closest('.cp-talhoes')) {
-      e.stopPropagation();
-      const chave = talhoesAbertos;
-      talhoesAbertos = null;
-      redesenhar(chave, '[data-acao="cp-talhoes"]');
-    }
-  });
-
-  form.addEventListener('change', (e) => {
-    const b = blocoDe(e.target);
-    if (b && e.target.dataset.campo === 'fazenda') {
-      // Fazenda escolhida: todos os talhões já vêm incluídos (a pessoa desmarca os que não quer)
-      b.fazenda = e.target.value;
-      b.talhoes = (DADOS.talhoes[b.fazenda] || []).map((t) => t.nome);
-      redesenhar(b.chave, '[data-campo="fazenda"]');
-      return;
-    }
-    if (b && e.target.dataset.talhao) {
-      const todos = (DADOS.talhoes[b.fazenda] || []).map((t) => t.nome);
-      const nome = e.target.dataset.talhao;
-      if (nome === '__todos__') b.talhoes = e.target.checked ? todos : [];
-      else b.talhoes = e.target.checked ? todos.filter((t) => t === nome || b.talhoes.includes(t)) : b.talhoes.filter((t) => t !== nome);
-      redesenhar(b.chave, `[data-talhao="${CSS.escape(nome)}"]`);
-      return;
-    }
-    atualizar();
-  });
+  form.addEventListener('submit', (e) => e.preventDefault());
+  form.addEventListener('change', (e) => { if (e.target.name && GERAIS.includes(e.target.name)) atualizar(); });
 
   // ----- Criar nova safra (última opção da lista de safras) -----
   function preencherSafras(selecionada = '') {
@@ -6764,76 +7015,52 @@ window.Telas.abrirModalCriarPlano = function ({ aoCriar, inicial = {} }) {
       if (!listaSafras.includes(nome)) listaSafras.push(nome);
       preencherSafras(nome);
       janela.fechar();
-      form.elements.empresa.focus();
+      form.elements[GERAIS[1]].focus();
       atualizar();
     });
     input.focus();
   }
 
   // ----- Validação -----
-  // Informações gerais e a fazenda de cada bloco são obrigatórias; talhões, não.
-  // Um único plano por safra e fazenda: não pode repetir fazenda entre os blocos nem criar um plano que já existe.
+  // Informações gerais e a fazenda são obrigatórias; talhões, não (sem talhões, a área fica "Pendente").
+  // Um único plano por safra, fazenda e cultura (09/11/2026): não deixa criar um plano que já existe
+  // (ex.: com a soja 27/27 da Boa Vista, o milho 27/27 da Boa Vista pode).
   function problemas() {
     const f = form.elements;
     const faltando = GERAIS.filter((nome) => !f[nome].value);
-    const porBloco = blocos.map((b, i) => {
-      if (!b.fazenda) return 'Preenchimento obrigatório';
-      if (blocos.findIndex((x) => x.fazenda === b.fazenda) < i) return `A Fazenda ${b.fazenda} já está em outro bloco.`;
-      if (f.safra.value && DADOS.planos.some((p) => p.safra === f.safra.value && p.fazenda === b.fazenda)) {
-        return `Já existe um plano da safra ${f.safra.value} para a Fazenda ${b.fazenda}.`;
-      }
-      return '';
-    });
-    return { faltando, porBloco };
+    let fazendaErro = '';
+    if (!fazenda) fazendaErro = 'Preenchimento obrigatório';
+    else if (f.safra.value && f.cultura.value && DADOS.planos.some((p) => p.safra === f.safra.value && p.fazenda === fazenda
+      && p.cultura === f.cultura.value)) {
+      fazendaErro = `Já existe um plano de ${f.cultura.value} da safra ${f.safra.value} para a Fazenda ${fazenda}.`;
+    }
+    return { faltando, fazendaErro };
   }
 
   function atualizar() {
-    const { faltando, porBloco } = problemas();
-    const bloqueado = faltando.length || porBloco.some(Boolean);
+    const { faltando, fazendaErro } = problemas();
+    const bloqueado = faltando.length || fazendaErro;
     // O botão parece desabilitado, mas continua clicável para explicar o que falta
-    botaoCriar.setAttribute('aria-disabled', bloqueado ? 'true' : 'false');
+    botaoProximo.setAttribute('aria-disabled', bloqueado ? 'true' : 'false');
     GERAIS.forEach((nome) => {
-      const vazio = tentouCriar && faltando.includes(nome);
+      const vazio = tentou && faltando.includes(nome);
       form.querySelector(`#cp-erro-${nome}`).hidden = !vazio;
       form.elements[nome].toggleAttribute('aria-invalid', vazio);
     });
-    caixaFazendas.querySelectorAll('[data-bloco]').forEach((sec, i) => {
-      const msg = porBloco[i];
-      // Fazenda vazia só é cobrada depois de tentar criar; fazenda repetida ou plano existente, na hora
-      const mostrar = msg && (tentouCriar || msg !== 'Preenchimento obrigatório');
-      const erro = sec.querySelector('[data-erro-fazenda]');
-      erro.textContent = mostrar ? msg : ''; // textContent: não precisa escapar
-      erro.hidden = !mostrar;
-      sec.querySelector('[data-campo="fazenda"]').classList.toggle('campo__controle--erro', !!mostrar && msg !== 'Preenchimento obrigatório');
-    });
-    erroCriar.hidden = !(tentouCriar && bloqueado);
-    erroCriar.textContent = faltando.length || porBloco.includes('Preenchimento obrigatório')
-      ? 'Preencha os campos obrigatórios.' : 'Confira as fazendas.';
-    return { faltando, porBloco };
+    // Fazenda vazia só é cobrada depois de tentar seguir; plano existente, na hora
+    const mostrar = fazendaErro && (tentou || fazendaErro !== 'Preenchimento obrigatório');
+    const erro = form.querySelector('#cp-erro-fazenda');
+    erro.textContent = mostrar ? fazendaErro : '';
+    erro.hidden = !mostrar;
+    selectFazenda.classList.toggle('campo__controle--erro', !!mostrar && fazendaErro !== 'Preenchimento obrigatório');
+    erroCriar.hidden = !(tentou && bloqueado) || etapa !== 1;
+    erroCriar.textContent = faltando.length || fazendaErro === 'Preenchimento obrigatório'
+      ? 'Preencha os campos obrigatórios.' : 'Confira a fazenda.';
+    return { faltando, fazendaErro };
   }
 
-  // ----- Criar Plano de Safra -----
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    tentouCriar = true;
-    const { faltando, porBloco } = atualizar();
-    if (faltando.length) { form.elements[faltando[0]].focus(); return; }
-    const i = porBloco.findIndex(Boolean);
-    if (i >= 0) { caixaFazendas.querySelectorAll('[data-campo="fazenda"]')[i].focus(); return; }
-    const f = form.elements;
-    modal.fechar();
-    aoCriar({
-      safra: f.safra.value,
-      empresa: f.empresa.value,
-      atividade: f.atividade.value,
-      cultura: f.cultura.value,
-      fazendas: blocos.map((b) => ({ fazenda: b.fazenda, talhoes: [...b.talhoes] }))
-    });
-  });
-
   // ----- Pedaços de HTML -----
-  // Com uma opção só (ex.: cultura, por enquanto só Soja), ela já vem escolhida.
-  // emBreve: opções que aparecem desabilitadas, com "(Em breve)".
+  // Com uma opção só, ela já vem escolhida. emBreve: opções que aparecem desabilitadas, com "(Em breve)".
   function campoLista(nome, rotulo, textoVazio, itens, emBreve = [], padrao = '') {
     const disponiveis = itens.filter((x) => !emBreve.includes(x));
     const escolhido = padrao || (disponiveis.length === 1 ? disponiveis[0] : '');
@@ -6906,7 +7133,7 @@ window.Telas.painelPlanos = (function () {
       .map((l) => ({ ...l, status: statusDe(l.plano), area: Util.areaCultivo(l.plano, Versoes.deTrabalho(l.plano)) }))
       .filter((l) => f.passaStatus(l.status))
       .sort((a, b) => ORDEM_STATUS.indexOf(a.status) - ORDEM_STATUS.indexOf(b.status)
-        || posicaoSafra(a.safra) - posicaoSafra(b.safra) || texto(a.empresa, b.empresa)
+        || posicaoSafra(a.safra) - posicaoSafra(b.safra) || (Util.comEmpresa() ? texto(a.empresa, b.empresa) : 0)
         || texto(a.fazenda, b.fazenda) || texto(a.cultura, b.cultura));
   }
 
@@ -6931,7 +7158,7 @@ window.Telas.painelPlanos = (function () {
       <div class="painel" data-guia-painel="painel">
         <section class="cartao lista-planos" aria-labelledby="pn-titulo-planos">
           <div class="secao__topo lista-planos__topo">
-            <h2 class="secao__titulo lista-planos__titulo" id="pn-titulo-planos">${Icones.documento} Planos de Safra</h2>
+            <h2 class="secao__titulo lista-planos__titulo" id="pn-titulo-planos">${Icones.documento} Planos de Safra Cadastrados</h2>
             <button class="botao botao--primario" type="button" data-acao="criar-plano" data-pn="criar">${Icones.mais} Criar Plano Safra</button>
           </div>
           <div class="tabela-rolagem" data-pn="tabela">
@@ -6968,18 +7195,21 @@ window.Telas.painelPlanos = (function () {
   let ordem = null; // { coluna, sentido: 'asc' | 'desc' }
   let ultimo = null; // { conteudo, filtros } do último desenho, para redesenhar ao ordenar
   const ORDEM_STATUS = ['nao-iniciado', 'construcao', 'publicada'];
-  const COLUNAS = [
+  // Sem o nível Empresa (Util.comEmpresa), sem a coluna Empresa
+  // Ordem das colunas (09/11/2026): Safra · (Empresa) · Fazenda · Cultura · Área · Status
+  const TODAS_COLUNAS = [
+    ['safra', 'Safra', (l) => posicaoSafra(l.safra)],
     ['empresa', 'Empresa', (l) => l.empresa],
     ['fazenda', 'Fazenda', (l) => l.fazenda],
-    ['safra', 'Safra', (l) => posicaoSafra(l.safra)],
     ['cultura', 'Cultura', (l) => l.cultura || null],
     ['area', 'Área (ha)', (l) => l.area || null, 'tabela__numero', 'Área de cultivo: talhões incluídos no plano'],
     ['status', 'Status', (l) => ORDEM_STATUS.indexOf(l.status)]
   ];
+  const colunas = () => TODAS_COLUNAS.filter(([c]) => c !== 'empresa' || Util.comEmpresa());
 
   function ordenadas(ls) {
     if (!ordem) return ls;
-    const valor = COLUNAS.find(([c]) => c === ordem.coluna)[2];
+    const valor = TODAS_COLUNAS.find(([c]) => c === ordem.coluna)[2];
     const sinal = ordem.sentido === 'asc' ? 1 : -1;
     return [...ls].sort((a, b) => {
       const va = valor(a); const vb = valor(b);
@@ -6990,7 +7220,7 @@ window.Telas.painelPlanos = (function () {
   }
 
   function cabecalho() {
-    return `<tr>${COLUNAS.map(([coluna, rotulo, , classe = '', dica = '']) => {
+    return `<tr>${colunas().map(([coluna, rotulo, , classe = '', dica = '']) => {
       const ativa = ordem && ordem.coluna === coluna;
       const sentido = ativa ? ordem.sentido : null;
       return `
@@ -7019,9 +7249,9 @@ window.Telas.painelPlanos = (function () {
     return `
       <tr class="lista-planos__linha ${novo ? 'lista-planos__linha--novo' : ''}" data-plano="${p.id}" tabindex="0" title="Abrir o plano"
           aria-label="Abrir plano ${novo ? 'novo ' : ''}${esc(p.safra)} · ${esc(p.fazenda)} · ${esc(p.cultura)}">
-        <td>${esc(l.empresa)}</td>
-        <td>${esc(l.fazenda)}${novo ? ' <span class="lista-planos__novo">Novo</span>' : ''}</td>
         <td>${esc(l.safra)}</td>
+        ${Util.comEmpresa() ? `<td>${esc(l.empresa)}</td>` : ''}
+        <td>${esc(l.fazenda)}${novo ? ' <span class="lista-planos__novo">Novo</span>' : ''}</td>
         <td>${esc(p.cultura)}</td>
         <td class="tabela__numero">${l.area ? ha(l.area) : '<span class="painel-tabela__vazio">—</span>'}</td>
         <td><span class="status ${classe}">${rotulo}</span></td>
@@ -7157,6 +7387,15 @@ window.Telas.listaPlanos = (function () {
   let safraPedida = null;
   function mostrarSafra(safra) { safraPedida = safra; guia = 'painel'; }
 
+  // Chegada à lista vinda de outra página (inclusive de um plano): os filtros voltam ao começo (só o Ano agrícola).
+  // Este arquivo carrega antes do app.js, então este aviso de troca de endereço chega antes do desenho da tela.
+  let entrou = true;
+  window.addEventListener('hashchange', (e) => {
+    const de = new URL(e.oldURL).hash;
+    const para = new URL(e.newURL).hash;
+    if (para !== de && !de.startsWith('#/plano-safra')) entrou = true;
+  });
+
   // Guia aberta: 'painel' (Planos de Safra) ou 'historico' (Histórico de versões).
   // Abre em Planos de Safra; a guia escolhida se mantém ao navegar.
   const GUIAS = [['painel', 'Planos de Safra'], ['historico', 'Histórico de versões']];
@@ -7166,14 +7405,20 @@ window.Telas.listaPlanos = (function () {
   const statusVersao = (p, v) => (Versoes.aIniciar(p) ? 'nao-iniciado' : Versoes.statusExibido(p, v));
 
   function desenhar() {
-    // Os filtros-base vêm das outras páginas; depois de criar planos, vão para o ano agrícola e a safra deles, com o
-    // resto em Todas (para o plano novo aparecer)
+    // Abre sempre só no Ano agrícola (09/11/2026): o ano vem das outras páginas (no começo, o atual) e os demais filtros
+    // em Todas (as safras, culturas e fazendas daquele ano), também ao voltar de um plano. Depois de criar planos, no
+    // ano agrícola deles. Os demais filtros só mudam as outras páginas se a pessoa mexer neles aqui.
     if (safraPedida) {
-      FiltrosBase.gravar({ ...FiltrosBase.padrao(), ano: [String(Util.anoAgricola(safraPedida))], safra: [safraPedida] });
-      Object.assign(filtros, { statusPlano: 'todos', status: 'todos' });
+      FiltrosBase.gravar({ ano: [String(Util.anoAgricola(safraPedida))] }, ['ano']);
       safraPedida = null;
+      entrou = true;
     }
-    FiltrosBase.ler(filtros);
+    if (entrou) {
+      FiltrosBase.ler(filtros);
+      Object.assign(filtros, { atividade: 'todos', safra: 'todos', cultura: 'todos', empresa: 'todos', fazenda: 'todos',
+        statusPlano: 'todos', status: 'todos' });
+      entrou = false;
+    }
 
     return `
       <header class="cabecalho cabecalho--guias vg-cabecalho">
@@ -7204,7 +7449,7 @@ window.Telas.listaPlanos = (function () {
             <table class="tabela">
               <thead>
                 <tr>
-                  <th>Safra</th><th>Empresa</th><th>Atividade</th><th>Cultura</th><th>Fazenda</th>
+                  <th>Safra</th>${Util.comEmpresa() ? '<th>Empresa</th>' : ''}<th>Atividade</th><th>Cultura</th><th>Fazenda</th>
                   <th>Versão</th><th>Status</th><th>Última atualização</th><th>Atualizado por</th>
                 </tr>
               </thead>
@@ -7396,7 +7641,7 @@ window.Telas.listaPlanos = (function () {
     const versoes = versoesFiltradas();
     conteudo.querySelector('#lp-historico').innerHTML = versoes.length
       ? versoes.map(linhaVersao).join('')
-      : `<tr><td class="tabela__vazia" colspan="9">Nenhuma versão encontrada com esses filtros.</td></tr>`;
+      : `<tr><td class="tabela__vazia" colspan="${Util.comEmpresa() ? 9 : 8}">Nenhuma versão encontrada com esses filtros.</td></tr>`;
     Telas.painelPlanos.atualizar(conteudo, paraPainel());
   }
 
@@ -7423,7 +7668,7 @@ window.Telas.listaPlanos = (function () {
           title="Abrir a versão ${esc(v.num)}${status === 'publicada' || status === 'revisada' ? ` (${status}, em consulta)` : ''}"
           aria-label="Abrir plano ${esc(p.safra)} · ${esc(p.fazenda)}, versão ${esc(v.num)}">
         <td>${esc(p.safra)}</td>
-        <td>${esc(p.empresa)}</td>
+        ${Util.comEmpresa() ? `<td>${esc(p.empresa)}</td>` : ''}
         <td>${esc(p.atividade || '—')}</td>
         <td>${esc(p.cultura)}</td>
         <td>${esc(p.fazenda)}</td>
@@ -7809,7 +8054,7 @@ window.Telas.calendario = (function () {
       ];
     }
     const op = it.op;
-    // Produto: o quarto item dá a dose do talhão em número, para o Consumo (dose × área do talhão)
+    // Produto: a dose do talhão
     const doseNo = (col, t) => {
       const ajuste = op.talhoes[t.nome];
       const l = ajuste ? Planos.linhaNoTalhao(op, ajuste, col) : null;
@@ -7820,16 +8065,7 @@ window.Telas.calendario = (function () {
       if (!x) return { texto: '—', classe: 'cal-piv__nao' };
       const ajustada = x.l.id in x.ajuste.doses && x.d !== x.l.dose;
       return { texto: textoDose(x.d, it.grupo), titulo: ajustada ? `Dose do talhão; padrão da receita: ${textoDose(x.l.dose, it.grupo)}` : '' };
-    }, (t) => { const x = doseNo(col, t); return x && x.d ? x.d * t.area : 0; }]);
-  }
-
-  // Consumo do produto na operação: soma de dose × área nos talhões do filtro, na unidade sem o "/ha"
-  // ("0,40 L/ha" em 435 ha → "174 L"). Sem dose em nenhum talhão: "—"
-  function textoConsumo(consumoNo, unidade, talhoes) {
-    const total = talhoes.reduce((s, t) => s + consumoNo(t), 0);
-    if (!total) return '—';
-    const u = String(unidade || '').replace(/\/ha$/, '');
-    return `${total.toLocaleString('pt-BR', { maximumFractionDigits: total < 10 ? 2 : 1 })}${u ? ` ${u}` : ''}`;
+    }]);
   }
 
   function diaMes(iso) { const { m, d } = partes(iso); return `${String(d).padStart(2, '0')}/${String(m).padStart(2, '0')}`; }
@@ -7855,7 +8091,7 @@ window.Telas.calendario = (function () {
     { id: 'op', rotulo: 'Operação', largura: 170, nivel: 'op', classe: 'cal-piv__nome' },
     { id: 'area', rotulo: 'Área (ha)', largura: 84, nivel: 'op', classe: 'cal-piv__area' },
     { id: 'prod', rotulo: 'Produto', largura: 150, nivel: 'linha', classe: 'cal-piv__produto' },
-    { id: 'consumo', rotulo: 'Consumo', largura: 104, nivel: 'linha', classe: 'cal-piv__num' },
+    // Consumo saiu em 09/11/2026 (pedido da usuária)
     { id: 'unid', rotulo: 'Dose', largura: 96, nivel: 'linha', classe: 'cal-piv__unid' }
   ];
   const LARGURA_OCULTA = 14;
@@ -7911,16 +8147,14 @@ window.Telas.calendario = (function () {
         const texto = `<span class="cal-piv__sem">${it.grupo.tipo === 'Sementes' ? 'Sem variedade' : 'Sem recomendação'}</span>`;
         const naProd = !ocultas.has('prod');
         linhas.push(`
-          <tr class="cal-piv__linha cal-piv__linha--inicio">${celulasOp}${linhaFixa({ prod: naProd ? texto : '', consumo: '', unid: naProd ? '' : texto })}
+          <tr class="cal-piv__linha cal-piv__linha--inicio">${celulasOp}${linhaFixa({ prod: naProd ? texto : '', unid: naProd ? '' : texto })}
             ${visiveis.map((t) => (talhaoOculto(t) ? celTalhaoOculto : '<td></td>')).join('')}
           </tr>`);
         return;
       }
-      subs.forEach(([rotulo, unidade, valor, consumoNo], i) => {
-        // Consumo só nos produtos (Plantio e Colheita: vazio)
-        const consumo = consumoNo ? esc(textoConsumo(consumoNo, unidade, visiveis)) : '';
+      subs.forEach(([rotulo, unidade, valor], i) => {
         linhas.push(`
-          <tr class="cal-piv__linha ${i ? '' : 'cal-piv__linha--inicio'}">${i ? '' : celulasOp}${linhaFixa({ prod: esc(rotulo), consumo, unid: unidade === 'data' ? '' : esc(unidade) })}
+          <tr class="cal-piv__linha ${i ? '' : 'cal-piv__linha--inicio'}">${i ? '' : celulasOp}${linhaFixa({ prod: esc(rotulo), unid: unidade === 'data' ? '' : esc(unidade) })}
             ${visiveis.map((t) => {
               if (talhaoOculto(t)) return celTalhaoOculto;
               const v = valor(t);
@@ -8660,17 +8894,21 @@ window.Telas.calendarioAgricola = (function () {
     const seta = (aberto) => `<span class="cag__seta ${aberto ? '' : 'cag__seta--fechada'}" aria-hidden="true">${Icones.abaixo}</span>`;
     const areaDe = (lista) => lista.reduce((s, p) => s + (Util.areaCultivo(p, Versoes.ultimaPublicada(p)) || 0), 0);
 
-    // Agrupado por empresa (na ordem do cadastro); dentro, por fazenda, e a safra antes da safrinha
+    // Agrupado por empresa (na ordem do cadastro); dentro, por fazenda, e a safra antes da safrinha.
+    // Sem o nível Empresa (Util.comEmpresa, 09/11/2026): sem a linha da empresa; começa pelas fazendas (fechadas)
     const linhas = [];
-    DADOS.empresas.filter((e) => planos.some((p) => p.empresa === e)).forEach((e) => {
-      const daEmpresa = planos.filter((p) => p.empresa === e);
-      const ce = `e:${e}`; const abertaE = empresasAbertas.has(ce);
-      linhas.push(`
+    const porEmpresa = Util.comEmpresa()
+      ? DADOS.empresas.filter((e) => planos.some((p) => p.empresa === e)).map((e) => [e, planos.filter((p) => p.empresa === e)])
+      : [[null, planos]];
+    porEmpresa.forEach(([e, daEmpresa]) => {
+      const ce = `e:${e}`; const abertaE = e === null || empresasAbertas.has(ce);
+      const daLinha = (extra) => ({ ...(e === null ? {} : { empresa: e }), ...extra });
+      if (e !== null) linhas.push(`
         <div class="cag__linha cag__linha--empresa" role="row">
           <span role="cell"><button class="cag__abrir" type="button" data-cag-recolher="${esc(ce)}" aria-expanded="${abertaE}">${seta(abertaE)}<strong>${esc(e)}</strong></button></span>
           <span role="cell"></span><span role="cell" class="cag__num"><strong>${Util.area(areaDe(daEmpresa))}</strong></span>
           ${abertaE ? `<span role="cell" class="cag__tempo cag__tempo--vazio" style="${fundo}">${marcaHoje}</span>`
-            : `<span role="cell" class="cag__tempo cag__tempo--faixas" style="${fundo}">${barras(juntar(daEmpresa.map((p) => ops.get(p))), j, { empresa: e })}${marcaHoje}</span>`}
+            : `<span role="cell" class="cag__tempo cag__tempo--faixas" style="${fundo}">${barras(juntar(daEmpresa.map((p) => ops.get(p))), j, daLinha({}))}${marcaHoje}</span>`}
         </div>`);
       if (!abertaE) return;
       [...new Set(daEmpresa.map((p) => p.fazenda))].sort((a, b) => a.localeCompare(b, 'pt-BR')).forEach((f) => {
@@ -8685,7 +8923,7 @@ window.Telas.calendarioAgricola = (function () {
             <span role="cell">${[...new Set(daFazenda.map((p) => p.cultura))].map(esc).join(' → ')}</span>
             <span role="cell" class="cag__num"><strong>${Util.area(areaF)}</strong></span>
             ${abertaF ? `<span role="cell" class="cag__tempo cag__tempo--vazio" style="${fundo}">${marcaHoje}</span>`
-              : `<span role="cell" class="cag__tempo cag__tempo--faixas" style="${fundo}">${barras(juntar(daFazenda.map((p) => ops.get(p))), j, { empresa: e, fazenda: f })}${marcaHoje}</span>`}
+              : `<span role="cell" class="cag__tempo cag__tempo--faixas" style="${fundo}">${barras(juntar(daFazenda.map((p) => ops.get(p))), j, daLinha({ fazenda: f }))}${marcaHoje}</span>`}
           </div>`);
         if (!abertaF) return;
         daFazenda.forEach((p) => {
@@ -8697,7 +8935,7 @@ window.Telas.calendarioAgricola = (function () {
               <span role="cell">${esc(p.safra)}</span>
               <span role="cell">${esc(p.cultura)}</span>
               <span role="cell" class="cag__num">${area ? Util.area(area) : '<span class="cag__pendente">Pendente</span>'}</span>
-              <span role="cell" class="cag__tempo cag__tempo--faixas" style="${fundo}">${lista.length ? barras(lista, j, { empresa: e, fazenda: f, safra: p.safra })
+              <span role="cell" class="cag__tempo cag__tempo--faixas" style="${fundo}">${lista.length ? barras(lista, j, daLinha({ fazenda: f, safra: p.safra }))
                 : `<span class="cag__sem">${Versoes.aIniciar(p) ? 'Plano ainda não iniciado' : v ? 'Nenhuma operação com data na versão publicada' : 'Plano ainda sem versão publicada'}</span>`}${marcaHoje}</span>
             </div>`);
         });
@@ -8706,7 +8944,7 @@ window.Telas.calendarioAgricola = (function () {
 
     return { temHoje, html: `
       <div class="cag__rolagem">
-        <div class="cag__tabela" role="table" aria-label="Operações por empresa, fazenda e safra">
+        <div class="cag__tabela" role="table" aria-label="Operações por ${Util.comEmpresa() ? 'empresa, ' : ''}fazenda e safra">
           <div class="cag__linha cag__linha--cab" role="row">
             <span role="columnheader">Fazenda / Safra</span><span role="columnheader">Cultura</span>
             <span role="columnheader" class="cag__num">Área</span>
@@ -8909,7 +9147,8 @@ window.Telas.centralCorp = (function () {
     : [[`${id}-atraso`, `${nome} · Em atraso`], [`${id}-prazo`, `${nome} · No prazo`]]))
     .map(([id, nome]) => [id, NOMES_RECOMENDADA[id] || nome]);
   const nomeStatus = (k) => STATUS_TODOS.find(([id]) => id === k)[1];
-  const NIVEIS = [['empresa', 'Empresa'], ['fazenda', 'Fazenda'], ['executor', 'Executor']];
+  // Sem o nível Empresa (Util.comEmpresa): sem o filtro, a coluna e o nível Empresa; o gráfico abre por Fazenda
+  const NIVEIS = Util.semEmpresa([['empresa', 'Empresa'], ['fazenda', 'Fazenda'], ['executor', 'Executor']]);
   const ACOES = [['pendente', 'Pendente de notificação'], ['enviada', 'Notificação enviada']];
 
   // Número fixo a partir de um texto (executor e atraso das OS geradas, sem sorteio)
@@ -8975,7 +9214,7 @@ window.Telas.centralCorp = (function () {
     const { safraInicial, primeiraData, somaDias, hoje } = B();
     const safra = safraInicial();
     return { safra, cultura: '', empresa: '', fazenda: '', grupo: '', de: primeiraData(safra), ate: somaDias(hoje(), 30),
-      status: null, nivel: 'empresa', barra: null, busca: '', statusOS: '', acao: '',
+      status: null, nivel: NIVEIS[0][0], barra: null, busca: '', statusOS: '', acao: '',
       ordem: { coluna: 'atraso', sentido: 'desc' }, selecao: new Set() };
   }
 
@@ -9014,7 +9253,7 @@ window.Telas.centralCorp = (function () {
       <div class="filtros oc-filtros__campos">
         ${opcoesSelect('safra', 'Safra', safras().map((s) => [s.nome, s.nome]), '', est.safra)}
         ${opcoesSelect('cultura', 'Cultura', presentes('cultura', DADOS.culturasPlanos), 'Todas', est.cultura)}
-        ${opcoesSelect('empresa', 'Empresa', presentes('empresa', DADOS.empresas), 'Todas', est.empresa)}
+        ${Util.comEmpresa() ? opcoesSelect('empresa', 'Empresa', presentes('empresa', DADOS.empresas), 'Todas', est.empresa) : ''}
         ${opcoesSelect('fazenda', 'Fazenda', presentes('fazenda', fazendas), 'Todas', est.fazenda)}
         ${opcoesSelect('grupo', 'Grupo de operação', gruposDaSafra(daSafra), 'Todos', est.grupo)}
         <div class="campo">
@@ -9137,7 +9376,7 @@ window.Telas.centralCorp = (function () {
 
   // ----- Tabela Ordens de Serviço -----
   const dataBR = (iso) => (iso ? Util.data(iso) : '—');
-  const COL = [
+  const COL = Util.semEmpresa([
     ['numero', 'Nº OS', (r) => r.numero, true, (r) => r.numero ?? '—'],
     ['safra', 'Safra', (r) => r.plano.safra],
     ['empresa', 'Empresa', (r) => r.plano.empresa],
@@ -9153,7 +9392,7 @@ window.Telas.centralCorp = (function () {
     ['atraso', 'Dias de atraso', (r) => r.atraso, true],
     ['status', 'Status OS', (r) => STATUS_TODOS.findIndex(([id]) => id === r.situacao), false, (r) => nomeStatus(r.situacao)],
     ['acao', 'Status da ação', (r) => r.acao, false, (r) => (r.acao ? ACOES.find(([id]) => id === r.acao)[1] : '—')]
-  ];
+  ]);
   const QUEBRA = ['grupo'];
   const texto = (c, r) => { const v = c[4] ? c[4](r) : c[2](r); return v === null || v === undefined ? '—' : v; };
 
@@ -9384,14 +9623,15 @@ window.Telas.osCalendario = (function () {
   // Grupos de operação pelo tipo (os nomes de cada plano podem mudar; a cor segue o tipo), nesta ordem na legenda
   // (03/11/2026: Corretivos, do tipo Aplicação de insumos, primeiro)
   const ORDEM_TIPO = ['aplicacao-de-insumos', 'sementes', 'fertilidade', 'defensivos', 'colheita'];
-  const FILTROS = [
+  // Sem o nível Empresa (Util.comEmpresa), sem o filtro Empresa (fica em Todas)
+  const FILTROS = Util.semEmpresa([
     ['safra', 'Safra', ['Todas', 'Nenhuma', 'selecionadas']],
     ['cultura', 'Cultura', ['Todas', 'Nenhuma', 'culturas']],
     ['empresa', 'Empresa', ['Todas', 'Nenhuma', 'empresas']],
     ['fazenda', 'Fazenda', ['Todas', 'Nenhuma', 'fazendas']],
     ['talhao', 'Talhão', ['Todos', 'Nenhum', 'talhões']],
     ['operacao', 'Operação', ['Todas', 'Nenhuma', 'operações']]
-  ];
+  ]);
 
   // Estado da tela: período, dia aberto e filtros ('todos' ou a lista do que está marcado). Mantém-se ao navegar.
   // Abre no Mês de hoje (03/11/2026; antes no Ano)
@@ -9769,7 +10009,7 @@ window.Telas.osCalendario = (function () {
         const d = barra.dataset;
         est.daBarra = { operacao: est.operacao, cultura: est.cultura, empresa: est.empresa, fazenda: est.fazenda, safra: est.safra };
         est.cultura = [d.cagCultura];
-        est.empresa = [d.cagEmpresa];
+        if (d.cagEmpresa) est.empresa = [d.cagEmpresa];
         if (d.cagFazenda) est.fazenda = [d.cagFazenda];
         if (d.cagSafra) est.safra = [d.cagSafra];
         est.dataRef = d.cagOp;
@@ -9880,7 +10120,8 @@ window.Telas.monitoramentoAplicacoes = (function () {
   // Base de filtros de todas as páginas (Ano agrícola, Atividade produtiva, Safra, Cultura, Empresa, Fazenda, Talhão), ora
   // à mostra, ora no Mais filtros. Aqui (04/11/2026): à mostra, de Safra a Talhão, Grupo de operação e Operação; no Mais
   // filtros, Ano agrícola e Atividade produtiva
-  const FILTROS = [
+  // Sem o nível Empresa (Util.comEmpresa), sem o filtro Empresa (fica em Todas)
+  const FILTROS = Util.semEmpresa([
     ['safra', 'Safra', ['Todas', 'Nenhuma', 'selecionadas']],
     ['cultura', 'Cultura', ['Todas', 'Nenhuma', 'culturas']],
     ['empresa', 'Empresa', ['Todas', 'Nenhuma', 'empresas']],
@@ -9888,7 +10129,7 @@ window.Telas.monitoramentoAplicacoes = (function () {
     ['talhao', 'Talhão', ['Todos', 'Nenhum', 'talhões']],
     ['grupo', 'Grupo de operação', ['Todos', 'Nenhum', 'grupos']],
     ['operacao', 'Operação', ['Todas', 'Nenhuma', 'operações']]
-  ];
+  ]);
   // Largura mínima de cada filtro à mostra (o rótulo e o valor inteiros). O que não couber na linha vai para o Mais
   // filtros, a partir do último (Operação, Grupo de operação…); quantos ficam à mostra depende da largura da tela (04/11/2026)
   const MINIMO = { safra: 92, cultura: 104, empresa: 124, fazenda: 124, talhao: 104, grupo: 136, operacao: 124 };
@@ -9965,7 +10206,7 @@ window.Telas.monitoramentoAplicacoes = (function () {
     const ops = opcoes('operacao');
     if (ops.length && !ops.some((o) => v.includes(o.valor))) est.operacao = 'todos';
   }
-  const UNICOS = ['safra', 'empresa', 'fazenda'];
+  const UNICOS = Util.semEmpresa(['safra', 'empresa', 'fazenda']);
   // Duração › Por talhão: abre (e Limpar filtros volta) com todos os grupos e todas as operações, na primeira operação
   // pela ordem do DAP; depois, obedece aos filtros
   function padraoDuracao() {
@@ -10027,13 +10268,15 @@ window.Telas.monitoramentoAplicacoes = (function () {
   function operacoes() {
     const porNome = new Map();
     const plantios = new Set();
+    const colheitas = new Set();
     planosFiltrados().forEach((p) => gruposDe(p).filter((g) => Cal().marcado(est, 'grupo', g.nome))
       .forEach((g) => g.operacoes.forEach((op) => {
         if (!op.nome) return;
         porNome.set(op.nome, Math.min(porNome.get(op.nome) ?? Infinity, dapDe(g, op)));
         if (g.tipo === 'Sementes') plantios.add(op.nome);
+        if (g.tipo === 'Colheita') colheitas.add(op.nome);
       })));
-    const todas = [...porNome].map(([nome, dap]) => ({ nome, dap, plantio: plantios.has(nome) }))
+    const todas = [...porNome].map(([nome, dap]) => ({ nome, dap, plantio: plantios.has(nome), colheita: colheitas.has(nome) }))
       .sort((a, b) => a.dap - b.dap || a.nome.localeCompare(b.nome, 'pt-BR', { numeric: true }));
     // Só as planejadas em ao menos um talhão filtrado (ex.: a Gessagem do modelo, sem talhões no plano da Boa Vista, fica
     // de fora: sem coluna, sem opção no filtro Operação e sem gráfico)
@@ -10086,6 +10329,19 @@ window.Telas.monitoramentoAplicacoes = (function () {
         const prazoPlantio = Cal().prazoDe(plantio, gPlantio);
         const dataPlantio = { planejado: base, executada: execPlantio, prazo: prazoPlantio,
           fechamento: fechamento(p, t.nome, 'Plantio', execPlantio, prazoPlantio, iT) };
+        // Colheita (09/11/2026): sempre, como a Data de plantio, qualquer que seja o filtro: plantio + ciclo da
+        // primeira variedade; sem ciclo, "—"
+        const gColheita = grupos.find((g) => g.tipo === 'Colheita');
+        const opColheita = gColheita && gColheita.operacoes[0];
+        const cicloColheita = (DADOS.variedades.find((x) => x.nome === variedades[0]) || {}).ciclo;
+        let dataColheita = null;
+        if (opColheita && cicloColheita) {
+          const planejado = somaDias(base, cicloColheita);
+          const iC = iT * 3 + 2;
+          const exec = executada(p, t.nome, opColheita.nome, planejado, s, iC);
+          const prazo = Cal().prazoDe(opColheita, gColheita);
+          dataColheita = { planejado, executada: exec, prazo, fechamento: fechamento(p, t.nome, opColheita.nome, exec, prazo, iC) };
+        }
         const aplic = {};
         grupos.filter((g) => Cal().marcado(est, 'grupo', g.nome)).forEach((g) => g.operacoes.forEach((op) => {
           if (!nomes.includes(op.nome)) return;
@@ -10108,7 +10364,7 @@ window.Telas.monitoramentoAplicacoes = (function () {
         const total = Object.keys(aplic).length;
         if (!total) return;
         const feitas = Object.values(aplic).map((a) => a.executada).filter(Boolean).sort();
-        saida.push({ plano: p, talhao: t.nome, variedades, plantio: dataPlantio,
+        saida.push({ plano: p, talhao: t.nome, variedades, plantio: dataPlantio, colheita: dataColheita,
           plantasM: s.plantasM ?? null, aplic, total, feitas: feitas.length,
           ultima: feitas.length ? diasEntre(feitas[feitas.length - 1], hoje()) : null });
       });
@@ -10141,7 +10397,7 @@ window.Telas.monitoramentoAplicacoes = (function () {
   const GUIAS = [
     ['calendario', 'Calendário', 'Consulte as operações agrícolas planejadas por ano, mês, semana ou dia.'],
     ['tabela', 'Desvios de data', 'Compare as datas planejadas e executadas das operações por talhão.'],
-    ['desvios', 'Desvios de dose', 'Analise os desvios entre o recomendado e o executado por produto, operação e nível de análise.'],
+    ['desvios', 'Desvios de dose', 'Analise os desvios entre o recomendado e o executado nas Ordens de Serviço, por produto, operação e nível de análise.'],
     ['falta', 'Risco de falta de produto', 'Estime a falta de produtos para as operações planejadas.']
   ];
   const GUIAS_PAGINA = ['tabela', 'desvios', 'falta'];
@@ -10245,7 +10501,7 @@ window.Telas.monitoramentoAplicacoes = (function () {
   // (fazenda, safra e talhão). -----
   function valorOrdem(r, coluna) {
     const fixos = { fazenda: r.plano.fazenda, talhao: r.talhao, variedade: r.variedades.join(', ') || null, plantasM: r.plantasM,
-      plantio: r.plantio.executada, feitas: r.total ? r.feitas / r.total : null, ultima: r.ultima };
+      plantio: r.plantio.executada, colheita: r.colheita ? (est.modo === 'dias' ? desvioDias(r.colheita) : r.colheita.executada || r.colheita.planejado) : null, feitas: r.total ? r.feitas / r.total : null, ultima: r.ultima };
     if (coluna in fixos) return fixos[coluna];
     const a = r.aplic[coluna.slice(3)];
     if (!a) return null;
@@ -10424,10 +10680,11 @@ window.Telas.monitoramentoAplicacoes = (function () {
     // Duração: sem a legenda de status (não filtra pelo status escolhido nas outras guias)
     if (est.visao === 'duracao') return cols.length ? duracao(linhas(cols), cols) : semOperacao();
     // Status escolhido na legenda: só os talhões com ao menos uma aplicação nesse status
-    const ls = ordenar(linhas(cols).filter((r) => !est.status || [r.plantio, ...Object.values(r.aplic)].some((a) => a && a.planejado && statusDe(a) === est.status)));
+    const ls = ordenar(linhas(cols).filter((r) => !est.status || [r.plantio, r.colheita, ...Object.values(r.aplic)].some((a) => a && a.planejado && statusDe(a) === est.status)));
     // O Plantio marcado não ganha coluna: é a Data de plantio
     const temOperacao = cols.length > 0;
-    cols = cols.filter((c) => !c.plantio);
+    // A Colheita também não: tem a coluna própria, sempre no fim (09/11/2026)
+    cols = cols.filter((c) => !c.plantio && !c.colheita);
     // Com um status escolhido, só as operações que têm aplicação nesse status
     if (est.status) cols = cols.filter((c) => ls.some((r) => r.aplic[c.nome] && statusDe(r.aplic[c.nome]) === est.status));
     // Título com a seta de ordenar (como nas outras tabelas)
@@ -10438,10 +10695,11 @@ window.Telas.monitoramentoAplicacoes = (function () {
         <span class="titulo-coluna"><span>${esc(rotulo)}</span><button class="titulo-ordenar ${ativa ? 'titulo-ordenar--ativo' : ''} ${ativa && o.sentido === 'desc' ? 'titulo-ordenar--desc' : ''}"
           type="button" data-ma-ordenar="${esc(id)}" title="Ordenar por ${esc(rotulo.toLowerCase())}" aria-label="Ordenar por ${esc(rotulo.toLowerCase())}">${ativa ? Icones.acima : Icones.ordenar}</button></span></th>`;
     };
-    // Colunas: Talhão (resumo), Estande e Data de plantio paradas à esquerda; as operações; Dias sem aplicação.
+    // Colunas: Talhão (resumo), Estande e Data de plantio paradas à esquerda; as operações; Colheita (sempre, como a
+    // Data de plantio; 09/11/2026); Dias sem aplicação.
     // A Data de plantio também na etiqueta do status da legenda (04/11/2026; antes a executada numa etiqueta neutra; o
     // Plantio marcado não ganha coluna própria)
-    const colunas = 4 + cols.length;
+    const colunas = 5 + cols.length;
     return `
       ${barra()}
       <div class="tabela-rolagem ma-tabela__rolagem">
@@ -10452,6 +10710,7 @@ window.Telas.monitoramentoAplicacoes = (function () {
               ${th('plantasM', 'Estande (plantas/m)', 'ma-ini ma-fixa ma-quebra tabela__numero', 'data-fixa="1"')}
               ${th('plantio', 'Data de plantio', 'ma-ini ma-fixa ma-fixa--ultima', 'data-fixa="2"')}
               ${cols.map((c) => th(`op|${c.nome}`, c.nome, 'ma-ini ma-quebra')).join('')}
+              ${th('colheita', 'Colheita', 'ma-ini ma-quebra')}
               ${th('ultima', 'Dias sem aplicação', 'ma-ini ma-quebra tabela__numero')}
             </tr>
           </thead>
@@ -10463,6 +10722,7 @@ window.Telas.monitoramentoAplicacoes = (function () {
                 <td class="ma-ini tabela__numero ma-fixa ma-estande" data-fixa="1">${r.plantasM === null ? '—' : Math.round(r.plantasM).toLocaleString('pt-BR')}</td>
                 ${celula(r.plantio, 'class="ma-fixa ma-fixa--ultima" data-fixa="2"')}
                 ${cols.map((c) => celula(r.aplic[c.nome])).join('')}
+                ${celula(r.colheita)}
                 <td class="ma-ini tabela__numero ma-dias-sem">${r.ultima === null ? '—' : r.ultima}</td>
               </tr>`).join('')
               : `<tr><td class="tabela__vazia" colspan="${colunas}">${est.status ? `Nenhum talhão com aplicação ${STATUS.find(([x]) => x === est.status)[1].toLowerCase()}.` : 'Nenhum talhão com essas operações planejadas.'}</td></tr>`}
@@ -10772,7 +11032,8 @@ window.Telas.desviosRecomendacao = (function () {
   ];
   const faixaDe = (d) => FAIXAS.find(([, , f]) => f(d))[0];
   // Níveis do gráfico Desvios por nível (03/11/2026: sem Talhão; Grupo de operação no lugar da Operação)
-  const NIVEIS = [['empresa', 'Empresa'], ['fazenda', 'Fazenda'], ['grupo', 'Grupo de operação'], ['executor', 'Executor']];
+  // Sem o nível Empresa (Util.comEmpresa): sem o filtro, o nível e a coluna Empresa; o gráfico abre por Fazenda
+  const NIVEIS = Util.semEmpresa([['empresa', 'Empresa'], ['fazenda', 'Fazenda'], ['grupo', 'Grupo de operação'], ['executor', 'Executor']]);
 
   let est = null;
   // Cabeçalho, filtros e Analisar por fixos no topo ao rolar (o alfinete solta e prende, como no Orçamento). Mantém-se ao navegar
@@ -10782,7 +11043,7 @@ window.Telas.desviosRecomendacao = (function () {
   // os demais em Todos/Todas; Analisar por Dose; nível Empresa
   function novoEstado() {
     const e = { talhao: 'todos', grupo: 'todos', operacao: 'todos', executor: 'todos', busca: {}, filtroAberto: null,
-      modo: est ? est.modo : 'dose', nivel: est ? est.nivel : 'empresa', faixa: null, produto: null, buscaDet: '', pagina: 1, porPagina: 10 };
+      modo: est ? est.modo : 'dose', nivel: est ? est.nivel : NIVEIS[0][0], faixa: null, produto: null, buscaDet: '', pagina: 1, porPagina: 10 };
     FiltrosBase.ler(e);
     return e;
   }
@@ -10957,7 +11218,7 @@ window.Telas.desviosRecomendacao = (function () {
 
   // Desvios por nível: o desvio médio (absoluto) dos registros de cada grupo, sempre do maior para o menor (empate: o nome)
   function porNivel(regs) {
-    if (!NIVEIS.some(([v]) => v === est.nivel)) est.nivel = 'empresa';
+    if (!NIVEIS.some(([v]) => v === est.nivel)) est.nivel = NIVEIS[0][0];
     const lista = regs.filter((r) => !est.faixa || faixaDe(desvioDe(r)) === est.faixa);
     const chave = { empresa: (r) => r.empresa, fazenda: (r) => r.fazenda, grupo: (r) => r.grupo, executor: (r) => r.executor }[est.nivel];
     const grupos = new Map();
@@ -11118,19 +11379,19 @@ window.Telas.desviosRecomendacao = (function () {
           </div>
         </div>
         <div class="tabela-rolagem"><table class="tabela dr-tabela dr-det">
-          <thead><tr>${titulo('det', 'os', 'Nº OS')}${titulo('det', 'criacao', 'Data de criação')}${titulo('det', 'fechamento', 'Data de fechamento')}${titulo('det', 'safra', 'Safra')}${titulo('det', 'empresa', 'Empresa')}${titulo('det', 'fazenda', 'Fazenda')}
+          <thead><tr>${titulo('det', 'os', 'Nº OS')}${titulo('det', 'criacao', 'Data de criação')}${titulo('det', 'fechamento', 'Data de fechamento')}${titulo('det', 'safra', 'Safra')}${Util.comEmpresa() ? titulo('det', 'empresa', 'Empresa') : ''}${titulo('det', 'fazenda', 'Fazenda')}
             ${titulo('det', 'talhao', 'Talhão')}${titulo('det', 'operacao', 'Operação')}${titulo('det', 'produto', 'Produto')}
             ${titulo('det', 'doseRec', 'Dose recomendada', 'tabela__numero')}${titulo('det', 'doseApl', 'Dose aplicada', 'tabela__numero')}${titulo('det', 'desvioDose', 'Desvio Dose (%)', 'dr-centro')}
             ${titulo('det', 'qtdRec', 'Quantidade recomendada', 'tabela__numero')}${titulo('det', 'qtdApl', 'Quantidade aplicada', 'tabela__numero')}${titulo('det', 'desvioQtd', 'Desvio Qtd (%)', 'dr-centro')}</tr></thead>
           <tbody>${pagina.length ? pagina.map((r) => `
             <tr title="Fechada em ${Util.data(r.fechamento)} · ${esc(r.executor)}">
-              <td>${esc(r.os)}</td><td>${r.executada ? Util.data(r.executada) : '—'}</td><td>${r.fechamento ? Util.data(r.fechamento) : '—'}</td><td>${esc(r.safra)}</td><td>${esc(r.empresa)}</td><td>${esc(r.fazenda)}</td><td>${esc(r.talhao)}</td>
+              <td>${esc(r.os)}</td><td>${r.executada ? Util.data(r.executada) : '—'}</td><td>${r.fechamento ? Util.data(r.fechamento) : '—'}</td><td>${esc(r.safra)}</td>${Util.comEmpresa() ? `<td>${esc(r.empresa)}</td>` : ''}<td>${esc(r.fazenda)}</td><td>${esc(r.talhao)}</td>
               <td>${esc(r.operacao)}</td><td>${esc(r.produto)}</td>
               <td class="tabela__numero">${dose(r.doseRec, r.unidade)}</td><td class="tabela__numero">${dose(r.doseApl, r.unidade)}</td>
               <td class="dr-centro">${etiqueta(dDose(r))}</td>
               <td class="tabela__numero">${qtd(r.qtdRec, r.unidade)}</td><td class="tabela__numero">${qtd(r.qtdApl, r.unidade)}</td>
               <td class="dr-centro">${etiqueta(dQtd(r))}</td></tr>`).join('')
-            : '<tr><td class="tabela__vazia" colspan="15">Nenhuma OS encontrada.</td></tr>'}</tbody>
+            : '<tr><td class="tabela__vazia" colspan="${Util.comEmpresa() ? 15 : 14}">Nenhuma OS encontrada.</td></tr>'}</tbody>
         </table></div>
         <div class="orc-paginacao">
           <span class="orc-paginacao__texto dr-det__conta">${fmt(de)}–${fmt(ate)} de ${fmt(ls.length)} OS</span>
@@ -11152,7 +11413,7 @@ window.Telas.desviosRecomendacao = (function () {
       +r.doseRec.toFixed(3), +r.doseApl.toFixed(3), +((r.doseApl / r.doseRec - 1) * 100).toFixed(1),
       +r.qtdRec.toFixed(1), +r.qtdApl.toFixed(1), +((r.qtdApl / r.qtdRec - 1) * 100).toFixed(1), r.executor])];
     const livro = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(livro, XLSX.utils.aoa_to_sheet(linhas), 'desvios');
+    XLSX.utils.book_append_sheet(livro, XLSX.utils.aoa_to_sheet(Util.semColunaEmpresa(linhas)), 'desvios');
     XLSX.writeFile(livro, `desvios-recomendacao_${Util.hojeISO()}.xlsx`);
   }
 
@@ -11708,13 +11969,14 @@ window.Telas.faltaProdutos = (function () {
   // aplicada · Desvio Qtd (%)), no formato do Detalhamento por OS dos Desvios de dose. Abre do maior para o menor
   // desvio; todas as colunas ordenam (1º clique crescente, 2º decrescente); 5 OS por página.
   const OS_POR_PAGINA = 5;
-  const COLUNAS_OS = [
+  // Sem o nível Empresa (Util.comEmpresa), sem a coluna Empresa
+  const COLUNAS_OS = Util.semEmpresa([
     ['os', 'Nº OS', (r) => r.os], ['criacao', 'Data de criação', (r) => r.executada || ''], ['fechamento', 'Data de fechamento', (r) => r.fechamento || ''],
     ['safra', 'Safra', (r) => r.safra], ['empresa', 'Empresa', (r) => r.empresa],
     ['fazenda', 'Fazenda', (r) => r.fazenda], ['talhao', 'Talhão', (r) => r.talhao], ['operacao', 'Operação', (r) => r.operacao],
     ['produto', 'Produto', (r) => r.produto], ['qtdRec', 'Quantidade recomendada', (r) => r.qtdRec, 'tabela__numero'],
     ['qtdApl', 'Quantidade aplicada', (r) => r.qtdApl, 'tabela__numero'], ['desvio', 'Desvio Qtd (%)', (r) => r.qtdApl / r.qtdRec - 1, 'dr-centro']
-  ];
+  ]);
   // Cor do desvio: as faixas dos Desvios de dose (abaixo do recomendado, sem desvio, até 10%, 10-20%, acima de 20%)
   const faixaOS = (d) => (d < -1e-9 ? 'abaixo' : Math.abs(d) <= 1e-9 ? 'sem' : d <= 0.10 ? 'ate10' : d <= 0.20 ? '10a20' : 'acima20');
   // Quantidade da OS: abaixo de 100, com uma casa (6,3 kg e 7,2 kg; sem ela, as duas apareceriam como 6 kg)
@@ -11745,7 +12007,7 @@ window.Telas.faltaProdutos = (function () {
             const d = r.qtdApl / r.qtdRec - 1;
             return `
             <tr title="Fechada em ${Util.data(r.fechamento)} · ${Util.escapar(r.executor)}">
-              <td>${Util.escapar(r.os)}</td><td>${r.executada ? Util.data(r.executada) : '—'}</td><td>${r.fechamento ? Util.data(r.fechamento) : '—'}</td><td>${Util.escapar(r.safra)}</td><td>${Util.escapar(r.empresa)}</td><td>${Util.escapar(r.fazenda)}</td>
+              <td>${Util.escapar(r.os)}</td><td>${r.executada ? Util.data(r.executada) : '—'}</td><td>${r.fechamento ? Util.data(r.fechamento) : '—'}</td><td>${Util.escapar(r.safra)}</td>${Util.comEmpresa() ? `<td>${Util.escapar(r.empresa)}</td>` : ''}<td>${Util.escapar(r.fazenda)}</td>
               <td>${Util.escapar(r.talhao)}</td><td>${Util.escapar(r.operacao)}</td><td>${Util.escapar(r.produto)}</td>
               <td class="tabela__numero">${qtdOS(r.qtdRec, r.unidade)}</td><td class="tabela__numero">${qtdOS(r.qtdApl, r.unidade)}</td>
               <td class="dr-centro"><span class="dr-etiqueta dr-cor--${faixaOS(d)}">${pctOS(d)}</span></td></tr>`;
@@ -12114,19 +12376,32 @@ window.Telas.orcamento = (function () {
   // ----- Compra do insumo: data da compra e custo digitado (só na memória, como o resto do protótipo) -----
   // Custo do cadastro: data simulada, entre 30 e 119 dias antes de hoje (fixa por produto). Custo digitado na tabela
   // (Por produto): etiqueta "Manual" e a data do dia em que foi digitado.
-  const compras = {}; // produto → { data: 'aaaa-mm-dd', manual: true }
+  // Fornecedor (09/11/2026): o da última compra (simulado, fixo por produto); com custo ou fornecedor digitado, o digitado
+  // (até digitar, fica o da última compra) e os dois com a etiqueta "Manual".
+  const compras = {}; // produto → { data: 'aaaa-mm-dd', manual: true, fornecedor }
   function dataSimulada(produto) {
     const n = [...produto].reduce((s, c) => (s * 31 + c.charCodeAt(0)) % 9973, 7);
     const d = new Date(`${Util.hojeISO()}T12:00`);
     d.setDate(d.getDate() - (30 + (n % 90)));
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   }
-  const compraDe = (produto) => compras[produto] || { data: dataSimulada(produto), manual: false };
+  function fornecedorSimulado(produto) {
+    const lista = DADOS.fornecedores || [];
+    const n = [...produto].reduce((s, c) => (s * 17 + c.charCodeAt(0)) % 7919, 3);
+    return lista.length ? lista[n % lista.length] : '';
+  }
+  const compraDe = (produto) => compras[produto] || { data: dataSimulada(produto), manual: false, fornecedor: fornecedorSimulado(produto) };
+  // Fornecedor da linha: sem preço (nenhuma compra) e sem digitar, vazio
+  const fornecedorDe = (l) => (compraDe(l.produto).manual || l.unitario !== null ? compraDe(l.produto).fornecedor : '');
+  // Fornecedor digitado: etiqueta Manual (no custo também) e a data de hoje
+  function gravarFornecedor(produto, nome) {
+    compras[produto] = { ...compraDe(produto), fornecedor: nome, data: Util.hojeISO(), manual: true };
+  }
   // Grava o custo unitário digitado, na moeda que está à mostra (sementes: em reais, como no cadastro)
   function gravarCusto(produto, grupo, valor) {
     if (grupo === 'Sementes') DADOS.precosSementes[produto] = emReais(valor, moeda);
     else DADOS.precosInsumos[produto] = [moeda, valor];
-    compras[produto] = { data: Util.hojeISO(), manual: true };
+    compras[produto] = { data: Util.hojeISO(), manual: true, fornecedor: compraDe(produto).fornecedor };
   }
   const grupoDe = (cad) => DADOS.grupoInsumoPorClasse[cad.classe] || (cad.fertilidade ? 'Fertilizantes' : 'Defensivos');
 
@@ -12155,7 +12430,7 @@ window.Telas.orcamento = (function () {
           const germ = (Planos.germinacaoLinha(op, t.nome, pl) || 100) / 100;
           const emb = DADOS.embalagemSemente[p.cultura] || DADOS.embalagemSemente.Soja;
           const preco = DADOS.precosSementes[pl.variedade];
-          itens.push({ ...base, produto: pl.variedade, grupo: 'Sementes', unidade: emb.texto,
+          itens.push({ ...base, produto: pl.variedade, grupo: 'Sementes', unidade: emb.texto, unidadeDose: `${emb.nome}/ha`, areaAplicada: areaVar,
             quantidade: pl.populacao * 1000 * areaVar / germ / emb.sementes, moedaPreco: 'R$', preco: preco ?? null });
         });
         const ajuste = op.talhoes && op.talhoes[t.nome];
@@ -12163,7 +12438,7 @@ window.Telas.orcamento = (function () {
         Planos.linhasTalhao(op, ajuste).forEach((linha) => {
           const cad = cadastroDe(linha.produto);
           const [moedaPreco, preco] = DADOS.precosInsumos[linha.produto] || ['R$', null];
-          itens.push({ ...base, produto: linha.produto, grupo: grupoDe(cad), unidade: linha.unidade || cad.unidade || '',
+          itens.push({ ...base, produto: linha.produto, grupo: grupoDe(cad), unidade: linha.unidade || cad.unidade || '', areaAplicada: t.area,
             quantidade: Planos.doseTalhao(op, ajuste, linha) * t.area, moedaPreco, preco });
         });
       })));
@@ -12244,7 +12519,7 @@ window.Telas.orcamento = (function () {
         </select>
       </div>
       ${multi('safra', 'Safra', 'Todas', 'selecionadas')}
-      ${multi('empresa', 'Empresa', 'Todas', 'selecionadas')}
+      ${Util.comEmpresa() ? multi('empresa', 'Empresa', 'Todas', 'selecionadas') : ''}
       ${multi('fazenda', 'Fazenda', 'Todas', 'selecionadas')}
       ${multi('talhao', 'Talhão', 'Todos', 'selecionados')}
       ${multi('cultura', 'Cultura', 'Todas', 'selecionadas')}
@@ -12396,7 +12671,7 @@ window.Telas.orcamento = (function () {
       x.custo += i.custo;
       mapa.set(chave, x);
     });
-    return [...mapa.values()].sort((a, b) => DADOS.empresas.indexOf(a.plano.empresa) - DADOS.empresas.indexOf(b.plano.empresa)
+    return [...mapa.values()].sort((a, b) => (Util.comEmpresa() ? DADOS.empresas.indexOf(a.plano.empresa) - DADOS.empresas.indexOf(b.plano.empresa) : 0)
       || a.plano.fazenda.localeCompare(b.plano.fazenda, 'pt-BR') || (cicloDe(a.plano) === 'Safrinha') - (cicloDe(b.plano) === 'Safrinha')
       || a.talhao.localeCompare(b.talhao, 'pt-BR', { numeric: true }));
   }
@@ -12456,11 +12731,13 @@ window.Telas.orcamento = (function () {
       ['estoque', 'Volume em estoque', (l) => l.estoque || null, true],
       ['comprar', 'Volume a ser comprado', (l) => l.comprar, true],
       ['unidade', 'Unidade', (l) => l.unidade],
+      ['fornecedor', 'Fornecedor', (l) => fornecedorDe(l) || null],
       ['unitario', 'Custo unitário', (l) => l.unitario, true],
       ['compra', 'Data da compra', (l) => (l.unitario === null ? null : compraDe(l.produto).data)],
       ['custo', 'Custo total', (l) => l.custo, true]
     ],
-    talhao: [
+    // Sem o nível Empresa (Util.comEmpresa), sem a coluna Empresa
+    talhao: Util.semEmpresa([
       ['safra', 'Safra', (l) => Util.posicaoSafra(l.plano.safra, DADOS.planos.map((p) => p.safra))],
       ['empresa', 'Empresa', (l) => l.plano.empresa],
       ['fazenda', 'Fazenda', (l) => l.plano.fazenda],
@@ -12469,9 +12746,29 @@ window.Telas.orcamento = (function () {
       ['area', 'Hectares', (l) => l.area, true],
       ['custo', 'Custo total', (l) => l.custo, true],
       ['porHa', `${moeda}/ha`, (l) => l.custo / l.area, true],
-      ['sacas', 'Custo em sacas', (l) => emSacas(l.custo, l.area, l.plano.cultura), true]
-    ]
+      ['sacas', 'Custo em sacas', (l) => emSacas(l.custo, l.area, l.plano.cultura), true],
+      // Última coluna (09/11/2026): a produtividade histórica do Planejamento, com as mesmas dicas
+      ['produtividade', 'Produtividade histórica (sc/ha)', (l) => mediaHistorica(historicoDe(l)), true, () => textoSafrasMedia()]
+    ])
   };
+
+  // ----- Produtividade histórica do talhão (a mesma do Planejamento): média das últimas 3 safras -----
+  const historicoDe = (l) => ((DADOS.historico || {})[l.plano.fazenda] || {})[l.talhao] || [];
+  const mediaHistorica = (h) => (h.length ? h.reduce((s, x) => s + x[2], 0) / h.length : null);
+  // Dica do título: as safras que entram na média ("Média das safras 23/24, 24/25 e 25/26")
+  function textoSafrasMedia() {
+    const safras = [...new Set(Object.values(DADOS.historico || {}).flatMap((f) => Object.values(f).flatMap((h) => h.map(([safra]) => safra))))].sort();
+    if (!safras.length) return 'Sem histórico de produtividade';
+    const lista = safras.length > 1 ? `${safras.slice(0, -1).join(', ')} e ${safras[safras.length - 1]}` : safras[0];
+    return `Média ${safras.length > 1 ? 'das safras' : 'da safra'} ${lista}`;
+  }
+  // Célula: a média, só o número; ao passar o mouse, safra a safra com a variedade de cada ano
+  function celulaHistorico(l) {
+    const h = historicoDe(l);
+    if (!h.length) return '—';
+    const safras = h.map(([safra, variedade, sc]) => `${safra} · ${variedade} · ${Math.round(sc)} sc/ha`).join('\n');
+    return `<span title="${esc(safras)}">${Math.round(mediaHistorica(h))}<span class="so-leitor"> (${esc(safras)})</span></span>`;
+  }
   // 1º clique crescente, 2º decrescente; vazios sempre no fim
   function ordenadas(ls) {
     const o = ordem[guiaDetalhe];
@@ -12487,12 +12784,12 @@ window.Telas.orcamento = (function () {
   }
   function cabecalhoDetalhe() {
     const o = ordem[guiaDetalhe];
-    return `<tr>${COLUNAS[guiaDetalhe].map(([coluna, rotulo, , num]) => {
+    return `<tr>${COLUNAS[guiaDetalhe].map(([coluna, rotulo, , num, dica]) => {
       const ativa = o && o.coluna === coluna;
       const sentido = ativa ? o.sentido : null;
       return `
         <th class="${num ? 'tabela__numero' : ''}" ${ativa ? `aria-sort="${sentido === 'asc' ? 'ascending' : 'descending'}"` : ''}>
-          <span class="titulo-coluna"><span>${rotulo}</span>
+          <span class="titulo-coluna"><span ${dica ? `title="${esc(dica())}"` : ''}>${rotulo}</span>
             <button class="titulo-ordenar ${ativa ? 'titulo-ordenar--ativo' : ''} ${sentido === 'desc' ? 'titulo-ordenar--desc' : ''}" type="button"
                     data-orc-ordenar="${coluna}" title="Ordenar por ${rotulo.toLowerCase()}"
                     aria-label="Ordenar por ${rotulo.toLowerCase()}${ativa ? (sentido === 'asc' ? ', crescente' : ', decrescente') : ''}">${ativa ? Icones.acima : Icones.ordenar}</button>
@@ -12516,6 +12813,17 @@ window.Telas.orcamento = (function () {
       </span>`;
   }
 
+  // Fornecedor editável na célula (como o custo); digitado ou com o custo digitado: etiqueta "Manual"
+  function celulaFornecedor(l) {
+    const manual = compraDe(l.produto).manual;
+    return `<span class="orc-custo orc-fornecedor">
+        <input class="celula orc-fornecedor__campo" type="text" autocomplete="off" maxlength="60"
+               data-orc-fornecedor="${esc(l.produto)}" placeholder="Fornecedor"
+               value="${esc(fornecedorDe(l))}" aria-label="Fornecedor de ${esc(l.produto)}">
+        ${manual ? '<span class="orc-custo__manual" title="Informado no orçamento">Manual</span>' : ''}
+      </span>`;
+  }
+
   function tabelaDetalhe(itens) {
     const vazio = (n) => `<tr><td class="tabela__vazia" colspan="${n}">Nada encontrado.</td></tr>`;
     if (guiaDetalhe === 'produto') {
@@ -12529,9 +12837,10 @@ window.Telas.orcamento = (function () {
             <td class="tabela__numero">${l.estoque ? quantidade(l.estoque) : '—'}</td>
             <td class="tabela__numero">${quantidade(l.comprar)}</td>
             <td class="orc-tabela__unidade">${esc(l.unidade)}</td>
+            <td class="tabela__editavel">${celulaFornecedor(l)}</td>
             <td class="tabela__numero tabela__editavel">${celulaCusto(l)}</td>
             <td class="orc-tabela__compra">${l.unitario === null ? '—' : Util.data(compraDe(l.produto).data)}</td>
-            <td class="tabela__numero">${dinheiro(l.custo)}</td></tr>`).join('') : vazio(9)}</tbody>
+            <td class="tabela__numero">${dinheiro(l.custo)}</td></tr>`).join('') : vazio(COLUNAS.produto.length)}</tbody>
         </table></div>${paginacao(ls.length)}`;
     }
     const ls = ordenadas(doTalhao(itens));
@@ -12539,10 +12848,11 @@ window.Telas.orcamento = (function () {
       <div class="tabela-rolagem"><table class="tabela orc-tabela">
         <thead>${cabecalhoDetalhe()}</thead>
         <tbody>${ls.length ? daPagina(ls).map((l) => `<tr>
-          <td>${esc(l.plano.safra)}</td><td>${esc(l.plano.empresa)}</td><td>${esc(l.plano.fazenda)}</td>
+          <td>${esc(l.plano.safra)}</td>${Util.comEmpresa() ? `<td>${esc(l.plano.empresa)}</td>` : ''}<td>${esc(l.plano.fazenda)}</td>
           <td>${esc(l.plano.cultura)}</td><td>${esc(l.talhao)}</td><td class="tabela__numero">${fmt(l.area)}</td>
           <td class="tabela__numero">${dinheiro(l.custo)}</td><td class="tabela__numero">${dinheiro(l.custo / l.area)}</td>
-          <td class="tabela__numero">${textoSacas(emSacas(l.custo, l.area, l.plano.cultura), l.plano.cultura)}</td></tr>`).join('') : vazio(9)}</tbody>
+          <td class="tabela__numero">${textoSacas(emSacas(l.custo, l.area, l.plano.cultura), l.plano.cultura)}</td>
+          <td class="tabela__numero">${celulaHistorico(l)}</td></tr>`).join('') : vazio(COLUNAS.talhao.length)}</tbody>
       </table></div>${paginacao(ls.length)}`;
   }
 
@@ -12552,18 +12862,19 @@ window.Telas.orcamento = (function () {
     const m = moeda;
     const dois = (n) => +n.toFixed(2);
     const linhas = guiaDetalhe === 'produto'
-      ? [['Grupo de insumo', 'Produto', 'Necessidade de consumo', 'Volume em estoque', 'Volume a ser comprado', 'Unidade', `Custo unitário (${m})`, 'Data da compra', 'Custo manual', `Custo total (${m})`],
-        ...ordenadas(doProduto(itens)).map((l) => [l.grupo, l.produto, dois(l.necessidade), dois(l.estoque), dois(l.comprar), l.unidade,
+      ? [['Grupo de insumo', 'Produto', 'Necessidade de consumo', 'Volume em estoque', 'Volume a ser comprado', 'Unidade', 'Fornecedor', `Custo unitário (${m})`, 'Data da compra', 'Custo manual', `Custo total (${m})`],
+        ...ordenadas(doProduto(itens)).map((l) => [l.grupo, l.produto, dois(l.necessidade), dois(l.estoque), dois(l.comprar), l.unidade, fornecedorDe(l),
           l.unitario === null ? '' : dois(exibir(l.unitario)), l.unitario === null ? '' : Util.data(compraDe(l.produto).data),
           compraDe(l.produto).manual ? 'Sim' : '', dois(exibir(l.custo))])]
-      : [['Safra', 'Empresa', 'Fazenda', 'Cultura', 'Talhão', 'Hectares', `Custo total (${m})`, `${m}/ha`, 'Custo em sacas (por ha)'],
+      : [['Safra', 'Empresa', 'Fazenda', 'Cultura', 'Talhão', 'Hectares', `Custo total (${m})`, `${m}/ha`, 'Custo em sacas (por ha)', 'Produtividade histórica (sc/ha)'],
         ...ordenadas(doTalhao(itens)).map((l) => {
           const s = emSacas(l.custo, l.area, l.plano.cultura);
           return [l.plano.safra, l.plano.empresa, l.plano.fazenda, l.plano.cultura, l.talhao, l.area,
-            dois(exibir(l.custo)), dois(exibir(l.custo / l.area)), s === null ? '' : +s.toFixed(1)];
+            dois(exibir(l.custo)), dois(exibir(l.custo / l.area)), s === null ? '' : +s.toFixed(1),
+            historicoDe(l).length ? Math.round(mediaHistorica(historicoDe(l))) : ''];
         })];
     const livro = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(livro, XLSX.utils.aoa_to_sheet(linhas), guiaDetalhe === 'produto' ? 'por_produto' : 'por_talhao');
+    XLSX.utils.book_append_sheet(livro, XLSX.utils.aoa_to_sheet(Util.semColunaEmpresa(linhas)), guiaDetalhe === 'produto' ? 'por_produto' : 'por_talhao');
     XLSX.writeFile(livro, `orcamento-insumos-${filtros.anoAgricola}-${guiaDetalhe === 'produto' ? 'por-produto' : 'por-talhao'}.xlsx`);
   }
 
@@ -12776,9 +13087,22 @@ window.Telas.orcamento = (function () {
       corpo.querySelector(`[data-orc-custo="${CSS.escape(produto)}"]`)?.focus();
       Aviso.mostrar(`Custo de ${esc(produto)} atualizado`);
     });
+    // Fornecedor digitado: grava ao sair do campo (ou Enter); vazio volta ao que estava
+    corpo.addEventListener('change', (e) => {
+      const campo = e.target.closest('[data-orc-fornecedor]');
+      if (!campo) return;
+      const nome = campo.value.trim();
+      if (!nome) { campo.value = campo.defaultValue; return; }
+      const produto = campo.dataset.orcFornecedor;
+      gravarFornecedor(produto, nome);
+      atualizarCorpo();
+      corpo.querySelector(`[data-orc-fornecedor="${CSS.escape(produto)}"]`)?.focus();
+      Aviso.mostrar(`Fornecedor de ${esc(produto)} atualizado`);
+    });
     corpo.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && e.target.matches('[data-orc-custo]')) { e.preventDefault(); e.target.blur(); }
-      if (e.key === 'Escape' && e.target.matches('[data-orc-custo]')) { e.target.value = e.target.defaultValue; e.target.blur(); }
+      const editavel = e.target.matches('[data-orc-custo], [data-orc-fornecedor]');
+      if (e.key === 'Enter' && editavel) { e.preventDefault(); e.target.blur(); }
+      if (e.key === 'Escape' && editavel) { e.target.value = e.target.defaultValue; e.target.blur(); }
     });
     corpo.addEventListener('change', (e) => {
       if (!e.target.matches('[data-orc-por-pagina]')) return;
@@ -12821,16 +13145,13 @@ window.Telas.indicadores = (function () {
   const data = (iso) => new Date(`${iso}T12:00`);
   const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   const somaDias = (i, n) => { const d = data(i); d.setDate(d.getDate() + n); return iso(d); };
-  const dias = (a, b) => Math.round((data(b) - data(a)) / 86400000);
   const diaMes = (i) => { const d = data(i); return `${String(d.getDate()).padStart(2, '0')}/${MESES[d.getMonth()]}`; };
   const diaMesAno = (i) => `${diaMes(i)}/${data(i).getFullYear()}`;
-  // Período previsto: { datas: "17/dez/2026 – 14/jan/2027", duracao: "Duração: 29 dias" } (contando os dois dias)
+  // Período previsto: { datas: "17/dez/2026 – 14/jan/2027" }
   function periodo(datas) {
     if (!datas.length) return null;
     const ord = [...datas].sort();
-    const [ini, fim] = [ord[0], ord[ord.length - 1]];
-    const n = dias(ini, fim) + 1;
-    return { datas: `${diaMesAno(ini)} – ${diaMesAno(fim)}`, duracao: `Duração: ${fmt(n)} ${n === 1 ? 'dia' : 'dias'}` };
+    return { datas: `${diaMesAno(ord[0])} – ${diaMesAno(ord[ord.length - 1])}` };
   }
 
   // ----- Plantio e colheita: uma linha por variedade de cada talhão (área, data de plantio, previsão de colheita) -----
@@ -12843,7 +13164,7 @@ window.Telas.indicadores = (function () {
         if (!l.variedade) return null;
         const v = DADOS.variedades.find((x) => x.nome === l.variedade);
         const area = Planos.areaLinhaPlantio(linhas, i, t.area) || 0;
-        return { area, plantio: l.data || null, colheita: l.data && v && v.ciclo ? somaDias(l.data, v.ciclo) : null };
+        return { variedade: l.variedade, area, plantio: l.data || null, colheita: l.data && v && v.ciclo ? somaDias(l.data, v.ciclo) : null };
       }).filter(Boolean);
     });
   }
@@ -12875,14 +13196,21 @@ window.Telas.indicadores = (function () {
   function barras(linhas, campo, gran) {
     const comData = linhas.filter((l) => l[campo]);
     if (!comData.length) return [];
+    // Por período, a área total e a de cada variedade (a barra se divide pelas variedades; 09/11/2026)
     const soma = new Map();
-    comData.forEach((l) => { const k = inicioPeriodo(l[campo], gran); soma.set(k, (soma.get(k) || 0) + l.area); });
+    const partes = new Map();
+    comData.forEach((l) => {
+      const k = inicioPeriodo(l[campo], gran);
+      soma.set(k, (soma.get(k) || 0) + l.area);
+      const p = partes.get(k) || new Map();
+      p.set(l.variedade, (p.get(l.variedade) || 0) + l.area);
+      partes.set(k, p);
+    });
     const chaves = [...soma.keys()].sort();
-    if (gran === 'dia') return chaves.map((k) => ({ inicio: k, rotulo: rotuloPeriodo(k, gran), area: soma.get(k) }));
+    const item = (k) => ({ inicio: k, rotulo: rotuloPeriodo(k, gran), area: soma.get(k) || 0, partes: partes.get(k) || new Map() });
+    if (gran === 'dia') return chaves.map(item);
     const lista = [];
-    for (let k = chaves[0]; k <= chaves[chaves.length - 1]; k = proximoPeriodo(k, gran)) {
-      lista.push({ inicio: k, rotulo: rotuloPeriodo(k, gran), area: soma.get(k) || 0 });
-    }
+    for (let k = chaves[0]; k <= chaves[chaves.length - 1]; k = proximoPeriodo(k, gran)) lista.push(item(k));
     return lista;
   }
 
@@ -12900,19 +13228,26 @@ window.Telas.indicadores = (function () {
     const mapa = new Map();
     Telas.orcamento.consumoDoPlano(ctx.plano, ctx.plano.grupos, ctx.talhoes).forEach((i) => {
       if (!i.quantidade) return;
-      const x = mapa.get(i.produto) || { grupo: i.grupo, produto: i.produto, unidade: i.unidade, necessidade: 0 };
+      const x = mapa.get(i.produto) || { grupo: i.grupo, produto: i.produto, unidade: i.unidade, necessidade: 0, area: 0,
+        unidadeDose: i.unidadeDose || (String(i.unidade).includes('/') ? i.unidade : `${i.unidade}/ha`) };
       x.necessidade += i.quantidade;
+      x.area += i.areaAplicada || 0;
       mapa.set(i.produto, x);
     });
-    return [...mapa.values()];
+    // Dose média (09/11/2026): a necessidade de consumo ÷ a área planejada do produto (a soma das áreas de cada aplicação)
+    return [...mapa.values()].map((x) => ({ ...x, doseMedia: x.area ? x.necessidade / x.area : null }));
   }
   // Colunas: [id, título, valor para ordenar, número?]. Sem escolha: na ordem dos grupos de insumo e do produto
   const COLUNAS = [
     ['grupo', 'Grupo de insumo', (l) => l.grupo],
     ['produto', 'Produto', (l) => l.produto],
     ['necessidade', 'Necessidade de consumo', (l) => l.necessidade, true],
-    ['unidade', 'Unidade', (l) => l.unidade]
+    ['unidade', 'Unidade do produto', (l) => l.unidade],
+    ['doseMedia', 'Dose média', (l) => l.doseMedia ?? -1, true],
+    ['unidadeDose', 'Unidade da dose', (l) => l.unidadeDose]
   ];
+  // Dose: duas casas ("0,40"); de 100 para cima, sem casas
+  const textoDose = (n) => (n === null ? '—' : fmt(n, n >= 100 ? 0 : 2));
   function ordenados(ls, ordem) {
     const texto = (a, b) => String(a).localeCompare(String(b), 'pt-BR', { numeric: true });
     if (!ordem) return [...ls].sort((a, b) => texto(a.grupo, b.grupo) || texto(a.produto, b.produto));
@@ -12946,13 +13281,13 @@ window.Telas.indicadores = (function () {
     }
     return `
       <section class="ind">
-        <h2 class="ind__titulo">Indicadores do planejamento</h2>
-        <p class="ind__sub">Visão consolidada da área e dos períodos previstos do plano de safra.</p>
+        <!-- Sem o título "Indicadores do planejamento" e o subtítulo (09/11/2026): tudo cabe na tela, sem rolar -->
         <div class="ind-cartoes">
+          ${cartaoArea(linhas, ctx)}
           ${cartao(Icones.broto, 'Plantio', periodo(plantadas.map((l) => l.plantio)), 'Nenhum talhão com data de plantio ainda.')}
           ${cartao(Icones.colheita, 'Colheita', periodo(comColheita.map((l) => l.colheita)), 'Sem previsão: falta a data de plantio ou o ciclo da variedade.')}
         </div>
-        ${grafico(linhas, est)}
+        ${grafico(linhas, est, ctx.plano.cultura)}
       </section>`;
   }
 
@@ -12992,7 +13327,35 @@ window.Telas.indicadores = (function () {
   // Grupos de insumo na ordem do cadastro (os que não estão no cadastro, no fim) e a classe da cor de cada um
   const posGrupo = (g) => { const i = DADOS.gruposInsumo.indexOf(g); return i < 0 ? 99 : i; };
   const classeGrupo = (g) => Util.normalizar(g).replace(/[^a-z0-9]+/g, '-');
-  // Plantio e Colheita: o período previsto e a duração; sem datas, um traço e o motivo
+  // Área planejada (09/11/2026): a área com variedade no Plantio, de quanto é a área de cultivo do plano (os talhões
+  // incluídos, na área planejada de cada um) e o percentual. Ex.: "650 ha" · "de 983 ha · 66,1%"
+  function cartaoArea(linhas, ctx) {
+    const planejada = linhas.reduce((s, l) => s + l.area, 0);
+    const total = ctx.talhoes.reduce((s, t) => s + t.area, 0);
+    const ha = (n) => `${n.toLocaleString('pt-BR', { maximumFractionDigits: 1 })} ha`;
+    const fracao = total ? Math.min(1, planejada / total) : 0;
+    const pct = (fracao * 100).toLocaleString('pt-BR', { maximumFractionDigits: 1 });
+    // Organização (09/11/2026, imagem da usuária): ícone e título em cima; a área à esquerda e o % à direita; a barra
+    // de 0 a 100% embaixo, na largura toda
+    return `
+      <div class="cartao ind-cartao ind-cartao--area">
+        <h3 class="ind-cartao__titulo ind-area__titulo"><span class="ind-cartao__icone" aria-hidden="true">${Icones.pizza}</span>Área planejada</h3>
+        <div class="ind-area__linha">
+          <div>
+            <p class="ind-area__valor" title="Área com variedade no Plantio">${ha(planejada)}</p>
+            <p class="ind-cartao__detalhe">de ${ha(total)} previstos no plano</p>
+          </div>
+          <div class="ind-area__pct">
+            <p class="ind-area__pct-valor">${pct}%</p>
+            <p class="ind-cartao__detalhe">planejado</p>
+          </div>
+        </div>
+        <div class="ind-progresso" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(fracao * 100)}"
+             aria-label="Área planejada: ${pct}% da área prevista no plano"><span style="width: ${fracao * 100}%"></span></div>
+      </div>`;
+  }
+
+  // Plantio e Colheita: o período previsto (sem a duração em dias, 09/11/2026); sem datas, um traço e o motivo
   function cartao(icone, titulo, per, semDatas) {
     return `
       <div class="cartao ind-cartao">
@@ -13001,7 +13364,7 @@ window.Telas.indicadores = (function () {
           <h3 class="ind-cartao__titulo">${titulo}</h3>
           <p class="ind-cartao__rotulo">Período previsto</p>
           <p class="ind-cartao__valor">${per ? per.datas : '—'}</p>
-          <p class="ind-cartao__detalhe">${per ? per.duracao : semDatas}</p>
+          ${per ? '' : `<p class="ind-cartao__detalhe">${semDatas}</p>`}
         </div>
       </div>`;
   }
@@ -13010,8 +13373,16 @@ window.Telas.indicadores = (function () {
   // mouse, o período e a área. Plantio | Colheita no estilo das guias do Detalhamento do orçamento (texto sublinhado).
   // À direita, "Nível" e a lista Mês · Quinzena · Dia; o gráfico mostra o período inteiro. No Dia, só os dias com área,
   // cada um com a sua data; se não couberem na largura, as barras rolam na horizontal
-  function grafico(linhas, est) {
+  function grafico(linhas, est, cultura) {
     const lista = barras(linhas, est.serie, est.gran);
+    // Variedades do gráfico, na ordem do cadastro (a mesma da cor), para a pilha e a legenda
+    const ordemVar = DADOS.variedades.filter((v) => v.cultura === cultura).map((v) => v.nome);
+    const posVar = (n) => { const i = ordemVar.indexOf(n); return i < 0 ? 999 : i; };
+    const variedades = [...new Set(lista.flatMap((b) => [...b.partes.keys()]))].sort((a, b) => posVar(a) - posVar(b) || a.localeCompare(b, 'pt-BR'));
+    const cor = (v) => Util.corVariedade(v, cultura);
+    const pilha = (b) => variedades.filter((v) => b.partes.get(v)).map((v) => `
+      <span class="ind-grafico__parte" style="height: ${b.partes.get(v) / b.area * 100}%; background: ${cor(v)}"
+            title="${esc(v)}: ${ha(b.partes.get(v))}"></span>`).join('');
     const { topo, passo } = escala(Math.max(0, ...lista.map((b) => b.area)));
     const marcas = [];
     for (let v = 0; v <= topo + 1e-9; v += passo) marcas.push(v);
@@ -13023,7 +13394,7 @@ window.Telas.indicadores = (function () {
     const coluna = Math.max(est.gran === 'dia' ? 46 : 0, (area - 110) / Math.max(1, lista.length));
     const girado = lista.some((b) => b.rotulo.length * 6.6 + 8 > coluna);
     return `
-      <section class="cartao ind-secao" aria-labelledby="ind-titulo-tempo">
+      <section class="cartao ind-secao ind-secao--area" aria-labelledby="ind-titulo-tempo">
         <div class="ind-secao__topo">
           <h3 class="ind-secao__titulo" id="ind-titulo-tempo">Distribuição da área planejada</h3>
           <nav class="orc-guias" aria-label="Série do gráfico">
@@ -13049,13 +13420,16 @@ window.Telas.indicadores = (function () {
                 <div class="ind-grafico__coluna" title="${b.rotulo}: ${ha(b.area)}">
                   <div class="ind-grafico__barra-area">
                     ${b.area ? `<span class="ind-grafico__valor" style="bottom: ${b.area / topo * 100}%">${fmt(Math.round(b.area))}</span>` : ''}
-                    <span class="ind-grafico__barra" style="height: ${b.area / topo * 100}%"></span>
+                    <span class="ind-grafico__barra ind-grafico__barra--pilha" style="height: ${b.area / topo * 100}%">${pilha(b)}</span>
                   </div>
                   <span class="ind-grafico__rotulo">${b.rotulo}</span>
                 </div>`).join('')}
             </div>
           </div>
-        </div>`}
+        </div>
+        <ul class="ind-var-legenda" aria-label="Variedades">
+          ${variedades.map((v) => `<li><span class="ind-var-legenda__cor" style="background: ${cor(v)}" aria-hidden="true"></span>${esc(v)}</li>`).join('')}
+        </ul>`}
       </section>`;
   }
 
@@ -13087,7 +13461,9 @@ window.Telas.indicadores = (function () {
             <th class="${numero ? 'tabela__numero' : ''}"><span class="titulo-coluna"><span>${rot}</span>${seta(id)}</span></th>`).join('')}</tr></thead>
           <tbody>${pagina.map((l) => `<tr>
             <td>${esc(l.grupo)}</td><td>${esc(l.produto)}</td>
-            <td class="tabela__numero">${quantidade(l.necessidade)}</td><td>${esc(l.unidade)}</td></tr>`).join('')}</tbody>
+            <td class="tabela__numero">${quantidade(l.necessidade)}</td><td>${esc(l.unidade)}</td>
+            <td class="tabela__numero" title="${l.area ? `${esc(quantidade(l.necessidade))} ${esc(l.unidade)} ÷ ${esc(fmt(l.area, l.area >= 100 ? 0 : 1))} ha planejados` : ''}">${textoDose(l.doseMedia)}</td>
+            <td>${esc(l.unidadeDose)}</td></tr>`).join('')}</tbody>
         </table></div>
         <div class="orc-paginacao">
           <label class="orc-paginacao__por">Itens por página
@@ -13106,8 +13482,9 @@ window.Telas.indicadores = (function () {
   function exportar(ctx) {
     const est = estadoPadrao(ctx);
     const p = ctx.plano;
-    const linhas = [['Grupo de insumo', 'Produto', 'Necessidade de consumo', 'Unidade'],
-      ...ordenados(produtos(ctx).filter(passaProduto(est)), est.ordem).map((l) => [l.grupo, l.produto, +l.necessidade.toFixed(2), l.unidade])];
+    const linhas = [['Grupo de insumo', 'Produto', 'Necessidade de consumo', 'Unidade do produto', 'Dose média', 'Unidade da dose'],
+      ...ordenados(produtos(ctx).filter(passaProduto(est)), est.ordem).map((l) => [l.grupo, l.produto, +l.necessidade.toFixed(2), l.unidade,
+        l.doseMedia === null ? '' : +l.doseMedia.toFixed(3), l.unidadeDose])];
     const limpo = (t) => Util.normalizar(t).replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
     const livro = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(livro, XLSX.utils.aoa_to_sheet(linhas), 'planejamento_produto');
@@ -13277,6 +13654,15 @@ window.Telas.validacao = (function () {
         const k = talhoes.filter((t) => recebe(g, op, t) && falta(t)).length;
         if (k) lista.push({ chave: `${versao}|${chave}|${op.id}`, nome: op.nome, texto: medida(k, problema), corrigir: { op } });
       });
+      // 5. Área do talhão alterada no Editar talhões (09/11/2026), com o plantio já feito: as variedades foram
+      // ajustadas na mesma proporção; uma pendência por talhão, até ser ignorada (a revisão foi feita)
+      if (g.tipo === 'Sementes' && op.areaAlterada) {
+        talhoes.filter((t) => op.areaAlterada[t.nome] && recebe(g, op, t)).forEach((t) => {
+          const { de, para } = op.areaAlterada[t.nome];
+          lista.push({ chave: `${versao}|area|${op.id}|${t.nome}|${para}`, nome: `${op.nome} · ${t.nome}`,
+            texto: `área alterada de ${TabelaAreas.fmt(de)} para ${TabelaAreas.fmt(para)}. Revise as áreas das variedades.`, corrigir: { op } });
+        });
+      }
       // 4. Operação sem DAP, com recomendação em algum talhão (o DAP é da operação; no Plantio é sempre 0)
       if (n && semDap(op) && g.tipo !== 'Sementes') {
         lista.push({ chave: `${versao}|sem-dap|${op.id}`, nome: op.nome, texto: medida(n, 'sem DAP'), corrigir: { op } });
@@ -13457,9 +13843,11 @@ window.Telas.validacao = (function () {
 /*
  * Modal "Como deseja iniciar o plano?"
  * Abre por cima da Visão Geral ao abrir um plano ainda não iniciado (só a versão 0.1, vazia: Versoes.aIniciar).
- * Opções: Usar modelo de operações · Importar planilha Excel · Copiar outro plano de safra (uma embaixo da outra).
+ * Opções: Usar modelo de operações · Copiar outro plano de safra · Importar planilha Excel (uma embaixo da outra).
  * "Começar o planejamento" cria a 0.2 em construção com esse conteúdo (Versoes.comecar) e abre o plano no Planejamento.
  * Cancelar ou X: fecha sem iniciar (o plano continua não iniciado).
+ * Também é a etapa 2 do Criar Plano de Safra (09/11/2026; Telas.abrirModalCriarPlano): embutir() desenha as opções
+ * dentro dele, para o plano que ainda vai nascer (rascunho: safra, fazenda, cultura, talhões e áreas).
  */
 window.Telas = window.Telas || {};
 
@@ -13469,12 +13857,16 @@ window.Telas.inicioPlano = (function () {
   const OPCOES = [
     { valor: 'modelo', titulo: 'Usar modelo de operações', icone: Icones.lista,
       texto: 'Use uma lista de operações e ajuste conforme necessário.' },
-    { valor: 'importar', titulo: 'Importar planilha Excel', icone: Icones.planilha,
-      texto: 'Continue um plano exportado por este sistema.' },
+    // Ordem (09/11/2026): Usar modelo · Copiar outro plano · Importar planilha
     { valor: 'copiar', titulo: 'Copiar outro plano de safra', icone: Icones.copiar,
-      texto: 'Copie um plano de safra da mesma cultura.' }
+      texto: 'Copie um plano de safra da mesma cultura.' },
+    { valor: 'importar', titulo: 'Importar planilha Excel', icone: Icones.planilha,
+      texto: 'Continue um plano exportado por este sistema.' }
   ];
-  const CAMPOS = [['safra', 'Safra'], ['empresa', 'Empresa'], ['fazenda', 'Fazenda'], ['cultura', 'Cultura']];
+  // Sem o nível Empresa (Util.comEmpresa), a Empresa não aparece nem é conferida no arquivo importado
+  const CAMPOS = [['safra', 'Safra'], ['empresa', 'Empresa'], ['fazenda', 'Fazenda'], ['cultura', 'Cultura']]
+    .filter(([c]) => c !== 'empresa' || Util.comEmpresa());
+  const empresaTexto = (empresa) => (Util.comEmpresa() ? `${esc(empresa)} · ` : '');
 
   // Estado da escolha, por plano (só enquanto a página está aberta)
   const estados = {};
@@ -13523,7 +13915,7 @@ window.Telas.inicioPlano = (function () {
       <div class="modal__corpo">
         <button class="modal__fechar" type="button" aria-label="Fechar" data-fechar>${Icones.fechar}</button>
         <h2 class="modal__titulo" id="modal-titulo">Como deseja iniciar o plano?</h2>
-        <p class="modal__subtitulo">Safra ${esc(plano.safra)} · ${esc(plano.empresa)} · Fazenda ${esc(plano.fazenda)} · ${esc(plano.cultura)}</p>
+        <p class="modal__subtitulo">Safra ${esc(plano.safra)} · ${empresaTexto(plano.empresa)}Fazenda ${esc(plano.fazenda)} · ${esc(plano.cultura)}</p>
         <div data-ini-corpo></div>
       </div>
       <div class="modal__rodape">
@@ -13551,7 +13943,7 @@ window.Telas.inicioPlano = (function () {
         <label class="campo__rotulo" for="ini-arquivo">Arquivo exportado pelo Plano de Safra (.xlsx) <span class="obrigatorio" aria-hidden="true">*</span></label>
         <input class="importar__arquivo" id="ini-arquivo" type="file" accept=".xlsx" data-ini="arquivo">
         ${e.erroArquivo ? `<p class="erro-campo" role="alert">${esc(e.erroArquivo)}</p>` : ''}
-        ${c ? `<p class="importar__ok">Planejamento da safra ${esc(c.safra)} · ${esc(c.empresa)} · Fazenda ${esc(c.fazenda)} · ${esc(c.cultura)}</p>` : ''}
+        ${c ? `<p class="importar__ok">Planejamento da safra ${esc(c.safra)} · ${empresaTexto(c.empresa)}Fazenda ${esc(c.fazenda)} · ${esc(c.cultura)}</p>` : ''}
         ${dif.length && !e.aceitou ? `
           <div class="importar__diferencas" role="alert">
             <p class="importar__titulo">${Icones.alerta} O arquivo é de outro plano</p>
@@ -13576,7 +13968,7 @@ window.Telas.inicioPlano = (function () {
             <option value="" disabled ${e.copiarDe ? '' : 'selected'}>Selecione um plano de ${esc(plano.cultura)}</option>
             ${lista.map(({ p, v }) => `
               <option value="${p.id}" ${String(p.id) === e.copiarDe ? 'selected' : ''}>
-                Safra ${esc(p.safra)} · ${esc(p.empresa)} · Fazenda ${esc(p.fazenda)} · versão ${esc(v.num)}
+                Safra ${esc(p.safra)} · ${empresaTexto(p.empresa)}Fazenda ${esc(p.fazenda)} · versão ${esc(v.num)}
               </option>`).join('')}
           </select>
           <p class="inicio-plano__nota">Copia a última versão publicada do plano escolhido: grupos de operação, operações, recomendações com produtos e doses padrão.</p>
@@ -13637,7 +14029,16 @@ window.Telas.inicioPlano = (function () {
     }
   }
 
-  return { abrir };
+  // Etapa 2 do Criar Plano: desenha as opções em "caixa" e liga os eventos em "el" (que tem o botão
+  // data-ini="comecar"). Devolve desenhar(), para desenhar de novo ao voltar à etapa.
+  function embutir(el, caixa, plano, { aoComecar }) {
+    delete estados[plano.id];
+    const redesenhar = () => { caixa.innerHTML = desenhar(plano); };
+    ligar(el, plano, { redesenhar, aoComecar: (grupos, aviso) => aoComecar(grupos, aviso) });
+    return redesenhar;
+  }
+
+  return { abrir, embutir };
 })();
 
 </script>
@@ -13957,7 +14358,7 @@ window.Telas.planoOperacoes = (function () {
   // primeiro item é link: volta à lista, com os filtros como estavam) | Versão 0.2 [status] e, embaixo, as abas e, à direita,
   // "Salvo às…", o botão da versão (Publicar versão ou Criar nova versão) e "Mais ações" (DECISOES 4.1.1)
   function cabecalho() {
-    const contexto = [`Safra ${plano.safra}`, plano.empresa, `Fazenda ${plano.fazenda}`, `Cultura ${plano.cultura}`].join(' · ');
+    const contexto = [`Safra ${plano.safra}`, ...(Util.comEmpresa() ? [plano.empresa] : []), `Fazenda ${plano.fazenda}`, `Cultura ${plano.cultura}`].join(' · ');
     const v = Versoes.aberta(plano);
     return `
       <header class="plano__cabecalho">
@@ -13988,7 +14389,7 @@ window.Telas.planoOperacoes = (function () {
     `;
   }
 
-  // Botão da versão: em construção, "Salvo às…" e Publicar versão (só na aba Validação); publicada, Criar nova
+  // Botão da versão: em construção, "Salvo às…" e Atualizar planejamento (antes Publicar versão; só na aba Validação); publicada, Criar nova
   // versão, em todas as abas (com o aviso quando já existe outra em construção)
   function acoesVersao() {
     if (somenteLeitura) {
@@ -14007,7 +14408,7 @@ window.Telas.planoOperacoes = (function () {
     }
     return `
       ${estadoSalvo()}
-      ${etapa === 'revisao' ? '<button class="botao botao--primario botao--p" type="button" data-acao="ver-publicar">Publicar versão</button>' : ''}`;
+      ${etapa === 'revisao' ? '<button class="botao botao--primario botao--p" type="button" data-acao="ver-publicar">Atualizar planejamento</button>' : ''}`;
   }
 
   // "Mais ações ▾": Editar talhões (só na versão em construção) · Exportar (.xlsx) · Trocar versão
@@ -14101,13 +14502,14 @@ window.Telas.planoOperacoes = (function () {
       case 'ver-publicar': {
         const num = plano.versaoAberta;
         // Pendências da Validação que não foram corrigidas nem ignoradas: não impedem; o título diz quantas são
-        // ("Publicar versão 0.2 com 22 pendências?") e o botão vira "Publicar mesmo assim"
+        // ("Publicar versão 0.2 com 22 pendências?"). Botão "Confirmar Atualização" (09/11/2026; antes "Publicar mesmo
+        // assim" ou "Publicar versão")
         const { total } = Telas.validacao.naoTratadas(ctxEstrutura());
         Modal.confirmar({
           titulo: total ? `Publicar versão ${esc(num)} com ${total} ${total === 1 ? 'pendência' : 'pendências'}?` : `Publicar versão ${esc(num)}?`,
           texto: total ? 'A versão não poderá mais ser editada após a publicação. Para fazer alterações, será necessário criar uma nova versão.'
             : 'A versão será registrada no histórico e não poderá mais ser editada. Para realizar novas alterações, será necessário criar uma nova versão.',
-          botoes: [{ rotulo: 'Cancelar' }, { rotulo: total ? 'Publicar mesmo assim' : 'Publicar versão', classe: 'primario', acao: () => {
+          botoes: [{ rotulo: 'Cancelar' }, { rotulo: 'Confirmar Atualização', classe: 'primario', acao: () => {
             Versoes.publicar(plano);
             abrirVersao(num);
             Aviso.mostrar(`Versão ${esc(num)} publicada`);
@@ -14126,9 +14528,10 @@ window.Telas.planoOperacoes = (function () {
   }
 
   // ----- Editar talhões (Mais ações; só na versão em construção) -----
-  // Modal com todos os talhões da fazenda (como no Criar Plano). Aplicar: os incluídos entram sem planejamento;
-  // os removidos levam o planejamento deles (plantio, germinação, recomendações e doses). Com algum removido já
-  // planejado, confirma antes. Depois, Desfazer (volta os talhões com o planejamento que tinham).
+  // Modal com todos os talhões da fazenda e a área planejada de cada um (TabelaAreas, como no Criar Plano; 09/11/2026).
+  // Aplicar: os incluídos entram sem planejamento; os removidos levam o planejamento deles (plantio, germinação,
+  // recomendações e doses). Com algum removido já planejado, confirma antes. Área mudada num talhão com plantio: as
+  // variedades se ajustam na mesma proporção e a Validação pede revisão (Plantio). Depois, Desfazer.
   function talhaoPlanejado(nome) {
     return plano.grupos.some((g) => g.operacoes.some((op) => (op.talhoes && op.talhoes[nome]) || (op.plantio && op.plantio[nome])));
   }
@@ -14136,58 +14539,55 @@ window.Telas.planoOperacoes = (function () {
   function editarTalhoes() {
     const todos = DADOS.talhoes[plano.fazenda] || [];
     const antes = talhoesFazenda.map((t) => t.nome);
-    let marcados = new Set(antes);
+    const areasAntes = { ...(plano.areas || {}) };
+    const est = { todos, marcados: new Set(antes), areas: { ...areasAntes }, editando: null, erro: '' };
+    const opcoes = { antes, areasAntes, planejado: talhaoPlanejado };
     const modal = Modal.abrir(`
       <form class="formulario" novalidate>
         <div class="modal__corpo">
           <button class="modal__fechar" type="button" aria-label="Fechar" data-fechar>${Icones.fechar}</button>
           <h2 class="modal__titulo" id="modal-titulo">Editar talhões</h2>
-          <p class="modal__subtitulo">Inclua ou remova talhões da Fazenda ${esc(plano.fazenda)} no plano de safra.</p>
-          <div class="et-lista" data-et-lista></div>
+          <p class="modal__subtitulo">Inclua ou remova talhões da Fazenda ${esc(plano.fazenda)} e ajuste a área planejada quando necessário.</p>
+          <div data-et-tabela></div>
           <p class="et-resumo" data-et-resumo aria-live="polite"></p>
         </div>
         <div class="modal__rodape">
           <button class="botao botao--secundario" type="button" data-fechar>Cancelar</button>
           <button class="botao botao--primario" type="submit">Aplicar</button>
         </div>
-      </form>`, { classe: 'modal--pequeno' });
+      </form>`, { classe: 'modal--formulario' });
     const form = modal.elemento.querySelector('form');
-    const desenharLista = () => {
-      const tudo = todos.length && todos.every((t) => marcados.has(t.nome));
-      form.querySelector('[data-et-lista]').innerHTML = `
-        <label class="et-item et-item--todos"><input type="checkbox" data-talhao="__todos__" ${tudo ? 'checked' : ''}
-          ${marcados.size && !tudo ? 'data-intermediario' : ''}> Todos</label>
-        ${todos.map((t) => `
-          <label class="et-item ${antes.includes(t.nome) && !marcados.has(t.nome) ? 'et-item--sai' : ''} ${!antes.includes(t.nome) && marcados.has(t.nome) ? 'et-item--entra' : ''}">
-            <input type="checkbox" data-talhao="${esc(t.nome)}" ${marcados.has(t.nome) ? 'checked' : ''}>
-            ${esc(t.nome)}
-            ${antes.includes(t.nome) && talhaoPlanejado(t.nome) ? '<span class="et-item__planejado" title="Este talhão já tem planejamento">planejado</span>' : ''}
-            <span class="et-item__area">${Util.area(t.area)}</span>
-          </label>`).join('')}`;
-      form.querySelectorAll('[data-intermediario]').forEach((c) => { c.indeterminate = true; });
-      const area = todos.filter((t) => marcados.has(t.nome)).reduce((s, t) => s + t.area, 0);
-      const entram = todos.filter((t) => marcados.has(t.nome) && !antes.includes(t.nome)).length;
-      const saem = antes.filter((n) => !marcados.has(n)).length;
-      form.querySelector('[data-et-resumo]').innerHTML = `
-        <span><strong>${marcados.size} de ${todos.length} talhões</strong> · Área de cultivo: ${marcados.size ? Util.area(area) : 'Pendente'}</span>
-        ${entram || saem ? `<span class="et-resumo__mudanca">${[entram ? `${entram} ${entram === 1 ? 'incluído' : 'incluídos'}` : '', saem ? `${saem} ${saem === 1 ? 'removido' : 'removidos'}` : ''].filter(Boolean).join(' · ')}</span>` : ''}`;
+    const caixa = form.querySelector('[data-et-tabela]');
+    const areaDe = (a, t) => a[t.nome] ?? t.area;
+    const mudancas = () => {
+      const entram = todos.filter((t) => est.marcados.has(t.nome) && !antes.includes(t.nome)).map((t) => t.nome);
+      const saem = antes.filter((n) => !est.marcados.has(n));
+      const alteradas = todos.filter((t) => antes.includes(t.nome) && est.marcados.has(t.nome) && areaDe(est.areas, t) !== areaDe(areasAntes, t));
+      return { entram, saem, alteradas };
     };
-    desenharLista();
-    form.addEventListener('change', (e) => {
-      const nome = e.target.dataset.talhao;
-      if (!nome) return;
-      if (nome === '__todos__') marcados = new Set(e.target.checked ? todos.map((t) => t.nome) : []);
-      else if (e.target.checked) marcados.add(nome); else marcados.delete(nome);
-      desenharLista();
-    });
+    const desenhar = (foco) => {
+      caixa.innerHTML = TabelaAreas.html(est, opcoes);
+      TabelaAreas.depois(caixa);
+      if (foco) caixa.querySelector(foco)?.focus();
+      const { entram, saem, alteradas } = mudancas();
+      const partes = [entram.length ? `${entram.length} ${entram.length === 1 ? 'incluído' : 'incluídos'}` : '',
+        saem.length ? `${saem.length} ${saem.length === 1 ? 'removido' : 'removidos'}` : '',
+        alteradas.length ? `${alteradas.length} ${alteradas.length === 1 ? 'área alterada' : 'áreas alteradas'}` : ''].filter(Boolean);
+      form.querySelector('[data-et-resumo]').innerHTML = `
+        <span><strong>${est.marcados.size} de ${todos.length} talhões</strong></span>
+        ${partes.length ? `<span class="et-resumo__mudanca">${partes.join(' · ')}</span>` : ''}`;
+    };
+    TabelaAreas.ligar(caixa, est, desenhar);
+    desenhar();
     form.addEventListener('submit', (e) => {
       e.preventDefault();
-      const saem = antes.filter((n) => !marcados.has(n));
-      const entram = todos.filter((t) => marcados.has(t.nome) && !antes.includes(t.nome)).map((t) => t.nome);
+      if (est.editando) return; // a área em edição está com erro
+      const { entram, saem, alteradas } = mudancas();
       modal.fechar();
-      if (!saem.length && !entram.length) return;
+      if (!saem.length && !entram.length && !alteradas.length) return;
       const planejados = saem.filter(talhaoPlanejado);
-      const aplicar = () => aplicarTalhoes(todos.filter((t) => marcados.has(t.nome)).map((t) => t.nome), saem, entram);
+      const aplicar = () => aplicarTalhoes(todos.filter((t) => est.marcados.has(t.nome)).map((t) => t.nome), saem, entram,
+        { ...est.areas }, alteradas.map((t) => t.nome));
       if (!planejados.length) { aplicar(); return; }
       const nomes = planejados.length === 1 ? planejados[0] : `${planejados.slice(0, -1).join(', ')} e ${planejados[planejados.length - 1]}`;
       Modal.confirmar({
@@ -14198,14 +14598,53 @@ window.Telas.planoOperacoes = (function () {
     });
   }
 
-  function aplicarTalhoes(novos, saem, entram) {
-    const voltar = { grupos: structuredClone(plano.grupos), talhoes: plano.talhoes ? [...plano.talhoes] : null };
+  // Área do talhão no plano: a planejada (areas) ou a cadastrada
+  function areaNoPlano(areas, nome) {
+    const t = (DADOS.talhoes[plano.fazenda] || []).find((x) => x.nome === nome);
+    return (areas || {})[nome] ?? (t ? t.area : null);
+  }
+
+  // Área do talhão mudou: no Plantio, as variedades com área informada se ajustam na mesma proporção (o % fica; a
+  // última fecha a conta) e a operação guarda a mudança (areaAlterada: { T03: { de, para } }), que a Validação mostra
+  // como pendência até ser ignorada. Talhão sem variedade não tem o que revisar. Devolve se ajustou alguma variedade.
+  function ajustarPlantio(nome, de, para) {
+    let ajustou = false;
+    plano.grupos.filter((g) => g.tipo === 'Sementes').forEach((g) => g.operacoes.forEach((op) => {
+      const linhas = Planos.linhasPlantio(op, nome);
+      if (!linhas.some((l) => l.variedade)) return;
+      const comArea = linhas.filter((l) => l.area !== null && l.area !== undefined && l.area !== '');
+      if (comArea.length && de) {
+        const fecha = comArea.length === linhas.length;
+        let soma = 0;
+        comArea.forEach((l, i) => {
+          if (fecha && i === comArea.length - 1) l.area = Math.round((para - soma) * 10) / 10;
+          else { l.area = Math.round(Number(l.area) * para / de * 10) / 10; soma += l.area; }
+        });
+        ajustou = true;
+      }
+      op.areaAlterada = op.areaAlterada || {};
+      const original = op.areaAlterada[nome] ? op.areaAlterada[nome].de : de;
+      if (original === para) delete op.areaAlterada[nome];
+      else op.areaAlterada[nome] = { de: original, para };
+    }));
+    return ajustou;
+  }
+
+  function aplicarTalhoes(novos, saem, entram, areas = plano.areas, alteradas = []) {
+    const voltar = { grupos: structuredClone(plano.grupos), talhoes: plano.talhoes ? [...plano.talhoes] : null,
+      areas: plano.areas ? { ...plano.areas } : null };
+    const areasAntes = plano.areas;
     plano.talhoes = novos;
+    // Só as áreas dos talhões que ficam
+    const novasAreas = Object.fromEntries(Object.entries(areas || {}).filter(([n]) => novos.includes(n)));
+    plano.areas = Object.keys(novasAreas).length ? novasAreas : null;
     plano.grupos.forEach((g) => g.operacoes.forEach((op) => saem.forEach((n) => {
       if (op.talhoes) delete op.talhoes[n];
       if (op.plantio) delete op.plantio[n];
       if (op.germinacoes) delete op.germinacoes[n];
+      if (op.areaAlterada) delete op.areaAlterada[n];
     })));
+    const variedades = alteradas.map((n) => ajustarPlantio(n, areaNoPlano(areasAntes, n), areaNoPlano(plano.areas, n))).some(Boolean);
     const atualizar = () => {
       talhoesFazenda = Util.talhoesPlano(plano);
       limparSelecao();
@@ -14215,9 +14654,10 @@ window.Telas.planoOperacoes = (function () {
     };
     atualizar();
     const partes = [entram.length ? `${entram.length} ${entram.length === 1 ? 'incluído' : 'incluídos'}` : '',
-      saem.length ? `${saem.length} ${saem.length === 1 ? 'removido' : 'removidos'}` : ''].filter(Boolean).join(', ');
-    Aviso.mostrar(`Talhões atualizados: ${partes}`, { acao: 'Desfazer', aoAgir: () => {
-      plano.grupos = voltar.grupos; plano.talhoes = voltar.talhoes;
+      saem.length ? `${saem.length} ${saem.length === 1 ? 'removido' : 'removidos'}` : '',
+      alteradas.length ? `${alteradas.length} ${alteradas.length === 1 ? 'área alterada' : 'áreas alteradas'}` : ''].filter(Boolean).join(', ');
+    Aviso.mostrar(`Talhões atualizados: ${partes}${variedades ? '. Áreas das variedades ajustadas à nova área do talhão' : ''}`, { acao: 'Desfazer', aoAgir: () => {
+      plano.grupos = voltar.grupos; plano.talhoes = voltar.talhoes; plano.areas = voltar.areas;
       if (raiz.isConnected) atualizar(); else { Versoes.salvar(plano); }
     } });
   }
@@ -15993,7 +16433,7 @@ window.Telas.planoOperacoes = (function () {
       : l.data ? `${dataCompleta(l.data)}${alertaData ? ` ${alertaData}` : ''}` : vazio;
     const colheita = prev ? dataCompleta(prev) : semCiclo(l) ? '<span class="texto-alerta">Informe o ciclo</span>' : vazio;
     const populacao = editar
-      ? `<span class="celula-linha celula-linha--numero"><span data-cel="alerta-pop">${alertaPop}</span>${campo('tb-populacao', pop ? numeroTexto(pop) : '', 'celula--numero', 'População', 'inputmode="decimal"')}</span>`
+      ? `<span class="celula-linha celula-linha--numero"><span data-cel="alerta-pop">${alertaPop}</span>${campo('tb-populacao', pop ? numeroTexto(pop) : '', 'celula--numero', 'População', 'inputmode="numeric" maxlength="3"')}</span>`
       : pop ? `${alertaPop ? `${alertaPop} ` : ''}${numeroTexto(pop)}` : vazio;
     // Germinação: a da variedade da linha (começa em 95%)
     const germinacao = editar
@@ -16157,7 +16597,7 @@ window.Telas.planoOperacoes = (function () {
             <p class="pt-variedades__disp ${disponivel < -0.001 ? 'pt-variedades__disp--erro' : ''}">${disponivel < -0.001
               ? `Passa ${numeroTexto(-disponivel)} ha da área do talhão` : `${numeroTexto(Math.max(0, disponivel))} ha disponíveis para planejamento`}</p>
             <div class="pt-var" role="table" aria-label="Variedades planejadas">
-              <div class="pt-var__cab" role="row">${titulo('Variedade')}${titulo('Área (%)')}${titulo('Data de plantio')}<span role="columnheader" class="pt-var__titulo" title="População de plantas (mil plantas/ha)">Pop. mil/ha</span>
+              <div class="pt-var__cab" role="row">${titulo('Variedade')}${titulo('Área (ha)')}${titulo('Data de plantio')}<span role="columnheader" class="pt-var__titulo" title="População de plantas (mil plantas/ha)">Pop. mil/ha</span>
                 ${titulo('Germinação (%)')}
                 <span role="columnheader"><span class="so-leitor">Ações</span></span></div>
               ${linhas.length ? linhas.map((l, vi) => linhaVariedadePainel(op, t, ed, l, vi, false)).join('')
@@ -16167,8 +16607,7 @@ window.Telas.planoOperacoes = (function () {
               <button class="botao pt-var__adicionar" type="button" data-acao="pt-adicionar-variedade">${Icones.mais} Adicionar variedade</button>
               <div class="painel-talhao__botoes">
                 ${estadoPainel(ed, talhao)}
-                <button class="botao botao--texto" type="button" data-acao="pt-cancelar" ${ed.alterado ? '' : 'disabled'}
-                        title="Descartar as alterações e voltar ao que está salvo">Cancelar</button>
+                <button class="botao botao--texto" type="button" data-acao="pt-cancelar" title="Fechar o painel">Cancelar</button>
                 <button class="botao botao--primario pt-salvar" type="button" data-acao="pt-salvar" ${ed.alterado ? '' : 'disabled'}>Salvar</button>
               </div>`}
           </section>
@@ -16192,9 +16631,8 @@ window.Telas.planoOperacoes = (function () {
     const germ = l.germinacao;
     const fora = foraDaJanela(v, l.data);
     const exemploPop = exemploPopulacao(v);
-    // Área (%) do talhão: com uma variedade, 100% (o talhão inteiro) ou a parte informada
-    const areaLinha = Planos.areaLinhaPlantio(ed.linhas.length ? ed.linhas : [l], 0, t.area);
-    const pctTalhao = areaLinha && t.area ? Math.round(areaLinha / t.area * 1000) / 10 : 100;
+    // Área (ha) da variedade no talhão (09/11/2026; antes em %): com uma variedade, o talhão inteiro ou a parte informada
+    const areaLinha = Planos.areaLinhaPlantio(ed.linhas.length ? ed.linhas : [l], 0, t.area) ?? t.area;
     const leitura = (valor) => `<p class="pt-form__valor">${valor}</p>`;
     return `
       <aside class="cartao painel-talhao painel-talhao--resumido" aria-label="Talhão ${esc(talhao)}">
@@ -16213,10 +16651,10 @@ window.Telas.planoOperacoes = (function () {
                 : campoVariedade('pt', { id: 'pt-variedade-0', talhao, vi: 0, nome: l.variedade, rotulo: 'Variedade' })}
             </div>
             <div class="campo pt-form__campo">
-              <label class="campo__rotulo" for="pt-area-0">Área (%)</label>
-              ${somenteLeitura ? leitura(numeroTexto(pctTalhao)) : `
+              <label class="campo__rotulo" for="pt-area-0">Área (ha)</label>
+              ${somenteLeitura ? leitura(numeroTexto(areaLinha)) : `
                 <input class="campo__controle" id="pt-area-0" data-campo="pt-area" data-var="0" type="text" inputmode="decimal"
-                       autocomplete="off" placeholder="100" value="${numeroTexto(pctTalhao)}" aria-label="Área (% do talhão)">`}
+                       autocomplete="off" placeholder="${numeroTexto(t.area)}" value="${numeroTexto(areaLinha)}" aria-label="Área da variedade (ha)">`}
             </div>
             <div class="campo pt-form__campo">
               <label class="campo__rotulo" for="pt-data-0">Data de plantio</label>
@@ -16232,7 +16670,7 @@ window.Telas.planoOperacoes = (function () {
             <div class="campo pt-form__campo">
               <label class="campo__rotulo" for="pt-populacao-0" title="População de plantas (mil plantas/ha)">Pop. mil/ha</label>
               ${somenteLeitura ? leitura(l.populacao ? numeroTexto(l.populacao) : '—') : `
-                <input class="campo__controle" id="pt-populacao-0" data-campo="pt-populacao" data-var="0" type="text" inputmode="decimal"
+                <input class="campo__controle" id="pt-populacao-0" data-campo="pt-populacao" data-var="0" type="text" inputmode="numeric" maxlength="3"
                        autocomplete="off" placeholder="Ex.: ${exemploPop}" value="${l.populacao ? numeroTexto(l.populacao) : ''}">`}
             </div>
             <div class="campo pt-form__campo">
@@ -16253,8 +16691,7 @@ window.Telas.planoOperacoes = (function () {
             <button class="botao pt-var__adicionar" type="button" data-acao="pt-adicionar-variedade">${Icones.mais} Adicionar variedade</button>
             <div class="painel-talhao__botoes">
               ${estadoPainel(ed, talhao)}
-              <button class="botao botao--secundario" type="button" data-acao="pt-cancelar" ${ed.alterado ? '' : 'disabled'}
-                      title="Descartar as alterações e voltar ao que está salvo">Cancelar</button>
+              <button class="botao botao--secundario" type="button" data-acao="pt-cancelar" title="Fechar o painel">Cancelar</button>
               <button class="botao botao--primario" type="button" data-acao="pt-salvar" ${ed.alterado ? '' : 'disabled'}>Salvar</button>
             </div>`}
           <nav class="painel-talhao__navegar" aria-label="Navegar entre talhões">
@@ -16276,8 +16713,8 @@ window.Telas.planoOperacoes = (function () {
     const erro = ed.erros[vi];
     const textoData = ed.datas[vi];
     const ciclo = v ? `<small>${v.ciclo ? `Ciclo de ${v.ciclo} dias` : 'Ciclo não informado'}</small>` : '';
-    // Área em % do talhão (guardada em ha)
-    const pct = area !== null && area !== undefined && t && t.area ? Math.round(area / t.area * 1000) / 10 : null;
+    // Área em ha (09/11/2026; antes em % do talhão)
+    const pct = area !== null && area !== undefined ? Math.round(area * 100) / 100 : null;
     const prev = previsaoColheita(l);
     const colheita = !largo ? '' : `<span role="cell"><span class="pt-var__calc" title="Calculada: data de plantio + ciclo da variedade">${prev ? dataCompleta(prev) : semCiclo(l) ? '<span class="texto-alerta">Informe o ciclo</span>' : '—'}</span></span>`;
     if (somenteLeitura) {
@@ -16294,7 +16731,7 @@ window.Telas.planoOperacoes = (function () {
     const opcoes = variedadesDaCultura().slice().sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
       .map((x) => `<option value="${esc(x.nome)}" ${x.nome === l.variedade ? 'selected' : ''}>${esc(x.nome)}${x.preCadastro ? ' (pré-cadastro)' : ''}</option>`).join('');
     const numero = (campo, valor, exemplo, rotulo) => `<input class="celula celula--numero" id="${campo}-${vi}" data-campo="${campo}" data-var="${vi}"
-             type="text" inputmode="decimal" autocomplete="off" placeholder="${exemplo}" value="${valor}" aria-label="${rotulo} da variedade ${vi + 1}">`;
+             type="text" ${campo === 'pt-populacao' ? 'inputmode="numeric" maxlength="3"' : 'inputmode="decimal"'} autocomplete="off" placeholder="${exemplo}" value="${valor}" aria-label="${rotulo} da variedade ${vi + 1}">`;
     const faltaArea = ed.linhas.length > 1 && (area === null || area === undefined);
     const fora = foraDaJanela(v, l.data);
     return `
@@ -16305,7 +16742,7 @@ window.Telas.planoOperacoes = (function () {
           </select>
           ${ciclo}
         </span>
-        <span role="cell">${numero('pt-area', pct !== null ? numeroTexto(pct) : '', faltaArea ? 'Informe' : '—', 'Área (% do talhão)')}</span>
+        <span role="cell">${numero('pt-area', pct !== null ? numeroTexto(pct) : '', faltaArea ? 'Informe' : '—', 'Área (ha)')}</span>
         <span role="cell" class="pt-var__data">
           <span class="pt-var__campo-data">
             <input class="celula ${textoData ? 'celula--erro' : ''}" id="pt-data-${vi}" data-campo="pt-data" data-var="${vi}" type="text" inputmode="numeric"
@@ -16345,11 +16782,11 @@ window.Telas.planoOperacoes = (function () {
     ed.linhas.forEach((l, vi) => {
       if (!l.variedade) ed.erros[vi] = 'Escolha a variedade.';
       else if (ed.datas[vi]) ed.erros[vi] = 'Data inválida. Use dd/mm/aaaa.';
-      else if (ed.linhas.length > 1 && !(Number(l.area) > 0)) ed.erros[vi] = 'Informe a área desta variedade (%).';
+      else if (ed.linhas.length > 1 && !(Number(l.area) > 0)) ed.erros[vi] = 'Informe a área desta variedade (ha).';
       else if (l.germinacao !== null && l.germinacao !== undefined && !(l.germinacao > 0 && l.germinacao <= 100)) ed.erros[vi] = 'Germinação: informe de 1 a 100.';
     });
     const soma = ed.linhas.reduce((x, l, vi) => x + (Planos.areaLinhaPlantio(ed.linhas, vi, total) || 0), 0);
-    if (!Object.keys(ed.erros).length && soma > total + 0.001) ed.erros[ed.linhas.length - 1] = `A soma das variedades passa de 100% da área do ${t}.`;
+    if (!Object.keys(ed.erros).length && soma > total + 0.001) ed.erros[ed.linhas.length - 1] = `A soma das variedades passa da área do ${t} (${numeroTexto(total)} ha).`;
     if (Object.keys(ed.erros).length) { desenharTudo(); return; }
     const linhas = ed.linhas.map((l) => ({ variedade: l.variedade, data: l.data || '', populacao: l.populacao || null,
       area: ed.linhas.length === 1 && (l.area === null || Number(l.area) === total) ? null : Number(l.area), germinacao: l.germinacao || Planos.germinacaoLinha(op, t, null),
@@ -16539,7 +16976,7 @@ window.Telas.planoOperacoes = (function () {
   // O mapa abre centrado no centróide dos talhões unidos. Clicar num talhão da fazenda abre o painel dele.
   const SATELITE = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
   // Cores das variedades: paleta categórica validada (ordem fixa; a cor segue a variedade, não a posição)
-  const CORES_VARIEDADE = ['#2a78d6', '#eb6834', '#1baf7a', '#eda100', '#e87ba4', '#008300', '#4a3aa7', '#e34948'];
+  // (a paleta fica em Util.CORES_VARIEDADE; o gráfico dos Indicadores usa as mesmas cores)
   const COR_NAO_PLANEJADO = '#d9dedb';
   const M_POR_GRAU = 111320;
   const geometriaCache = {};
@@ -16547,8 +16984,7 @@ window.Telas.planoOperacoes = (function () {
   let mexeuNoMapa = false; // a pessoa arrastou ou deu zoom
 
   function corVariedade(nome) {
-    const i = variedadesDaCultura().findIndex((v) => v.nome === nome);
-    return i >= 0 && i < CORES_VARIEDADE.length ? CORES_VARIEDADE[i] : '#6b7c8f';
+    return Util.corVariedade(nome, plano.cultura);
   }
 
   // Polígonos dos talhões da fazenda, gerados a partir das áreas (DADOS.geometriaFazendas):
@@ -16912,6 +17348,8 @@ window.Telas.planoOperacoes = (function () {
   // Lista de variedades com a participação de cada uma em % da área de cada talhão, a data de plantio e a população;
   // e a germinação (%), uma para todas. Ao aplicar, substitui as variedades dos talhões marcados (confirma se algum já
   // tinha plantio). A soma das % vai até 100.
+  // Um talhão só (09/11/2026): a área de cada variedade em ha (a soma vai até a área do talhão); vários, em %.
+  // O campo "pct" guarda o que está na tela: ha (emHa) ou %.
   function abrirPlantio(op) {
     const marcados = new Set(linhasMarcadas(op).map((m) => m.talhao));
     const talhoes = talhoesFazenda.filter((t) => marcados.has(t.nome)).map((t) => t.nome);
@@ -16924,8 +17362,11 @@ window.Telas.planoOperacoes = (function () {
     };
     const primeira = composicao(talhoes[0]);
     const igual = primeira.length && talhoes.every((t) => JSON.stringify(composicao(t)) === JSON.stringify(primeira));
-    ui.plantando = { talhoes, linhas: igual ? primeira.map((l) => ({ ...l, pct: numeroTexto(l.pct) }))
-      : [{ ...linhaPlantioModal(op), pct: '100' }],
+    const emHa = talhoes.length === 1;
+    const totalHa = areaTalhaoDe(talhoes[0]);
+    const naTela = (pct) => (emHa ? Math.round(totalHa * pct / 100 * 100) / 100 : pct);
+    ui.plantando = { talhoes, emHa, linhas: igual ? primeira.map((l) => ({ ...l, pct: numeroTexto(naTela(l.pct)) }))
+      : [{ ...linhaPlantioModal(op), pct: numeroTexto(naTela(100)) }],
       datasTexto: {}, erros: {} };
     desenharMantendoFoco('.definir');
   }
@@ -16936,16 +17377,20 @@ window.Telas.planoOperacoes = (function () {
   }
 
   const somaPct = (pl) => pl.linhas.reduce((s, l) => s + (Util.numero(l.pct) || 0), 0);
+  // Total da composição: a área do talhão (ha, um talhão só) ou 100 (%); casas de arredondamento
+  const totalPlantio = (pl) => (pl.emHa ? areaTalhaoDe(pl.talhoes[0]) : 100);
+  const casasPlantio = (pl) => (pl.emHa ? 2 : 1);
+  const unidadePlantio = (pl) => (pl.emHa ? ' ha' : '%');
   // % digitada numa variedade do modal: as outras se ajustam na proporção (sempre 100%). Devolve se mudou algo.
   function ajustarPctModal(vi) {
     const pl = ui.plantando;
     if (!pl || pl.linhas.length < 2 || !(pl.linhas[vi].pct || '').trim()) return false;
-    partesProporcionais(pl.linhas.map((l) => Util.numero(l.pct) || 0), 100, 1, vi).forEach((p, i) => { pl.linhas[i].pct = numeroTexto(p); });
+    partesProporcionais(pl.linhas.map((l) => Util.numero(l.pct) || 0), totalPlantio(pl), casasPlantio(pl), vi).forEach((p, i) => { pl.linhas[i].pct = numeroTexto(p); });
     delete pl.erros.composicao;
     // Sem área: a linha fica em vermelho, com a mensagem, e o aviso aparece na hora
     const zeradas = pl.linhas.map((l, i) => i).filter((i) => !(Util.numero(pl.linhas[i].pct) > 0));
     pl.linhas.forEach((l, i) => { delete pl.erros[`pct${i}`]; });
-    zeradas.forEach((i) => { pl.erros[`pct${i}`] = `Variedade ${i + 1}: ficou com 0% da área. Ajuste a % ou exclua a variedade.`; });
+    zeradas.forEach((i) => { pl.erros[`pct${i}`] = `Variedade ${i + 1}: ficou sem área. Ajuste a área ou exclua a variedade.`; });
     avisarSemArea(zeradas.map((i) => pl.linhas[i].variedade));
     return true;
   }
@@ -16969,14 +17414,14 @@ window.Telas.planoOperacoes = (function () {
           </div>
           <div class="campo composicao__pct">
             <input class="campo__controle ${classeErro(`pct${vi}`)}" data-campo="pl-pct" data-var="${vi}" type="text" inputmode="decimal"
-                   autocomplete="off" placeholder="%" value="${esc(l.pct || '')}" aria-label="Participação da variedade ${vi + 1} (% da área de cada talhão)">
+                   autocomplete="off" placeholder="${pl.emHa ? 'ha' : '%'}" value="${esc(l.pct || '')}" aria-label="${pl.emHa ? `Área da variedade ${vi + 1} (ha)` : `Participação da variedade ${vi + 1} (% da área de cada talhão)`}">
           </div>
           <div class="campo composicao__data">
             ${campoData(`pl-data-${vi}`, 'pl-data', l.data, pl.datasTexto[vi] ?? null, pl.erros[`data${vi}`] || '')
               .replace('data-campo="pl-data"', `data-campo="pl-data" data-var="${vi}"`).replace('data-campo="pl-data-cal"', `data-campo="pl-data-cal" data-var="${vi}"`)}
           </div>
           <div class="campo composicao__pop">
-            <input class="campo__controle ${classeErro(`populacao${vi}`)}" data-campo="pl-populacao" data-var="${vi}" type="text" inputmode="decimal"
+            <input class="campo__controle ${classeErro(`populacao${vi}`)}" data-campo="pl-populacao" data-var="${vi}" type="text" inputmode="numeric" maxlength="3"
                    autocomplete="off" placeholder="Ex.: ${exemploPopulacao(v)}" value="${esc(l.populacao || '')}" aria-label="População da variedade ${vi + 1}">
           </div>
           <div class="campo composicao__germ">
@@ -17000,16 +17445,17 @@ window.Telas.planoOperacoes = (function () {
             <button class="botao-icone" type="button" data-acao="pl-fechar" aria-label="Fechar">${Icones.fechar}</button>
           </div>
           <div class="definir__corpo">
-            <p class="campo__ajuda plantio__orientacao">Informe as variedades e a participação de cada uma na área de cada talhão marcado. Ao aplicar, substitui as variedades desses talhões.</p>
+            <p class="campo__ajuda plantio__orientacao">${pl.emHa ? 'Informe as variedades e a área de cada uma no talhão. Ao aplicar, substitui as variedades do talhão.'
+              : 'Informe as variedades e a participação de cada uma na área de cada talhão marcado. Ao aplicar, substitui as variedades desses talhões.'}</p>
             <div class="composicao">
               <div class="composicao__linha composicao__cab" aria-hidden="true">
-                <span>Variedade</span><span>Área (%)</span><span>Data de plantio</span><span title="População de plantas (mil plantas/ha)">Pop. mil/ha</span><span>Germinação (%)</span><span></span>
+                <span>Variedade</span><span>${pl.emHa ? 'Área (ha)' : 'Área (%)'}</span><span>Data de plantio</span><span title="População de plantas (mil plantas/ha)">Pop. mil/ha</span><span>Germinação (%)</span><span></span>
               </div>
               ${linhas}
             </div>
             <div class="composicao__rodape">
               <button class="link-acao composicao__adicionar" type="button" data-acao="pl-adicionar">${Icones.mais} Adicionar variedade</button>
-              <span class="composicao__soma ${soma > 100.001 ? 'composicao__soma--erro' : ''}" data-pl-soma>Total: <strong>${numeroTexto(soma)}%</strong> da área</span>
+              <span class="composicao__soma ${soma > totalPlantio(pl) + 0.001 ? 'composicao__soma--erro' : ''}" data-pl-soma>${textoSomaPlantio(pl, soma)}</span>
             </div>
             ${erro('composicao')}
           </div>
@@ -17027,8 +17473,13 @@ window.Telas.planoOperacoes = (function () {
     const soma = somaPct(pl);
     const el = raiz.querySelector('[data-pl-soma]');
     if (!el) return;
-    el.innerHTML = `Total: <strong>${numeroTexto(soma)}%</strong> da área`;
-    el.classList.toggle('composicao__soma--erro', soma > 100.001);
+    el.innerHTML = textoSomaPlantio(pl, soma);
+    el.classList.toggle('composicao__soma--erro', soma > totalPlantio(pl) + 0.001);
+  }
+  // "Total: 100% da área" ou, num talhão só, "Total: 115 de 115 ha"
+  function textoSomaPlantio(pl, soma) {
+    return pl.emHa ? `Total: <strong>${numeroTexto(soma)} de ${numeroTexto(totalPlantio(pl))} ha</strong>`
+      : `Total: <strong>${numeroTexto(soma)}%</strong> da área`;
   }
 
   // Valida e substitui as variedades dos talhões marcados (confirma quando algum já tinha plantio)
@@ -17038,7 +17489,8 @@ window.Telas.planoOperacoes = (function () {
     pl.linhas.forEach((l, vi) => {
       if (!l.variedade) pl.erros[`variedade${vi}`] = `Variedade ${vi + 1}: escolha a variedade.`;
       const pct = Util.numero(l.pct);
-      if (!(pct > 0)) pl.erros[`pct${vi}`] = `Variedade ${vi + 1}: informe a participação em % (maior que zero).`;
+      if (!(pct > 0)) pl.erros[`pct${vi}`] = pl.emHa ? `Variedade ${vi + 1}: informe a área em ha (maior que zero).`
+        : `Variedade ${vi + 1}: informe a participação em % (maior que zero).`;
       if (pl.datasTexto[vi]) pl.erros[`data${vi}`] = 'Data inválida. Use dd/mm/aaaa.';
       if ((l.populacao || '').trim() && !(Util.numero(l.populacao) > 0)) pl.erros[`populacao${vi}`] = `Variedade ${vi + 1}: população maior que zero.`;
       const g = Util.numero(l.germinacao || '');
@@ -17046,17 +17498,18 @@ window.Telas.planoOperacoes = (function () {
     });
     const nomes = pl.linhas.map((l) => l.variedade).filter(Boolean);
     if (new Set(nomes).size !== nomes.length) pl.erros.composicao = 'A mesma variedade aparece duas vezes.';
-    if (somaPct(pl) > 100.001) pl.erros.composicao = 'A soma das participações passa de 100%.';
+    if (somaPct(pl) > totalPlantio(pl) + 0.001) pl.erros.composicao = pl.emHa ? `A soma das áreas passa da área do ${esc(pl.talhoes[0])} (${numeroTexto(totalPlantio(pl))} ha).`
+      : 'A soma das participações passa de 100%.';
     if (Object.keys(pl.erros).length) { desenharTudo(); return; }
     const aplicar = () => {
       pl.talhoes.forEach((t) => {
         const area = areaTalhaoDe(t);
         op.plantio[t] = pl.linhas.map((l) => ({ variedade: l.variedade, data: l.data || '', populacao: Util.numero(l.populacao || '') || null,
-          area: Math.round(area * Util.numero(l.pct) / 100 * 100) / 100, germinacao: Util.numero(l.germinacao || '') || Planos.germinacaoLinha(op, t, null),
+          area: pl.emHa ? Util.numero(l.pct) : Math.round(area * Util.numero(l.pct) / 100 * 100) / 100, germinacao: Util.numero(l.germinacao || '') || Planos.germinacaoLinha(op, t, null),
           ...(pl.linhas.length > 1 ? { areaDigitada: true } : {}) }));
       });
       const n = pl.talhoes.length;
-      const composicao = pl.linhas.map((l) => `${esc(l.variedade)} ${numeroTexto(Util.numero(l.pct))}%`).join(' + ');
+      const composicao = pl.linhas.map((l) => `${esc(l.variedade)} ${numeroTexto(Util.numero(l.pct))}${unidadePlantio(pl)}`).join(' + ');
       ui.plantando = null;
       ui.filtroTalhoes = 'todos';
       limparSelecao(); alterou(); desenharTudo();
@@ -17265,6 +17718,12 @@ window.Telas.planoOperacoes = (function () {
   }
 
   // Só números e uma vírgula decimal; o ponto digitado vira vírgula
+  // População (mil plantas/ha): só números inteiros, até 3 dígitos (09/11/2026)
+  function soPopulacao(el) {
+    const v = el.value.replace(/\D/g, '').slice(0, 3);
+    if (v !== el.value) el.value = v;
+    return v;
+  }
   function soNumero(el) {
     let v = el.value.replace(/\./g, ',').replace(/[^\d,]/g, '');
     const virgula = v.indexOf(',');
@@ -17354,7 +17813,8 @@ window.Telas.planoOperacoes = (function () {
       const mesmoPA = (d) => !!linha.principioAtivo && d.principioAtivo === linha.principioAtivo;
       opcoes = cadastro
         .filter((d) => d.produto && (trocando || !linha.principioAtivo || mesmoPA(d)) && bate(d.produto))
-        .sort((a, b) => (trocando ? Number(mesmoPA(b)) - Number(mesmoPA(a)) : 0))
+        // Em ordem alfabética (09/11/2026), como a variedade e o princípio ativo
+        .sort((a, b) => (trocando ? Number(mesmoPA(b)) - Number(mesmoPA(a)) : 0) || a.produto.localeCompare(b.produto, 'pt-BR'))
         .map((d) => ({ valor: d.produto, rotulo: `${esc(d.produto)}<span class="combo__sub">${esc(d.garantia || d.principioAtivo || '—')} · ${d.unidade}</span>`, pre: d.preCadastro }));
     }
     opcoes = opcoes.slice(0, 8);
@@ -17557,7 +18017,7 @@ window.Telas.planoOperacoes = (function () {
       case 'pl-adicionar': {
         const pl = ui.plantando;
         pl.linhas.push(linhaPlantioModal(op));
-        partesIguais(pl.linhas.length, 100, 1).forEach((p, i) => { pl.linhas[i].pct = numeroTexto(p); });
+        partesIguais(pl.linhas.length, totalPlantio(pl), casasPlantio(pl)).forEach((p, i) => { pl.linhas[i].pct = numeroTexto(p); });
         delete pl.erros.composicao;
         desenharMantendoFoco(`#pl-variedade-${pl.linhas.length - 1}`); break;
       }
@@ -17565,7 +18025,7 @@ window.Telas.planoOperacoes = (function () {
         const pl = ui.plantando;
         const vi = Number(alvo.dataset.var);
         pl.linhas.splice(vi, 1);
-        partesProporcionais(pl.linhas.map((l) => Util.numero(l.pct) || 0), 100, 1).forEach((p, i) => { pl.linhas[i].pct = numeroTexto(p); });
+        partesProporcionais(pl.linhas.map((l) => Util.numero(l.pct) || 0), totalPlantio(pl), casasPlantio(pl)).forEach((p, i) => { pl.linhas[i].pct = numeroTexto(p); });
         const datas = {};
         Object.entries(pl.datasTexto).forEach(([k, v]) => { const i = Number(k); if (i < vi) datas[i] = v; else if (i > vi) datas[i - 1] = v; });
         pl.datasTexto = datas; pl.erros = {};
@@ -17598,7 +18058,8 @@ window.Telas.planoOperacoes = (function () {
         ui.historicoMinimizado = !ui.historicoMinimizado; desenharMantendoFoco('[data-acao="pt-historico"]'); break;
       case 'pt-salvar': salvarPainel(op); break;
       // Cancelar: descarta o rascunho e volta ao que está salvo (o painel continua aberto)
-      case 'pt-cancelar': ui.painelEdicao = null; desenharMantendoFoco('[data-acao="pt-adicionar-variedade"]'); break;
+      // Cancelar (09/11/2026): sempre habilitado; fecha o painel do mesmo modo do X (com alteração, pergunta antes)
+      case 'pt-cancelar': confirmarDescartePainel(fecharPainel); break;
       case 'excluir-plantio': excluirPlantio(op); break;
 
       // Link do aviso do TSI: abre a guia do grupo Sementes (Plantio)
@@ -17760,18 +18221,18 @@ window.Telas.planoOperacoes = (function () {
     }
     if (campo === 'pt-area') {
       const texto = e.target.value.trim();
-      // Digitada em % do talhão; guardada em ha
-      // Com mais de uma variedade, as outras se ajustam na proporção (sempre 100%)
+      // Digitada em ha (09/11/2026; antes em %), até a área do talhão
+      // Com mais de uma variedade, as outras se ajustam na proporção (sempre a área do talhão)
       const n = texto ? Util.numero(texto) : null;
       const ed = ui.painelEdicao;
       const total = areaTalhaoDe(ed.talhao);
-      const area = n && n > 0 ? Math.round(total * Math.min(n, 100) / 100 * 100) / 100 : null;
+      const area = n && n > 0 ? Math.round(Math.min(n, total) * 100) / 100 : null;
       if (ed.linhas.length > 1 && area !== null) {
         areasAoMudar(ed.linhas, vi, area, total); ed.alterado = true;
         // Sem área: a linha fica em vermelho, com a mensagem, e o aviso aparece na hora
         const zeradas = ed.linhas.map((l, i) => i).filter((i) => !(Number(ed.linhas[i].area) > 0));
         ed.linhas.forEach((l, i) => { if (!zeradas.includes(i)) delete ed.erros[i]; });
-        zeradas.forEach((i) => { ed.erros[i] = 'Ficou com 0% da área. Ajuste a % ou exclua a variedade.'; });
+        zeradas.forEach((i) => { ed.erros[i] = 'Ficou sem área. Ajuste a área ou exclua a variedade.'; });
         avisarSemArea(zeradas.map((i) => ed.linhas[i].variedade));
       }
       else mudarRascunho(vi, { area, areaDigitada: true });
@@ -17822,7 +18283,8 @@ window.Telas.planoOperacoes = (function () {
     // Plantio: nome do pré-cadastro de variedade (modal e painel); ciclo só com números
     if (e.target.dataset.campo === 'pt-pre') { ui.prePainel = e.target.value; return; }
     if (e.target.dataset.campo === 'tb-data') { const v = mascaraData(e.target.value); if (v !== e.target.value) e.target.value = v; return; }
-    if (['tb-populacao', 'tb-area', 'tb-germinacao', 'tb-dose', 'campo-area'].includes(e.target.dataset.campo)) { soNumero(e.target); return; }
+    if (e.target.dataset.campo === 'tb-populacao') { soPopulacao(e.target); return; }
+    if (['tb-area', 'tb-germinacao', 'tb-dose', 'campo-area'].includes(e.target.dataset.campo)) { soNumero(e.target); return; }
     if (e.target.dataset.campo === 'pt-data' || e.target.dataset.campo === 'pl-data') {
       const v = mascaraData(e.target.value);
       if (v !== e.target.value) e.target.value = v;
@@ -17834,9 +18296,10 @@ window.Telas.planoOperacoes = (function () {
       return;
     }
     // Área, população, % e germinação só com números e uma vírgula
-    if (['pt-area', 'pt-populacao', 'pt-germinacao'].includes(e.target.dataset.campo)) { soNumero(e.target); return; }
+    if (e.target.dataset.campo === 'pt-populacao') { soPopulacao(e.target); return; }
+    if (['pt-area', 'pt-germinacao'].includes(e.target.dataset.campo)) { soNumero(e.target); return; }
     if (e.target.dataset.campo === 'pl-germinacao') { ui.plantando.linhas[Number(e.target.dataset.var)].germinacao = soNumero(e.target); return; }
-    if (e.target.dataset.campo === 'pl-populacao') { ui.plantando.linhas[Number(e.target.dataset.var)].populacao = soNumero(e.target); return; }
+    if (e.target.dataset.campo === 'pl-populacao') { ui.plantando.linhas[Number(e.target.dataset.var)].populacao = soPopulacao(e.target); return; }
     if (e.target.dataset.campo === 'pl-pct') {
       ui.plantando.linhas[Number(e.target.dataset.var)].pct = soNumero(e.target);
       atualizarRodapePlantio(); return;
@@ -18923,41 +19386,32 @@ window.Configuracoes = (function () {
     `;
   }
 
-  // Cria um plano por fazenda do modal (Safra + Empresa + Fazenda + Cultura identificam o plano) e volta para a
-  // lista de planos, com o filtro na safra dos planos criados (uma linha por fazenda, com a etiqueta "Novo").
-  // Cada plano nasce só com a versão 0.1, vazia e publicada (DECISOES 4.1.1). Uma fazenda só: abre direto o
-  // "Como deseja iniciar o plano?" dele, pelo mesmo caminho do clique na linha (cancelado, fica na lista).
-  // Várias fazendas: o aviso pede para clicar na linha de cada uma.
-  // O primeiro plano criado (a partir do primeiro uso) entra na lista junto com os planos de exemplo.
-  // talhoes: os talhões incluídos (pode ser vazio: Área de cultivo "Pendente").
-  function criarPlanos({ fazendas, ...contexto }) {
+  // Cria o plano do Criar Plano de Safra (09/11/2026: tela inteira, uma fazenda, duas etapas). Safra + Fazenda + Cultura
+  // identificam o plano. Nasce já iniciado, pela opção da etapa 2 (Como iniciar): a 0.1 publicada (registro inicial) e
+  // a 0.2 em construção com o conteúdo escolhido (DECISOES 4.1.1), e abre no Planejamento.
+  // talhoes: os talhões incluídos (pode ser vazio: Área de cultivo "Pendente"); areas: as áreas planejadas diferentes
+  // da cadastrada ({ T02: 60 }). O primeiro plano criado (a partir do primeiro uso) entra junto com os planos de exemplo.
+  function criarPlanos({ fazenda, talhoes, areas, grupos, aviso, ...contexto }) {
     if (!temPlanos()) carregarPlanosExemplo();
-    const criados = fazendas.map(({ fazenda, talhoes }) => {
-      const plano = {
-        id: estado.proximoIdPlano++,
-        ...contexto,
-        fazenda,
-        talhoes,
-        custo: null,
-        receita: null,
-        atualizadoEm: Util.hojeISO(),
-        atualizadoPor: DADOS.usuario.nome
-      };
-      Versoes.iniciar(plano, []);
-      DADOS.planos.push(plano);
-      return plano;
-    });
-    const nomes = criados.map((p) => Util.escapar(p.fazenda)).join(', ');
-    Telas.listaPlanos.mostrarSafra(contexto.safra);
-    // Depois de desenhar a lista (mostrarTela apaga o aviso anterior): a tabela rola até o plano novo e, com uma
-    // fazenda, abre o modal de início; com várias, o aviso
-    const depois = () => {
-      document.querySelector('.lista-planos__linha--novo')?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-      if (criados.length === 1) Telas.listaPlanos.abrirPlano(criados[0]);
-      else Aviso.mostrar(`${criados.length} planos criados (${nomes}). Clique na linha de cada um para começar.`);
+    const plano = {
+      id: estado.proximoIdPlano++,
+      ...contexto,
+      // Sem o nível Empresa no modal (Util.comEmpresa), a empresa da fazenda
+      empresa: contexto.empresa || Util.empresaDaFazenda(fazenda),
+      fazenda,
+      talhoes,
+      areas: areas && Object.keys(areas).length ? { ...areas } : null,
+      custo: null,
+      receita: null,
+      atualizadoEm: Util.hojeISO(),
+      atualizadoPor: DADOS.usuario.nome
     };
-    if (location.hash === '#/plano-safra') { mostrarTela(); depois(); }
-    else { window.addEventListener('hashchange', depois, { once: true }); location.hash = '#/plano-safra'; }
+    Versoes.iniciar(plano, []);
+    DADOS.planos.push(plano);
+    Versoes.comecar(plano, grupos || []);
+    // O aviso entra depois da troca de tela (a troca apaga o aviso anterior)
+    window.addEventListener('hashchange', () => Aviso.mostrar(aviso ? `Plano criado · ${aviso}` : 'Plano criado'), { once: true });
+    location.hash = `#/plano/${plano.id}`;
   }
 
   // O exemplo anda com o ano agrícola (DADOS.dataReferencia): as datas do exemplo andam os anos agrícolas entre hoje e a

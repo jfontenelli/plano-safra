@@ -76,6 +76,15 @@ window.Telas.listaPlanos = (function () {
   let safraPedida = null;
   function mostrarSafra(safra) { safraPedida = safra; guia = 'painel'; }
 
+  // Chegada à lista vinda de outra página (inclusive de um plano): os filtros voltam ao começo (só o Ano agrícola).
+  // Este arquivo carrega antes do app.js, então este aviso de troca de endereço chega antes do desenho da tela.
+  let entrou = true;
+  window.addEventListener('hashchange', (e) => {
+    const de = new URL(e.oldURL).hash;
+    const para = new URL(e.newURL).hash;
+    if (para !== de && !de.startsWith('#/plano-safra')) entrou = true;
+  });
+
   // Guia aberta: 'painel' (Planos de Safra) ou 'historico' (Histórico de versões).
   // Abre em Planos de Safra; a guia escolhida se mantém ao navegar.
   const GUIAS = [['painel', 'Planos de Safra'], ['historico', 'Histórico de versões']];
@@ -85,14 +94,20 @@ window.Telas.listaPlanos = (function () {
   const statusVersao = (p, v) => (Versoes.aIniciar(p) ? 'nao-iniciado' : Versoes.statusExibido(p, v));
 
   function desenhar() {
-    // Os filtros-base vêm das outras páginas; depois de criar planos, vão para o ano agrícola e a safra deles, com o
-    // resto em Todas (para o plano novo aparecer)
+    // Abre sempre só no Ano agrícola (09/11/2026): o ano vem das outras páginas (no começo, o atual) e os demais filtros
+    // em Todas (as safras, culturas e fazendas daquele ano), também ao voltar de um plano. Depois de criar planos, no
+    // ano agrícola deles. Os demais filtros só mudam as outras páginas se a pessoa mexer neles aqui.
     if (safraPedida) {
-      FiltrosBase.gravar({ ...FiltrosBase.padrao(), ano: [String(Util.anoAgricola(safraPedida))], safra: [safraPedida] });
-      Object.assign(filtros, { statusPlano: 'todos', status: 'todos' });
+      FiltrosBase.gravar({ ano: [String(Util.anoAgricola(safraPedida))] }, ['ano']);
       safraPedida = null;
+      entrou = true;
     }
-    FiltrosBase.ler(filtros);
+    if (entrou) {
+      FiltrosBase.ler(filtros);
+      Object.assign(filtros, { atividade: 'todos', safra: 'todos', cultura: 'todos', empresa: 'todos', fazenda: 'todos',
+        statusPlano: 'todos', status: 'todos' });
+      entrou = false;
+    }
 
     return `
       <header class="cabecalho cabecalho--guias vg-cabecalho">
@@ -123,7 +138,7 @@ window.Telas.listaPlanos = (function () {
             <table class="tabela">
               <thead>
                 <tr>
-                  <th>Safra</th><th>Empresa</th><th>Atividade</th><th>Cultura</th><th>Fazenda</th>
+                  <th>Safra</th>${Util.comEmpresa() ? '<th>Empresa</th>' : ''}<th>Atividade</th><th>Cultura</th><th>Fazenda</th>
                   <th>Versão</th><th>Status</th><th>Última atualização</th><th>Atualizado por</th>
                 </tr>
               </thead>
@@ -315,7 +330,7 @@ window.Telas.listaPlanos = (function () {
     const versoes = versoesFiltradas();
     conteudo.querySelector('#lp-historico').innerHTML = versoes.length
       ? versoes.map(linhaVersao).join('')
-      : `<tr><td class="tabela__vazia" colspan="9">Nenhuma versão encontrada com esses filtros.</td></tr>`;
+      : `<tr><td class="tabela__vazia" colspan="${Util.comEmpresa() ? 9 : 8}">Nenhuma versão encontrada com esses filtros.</td></tr>`;
     Telas.painelPlanos.atualizar(conteudo, paraPainel());
   }
 
@@ -342,7 +357,7 @@ window.Telas.listaPlanos = (function () {
           title="Abrir a versão ${esc(v.num)}${status === 'publicada' || status === 'revisada' ? ` (${status}, em consulta)` : ''}"
           aria-label="Abrir plano ${esc(p.safra)} · ${esc(p.fazenda)}, versão ${esc(v.num)}">
         <td>${esc(p.safra)}</td>
-        <td>${esc(p.empresa)}</td>
+        ${Util.comEmpresa() ? `<td>${esc(p.empresa)}</td>` : ''}
         <td>${esc(p.atividade || '—')}</td>
         <td>${esc(p.cultura)}</td>
         <td>${esc(p.fazenda)}</td>
