@@ -4302,6 +4302,7 @@ html[data-tema="escuro"] .fp-modal { --fp-est-desv: #ff6b5e; }
 .fp-graf__eixo .fp-graf__eixo-op { font-size: 11px; fill: var(--texto-suave); }
 .conteudo:has(.cc) { background: var(--superficie); } /* Central OS: fundo branco (04/11/2026) */
 .conteudo:has(.os-cal) { background: var(--superficie); } /* Calendário: fundo branco (05/11/2026), como a Central OS */
+.conteudo:has(.ao) { background: var(--superficie); } /* Progresso das operações: fundo branco (11/11/2026), como as outras guias */
 /* Semana por talhão (05/11/2026): título do dia em duas linhas, "dom" em cima e "01 nov" embaixo (hoje, no verde) */
 .cal-tal__dia { flex-direction: column; gap: 2px; padding: 6px 10px; }
 .cal-tal__dia-sem { font-size: 13px; font-weight: 600; color: var(--texto-suave); text-transform: lowercase; }
@@ -4435,3 +4436,68 @@ html[data-tema="escuro"] .fp-selo.fp-sit--falta { background: #4a2222; }
 /* Cartão que começa antes da área visível (11/11/2026): o ícone e o nome grudam logo depois da coluna Talhão ao rolar
    para o lado, como os eventos longos no Google Agenda (assim o nome nunca fica escondido) */
 .cal-tal__conteudo { position: sticky; left: calc(var(--info-largura, 140px) + 10px); display: flex; align-items: center; gap: 6px; min-width: 0; max-width: 100%; }
+
+/* ===== Operações › Acompanhamento Operacional (11/11/2026, imagem da usuária) ===== */
+.ao { display: flex; flex-direction: column; gap: 14px; }
+.ao__corpo { display: flex; flex-direction: column; gap: 14px; }
+.ao-operacao { margin: 2px 0 0; font-size: 18px; font-weight: 400; color: var(--texto); }
+.ao-operacao strong { font-weight: 700; }
+.ao-operacao__dap { color: var(--texto-suave); }
+.ao-vazio { margin: 0; padding: 18px 20px; color: var(--texto-suave); }
+.ao-cartoes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.ao-cartao { position: relative; overflow: hidden; display: flex; align-items: center; gap: 24px; padding: 16px 24px 16px 30px; }
+.ao-cartao::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 6px; background: var(--ao-c); }
+.ao-cartao--executada { --ao-c: #1f7a4d; }
+.ao-cartao--restante { --ao-c: #b9c0bc; }
+html[data-tema="escuro"] .ao-cartao--restante { --ao-c: #7C8E9B; }
+.ao-cartao__textos { flex: 0 0 auto; }
+.ao-cartao__titulo { margin: 0 0 2px; font-size: 15px; font-weight: 700; color: var(--texto); }
+.ao-cartao__numero { margin: 0 0 4px; font-size: 30px; font-weight: 700; line-height: 1.1; color: var(--texto); font-variant-numeric: tabular-nums; }
+.ao-cartao__texto { margin: 0; font-size: 14px; color: var(--texto-suave); }
+.ao-cartao__lado { flex: 1; display: flex; flex-direction: column; gap: 10px; padding-top: 18px; }
+.ao-cartao__lado .ao-cartao__texto { text-align: right; }
+.ao-cartao__barra { height: 12px; border-radius: 999px; background: var(--superficie-3, #e6eae8); overflow: hidden; }
+.ao-cartao__barra span { display: block; height: 100%; border-radius: 999px; background: var(--ao-c); }
+.ao-quadros { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.ao-quadro { display: flex; flex-direction: column; gap: 10px; padding: 16px 20px; min-width: 0; }
+.ao-quadro__titulo { margin: 0; font-size: 17px; font-weight: 700; color: var(--texto); }
+.ao-quadro__op { font-weight: 400; color: var(--texto-suave); } /* a operação e o DAP, no título do quadro */
+.ao-quadro__op strong { font-weight: 700; color: var(--texto); }
+.ao-quadro__sub { margin: -6px 0 0; font-size: 13px; color: var(--texto-suave); }
+.ao-mapa { height: 300px; flex: none; }
+.ao-grafico-caixa { width: 100%; }
+.ao-grafico { display: block; width: 100%; height: 264px; } /* no tamanho real (viewBox = a largura do quadro) */
+.ao-grafico__grade { stroke: var(--borda); stroke-width: 1; }
+.ao-grafico__eixo { font-size: 12px; fill: var(--texto-suave); font-variant-numeric: tabular-nums; }
+.ao-grafico__titulo-eixo { font-size: 12px; font-weight: 600; fill: var(--texto-suave); dominant-baseline: middle; }
+.ao-grafico__area { fill: color-mix(in srgb, #1f7a4d 16%, transparent); }
+.ao-grafico__linha { fill: none; stroke: #1f7a4d; stroke-width: 2; stroke-linejoin: round; }
+.ao-grafico__ponto circle { fill: var(--superficie); stroke: #1f7a4d; stroke-width: 2; cursor: default; }
+.ao-grafico__ponto--hoje circle { fill: #1f7a4d; }
+.ao-grafico__balao rect, .ao-grafico__balao path { fill: #1f7a4d; }
+.ao-grafico__balao text { font-size: 13px; font-weight: 700; fill: #fff; }
+@media (max-width: 1100px) { .ao-quadros, .ao-cartoes { grid-template-columns: 1fr; } }
+/* Progresso das operações: guias internas (Visão Geral da Operação · Progresso da Operação) e a Visão Geral */
+.ao-subguias { display: flex; gap: 0; align-self: flex-start; border-bottom: 1px solid var(--borda); }
+.ao-subguia { padding: 8px 16px; border: 0; border-bottom: 3px solid transparent; background: none; font: inherit; font-size: 14px; font-weight: 600; color: var(--texto-suave); cursor: pointer; }
+.ao-subguia:hover { color: var(--texto); }
+.ao-subguia--ativa { border-bottom-color: var(--verde-700); color: var(--texto); }
+.ao-subguia:focus-visible { outline: 2px solid var(--verde-600); outline-offset: -2px; }
+.ao-quadros--visao { grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.3fr); }
+.ao-mapa--visao { height: 380px; }
+.ao-etiqueta { display: inline-block; padding: 3px 10px; border-radius: 6px; font-size: 13px; font-weight: 400; white-space: nowrap; }
+.ao-tabela { font-size: 13px; }
+.ao-tabela td { white-space: nowrap; padding-left: 8px; padding-right: 8px; }
+.ao-tabela th { padding-left: 8px; padding-right: 8px; white-space: normal; line-height: 1.25; vertical-align: bottom; } /* títulos em até duas linhas, para a tabela caber */
+.ao-rotulo-mapa { width: auto !important; height: auto !important; background: none; border: 0; }
+.ao-rotulo { display: inline-flex; flex-direction: column; align-items: center; transform: translate(-50%, -50%); text-align: center; white-space: nowrap; line-height: 1.2; }
+.ao-rotulo strong { font-size: 14px; }
+.ao-rotulo span { display: block; width: max-content; max-width: 52px; font-size: 11px; white-space: normal; overflow-wrap: break-word; } /* nome resumido, em mais de uma linha se precisar */
+/* Expandir e recolher os quadros (11/11/2026): expandido, o quadro ocupa a largura toda e fica em cima; o outro, também na
+   largura toda, embaixo. O mapa expandido fica mais alto */
+.ao-quadro__topo { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.ao-expandir { border: 1px solid var(--borda); border-radius: 8px; }
+.ao-quadros.ao-quadros--empilhado { grid-template-columns: minmax(0, 1fr); }
+.ao-quadros--empilhado .ao-quadro--expandido { order: -1; }
+.ao-quadros--empilhado .ao-quadro--expandido .ao-mapa { height: max(420px, calc(100vh - 380px)); }
+

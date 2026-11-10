@@ -5153,5 +5153,6 @@ window.Telas.planoOperacoes = (function () {
   // Voltar e Avançar do navegador (a troca de endereço não dá para impedir): a casca pergunta antes de sair
   const temAlteracaoPendente = () => !!(ui && ui.painelEdicao && ui.painelEdicao.alterado && raiz && raiz.isConnected);
 
-  return { desenhar, aoMostrar, temAlteracaoPendente, confirmarSaida: (seguir) => confirmarDescartePainel(seguir) };
+  // poligonosFazenda: também no Acompanhamento Operacional (js/telas/acompanhamento-operacional.js)
+  return { desenhar, aoMostrar, temAlteracaoPendente, confirmarSaida: (seguir) => confirmarDescartePainel(seguir), poligonosFazenda };
 })();

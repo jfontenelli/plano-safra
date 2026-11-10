@@ -152,7 +152,9 @@ window.BarraFiltros = (function () {
         if (!Array.isArray(e[c]) || !e[c].length) return;
         const valores = cfg.opcoes(c).map((o) => o.valor);
         const ficam = e[c].filter((v) => valores.includes(v));
-        e[c] = ficam.length && ficam.length < valores.length ? ficam : 'todos';
+        // Filtro de uma escolha só: a escolhida fica, mesmo sendo a única opção
+        const unico = (cfg.unicos ? cfg.unicos() : []).includes(c);
+        e[c] = ficam.length && (unico || ficam.length < valores.length) ? ficam : 'todos';
       });
     }
     // Depois de mexer num filtro: nos que dependem dele, as marcadas que não são mais opção saem (sem nenhuma, Todas)
@@ -162,7 +164,7 @@ window.BarraFiltros = (function () {
         if (!Array.isArray(e[c]) || !e[c].length) return;
         const valores = cfg.opcoes(c).map((o) => o.valor);
         const ficam = e[c].filter((v) => valores.includes(v));
-        const novo = ficam.length && ficam.length < valores.length ? ficam : 'todos';
+        const novo = ficam.length && ((cfg.unicos ? cfg.unicos() : []).includes(c) || ficam.length < valores.length) ? ficam : 'todos';
         if (JSON.stringify(novo) !== JSON.stringify(e[c])) { e[c] = novo; mudadas.push(c); }
         podar(c, mudadas);
       });

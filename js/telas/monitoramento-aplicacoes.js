@@ -281,6 +281,7 @@ window.Telas.monitoramentoAplicacoes = (function () {
     const cab = `<header class="cabecalho oa-cabecalho ma-cabecalho" data-ma-cabecalho>${cabecalho()}</header>`;
     if (est.visao === 'desvios') return Telas.desviosRecomendacao.desenhar(cab);
     if (est.visao === 'falta') return Telas.faltaProdutos.desenhar(cab);
+    if (est.visao === 'acompanhamento') return Telas.acompanhamentoOperacional.desenhar(cab);
     return `
       ${cab}
       <div class="pagina ma">
@@ -296,11 +297,14 @@ window.Telas.monitoramentoAplicacoes = (function () {
   // desde 03/11/2026). A Duração da Operação saiu em 29/10/2026; o código dela continua aqui
   const GUIAS = [
     ['calendario', 'Calendário', 'Consulte as operações agrícolas planejadas e executadas por ano, mês, semana ou dia.'],
+    // Acompanhamento (11/11/2026; no mesmo dia, Acompanhamento Operacional e Progresso das operações): js/telas/acompanhamento-operacional.js
+    // O subtítulo muda com a guia interna (js/telas/acompanhamento-operacional.js); aqui, o da Visão Atual, que abre primeiro
+    ['acompanhamento', 'Acompanhamento', 'Visualize a última operação registrada na Ordem de Serviço de cada talhão e sua distribuição espacial.'],
     ['tabela', 'Desvios de data', 'Compare as datas planejadas e executadas das operações por talhão.'],
     ['desvios', 'Desvios de dose', 'Analise os desvios entre o recomendado e o executado nas Ordens de Serviço, por produto, operação e nível de análise.'],
     ['falta', 'Risco de falta de produto', 'Estime a falta de produtos para as operações planejadas.']
   ];
-  const GUIAS_PAGINA = ['calendario', 'tabela', 'desvios', 'falta'];
+  const GUIAS_PAGINA = ['calendario', 'acompanhamento', 'tabela', 'desvios', 'falta'];
   // Guia aberta por último: o item Operações do menu abre nela (no começo, o Calendário)
   let guiaAtual = 'calendario';
   const guiaAberta = () => guiaAtual;
@@ -683,6 +687,7 @@ window.Telas.monitoramentoAplicacoes = (function () {
     if (guia && guia !== 'calendario') irParaGuia(guia);
     if (est.visao === 'desvios') { Telas.desviosRecomendacao.aoMostrar(conteudo); return; }
     if (est.visao === 'falta') { Telas.faltaProdutos.aoMostrar(conteudo); return; }
+    if (est.visao === 'acompanhamento') { Telas.acompanhamentoOperacional.aoMostrar(conteudo); return; }
     // Os eventos ficam na página da tela (a área de conteúdo é a mesma para todas as telas)
     const raiz = conteudo.querySelector('.ma');
     const caixaFiltros = raiz.querySelector('[data-ma-filtros]');
