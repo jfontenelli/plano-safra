@@ -2939,6 +2939,7 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .cag__faixa { position: absolute; height: 9px; padding: 0; border: 0; border-radius: 5px; background: color-mix(in srgb, var(--c) 40%, transparent); cursor: pointer; }
 .cag__faixa:focus-visible { outline: 2px solid var(--c); outline-offset: 1px; z-index: 2; }
 .cag__faixa:hover { outline: 1px solid rgba(26, 31, 28, .45); z-index: 2; }
+.cag__faixa--info { cursor: default; } /* só informa (Cronograma de Safras, 11/11/2026) */
 .cag__meses--dias > span { font-size: 10px; padding: 9px 0; }
 .cag__hoje { position: absolute; top: 0; bottom: 0; width: 0; border-left: 2px dotted #8A9BA8; pointer-events: none; }
 .cag__sem { position: relative; z-index: 1; align-self: flex-start; margin-left: 10px; padding: 2px 6px; background: var(--superficie); font-size: 13px; font-style: italic; color: #6B7A72; }
@@ -3168,8 +3169,8 @@ html[data-tema="escuro"] .md-modo__botao--ativo { background: #176B50; }
 .md-grafico--larga .md-rotulo { font-size: 13px; }
 /* Planejada × Executada do Monitoramento: uma linha por talhão e uma coluna por operação (talhão e eixo parados à
    esquerda, nomes das operações parados no topo). Em cada operação, o ponto no zero e a barra do desvio */
-.ma-lista { --mt-adiantada: #1f6fd1; --mt-prazo: #1f9d55; --mt-atrasada: #e8772e; --mt-pendente: #d93025; --mt-futura: #9aa5ad; }
-html[data-tema="escuro"] .ma-lista { --mt-adiantada: #6FA8E8; --mt-prazo: #4FD28A; --mt-atrasada: #F0995A; --mt-pendente: #F28B82; --mt-futura: #7C8E9B; }
+.ma-lista, .os-cal { --mt-adiantada: #1f6fd1; --mt-prazo: #1f9d55; --mt-atrasada: #e8772e; --mt-pendente: #d93025; --mt-futura: #9aa5ad; }
+html[data-tema="escuro"] .ma-lista, html[data-tema="escuro"] .os-cal { --mt-adiantada: #6FA8E8; --mt-prazo: #4FD28A; --mt-atrasada: #F0995A; --mt-pendente: #F28B82; --mt-futura: #7C8E9B; }
 .mt-rolagem { max-height: calc(100vh - 330px); min-height: 220px; overflow: auto; border-top: 1px solid var(--borda); }
 .mt { width: max-content; min-width: 100%; }
 .mt-linha { display: flex; border-bottom: 1px solid var(--borda); }
@@ -3220,22 +3221,23 @@ html[data-tema="escuro"] .ma-lista { --mt-adiantada: #6FA8E8; --mt-prazo: #4FD28
 /* Barra acima da tabela: legenda dos status da aplicação (clicável) */
 .ma-barra { display: flex; align-items: center; flex-wrap: wrap; gap: 12px 24px; padding: 14px 20px; }
 /* Status da aplicação: cor de fundo da última célula da aplicação (e da legenda) */
+/* Legenda (10/11/2026): status em 13px, títulos em 15px, bolinhas de 18px (antes 14px) */
 .ma-legenda { display: flex; align-items: center; gap: 16px; font-size: 13px; color: var(--texto-suave); }
-.ma-legenda__titulo { color: var(--texto); }
+.ma-legenda__titulo { color: var(--texto); font-size: 15px; }
 .ma-legenda ul { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 0; padding: 0; list-style: none; }
 .ma-legenda li { display: inline-flex; }
-.ma-legenda__item { display: inline-flex; align-items: center; gap: 6px; padding: 4px 6px; border: 0; border-radius: 6px; background: transparent;
+.ma-legenda__item { display: inline-flex; align-items: center; gap: 8px; padding: 4px 6px; border: 0; border-radius: 6px; background: transparent;
   font: inherit; color: inherit; cursor: pointer; }
 .ma-legenda__item:hover { background: var(--superficie-2); color: var(--texto); }
 .ma-legenda__item[aria-pressed="true"] { color: var(--texto); font-weight: 600; }
 .ma-legenda__item--apagado { opacity: .45; }
 .ma-legenda__item:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 1px; }
 /* Bolinhas da legenda: as mesmas da visão Planejada × Executada */
-.ma-legenda__cor { display: inline-block; width: 14px; height: 14px; border-radius: 50%; box-sizing: border-box; }
-.ma-legenda__cor.mt-ponto--futura { width: 14px; height: 14px; }
+.ma-legenda__cor { display: inline-block; width: 18px; height: 18px; border-radius: 50%; box-sizing: border-box; }
+.ma-legenda__cor.mt-ponto--futura { width: 18px; height: 18px; }
 /* Executadas: Pendente com o mesmo ícone da tabela (bolinha com exclamação, em vermelho) */
-.ma-legenda__icone { display: inline-grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; color: var(--erro); }
-.ma-legenda__icone .icone { width: 18px; height: 18px; }
+.ma-legenda__icone { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; color: var(--erro); }
+.ma-legenda__icone .icone { width: 20px; height: 20px; }
 .ma-st--adiantada { background: var(--info-fundo); }
 .ma-st--prazo     { background: var(--verde-100); }
 .ma-st--atrasada  { background: #fdebdc; }
@@ -3763,8 +3765,8 @@ html[data-tema="escuro"] .cal-mestab__area { --f: color-mix(in srgb, var(--c) 24
 
 /* ===== Gestão da Lavoura › Calendário › Mês (05/11/2026): talhão × semanas, barras que atravessam as semanas ===== */
 .cal-tal { display: grid; grid-template-columns: minmax(140px, max-content) repeat(var(--semanas), minmax(130px, 1fr)); grid-auto-rows: minmax(44px, auto); min-width: max-content; }
-/* Cabeçalho inteiro em cinza claro (Fazenda · Talhão · Área (ha) · semanas); as células ficam brancas */
-.cal-tal__cab { position: sticky; top: 0; z-index: 3; grid-row: 1; display: flex; border-bottom: 1px solid var(--borda); border-left: 1px solid var(--borda); background: var(--superficie-2); color: var(--texto); }
+/* Cabeçalho branco, como as células (10/11/2026; antes cinza claro) */
+.cal-tal__cab { position: sticky; top: 0; z-index: 3; grid-row: 1; display: flex; border-bottom: 1px solid var(--borda); border-left: 1px solid var(--borda); background: var(--superficie); /* branco (10/11/2026; antes cinza claro) */ color: var(--texto); }
 .cal-tal__cab:first-child { border-left: 0; }
 .cal-tal__cab--info { align-items: center; justify-content: flex-start; min-height: 42px; padding: 8px 16px; font-weight: 700; white-space: nowrap; } /* como o título das semanas, à esquerda */
 .cal-tal__cab.cal-tal--passado { color: var(--texto-suave); }
@@ -3781,13 +3783,64 @@ html[data-tema="escuro"] .cal-mestab__area { --f: color-mix(in srgb, var(--c) 24
 .cal-tal__nome { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .cal-tal__barra.cal-tal--passado { opacity: .55; }
 html[data-tema="escuro"] .cal-tal__barra { --f: color-mix(in srgb, var(--c) 24%, #15232D); }
+/* Status das operações (11/11/2026): o cartão do calendário antigo (o mesmo preenchimento, altura e largura, fundo claro
+   na cor, sem contorno, nome em preto e negrito), com o ícone do status no lugar da bolinha, na cor do status:
+   Atrasada vermelho (com o selo dos dias de atraso); Em execução na cor do Defensivo (laranja; os dias só na dica);
+   Finalizada na cor do Plantio (verde); Planejada cinza. No escuro, o fundo é a cor misturada ao fundo do tema. */
+.cal-st--atrasada   { --c: #C62828; --f: #FCE8E6; }
+.cal-st--execucao   { --c: #e8772e; --f: #fdeee3; }
+.cal-st--finalizada { --c: #1f9d55; --f: #e3f4ea; }
+.cal-st--planejada  { --c: #8a948f; --f: #eef1f0; }
+html[data-tema="escuro"] .cal-st--atrasada   { --c: #F28B82; }
+html[data-tema="escuro"] .cal-st--execucao   { --c: #F0995A; }
+html[data-tema="escuro"] .cal-st--finalizada { --c: #4FD28A; }
+html[data-tema="escuro"] .cal-st--planejada  { --c: #9AA8B1; }
+html[data-tema="escuro"] .cal-tal__barra[class*="cal-st--"] { --f: color-mix(in srgb, var(--c) 24%, #15232D); }
+.cal-tal__barra[class*="cal-st--"] { align-items: center; gap: 6px; margin: 5px 6px; padding: 6px 10px; border: 0; border-radius: 6px;
+  background: var(--f); color: var(--texto); font-size: 13px; font-weight: 700; }
+.cal-tal__icone { display: inline-flex; flex-shrink: 0; color: var(--c); }
+.cal-tal__icone .icone { width: 15px; height: 15px; stroke-width: 2.2; }
+/* Legenda: os mesmos ícones das etiquetas (Atrasada a exclamação, Executada o check, Planejada o calendário) */
+.cal-leg__icone { display: inline-flex; color: var(--c); }
+.cal-leg__icone .icone { width: 18px; height: 18px; stroke-width: 2.2; }
+.cal-tal__textos { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.cal-tal__atraso { font-size: 12px; font-weight: 400; color: var(--c); white-space: nowrap; }
+/* Redesenho (10/11/2026, liberdade de design da usuária):
+   - Colunas que já passaram: o título em cinza e os cartões esmaecidos, sem fundo nas células. A coluna de hoje sem fundo
+     (só o título no verde-claro).
+   - Cartão de uma linha: o atraso num selo à direita ("25d"; "25 dias de atraso" na dica); todos da mesma altura.
+   - Grade mais leve e cartões mais compactos. */
+.cal-tal__cel { border-left-color: color-mix(in srgb, var(--borda) 55%, transparent); }
+/* Nome grande: quebra em até duas linhas (o resto em "…"; o nome inteiro na dica) */
+.cal-tal__nome { flex: 1; min-width: 0; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden;
+  white-space: normal; overflow-wrap: anywhere; }
+.cal-tal__selo { flex-shrink: 0; margin-left: 4px; padding: 0 6px; border-radius: 999px; background: var(--superficie); color: var(--c);
+  font-size: 11.5px; font-weight: 400; line-height: 18px; font-variant-numeric: tabular-nums; }
+html[data-tema="escuro"] .cal-tal__selo { background: rgba(0, 0, 0, .25); }
+.cal-tal__info { padding: 6px 16px; }
+/* Hoje (a semana ou o dia de hoje no título da coluna), só no Calendário de Gestão da Lavoura (10/11/2026): verde-claro
+   com o texto verde-escuro, no lugar do verde-escuro com texto branco */
+.cal-tal .cal-mestab__rotulo--atual { background: #E1F2E8; color: #0B5A35; }
+html[data-tema="escuro"] .cal-tal .cal-mestab__rotulo--atual { background: #1C3D2C; color: #8FE0B2; }
+/* Hectares previstos embaixo da data do título da coluna: discreto, centralizado, menor que a data */
+.cal-tal__sem { flex-direction: column; gap: 2px; }
+.cal-tal__ha { display: block; font-size: 12px; font-weight: 400; line-height: 1.2; color: var(--texto-suave); text-align: center; white-space: nowrap; font-variant-numeric: tabular-nums; }
 
 /* ===== Operações Agrícolas › Planejadas × Executadas: tabela com o cartão do talhão ===== */
 .ma-barra { justify-content: space-between; }
 .ma-legenda__titulo { font-weight: 700; color: var(--texto); }
 .ma-modo { display: flex; align-items: center; gap: 12px; padding-left: 20px; border-left: 1px solid var(--borda); font-size: 14px; }
-.ma-modo__titulo { font-weight: 700; color: var(--texto); white-space: nowrap; }
+.ma-modo__titulo { font-weight: 700; color: var(--texto); white-space: nowrap; font-size: 15px; }
 .ma-modo .semente-visao { height: 36px; padding: 0 16px; font-size: 14px; }
+/* Calendário (Mês, Semana e Dia; 10/11/2026): a tira da legenda no formato da tira da Operações › Desvios de data, com a
+   navegação à direita depois de um traço, como o "Visualizar por:" de lá */
+.os-cal__corpo .os-cal__barra { gap: 12px 24px; margin-bottom: 12px; padding: 14px 20px; border: 1px solid var(--borda); border-radius: 12px;
+  background: var(--superficie); box-shadow: var(--sombra); } /* num cartão, como o dos filtros */
+.os-cal__barra .cal-nav { padding-left: 20px; border-left: 1px solid var(--borda); }
+/* Legenda do Calendário: título 15px, status 14px e ícones 16px (11/11/2026); status em preto */
+.os-cal__barra .ma-legenda { font-size: 14px; color: var(--texto); }
+.os-cal__barra .ma-legenda__titulo { font-size: 15px; }
+.os-cal__barra .cal-leg__icone .icone { width: 16px; height: 16px; }
 .ma-tabela--pxe td { vertical-align: middle; }
 .ma-tabela--pxe .ma-th-talhao .titulo-coluna { justify-content: flex-start; }
 .ma-tabela--pxe th.ma-th-talhao { text-align: left !important; }
@@ -4374,6 +4427,25 @@ html[data-tema="escuro"] .fp-selo.fp-sit--falta { background: #4a2222; }
 .modal--tela .fp-modal__cab { position: sticky; top: -14px; z-index: 4; margin-top: -14px; padding-top: 14px; background: var(--superficie); }
 .fp-modal__x { top: -2px; z-index: 6; background: transparent; }
 
+/* ===== Plano de Safra › Planos › Cronograma de Safras (11/11/2026; antes o Ano do Calendário) ===== */
+.cs__etiqueta { display: flex; justify-content: flex-end; margin-bottom: -8px; } /* acima dos filtros, à direita */
+.cs__etiqueta[hidden] { display: none; }
+.cs { display: flex; flex-direction: column; gap: 12px; }
+.cs[hidden] { display: none; }
+/* A tira da legenda num cartão, como a do Calendário: a legenda dos grupos e, à direita, depois de um traço, o ano */
+.cs__barra { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 24px; padding: 14px 20px; }
+.cs__barra .cal-nav { padding-left: 20px; border-left: 1px solid var(--borda); }
+.cs__ano .cag__rolagem { box-shadow: var(--sombra); border-radius: 12px; }
+
+/* Calendário › Ano (11/11/2026): a rolagem para no começo de um mês (logo depois da coluna Talhão) */
+.cal-mestab:has(.cal-tal--ano) { scroll-snap-type: x mandatory; }
+.cal-tal--ano > .cal-tal__cab:not(.cal-tal__cab--info) { scroll-snap-align: start; }
+.cal-tal--ano { grid-template-columns: minmax(140px, max-content) repeat(var(--semanas), var(--mes-largura, 200px)); }
+
+/* Cartão que começa antes da área visível (11/11/2026): o ícone e o nome grudam logo depois da coluna Talhão ao rolar
+   para o lado, como os eventos longos no Google Agenda (assim o nome nunca fica escondido) */
+.cal-tal__conteudo { position: sticky; left: calc(var(--info-largura, 140px) + 10px); display: flex; align-items: center; gap: 6px; min-width: 0; max-width: 100%; }
+
 </style>
 </head>
 <body>
@@ -4418,9 +4490,9 @@ html[data-tema="escuro"] .fp-selo.fp-sit--falta { background: #4a2222; }
             </a>
           </div>
         </div>
-        <!-- Gestão da Lavoura: Calendário (antes Operações Agrícolas), Operações (antes Planejadas × Executadas) e Central OS (o nome leva ao Calendário) -->
+        <!-- Gestão da Lavoura: Operações (com a guia Calendário, a primeira; 11/11/2026) e Central OS (o nome leva a Operações) -->
         <div class="menu__grupo">
-          <a class="menu__item menu__pai" href="#/calendario-agricola" title="Gestão da Lavoura">
+          <a class="menu__item menu__pai" href="#/planejado-executado" title="Gestão da Lavoura">
             <svg class="menu__icone" viewBox="0 0 24 24" aria-hidden="true">
               <!-- Lavoura: o broto (antes o ícone do Plano de Safra) -->
               <path d="M12 21v-9"/>
@@ -4434,13 +4506,6 @@ html[data-tema="escuro"] .fp-selo.fp-sit--falta { background: #4a2222; }
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
           </button>
           <div class="menu__subitens" id="menu-subitens-lavoura">
-            <a class="menu__item menu__sub" href="#/calendario-agricola" data-rota="calendario-agricola" title="Calendário">
-              <svg class="menu__icone" viewBox="0 0 24 24" aria-hidden="true">
-                <!-- Calendário -->
-                <rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>
-              </svg>
-              <span class="menu__texto">Calendário</span>
-            </a>
             <a class="menu__item menu__sub" href="#/planejado-executado" data-rota="planejado-executado" title="Operações">
               <svg class="menu__icone" viewBox="0 0 24 24" aria-hidden="true">
                 <!-- Prancheta com check -->
@@ -5398,6 +5463,8 @@ window.Icones = (function () {
     copiar: svg('<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/>'),
     // Monitoramento › Aplicações: aplicação pendente (exclamação no círculo) e futura (calendário com relógio)
     pendente: svg('<circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.5M12 16.5h.01"/>'),
+    // Executada (Calendário, 10/11/2026): o check no círculo, da mesma família da exclamação da Atrasada
+    executada: svg('<circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.8 2.8L16 10"/>'),
     futura: svg('<path d="M11 19H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v3"/><path d="M4 10h14M8 3v4M14 3v4"/><circle cx="17" cy="17" r="4"/><path d="M17 15.5V17l1 1"/>'),
     relogio: svg('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'),
     calendario: svg('<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>'),
@@ -6232,7 +6299,8 @@ window.ArquivoPlano = (function () {
  *   opcoes: (chave) => [{ valor, nome, extra? }],
  *   depende: { chave: [chaves de que ela depende] },
  *   padrao: () => os valores de Limpar filtros (dos filtros da página; os base vêm de FiltrosBase),
- *   aoMudar: () => atualiza o resultado da página
+ *   aoMudar: () => atualiza o resultado da página,
+ *   unicos: () => [chaves com uma escolha só] (opcional; botões de opção, sem "Todas")
  * }
  */
 window.FiltrosBase = (function () {
@@ -6288,7 +6356,7 @@ window.BarraFiltros = (function () {
       return `
         <div class="campo" ${minimo ? `style="min-width: ${minimo}px"` : ''}>
           <span class="campo__rotulo">${rotulo}</span>
-          ${Cal().filtroCaixa(est(), chave, cfg.opcoes(chave), textos, rotulo)}
+          ${Cal().filtroCaixa(est(), chave, cfg.opcoes(chave), textos, rotulo, { unico: (cfg.unicos ? cfg.unicos() : []).includes(chave) })}
         </div>`;
     }
     function html() {
@@ -6421,10 +6489,11 @@ window.BarraFiltros = (function () {
         const chave = e.target.dataset.filtro;
         const valores = cfg.opcoes(chave).map((o) => o.valor);
         let marcados = valores.filter((v) => Cal().marcado(st, chave, v));
-        if (e.target.value === 'todos') marcados = e.target.checked ? [...valores] : [];
+        if (e.target.type === 'radio') marcados = [e.target.value];
+        else if (e.target.value === 'todos') marcados = e.target.checked ? [...valores] : [];
         else if (e.target.checked) marcados.push(e.target.value);
         else marcados = marcados.filter((n) => n !== e.target.value);
-        st[chave] = marcados.length === valores.length ? 'todos' : marcados;
+        st[chave] = marcados.length === valores.length && e.target.type !== 'radio' ? 'todos' : marcados;
         const mudadas = [chave];
         podar(chave, mudadas);
         FiltrosBase.gravar(st, mudadas);
@@ -7312,8 +7381,9 @@ window.Telas.painelPlanos = (function () {
 /*
  * Tela 03 — Planos de Safra, lista de planos (docs/telas/03-lista-planos.md)
  * Aparece no menu Plano de Safra › Planos quando existe ao menos um plano.
- * Duas guias com os mesmos filtros: Planos de Safra (o Painel: Telas.painelPlanos, uma linha por fazenda e safra)
- * e Histórico de versões (uma linha por versão de cada plano).
+ * Três guias com os mesmos filtros: Planos de Safra (o Painel: Telas.painelPlanos, uma linha por fazenda e safra),
+ * Cronograma de Safras (11/11/2026: o ano agrícola por empresa, fazenda e safra, Telas.cronogramaSafras) e Histórico
+ * de versões (uma linha por versão de cada plano).
  */
 window.Telas = window.Telas || {};
 
@@ -7328,7 +7398,7 @@ window.Telas.listaPlanos = (function () {
   // Situação do plano (guia Planos de Safra): as três opções sempre, na ordem da tabela
   const STATUS_PLANO = [['nao-iniciado', 'Não iniciado'], ['construcao', 'Em construção'], ['publicada', 'Publicado']];
   const STATUS = [['nao-iniciado', 'Não iniciado'], ['construcao', 'Em construção'], ['publicada', 'Publicada'], ['revisada', 'Revisada']];
-  const filtros = { statusPlano: 'todos', status: 'todos', busca: {}, filtroAberto: null };
+  const filtros = { statusPlano: 'todos', status: 'todos', operacao: 'todos', busca: {}, filtroAberto: null };
   const BASE = [
     ['ano', 'Ano agrícola', ['Todos', 'Nenhum', 'anos'], 104],
     ['atividade', 'Atividade produtiva', ['Todas', 'Nenhuma', 'atividades'], 140],
@@ -7349,6 +7419,8 @@ window.Telas.listaPlanos = (function () {
   function opcoes(chave) {
     if (chave === 'ano') return comoOpcoes([...Telas.painelPlanos.anos()].reverse());
     if (chave === 'statusPlano') return comoOpcoes(STATUS_PLANO);
+    // Operação (só no Cronograma de Safras): as dos grupos à mostra na legenda, nos planos dos filtros
+    if (chave === 'operacao') return Telas.cronogramaSafras.opcoesOperacao(DADOS.planos.filter(passa));
     if (chave === 'status') {
       const naLista = new Set();
       DADOS.planos.forEach((p) => Versoes.lista(p).forEach((v) => naLista.add(statusVersao(p, v))));
@@ -7372,13 +7444,17 @@ window.Telas.listaPlanos = (function () {
   const barra = BarraFiltros.criar({
     id: 'lp',
     estado: () => filtros,
+    // O filtro de cada guia: Situação do plano (Planos de Safra), Operação (Cronograma de Safras), Status do plano (Histórico)
     campos: () => [...BASE, guia === 'painel'
       ? ['statusPlano', 'Situação do plano', ['Todas', 'Nenhuma', 'situações'], 150]
+      : guia === 'cronograma' ? ['operacao', 'Operação', ['Todas', 'Nenhuma', 'operações'], 124]
       : ['status', 'Status do plano', ['Todos', 'Nenhum', 'status'], 140]],
     mais: () => [],
+    // Cronograma de Safras: o Ano agrícola com uma escolha só (as setas e o Hoje trocam o filtro)
+    unicos: () => (guia === 'cronograma' ? ['ano'] : []),
     opcoes,
     depende: DEPENDE,
-    padrao: () => ({ statusPlano: 'todos', status: 'todos' }),
+    padrao: () => ({ statusPlano: 'todos', status: 'todos', operacao: 'todos' }),
     aoMudar: () => atualizar(document.getElementById('conteudo'))
   });
 
@@ -7396,9 +7472,9 @@ window.Telas.listaPlanos = (function () {
     if (para !== de && !de.startsWith('#/plano-safra')) entrou = true;
   });
 
-  // Guia aberta: 'painel' (Planos de Safra) ou 'historico' (Histórico de versões).
+  // Guia aberta: 'painel' (Planos de Safra), 'cronograma' (Cronograma de Safras) ou 'historico' (Histórico de versões).
   // Abre em Planos de Safra; a guia escolhida se mantém ao navegar.
-  const GUIAS = [['painel', 'Planos de Safra'], ['historico', 'Histórico de versões']];
+  const GUIAS = [['painel', 'Planos de Safra'], ['cronograma', 'Cronograma de Safras'], ['historico', 'Histórico de versões']];
   let guia = 'painel';
   // Status de uma versão: a 0.1 de um plano ainda não iniciado aparece como "Não iniciado"
   // Status de cada versão: só a última publicada do plano é Publicada; as publicadas antes dela, Revisada
@@ -7416,7 +7492,7 @@ window.Telas.listaPlanos = (function () {
     if (entrou) {
       FiltrosBase.ler(filtros);
       Object.assign(filtros, { atividade: 'todos', safra: 'todos', cultura: 'todos', empresa: 'todos', fazenda: 'todos',
-        statusPlano: 'todos', status: 'todos' });
+        statusPlano: 'todos', status: 'todos', operacao: 'todos' });
       entrou = false;
     }
 
@@ -7437,9 +7513,15 @@ window.Telas.listaPlanos = (function () {
       </header>
 
       <div class="pagina">
+        <!-- Cronograma de Safras: a etiqueta das últimas versões, acima dos filtros, à direita (só nesta guia) -->
+        <div class="cs__etiqueta" data-guia-painel="cronograma" ${guia === 'cronograma' ? '' : 'hidden'}>
+          <span class="cag-etiqueta" title="Mostra a última versão publicada de cada plano. Alterações em versões em construção aparecem aqui depois de publicadas.">${Icones.info} Últimas versões</span>
+        </div>
         <section class="cartao filtros" aria-label="Filtrar planos" data-lp-filtros></section>
 
         ${Telas.painelPlanos.desenhar()}
+
+        ${Telas.cronogramaSafras.desenhar(guia === 'cronograma')}
 
         <section class="cartao lista-planos" aria-labelledby="titulo-historico" data-guia-painel="historico" ${guia === 'historico' ? '' : 'hidden'}>
           <div class="secao__topo lista-planos__topo">
@@ -7464,7 +7546,14 @@ window.Telas.listaPlanos = (function () {
   // Depois que o HTML está na página: liga os filtros e desenha números e lista
   function aoMostrar(conteudo) {
     barra.ligar(conteudo.querySelector('[data-lp-filtros]'));
-    atualizar(conteudo);
+    Telas.cronogramaSafras.ligar(conteudo, {
+      filtros,
+      planos: () => DADOS.planos.filter(passa),
+      // Hoje e as setas: trocam o filtro Ano agrícola (vale também nas outras guias e páginas)
+      aoMudarAno: (ano) => { filtros.ano = [ano]; FiltrosBase.gravar(filtros, ['ano']); barra.redesenhar(); atualizar(conteudo); },
+      // Legenda: muda as opções do filtro Operação
+      aoMudarGrupo: () => { barra.redesenhar(); atualizar(conteudo); }
+    });
     trocarGuia(conteudo, guia);
     Telas.painelPlanos.ligar(conteudo, { abrirPlano, abrirMenuPlano });
     // Guias: troca o painel sem desenhar a tela de novo (os filtros continuam)
@@ -7554,14 +7643,21 @@ window.Telas.listaPlanos = (function () {
 
   function trocarGuia(conteudo, nova) {
     guia = nova;
+    // Cronograma de Safras: um ano agrícola por vez (o marcado; sem um só, o de hoje ou o mais recente com planos)
+    if (guia === 'cronograma' && !(Array.isArray(filtros.ano) && filtros.ano.length === 1)) {
+      const marcados = Array.isArray(filtros.ano) ? filtros.ano : [];
+      filtros.ano = [marcados.includes(Telas.cronogramaSafras.anoAtual()) || !marcados.length ? Telas.cronogramaSafras.anoAtual() : marcados[0]];
+      FiltrosBase.gravar(filtros, ['ano']);
+    }
     conteudo.querySelectorAll('[data-guia]').forEach((b) => {
       const ativa = b.dataset.guia === guia;
       b.classList.toggle('etapa--ativa', ativa);
       if (ativa) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
     });
     conteudo.querySelectorAll('[data-guia-painel]').forEach((painel) => { painel.hidden = painel.dataset.guiaPainel !== guia; });
-    // Cada guia mostra o seu filtro: Situação do plano no Planos de Safra, Status do plano no Histórico
+    // Cada guia mostra o seu filtro: Situação do plano no Planos de Safra, Operação no Cronograma, Status do plano no Histórico
     barra.redesenhar();
+    atualizar(conteudo);
   }
 
   // "Histórico de versões" do menu ⋯: a guia Histórico, com os filtros naquele plano
@@ -7643,6 +7739,7 @@ window.Telas.listaPlanos = (function () {
       ? versoes.map(linhaVersao).join('')
       : `<tr><td class="tabela__vazia" colspan="${Util.comEmpresa() ? 9 : 8}">Nenhuma versão encontrada com esses filtros.</td></tr>`;
     Telas.painelPlanos.atualizar(conteudo, paraPainel());
+    Telas.cronogramaSafras.atualizar(conteudo);
   }
 
   // ----- Histórico de versões -----
@@ -8462,7 +8559,8 @@ window.Telas.calendario = (function () {
   // todos: os eventos (eventos()); filtros: HTML da linha acima da grade; semData: operações planejadas sem data
   // corpoMes (opcional): desenha o Mês, a Semana e o Dia no lugar da tabela por operação e da grade (Gestão da Lavoura ›
   // Calendário: por talhão)
-  function calendarioMes({ est, todos, filtros = '', semData = 0, corpoMes = null }) {
+  // semRodape: sem o rodapé Área operacional (Gestão da Lavoura › Calendário, 10/11/2026: a área fica nos títulos das colunas)
+  function calendarioMes({ est, todos, filtros = '', semData = 0, corpoMes = null, semRodape = false }) {
     const escala = est.escala || 'mes';
     const ref = est.dataRef || hojeIso();
     const { de, ate } = periodo(escala, ref);
@@ -8497,7 +8595,7 @@ window.Telas.calendario = (function () {
           ${filtros ? `<div class="cal-mes__filtros">${filtros}</div>` : ''}
           ${semData ? `<p class="calendario__pendentes">${Icones.info}<span>${plural(semData, 'operação planejada fica', 'operações planejadas ficam')} fora do calendário: sem data de plantio nos talhões dela.</span></p>` : ''}
           ${corpo}
-          ${rodapeArea(escala, ref, escala === 'dia' ? doDia(todos, ref) : doPeriodo)}
+          ${semRodape ? '' : rodapeArea(escala, ref, escala === 'dia' ? doDia(todos, ref) : doPeriodo)}
         </div>
         ${aberto ? painelDia(todos, aberto, est) : ''}
       </div>`;
@@ -8527,12 +8625,13 @@ window.Telas.calendario = (function () {
         ${seletorEscala(est)}
       </div>`;
   }
-  // Lista suspensa da escala: Ano (a visão do ano agrícola do Calendário Agrícola, js/telas/os-calendario.js), Mês, Semana, Dia
+  // Lista suspensa da escala: Mês, Semana, Dia; com est.comAno (Operações › Calendário, 11/11/2026), também Ano (a safra)
   function seletorEscala(est) {
     const escala = est.escala || 'mes';
+    const opcoesEscala = [...(est.comAno ? [['ano', 'Ano']] : []), ['mes', 'Mês'], ['semana', 'Semana'], ['dia', 'Dia']];
     return `
         <select class="campo__controle cal-nav__escala" data-campo="cal-escala" aria-label="Escala do calendário">
-          ${[['ano', 'Ano'], ['mes', 'Mês'], ['semana', 'Semana'], ['dia', 'Dia']].map(([v, rot]) => `<option value="${v}" ${escala === v ? 'selected' : ''}>${rot}</option>`).join('')}
+          ${opcoesEscala.map(([v, rot]) => `<option value="${v}" ${escala === v ? 'selected' : ''}>${rot}</option>`).join('')}
         </select>`;
   }
 
@@ -8847,19 +8946,15 @@ window.Telas.calendarioAgricola = (function () {
   }
 
   // Barras de uma lista de operações: uma faixa por grupo (na ordem da legenda), transparentes (sobreposição mais forte).
-  // Clicar na barra abre o Mês no começo da operação (a tela lê a linha: empresa, fazenda e safra; e a cultura).
-  // A operação não vira filtro.
-  function barras(lista, j, linha) {
-    const daLinha = Object.entries(linha).map(([k, v]) => `data-cag-${k}="${esc(v)}"`).join(' ');
-    const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  // Barras só informam (11/11/2026, no Cronograma de Safras: antes, no Ano do Calendário, o clique abria o Mês)
+  function barras(lista, j) {
     return lista.filter((o) => o.fim >= j.ini && o.ini < j.fim).map((o) => {
       const fimMais = new Date(o.fim); fimMais.setDate(fimMais.getDate() + 1);
       const esq = pct(o.ini, j); const dir = pct(fimMais, j);
       const faixa = faixaDe(o.tipo);
       const dica = `${o.nome} · ${o.grupo} · ${o.cultura} · ${ddmm(o.ini)} a ${ddmm(o.fim)}${o.area ? ` · ${Util.area(o.area)}` : ''}`;
-      return `<button class="cag__faixa" type="button" style="left: ${esq.toFixed(2)}%; width: ${Math.max(0.4, dir - esq).toFixed(2)}%; top: ${6 + faixa * 12}px; --c: ${COR_GRUPO[o.tipo] || '#7B8A82'}"
-                   data-cag-op="${iso(o.ini)}" data-cag-cultura="${esc(o.cultura)}" ${daLinha}
-                   title="${esc(dica)} · Clique para ver no mês" aria-label="${esc(dica)}. Ver no mês"></button>`;
+      return `<span class="cag__faixa cag__faixa--info" style="left: ${esq.toFixed(2)}%; width: ${Math.max(0.4, dir - esq).toFixed(2)}%; top: ${6 + faixa * 12}px; --c: ${COR_GRUPO[o.tipo] || '#7B8A82'}"
+                   title="${esc(dica)}" role="img" aria-label="${esc(dica)}"></span>`;
     }).join('');
   }
   // Junta as operações de vários planos (a linha da fazenda): a mesma operação da mesma cultura vai do primeiro ao último dia
@@ -8902,13 +8997,12 @@ window.Telas.calendarioAgricola = (function () {
       : [[null, planos]];
     porEmpresa.forEach(([e, daEmpresa]) => {
       const ce = `e:${e}`; const abertaE = e === null || empresasAbertas.has(ce);
-      const daLinha = (extra) => ({ ...(e === null ? {} : { empresa: e }), ...extra });
       if (e !== null) linhas.push(`
         <div class="cag__linha cag__linha--empresa" role="row">
           <span role="cell"><button class="cag__abrir" type="button" data-cag-recolher="${esc(ce)}" aria-expanded="${abertaE}">${seta(abertaE)}<strong>${esc(e)}</strong></button></span>
           <span role="cell"></span><span role="cell" class="cag__num"><strong>${Util.area(areaDe(daEmpresa))}</strong></span>
           ${abertaE ? `<span role="cell" class="cag__tempo cag__tempo--vazio" style="${fundo}">${marcaHoje}</span>`
-            : `<span role="cell" class="cag__tempo cag__tempo--faixas" style="${fundo}">${barras(juntar(daEmpresa.map((p) => ops.get(p))), j, daLinha({}))}${marcaHoje}</span>`}
+            : `<span role="cell" class="cag__tempo cag__tempo--faixas" style="${fundo}">${barras(juntar(daEmpresa.map((p) => ops.get(p))), j)}${marcaHoje}</span>`}
         </div>`);
       if (!abertaE) return;
       [...new Set(daEmpresa.map((p) => p.fazenda))].sort((a, b) => a.localeCompare(b, 'pt-BR')).forEach((f) => {
@@ -8923,7 +9017,7 @@ window.Telas.calendarioAgricola = (function () {
             <span role="cell">${[...new Set(daFazenda.map((p) => p.cultura))].map(esc).join(' → ')}</span>
             <span role="cell" class="cag__num"><strong>${Util.area(areaF)}</strong></span>
             ${abertaF ? `<span role="cell" class="cag__tempo cag__tempo--vazio" style="${fundo}">${marcaHoje}</span>`
-              : `<span role="cell" class="cag__tempo cag__tempo--faixas" style="${fundo}">${barras(juntar(daFazenda.map((p) => ops.get(p))), j, daLinha({ fazenda: f }))}${marcaHoje}</span>`}
+              : `<span role="cell" class="cag__tempo cag__tempo--faixas" style="${fundo}">${barras(juntar(daFazenda.map((p) => ops.get(p))), j)}${marcaHoje}</span>`}
           </div>`);
         if (!abertaF) return;
         daFazenda.forEach((p) => {
@@ -8935,7 +9029,7 @@ window.Telas.calendarioAgricola = (function () {
               <span role="cell">${esc(p.safra)}</span>
               <span role="cell">${esc(p.cultura)}</span>
               <span role="cell" class="cag__num">${area ? Util.area(area) : '<span class="cag__pendente">Pendente</span>'}</span>
-              <span role="cell" class="cag__tempo cag__tempo--faixas" style="${fundo}">${lista.length ? barras(lista, j, daLinha({ fazenda: f, safra: p.safra }))
+              <span role="cell" class="cag__tempo cag__tempo--faixas" style="${fundo}">${lista.length ? barras(lista, j)
                 : `<span class="cag__sem">${Versoes.aIniciar(p) ? 'Plano ainda não iniciado' : v ? 'Nenhuma operação com data na versão publicada' : 'Plano ainda sem versão publicada'}</span>`}${marcaHoje}</span>
             </div>`);
         });
@@ -8975,6 +9069,144 @@ window.Telas.calendarioAgricola = (function () {
 </script>
   <script>
 /*
+ * Plano de Safra › Planos › guia Cronograma de Safras (11/11/2026; antes a escala Ano do Calendário de Gestão da Lavoura).
+ * O ano agrícola por Empresa › Fazenda › Safra/Safrinha (a tabela de js/telas/calendario-agricola.js), na última versão
+ * publicada de cada plano. Filtros: os da página Planos (Ano agrícola com uma escolha só nesta guia, Atividade produtiva,
+ * Safra, Cultura, Empresa, Fazenda) e Operação; a legenda dos grupos filtra um grupo por vez. Hoje e as setas trocam o
+ * Ano agrícola (o filtro). As barras só informam (sem clique).
+ * A página (js/telas/03-lista-planos.js) cuida dos filtros e chama desenhar/atualizar/ligar.
+ */
+window.Telas = window.Telas || {};
+
+window.Telas.cronogramaSafras = (function () {
+  const esc = Util.escapar;
+  const Cal = () => Telas.calendario;
+  // Grupos pelo tipo, na ordem da legenda (Corretivos, Plantio, Fertilidade, Defensivo, Colheita)
+  const ORDEM_TIPO = ['aplicacao-de-insumos', 'sementes', 'fertilidade', 'defensivos', 'colheita'];
+  const tipoDe = (g) => Util.normalizar(g.tipo || 'outro').replace(/\s+/g, '-');
+  const posTipo = (t) => (ORDEM_TIPO.includes(t) ? ORDEM_TIPO.indexOf(t) : 99);
+  const nomeOp = (it) => (it.colheita ? 'Colheita' : it.op.nome || 'Sem operação');
+  // Grupo escolhido na legenda: 'todos' ou [tipo] (um por vez). Mantém-se ao navegar.
+  const est = { grupo: 'todos' };
+  let pagina = null; // { filtros, planos: () => os planos da guia, aoMudarAno: (ano) => … }
+
+  const comPublicada = (planos) => planos.filter((p) => Versoes.publicadaComPlanejamento(p));
+  const anos = () => Util.anosAgricolas(comPublicada(DADOS.planos));
+  const anoDe = (iso) => { const [a, m] = iso.split('-').map(Number); return String(m >= 9 ? a : a - 1); };
+  // Ano agrícola de hoje (ou, sem plano publicado nele, o mais recente)
+  const anoAtual = () => { const lista = anos(); const h = anoDe(Cal().hojeIso()); return lista.includes(h) ? h : Util.anoAgricolaMaisRecente(lista); };
+
+  // Operações planejadas dos planos (para a legenda e o filtro Operação)
+  function itens(planos) {
+    const saida = [];
+    comPublicada(planos).forEach((p) => {
+      const v = Versoes.ultimaPublicada(p);
+      const ctx = { plano: { grupos: Versoes.grupos(p, v) }, talhoes: Util.talhoesPlano(p, v), estado: { talhao: 'todos' } };
+      Cal().itens(ctx).filter((it) => (it.colheita ? !it.aguardando : it.talhoes.length > 0)).forEach((it) => saida.push(it));
+    });
+    return saida;
+  }
+  function grupos(planos) {
+    const mapa = new Map();
+    itens(planos).forEach((it) => { const t = tipoDe(it.grupo); if (!mapa.has(t)) mapa.set(t, it.grupo.nome); });
+    return [...mapa.entries()].map(([valor, nome]) => ({ valor, nome })).sort((a, b) => posTipo(a.valor) - posTipo(b.valor));
+  }
+  // Opções do filtro Operação: as dos grupos à mostra na legenda, pelo nome, na ordem da legenda e do plano
+  function opcoesOperacao(planos) {
+    const vistos = new Map();
+    itens(planos).filter((it) => Cal().marcado(est, 'grupo', tipoDe(it.grupo))).forEach((it, i) => {
+      const nome = nomeOp(it);
+      if (!vistos.has(nome)) vistos.set(nome, { valor: nome, nome, extra: it.grupo.nome, pos: posTipo(tipoDe(it.grupo)), i });
+    });
+    return [...vistos.values()].sort((a, b) => a.pos - b.pos || a.i - b.i);
+  }
+
+  // Legenda que filtra (como no Ano do Calendário): um grupo por vez; clicar de novo, ou em Mostrar todos, volta a todos
+  function legenda(lista, temHoje) {
+    const todos = lista.every((o) => Cal().marcado(est, 'grupo', o.valor));
+    return `
+      <div class="cal-legenda" role="group" aria-label="Filtrar por grupo de operação">
+        ${lista.map((o) => {
+          const ligado = Cal().marcado(est, 'grupo', o.valor);
+          return `
+            <button class="cal-leg ${ligado ? '' : 'cal-leg--desligado'}" type="button" data-cs-grupo="${esc(o.valor)}" aria-pressed="${ligado && !todos}"
+                    title="${ligado && !todos ? 'Mostrar todos' : `Mostrar só ${esc(o.nome)}`}">
+              <span class="cal-ponto cal-ponto--${esc(o.valor)}"></span>${esc(o.nome)}</button>`;
+        }).join('')}
+        ${todos ? '' : '<button class="link-acao cal-legenda__todos" type="button" data-cs-grupo="">Mostrar todos</button>'}
+        ${temHoje ? '<span class="os-cal__hoje"><span class="cag__cor cag__cor--hoje" aria-hidden="true"></span>Hoje</span>' : ''}
+      </div>`;
+  }
+
+  // Hoje · ‹ › · o ano: trocam o filtro Ano agrícola (entre os anos com plano publicado)
+  function nav(ano) {
+    const lista = anos();
+    const i = lista.indexOf(ano);
+    return `
+      <div class="cal-nav">
+        <button class="botao botao--secundario botao--p cal-nav__hoje" type="button" data-cs-ano="${esc(anoAtual())}" title="Ir para o ano agrícola de hoje">Hoje</button>
+        <button class="botao-icone cal-nav__seta" type="button" data-cs-ano="${esc(lista[i - 1] || '')}" aria-label="Ano agrícola anterior" title="Ano agrícola anterior" ${i <= 0 ? 'disabled' : ''}>${Icones.anterior}</button>
+        <button class="botao-icone cal-nav__seta" type="button" data-cs-ano="${esc(lista[i + 1] || '')}" aria-label="Próximo ano agrícola" title="Próximo ano agrícola" ${i < 0 || i >= lista.length - 1 ? 'disabled' : ''}>${Icones.proxima}</button>
+        <span class="cal-nav__titulo" title="Ano agrícola ${esc(ano)}" aria-live="polite">${esc(ano)}</span>
+      </div>`;
+  }
+
+  // O painel da guia (escondido nas outras guias)
+  function desenhar(visivel) {
+    return `<div class="cs" data-guia-painel="cronograma" ${visivel ? '' : 'hidden'} data-cs></div>`;
+  }
+
+  function atualizar(conteudo) {
+    const caixa = conteudo.querySelector('[data-cs]');
+    if (!caixa || !pagina) return;
+    const f = pagina.filtros;
+    const ano = Array.isArray(f.ano) && f.ano.length === 1 ? f.ano[0] : anoAtual();
+    const planos = comPublicada(pagina.planos());
+    const { html, temHoje } = Telas.calendarioAgricola.tabela({
+      planos,
+      talhaoOk: () => true,
+      opOk: (o) => Cal().marcado(est, 'grupo', tipoDe(o)) && Cal().marcado(f, 'operacao', o.tipo === 'Colheita' ? 'Colheita' : o.nome)
+    });
+    caixa.innerHTML = `
+      <section class="cartao cs__barra" aria-label="Legenda e ano agrícola">
+        ${legenda(grupos(planos), temHoje)}
+        ${nav(ano)}
+      </section>
+      <div class="cs__ano">${html}</div>`;
+  }
+
+  // cfg: { filtros, planos, aoMudarAno(ano), aoMudarGrupo() }
+  function ligar(conteudo, cfg) {
+    pagina = cfg;
+    const caixa = conteudo.querySelector('[data-cs]');
+    caixa.addEventListener('click', (e) => {
+      const g = e.target.closest('[data-cs-grupo]');
+      if (g) {
+        const v = g.dataset.csGrupo;
+        const soEle = Array.isArray(est.grupo) && est.grupo.length === 1 && est.grupo[0] === v;
+        est.grupo = !v || soEle ? 'todos' : [v];
+        cfg.aoMudarGrupo();
+        caixa.querySelector(v ? `[data-cs-grupo="${CSS.escape(v)}"]` : '.cal-leg')?.focus();
+        return;
+      }
+      const a = e.target.closest('[data-cs-ano]');
+      if (a && !a.disabled && a.dataset.csAno) {
+        const foco = a.classList.contains('cal-nav__hoje') ? '.cal-nav__hoje' : `[aria-label="${a.getAttribute('aria-label')}"]:not(:disabled)`;
+        cfg.aoMudarAno(a.dataset.csAno);
+        caixa.querySelector(foco)?.focus();
+        return;
+      }
+      // Abrir/fechar empresa e fazenda
+      Telas.calendarioAgricola.aoClicar(e, (foco) => { atualizar(conteudo); if (foco) caixa.querySelector(foco)?.focus(); });
+    });
+  }
+
+  return { desenhar, atualizar, ligar, opcoesOperacao, anoAtual };
+})();
+
+</script>
+  <script>
+/*
  * Gestão da Lavoura (DECISOES 4.0): o cabeçalho das páginas (caminho, título e subtítulo) e o que a Central OS
  * (js/telas/central-corp.js) usa em comum: datas, planos publicados, safras, operações por talhão, OS de exemplo,
  * filtros e ordenação. Antes ficava em Minhas tarefas (guardada em rascunhos/minhas-tarefas/).
@@ -9004,7 +9236,7 @@ window.Telas.gestaoLavoura = (function () {
         </div>
       </header>`;
   }
-  const etiquetaPublicadas = () => `<span class="cag-etiqueta" title="Mostra a última versão publicada de cada plano. Alterações em versões em construção aparecem aqui depois de publicadas.">${Icones.info} Últimas versões publicadas</span>`;
+  const etiquetaPublicadas = () => `<span class="cag-etiqueta" title="Mostra a última versão publicada de cada plano. Alterações em versões em construção aparecem aqui depois de publicadas.">${Icones.info} Últimas versões</span>`;
 
   // ----- Datas -----
   const hoje = () => Util.hojeISO();
@@ -9604,16 +9836,14 @@ window.Telas.centralCorp = (function () {
 </script>
   <script>
 /*
- * Calendário Agrícola, a primeira guia de Gestão da Lavoura › Planejado x Executado (DECISOES 4.0), com os seus próprios
- * filtros: a lista suspensa Ano · Mês · Semana · Dia. Ano (abre nele):
- * o ano agrícola por Empresa › Fazenda › Safra/Safrinha (js/telas/calendario-agricola.js; as setas trocam o ano agrícola).
- * Mês, Semana e Dia: a Agenda Agrícola, a grade que antes ficava no Resumo do plano,
- * com as operações de vários planos somados, sem a associação a um plano. Usa a última versão publicada de cada
- * plano. Filtros com várias escolhas: Safra (Safra ou Safrinha), Cultura, Empresa, Fazenda, Talhão e Operação. Sem filtro de
- * Ano Agrícola: o tempo anda pelas setas do calendário. Abre no dia de hoje. A legenda filtra os grupos de operação
- * e o filtro Operação levam o calendário para a primeira operação escolhida; voltar a todas não muda o tempo (só o Hoje vai para hoje).
+ * Gestão da Lavoura › Operações › guia Calendário (Tela 07; 11/11/2026, antes item do menu): a lista suspensa Mês · Semana · Dia (11/11/2026: o Ano saiu e virou a guia
+ * Cronograma de Safras da página Planos, js/telas/cronograma-safras.js). As operações de vários planos somados, sem a
+ * associação a um plano, na última versão publicada de cada plano, por talhão. Ano (11/11/2026): a mesma tabela, com os
+ * meses da safra escolhida (da primeira operação à colheita); as setas trocam a safra. Filtros: Safra (uma escolha), Cultura,
+ * Empresa, Fazenda, Talhão, Grupo de operação e Operação. O tempo anda pelas setas; abre no Mês de hoje.
+ * Legenda por status (Atrasada · Em execução · Finalizada · Planejada), etiquetas na cor do status, a atrasada migra
+ * para hoje, "N ha previstos" no título de cada coluna. Detalhe em registros().
  * As datas e o desenho da grade vêm do Calendário do plano (js/telas/05-calendario.js).
- * Por enquanto só migrado; o refinamento para a programação das OS vem depois.
  */
 window.Telas = window.Telas || {};
 
@@ -9630,34 +9860,32 @@ window.Telas.osCalendario = (function () {
     ['empresa', 'Empresa', ['Todas', 'Nenhuma', 'empresas']],
     ['fazenda', 'Fazenda', ['Todas', 'Nenhuma', 'fazendas']],
     ['talhao', 'Talhão', ['Todos', 'Nenhum', 'talhões']],
+    ['grupo', 'Grupo de operação', ['Todos', 'Nenhum', 'grupos']],
     ['operacao', 'Operação', ['Todas', 'Nenhuma', 'operações']]
   ]);
 
   // Estado da tela: período, dia aberto e filtros ('todos' ou a lista do que está marcado). Mantém-se ao navegar.
-  // Abre no Mês de hoje (03/11/2026; antes no Ano)
-  const novoEstado = () => ({ escala: 'mes', anoAgricola: anoInicial(), dataRef: Cal().hojeIso(), safra: 'todos', empresa: 'todos', fazenda: 'todos',
-    cultura: 'todos', operacao: 'todos', talhao: 'todos', grupo: 'todos' });
+  // Abre no Mês de hoje
+  const novoEstado = () => ({ escala: 'mes', comAno: true, dataRef: Cal().hojeIso(), safra: 'todos', empresa: 'todos', fazenda: 'todos',
+    cultura: 'todos', operacao: 'todos', talhao: 'todos', grupo: 'todos', status: null });
   let est = null;
 
-  // Grupo de operação (ou operação do Ano, que traz o tipo) → a chave da cor
+  // Grupo de operação → a chave (o tipo)
   const tipoDe = (grupo) => Util.normalizar(grupo.tipo || 'outro').replace(/\s+/g, '-');
   const nomeOp = (it) => (it.colheita ? 'Colheita' : it.op.nome || 'Sem operação');
   const posTipo = (t) => (ORDEM_TIPO.includes(t) ? ORDEM_TIPO.indexOf(t) : 99);
-  // Aparece no calendário: grupo ligado na legenda e operação marcada no filtro
+  // Aparece no calendário: grupo e operação marcados nos filtros
   const visivel = (it) => Cal().marcado(est, 'grupo', tipoDe(it.grupo)) && Cal().marcado(est, 'operacao', nomeOp(it));
   const comPublicada = () => DADOS.planos.filter((p) => Versoes.publicadaComPlanejamento(p));
   const valorDe = { safra: (p) => p.safra, empresa: (p) => p.empresa, fazenda: (p) => p.fazenda, cultura: (p) => p.cultura };
-  // Ano agrícola de uma data (01/09 a 31/08), em texto ("2026"); os anos com plano publicado; o de hoje ou o mais recente
-  const anoDe = (iso) => { const [a, m] = iso.split('-').map(Number); return String(m >= 9 ? a : a - 1); };
-  const anos = () => Util.anosAgricolas(comPublicada());
-  const anoInicial = () => { const lista = anos(); const h = anoDe(Cal().hojeIso()); return lista.includes(h) ? h : Util.anoAgricolaMaisRecente(lista); };
   const planosFiltrados = () => comPublicada().filter((p) => Object.keys(valorDe).every((c) => Cal().marcado(est, c, valorDe[c](p))));
 
   // Opções de cada filtro: o que existe nos planos com versão publicada. Talhão: os talhões dos planos que passam
   // pelos outros filtros, com a fazenda junto ("Santa Clara · T01"), porque o nome se repete entre fazendas.
-  // Operação: as operações dos grupos ligados na legenda, pelo nome (o mesmo nome em vários planos é uma opção só),
+  // Operação: as operações dos grupos marcados, pelo nome (o mesmo nome em vários planos é uma opção só),
   // na ordem da legenda e, dentro do grupo, na ordem do plano; ao lado, o grupo.
   function opcoes(chave) {
+    if (chave === 'grupo') return gruposLegenda(calcular().itens);
     if (chave === 'operacao') {
       const vistos = new Map();
       calcular().itens.filter(({ it }) => Cal().marcado(est, 'grupo', tipoDe(it.grupo))).forEach(({ it }, i) => {
@@ -9674,9 +9902,9 @@ window.Telas.osCalendario = (function () {
       }));
       return [...vistos.values()].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR', { numeric: true }));
     }
-    // Mês, Semana e Dia: Safra → Empresa → Fazenda; a Empresa só com as que têm a safra escolhida e a Fazenda só com
-    // as das empresas marcadas e da safra, em ordem alfabética
-    if (unicoAtivo() && (chave === 'empresa' || chave === 'fazenda')) {
+    // Safra → Empresa → Fazenda; a Empresa só com as que têm a safra escolhida e a Fazenda só com as das empresas
+    // marcadas e da safra, em ordem alfabética
+    if (chave === 'empresa' || chave === 'fazenda') {
       const base = comPublicada().filter((p) => Cal().marcado(est, 'safra', p.safra)
         && (chave === 'empresa' || Cal().marcado(est, 'empresa', p.empresa)));
       return [...new Set(base.map(valorDe[chave]))].sort((a, b) => a.localeCompare(b, 'pt-BR')).map((x) => ({ valor: x, nome: x }));
@@ -9688,15 +9916,11 @@ window.Telas.osCalendario = (function () {
     return ordem.filter((x) => presentes.has(x)).map((x) => ({ valor: x, nome: x }));
   }
 
-  // Mês, Semana e Dia (05/11/2026): uma Safra por vez (a escolhida; sem escolha, a safra atual ou, sem ela, a mais
-  // recente); Empresa, Fazenda, Cultura, Talhão e Operação com várias. Empresa e Fazenda dependem da safra: se nenhuma
-  // marcada existe com ela (ex.: trocou a safra), voltam a Todas. O Ano fica com várias escolhas em todos.
+  // Uma Safra por vez (05/11/2026; a escolhida; sem escolha, a safra atual ou, sem ela, a mais recente); Empresa,
+  // Fazenda, Cultura, Talhão, Grupo de operação e Operação com várias. Empresa e Fazenda dependem da safra: se nenhuma
+  // marcada existe com ela (ex.: trocou a safra), voltam a Todas.
   const UNICOS = ['safra'];
-  // Todos os filtros da página (os da barra e os grupos da legenda): o Ano abre com todos em Todas
-  const FILTROS_TODOS = ['safra', 'cultura', 'empresa', 'fazenda', 'talhao', 'operacao', 'grupo'];
-  const unicoAtivo = () => est.escala !== 'ano';
   function ajustarUnicos() {
-    if (!unicoAtivo()) return;
     UNICOS.forEach((chave) => {
       const ops = opcoes(chave).map((o) => o.valor);
       const escolhida = Array.isArray(est[chave]) && est[chave].length === 1 && ops.includes(est[chave][0]) ? est[chave][0] : null;
@@ -9715,6 +9939,7 @@ window.Telas.osCalendario = (function () {
   // Operações planejadas de cada plano (só as que têm talhão; a colheita depois do plantio), com os eventos no tempo
   function calcular() {
     const itens = []; const eventos = [];
+    let ini = null; let fim = null; // da primeira operação ao fim da colheita, nos planos dos filtros (para o Ano)
     planosFiltrados().forEach((p) => {
       const v = Versoes.ultimaPublicada(p);
       const talhao = est.talhao === 'todos' ? 'todos'
@@ -9723,44 +9948,56 @@ window.Telas.osCalendario = (function () {
       const lista = Cal().itens(ctx).filter((it) => (it.colheita ? !it.aguardando : it.talhoes.length > 0));
       const local = `${p.fazenda} · ${p.safra}`;
       lista.forEach((it) => itens.push({ it, local }));
+      Cal().eventos(ctx, lista).forEach((ev) => { if (!ini || ev.inicio < ini) ini = ev.inicio; if (!fim || ev.fim > fim) fim = ev.fim; });
       const visiveis = lista.filter(visivel);
       const ano = String(Util.anoAgricola(p.safra));
-      Cal().eventos(ctx, visiveis).forEach((ev) => eventos.push({ ...ev, local, ano, fazenda: p.fazenda,
+      Cal().eventos(ctx, visiveis).forEach((ev) => eventos.push({ ...ev, local, ano, fazenda: p.fazenda, plano: p,
         chave: `${p.id}:${ev.it.colheita ? 'colheita' : ev.it.op.id}` }));
     });
     eventos.sort((a, b) => a.inicio.localeCompare(b.inicio));
     const semData = itens.filter(({ it }) => visivel(it) && !eventos.some((ev) => ev.it === it)).length;
-    return { itens, eventos, semData };
+    return { itens, eventos, semData, periodoSafra: ini ? { de: `${ini.slice(0, 8)}01`, ate: ultimoDia(fim) } : null };
+  }
+  const ultimoDia = (iso) => { const d = new Date(Number(iso.slice(0, 4)), Number(iso.slice(5, 7)), 0); return `${iso.slice(0, 8)}${String(d.getDate()).padStart(2, '0')}`; };
+
+  // Ano: os meses de de a ate, "set 2026"
+  function mesesDe(de, ate) {
+    const lista = [];
+    for (let a = Number(de.slice(0, 4)), m = Number(de.slice(5, 7)); `${a}-${String(m).padStart(2, '0')}-01` <= ate; m === 12 ? (a++, m = 1) : m++) {
+      const ini = `${a}-${String(m).padStart(2, '0')}-01`;
+      lista.push({ de: ini, ate: ultimoDia(ini), rotulo: `${MESES_SEM[m - 1]} ${a}` });
+    }
+    return lista;
+  }
+  // Safras do filtro, da mais antiga para a mais recente (para as setas do Ano)
+  const safrasEmOrdem = () => Util.ordenarSafras(opcoes('safra').map((o) => o.valor)).reverse();
+  // Ano: Hoje (a safra atual) · ‹ › (a safra anterior e a próxima) · "Safra 26/27" · a escala
+  function navAno() {
+    const lista = safrasEmOrdem();
+    const s = Array.isArray(est.safra) ? est.safra[0] : '';
+    const i = lista.indexOf(s);
+    const atual = lista.includes(FiltrosBase.safraAtual()) ? FiltrosBase.safraAtual() : lista[lista.length - 1];
+    return `
+      <div class="cal-nav">
+        <button class="botao botao--secundario botao--p cal-nav__hoje" type="button" data-acao="os-safra" data-safra="${esc(atual || '')}" title="Ir para a safra atual">Hoje</button>
+        <button class="botao-icone cal-nav__seta" type="button" data-acao="os-safra" data-safra="${esc(lista[i - 1] || '')}" aria-label="Safra anterior" title="Safra anterior" ${i <= 0 ? 'disabled' : ''}>${Icones.anterior}</button>
+        <button class="botao-icone cal-nav__seta" type="button" data-acao="os-safra" data-safra="${esc(lista[i + 1] || '')}" aria-label="Próxima safra" title="Próxima safra" ${i < 0 || i >= lista.length - 1 ? 'disabled' : ''}>${Icones.proxima}</button>
+        <span class="cal-nav__titulo" aria-live="polite">Safra ${esc(s)}</span>
+        ${Cal().seletorEscala(est)}
+      </div>`;
   }
 
-  // Grupos da legenda: os tipos que têm operação, na ordem Corretivos, Plantio, Fertilidade, Defensivo, Colheita (outros no fim)
+  // Grupos (filtro Grupo de operação): os tipos que têm operação, na ordem Corretivos, Plantio, Fertilidade, Defensivo, Colheita (outros no fim)
   function gruposLegenda(itens) {
     const mapa = new Map();
     itens.forEach(({ it }) => { const t = tipoDe(it.grupo); if (!mapa.has(t)) mapa.set(t, it.grupo.nome); });
     return [...mapa.entries()].map(([valor, nome]) => ({ valor, nome })).sort((a, b) => posTipo(a.valor) - posTipo(b.valor));
   }
 
-  // Legenda que filtra: clicar num grupo mostra só ele (outro grupo substitui o anterior); clicar no grupo que está à
-  // mostra, ou em Mostrar todos, volta a todos. Com um grupo, o calendário vai para a operação mais cedo dele; com
-  // todos, volta para hoje.
-  function legenda(grupos, temHoje = false) {
-    const todos = grupos.every((o) => Cal().marcado(est, 'grupo', o.valor));
-    return `
-      <div class="cal-legenda" role="group" aria-label="Filtrar por grupo de operação">
-        ${grupos.map((o) => {
-          const ligado = Cal().marcado(est, 'grupo', o.valor);
-          return `
-            <button class="cal-leg ${ligado ? '' : 'cal-leg--desligado'}" type="button" data-acao="os-leg" data-grupo="${esc(o.valor)}" aria-pressed="${ligado && !todos}"
-                    title="${ligado && !todos ? 'Mostrar todos' : `Mostrar só ${esc(o.nome)}`}">
-              <span class="cal-ponto cal-ponto--${esc(o.valor)}"></span>${esc(o.nome)}</button>`;
-        }).join('')}
-        ${todos ? '' : '<button class="link-acao cal-legenda__todos" type="button" data-acao="os-leg-todos">Mostrar todos</button>'}
-        ${temHoje ? '<span class="os-cal__hoje"><span class="cag__cor cag__cor--hoje" aria-hidden="true"></span>Hoje</span>' : ''}
-      </div>`;
-  }
-
   function desenhar() {
     est = est || novoEstado();
+    // Primeira guia de Operações (11/11/2026): o item Operações do menu volta para ela
+    Telas.monitoramentoAplicacoes.marcarCalendario();
     return `
       <header class="cabecalho oa-cabecalho ma-cabecalho" data-os-cabecalho>${Telas.monitoramentoAplicacoes.cabecalho('calendario')}</header>
       <div class="pagina os-cal">
@@ -9774,7 +10011,7 @@ window.Telas.osCalendario = (function () {
       ${FILTROS.map(([chave, rotulo, textos]) => `
         <div class="campo">
           <span class="campo__rotulo">${rotulo}</span>
-          ${Cal().filtroCaixa(est, chave, opcoes(chave), textos, rotulo, { unico: unicoAtivo() && UNICOS.includes(chave) })}
+          ${Cal().filtroCaixa(est, chave, opcoes(chave), textos, rotulo, { unico: UNICOS.includes(chave) })}
         </div>`).join('')}
       <div class="bf__acoes bf__acoes--texto">
         <!-- Limpar filtros padronizado (04/11/2026): contorno cinza, texto e ícone pretos, sempre com o nome -->
@@ -9783,34 +10020,75 @@ window.Telas.osCalendario = (function () {
       </div>`;
   }
 
-  // Visão Ano: Hoje (o ano agrícola de hoje) · ‹ › (o ano agrícola anterior e o próximo, entre os que têm plano) · o ano ·
-  // a lista suspensa Ano, Mês, Semana, Dia
-  function navAno() {
-    const lista = anos();
-    const i = lista.indexOf(est.anoAgricola);
-    return `
-      <div class="cal-nav">
-        <button class="botao botao--secundario botao--p cal-nav__hoje" type="button" data-acao="os-ano-hoje" title="Ir para o ano agrícola de hoje">Hoje</button>
-        <button class="botao-icone cal-nav__seta" type="button" data-os-ano="-1" aria-label="Ano agrícola anterior" title="Ano agrícola anterior" ${i <= 0 ? 'disabled' : ''}>${Icones.anterior}</button>
-        <button class="botao-icone cal-nav__seta" type="button" data-os-ano="1" aria-label="Próximo ano agrícola" title="Próximo ano agrícola" ${i >= lista.length - 1 ? 'disabled' : ''}>${Icones.proxima}</button>
-        <span class="cal-nav__titulo" title="Ano agrícola ${esc(est.anoAgricola)}" aria-live="polite">${esc(est.anoAgricola)}</span>
-        ${Cal().seletorEscala(est)}
-      </div>`;
-  }
-
-  // Visão Ano: os planos dos filtros no ano agrícola; Talhão, Operação e a legenda filtram as barras
-  function corpoAno(itens) {
-    const { html, temHoje } = Telas.calendarioAgricola.tabela({
-      planos: planosFiltrados().filter((p) => String(Util.anoAgricola(p.safra)) === est.anoAgricola),
-      talhaoOk: (p, t) => est.talhao === 'todos' || est.talhao.includes(`${p.fazenda}|${t}`),
-      opOk: (o) => Cal().marcado(est, 'grupo', tipoDe(o)) && Cal().marcado(est, 'operacao', o.tipo === 'Colheita' ? 'Colheita' : o.nome)
+  // ----- Status das operações no Mês, na Semana e no Dia (10/11/2026) -----
+  // Uma operação num talhão é um registro, com o status pela data de hoje real (não a do período mostrado):
+  // - Finalizada (antes Executada; 10/11/2026): a OS foi fechada. Aparece onde ocorreu: da abertura da OS ao fechamento.
+  //   As datas vêm da mesma simulação da página Operações (Telas.monitoramentoAplicacoes.execucao).
+  // - Em execução (10/11/2026): a OS foi aberta e ainda não foi fechada (mesmo com o prazo vencido). Da abertura até hoje.
+  // - Atrasada: o prazo final (dia planejado + previsão de conclusão) passou e a OS nem foi aberta. Migra para hoje:
+  //   aparece só no dia de hoje (Semana e Dia) ou na semana de hoje (Mês), com os dias de atraso (a partir do dia
+  //   seguinte ao prazo final); some dos períodos anteriores. A data planejada não muda.
+  // - Planejada: a OS não foi aberta e o prazo não venceu. Só o dia planejado no talhão, sem duração (a duração vem com
+  //   a abertura da OS; 10/11/2026).
+  // ref: a data de referência para os hectares previstos (cada operação conta uma vez): Planejada, o dia planejado;
+  // Atrasada e Em execução, hoje; Finalizada, o fechamento da OS.
+  // Ordem do ciclo da OS (11/11/2026), a mesma dos cartões na célula: não começou (Atrasada, Planejada), Em execução, Finalizada
+  const STATUS = [['atrasada', 'Atrasada'], ['planejada', 'Planejada'], ['execucao', 'Em execução'], ['finalizada', 'Finalizada']];
+  const DICA_STATUS = {
+    atrasada: 'O prazo planejado já passou e a OS não foi aberta.',
+    execucao: 'A OS foi aberta e ainda não foi fechada.',
+    finalizada: 'A operação foi concluída (OS fechada).',
+    planejada: 'A OS ainda não foi aberta e o prazo planejado não venceu.'
+  };
+  // Ícones, na legenda e nos cartões
+  const ICONE = () => ({ atrasada: Icones.pendente, execucao: Icones.relogio, finalizada: Icones.executada, planejada: Icones.calendario });
+  // Na mesma célula, uma embaixo da outra, na ordem da legenda: Atrasadas, Planejadas, Em execução e Finalizadas
+  const PRIORIDADE = { atrasada: 0, planejada: 1, execucao: 2, finalizada: 3 };
+  const diasEntre = (de, ate) => Math.round((Date.parse(ate) - Date.parse(de)) / 86400000);
+  function registros(evs) {
+    const hoje = Cal().hojeIso();
+    const saida = [];
+    evs.forEach((ev) => {
+      const p = ev.plano;
+      const talhoes = Util.talhoesPlano(p, Versoes.ultimaPublicada(p));
+      const g = ev.it.grupo;
+      const op = ev.it.op;
+      ev.talhoes.forEach((t) => {
+        const iT = talhoes.findIndex((x) => x.nome === t);
+        // Índice da simulação, como nas outras páginas: Plantio, o do talhão; Colheita, iT * 3 + 2; as outras, pela posição no grupo
+        const i = ev.it.colheita ? iT * 3 + 2 : g.tipo === 'Sementes' ? iT : iT * 3 + Math.max(0, (g.operacoes || []).indexOf(op));
+        const { executada, fechamento } = op ? Telas.monitoramentoAplicacoes.execucao(p, t, op, g, ev.inicio, iT, i) : {};
+        // Área operacional: a área planejada do talhão (na colheita de um talhão só, a das variedades dele)
+        const area = ev.talhoes.length === 1 ? ev.area : (talhoes[iT] || { area: 0 }).area;
+        let r;
+        if (fechamento) r = { status: 'finalizada', inicio: executada, fim: fechamento, ref: fechamento };
+        else if (executada) r = { status: 'execucao', inicio: executada, fim: hoje, ref: hoje, emExecucao: diasEntre(executada, hoje) };
+        else if (ev.fim < hoje) r = { status: 'atrasada', inicio: hoje, fim: hoje, ref: hoje, atraso: diasEntre(ev.fim, hoje) };
+        else r = { status: 'planejada', inicio: ev.inicio, fim: ev.inicio, ref: ev.inicio };
+        saida.push({ ...r, ev, talhao: `${ev.fazenda}|${t}`, area, executada, fechamento });
+      });
     });
+    // Status escolhido na legenda: só ele (também nos hectares)
+    return saida.filter((r) => !est.status || r.status === est.status);
+  }
+  // Hectares previstos de uma coluna (dia ou semana): a área dos registros com a data de referência nela
+  const haPrevistos = (regs, de, ate) => regs.reduce((s, r) => s + (r.ref >= de && r.ref <= ate ? r.area : 0), 0);
+
+  // Legenda (10/11/2026): Atrasada · Planejada · Em execução · Finalizada, um status por vez (clicar de novo volta a todos); não muda o período
+  // No padrão da legenda da página Operações › Desvios de data (10/11/2026): o título "Operações:" e os status, com os
+  // mesmos ícones dos cartões do calendário (Atrasada, a exclamação; Em execução, o relógio; Finalizada, o check; Planejada, o calendário)
+  const MARCA = Object.fromEntries(STATUS.map(([id]) => [id,
+    `<span class="cal-leg__icone cal-st--${id}" aria-hidden="true">${ICONE()[id]}</span>`]));
+  function legendaStatus() {
     return `
-      <div class="calendario__barra">
-        ${legenda(gruposLegenda(itens), temHoje)}
-        ${navAno()}
-      </div>
-      <div class="os-cal__ano">${html}</div>`;
+      <div class="ma-legenda">
+        <span class="ma-legenda__titulo">Operações:</span>
+        <ul aria-label="Filtrar por status da operação">
+          ${STATUS.map(([id, nome]) => `<li><button class="ma-legenda__item ${est.status && est.status !== id ? 'ma-legenda__item--apagado' : ''}" type="button"
+              data-acao="os-status" data-status="${id}" aria-pressed="${est.status === id}" title="${est.status === id ? 'Mostrar todos' : DICA_STATUS[id]}">
+              ${MARCA[id]}${nome}</button></li>`).join('')}
+        </ul>
+      </div>`;
   }
 
   // ----- Mês (05/11/2026, imagem da usuária): uma linha por talhão × as semanas do mês -----
@@ -9849,58 +10127,56 @@ window.Telas.osCalendario = (function () {
     return lista;
   }
 
-  // Mês e Semana por talhão. Barras: cada operação de um talhão ocupa as colunas inteiras (semanas no Mês, dias na
-  // Semana) do início ao fim da previsão de conclusão; colunas seguidas viram uma barra só (como um evento de vários
-  // dias no Google Agenda). Duas barras na mesma coluna do mesmo talhão ficam uma embaixo da outra (a linha cresce).
+  // Mês e Semana por talhão. Barras: cada operação de um talhão (um registro, com o status) ocupa as colunas inteiras
+  // (semanas no Mês, dias na Semana) do início ao fim em que aparece (ver registros()), numa barra só (como um evento
+  // de vários dias no Google Agenda), na cor do status. Várias barras na mesma coluna do mesmo talhão ficam uma embaixo da
+  // outra (a linha cresce), na ordem Atrasadas, Planejadas, Em execução e Finalizadas. Como a etiqueta da página Operações › Desvios de data (10/11/2026): o ícone (ICONE), o nome e o atraso.
   // Dia (05/11/2026, imagem da usuária): a mesma tabela, com uma coluna só, a do dia; a tabela fica estreita.
-  function mesPorTalhao(evs, de, ate, escala = 'mes') {
+  // Embaixo da data de cada coluna, "850 ha previstos" (10/11/2026; haPrevistos).
+  function mesPorTalhao(regs, de, ate, escala = 'mes') {
     const naSemana = escala === 'semana' || escala === 'dia';
     const noDia = escala === 'dia';
-    const semanas = noDia ? diasDaSemana(de, 1) : naSemana ? diasDaSemana(de) : Cal().semanasDoMes(de, ate);
+    const noAno = escala === 'ano';
+    const semanas = noAno ? mesesDe(de, ate) : noDia ? diasDaSemana(de, 1) : naSemana ? diasDaSemana(de) : Cal().semanasDoMes(de, ate);
     const linhas = talhoesDoMes();
     if (!linhas.length) return '<p class="cal-painel__vazio">Nenhum talhão nos planos publicados com esses filtros.</p>';
     const hoje = Cal().hojeIso();
     const semanaDe = (iso) => semanas.findIndex((s) => s.de <= iso && iso <= s.ate);
-    // Por talhão: as operações (chave do plano + operação) com as semanas ocupadas e os períodos
-    const ops = new Map(linhas.map((l) => [l.chave, new Map()]));
-    evs.forEach((ev) => {
-      if (ev.fim < de || ev.inicio > ate) return;
-      const a = semanaDe(ev.inicio < de ? de : ev.inicio);
-      const b = semanaDe(ev.fim > ate ? ate : ev.fim);
-      ev.talhoes.forEach((t) => {
-        const doTalhao = ops.get(`${ev.fazenda}|${t}`);
-        if (!doTalhao) return;
-        if (!doTalhao.has(ev.chave)) doTalhao.set(ev.chave, { ev, semanas: new Set(), periodos: [] });
-        const o = doTalhao.get(ev.chave);
-        for (let i = a; i <= b; i++) o.semanas.add(i);
-        o.periodos.push({ inicio: ev.inicio, fim: ev.fim, a, b });
-      });
+    // Por talhão: as barras (registros no período), com as colunas ocupadas
+    const porTalhao = new Map(linhas.map((l) => [l.chave, []]));
+    regs.forEach((r) => {
+      if (r.fim < de || r.inicio > ate || !porTalhao.has(r.talhao)) return;
+      porTalhao.get(r.talhao).push({ r, a: semanaDe(r.inicio < de ? de : r.inicio), b: semanaDe(r.fim > ate ? ate : r.fim) });
     });
     const barrasDe = (chave) => {
-      const barras = [];
-      ops.get(chave).forEach((o) => {
-        const lista = [...o.semanas].sort((x, y) => x - y);
-        lista.forEach((i, k) => {
-          if (k > 0 && lista[k - 1] === i - 1) barras[barras.length - 1].b = i;
-          else barras.push({ ev: o.ev, periodos: o.periodos, a: i, b: i });
-        });
-      });
-      barras.sort((x, y) => x.a - y.a || y.b - x.b || x.ev.inicio.localeCompare(y.ev.inicio));
-      // Uma faixa por barra que se sobrepõe a outra
-      const fimFaixa = [];
+      const barras = porTalhao.get(chave);
+      barras.sort((x, y) => PRIORIDADE[x.r.status] - PRIORIDADE[y.r.status] || x.a - y.a || y.b - x.b
+        || x.r.inicio.localeCompare(y.r.inicio));
+      // Cada barra na primeira faixa em que não se sobrepõe a outra
+      const faixas = [];
       barras.forEach((br) => {
-        let f = fimFaixa.findIndex((fim) => fim < br.a);
-        if (f < 0) { f = fimFaixa.length; fimFaixa.push(br.b); } else fimFaixa[f] = br.b;
+        let f = faixas.findIndex((ocup) => ocup.every(([a, b]) => b < br.a || a > br.b));
+        if (f < 0) { f = faixas.length; faixas.push([]); }
+        faixas[f].push([br.a, br.b]);
         br.faixa = f;
       });
-      return { barras, faixas: Math.max(1, fimFaixa.length) };
+      return { barras, faixas: Math.max(1, faixas.length) };
     };
-    const dica = (l, br) => {
-      const ps = br.periodos.filter((p) => p.b >= br.a && p.a <= br.b);
-      const inicio = ps.map((p) => p.inicio).sort()[0];
-      const fim = ps.map((p) => p.fim).sort().pop();
-      return `${br.ev.nome} · ${br.ev.local} · ${Cal().faixaDias({ inicio, fim })} · ${l.nome} · ${Util.area(l.area)}`;
+    const diasAtraso = (n) => `${n} ${n === 1 ? 'dia' : 'dias'} de atraso`;
+    // Dica (11/11/2026): "Boa Vista · T01 · 2ª Fungicida" e, embaixo, o status com as datas (dd/mm/aaaa) e os dias:
+    // "Em Execução desde 15/10/2026 (26 dias)", "Atrasada desde 02/11/2026 (9 dias)" (o dia seguinte ao prazo final),
+    // "Finalizada: 10/10/2026 - 15/10/2026 (5 dias)", "Planejada: 15/10/2026"
+    const nDias = (n) => `${n} ${n === 1 ? 'dia' : 'dias'}`;
+    const dica = (l, { r }) => {
+      const situacao = r.status === 'finalizada' ? `Finalizada: ${Util.data(r.executada)} - ${Util.data(r.fechamento)} (${nDias(diasEntre(r.executada, r.fechamento))})`
+        : r.status === 'execucao' ? `Em Execução desde ${Util.data(r.executada)} (${nDias(r.emExecucao)})`
+        : r.status === 'atrasada' ? `Atrasada desde ${Util.data(Telas.monitoramentoAplicacoes.somaDias(r.ev.fim, 1))} (${nDias(r.atraso)})`
+        : `Planejada: ${Util.data(r.ev.inicio)}`;
+      return `${l.fazenda} · ${l.nome} · ${r.ev.nome}
+${situacao}`;
     };
+    // Colunas que já passaram: a coluna inteira esmaecida (o fundo cinza leve, o título e os cartões); hoje sem fundo
+    const fundo = (s) => (s.ate < hoje ? 'cal-tal--passado' : '');
     let linha = 2; // a 1ª linha da grade é o cabeçalho
     const corpoLinhas = linhas.map((l) => {
       const { barras, faixas } = barrasDe(l.chave);
@@ -9910,47 +10186,62 @@ window.Telas.osCalendario = (function () {
       return `
         <div class="cal-tal__info" style="${area}; grid-column: 1"><strong class="cal-tal__talhao">${esc(l.nome)}</strong>
           <span class="cal-tal__fazenda">${esc(l.fazenda)}</span><span class="cal-tal__var">${esc(l.variedades.join(', ') || '—')}</span></div>
-        ${semanas.map((s, i) => `<div class="cal-tal__cel ${s.ate < hoje ? 'cal-tal--passado' : ''}" style="${area}; grid-column: ${i + 2}"></div>`).join('')}
+        ${semanas.map((s, i) => `<div class="cal-tal__cel ${fundo(s)}" style="${area}; grid-column: ${i + 2}"></div>`).join('')}
         ${barras.map((br) => `
-          <span class="cal-tal__barra cal-ponto--${br.ev.tipo} ${semanas[br.b].ate < hoje ? 'cal-tal--passado' : ''}"
+          <span class="cal-tal__barra cal-st--${br.r.status} ${semanas[br.b].ate < hoje ? 'cal-tal--passado' : ''}"
                 style="grid-row: ${r + br.faixa}; grid-column: ${br.a + 2} / ${br.b + 3}" title="${esc(dica(l, br))}">
-            <span class="cal-ponto cal-ponto--${br.ev.tipo}"></span><span class="cal-tal__nome">${esc(br.ev.nome)}</span></span>`).join('')}`;
+            <span class="cal-tal__conteudo"><span class="cal-tal__icone" aria-hidden="true">${ICONE()[br.r.status]}</span><span class="cal-tal__nome">${esc(br.r.ev.nome)}</span>${br.r.status === 'atrasada'
+              ? `<span class="cal-tal__selo" aria-label="${diasAtraso(br.r.atraso)}">${br.r.atraso}d</span>`
+              : ''}</span></span>`).join('')}`;
     }).join('');
+    // Colunas que já passaram (o dia ou a semana inteira antes de hoje): "N ha executados", só a área das finalizadas
+    // (fechamento da OS na coluna); hoje e os dias seguintes, "N ha previstos" (10/11/2026)
+    const ha = (s) => (s.ate < hoje
+      ? `<span class="cal-tal__ha">${Util.area(haPrevistos(regs.filter((r) => r.status === 'finalizada'), s.de, s.ate))} executados</span>`
+      : `<span class="cal-tal__ha">${Util.area(haPrevistos(regs, s.de, s.ate))} previstos</span>`);
     return `
       <div class="cal-mestab">
-        <div class="cal-tal ${noDia ? 'cal-tal--dia' : ''}" style="--semanas: ${semanas.length}">
+        <div class="cal-tal ${noDia ? 'cal-tal--dia' : ''} ${noAno ? 'cal-tal--ano' : ''}" style="--semanas: ${semanas.length}">
           <div class="cal-tal__cab cal-tal__cab--info" style="grid-column: 1">Talhão</div>
-          ${semanas.map((s, i) => `<div class="cal-tal__cab ${s.ate < hoje ? 'cal-tal--passado' : ''}" style="grid-column: ${i + 2}">
+          ${semanas.map((s, i) => `<div class="cal-tal__cab ${fundo(s)}" style="grid-column: ${i + 2}" ${s.de <= hoje && hoje <= s.ate ? 'data-coluna-hoje' : ''}>
             ${noDia ? `
-            <span class="cal-mestab__semana cal-tal__dia cal-tal__dia--fixo"><span class="cal-tal__dia-sem">${s.dia}</span><span class="cal-mestab__rotulo ${s.de === hoje ? 'cal-mestab__rotulo--atual' : ''}">${s.data}</span></span>` : naSemana ? `
+            <span class="cal-mestab__semana cal-tal__dia cal-tal__dia--fixo"><span class="cal-tal__dia-sem">${s.dia}</span><span class="cal-mestab__rotulo ${s.de === hoje ? 'cal-mestab__rotulo--atual' : ''}">${s.data}</span>${ha(s)}</span>` : naSemana ? `
             <button class="cal-mestab__semana cal-tal__dia" type="button" data-acao="os-dia" data-dia="${s.de}"
-                    title="Ver o dia ${s.data}${s.de === hoje ? ' (hoje)' : ''}"><span class="cal-tal__dia-sem">${s.dia}</span><span class="cal-mestab__rotulo ${s.de === hoje ? 'cal-mestab__rotulo--atual' : ''}">${s.data}</span></button>` : `
-            <button class="cal-mestab__semana" type="button" data-acao="cal-semana" data-dia="${s.de}"
-                    title="Ver a semana de ${s.rotulo}${s.de <= hoje && hoje <= s.ate ? ' (semana atual)' : ''}"><span class="cal-mestab__rotulo ${s.de <= hoje && hoje <= s.ate ? 'cal-mestab__rotulo--atual' : ''}">${s.rotulo}</span></button>`}</div>`).join('')}
+                    title="Ver o dia ${s.data}${s.de === hoje ? ' (hoje)' : ''}"><span class="cal-tal__dia-sem">${s.dia}</span><span class="cal-mestab__rotulo ${s.de === hoje ? 'cal-mestab__rotulo--atual' : ''}">${s.data}</span>${ha(s)}</button>` : `
+            ${noAno ? `
+            <button class="cal-mestab__semana cal-tal__sem" type="button" data-acao="os-mes" data-dia="${s.de}"
+                    title="Ver o mês de ${s.rotulo}${s.de <= hoje && hoje <= s.ate ? ' (mês atual)' : ''}"><span class="cal-mestab__rotulo ${s.de <= hoje && hoje <= s.ate ? 'cal-mestab__rotulo--atual' : ''}">${s.rotulo}</span>${ha(s)}</button>` : `
+            <button class="cal-mestab__semana cal-tal__sem" type="button" data-acao="cal-semana" data-dia="${s.de}"
+                    title="Ver a semana de ${s.rotulo}${s.de <= hoje && hoje <= s.ate ? ' (semana atual)' : ''}"><span class="cal-mestab__rotulo ${s.de <= hoje && hoje <= s.ate ? 'cal-mestab__rotulo--atual' : ''}">${s.rotulo}</span>${ha(s)}</button>`}`}</div>`).join('')}
           ${corpoLinhas}
         </div>
       </div>`;
   }
 
   function corpo() {
-    const { itens, eventos, semData } = calcular();
-    if (est.escala === 'ano') return corpoAno(itens);
-    const grupos = gruposLegenda(itens);
+    const { itens, eventos, semData, periodoSafra } = calcular();
+    if (est.escala === 'ano') {
+      return `
+      <div class="calendario__barra os-cal__barra">
+        ${legendaStatus()}
+        ${navAno()}
+      </div>
+      ${itens.length && periodoSafra ? `
+      <div class="cal-mes"><div class="cal-mes__principal">
+        ${semData ? `<p class="calendario__pendentes">${Icones.info}<span>${semData} ${semData === 1 ? 'operação planejada fica' : 'operações planejadas ficam'} fora do calendário: sem data de plantio nos talhões dela.</span></p>` : ''}
+        ${mesPorTalhao(registros(eventos), periodoSafra.de, periodoSafra.ate, 'ano')}
+      </div></div>`
+        : `<p class="cag__vazio">${planosFiltrados().length ? 'Nenhuma operação planejada nos planos publicados com esses filtros.' : 'Nenhum plano publicado com esses filtros.'}</p>`}`;
+    }
+    // Mês, Semana e Dia (10/11/2026): legenda por status; os registros (operação × talhão, com o status) no lugar dos
+    // eventos; sem o rodapé Área operacional (a área fica nos títulos das colunas)
     return `
-      <div class="calendario__barra">
-        ${legenda(grupos)}
+      <div class="calendario__barra os-cal__barra">
+        ${legendaStatus()}
         ${Cal().navCalendario(est)}
       </div>
-      ${itens.length ? Cal().calendarioMes({ est, todos: eventos, semData, corpoMes: mesPorTalhao })
+      ${itens.length ? Cal().calendarioMes({ est, todos: registros(eventos), semData, corpoMes: mesPorTalhao, semRodape: true })
         : `<p class="cag__vazio">${planosFiltrados().length ? 'Nenhuma operação planejada nos planos publicados com esses filtros.' : 'Nenhum plano publicado com esses filtros.'}</p>`}`;
-  }
-
-  // Operação aberta pela barra do Ano: os filtros de antes do clique ficam guardados em est.daBarra. Hoje volta a
-  // eles; mexer num filtro, Limpar filtros ou voltar ao Ano esquece o que foi guardado.
-  function voltarDaBarra() {
-    if (!est.daBarra) return;
-    Object.assign(est, est.daBarra);
-    est.daBarra = null;
   }
 
   function aoMostrar(conteudo) {
@@ -9962,67 +10253,72 @@ window.Telas.osCalendario = (function () {
     // Redesenha e devolve o foco ao elemento equivalente (os filtros e o calendário são refeitos)
     const redesenhar = (foco) => {
       ajustarUnicos();
+      const rolagem = caixa.querySelector('.cal-mestab')?.scrollLeft || 0;
       caixaFiltros.innerHTML = filtros();
       caixa.innerHTML = corpo();
-      if (foco) raiz.querySelector(foco)?.focus();
+      // Largura da coluna Talhão (parada à esquerda): o nome do cartão gruda logo depois dela ao rolar para o lado
+      const box = caixa.querySelector('.cal-mestab');
+      const info = box && box.querySelector('.cal-tal__cab--info');
+      if (info) box.style.setProperty('--info-largura', `${info.offsetWidth}px`);
+      if (est.escala === 'ano') rolarAno(rolagem);
+      if (foco) raiz.querySelector(foco)?.focus({ preventScroll: true });
     };
+    // Ano (11/11/2026): a rolagem para sempre no começo de um mês (logo depois da coluna Talhão, que fica parada). Abre
+    // sempre com o mês anterior ao de hoje na primeira coluna (ao entrar no Ano, ao voltar à página, com Hoje e ao trocar a safra; sem ele, no começo);
+    // nos outros redesenhos (filtros, legenda), fica onde estava
+    // Ao mudar o tamanho da janela (ou recolher o menu), refaz a largura dos meses
+    new ResizeObserver(() => { if (est.escala === 'ano' && caixa.isConnected) rolarAno(caixa.querySelector('.cal-mestab')?.scrollLeft || 0); }).observe(caixa);
+    function rolarAno(antes) {
+      const box = caixa.querySelector('.cal-mestab');
+      const info = box && box.querySelector('.cal-tal__cab--info');
+      if (!box || !info) return;
+      box.style.scrollPaddingLeft = `${info.offsetWidth}px`;
+      // Meses de largura igual que enchem a área visível (ao lado da coluna Talhão) num número inteiro de meses: assim a
+      // rolagem, até no fim, para sempre no começo de um mês (cada mês com ao menos 200 px)
+      const grade = box.querySelector('.cal-tal--ano');
+      const disp = box.clientWidth - info.offsetWidth;
+      const meses = grade.querySelectorAll('.cal-tal__cab:not(.cal-tal__cab--info)').length;
+      const cabem = Math.max(1, Math.min(meses, Math.floor(disp / 200)));
+      grade.style.setProperty('--mes-largura', `${Math.floor(disp / cabem)}px`);
+      const hojeCab = box.querySelector('[data-coluna-hoje]');
+      if (est.irParaHoje) {
+        // O mês anterior ao de hoje na primeira coluna, e o de hoje logo depois (sem o de hoje na safra, o começo)
+        const anterior = hojeCab && hojeCab.previousElementSibling;
+        const alvo = anterior && anterior.matches('.cal-tal__cab:not(.cal-tal__cab--info)') ? anterior : hojeCab;
+        box.scrollLeft = alvo ? box.scrollLeft + alvo.getBoundingClientRect().left - box.getBoundingClientRect().left - info.offsetWidth : 0;
+      } else box.scrollLeft = antes;
+      est.irParaHoje = false;
+    }
     const ctx = { estado: est };
     const acoes = { redesenhar };
 
     raiz.addEventListener('click', (e) => {
       if (e.target.closest('[data-acao="os-limpar"]')) {
-        est = Object.assign(novoEstado(), { escala: est.escala, dataRef: est.dataRef, anoAgricola: est.anoAgricola });
-        est.daBarra = null;
+        est = Object.assign(novoEstado(), { escala: est.escala, dataRef: est.dataRef });
         ctx.estado = est;
         redesenhar('[data-acao="os-limpar"]');
         return;
       }
-      const leg = e.target.closest('[data-acao="os-leg"], [data-acao="os-leg-todos"]');
-      if (leg) {
-        const v = leg.dataset.grupo;
-        const soEle = Array.isArray(est.grupo) && est.grupo.length === 1 && est.grupo[0] === v;
-        if (leg.dataset.acao === 'os-leg-todos') voltarDaBarra();
-        est.grupo = leg.dataset.acao === 'os-leg-todos' || soEle ? 'todos' : [v];
-        // No Ano, o ano agrícola fica; no Mês, na Semana e no Dia, um grupo leva à primeira operação dele. Voltar a
-        // todos (Mostrar todos ou o grupo à mostra) não muda o tempo: só o botão Hoje vai para hoje
-        if (est.escala !== 'ano' && est.grupo !== 'todos') {
-          const primeira = calcular().eventos[0];
-          if (primeira) est.dataRef = primeira.inicio;
-          est.diaAberto = null;
-        }
-        redesenhar(leg.dataset.acao === 'os-leg' ? `[data-acao="os-leg"][data-grupo="${CSS.escape(v)}"]` : '.cal-leg');
+      // Legenda do Mês, da Semana e do Dia (10/11/2026): um status por vez; clicar de novo volta a todos. O período fica
+      const st = e.target.closest('[data-acao="os-status"]');
+      if (st) {
+        est.status = est.status === st.dataset.status ? null : st.dataset.status;
+        redesenhar(`[data-acao="os-status"][data-status="${st.dataset.status}"]`);
         return;
       }
-      // Visão Ano: Hoje, setas do ano agrícola e abrir/fechar empresa e fazenda
-      const ano = e.target.closest('[data-os-ano]');
-      if (ano && !ano.disabled) {
-        const lista = anos();
-        est.anoAgricola = lista[lista.indexOf(est.anoAgricola) + Number(ano.dataset.osAno)];
-        redesenhar(`[data-os-ano="${ano.dataset.osAno}"]:not(:disabled)`);
-        return;
-      }
-      if (e.target.closest('[data-acao="os-ano-hoje"]')) { est.anoAgricola = anoInicial(); redesenhar('[data-acao="os-ano-hoje"]'); return; }
-      // Barra do Ano: abre o Mês no começo da operação clicada, nos filtros da linha (empresa, fazenda, safra) e na
-      // cultura da barra; a operação não vira filtro
-      const barra = e.target.closest('[data-cag-op]');
-      if (barra) {
-        const d = barra.dataset;
-        est.daBarra = { operacao: est.operacao, cultura: est.cultura, empresa: est.empresa, fazenda: est.fazenda, safra: est.safra };
-        est.cultura = [d.cagCultura];
-        if (d.cagEmpresa) est.empresa = [d.cagEmpresa];
-        if (d.cagFazenda) est.fazenda = [d.cagFazenda];
-        if (d.cagSafra) est.safra = [d.cagSafra];
-        est.dataRef = d.cagOp;
-        est.escala = 'mes'; est.diaAberto = null; est.filtrosMes = null;
-        redesenhar('[data-campo="cal-escala"]');
-        return;
-      }
-      if (Telas.calendarioAgricola.aoClicar(e, redesenhar)) return;
       // Semana: clicar no título de um dia abre o Dia
+      // Ano: o título do mês abre o Mês; Hoje e as setas trocam a safra (o filtro)
+      const mes = e.target.closest('[data-acao="os-mes"]');
+      if (mes) { est.escala = 'mes'; est.dataRef = mes.dataset.dia; est.diaAberto = null; redesenhar('[data-campo="cal-escala"]'); return; }
+      const sf = e.target.closest('[data-acao="os-safra"]');
+      if (sf) {
+        if (!sf.disabled && sf.dataset.safra) { est.safra = [sf.dataset.safra]; ajustarUnicos(); }
+        est.irParaHoje = true;
+        redesenhar(sf.classList.contains('cal-nav__hoje') ? '.cal-nav__hoje' : `[aria-label="${sf.getAttribute('aria-label')}"]:not(:disabled)`);
+        return;
+      }
       const dia = e.target.closest('[data-acao="os-dia"]');
       if (dia) { est.escala = 'dia'; est.dataRef = dia.dataset.dia; est.diaAberto = null; redesenhar('[data-campo="cal-escala"]'); return; }
-      // Hoje, depois de abrir uma operação pela barra do Ano: volta a todas as operações (o Calendário vai para hoje)
-      if (e.target.closest('[data-acao="cal-hoje"]')) voltarDaBarra();
       // Hoje, setas, dia, painel do dia, "+N talhões" e abrir/fechar as caixas de filtro: como no Calendário do plano
       Cal().aoClicar(e, ctx, acoes);
     });
@@ -10040,40 +10336,28 @@ window.Telas.osCalendario = (function () {
         est[chave] = marcados.length === valores.length && e.target.type !== 'radio' ? 'todos' : marcados;
         // Trocar a Safra refaz Empresa e Fazenda (as marcadas ficam, se ainda existirem)
         if (e.target.type === 'radio') ajustarUnicos();
-        est.daBarra = null;
-        // Operação, como a legenda: com escolha, vai para a operação mais cedo; com todas, o tempo fica
-        if (chave === 'operacao' && est.escala !== 'ano' && est.operacao !== 'todos') {
-          const primeira = calcular().eventos[0];
-          if (primeira) est.dataRef = primeira.inicio;
+        // Grupo de operação e Operação (10/11/2026): com escolha, vai para a operação mais cedo; de volta a Todos, vai
+        // para hoje (como o botão Hoje)
+        if (chave === 'operacao' || chave === 'grupo') {
+          if (est[chave] === 'todos') est.dataRef = Cal().hojeIso();
+          else {
+            const primeira = calcular().eventos[0];
+            if (primeira) est.dataRef = primeira.inicio;
+          }
           est.diaAberto = null;
         }
         est.filtroAberto = chave;
         redesenhar(`[data-campo="cal-filtro"][data-filtro="${chave}"][value="${CSS.escape(e.target.value)}"]`);
         return;
       }
-      // Escala (05/11/2026): o Ano abre no ano agrícola atual (o de hoje ou, sem planos nele, o mais recente) com todos os
-      // filtros em Todas (safras e safrinhas, culturas, empresas, fazendas, talhões, operações e grupos). Do Ano para
-      // Mês, Semana ou Dia, o dia mostrado antes, se estiver no ano agrícola; senão, hoje (no ano de hoje) ou o começo
-      // do ano agrícola
-      if (e.target.dataset.campo === 'cal-escala' && (e.target.value === 'ano' || est.escala === 'ano')) {
-        if (e.target.value === 'ano') {
-          est.anoAgricola = anoInicial();
-          // A escolha do Mês fica guardada para a volta
-          est.filtrosMes = Object.fromEntries(FILTROS_TODOS.map((c) => [c, est[c]]));
-          FILTROS_TODOS.forEach((c) => { est[c] = 'todos'; });
-          // O ano agrícola inteiro, no nível Empresa (como ao abrir)
-          Telas.calendarioAgricola.recolherTudo();
-        } else {
-          // Do Ano para Mês, Semana ou Dia: voltam os filtros escolhidos antes no Mês, se os do Ano não foram mexidos
-          // (mexidos, valem os do Ano, com a primeira marcada de Safra, Empresa e Fazenda)
-          if (est.filtrosMes && FILTROS_TODOS.every((c) => est[c] === 'todos')) Object.assign(est, est.filtrosMes);
-          est.filtrosMes = null;
-          if (anoDe(est.dataRef) !== est.anoAgricola) {
-            est.dataRef = anoDe(Cal().hojeIso()) === est.anoAgricola ? Cal().hojeIso() : `${est.anoAgricola}-09-01`;
-          }
-        }
+      // Para o Ano: no mês de hoje
+      if (e.target.dataset.campo === 'cal-escala' && e.target.value === 'ano') est.irParaHoje = true;
+      // Do Ano para Mês, Semana ou Dia: hoje, se estiver na safra; senão, o começo da safra
+      if (e.target.dataset.campo === 'cal-escala' && est.escala === 'ano') {
+        const p = calcular().periodoSafra;
+        const hoje = Cal().hojeIso();
+        est.dataRef = !p || (p.de <= hoje && hoje <= p.ate) ? hoje : p.de;
         est.escala = e.target.value; est.diaAberto = null;
-        if (e.target.value === 'ano') est.daBarra = null;
         redesenhar('[data-campo="cal-escala"]');
         return;
       }
@@ -10081,6 +10365,7 @@ window.Telas.osCalendario = (function () {
     });
 
     raiz.addEventListener('input', (e) => Cal().aoDigitar(e, ctx));
+    est.irParaHoje = true;
     redesenhar();
   }
 
@@ -10379,6 +10664,7 @@ window.Telas.monitoramentoAplicacoes = (function () {
   function desenhar(guia) {
     est = est || novoEstado();
     if (guia && guia !== 'calendario') irParaGuia(guia);
+    guiaAtual = est.visao;
     const cab = `<header class="cabecalho oa-cabecalho ma-cabecalho" data-ma-cabecalho>${cabecalho()}</header>`;
     if (est.visao === 'desvios') return Telas.desviosRecomendacao.desenhar(cab);
     if (est.visao === 'falta') return Telas.faltaProdutos.desenhar(cab);
@@ -10390,17 +10676,22 @@ window.Telas.monitoramentoAplicacoes = (function () {
       </div>`;
   }
 
-  // Cabeçalho: caminho, título e subtítulo. O Calendário (outra página: js/telas/os-calendario.js) só usa o cabeçalho.
+  // Cabeçalho: título, subtítulo e as guias. A guia Calendário é outra página (js/telas/os-calendario.js, #/calendario-agricola)
+  // com este mesmo cabeçalho (11/11/2026: o Calendário saiu do menu e virou a primeira guia de Operações).
   // O item Operações do menu abre a página Planejado × Executado (03/11/2026), com as guias Planejado × Executado (a
   // tabela por talhão), Desvios de Recomendação e Previsão de Falta de Produtos: o título da guia (sem o caminho no topo,
   // desde 03/11/2026). A Duração da Operação saiu em 29/10/2026; o código dela continua aqui
   const GUIAS = [
-    ['calendario', 'Calendário', 'Consulte as operações agrícolas planejadas por ano, mês, semana ou dia.'],
+    ['calendario', 'Calendário', 'Consulte as operações agrícolas planejadas e executadas por ano, mês, semana ou dia.'],
     ['tabela', 'Desvios de data', 'Compare as datas planejadas e executadas das operações por talhão.'],
     ['desvios', 'Desvios de dose', 'Analise os desvios entre o recomendado e o executado nas Ordens de Serviço, por produto, operação e nível de análise.'],
     ['falta', 'Risco de falta de produto', 'Estime a falta de produtos para as operações planejadas.']
   ];
-  const GUIAS_PAGINA = ['tabela', 'desvios', 'falta'];
+  const GUIAS_PAGINA = ['calendario', 'tabela', 'desvios', 'falta'];
+  // Guia aberta por último: o item Operações do menu abre nela (no começo, o Calendário)
+  let guiaAtual = 'calendario';
+  const guiaAberta = () => guiaAtual;
+  const marcarCalendario = () => { guiaAtual = 'calendario'; };
   // visao: a guia (o Calendário chama com 'calendario'). Só no Calendário, a etiqueta das versões publicadas.
   // Título da página (05/11/2026; antes "Planejado × Executado"): sempre "Operações", em qualquer guia (Desvios de data ·
   // Desvios de dose · Risco de falta de produto, antes Previsão de Falta de Produtos); o subtítulo é o da guia aberta.
@@ -10413,21 +10704,18 @@ window.Telas.monitoramentoAplicacoes = (function () {
     return `<span class="cag-etiqueta ma-atualizado" title="OS fechadas e estoques atualizados em ${data} às ${hora}">${Icones.sincronizar} Dados atualizados em ${data} às ${hora}</span>`;
   }
   function cabecalho(visao = est.visao) {
-    const [, nome, subtitulo] = GUIAS.find(([id]) => id === visao);
+    const [, , subtitulo] = GUIAS.find(([id]) => id === visao);
     const titulo = `
         <div class="oa-cabecalho__titulo">
-          <h1 class="cabecalho__titulo">${visao === 'calendario' ? nome : 'Operações'}</h1>
+          <h1 class="cabecalho__titulo">Operações</h1>
           <p class="cabecalho__subtitulo">${subtitulo}</p>
         </div>`;
-    if (visao === 'calendario') {
-      return `${Telas.gestaoLavoura.caminho(nome)}<div class="oa-cabecalho__abas">${titulo}${Telas.gestaoLavoura.etiquetaPublicadas()}</div>`;
-    }
-    // Dados atualizados (05/11/2026, só nesta página): a data e a hora em que a página foi aberta (no protótipo, os dados das OS
-    // fechadas e dos estoques não vêm de um sistema), à direita do título, nas três guias
+    // Dados atualizados (05/11/2026): a data e a hora em que a página foi aberta (no protótipo, os dados das OS fechadas e
+    // dos estoques não vêm de um sistema), à direita do título, nas quatro guias (também no Calendário, 11/11/2026)
     return `
       <div class="oa-cabecalho__abas">${titulo}${seloAtualizacao()}</div>
       <nav class="ma-guias" aria-label="Guias de Operações">
-        ${GUIAS_PAGINA.map((id) => `<a class="botao botao--p ${id === visao ? 'botao--primario' : 'botao--secundario'} ma-guia" href="#/planejado-executado/${id}"
+        ${GUIAS_PAGINA.map((id) => `<a class="botao botao--p ${id === visao ? 'botao--primario' : 'botao--secundario'} ma-guia" href="${id === 'calendario' ? '#/calendario-agricola' : `#/planejado-executado/${id}`}"
           ${id === visao ? 'aria-current="page"' : ''}>${GUIAS.find(([x]) => x === id)[1]}</a>`).join('')}
       </nav>`;
   }
@@ -10964,7 +11252,7 @@ window.Telas.monitoramentoAplicacoes = (function () {
     return { executada: exec, fechamento: fechamento(p, talhao, op.nome, exec, Cal().prazoDe(op, g), i), os: osDe(p, talhao, op.nome) || null };
   }
 
-  return { desenhar, aoMostrar, cabecalho, estadoInicial, execucao, somaDias };
+  return { desenhar, aoMostrar, cabecalho, estadoInicial, execucao, somaDias, guiaAberta, marcarCalendario };
 })();
 
 </script>
@@ -12484,7 +12772,7 @@ window.Telas.orcamento = (function () {
       <header class="cabecalho orc-cabecalho">
         <div class="orc-topo">
           <h1 class="cabecalho__titulo">Orçamento de Insumos</h1>
-          <span class="cag-etiqueta" title="Mostra a última versão publicada de cada plano. Alterações em versões em construção aparecem aqui depois de publicadas.">${Icones.info} Últimas versões publicadas</span>
+          <span class="cag-etiqueta" title="Mostra a última versão publicada de cada plano. Alterações em versões em construção aparecem aqui depois de publicadas.">${Icones.info} Últimas versões</span>
         </div>
         <div class="orc-moeda" role="group" aria-label="Moeda de exibição">
           <span class="orc-moeda__rotulo" title="Os valores em outra moeda são convertidos pela PTAX de referência">Moeda de exibição ${Icones.info}</span>
@@ -19280,9 +19568,10 @@ window.Configuracoes = (function () {
     'orcamento':      { titulo: 'Orçamento de Insumos', menu: 'orcamento',
                         desenhar: () => temPlanos() ? Telas.orcamento.desenhar() : Telas.semPlanos('orcamento'),
                         aoMostrar: (conteudo) => { if (temPlanos()) Telas.orcamento.aoMostrar(conteudo); } },
-    // Gestão da Lavoura (vários planos somados), três itens no menu (03/11/2026): Calendário (antes
-    // Operações Agrícolas; Ano, Mês, Semana, Dia; o nome do grupo leva a ele), Operações (antes Planejadas × Executadas) e Central OS
-    'calendario-agricola': { titulo: 'Calendário', menu: 'calendario-agricola',
+    // Gestão da Lavoura (vários planos somados), dois itens no menu (11/11/2026): Operações (com as guias Calendário,
+    // Desvios de data, Desvios de dose e Risco de falta de produto; o nome do grupo leva a ele) e Central OS.
+    // O Calendário é a primeira guia de Operações (antes item do menu): no menu, fica destacado Operações
+    'calendario-agricola': { titulo: 'Calendário · Operações', menu: 'planejado-executado',
                         desenhar: () => temPlanos() ? Telas.osCalendario.desenhar() : Telas.semPlanos('calendario'),
                         aoMostrar: (conteudo) => { if (temPlanos()) Telas.osCalendario.aoMostrar(conteudo); } },
     'central-os':     { titulo: 'Central OS', menu: 'central-os',
@@ -19323,6 +19612,11 @@ window.Configuracoes = (function () {
     const [nome, parametro, extra] = location.hash.replace(/^#\/?/, '').split('/');
     // Endereço desconhecido (inclusive o antigo #/planejamento): a lista de planos; nenhum plano abre sozinho
     if (!ROTAS[nome]) return { nome: ROTA_INICIAL };
+    // Operações sem guia no endereço (o item do menu): a guia aberta por último; no começo, o Calendário
+    if (nome === 'planejado-executado' && !parametro && Telas.monitoramentoAplicacoes.guiaAberta() === 'calendario') {
+      history.replaceState(null, '', '#/calendario-agricola');
+      return { nome: 'calendario-agricola' };
+    }
     // Plano que não existe mais (ex.: página recarregada) volta para a lista
     if (nome === 'plano' && !buscarPlano(parametro)) return { nome: ROTA_INICIAL };
     // Endereço de um plano ainda não iniciado (ex.: página atualizada: os dados voltam ao exemplo inicial): lista de planos,

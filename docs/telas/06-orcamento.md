@@ -10,7 +10,7 @@ Mostrar, para todos os planos do Ano Agrícola, **quanto de cada insumo os plano
 
 ## Quando aparece
 - Item **Orçamento** do menu Plano de Safra (antes "Suprimentos"). Título da página: **Orçamento de Insumos**.
-- Soma a **última versão publicada de cada plano** (etiqueta "ⓘ Últimas versões publicadas" ao lado do título). Versão em construção não entra. **Só planos publicados**: a 0.1 vazia (registro da criação do plano) não conta; plano só com ela (não iniciado ou ainda sem publicação) fica fora da área produtiva, da receita estimada e dos filtros (19/10/2026). Sementes por variedade, pela área de aplicação dela.
+- Soma a **última versão publicada de cada plano** (etiqueta "ⓘ Últimas versões" ao lado do título). Versão em construção não entra. **Só planos publicados**: a 0.1 vazia (registro da criação do plano) não conta; plano só com ela (não iniciado ou ainda sem publicação) fica fora da área produtiva, da receita estimada e dos filtros (19/10/2026). Sementes por variedade, pela área de aplicação dela.
 - Sem nenhum plano: o convite "Crie seu primeiro plano para visualizar o Orçamento de Insumos" (DECISOES 4.0).
 
 ## Conteúdo (de cima para baixo)
@@ -18,7 +18,7 @@ Mostrar, para todos os planos do Ano Agrícola, **quanto de cada insumo os plano
 ### Parte fixa no topo
 Cabeçalho, filtros e estimativas ficam **congelados no topo** enquanto a página rola. O **alfinete** no canto direito do cabeçalho congela e descongela (verde e preenchido = congelado; cinza, só o contorno = solto; texto ao passar o mouse "Descongelar cabeçalho" / "Congelar cabeçalho"). Começa congelado; a escolha se mantém ao navegar.
 
-1. **Cabeçalho** (baixo): título, etiqueta "Últimas versões publicadas" e, à direita, **Moeda de exibição ⓘ [R$ | US$]** e o alfinete.
+1. **Cabeçalho** (baixo): título, etiqueta "Últimas versões" e, à direita, **Moeda de exibição ⓘ [R$ | US$]** e o alfinete.
 2. **Filtros**, numa linha: **Ano Agrícola** (uma escolha só, sem "Todos") · **Safra** (as safras do cadastro do Ano Agrícola, da mais recente para a mais antiga) · **Empresa** · **Fazenda** · **Talhão** · **Cultura** · **Insumos** · **Limpar filtros** (04/11/2026: botão com a vassoura, contorno cinza, texto e ícone pretos, sem negrito; com o menu lateral expandido, só a vassoura, com o nome na dica).
    - Menos o Ano Agrícola, todos têm **várias escolhas**: lista com caixas de marcar e "Todas"/"Todos" no topo; o campo mostra "Todas", o nome escolhido ou "2 selecionadas". A lista fica aberta enquanto se marca; fecha ao clicar fora ou com Esc.
    - As opções vêm dos planos publicados e dependem dos filtros de cima (ex.: com duas fazendas marcadas, Talhão mostra só os talhões delas). Opção que sai da lista é desmarcada.

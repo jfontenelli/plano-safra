@@ -2929,6 +2929,7 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .cag__faixa { position: absolute; height: 9px; padding: 0; border: 0; border-radius: 5px; background: color-mix(in srgb, var(--c) 40%, transparent); cursor: pointer; }
 .cag__faixa:focus-visible { outline: 2px solid var(--c); outline-offset: 1px; z-index: 2; }
 .cag__faixa:hover { outline: 1px solid rgba(26, 31, 28, .45); z-index: 2; }
+.cag__faixa--info { cursor: default; } /* só informa (Cronograma de Safras, 11/11/2026) */
 .cag__meses--dias > span { font-size: 10px; padding: 9px 0; }
 .cag__hoje { position: absolute; top: 0; bottom: 0; width: 0; border-left: 2px dotted #8A9BA8; pointer-events: none; }
 .cag__sem { position: relative; z-index: 1; align-self: flex-start; margin-left: 10px; padding: 2px 6px; background: var(--superficie); font-size: 13px; font-style: italic; color: #6B7A72; }
@@ -3158,8 +3159,8 @@ html[data-tema="escuro"] .md-modo__botao--ativo { background: #176B50; }
 .md-grafico--larga .md-rotulo { font-size: 13px; }
 /* Planejada × Executada do Monitoramento: uma linha por talhão e uma coluna por operação (talhão e eixo parados à
    esquerda, nomes das operações parados no topo). Em cada operação, o ponto no zero e a barra do desvio */
-.ma-lista { --mt-adiantada: #1f6fd1; --mt-prazo: #1f9d55; --mt-atrasada: #e8772e; --mt-pendente: #d93025; --mt-futura: #9aa5ad; }
-html[data-tema="escuro"] .ma-lista { --mt-adiantada: #6FA8E8; --mt-prazo: #4FD28A; --mt-atrasada: #F0995A; --mt-pendente: #F28B82; --mt-futura: #7C8E9B; }
+.ma-lista, .os-cal { --mt-adiantada: #1f6fd1; --mt-prazo: #1f9d55; --mt-atrasada: #e8772e; --mt-pendente: #d93025; --mt-futura: #9aa5ad; }
+html[data-tema="escuro"] .ma-lista, html[data-tema="escuro"] .os-cal { --mt-adiantada: #6FA8E8; --mt-prazo: #4FD28A; --mt-atrasada: #F0995A; --mt-pendente: #F28B82; --mt-futura: #7C8E9B; }
 .mt-rolagem { max-height: calc(100vh - 330px); min-height: 220px; overflow: auto; border-top: 1px solid var(--borda); }
 .mt { width: max-content; min-width: 100%; }
 .mt-linha { display: flex; border-bottom: 1px solid var(--borda); }
@@ -3210,22 +3211,23 @@ html[data-tema="escuro"] .ma-lista { --mt-adiantada: #6FA8E8; --mt-prazo: #4FD28
 /* Barra acima da tabela: legenda dos status da aplicação (clicável) */
 .ma-barra { display: flex; align-items: center; flex-wrap: wrap; gap: 12px 24px; padding: 14px 20px; }
 /* Status da aplicação: cor de fundo da última célula da aplicação (e da legenda) */
+/* Legenda (10/11/2026): status em 13px, títulos em 15px, bolinhas de 18px (antes 14px) */
 .ma-legenda { display: flex; align-items: center; gap: 16px; font-size: 13px; color: var(--texto-suave); }
-.ma-legenda__titulo { color: var(--texto); }
+.ma-legenda__titulo { color: var(--texto); font-size: 15px; }
 .ma-legenda ul { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 0; padding: 0; list-style: none; }
 .ma-legenda li { display: inline-flex; }
-.ma-legenda__item { display: inline-flex; align-items: center; gap: 6px; padding: 4px 6px; border: 0; border-radius: 6px; background: transparent;
+.ma-legenda__item { display: inline-flex; align-items: center; gap: 8px; padding: 4px 6px; border: 0; border-radius: 6px; background: transparent;
   font: inherit; color: inherit; cursor: pointer; }
 .ma-legenda__item:hover { background: var(--superficie-2); color: var(--texto); }
 .ma-legenda__item[aria-pressed="true"] { color: var(--texto); font-weight: 600; }
 .ma-legenda__item--apagado { opacity: .45; }
 .ma-legenda__item:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 1px; }
 /* Bolinhas da legenda: as mesmas da visão Planejada × Executada */
-.ma-legenda__cor { display: inline-block; width: 14px; height: 14px; border-radius: 50%; box-sizing: border-box; }
-.ma-legenda__cor.mt-ponto--futura { width: 14px; height: 14px; }
+.ma-legenda__cor { display: inline-block; width: 18px; height: 18px; border-radius: 50%; box-sizing: border-box; }
+.ma-legenda__cor.mt-ponto--futura { width: 18px; height: 18px; }
 /* Executadas: Pendente com o mesmo ícone da tabela (bolinha com exclamação, em vermelho) */
-.ma-legenda__icone { display: inline-grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; color: var(--erro); }
-.ma-legenda__icone .icone { width: 18px; height: 18px; }
+.ma-legenda__icone { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; color: var(--erro); }
+.ma-legenda__icone .icone { width: 20px; height: 20px; }
 .ma-st--adiantada { background: var(--info-fundo); }
 .ma-st--prazo     { background: var(--verde-100); }
 .ma-st--atrasada  { background: #fdebdc; }
@@ -3753,8 +3755,8 @@ html[data-tema="escuro"] .cal-mestab__area { --f: color-mix(in srgb, var(--c) 24
 
 /* ===== Gestão da Lavoura › Calendário › Mês (05/11/2026): talhão × semanas, barras que atravessam as semanas ===== */
 .cal-tal { display: grid; grid-template-columns: minmax(140px, max-content) repeat(var(--semanas), minmax(130px, 1fr)); grid-auto-rows: minmax(44px, auto); min-width: max-content; }
-/* Cabeçalho inteiro em cinza claro (Fazenda · Talhão · Área (ha) · semanas); as células ficam brancas */
-.cal-tal__cab { position: sticky; top: 0; z-index: 3; grid-row: 1; display: flex; border-bottom: 1px solid var(--borda); border-left: 1px solid var(--borda); background: var(--superficie-2); color: var(--texto); }
+/* Cabeçalho branco, como as células (10/11/2026; antes cinza claro) */
+.cal-tal__cab { position: sticky; top: 0; z-index: 3; grid-row: 1; display: flex; border-bottom: 1px solid var(--borda); border-left: 1px solid var(--borda); background: var(--superficie); /* branco (10/11/2026; antes cinza claro) */ color: var(--texto); }
 .cal-tal__cab:first-child { border-left: 0; }
 .cal-tal__cab--info { align-items: center; justify-content: flex-start; min-height: 42px; padding: 8px 16px; font-weight: 700; white-space: nowrap; } /* como o título das semanas, à esquerda */
 .cal-tal__cab.cal-tal--passado { color: var(--texto-suave); }
@@ -3771,13 +3773,64 @@ html[data-tema="escuro"] .cal-mestab__area { --f: color-mix(in srgb, var(--c) 24
 .cal-tal__nome { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .cal-tal__barra.cal-tal--passado { opacity: .55; }
 html[data-tema="escuro"] .cal-tal__barra { --f: color-mix(in srgb, var(--c) 24%, #15232D); }
+/* Status das operações (11/11/2026): o cartão do calendário antigo (o mesmo preenchimento, altura e largura, fundo claro
+   na cor, sem contorno, nome em preto e negrito), com o ícone do status no lugar da bolinha, na cor do status:
+   Atrasada vermelho (com o selo dos dias de atraso); Em execução na cor do Defensivo (laranja; os dias só na dica);
+   Finalizada na cor do Plantio (verde); Planejada cinza. No escuro, o fundo é a cor misturada ao fundo do tema. */
+.cal-st--atrasada   { --c: #C62828; --f: #FCE8E6; }
+.cal-st--execucao   { --c: #e8772e; --f: #fdeee3; }
+.cal-st--finalizada { --c: #1f9d55; --f: #e3f4ea; }
+.cal-st--planejada  { --c: #8a948f; --f: #eef1f0; }
+html[data-tema="escuro"] .cal-st--atrasada   { --c: #F28B82; }
+html[data-tema="escuro"] .cal-st--execucao   { --c: #F0995A; }
+html[data-tema="escuro"] .cal-st--finalizada { --c: #4FD28A; }
+html[data-tema="escuro"] .cal-st--planejada  { --c: #9AA8B1; }
+html[data-tema="escuro"] .cal-tal__barra[class*="cal-st--"] { --f: color-mix(in srgb, var(--c) 24%, #15232D); }
+.cal-tal__barra[class*="cal-st--"] { align-items: center; gap: 6px; margin: 5px 6px; padding: 6px 10px; border: 0; border-radius: 6px;
+  background: var(--f); color: var(--texto); font-size: 13px; font-weight: 700; }
+.cal-tal__icone { display: inline-flex; flex-shrink: 0; color: var(--c); }
+.cal-tal__icone .icone { width: 15px; height: 15px; stroke-width: 2.2; }
+/* Legenda: os mesmos ícones das etiquetas (Atrasada a exclamação, Executada o check, Planejada o calendário) */
+.cal-leg__icone { display: inline-flex; color: var(--c); }
+.cal-leg__icone .icone { width: 18px; height: 18px; stroke-width: 2.2; }
+.cal-tal__textos { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.cal-tal__atraso { font-size: 12px; font-weight: 400; color: var(--c); white-space: nowrap; }
+/* Redesenho (10/11/2026, liberdade de design da usuária):
+   - Colunas que já passaram: o título em cinza e os cartões esmaecidos, sem fundo nas células. A coluna de hoje sem fundo
+     (só o título no verde-claro).
+   - Cartão de uma linha: o atraso num selo à direita ("25d"; "25 dias de atraso" na dica); todos da mesma altura.
+   - Grade mais leve e cartões mais compactos. */
+.cal-tal__cel { border-left-color: color-mix(in srgb, var(--borda) 55%, transparent); }
+/* Nome grande: quebra em até duas linhas (o resto em "…"; o nome inteiro na dica) */
+.cal-tal__nome { flex: 1; min-width: 0; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden;
+  white-space: normal; overflow-wrap: anywhere; }
+.cal-tal__selo { flex-shrink: 0; margin-left: 4px; padding: 0 6px; border-radius: 999px; background: var(--superficie); color: var(--c);
+  font-size: 11.5px; font-weight: 400; line-height: 18px; font-variant-numeric: tabular-nums; }
+html[data-tema="escuro"] .cal-tal__selo { background: rgba(0, 0, 0, .25); }
+.cal-tal__info { padding: 6px 16px; }
+/* Hoje (a semana ou o dia de hoje no título da coluna), só no Calendário de Gestão da Lavoura (10/11/2026): verde-claro
+   com o texto verde-escuro, no lugar do verde-escuro com texto branco */
+.cal-tal .cal-mestab__rotulo--atual { background: #E1F2E8; color: #0B5A35; }
+html[data-tema="escuro"] .cal-tal .cal-mestab__rotulo--atual { background: #1C3D2C; color: #8FE0B2; }
+/* Hectares previstos embaixo da data do título da coluna: discreto, centralizado, menor que a data */
+.cal-tal__sem { flex-direction: column; gap: 2px; }
+.cal-tal__ha { display: block; font-size: 12px; font-weight: 400; line-height: 1.2; color: var(--texto-suave); text-align: center; white-space: nowrap; font-variant-numeric: tabular-nums; }
 
 /* ===== Operações Agrícolas › Planejadas × Executadas: tabela com o cartão do talhão ===== */
 .ma-barra { justify-content: space-between; }
 .ma-legenda__titulo { font-weight: 700; color: var(--texto); }
 .ma-modo { display: flex; align-items: center; gap: 12px; padding-left: 20px; border-left: 1px solid var(--borda); font-size: 14px; }
-.ma-modo__titulo { font-weight: 700; color: var(--texto); white-space: nowrap; }
+.ma-modo__titulo { font-weight: 700; color: var(--texto); white-space: nowrap; font-size: 15px; }
 .ma-modo .semente-visao { height: 36px; padding: 0 16px; font-size: 14px; }
+/* Calendário (Mês, Semana e Dia; 10/11/2026): a tira da legenda no formato da tira da Operações › Desvios de data, com a
+   navegação à direita depois de um traço, como o "Visualizar por:" de lá */
+.os-cal__corpo .os-cal__barra { gap: 12px 24px; margin-bottom: 12px; padding: 14px 20px; border: 1px solid var(--borda); border-radius: 12px;
+  background: var(--superficie); box-shadow: var(--sombra); } /* num cartão, como o dos filtros */
+.os-cal__barra .cal-nav { padding-left: 20px; border-left: 1px solid var(--borda); }
+/* Legenda do Calendário: título 15px, status 14px e ícones 16px (11/11/2026); status em preto */
+.os-cal__barra .ma-legenda { font-size: 14px; color: var(--texto); }
+.os-cal__barra .ma-legenda__titulo { font-size: 15px; }
+.os-cal__barra .cal-leg__icone .icone { width: 16px; height: 16px; }
 .ma-tabela--pxe td { vertical-align: middle; }
 .ma-tabela--pxe .ma-th-talhao .titulo-coluna { justify-content: flex-start; }
 .ma-tabela--pxe th.ma-th-talhao { text-align: left !important; }
@@ -4363,3 +4416,22 @@ html[data-tema="escuro"] .fp-selo.fp-sit--falta { background: #4a2222; }
    mostra com o Histórico de OS aberto */
 .modal--tela .fp-modal__cab { position: sticky; top: -14px; z-index: 4; margin-top: -14px; padding-top: 14px; background: var(--superficie); }
 .fp-modal__x { top: -2px; z-index: 6; background: transparent; }
+
+/* ===== Plano de Safra › Planos › Cronograma de Safras (11/11/2026; antes o Ano do Calendário) ===== */
+.cs__etiqueta { display: flex; justify-content: flex-end; margin-bottom: -8px; } /* acima dos filtros, à direita */
+.cs__etiqueta[hidden] { display: none; }
+.cs { display: flex; flex-direction: column; gap: 12px; }
+.cs[hidden] { display: none; }
+/* A tira da legenda num cartão, como a do Calendário: a legenda dos grupos e, à direita, depois de um traço, o ano */
+.cs__barra { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 24px; padding: 14px 20px; }
+.cs__barra .cal-nav { padding-left: 20px; border-left: 1px solid var(--borda); }
+.cs__ano .cag__rolagem { box-shadow: var(--sombra); border-radius: 12px; }
+
+/* Calendário › Ano (11/11/2026): a rolagem para no começo de um mês (logo depois da coluna Talhão) */
+.cal-mestab:has(.cal-tal--ano) { scroll-snap-type: x mandatory; }
+.cal-tal--ano > .cal-tal__cab:not(.cal-tal__cab--info) { scroll-snap-align: start; }
+.cal-tal--ano { grid-template-columns: minmax(140px, max-content) repeat(var(--semanas), var(--mes-largura, 200px)); }
+
+/* Cartão que começa antes da área visível (11/11/2026): o ícone e o nome grudam logo depois da coluna Talhão ao rolar
+   para o lado, como os eventos longos no Google Agenda (assim o nome nunca fica escondido) */
+.cal-tal__conteudo { position: sticky; left: calc(var(--info-largura, 140px) + 10px); display: flex; align-items: center; gap: 6px; min-width: 0; max-width: 100%; }

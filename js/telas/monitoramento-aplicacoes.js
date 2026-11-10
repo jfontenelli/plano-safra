@@ -277,6 +277,7 @@ window.Telas.monitoramentoAplicacoes = (function () {
   function desenhar(guia) {
     est = est || novoEstado();
     if (guia && guia !== 'calendario') irParaGuia(guia);
+    guiaAtual = est.visao;
     const cab = `<header class="cabecalho oa-cabecalho ma-cabecalho" data-ma-cabecalho>${cabecalho()}</header>`;
     if (est.visao === 'desvios') return Telas.desviosRecomendacao.desenhar(cab);
     if (est.visao === 'falta') return Telas.faltaProdutos.desenhar(cab);
@@ -288,17 +289,22 @@ window.Telas.monitoramentoAplicacoes = (function () {
       </div>`;
   }
 
-  // Cabeçalho: caminho, título e subtítulo. O Calendário (outra página: js/telas/os-calendario.js) só usa o cabeçalho.
+  // Cabeçalho: título, subtítulo e as guias. A guia Calendário é outra página (js/telas/os-calendario.js, #/calendario-agricola)
+  // com este mesmo cabeçalho (11/11/2026: o Calendário saiu do menu e virou a primeira guia de Operações).
   // O item Operações do menu abre a página Planejado × Executado (03/11/2026), com as guias Planejado × Executado (a
   // tabela por talhão), Desvios de Recomendação e Previsão de Falta de Produtos: o título da guia (sem o caminho no topo,
   // desde 03/11/2026). A Duração da Operação saiu em 29/10/2026; o código dela continua aqui
   const GUIAS = [
-    ['calendario', 'Calendário', 'Consulte as operações agrícolas planejadas por ano, mês, semana ou dia.'],
+    ['calendario', 'Calendário', 'Consulte as operações agrícolas planejadas e executadas por ano, mês, semana ou dia.'],
     ['tabela', 'Desvios de data', 'Compare as datas planejadas e executadas das operações por talhão.'],
     ['desvios', 'Desvios de dose', 'Analise os desvios entre o recomendado e o executado nas Ordens de Serviço, por produto, operação e nível de análise.'],
     ['falta', 'Risco de falta de produto', 'Estime a falta de produtos para as operações planejadas.']
   ];
-  const GUIAS_PAGINA = ['tabela', 'desvios', 'falta'];
+  const GUIAS_PAGINA = ['calendario', 'tabela', 'desvios', 'falta'];
+  // Guia aberta por último: o item Operações do menu abre nela (no começo, o Calendário)
+  let guiaAtual = 'calendario';
+  const guiaAberta = () => guiaAtual;
+  const marcarCalendario = () => { guiaAtual = 'calendario'; };
   // visao: a guia (o Calendário chama com 'calendario'). Só no Calendário, a etiqueta das versões publicadas.
   // Título da página (05/11/2026; antes "Planejado × Executado"): sempre "Operações", em qualquer guia (Desvios de data ·
   // Desvios de dose · Risco de falta de produto, antes Previsão de Falta de Produtos); o subtítulo é o da guia aberta.
@@ -311,21 +317,18 @@ window.Telas.monitoramentoAplicacoes = (function () {
     return `<span class="cag-etiqueta ma-atualizado" title="OS fechadas e estoques atualizados em ${data} às ${hora}">${Icones.sincronizar} Dados atualizados em ${data} às ${hora}</span>`;
   }
   function cabecalho(visao = est.visao) {
-    const [, nome, subtitulo] = GUIAS.find(([id]) => id === visao);
+    const [, , subtitulo] = GUIAS.find(([id]) => id === visao);
     const titulo = `
         <div class="oa-cabecalho__titulo">
-          <h1 class="cabecalho__titulo">${visao === 'calendario' ? nome : 'Operações'}</h1>
+          <h1 class="cabecalho__titulo">Operações</h1>
           <p class="cabecalho__subtitulo">${subtitulo}</p>
         </div>`;
-    if (visao === 'calendario') {
-      return `${Telas.gestaoLavoura.caminho(nome)}<div class="oa-cabecalho__abas">${titulo}${Telas.gestaoLavoura.etiquetaPublicadas()}</div>`;
-    }
-    // Dados atualizados (05/11/2026, só nesta página): a data e a hora em que a página foi aberta (no protótipo, os dados das OS
-    // fechadas e dos estoques não vêm de um sistema), à direita do título, nas três guias
+    // Dados atualizados (05/11/2026): a data e a hora em que a página foi aberta (no protótipo, os dados das OS fechadas e
+    // dos estoques não vêm de um sistema), à direita do título, nas quatro guias (também no Calendário, 11/11/2026)
     return `
       <div class="oa-cabecalho__abas">${titulo}${seloAtualizacao()}</div>
       <nav class="ma-guias" aria-label="Guias de Operações">
-        ${GUIAS_PAGINA.map((id) => `<a class="botao botao--p ${id === visao ? 'botao--primario' : 'botao--secundario'} ma-guia" href="#/planejado-executado/${id}"
+        ${GUIAS_PAGINA.map((id) => `<a class="botao botao--p ${id === visao ? 'botao--primario' : 'botao--secundario'} ma-guia" href="${id === 'calendario' ? '#/calendario-agricola' : `#/planejado-executado/${id}`}"
           ${id === visao ? 'aria-current="page"' : ''}>${GUIAS.find(([x]) => x === id)[1]}</a>`).join('')}
       </nav>`;
   }
@@ -862,5 +865,5 @@ window.Telas.monitoramentoAplicacoes = (function () {
     return { executada: exec, fechamento: fechamento(p, talhao, op.nome, exec, Cal().prazoDe(op, g), i), os: osDe(p, talhao, op.nome) || null };
   }
 
-  return { desenhar, aoMostrar, cabecalho, estadoInicial, execucao, somaDias };
+  return { desenhar, aoMostrar, cabecalho, estadoInicial, execucao, somaDias, guiaAberta, marcarCalendario };
 })();

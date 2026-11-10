@@ -20,7 +20,8 @@
  *   opcoes: (chave) => [{ valor, nome, extra? }],
  *   depende: { chave: [chaves de que ela depende] },
  *   padrao: () => os valores de Limpar filtros (dos filtros da página; os base vêm de FiltrosBase),
- *   aoMudar: () => atualiza o resultado da página
+ *   aoMudar: () => atualiza o resultado da página,
+ *   unicos: () => [chaves com uma escolha só] (opcional; botões de opção, sem "Todas")
  * }
  */
 window.FiltrosBase = (function () {
@@ -76,7 +77,7 @@ window.BarraFiltros = (function () {
       return `
         <div class="campo" ${minimo ? `style="min-width: ${minimo}px"` : ''}>
           <span class="campo__rotulo">${rotulo}</span>
-          ${Cal().filtroCaixa(est(), chave, cfg.opcoes(chave), textos, rotulo)}
+          ${Cal().filtroCaixa(est(), chave, cfg.opcoes(chave), textos, rotulo, { unico: (cfg.unicos ? cfg.unicos() : []).includes(chave) })}
         </div>`;
     }
     function html() {
@@ -209,10 +210,11 @@ window.BarraFiltros = (function () {
         const chave = e.target.dataset.filtro;
         const valores = cfg.opcoes(chave).map((o) => o.valor);
         let marcados = valores.filter((v) => Cal().marcado(st, chave, v));
-        if (e.target.value === 'todos') marcados = e.target.checked ? [...valores] : [];
+        if (e.target.type === 'radio') marcados = [e.target.value];
+        else if (e.target.value === 'todos') marcados = e.target.checked ? [...valores] : [];
         else if (e.target.checked) marcados.push(e.target.value);
         else marcados = marcados.filter((n) => n !== e.target.value);
-        st[chave] = marcados.length === valores.length ? 'todos' : marcados;
+        st[chave] = marcados.length === valores.length && e.target.type !== 'radio' ? 'todos' : marcados;
         const mudadas = [chave];
         podar(chave, mudadas);
         FiltrosBase.gravar(st, mudadas);

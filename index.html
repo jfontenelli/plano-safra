@@ -51,9 +51,9 @@
             </a>
           </div>
         </div>
-        <!-- Gestão da Lavoura: Calendário (antes Operações Agrícolas), Operações (antes Planejadas × Executadas) e Central OS (o nome leva ao Calendário) -->
+        <!-- Gestão da Lavoura: Operações (com a guia Calendário, a primeira; 11/11/2026) e Central OS (o nome leva a Operações) -->
         <div class="menu__grupo">
-          <a class="menu__item menu__pai" href="#/calendario-agricola" title="Gestão da Lavoura">
+          <a class="menu__item menu__pai" href="#/planejado-executado" title="Gestão da Lavoura">
             <svg class="menu__icone" viewBox="0 0 24 24" aria-hidden="true">
               <!-- Lavoura: o broto (antes o ícone do Plano de Safra) -->
               <path d="M12 21v-9"/>
@@ -67,13 +67,6 @@
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
           </button>
           <div class="menu__subitens" id="menu-subitens-lavoura">
-            <a class="menu__item menu__sub" href="#/calendario-agricola" data-rota="calendario-agricola" title="Calendário">
-              <svg class="menu__icone" viewBox="0 0 24 24" aria-hidden="true">
-                <!-- Calendário -->
-                <rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>
-              </svg>
-              <span class="menu__texto">Calendário</span>
-            </a>
             <a class="menu__item menu__sub" href="#/planejado-executado" data-rota="planejado-executado" title="Operações">
               <svg class="menu__icone" viewBox="0 0 24 24" aria-hidden="true">
                 <!-- Prancheta com check -->
@@ -153,6 +146,7 @@
   <script src="js/telas/03-lista-planos.js"></script>
   <script src="js/telas/05-calendario.js"></script>
   <script src="js/telas/calendario-agricola.js"></script>
+  <script src="js/telas/cronograma-safras.js"></script>
   <script src="js/telas/gestao-lavoura.js"></script>
   <script src="js/telas/central-corp.js"></script>
   <script src="js/telas/os-calendario.js"></script>

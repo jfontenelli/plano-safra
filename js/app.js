@@ -20,9 +20,10 @@
     'orcamento':      { titulo: 'Orçamento de Insumos', menu: 'orcamento',
                         desenhar: () => temPlanos() ? Telas.orcamento.desenhar() : Telas.semPlanos('orcamento'),
                         aoMostrar: (conteudo) => { if (temPlanos()) Telas.orcamento.aoMostrar(conteudo); } },
-    // Gestão da Lavoura (vários planos somados), três itens no menu (03/11/2026): Calendário (antes
-    // Operações Agrícolas; Ano, Mês, Semana, Dia; o nome do grupo leva a ele), Operações (antes Planejadas × Executadas) e Central OS
-    'calendario-agricola': { titulo: 'Calendário', menu: 'calendario-agricola',
+    // Gestão da Lavoura (vários planos somados), dois itens no menu (11/11/2026): Operações (com as guias Calendário,
+    // Desvios de data, Desvios de dose e Risco de falta de produto; o nome do grupo leva a ele) e Central OS.
+    // O Calendário é a primeira guia de Operações (antes item do menu): no menu, fica destacado Operações
+    'calendario-agricola': { titulo: 'Calendário · Operações', menu: 'planejado-executado',
                         desenhar: () => temPlanos() ? Telas.osCalendario.desenhar() : Telas.semPlanos('calendario'),
                         aoMostrar: (conteudo) => { if (temPlanos()) Telas.osCalendario.aoMostrar(conteudo); } },
     'central-os':     { titulo: 'Central OS', menu: 'central-os',
@@ -63,6 +64,11 @@
     const [nome, parametro, extra] = location.hash.replace(/^#\/?/, '').split('/');
     // Endereço desconhecido (inclusive o antigo #/planejamento): a lista de planos; nenhum plano abre sozinho
     if (!ROTAS[nome]) return { nome: ROTA_INICIAL };
+    // Operações sem guia no endereço (o item do menu): a guia aberta por último; no começo, o Calendário
+    if (nome === 'planejado-executado' && !parametro && Telas.monitoramentoAplicacoes.guiaAberta() === 'calendario') {
+      history.replaceState(null, '', '#/calendario-agricola');
+      return { nome: 'calendario-agricola' };
+    }
     // Plano que não existe mais (ex.: página recarregada) volta para a lista
     if (nome === 'plano' && !buscarPlano(parametro)) return { nome: ROTA_INICIAL };
     // Endereço de um plano ainda não iniciado (ex.: página atualizada: os dados voltam ao exemplo inicial): lista de planos,

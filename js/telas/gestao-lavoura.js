@@ -28,7 +28,7 @@ window.Telas.gestaoLavoura = (function () {
         </div>
       </header>`;
   }
-  const etiquetaPublicadas = () => `<span class="cag-etiqueta" title="Mostra a última versão publicada de cada plano. Alterações em versões em construção aparecem aqui depois de publicadas.">${Icones.info} Últimas versões publicadas</span>`;
+  const etiquetaPublicadas = () => `<span class="cag-etiqueta" title="Mostra a última versão publicada de cada plano. Alterações em versões em construção aparecem aqui depois de publicadas.">${Icones.info} Últimas versões</span>`;
 
   // ----- Datas -----
   const hoje = () => Util.hojeISO();

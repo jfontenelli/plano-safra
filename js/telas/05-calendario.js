@@ -776,7 +776,8 @@ window.Telas.calendario = (function () {
   // todos: os eventos (eventos()); filtros: HTML da linha acima da grade; semData: operações planejadas sem data
   // corpoMes (opcional): desenha o Mês, a Semana e o Dia no lugar da tabela por operação e da grade (Gestão da Lavoura ›
   // Calendário: por talhão)
-  function calendarioMes({ est, todos, filtros = '', semData = 0, corpoMes = null }) {
+  // semRodape: sem o rodapé Área operacional (Gestão da Lavoura › Calendário, 10/11/2026: a área fica nos títulos das colunas)
+  function calendarioMes({ est, todos, filtros = '', semData = 0, corpoMes = null, semRodape = false }) {
     const escala = est.escala || 'mes';
     const ref = est.dataRef || hojeIso();
     const { de, ate } = periodo(escala, ref);
@@ -811,7 +812,7 @@ window.Telas.calendario = (function () {
           ${filtros ? `<div class="cal-mes__filtros">${filtros}</div>` : ''}
           ${semData ? `<p class="calendario__pendentes">${Icones.info}<span>${plural(semData, 'operação planejada fica', 'operações planejadas ficam')} fora do calendário: sem data de plantio nos talhões dela.</span></p>` : ''}
           ${corpo}
-          ${rodapeArea(escala, ref, escala === 'dia' ? doDia(todos, ref) : doPeriodo)}
+          ${semRodape ? '' : rodapeArea(escala, ref, escala === 'dia' ? doDia(todos, ref) : doPeriodo)}
         </div>
         ${aberto ? painelDia(todos, aberto, est) : ''}
       </div>`;
@@ -841,12 +842,13 @@ window.Telas.calendario = (function () {
         ${seletorEscala(est)}
       </div>`;
   }
-  // Lista suspensa da escala: Ano (a visão do ano agrícola do Calendário Agrícola, js/telas/os-calendario.js), Mês, Semana, Dia
+  // Lista suspensa da escala: Mês, Semana, Dia; com est.comAno (Operações › Calendário, 11/11/2026), também Ano (a safra)
   function seletorEscala(est) {
     const escala = est.escala || 'mes';
+    const opcoesEscala = [...(est.comAno ? [['ano', 'Ano']] : []), ['mes', 'Mês'], ['semana', 'Semana'], ['dia', 'Dia']];
     return `
         <select class="campo__controle cal-nav__escala" data-campo="cal-escala" aria-label="Escala do calendário">
-          ${[['ano', 'Ano'], ['mes', 'Mês'], ['semana', 'Semana'], ['dia', 'Dia']].map(([v, rot]) => `<option value="${v}" ${escala === v ? 'selected' : ''}>${rot}</option>`).join('')}
+          ${opcoesEscala.map(([v, rot]) => `<option value="${v}" ${escala === v ? 'selected' : ''}>${rot}</option>`).join('')}
         </select>`;
   }
 

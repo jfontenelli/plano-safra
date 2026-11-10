@@ -66,6 +66,8 @@ window.Icones = (function () {
     copiar: svg('<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/>'),
     // Monitoramento › Aplicações: aplicação pendente (exclamação no círculo) e futura (calendário com relógio)
     pendente: svg('<circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.5M12 16.5h.01"/>'),
+    // Executada (Calendário, 10/11/2026): o check no círculo, da mesma família da exclamação da Atrasada
+    executada: svg('<circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.8 2.8L16 10"/>'),
     futura: svg('<path d="M11 19H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v3"/><path d="M4 10h14M8 3v4M14 3v4"/><circle cx="17" cy="17" r="4"/><path d="M17 15.5V17l1 1"/>'),
     relogio: svg('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'),
     calendario: svg('<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>'),

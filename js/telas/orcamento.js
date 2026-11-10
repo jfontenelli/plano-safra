@@ -200,7 +200,7 @@ window.Telas.orcamento = (function () {
       <header class="cabecalho orc-cabecalho">
         <div class="orc-topo">
           <h1 class="cabecalho__titulo">Orçamento de Insumos</h1>
-          <span class="cag-etiqueta" title="Mostra a última versão publicada de cada plano. Alterações em versões em construção aparecem aqui depois de publicadas.">${Icones.info} Últimas versões publicadas</span>
+          <span class="cag-etiqueta" title="Mostra a última versão publicada de cada plano. Alterações em versões em construção aparecem aqui depois de publicadas.">${Icones.info} Últimas versões</span>
         </div>
         <div class="orc-moeda" role="group" aria-label="Moeda de exibição">
           <span class="orc-moeda__rotulo" title="Os valores em outra moeda são convertidos pela PTAX de referência">Moeda de exibição ${Icones.info}</span>
