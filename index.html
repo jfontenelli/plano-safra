@@ -19,7 +19,8 @@
       </div>
 
       <nav class="menu__nav" aria-label="Menu principal">
-        <!-- Plano de Safra: dois itens (Planos, Orçamento); o plano abre pela lista -->
+        <!-- Plano de Safra (11/11/2026): Planos e Cronograma de Safras (antes guia de Planos); o Orçamento foi para
+             rascunhos/orcamento/; o plano abre pela lista -->
         <div class="menu__grupo">
           <a class="menu__item menu__pai" href="#/plano-safra" title="Plano de Safra">
             <svg class="menu__icone" viewBox="0 0 24 24" aria-hidden="true">
@@ -43,11 +44,12 @@
               </svg>
               <span class="menu__texto">Planos</span>
             </a>
-            <a class="menu__item menu__sub" href="#/orcamento" data-rota="orcamento" title="Orçamento">
+            <a class="menu__item menu__sub" href="#/cronograma-safras" data-rota="cronograma" title="Cronograma">
               <svg class="menu__icone" viewBox="0 0 24 24" aria-hidden="true">
-                <circle cx="12" cy="12" r="9"/><path d="M15 9.5c-.5-1-1.6-1.5-3-1.5-1.7 0-3 .8-3 2s1.3 1.7 3 2 3 .8 3 2-1.3 2-3 2c-1.4 0-2.5-.5-3-1.5M12 6.5V8M12 16v1.5"/>
+                <!-- Cronograma: barras de tempo escalonadas -->
+                <path d="M3 5h18M3 19h18"/><rect x="4" y="8" width="9" height="3" rx="1"/><rect x="9" y="13" width="10" height="3" rx="1"/>
               </svg>
-              <span class="menu__texto">Orçamento</span>
+              <span class="menu__texto">Cronograma</span>
             </a>
           </div>
         </div>
@@ -155,6 +157,7 @@
   <script src="js/telas/desvios-recomendacao.js"></script>
   <script src="js/telas/falta-produtos.js"></script>
   <script src="js/telas/acompanhamento-operacional.js"></script>
+  <!-- Orçamento fora do menu (rascunhos/orcamento/), mas carregado: Risco de falta e Indicadores usam consumoDoPlano -->
   <script src="js/telas/orcamento.js"></script>
   <script src="js/telas/indicadores.js"></script>
   <script src="js/telas/04.0-operacoes-plano.js"></script>

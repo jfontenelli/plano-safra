@@ -143,7 +143,7 @@ window.Telas.painelPlanos = (function () {
   const STATUS = {
     'nao-iniciado': ['Não iniciado', 'status--nao-iniciado'],
     construcao: ['Em construção', 'status--construcao'],
-    publicada: ['Publicado', 'status--aprovado']
+    publicada: ['Atualizado', 'status--aprovado']
   };
 
   function linha(l) {

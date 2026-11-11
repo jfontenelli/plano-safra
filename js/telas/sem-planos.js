@@ -10,6 +10,7 @@ window.Telas.semPlanos = function (item) {
   const ITENS = {
     planejamento: { titulo: 'Planejamento', alvo: 'o planejamento', texto: TEXTO_PLANO, icone: Icones.lista },
     calendario:   { titulo: 'Calendário', alvo: 'o Calendário', texto: TEXTO_PLANO, icone: Icones.calendario },
+    cronograma:   { titulo: 'Cronograma de Safras', alvo: 'o Cronograma de Safras', texto: TEXTO_PLANO, icone: Icones.calendario },
     'central-os': { titulo: 'Central OS', alvo: 'a Central OS', texto: TEXTO_PLANO, icone: Icones.documento },
     'planejado-executado': { titulo: 'Operações', alvo: 'as Operações', texto: TEXTO_PLANO, icone: Icones.prancheta },
     estoque:      { titulo: 'Estoque', alvo: 'o Estoque', texto: TEXTO_PLANO, icone: Icones.caixaOk },

@@ -15,7 +15,9 @@
  *                      Na versão em construção, cada alteração é salva na hora (salvamento automático).
  *
  * Versão publicada é imutável. Só pode haver uma versão em construção por plano.
- * Status mostrado nas telas: só a última versão publicada é "Publicada"; as publicadas antes dela, "Revisada".
+ * Status mostrado nas telas (11/11/2026): toda versão publicada tem o status "Atualizado" (antes a última era "Publicada" e as
+ * publicadas antes dela, "Revisada"). Ficam só Em construção e Atualizado (e o plano Não iniciado), o mesmo nome no plano e nas versões.
+ * A chave interna continua 'revisada'.
  */
 window.Versoes = (function () {
   const copiar = (grupos) => structuredClone(grupos || []);
@@ -161,18 +163,17 @@ window.Versoes = (function () {
     return `${d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })} às ${d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
   }
 
-  // 'construcao' | 'publicada' (a última publicada do plano) | 'revisada' (publicada antes da última)
+  // 'construcao' | 'revisada' (toda versão publicada, mostrada como Atualizado; 11/11/2026)
   function statusExibido(plano, v) {
-    if (v.status === 'construcao') return 'construcao';
-    return v === ultimaPublicada(plano) ? 'publicada' : 'revisada';
+    return v.status === 'construcao' ? 'construcao' : 'revisada';
   }
-  const ROTULOS = { construcao: 'Em construção', publicada: 'Publicada', revisada: 'Revisada' };
+  const ROTULOS = { construcao: 'Em construção', revisada: 'Atualizado' };
   function rotuloStatus(plano, v) { return ROTULOS[statusExibido(plano, v)]; }
 
-  // Linha de detalhe: "Publicada em 12/10 às 17:05 por Maria Gonçalves"
+  // Linha de detalhe: "Atualizado em 12/10 às 17:05 por Maria Gonçalves"
   function detalhe(v) {
     return v.status === 'publicada'
-      ? `Publicada em ${quando(v.publicadaEm)} por ${v.publicadaPor}`
+      ? `Atualizado em ${quando(v.publicadaEm)} por ${v.publicadaPor}`
       : `Salva em ${quando(v.salvaEm)} por ${v.salvaPor}${v.origem ? ` · origem ${v.origem}` : ''}`;
   }
 

@@ -1,4 +1,32 @@
-# Orçamento de Insumos (antes "Suprimentos") — rascunho para retomar
+# Orçamento de Insumos (Tela 06) — guardado para retomar
+
+Em 11/11/2026 a usuária pediu para **tirar a guia Orçamento do Plano de Safra e guardar a tela inteira**, para recuperar fácil.
+
+## Onde está o Orçamento completo, como estava
+
+- **Marca no git: `orcamento-11-11-2026`** (commit c3b7396, o último com o Orçamento no menu).
+  Para ver um arquivo como estava: `git show orcamento-11-11-2026:js/telas/orcamento.js`.
+  Para abrir o protótipo inteiro como estava (sem mexer na branch atual): `git worktree add ../plano-safra-orcamento orcamento-11-11-2026` e abrir o `index.html` dessa pasta (`#/orcamento`).
+- **Detalhe da tela:** `06-orcamento.md` (nesta pasta; antes ficava em `docs/telas/`). Vale sobre o histórico de 15/10 lá embaixo.
+
+## O que saiu do protótipo (para recolocar ao retomar)
+
+| Onde | O que saiu | Como recolocar |
+|---|---|---|
+| `index.html` · menu Plano de Safra | o item **Orçamento** (`href="#/orcamento"`, `data-rota="orcamento"`, ícone da moeda), logo abaixo de Planos | copiar o `<a class="menu__item menu__sub" …>` da marca |
+| `js/app.js` · `ROTAS` | a rota `'orcamento'` | voltar `'orcamento': { titulo: 'Orçamento de Insumos', menu: 'orcamento', desenhar: () => temPlanos() ? Telas.orcamento.desenhar() : Telas.semPlanos('orcamento'), aoMostrar: (conteudo) => { if (temPlanos()) Telas.orcamento.aoMostrar(conteudo); } }` |
+| `docs/telas/06-orcamento.md` | movido para esta pasta | mover de volta |
+
+**O código da tela continua no protótipo, carregado** (só não há como chegar nele): `js/telas/orcamento.js` (moeda R$/US$, filtros, Estimativas de comercialização, Resumo do orçamento, Orçamento por tipo de insumo, Detalhamento Por produto · Por talhão, Exportar XLSX, alfinete), os estilos `.orc-*` em `css/estilo.css`, a entrada `orcamento` em `js/telas/sem-planos.js` e, em `js/dados-exemplo.js`, `ptaxReferencia`, `comercializacao`, `fornecedores`, `precosInsumos`, `precosSementes` e `estoqueInsumos`.
+Ele precisa continuar carregado: o **Risco de falta de produto** e os **Indicadores** do Resumo do plano usam `Telas.orcamento.consumoDoPlano` (a conta da necessidade de cada insumo). Recolocando o menu e a rota, a tela volta a funcionar como em 11/11.
+
+## Histórico: arquivos desta pasta e decisões de 15/10/2026
+
+Os arquivos `design-claude.html`, `dados-design.js`, `dash-local.js`, `prompt-claude-design.md` e as capturas são o primeiro design (ainda "Suprimentos"), de 15/10. O texto abaixo é o README daquela época.
+
+---
+
+### Orçamento de Insumos (antes "Suprimentos") — rascunho para retomar
 
 **Atualização em 16/10/2026: construído** (`js/telas/orcamento.js`; doc atual em `docs/telas/06-orcamento.md`, que vale sobre este rascunho). Na construção, algumas decisões de 15/10 mudaram: saíram as guias Safra/Safrinha (voltou o filtro Safra), entraram a moeda de exibição R$/US$, os 4 cards da referência (Custo em sacas só com uma cultura) e a receita estimada num card só, e os grupos de insumo da referência. Este rascunho fica como histórico.
 

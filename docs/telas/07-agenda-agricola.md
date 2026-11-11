@@ -6,7 +6,7 @@ Imagens: `referencias/05.3-resumo-calendario.png` (Mês, Semana e Dia: a do Cale
 **Situação no protótipo:** construída.
 
 ## Objetivo
-Ver as operações planejadas e executadas de todas as fazendas (vários planos somados), por talhão, **mês a mês, semana a semana e dia a dia**, para acompanhar e programar as Ordens de Serviço. O ano agrícola por empresa e fazenda fica no Cronograma de Safras (Tela 03).
+Ver as operações planejadas e executadas de todas as fazendas (vários planos somados), por talhão, **mês a mês, semana a semana e dia a dia**, para acompanhar e programar as Ordens de Serviço. O ano agrícola por empresa e fazenda fica no Cronograma de Safras (Tela 03.1).
 
 ## Quando aparece
 - **Primeira guia** da página **Operações** (Tela 10; 11/11/2026, antes item do menu): **Calendário · Desvios de data · Desvios de dose · Risco de falta de produto** (endereço `#/calendario-agricola`). O item **Operações** do menu Gestão da Lavoura (e o nome do grupo) abre na **última guia usada**; no começo, o Calendário. No menu, fica destacado Operações.
@@ -73,7 +73,7 @@ Cada operação num talhão tem um status, pela **data de hoje real** (não a do
 ## Navegação
 - Menu Gestão da Lavoura (o nome ou o item Calendário) → esta página (`#/calendario-agricola`).
 - Item Operações → a Tela 10.
-- O ano agrícola por empresa e fazenda: Plano de Safra › Planos › Cronograma de Safras (Tela 03).
+- O ano agrícola por empresa e fazenda: Plano de Safra › Cronograma (Tela 03.1; 11/11/2026, antes guia da página Planos).
 - "+ Criar Plano de Safra" (sem planos) → modal Criar Plano (Tela 02).
 
 ## Para testar

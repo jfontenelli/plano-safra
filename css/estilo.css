@@ -2186,6 +2186,9 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .cal-ponto--fertilidade, .cal-ev--fertilidade { --c: #8e44ad; --f: #f2e6f7; }
 .cal-ponto--colheita, .cal-ev--colheita { --c: #d4a017; --f: #fbf3dc; }
 .cal-ponto--outro, .cal-ev--outro { --c: #3b74d6; --f: #e6eefb; }
+/* Grupos criados pelo "+" (11/11/2026): as mesmas cores das barras do Cronograma de Safras */
+.cal-ponto--aplicacao-de-insumos, .cal-ev--aplicacao-de-insumos { --c: #3b74d6; --f: #e6eefb; }
+.cal-ponto--operacao-de-campo, .cal-ev--operacao-de-campo { --c: #5b6b73; --f: #eceff0; }
 .cal-grade { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); background: var(--superficie); border: 1px solid var(--borda); border-radius: var(--raio); overflow: hidden; }
 .cal-grade__cab { padding: 8px; border-bottom: 1px solid var(--borda); background: var(--superficie-2); text-align: center; font-size: 12px; font-weight: 700; letter-spacing: .04em; color: var(--texto-suave); }
 .cal-dia { display: flex; flex-direction: column; gap: 4px; min-height: 104px; padding: 6px; border-right: 1px solid var(--borda); border-bottom: 1px solid var(--borda); cursor: pointer; min-width: 0; }
@@ -2925,7 +2928,7 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .cag__linha--fazenda > span:first-child { padding-left: 26px; }
 .cag__linha--safra > span:first-child { padding-left: 52px; }
 .cag__tempo--vazio { min-height: 34px; }
-.cag__tempo--faixas { min-height: 68px; } /* cinco faixas: Operação de campo, Plantio, Fertilidade, Defensivo, Colheita */
+.cag__tempo--faixas { min-height: 80px; } /* seis faixas: Operação de campo, Aplicação de insumos (Corretivos), Plantio, Fertilidade, Defensivo, Colheita */
 .cag__faixa { position: absolute; height: 9px; padding: 0; border: 0; border-radius: 5px; background: color-mix(in srgb, var(--c) 40%, transparent); cursor: pointer; }
 .cag__faixa:focus-visible { outline: 2px solid var(--c); outline-offset: 1px; z-index: 2; }
 .cag__faixa:hover { outline: 1px solid rgba(26, 31, 28, .45); z-index: 2; }
@@ -4306,6 +4309,7 @@ html[data-tema="escuro"] .fp-modal { --fp-est-desv: #ff6b5e; }
 .conteudo:has(.cc) { background: var(--superficie); } /* Central OS: fundo branco (04/11/2026) */
 .conteudo:has(.os-cal) { background: var(--superficie); } /* Calendário: fundo branco (05/11/2026), como a Central OS */
 .conteudo:has(.ao) { background: var(--superficie); } /* Progresso das operações: fundo branco (11/11/2026), como as outras guias */
+.conteudo:has(.cs-pagina) { background: var(--superficie); } /* Cronograma de Safras: fundo branco (11/11/2026), como as outras páginas */
 /* Semana por talhão (05/11/2026): título do dia em duas linhas, "dom" em cima e "01 nov" embaixo (hoje, no verde) */
 .cal-tal__dia { flex-direction: column; gap: 2px; padding: 6px 10px; }
 .cal-tal__dia-sem { font-size: 13px; font-weight: 600; color: var(--texto-suave); text-transform: lowercase; }

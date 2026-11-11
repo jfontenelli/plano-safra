@@ -1,7 +1,7 @@
 /*
  * Modal "Como deseja iniciar o plano?"
  * Abre por cima da Visão Geral ao abrir um plano ainda não iniciado (só a versão 0.1, vazia: Versoes.aIniciar).
- * Opções: Usar modelo de operações · Copiar outro plano de safra · Importar planilha Excel (uma embaixo da outra).
+ * Opções: Usar modelo de operações · Copiar outro plano de safra (uma embaixo da outra; Importar saiu em 11/11/2026).
  * "Começar o planejamento" cria a 0.2 em construção com esse conteúdo (Versoes.comecar) e abre o plano no Planejamento.
  * Cancelar ou X: fecha sem iniciar (o plano continua não iniciado).
  * Também é a etapa 2 do Criar Plano de Safra (09/11/2026; Telas.abrirModalCriarPlano): embutir() desenha as opções
@@ -13,13 +13,14 @@ window.Telas.inicioPlano = (function () {
   const esc = Util.escapar;
 
   const OPCOES = [
-    { valor: 'modelo', titulo: 'Usar modelo de operações', icone: Icones.lista,
-      texto: 'Use uma lista de operações e ajuste conforme necessário.' },
-    // Ordem (09/11/2026): Usar modelo · Copiar outro plano · Importar planilha
+    // 11/11/2026: antes "Usar modelo de operações · Use uma lista de operações e ajuste conforme necessário."
+    { valor: 'modelo', titulo: 'Usar operações cadastradas no ERP Compass', icone: Icones.lista,
+      texto: 'As operações são criadas e editadas somente no ERP Compass.' },
+    // Ordem (09/11/2026): Usar modelo · Copiar outro plano. Importar planilha Excel saiu em 11/11/2026 (o código
+    // dele, detalheImportar, fica aqui sem uso; para voltar: { valor: 'importar', titulo: 'Importar planilha Excel',
+    // icone: Icones.planilha, texto: 'Continue um plano exportado por este sistema.' })
     { valor: 'copiar', titulo: 'Copiar outro plano de safra', icone: Icones.copiar,
-      texto: 'Copie um plano de safra da mesma cultura.' },
-    { valor: 'importar', titulo: 'Importar planilha Excel', icone: Icones.planilha,
-      texto: 'Continue um plano exportado por este sistema.' }
+      texto: 'Copie um plano de safra da mesma cultura.' }
   ];
   // Sem o nível Empresa (Util.comEmpresa), a Empresa não aparece nem é conferida no arquivo importado
   const CAMPOS = [['safra', 'Safra'], ['empresa', 'Empresa'], ['fazenda', 'Fazenda'], ['cultura', 'Cultura']]

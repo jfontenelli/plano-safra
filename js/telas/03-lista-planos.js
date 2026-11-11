@@ -1,9 +1,9 @@
 /*
  * Tela 03 — Planos de Safra, lista de planos (docs/telas/03-lista-planos.md)
  * Aparece no menu Plano de Safra › Planos quando existe ao menos um plano.
- * Três guias com os mesmos filtros: Planos de Safra (o Painel: Telas.painelPlanos, uma linha por fazenda e safra),
- * Cronograma de Safras (11/11/2026: o ano agrícola por empresa, fazenda e safra, Telas.cronogramaSafras) e Histórico
- * de versões (uma linha por versão de cada plano).
+ * Duas guias com os mesmos filtros: Planos de Safra (o Painel: Telas.painelPlanos, uma linha por fazenda e safra) e
+ * Histórico de versões (uma linha por versão de cada plano). O Cronograma de Safras, que foi guia aqui, virou item do
+ * menu em 11/11/2026 (js/telas/cronograma-safras.js).
  */
 window.Telas = window.Telas || {};
 
@@ -16,9 +16,9 @@ window.Telas.listaPlanos = (function () {
   // o que não cabe na linha vai para o Mais filtros. Dependentes: Ano agrícola e Atividade limitam Safra e Cultura;
   // Empresa limita Fazenda (as da empresa, mesmo sem plano)
   // Situação do plano (guia Planos de Safra): as três opções sempre, na ordem da tabela
-  const STATUS_PLANO = [['nao-iniciado', 'Não iniciado'], ['construcao', 'Em construção'], ['publicada', 'Publicado']];
-  const STATUS = [['nao-iniciado', 'Não iniciado'], ['construcao', 'Em construção'], ['publicada', 'Publicada'], ['revisada', 'Revisada']];
-  const filtros = { statusPlano: 'todos', status: 'todos', operacao: 'todos', busca: {}, filtroAberto: null };
+  const STATUS_PLANO = [['nao-iniciado', 'Não iniciado'], ['construcao', 'Em construção'], ['publicada', 'Atualizado']];
+  const STATUS = [['nao-iniciado', 'Não iniciado'], ['construcao', 'Em construção'], ['revisada', 'Atualizado']];
+  const filtros = { statusPlano: 'todos', status: 'todos', busca: {}, filtroAberto: null };
   const BASE = [
     ['ano', 'Ano agrícola', ['Todos', 'Nenhum', 'anos'], 104],
     ['atividade', 'Atividade produtiva', ['Todas', 'Nenhuma', 'atividades'], 140],
@@ -39,8 +39,6 @@ window.Telas.listaPlanos = (function () {
   function opcoes(chave) {
     if (chave === 'ano') return comoOpcoes([...Telas.painelPlanos.anos()].reverse());
     if (chave === 'statusPlano') return comoOpcoes(STATUS_PLANO);
-    // Operação (só no Cronograma de Safras): as dos grupos à mostra na legenda, nos planos dos filtros
-    if (chave === 'operacao') return Telas.cronogramaSafras.opcoesOperacao(DADOS.planos.filter(passa));
     if (chave === 'status') {
       const naLista = new Set();
       DADOS.planos.forEach((p) => Versoes.lista(p).forEach((v) => naLista.add(statusVersao(p, v))));
@@ -64,17 +62,14 @@ window.Telas.listaPlanos = (function () {
   const barra = BarraFiltros.criar({
     id: 'lp',
     estado: () => filtros,
-    // O filtro de cada guia: Situação do plano (Planos de Safra), Operação (Cronograma de Safras), Status do plano (Histórico)
+    // O filtro de cada guia: Situação do plano (Planos de Safra), Status do plano (Histórico)
     campos: () => [...BASE, guia === 'painel'
       ? ['statusPlano', 'Situação do plano', ['Todas', 'Nenhuma', 'situações'], 150]
-      : guia === 'cronograma' ? ['operacao', 'Operação', ['Todas', 'Nenhuma', 'operações'], 124]
       : ['status', 'Status do plano', ['Todos', 'Nenhum', 'status'], 140]],
     mais: () => [],
-    // Cronograma de Safras: o Ano agrícola com uma escolha só (as setas e o Hoje trocam o filtro)
-    unicos: () => (guia === 'cronograma' ? ['ano'] : []),
     opcoes,
     depende: DEPENDE,
-    padrao: () => ({ statusPlano: 'todos', status: 'todos', operacao: 'todos' }),
+    padrao: () => ({ statusPlano: 'todos', status: 'todos' }),
     aoMudar: () => atualizar(document.getElementById('conteudo'))
   });
 
@@ -92,12 +87,12 @@ window.Telas.listaPlanos = (function () {
     if (para !== de && !de.startsWith('#/plano-safra')) entrou = true;
   });
 
-  // Guia aberta: 'painel' (Planos de Safra), 'cronograma' (Cronograma de Safras) ou 'historico' (Histórico de versões).
+  // Guia aberta: 'painel' (Planos de Safra) ou 'historico' (Histórico de versões).
   // Abre em Planos de Safra; a guia escolhida se mantém ao navegar.
-  const GUIAS = [['painel', 'Planos de Safra'], ['cronograma', 'Cronograma de Safras'], ['historico', 'Histórico de versões']];
+  const GUIAS = [['painel', 'Planos de Safra'], ['historico', 'Histórico de versões']];
   let guia = 'painel';
   // Status de uma versão: a 0.1 de um plano ainda não iniciado aparece como "Não iniciado"
-  // Status de cada versão: só a última publicada do plano é Publicada; as publicadas antes dela, Revisada
+  // Status de cada versão (11/11/2026): toda versão publicada tem o status Atualizado (Versoes.statusExibido)
   const statusVersao = (p, v) => (Versoes.aIniciar(p) ? 'nao-iniciado' : Versoes.statusExibido(p, v));
 
   function desenhar() {
@@ -112,7 +107,7 @@ window.Telas.listaPlanos = (function () {
     if (entrou) {
       FiltrosBase.ler(filtros);
       Object.assign(filtros, { atividade: 'todos', safra: 'todos', cultura: 'todos', empresa: 'todos', fazenda: 'todos',
-        statusPlano: 'todos', status: 'todos', operacao: 'todos' });
+        statusPlano: 'todos', status: 'todos' });
       entrou = false;
     }
 
@@ -133,15 +128,9 @@ window.Telas.listaPlanos = (function () {
       </header>
 
       <div class="pagina">
-        <!-- Cronograma de Safras: a etiqueta das últimas versões, acima dos filtros, à direita (só nesta guia) -->
-        <div class="cs__etiqueta" data-guia-painel="cronograma" ${guia === 'cronograma' ? '' : 'hidden'}>
-          <span class="cag-etiqueta" title="Mostra a última versão publicada de cada plano. Alterações em versões em construção aparecem aqui depois de publicadas.">${Icones.info} Últimas versões</span>
-        </div>
         <section class="cartao filtros" aria-label="Filtrar planos" data-lp-filtros></section>
 
         ${Telas.painelPlanos.desenhar()}
-
-        ${Telas.cronogramaSafras.desenhar(guia === 'cronograma')}
 
         <section class="cartao lista-planos" aria-labelledby="titulo-historico" data-guia-painel="historico" ${guia === 'historico' ? '' : 'hidden'}>
           <div class="secao__topo lista-planos__topo">
@@ -166,14 +155,6 @@ window.Telas.listaPlanos = (function () {
   // Depois que o HTML está na página: liga os filtros e desenha números e lista
   function aoMostrar(conteudo) {
     barra.ligar(conteudo.querySelector('[data-lp-filtros]'));
-    Telas.cronogramaSafras.ligar(conteudo, {
-      filtros,
-      planos: () => DADOS.planos.filter(passa),
-      // Hoje e as setas: trocam o filtro Ano agrícola (vale também nas outras guias e páginas)
-      aoMudarAno: (ano) => { filtros.ano = [ano]; FiltrosBase.gravar(filtros, ['ano']); barra.redesenhar(); atualizar(conteudo); },
-      // Legenda: muda as opções do filtro Operação
-      aoMudarGrupo: () => { barra.redesenhar(); atualizar(conteudo); }
-    });
     trocarGuia(conteudo, guia);
     Telas.painelPlanos.ligar(conteudo, { abrirPlano, abrirMenuPlano });
     // Guias: troca o painel sem desenhar a tela de novo (os filtros continuam)
@@ -220,7 +201,7 @@ window.Telas.listaPlanos = (function () {
       item('nova-versao', 'Criar nova versão', Versoes.aIniciar(p)
         ? { motivo: 'O plano ainda não foi iniciado', bloqueado: true }
         : construcao ? { motivo: `A versão ${construcao.num} já está em construção`, bloqueado: true }
-        : { motivo: `A partir da versão ${publicada.num}, publicada` }),
+        : { motivo: `A partir da versão ${publicada.num} (Atualizado)` }),
       item('historico', 'Histórico de versões'),
       item('exportar', 'Exportar XLSX'),
       '<hr class="menu-contexto__separador">',
@@ -263,19 +244,13 @@ window.Telas.listaPlanos = (function () {
 
   function trocarGuia(conteudo, nova) {
     guia = nova;
-    // Cronograma de Safras: um ano agrícola por vez (o marcado; sem um só, o de hoje ou o mais recente com planos)
-    if (guia === 'cronograma' && !(Array.isArray(filtros.ano) && filtros.ano.length === 1)) {
-      const marcados = Array.isArray(filtros.ano) ? filtros.ano : [];
-      filtros.ano = [marcados.includes(Telas.cronogramaSafras.anoAtual()) || !marcados.length ? Telas.cronogramaSafras.anoAtual() : marcados[0]];
-      FiltrosBase.gravar(filtros, ['ano']);
-    }
     conteudo.querySelectorAll('[data-guia]').forEach((b) => {
       const ativa = b.dataset.guia === guia;
       b.classList.toggle('etapa--ativa', ativa);
       if (ativa) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
     });
     conteudo.querySelectorAll('[data-guia-painel]').forEach((painel) => { painel.hidden = painel.dataset.guiaPainel !== guia; });
-    // Cada guia mostra o seu filtro: Situação do plano no Planos de Safra, Operação no Cronograma, Status do plano no Histórico
+    // Cada guia mostra o seu filtro: Situação do plano no Planos de Safra, Status do plano no Histórico
     barra.redesenhar();
     atualizar(conteudo);
   }
@@ -359,7 +334,6 @@ window.Telas.listaPlanos = (function () {
       ? versoes.map(linhaVersao).join('')
       : `<tr><td class="tabela__vazia" colspan="${Util.comEmpresa() ? 9 : 8}">Nenhuma versão encontrada com esses filtros.</td></tr>`;
     Telas.painelPlanos.atualizar(conteudo, paraPainel());
-    Telas.cronogramaSafras.atualizar(conteudo);
   }
 
   // ----- Histórico de versões -----
@@ -379,10 +353,10 @@ window.Telas.listaPlanos = (function () {
     const quando = status === 'construcao' ? v.salvaEm : v.publicadaEm;
     const quem = status === 'construcao' ? v.salvaPor : v.publicadaPor;
     const rotulo = Object.fromEntries(STATUS)[status];
-    const classe = { 'nao-iniciado': 'status--nao-iniciado', construcao: 'status--construcao', publicada: 'status--aprovado', revisada: 'status--revisada' }[status];
+    const classe = { 'nao-iniciado': 'status--nao-iniciado', construcao: 'status--construcao', revisada: 'status--aprovado' }[status];
     return `
       <tr class="lista-planos__linha" data-plano="${p.id}" data-versao="${esc(v.num)}" tabindex="0"
-          title="Abrir a versão ${esc(v.num)}${status === 'publicada' || status === 'revisada' ? ` (${status}, em consulta)` : ''}"
+          title="Abrir a versão ${esc(v.num)}${status === 'revisada' ? ' (Atualizado, em consulta)' : ''}"
           aria-label="Abrir plano ${esc(p.safra)} · ${esc(p.fazenda)}, versão ${esc(v.num)}">
         <td>${esc(p.safra)}</td>
         ${Util.comEmpresa() ? `<td>${esc(p.empresa)}</td>` : ''}

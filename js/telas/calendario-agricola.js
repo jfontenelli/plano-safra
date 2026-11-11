@@ -12,10 +12,11 @@ window.Telas.calendarioAgricola = (function () {
   const NOMES_MESES = ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'];
   // Cor de cada grupo de operação, pelo tipo (as mesmas do Calendário do plano); uma faixa por grupo, nesta ordem
   // Grupos criados pelo "+": Operação de campo (ex.: Preparo do solo) numa faixa própria, cinza, antes do Plantio;
-  // Aplicação de insumos (ex.: Corretivos) junto da Fertilidade (mesma faixa e cor)
-  const COR_GRUPO = { 'Operação de campo': '#5b6b73', Sementes: '#1f9d55', Fertilidade: '#8e44ad', 'Aplicação de insumos': '#8e44ad', Defensivos: '#e8772e', Colheita: '#d4a017' };
-  const ORDEM_GRUPO = ['Operação de campo', 'Sementes', 'Fertilidade', 'Defensivos', 'Colheita'];
-  const faixaDe = (tipo) => Math.max(0, ORDEM_GRUPO.indexOf(tipo === 'Aplicação de insumos' ? 'Fertilidade' : tipo));
+  // Aplicação de insumos (ex.: Corretivos) numa faixa própria, azul, como na legenda (11/11/2026: antes junto da
+  // Fertilidade, roxa, e a Calagem parecia fertilizante)
+  const COR_GRUPO = { 'Operação de campo': '#5b6b73', 'Aplicação de insumos': '#3b74d6', Sementes: '#1f9d55', Fertilidade: '#8e44ad', Defensivos: '#e8772e', Colheita: '#d4a017' };
+  const ORDEM_GRUPO = ['Operação de campo', 'Aplicação de insumos', 'Sementes', 'Fertilidade', 'Defensivos', 'Colheita'];
+  const faixaDe = (tipo) => Math.max(0, ORDEM_GRUPO.indexOf(tipo));
 
   // Empresas abertas ('e:Empresa A') e fazendas abertas ('f:Empresa A|Santa Clara'). Abre no nível Empresa (tudo
   // fechado); a escolha se mantém ao navegar. As barras ficam só no nível mais aberto de cada ramo: empresa fechada

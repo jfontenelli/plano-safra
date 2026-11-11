@@ -326,7 +326,7 @@ window.Telas.planoOperacoes = (function () {
             </nav>
             <span class="plano__barra" aria-hidden="true">|</span>
             <span class="plano__versao">Versão ${esc(v.num)}
-              <span class="status status--${{ construcao: 'construcao', publicada: 'aprovado', revisada: 'revisada' }[Versoes.statusExibido(plano, v)]}">${Versoes.rotuloStatus(plano, v)}</span></span>
+              <span class="status status--${{ construcao: 'construcao', revisada: 'aprovado' }[Versoes.statusExibido(plano, v)]}">${Versoes.rotuloStatus(plano, v)}</span></span>
           </div>
         </div>
         <div class="plano__linha-etapas">
@@ -413,12 +413,12 @@ window.Telas.planoOperacoes = (function () {
     avisoConsulta();
   }
 
-  // "Versão 0.2 publicada" · Cancelar · Criar nova versão (com outra versão em construção: Abrir versão 0.3)
+  // "Versão 0.2 · Atualizado" · Cancelar · Criar nova versão (com outra versão em construção: Abrir versão 0.3)
   function avisoConsulta() {
     const v = Versoes.aberta(plano);
     const construcao = Versoes.emConstrucao(plano);
     Modal.confirmar({
-      titulo: `Versão ${esc(v.num)} ${Versoes.rotuloStatus(plano, v).toLowerCase()}`,
+      titulo: `Versão ${esc(v.num)} · ${Versoes.rotuloStatus(plano, v)}`,
       texto: construcao
         ? `Somente consulta. As alterações são feitas na versão ${esc(construcao.num)}, que já está em construção.`
         : 'Somente consulta. Para alterar, crie uma nova versão a partir desta.',
@@ -467,7 +467,7 @@ window.Telas.planoOperacoes = (function () {
           botoes: [{ rotulo: 'Cancelar' }, { rotulo: 'Confirmar Atualização', classe: 'primario', acao: () => {
             Versoes.publicar(plano);
             abrirVersao(num);
-            Aviso.mostrar(`Versão ${esc(num)} publicada`);
+            Aviso.mostrar(`Versão ${esc(num)} atualizada`);
           } }]
         });
         break;
@@ -1104,7 +1104,11 @@ window.Telas.planoOperacoes = (function () {
   }
 
   // Campo de busca com o texto digitado que não foi encontrado no cadastro (mantém o texto e mostra o erro)
-  const MSG_NAO_ENCONTRADO = 'Não encontrado no cadastro. Escolha na lista ou use "+ Pré-cadastrar".';
+  // Pré-cadastro fora desta entrega (11/11/2026; rascunhos/pre-cadastro/README.md): sem a opção "+ Pré-cadastrar" nas
+  // buscas de variedade, princípio ativo e produto. O código continua aqui; para voltar, PRE_CADASTRO = true.
+  const PRE_CADASTRO = false;
+  const MSG_NAO_ENCONTRADO = PRE_CADASTRO ? 'Não encontrado no cadastro. Escolha na lista ou use "+ Pré-cadastrar".'
+    : 'Não encontrado no cadastro. Escolha na lista.';
   function celulaCombo(l, tipo, valor, placeholder, comErro) {
     const digitado = ui.naoEncontrado[`${l.id}:${tipo}`];
     if (digitado === undefined) return combo(l, tipo, valor, placeholder, comErro);
@@ -1659,7 +1663,7 @@ window.Telas.planoOperacoes = (function () {
     const opcoes = lista.map((v) => ({ valor: v.nome,
       rotulo: `${esc(v.nome)}<span class="combo__sub">${v.ciclo ? `ciclo ${v.ciclo} dias` : 'ciclo não informado'}</span>`, pre: v.preCadastro }));
     const exata = lista.some((v) => Util.normalizar(v.nome) === busca);
-    if (texto.trim() && !exata) opcoes.push({ preCadastrar: true, valor: texto.trim(), rotulo: `${Icones.mais} Pré-cadastrar "${esc(texto.trim())}"` });
+    if (PRE_CADASTRO && texto.trim() && !exata) opcoes.push({ preCadastrar: true, valor: texto.trim(), rotulo: `${Icones.mais} Pré-cadastrar "${esc(texto.trim())}"` });
     return { opcoes, nenhuma: !lista.length };
   }
 
@@ -1738,7 +1742,7 @@ window.Telas.planoOperacoes = (function () {
     const v = acharVariedade(texto);
     if (v) { aplicarVariedade(input, v.nome, { semFoco }); return; }
     fecharBuscaVariedade(input);
-    Aviso.mostrar('Variedade não encontrada: escolha na lista ou pré-cadastre.');
+    Aviso.mostrar(PRE_CADASTRO ? 'Variedade não encontrada: escolha na lista ou pré-cadastre.' : 'Variedade não encontrada: escolha na lista.');
   }
 
   // Setas escolhem a opção ativa; Enter confirma; Esc desiste
@@ -3774,7 +3778,7 @@ window.Telas.planoOperacoes = (function () {
     }
     opcoes = opcoes.slice(0, 8);
     // "+ Pré-cadastrar" sempre como última opção quando há texto digitado (princípio ativo e produto comercial)
-    if (texto.trim()) opcoes.push({ preCadastrar: true, valor: texto.trim(), rotulo: `${Icones.mais} Pré-cadastrar "${esc(texto.trim())}"` });
+    if (PRE_CADASTRO && texto.trim()) opcoes.push({ preCadastrar: true, valor: texto.trim(), rotulo: `${Icones.mais} Pré-cadastrar "${esc(texto.trim())}"` });
     return opcoes;
   }
 
@@ -3788,7 +3792,8 @@ window.Telas.planoOperacoes = (function () {
       <div class="combo__opcao ${o.preCadastrar ? 'combo__opcao--pre' : ''}" role="option" data-indice="${i}"
            data-valor="${esc(o.valor)}" ${o.preCadastrar ? 'data-pre-cadastrar' : ''}>
         ${o.rotulo} ${o.pre ? '<span class="etiqueta-pre">Pré-cadastro</span>' : ''}
-      </div>`).join('') : '<div class="combo__nada">Digite para buscar</div>';
+      </div>`).join('') : `<div class="combo__nada">${input.value.trim() && input.value !== (tipo === 'pa' ? linha.principioAtivo : linha.produto)
+        ? 'Nenhum item encontrado no cadastro' : 'Digite para buscar'}</div>`;
     lista.hidden = false;
     input.setAttribute('aria-expanded', 'true');
   }
