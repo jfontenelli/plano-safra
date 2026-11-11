@@ -231,7 +231,7 @@ window.Telas.monitoramentoAplicacoes = (function () {
         // primeira variedade; sem ciclo, "—"
         const gColheita = grupos.find((g) => g.tipo === 'Colheita');
         const opColheita = gColheita && gColheita.operacoes[0];
-        const cicloColheita = (DADOS.variedades.find((x) => x.nome === variedades[0]) || {}).ciclo;
+        const cicloColheita = Util.cicloVariedade(DADOS.variedades.find((x) => x.nome === variedades[0]), p.fazenda);
         let dataColheita = null;
         if (opColheita && cicloColheita) {
           const planejado = somaDias(base, cicloColheita);
@@ -247,7 +247,7 @@ window.Telas.monitoramentoAplicacoes = (function () {
           if (g.tipo === 'Sementes') { if (op === plantio) aplic[op.nome] = dataPlantio; return; }
           let planejado;
           if (g.tipo === 'Colheita') {
-            const ciclo = (DADOS.variedades.find((x) => x.nome === variedades[0]) || {}).ciclo;
+            const ciclo = Util.cicloVariedade(DADOS.variedades.find((x) => x.nome === variedades[0]), p.fazenda);
             if (op !== g.operacoes[0] || !ciclo) return;
             planejado = somaDias(base, ciclo);
           } else {
@@ -663,7 +663,8 @@ window.Telas.monitoramentoAplicacoes = (function () {
     t.querySelectorAll('[data-fixa]').forEach((c) => { c.style.left = `${esquerda[c.dataset.fixa]}px`; });
   }
 
-  // Barra acima da tabela: legenda dos status da aplicação (clicável), com as bolinhas da visão Planejada × Executada
+  // Barra acima da tabela: legenda dos status da aplicação (clicável). 11/11/2026: cada status no fundo da etiqueta da tabela,
+  // com o ícone dela (o calendário; a Atrasada, a exclamação) na cor do texto da etiqueta
   const LEGENDA = ['pendente', 'adiantada', 'prazo', 'atrasada', 'futura'].map((id) => STATUS.find(([x]) => x === id));
   // Dica de cada item da legenda (ao clicar, filtra os talhões; clicado de novo, mostra todos)
   const DICA_LEGENDA = {
@@ -679,9 +680,9 @@ window.Telas.monitoramentoAplicacoes = (function () {
         <div class="ma-legenda">
           <span class="ma-legenda__titulo">Operação:</span>
           <ul aria-label="Status da aplicação">
-            ${LEGENDA.map(([id, nome]) => `<li><button class="ma-legenda__item ${est.status && est.status !== id ? 'ma-legenda__item--apagado' : ''}" type="button"
+            ${LEGENDA.map(([id, nome]) => `<li><button class="ma-legenda__item ma-leg-cor ma-st--${id} ${est.status && est.status !== id ? 'ma-legenda__item--apagado' : ''}" type="button"
                 data-ma-status="${id}" aria-pressed="${est.status === id}" title="${est.status === id ? 'Mostrar todos os talhões' : DICA_LEGENDA[id]}">
-                ${id === 'pendente' ? `<span class="ma-legenda__icone ma-st--pendente" aria-hidden="true">${Icones.pendente}</span>` : `<span class="ma-legenda__cor mt-ponto--${id}" aria-hidden="true"></span>`}${nome}</button></li>`).join('')}
+                <span class="ma-legenda__icone" aria-hidden="true">${id === 'pendente' ? Icones.pendente : Icones.calendario}</span>${nome}</button></li>`).join('')}
           </ul>
         </div>
         <div class="ma-modo">

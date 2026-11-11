@@ -37,7 +37,7 @@ window.Telas.indicadores = (function () {
         if (!l.variedade) return null;
         const v = DADOS.variedades.find((x) => x.nome === l.variedade);
         const area = Planos.areaLinhaPlantio(linhas, i, t.area) || 0;
-        return { variedade: l.variedade, area, plantio: l.data || null, colheita: l.data && v && v.ciclo ? somaDias(l.data, v.ciclo) : null };
+        return { variedade: l.variedade, area, plantio: l.data || null, colheita: l.data && Util.cicloVariedade(v, ctx.plano.fazenda) ? somaDias(l.data, Util.cicloVariedade(v, ctx.plano.fazenda)) : null };
       }).filter(Boolean);
     });
   }

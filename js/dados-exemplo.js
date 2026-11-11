@@ -33,6 +33,10 @@ window.DADOS = {
   atividades: ['Agricultura', 'Pecuária', 'Silvicultura'],
   atividadesEmBreve: ['Pecuária', 'Silvicultura'],
   fazendas: ['São José', 'Boa Vista', 'Santa Clara', 'Primavera'],
+  // Região de cada fazenda (11/11/2026, exemplo): o ciclo da variedade muda com a região (Cadastros › Culturas e variedades)
+  regiaoFazenda: { 'São José': 'Norte', 'Boa Vista': 'Norte', 'Santa Clara': 'Leste', 'Primavera': 'Sul' },
+  // Ciclo por região (exemplo): o ciclo da variedade (Norte) mais estes dias. Ajuste à vontade
+  ajusteCicloRegiao: { Norte: 0, Leste: 4, Sul: 8 },
   // Fazendas de cada empresa (exemplo, para o Painel da Visão Geral: "Sem plano" e área total). Ajuste à vontade.
   fazendasPorEmpresa: {
     'Empresa A': ['São José', 'Santa Clara'],

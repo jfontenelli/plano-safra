@@ -12,7 +12,7 @@ Criar um plano: informações gerais, a fazenda com os talhões e a **área plan
 - **Ocupa a tela inteira** (o modal todo; o conteúdo usa a largura toda e o modal rola quando a tabela não cabe). No topo, o indicador de etapas **1 Definir o plano ── 2 Como iniciar** (as duas próximas, ligadas por uma linha curta; a etapa atual em verde) e o X para fechar.
 - **Etapa 1 · Definir o plano**: título "Criar Plano de Safra"; subtítulo "Defina as informações gerais e selecione as áreas que farão parte do plano."
   - **Informações gerais**, numa linha, todas obrigatórias: **Safra · Atividade · Cultura · Fazenda** (com o nível Empresa, ver DECISOES 3: Safra · Empresa · Atividade · Cultura · Fazenda).
-    - Na lista de Safra, a última opção é "+ Criar nova safra".
+    - Na lista de Safra, só as safras cadastradas (vêm do ERP Compass; o "+ Criar nova safra" saiu em 11/11/2026).
     - Aberto pelo link do aviso sem plano da lista (Tela 03): a lista de Safra traz só as safras do Ano Agrícola do filtro, e Safra e Fazenda já vêm com o que os filtros dizem.
     - Atividade: Agricultura (já escolhida), Pecuária (Em breve), Silvicultura (Em breve).
     - Cultura: Soja e Milho (nenhuma vem escolhida).
@@ -27,7 +27,7 @@ Criar um plano: informações gerais, a fazenda com os talhões e a **área plan
 - **Área planejada** (clique no valor ou no lápis): campo com o número; **Enter** ou sair do campo grava; **Esc** desfaz. Vale de **0,1 ha até a área cadastrada**; acima: "Máximo 95 ha (área cadastrada)."; vazio ou zero: "Informe a área, a partir de 0,1 ha." Área diferente da cadastrada fica em verde. Para tirar o talhão do plano, desmarca-se a caixa (área "—").
 - A área planejada **vale em tudo dentro do plano**: área de cultivo, quantidades de semente e de produtos, Orçamento, Calendário, OS e planilha exportada. O cadastro da fazenda não muda.
 - Talhões não são obrigatórios: sem nenhum, a área fica "Pendente" e o plano pode ser criado.
-- "Criar nova safra": abre uma **janela pequena por cima do formulário**, "**Nova safra**" (subtítulo "A safra nova entra na lista e fica selecionada."), com o campo **Safra*** ("Nome da safra (ex.: 26/27)", já com o cursor) e os botões **Cancelar** e **Confirmar** (desabilitado com o campo vazio). A safra tem só o nome.
+- (Fora desde 11/11/2026.) "Criar nova safra": abre uma **janela pequena por cima do formulário**, "**Nova safra**" (subtítulo "A safra nova entra na lista e fica selecionada."), com o campo **Safra*** ("Nome da safra (ex.: 26/27)", já com o cursor) e os botões **Cancelar** e **Confirmar** (desabilitado com o campo vazio). A safra tem só o nome.
   - **Confirmar** ou **Enter**: a janela fecha, a safra nova entra na lista já selecionada e o cursor vai para o campo seguinte. Nome que já existe: só seleciona a safra existente.
   - **Cancelar** ou **Esc**: fecha sem criar; a Safra volta ao que estava.
   - **Clicar fora** não fecha: o cursor volta ao campo e aparece, em âmbar, "Confirme ou cancele a nova safra."
@@ -51,18 +51,17 @@ Criar um plano: informações gerais, a fazenda com os talhões e a **área plan
 
 ## Conteúdo
 - Título "Como deseja iniciar o plano?"; subtítulo só com o plano: "Safra 26/27 · Fazenda São José · Soja" (a Empresa só com o nível Empresa; DECISOES 3). Ao começar, o plano passa para a versão 0.2, em construção, e abre na aba Planejamento.
-- Três cards (um escolhido por vez; Usar modelo de operações já vem marcado), um embaixo do outro, na largura do modal, nesta ordem (09/11/2026: Copiar antes de Importar; 29/10/2026: nomes e textos novos; saiu Começar do zero):
+- Dois cards (um escolhido por vez; o primeiro já vem marcado), um embaixo do outro, na largura do modal, nesta ordem (11/11/2026: saiu Importar planilha Excel e o primeiro mudou de nome; 09/11/2026: Copiar antes de Importar; 29/10/2026: nomes e textos novos; saiu Começar do zero):
 
 | Card | Texto | Comportamento |
 |---|---|---|
-| Usar modelo de operações | Use uma lista de operações e ajuste conforme necessário. | Grupos e operações do modelo da cultura do plano (Soja ou Milho). |
+| Usar operações cadastradas no ERP Compass (antes Usar modelo de operações) | As operações são criadas e editadas somente no ERP Compass. | No protótipo: grupos e operações do modelo da cultura do plano (Soja ou Milho). |
 | Copiar outro plano de safra | Copie um plano de safra da mesma cultura. | Lista "Plano para copiar" (obrigatória). Ver as regras abaixo. |
-| Importar planilha Excel | Continue um plano exportado por este sistema. | Campo do arquivo (obrigatório). Ver as regras abaixo. |
 
 - Rodapé: "Cancelar" e "Começar o planejamento".
 
 ## Regras
-- **Importar planilha Excel** (só o .xlsx exportado pelo Plano de Safra): ao carregar, mostra de qual plano é ("Planejamento da safra 26/27 · Empresa A · Fazenda São José · Soja"). Safra, Empresa, Fazenda e Cultura do plano são conferidas com as do arquivo; se forem diferentes, quadro amarelo "O arquivo é de outro plano" com as diferenças e o botão **Importar mesmo assim**. Talhões do arquivo que não estão no plano ficam de fora, com aviso. Arquivo que não é do sistema: "Este arquivo não foi exportado pelo Plano de Safra…". Sem arquivo: "Escolha o arquivo exportado pelo Plano de Safra."
+- (Fora desde 11/11/2026; o código continua no protótipo, sem uso.) **Importar planilha Excel** (só o .xlsx exportado pelo Plano de Safra): ao carregar, mostra de qual plano é ("Planejamento da safra 26/27 · Empresa A · Fazenda São José · Soja"). Safra, Empresa, Fazenda e Cultura do plano são conferidas com as do arquivo; se forem diferentes, quadro amarelo "O arquivo é de outro plano" com as diferenças e o botão **Importar mesmo assim**. Talhões do arquivo que não estão no plano ficam de fora, com aviso. Arquivo que não é do sistema: "Este arquivo não foi exportado pelo Plano de Safra…". Sem arquivo: "Escolha o arquivo exportado pelo Plano de Safra."
 - **Copiar outro plano de safra**: a lista mostra só os planos **da mesma cultura** (qualquer fazenda e safra) **já publicados**, como "Safra 26/27 · Empresa A · Fazenda Santa Clara · versão 0.2". Copia sempre a **última versão publicada**: grupos de operação, operações e recomendações com produtos e doses padrão. **Não copia** talhões, áreas, plantio, germinação nem doses próprias de talhão. Sem plano publicado: "Ainda não há plano de Soja publicado para copiar."
 - "Começar o planejamento" cria a **0.2 em construção** com o conteúdo escolhido e abre o plano na aba Planejamento, com aviso quando importado ou copiado ("Copiado do plano da Fazenda Santa Clara (safra 26/27, versão 0.2)").
-- Cancelar ou X: fecha; o plano continua não iniciado. Cada vez que o modal abre, começa em "Usar modelo de operações".
+- Cancelar ou X: fecha; o plano continua não iniciado. Cada vez que o modal abre, começa em "Usar operações cadastradas no ERP Compass".

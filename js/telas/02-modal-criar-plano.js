@@ -194,8 +194,10 @@ window.Telas.abrirModalCriarPlano = function ({ aoCriar, inicial = {} }) {
 
   // ----- Criar nova safra (última opção da lista de safras) -----
   function preencherSafras(selecionada = '') {
+    // 11/11/2026: as safras vêm do ERP Compass (só consulta no produto): sem o "+ Criar nova safra" (o código continua)
+    const CRIA_SAFRA = false;
     selectSafra.innerHTML = opcoes('Selecione', listaSafras, selecionada) +
-      `<option value="${NOVA_SAFRA}">+ Criar nova safra</option>`;
+      (CRIA_SAFRA ? `<option value="${NOVA_SAFRA}">+ Criar nova safra</option>` : '');
     safraAnterior = selecionada;
   }
 

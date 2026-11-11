@@ -2,6 +2,13 @@
  * Cálculos e formatação usados por várias telas.
  */
 window.Util = {
+  // Ciclo da variedade (dias) na região da fazenda (11/11/2026; DECISOES 4.3): o ciclo do cadastro (Norte) mais o ajuste da
+  // região (DADOS.regiaoFazenda e DADOS.ajusteCicloRegiao). Sem ciclo no cadastro: null. Sem fazenda: o ciclo do cadastro
+  ajusteCicloFazenda(fazenda) { return (DADOS.ajusteCicloRegiao || {})[(DADOS.regiaoFazenda || {})[fazenda]] || 0; },
+  cicloVariedade(v, fazenda) {
+    if (!v || v.ciclo === null || v.ciclo === undefined || v.ciclo === '') return null;
+    return v.ciclo + Util.ajusteCicloFazenda(fazenda);
+  },
   // Nível Empresa à mostra? (DADOS.usaEmpresa; escondido no protótipo desde 09/11/2026)
   comEmpresa() { return DADOS.usaEmpresa !== false; },
   // Listas de filtros, colunas e níveis ([chave, rótulo, ...]): sem o nível Empresa, tira a entrada 'empresa'

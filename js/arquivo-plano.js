@@ -44,16 +44,16 @@ window.ArquivoPlano = (function () {
     ];
 
     // previsao_cumprimento: prazo para encerramento da OS, em dias (vazio = padrão do grupo)
-    const abaOperacoes = [['grupo_operacao', 'tipo_grupo', 'operacao', 'dap', 'fenologia', 'previsao_cumprimento']];
+    const abaOperacoes = [['grupo_operacao', 'tipo_grupo', 'operacao', 'dap', 'previsao_cumprimento']];
     plano.grupos.forEach((g) => {
       if (!g.operacoes.length) abaOperacoes.push([g.nome, g.tipo || '', '', '', '', '']);
-      g.operacoes.forEach((op) => abaOperacoes.push([g.nome, g.tipo || '', op.nome, op.dap ?? '', op.fenologia || '', op.prazo ?? '']));
+      g.operacoes.forEach((op) => abaOperacoes.push([g.nome, g.tipo || '', op.nome, op.dap ?? '', op.prazo ?? '']));
     });
     if (plantio && plantio.prazoColheita) abaPlano.push(['prazo_colheita', plantio.prazoColheita]);
 
     // Uma linha por variedade (o talhão pode ter várias, cada uma com a sua área de aplicação)
     const abaVariedade = [['fazenda', 'talhao', 'area_talhao', 'area_aplicacao', 'cultura', 'grupo_operacao', 'operacao', 'variedade',
-      'data_plantio', 'pop_plantas_planejada', 'pop_plantas_recomendada', 'perc_germinacao', 'quantidade_total_sementes', 'embalagem', 'qtd_embalagens']];
+      'data_plantio', 'pop_plantas_planejada', 'perc_germinacao', 'quantidade_total_sementes', 'embalagem', 'qtd_embalagens']];
     // Embalagem da cultura, como na tabela do Plantio (soja: bag de 5 milhões de sementes; milho: saco de 20 kg, 60 mil)
     const emb = DADOS.embalagemSemente[plano.cultura] || DADOS.embalagemSemente.Soja;
     if (sementes) {
@@ -66,7 +66,7 @@ window.ArquivoPlano = (function () {
             const v = p.variedade ? DADOS.variedades.find((x) => x.nome === p.variedade) : null;
             const sem = p.populacao && g && areaVar ? p.populacao * 1000 * areaVar / (g / 100) : null;
             abaVariedade.push([plano.fazenda, t.nome, t.area, areaVar ?? '', plano.cultura, sementes.nome, op.nome, p.variedade || '',
-              p.data || '', p.populacao || '', v && v.populacao ? `${v.populacao[0]}-${v.populacao[1]}` : '',
+              p.data || '', p.populacao || '',
               g || '', sem ? Math.round(sem) : '', sem ? emb.descricao : '', sem ? Math.round(sem / emb.sementes * 10) / 10 : '']);
           });
         });
@@ -76,7 +76,7 @@ window.ArquivoPlano = (function () {
     const abasRec = {};
     ABAS_REC.forEach((nome) => {
       abasRec[nome] = [['fazenda', 'talhao', 'area_talhao', 'area_aplicacao', 'unidade_area', 'cultura', 'variedade',
-        'grupo_operacao', 'operacao', 'fenologia', 'dap',
+        'grupo_operacao', 'operacao', 'dap',
         nome === 'corretivo_fertilizante' ? 'materia_prima' : 'principio_ativo', 'nome_produto_comercial',
         'unidade_produto', 'dose_padrao', 'dose_ha', 'volume']];
     });
@@ -92,7 +92,7 @@ window.ArquivoPlano = (function () {
           r.produtos.filter(Planos.linhaPreenchida).forEach((l) => {
             const dose = Planos.doseTalhao(op, ajuste, l);
             aba.push([plano.fazenda, t.nome, t.area, t.area, 'ha', plano.cultura, variedade, g.nome, op.nome,
-              op.fenologia || '', op.dap ?? '', l.principioAtivo || '', l.produto || '', l.unidade || '',
+              op.dap ?? '', l.principioAtivo || '', l.produto || '', l.unidade || '',
               l.dose ?? '', dose ?? '', dose !== null && dose !== undefined ? Math.round(dose * t.area * 100) / 100 : '']);
           });
         });

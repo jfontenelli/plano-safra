@@ -2137,6 +2137,11 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .cal-filtro__busca { padding: 4px 10px 8px; }
 .cal-filtro__busca .campo__controle { width: 100%; min-width: 0; }
 .cal-filtro__opcao[hidden] { display: none; }
+/* 11/11/2026: todos os filtros de uma escolha (Safra, Fazenda, Ano agrícola, Operação do Progresso…) com a caixinha quadrada, como as de várias escolhas; o traço separa blocos de opções (Plantio/Colheita e as demais, no Progresso) */
+.cal-filtro__opcao input[type="radio"] { -webkit-appearance: none; appearance: none; flex-shrink: 0; width: 16px; height: 16px; margin: 0 2px; border: 1.5px solid var(--borda-forte); border-radius: 3px; background: var(--superficie) center / 12px no-repeat; cursor: pointer; }
+.cal-filtro__opcao input[type="radio"]:checked { border-color: #0075ff; background-color: #0075ff; background-image: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 12 12%27%3E%3Cpath d=%27M2.5 6.2l2.3 2.3 4.7-5%27 fill=%27none%27 stroke=%27white%27 stroke-width=%271.8%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27/%3E%3C/svg%3E"); }
+.cal-filtro__opcao input[type="radio"]:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 2px; }
+.cal-filtro__separador { margin: 4px 14px; border: 0; border-top: 1px solid var(--borda-forte); }
 .cal-filtro__nada { margin: 0; padding: 8px 14px; font-size: 13px; color: var(--texto-suave); }
 .cal-filtro__area { margin-left: auto; padding-left: 16px; color: var(--texto-suave); font-size: 13px; }
 .calendario__visoes .visoes__botao { height: 38px; }
@@ -2186,6 +2191,9 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .cal-ponto--fertilidade, .cal-ev--fertilidade { --c: #8e44ad; --f: #f2e6f7; }
 .cal-ponto--colheita, .cal-ev--colheita { --c: #d4a017; --f: #fbf3dc; }
 .cal-ponto--outro, .cal-ev--outro { --c: #3b74d6; --f: #e6eefb; }
+/* Grupos criados pelo "+" (11/11/2026): as mesmas cores das barras do Cronograma de Safras */
+.cal-ponto--aplicacao-de-insumos, .cal-ev--aplicacao-de-insumos { --c: #3b74d6; --f: #e6eefb; }
+.cal-ponto--operacao-de-campo, .cal-ev--operacao-de-campo { --c: #5b6b73; --f: #eceff0; }
 .cal-grade { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); background: var(--superficie); border: 1px solid var(--borda); border-radius: var(--raio); overflow: hidden; }
 .cal-grade__cab { padding: 8px; border-bottom: 1px solid var(--borda); background: var(--superficie-2); text-align: center; font-size: 12px; font-weight: 700; letter-spacing: .04em; color: var(--texto-suave); }
 .cal-dia { display: flex; flex-direction: column; gap: 4px; min-height: 104px; padding: 6px; border-right: 1px solid var(--borda); border-bottom: 1px solid var(--borda); cursor: pointer; min-width: 0; }
@@ -2925,7 +2933,7 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .cag__linha--fazenda > span:first-child { padding-left: 26px; }
 .cag__linha--safra > span:first-child { padding-left: 52px; }
 .cag__tempo--vazio { min-height: 34px; }
-.cag__tempo--faixas { min-height: 68px; } /* cinco faixas: Operação de campo, Plantio, Fertilidade, Defensivo, Colheita */
+.cag__tempo--faixas { min-height: 80px; } /* seis faixas: Operação de campo, Aplicação de insumos (Corretivos), Plantio, Fertilidade, Defensivo, Colheita */
 .cag__faixa { position: absolute; height: 9px; padding: 0; border: 0; border-radius: 5px; background: color-mix(in srgb, var(--c) 40%, transparent); cursor: pointer; }
 .cag__faixa:focus-visible { outline: 2px solid var(--c); outline-offset: 1px; z-index: 2; }
 .cag__faixa:hover { outline: 1px solid rgba(26, 31, 28, .45); z-index: 2; }
@@ -3219,7 +3227,21 @@ html[data-tema="escuro"] .ma-lista, html[data-tema="escuro"] .os-cal { --mt-adia
 .ma-legenda li { display: inline-flex; }
 .ma-legenda__item { display: inline-flex; align-items: center; gap: 8px; padding: 4px 6px; border: 0; border-radius: 6px; background: transparent;
   font: inherit; color: inherit; cursor: pointer; }
-.ma-legenda__item:hover { background: var(--superficie-2); color: var(--texto); }
+.ma-legenda__item:not(.ma-leg-cor):not(.os-leg-cor):hover { background: var(--superficie-2); color: var(--texto); }
+/* Legenda de Desvios de data (11/11/2026): cada status com o fundo da célula dele na tabela; bolinhas e ícone menores */
+.ma-legenda__item.ma-leg-cor { padding: 4px 10px; color: var(--texto); }
+.ma-legenda__item.ma-leg-cor:hover { box-shadow: inset 0 0 0 1px var(--borda-forte); }
+.ma-leg-cor .ma-legenda__cor, .ma-leg-cor .ma-legenda__cor.mt-ponto--futura { width: 13px; height: 13px; }
+.ma-leg-cor .ma-legenda__icone, .ma-leg-cor .ma-legenda__icone .icone { width: 15px; height: 15px; }
+.ma-leg-cor .ma-legenda__icone { background: transparent; }
+/* Ícone da legenda na cor do texto da etiqueta de cada status (as mesmas de .ma-etiqueta) */
+.ma-leg-cor.ma-st--pendente .ma-legenda__icone  { color: var(--erro); }
+.ma-leg-cor.ma-st--adiantada .ma-legenda__icone { color: #5E35B1; }
+.ma-leg-cor.ma-st--prazo .ma-legenda__icone     { color: var(--verde-700); }
+.ma-leg-cor.ma-st--atrasada .ma-legenda__icone  { color: #b9560f; }
+.ma-leg-cor.ma-st--futura .ma-legenda__icone    { color: var(--texto-suave); }
+html[data-tema="escuro"] .ma-leg-cor.ma-st--adiantada .ma-legenda__icone { color: #C3A8F5; }
+html[data-tema="escuro"] .ma-leg-cor.ma-st--atrasada .ma-legenda__icone  { color: #F0995A; }
 .ma-legenda__item[aria-pressed="true"] { color: var(--texto); font-weight: 600; }
 .ma-legenda__item--apagado { opacity: .45; }
 .ma-legenda__item:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 1px; }
@@ -3794,6 +3816,10 @@ html[data-tema="escuro"] .cal-tal__barra[class*="cal-st--"] { --f: color-mix(in 
 .cal-tal__icone .icone { width: 15px; height: 15px; stroke-width: 2.2; }
 /* Legenda: os mesmos ícones das etiquetas (Atrasada a exclamação, Executada o check, Planejada o calendário) */
 .cal-leg__icone { display: inline-flex; color: var(--c); }
+/* Legenda do Calendário (11/11/2026): cada status com o fundo das operações no calendário (o mesmo --f dos cartões) */
+.ma-legenda__item.os-leg-cor { padding: 4px 10px; background: var(--f); color: var(--texto); }
+.ma-legenda__item.os-leg-cor:hover { background: var(--f); box-shadow: inset 0 0 0 1px var(--c); }
+html[data-tema="escuro"] .ma-legenda__item.os-leg-cor { --f: color-mix(in srgb, var(--c) 24%, #15232D); }
 .cal-leg__icone .icone { width: 18px; height: 18px; stroke-width: 2.2; }
 .cal-tal__textos { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
 .cal-tal__atraso { font-size: 12px; font-weight: 400; color: var(--c); white-space: nowrap; }
@@ -4306,6 +4332,7 @@ html[data-tema="escuro"] .fp-modal { --fp-est-desv: #ff6b5e; }
 .conteudo:has(.cc) { background: var(--superficie); } /* Central OS: fundo branco (04/11/2026) */
 .conteudo:has(.os-cal) { background: var(--superficie); } /* Calendário: fundo branco (05/11/2026), como a Central OS */
 .conteudo:has(.ao) { background: var(--superficie); } /* Progresso das operações: fundo branco (11/11/2026), como as outras guias */
+.conteudo:has(.cs-pagina) { background: var(--superficie); } /* Cronograma de Safras: fundo branco (11/11/2026), como as outras páginas */
 /* Semana por talhão (05/11/2026): título do dia em duas linhas, "dom" em cima e "01 nov" embaixo (hoje, no verde) */
 .cal-tal__dia { flex-direction: column; gap: 2px; padding: 6px 10px; }
 .cal-tal__dia-sem { font-size: 13px; font-weight: 600; color: var(--texto-suave); text-transform: lowercase; }
@@ -4510,3 +4537,128 @@ html[data-tema="escuro"] .ao-cartao--restante { --ao-c: #9AA8B1; }
 .ao-quadros--empilhado .ao-quadro--expandido { order: -1; }
 .ao-quadros--empilhado .ao-quadro--expandido .ao-mapa { height: max(420px, calc(100vh - 380px)); }
 
+
+/* ===== Cadastros (10/11/2026; trazido em 11/11/2026): Fazendas e talhões, Safras, Culturas e variedades, Operações ===== */
+.cad { padding: 24px 40px 48px; }
+.cad-cabecalho__linha { align-self: stretch; display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.cad-salvo { display: inline-flex; align-items: center; gap: 6px; margin-bottom: 10px; font-size: 13px; color: var(--texto-suave); }
+.cad-salvo .icone { width: 15px; height: 15px; color: var(--verde-600); }
+.cad .etapa .selo, .cad-cabecalho__linha .etapa .selo { margin-left: 8px; background: var(--aviso-fundo); color: var(--aviso-texto); }
+.cad-duas { display: grid; grid-template-columns: 290px minmax(0, 1fr); gap: 20px; align-items: start; }
+.cad-coluna { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+.cad-topo { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 14px 20px; }
+.cad-topo__titulo { font-size: 17px; font-weight: 700; }
+.cad-topo__titulo small { margin-left: 8px; font-size: 13px; font-weight: 500; color: var(--texto-suave); }
+.cad-topo__acoes { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.cad-nota { margin: 0; padding: 0 20px 14px; font-size: 13px; color: var(--texto-suave); }
+.cad-nota--solta { padding: 0; margin-bottom: 14px; }
+.cad .cartao { overflow: hidden; }
+
+/* Lista lateral (fazendas, culturas) */
+.cad-lista { margin: 0; padding: 6px; list-style: none; }
+.cad-lista__grupo { padding: 12px 12px 4px; font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--texto-fraco); }
+.cad-lista__vazio { padding: 2px 12px 8px; font-size: 13px; color: var(--texto-fraco); }
+.cad-item { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; padding: 9px 12px; border: 0; border-radius: 8px; background: none; font: inherit; text-align: left; color: var(--texto); cursor: pointer; }
+.cad-item:hover { background: var(--superficie-2); }
+.cad-item:focus-visible { outline: 2px solid var(--verde-600); outline-offset: -2px; }
+.cad-item--ativo, .cad-item--ativo:hover { background: var(--verde-100); color: var(--verde-800); font-weight: 600; box-shadow: inset 3px 0 0 var(--verde-700); }
+.cad-item__sub { display: block; font-size: 12px; font-weight: 400; color: var(--texto-suave); }
+.cad-item__alerta { display: inline-flex; color: #b45f06; }
+.cad-item__alerta .icone { width: 16px; height: 16px; }
+.cad-lista__rodape { display: flex; flex-direction: column; gap: 8px; padding: 12px; border-top: 1px solid var(--borda); }
+.cad-chave { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-bottom: 1px solid var(--borda); font-size: 14px; cursor: pointer; }
+.cad-chave input { width: 16px; height: 16px; accent-color: var(--verde-700); }
+html[data-tema="escuro"] .cad-item--ativo, html[data-tema="escuro"] .cad-item--ativo:hover { background: #176B50; color: #fff; }
+html[data-tema="escuro"] .cad-item--ativo .cad-item__sub { color: #d5e6de; }
+
+/* Fazenda: dados + mapa */
+.cad-fazenda { display: grid; grid-template-columns: minmax(230px, 300px) minmax(0, 1fr); gap: 20px; padding: 4px 20px 20px; }
+.cad-fazenda .campo { margin-bottom: 12px; }
+.cad-fazenda .campo__controle { height: 38px; }
+.cad-mapa { height: 340px; border: 1px solid var(--borda); border-radius: 10px; background: var(--superficie-3); z-index: 0; }
+.cad-mapa--p { height: 230px; }
+.cad-dica { display: flex; align-items: flex-start; gap: 6px; margin: 6px 0 0; font-size: 13px; color: var(--texto-suave); }
+.cad-dica .icone { width: 15px; height: 15px; margin-top: 2px; }
+.cad-sede { display: grid; place-items: center; width: 30px !important; height: 30px !important; border: 2px solid #fff; border-radius: 50%; background: var(--verde-700); color: #fff; box-shadow: 0 1px 4px rgba(0, 0, 0, .5); cursor: grab; }
+.cad-sede .icone { width: 16px; height: 16px; }
+
+/* Tabelas dos cadastros: campos na própria linha */
+.cad .tabela td { padding-top: 8px; padding-bottom: 8px; vertical-align: middle; }
+.cad-campo { width: 100%; height: 34px; padding: 0 10px; border: 1px solid transparent; border-radius: 6px; background: transparent; font: inherit; font-size: 14px; color: var(--texto); }
+.cad-campo:hover { border-color: var(--borda-forte); background: var(--superficie); }
+.cad-campo:focus { outline: none; border-color: var(--verde-600); background: var(--superficie); box-shadow: 0 0 0 3px rgba(24, 122, 79, .15); }
+.cad-campo--num { width: 96px; text-align: right; font-variant-numeric: tabular-nums; }
+.cad-campo--cod { width: 84px; font-weight: 600; }
+.cad-campo--nome { min-width: 200px; font-weight: 600; }
+.cad-campo::placeholder { color: var(--texto-fraco); font-weight: 400; }
+select.cad-campo { cursor: pointer; }
+.cad-falta { color: #b45f06; font-weight: 600; }
+.cad-ok { display: inline-flex; align-items: center; gap: 5px; color: var(--verde-700); font-weight: 600; }
+.cad-ok .icone { width: 15px; height: 15px; }
+.cad-link { padding: 0; border: 0; background: none; font: inherit; font-weight: 600; color: var(--verde-700); cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+.cad-status { display: inline-block; padding: 1px 9px; border-radius: 999px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+.cad-status--pre { background: var(--aviso-fundo); color: var(--aviso-texto); }
+.cad-status--ok { background: var(--verde-100); color: var(--verde-700); }
+.cad-linha--alvo > * { background: var(--verde-100) !important; }
+.cad-vazio { padding: 36px 24px; text-align: center; color: var(--texto-suave); }
+.cad-vazio h3 { margin-bottom: 6px; font-size: 17px; color: var(--texto); }
+.cad-vazio p { margin: 0 auto 16px; max-width: 520px; }
+.cad-vazio__acoes { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+
+/* Barra de filtros (chips + busca) */
+.cad-barra { display: flex; align-items: center; gap: 10px 14px; flex-wrap: wrap; padding: 14px 20px; border-bottom: 1px solid var(--borda); }
+.cad-barra .campo__controle { height: 36px; width: auto; min-width: 190px; font-size: 14px; }
+.cad-barra__busca { flex: 1 1 220px; max-width: 340px; }
+.cad-barra__fim { margin-left: auto; display: flex; gap: 8px; }
+.cad-subguias { display: flex; gap: 8px; padding: 0 20px 14px; }
+
+/* Operações: um cartão por grupo */
+.cad-grupo { margin-bottom: 16px; }
+.cad-grupo__topo { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 10px 12px 10px 14px; background: var(--superficie-2); border-bottom: 1px solid var(--borda); }
+.cad-grupo__topo .cad-campo--nome { flex: 0 1 260px; font-size: 16px; }
+.cad-grupo__tipo { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--texto-suave); }
+.cad-grupo__tipo select { width: auto; }
+.cad-grupo__fim { margin-left: auto; display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--texto-suave); }
+.cad-grupo .tabela th { padding-top: 9px; padding-bottom: 9px; background: none; font-size: 13px; color: var(--texto-suave); }
+.cad-grupo__mais { padding: 8px 14px 12px; }
+
+/* Importação de talhões */
+.cad-soltar { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 28px 20px; border: 2px dashed var(--borda-forte); border-radius: 12px; background: var(--superficie-2); text-align: center; color: var(--texto-suave); cursor: pointer; }
+.cad-soltar:hover, .cad-soltar--sobre { border-color: var(--verde-600); background: var(--verde-100); }
+.cad-soltar strong { font-size: 16px; color: var(--texto); }
+.cad-soltar .icone { width: 30px; height: 30px; color: var(--verde-600); }
+.cad-soltar input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.cad-imp { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); gap: 16px; margin-top: 14px; }
+.cad-imp .cad-campo--nome { min-width: 110px; }
+.cad-imp__tabela .tabela td:last-child { white-space: normal; }
+.cad-imp__tabela { max-height: 300px; overflow: auto; border: 1px solid var(--borda); border-radius: 8px; }
+.cad-imp__tabela .tabela th { position: sticky; top: 0; z-index: 1; padding: 9px 10px; font-size: 13px; }
+.cad-imp__tabela .tabela td { padding: 5px 10px; }
+.cad-imp__resumo { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-top: 14px; }
+.cad-imp__resumo .campo { margin: 0; min-width: 220px; }
+.cad-erro { margin: 10px 0 0; color: var(--erro); font-size: 14px; }
+.cad-erro:empty { display: none; }
+.cad-aviso { display: flex; gap: 8px; margin: 0 0 14px; padding: 10px 12px; border: 1px solid var(--aviso-borda); border-radius: 8px; background: var(--aviso-fundo); color: var(--aviso-texto); font-size: 14px; }
+.cad-aviso .icone { width: 18px; height: 18px; margin-top: 1px; }
+.modal--cad-largo { max-width: 940px; }
+
+@media (max-width: 1100px) {
+  .cad { padding: 20px; }
+  .cad-duas, .cad-fazenda, .cad-imp { grid-template-columns: 1fr; }
+}
+.cad-grupo__nome { font-size: 15px; } /* 11/11/2026: nome do grupo só para consulta (vem do ERP Compass) */
+/* Mapas (Leaflet; 11/11/2026): as camadas do mapa (z-index 400 a 1000) ficam presas dentro dele, para as listas dos
+   filtros e os menus abrirem por cima do mapa, e não atrás */
+.leaflet-container { z-index: 0; }
+/* Cadastros › Culturas e variedades (11/11/2026): ciclo por fazenda; o título da coluna com o nome e a etiqueta da região */
+.cad-ciclos__fazenda span:first-child { display: block; }
+.cad-ciclos__fazenda .cad-regiao { display: inline-block; margin-top: 4px; background: var(--superficie-3); color: var(--texto); font-weight: 600; white-space: nowrap; }
+/* Etiqueta da região pela cor (11/11/2026): Norte azul, Leste laranja, Sul roxo; outra região, cinza */
+.cad-regiao--norte { background: #e3eefb !important; color: #1f5fa8 !important; }
+.cad-regiao--leste { background: #fdeee3 !important; color: #a84f12 !important; }
+.cad-regiao--sul   { background: #f2e6f7 !important; color: #7a3f86 !important; }
+html[data-tema="escuro"] .cad-regiao--norte { background: #1E3550 !important; color: #9CC3F0 !important; }
+html[data-tema="escuro"] .cad-regiao--leste { background: #3D2817 !important; color: #F0995A !important; }
+html[data-tema="escuro"] .cad-regiao--sul   { background: #33223D !important; color: #D3A8E5 !important; }
+/* Cadastros (11/11/2026): fundo branco em todas as guias, como as outras páginas de consulta */
+.conteudo:has(.cad) { background: var(--superficie); }

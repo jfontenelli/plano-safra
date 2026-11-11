@@ -107,7 +107,7 @@ window.Telas.osCalendario = (function () {
       const v = Versoes.ultimaPublicada(p);
       const talhao = est.talhao === 'todos' ? 'todos'
         : est.talhao.filter((x) => x.startsWith(`${p.fazenda}|`)).map((x) => x.slice(p.fazenda.length + 1));
-      const ctx = { plano: { grupos: Versoes.grupos(p, v) }, talhoes: Util.talhoesPlano(p, v), estado: { talhao } };
+      const ctx = { plano: { grupos: Versoes.grupos(p, v), fazenda: p.fazenda }, talhoes: Util.talhoesPlano(p, v), estado: { talhao } };
       const lista = Cal().itens(ctx).filter((it) => (it.colheita ? !it.aguardando : it.talhoes.length > 0));
       const local = `${p.fazenda} · ${p.safra}`;
       lista.forEach((it) => itens.push({ it, local }));
@@ -247,7 +247,7 @@ window.Telas.osCalendario = (function () {
       <div class="ma-legenda">
         <span class="ma-legenda__titulo">Operações:</span>
         <ul aria-label="Filtrar por status da operação">
-          ${STATUS.map(([id, nome]) => `<li><button class="ma-legenda__item ${est.status && est.status !== id ? 'ma-legenda__item--apagado' : ''}" type="button"
+          ${STATUS.map(([id, nome]) => `<li><button class="ma-legenda__item os-leg-cor cal-st--${id} ${est.status && est.status !== id ? 'ma-legenda__item--apagado' : ''}" type="button"
               data-acao="os-status" data-status="${id}" aria-pressed="${est.status === id}" title="${est.status === id ? 'Mostrar todos' : DICA_STATUS[id]}">
               ${MARCA[id]}${nome}</button></li>`).join('')}
         </ul>

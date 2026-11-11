@@ -6,7 +6,7 @@ Imagens: `referencias/05.3-resumo-calendario.png` (Mês, Semana e Dia: a do Cale
 **Situação no protótipo:** construída.
 
 ## Objetivo
-Ver as operações planejadas e executadas de todas as fazendas (vários planos somados), por talhão, **mês a mês, semana a semana e dia a dia**, para acompanhar e programar as Ordens de Serviço. O ano agrícola por empresa e fazenda fica no Cronograma de Safras (Tela 03).
+Ver as operações planejadas e executadas de todas as fazendas (vários planos somados), por talhão, **mês a mês, semana a semana e dia a dia**, para acompanhar e programar as Ordens de Serviço. O ano agrícola por empresa e fazenda fica no Cronograma de Safras (Tela 03.1).
 
 ## Quando aparece
 - **Primeira guia** da página **Operações** (Tela 10; 11/11/2026, antes item do menu): **Calendário · Desvios de data · Desvios de dose · Risco de falta de produto** (endereço `#/calendario-agricola`). O item **Operações** do menu Gestão da Lavoura (e o nome do grupo) abre na **última guia usada**; no começo, o Calendário. No menu, fica destacado Operações.
@@ -19,7 +19,7 @@ Ver as operações planejadas e executadas de todas as fazendas (vários planos 
 - **Grupo de operação** (10/11/2026): os grupos dos planos (Corretivos, Plantio, Fertilidade, Defensivo, Colheita), várias escolhas.
 - **Operação:** as operações dos grupos marcados, pelo nome (o mesmo nome em vários planos é uma opção só, ex.: Adubação de plantio da soja e do milho), na ordem da legenda (Plantio, Fertilidade, Defensivo, Colheita) e, dentro do grupo, na ordem do plano; o grupo aparece ao lado.
 - **Sem filtro de Ano Agrícola:** o tempo anda pelas setas do calendário.
-- **Barra do calendário:** à esquerda, a **legenda que filtra** (10/11/2026), no formato da tira da página Operações › Desvios de data, **num cartão como o dos filtros**: o título **"Operações:"** (15 px, negrito) e os status **Atrasada · Planejada · Em execução · Executada** (14 px, em preto; a ordem do ciclo da OS: o que não começou, o que está rodando, o que acabou), cada um com o ícone do cartão (16 px), na cor do status; à direita, depois de um traço vertical, **Hoje · ‹ › · período · [lista suspensa de escala]**, com as opções **Ano · Mês · Semana · Dia** (o Ano, com os meses da safra, desde 11/11/2026; antes, até 11/11/2026, o Ano por empresa e fazenda, que virou o Cronograma de Safras da Tela 03).
+- **Barra do calendário:** à esquerda, a **legenda que filtra** (10/11/2026), no formato da tira da página Operações › Desvios de data, **num cartão como o dos filtros**: o título **"Operações:"** (15 px, negrito) e os status **Atrasada · Planejada · Em execução · Executada**, cada um com o **fundo das operações no calendário** (11/11/2026; vermelho-claro, cinza, azul-claro, verde-claro) (14 px, em preto; a ordem do ciclo da OS: o que não começou, o que está rodando, o que acabou), cada um com o ícone do cartão (16 px), na cor do status; à direita, depois de um traço vertical, **Hoje · ‹ › · período · [lista suspensa de escala]**, com as opções **Ano · Mês · Semana · Dia** (o Ano, com os meses da safra, desde 11/11/2026; antes, até 11/11/2026, o Ano por empresa e fazenda, que virou o Cronograma de Safras da Tela 03).
 - **Mês:** a tabela Talhão × semanas do mês. **Semana:** a tabela Talhão × dias da semana. **Dia:** a tabela Talhão × o dia (detalhe abaixo). Sem o rodapé Área operacional (saiu em 10/11/2026: a área fica no título de cada coluna).
 
 ## Regras
@@ -73,7 +73,7 @@ Cada operação num talhão tem um status, pela **data de hoje real** (não a do
 ## Navegação
 - Menu Gestão da Lavoura (o nome ou o item Calendário) → esta página (`#/calendario-agricola`).
 - Item Operações → a Tela 10.
-- O ano agrícola por empresa e fazenda: Plano de Safra › Planos › Cronograma de Safras (Tela 03).
+- O ano agrícola por empresa e fazenda: Plano de Safra › Cronograma (Tela 03.1; 11/11/2026, antes guia da página Planos).
 - "+ Criar Plano de Safra" (sem planos) → modal Criar Plano (Tela 02).
 
 ## Para testar

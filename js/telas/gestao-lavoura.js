@@ -78,7 +78,7 @@ window.Telas.gestaoLavoura = (function () {
           ls.forEach((l, i) => {
             if (!l.variedade) return;
             const dataPl = l.data || base(t.nome);
-            const ciclo = (DADOS.variedades.find((x) => x.nome === l.variedade) || {}).ciclo;
+            const ciclo = Util.cicloVariedade(DADOS.variedades.find((x) => x.nome === l.variedade), p.fazenda);
             const data = g.tipo === 'Sementes' ? dataPl : dataPl && ciclo ? somaDias(dataPl, ciclo) : null;
             if (data) porData.set(data, (porData.get(data) || 0) + (Planos.areaLinhaPlantio(ls, i, t.area) ?? t.area));
           });

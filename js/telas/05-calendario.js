@@ -19,16 +19,17 @@ window.Telas.calendario = (function () {
     return grupo.tipo === 'Sementes' ? 3 : grupo.tipo === 'Colheita' ? PRAZO_COLHEITA : 2;
   }
 
-  // Pré-plantio (DAP negativo), Plantio (DAP 0) e Colheita não têm fenologia
-  function fenologiaDe(op) {
-    if (op.dap === null || op.dap === undefined || op.dap === '') return '';
-    if (op.dap <= 0) return '';
-    return op.fenologia || '';
+  // Fenologia: saiu de todo o produto em 11/11/2026 (o código das fases por estádio fica, sem uso)
+  function fenologiaDe() {
+    return '';
   }
 
   function variedade(nome) {
     return DADOS.variedades.find((v) => v.nome === nome) || null;
   }
+  // Fazenda do plano do contexto (para o ciclo da variedade na região; 11/11/2026)
+  let fazendaCtx = null;
+  const cicloV = (v) => Util.cicloVariedade(v, fazendaCtx);
 
   // Dose: duas casas nos defensivos e no TSI; sem casas fixas na Fertilidade
   function textoDose(valor, grupo) {
@@ -39,6 +40,7 @@ window.Telas.calendario = (function () {
   // ----- Itens do calendário: uma operação de qualquer grupo, ou a colheita (prevista pelo plantio) -----
   function itens(ctx) {
     const { plano, talhoes, estado } = ctx;
+    fazendaCtx = (plano && plano.fazenda) || null;
     const filtro = (nome) => talhaoMarcado(estado, nome);
     const daFazenda = talhoes.filter((t) => filtro(t.nome));
     const area = (nomes) => daFazenda.filter((t) => nomes.includes(t.nome)).reduce((s, t) => s + t.area, 0);
@@ -83,7 +85,7 @@ window.Telas.calendario = (function () {
     {
       if (comPrevisao.length) {
         const linhasCom = comPrevisao.flatMap((t) => Planos.linhasPlantio(plantio, t).filter((l) => previsaoColheita(l)));
-        const ciclos = linhasCom.map((l) => variedade(l.variedade).ciclo);
+        const ciclos = linhasCom.map((l) => cicloV(variedade(l.variedade)));
         lista.push({ colheita: true, grupo: gColheita || { nome: 'Colheita', tipo: 'Colheita' }, op: opColheita || plantio,
           dap: Math.min(...ciclos), dapMax: Math.max(...ciclos), fenologia: '',
           prazo: prazoColheita, talhoes: comPrevisao, area: area(comPrevisao), produtos: [],
@@ -181,7 +183,7 @@ window.Telas.calendario = (function () {
     if (c.chave === 'colheita') return ['Colheita', faixa || 'pelo ciclo da variedade'];
     if (c.chave === 'sem-dap') return ['Sem DAP', ''];
     if (c.chave.startsWith('fen:')) return [c.chave.slice(4), faixa];
-    return [faixa, 'sem fenologia'];
+    return [faixa, ''];
   }
 
   // ----- Desenho -----
@@ -195,7 +197,8 @@ window.Telas.calendario = (function () {
       .filter((it) => marcado(estado, 'operacao', chaveOperacao(it)));
     // A Programação ocupa a área logo abaixo das abas. Em cima, as visões em guias (Tabela · Ciclo Produtivo ·
     // Produtos); embaixo, os filtros Grupo de operação, Operação e Talhão (Produtos tem a sua legenda de grupos de insumo).
-    if (!['infografico', 'produtos'].includes(estado.visao)) estado.visao = 'tabela';
+    // Ciclo Produtivo (infografico) no rascunho desde 11/11/2026 (rascunhos/ciclo-produtivo/README.md): a guia saiu; o código fica
+    if (!['produtos'].includes(estado.visao)) estado.visao = 'tabela';
     // Sem nada planejado: estado vazio no centro (o ícone da visão, título, texto) e o botão que leva ao Planejamento,
     // na guia Plantio. Não é um aviso: não há nada errado, só falta planejar.
     const vazio = `
@@ -209,7 +212,7 @@ window.Telas.calendario = (function () {
       <section class="calendario">
         <div class="calendario__barra">
           <div class="resumo-guias" role="tablist" aria-label="Visão do Resumo">
-            ${[['tabela', Icones.lista, 'Tabela'], ['infografico', Icones.grafico, 'Ciclo Produtivo'], ['produtos', Icones.caixa, 'Produtos']].map(([v, icone, rotulo]) => `
+            ${[['tabela', Icones.lista, 'Tabela'], ['produtos', Icones.caixa, 'Produtos']].map(([v, icone, rotulo]) => `
               <button class="resumo-guias__guia ${estado.visao === v ? 'resumo-guias__guia--ativa' : ''}" type="button" role="tab" data-acao="cal-visao"
                       data-visao="${v}" aria-selected="${estado.visao === v}">${icone}${rotulo}</button>`).join('')}
           </div>
@@ -277,7 +280,7 @@ window.Telas.calendario = (function () {
   }
   function previsaoColheita(p) {
     const v = p && p.variedade ? variedade(p.variedade) : null;
-    return p && p.data && v && v.ciclo ? somaDias(p.data, v.ciclo) : null;
+    return p && p.data && cicloV(v) ? somaDias(p.data, cicloV(v)) : null;
   }
   // Resumo do plantio por talhão (pode ter várias variedades): a primeira data de plantio (as outras operações do
   // talhão partem dela), as variedades, as populações e as variedades (linhas), para a colheita de cada uma
@@ -400,7 +403,6 @@ window.Telas.calendario = (function () {
   // nivel 'op': uma célula por operação (na altura de todos os produtos); 'linha': uma por produto
   const COLUNAS = [
     { id: 'dap', rotulo: 'DAP', largura: 64, nivel: 'op', classe: 'cal-piv__num' },
-    { id: 'fen', rotulo: 'Fenologia', largura: 96, nivel: 'op', classe: 'cal-piv__fen' },
     { id: 'data', rotulo: 'Data prevista', largura: 120, nivel: 'op', classe: 'cal-piv__data' },
     { id: 'op', rotulo: 'Operação', largura: 170, nivel: 'op', classe: 'cal-piv__nome' },
     { id: 'area', rotulo: 'Área (ha)', largura: 84, nivel: 'op', classe: 'cal-piv__area' },
@@ -443,7 +445,6 @@ window.Telas.calendario = (function () {
       const dap = it.aguardando ? 'pelo ciclo' : it.colheita && it.dapMax !== it.dap ? `${it.dap} a ${it.dapMax}` : it.dap ?? '—';
       const conteudoOp = {
         dap: () => dap,
-        fen: () => esc(it.fenologia || '—'),
         data: () => dataPrevista(it, visiveis, pl),
         area: () => (it.area ? Util.area(it.area).replace(' ha', '') : '—'),
         // Dentro do plano, o nome é um link que abre a operação no Planejamento (Colheita e "Sem grupo" não estão lá)
@@ -902,7 +903,7 @@ window.Telas.calendario = (function () {
             <label class="cal-filtro__opcao" data-nome="${esc(Util.normalizar(o.nome))}" ${casaBusca(estado, chave, o.nome) ? '' : 'hidden'}>
               <input type="${unico ? 'radio' : 'checkbox'}" ${unico ? `name="cal-unico-${chave}"` : ''} data-campo="cal-filtro" data-filtro="${chave}" value="${esc(o.valor)}" ${marcado(estado, chave, o.valor) ? 'checked' : ''}>
               <span>${esc(o.nome)}</span>${o.extra ? `<span class="cal-filtro__area">${esc(o.extra)}</span>` : ''}
-            </label>`).join('')}
+            </label>${o.separar ? '<hr class="cal-filtro__separador" aria-hidden="true">' : ''}`).join('')}
           <p class="cal-filtro__nada" ${opcoes.some((o) => casaBusca(estado, chave, o.nome)) ? 'hidden' : ''}>Nada encontrado</p>
         </div>
       </details>`;

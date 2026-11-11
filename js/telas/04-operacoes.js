@@ -326,7 +326,7 @@ window.Telas.planoOperacoes = (function () {
             </nav>
             <span class="plano__barra" aria-hidden="true">|</span>
             <span class="plano__versao">Versão ${esc(v.num)}
-              <span class="status status--${{ construcao: 'construcao', publicada: 'aprovado', revisada: 'revisada' }[Versoes.statusExibido(plano, v)]}">${Versoes.rotuloStatus(plano, v)}</span></span>
+              <span class="status status--${{ construcao: 'construcao', revisada: 'aprovado' }[Versoes.statusExibido(plano, v)]}">${Versoes.rotuloStatus(plano, v)}</span></span>
           </div>
         </div>
         <div class="plano__linha-etapas">
@@ -413,12 +413,12 @@ window.Telas.planoOperacoes = (function () {
     avisoConsulta();
   }
 
-  // "Versão 0.2 publicada" · Cancelar · Criar nova versão (com outra versão em construção: Abrir versão 0.3)
+  // "Versão 0.2 · Atualizado" · Cancelar · Criar nova versão (com outra versão em construção: Abrir versão 0.3)
   function avisoConsulta() {
     const v = Versoes.aberta(plano);
     const construcao = Versoes.emConstrucao(plano);
     Modal.confirmar({
-      titulo: `Versão ${esc(v.num)} ${Versoes.rotuloStatus(plano, v).toLowerCase()}`,
+      titulo: `Versão ${esc(v.num)} · ${Versoes.rotuloStatus(plano, v)}`,
       texto: construcao
         ? `Somente consulta. As alterações são feitas na versão ${esc(construcao.num)}, que já está em construção.`
         : 'Somente consulta. Para alterar, crie uma nova versão a partir desta.',
@@ -467,7 +467,7 @@ window.Telas.planoOperacoes = (function () {
           botoes: [{ rotulo: 'Cancelar' }, { rotulo: 'Confirmar Atualização', classe: 'primario', acao: () => {
             Versoes.publicar(plano);
             abrirVersao(num);
-            Aviso.mostrar(`Versão ${esc(num)} publicada`);
+            Aviso.mostrar(`Versão ${esc(num)} atualizada`);
           } }]
         });
         break;
@@ -718,7 +718,7 @@ window.Telas.planoOperacoes = (function () {
                 </li>`;
             }).join('')}
           </ul>
-          ${somenteLeitura ? '' : `
+          ${!editaEstrutura() ? '' : `
             <button class="botao-icone ops-lista__nova-min" type="button" data-acao="nova-op" title="Nova operação"
                     aria-label="Nova operação">${Icones.mais}</button>`}
         </aside>`;
@@ -735,7 +735,7 @@ window.Telas.planoOperacoes = (function () {
         <ul class="ops-lista__itens">
           ${ops.map((op) => itemOperacao(op, atual && op.id === atual.id)).join('')}
         </ul>
-        ${somenteLeitura ? '' : `
+        ${!editaEstrutura() ? '' : `
           <button class="link-acao ops-lista__nova" type="button" data-acao="nova-op">${Icones.mais} Nova operação</button>`}
         ${grupo.operacoes.length === 0 && !usaNovasOperacoes(grupo) ? '<p class="ops-lista__vazia">Nenhuma operação neste grupo.</p>' : ''}
       </aside>
@@ -752,7 +752,7 @@ window.Telas.planoOperacoes = (function () {
                    aria-label="Nome da operação" data-foco-inicial>${esc(op.nome)}</textarea>`
       : `<button class="ops-item__nome" type="button" data-acao="abrir-op" data-op="${op.id}"
                  ${ativo ? 'aria-current="true"' : ''}
-                 title="${somenteLeitura ? esc(op.nome) : `${esc(op.nome)} · clique duas vezes para renomear`}">${esc(op.nome)}</button>`;
+                 title="${!editaEstrutura() ? esc(op.nome) : `${esc(op.nome)} · clique duas vezes para renomear`}">${esc(op.nome)}</button>`;
     return `
       <li class="ops-item ${ativo ? 'ops-item--ativo' : ''}">
         ${nome}
@@ -781,14 +781,14 @@ window.Telas.planoOperacoes = (function () {
       return `<input class="campo__controle op-cabecalho__nome-campo" data-campo="nome-op" value="${esc(op.nome)}"
                      aria-label="Nome da operação" data-foco-inicial>`;
     }
-    if (somenteLeitura) return `<h2 class="op-cabecalho__nome" title="${esc(op.nome)}">${esc(op.nome)}</h2>`;
+    if (!editaEstrutura()) return `<h2 class="op-cabecalho__nome" title="${esc(op.nome)}">${esc(op.nome)}</h2>`;
     return `<h2 class="op-cabecalho__nome op-cabecalho__nome--editavel" tabindex="0" data-renomear-op="${op.id}"
                 title="${esc(op.nome)} · clique duas vezes para renomear">${esc(op.nome)}</h2>`;
   }
 
   function aoDuploClique(e) {
     const nome = e.target.closest('[data-renomear-op]');
-    if (!nome || somenteLeitura) return;
+    if (!nome || !editaEstrutura()) return;
     ui.renomeandoOp = nome.dataset.renomearOp; desenharTudo();
   }
 
@@ -810,7 +810,7 @@ window.Telas.planoOperacoes = (function () {
       <section class="cartao grupo-vazio" aria-label="${esc(grupo.nome)}">
         ${ILUSTRACAO_VAZIO}
         <h2 class="grupo-vazio__titulo">Nenhuma operação neste grupo</h2>
-        <p class="grupo-vazio__texto">${somenteLeitura ? 'Este grupo ainda não tem operações.' : `Para começar, clique em
+        <p class="grupo-vazio__texto">${!editaEstrutura() ? `Este grupo ainda não tem operações.${ESTRUTURA_DO_ERP ? ' As operações são criadas no ERP Compass.' : ''}` : `Para começar, clique em
           <button class="grupo-vazio__link" type="button" data-acao="nova-op">${Icones.mais} Nova operação</button> e defina o nome, o DAP e ${oQue}.`}</p>
       </section>`;
   }
@@ -821,8 +821,8 @@ window.Telas.planoOperacoes = (function () {
     if (usaNovasOperacoes(grupo) && !op) return grupoSemOperacao(grupo);
     if (ehOperacaoCampo(grupo)) return detalheOperacaoCampo(grupo, op);
     if (!op) {
-      return `<div class="cartao vazio"><p class="vazio__texto">${somenteLeitura
-        ? 'Nenhuma operação neste grupo.' : 'Nenhuma operação neste grupo. Use "+ Nova operação" para criar.'}</p></div>`;
+      return `<div class="cartao vazio"><p class="vazio__texto">${!editaEstrutura()
+        ? `Nenhuma operação neste grupo.${ESTRUTURA_DO_ERP ? ' As operações são criadas no ERP Compass.' : ''}` : 'Nenhuma operação neste grupo. Use "+ Nova operação" para criar.'}</p></div>`;
     }
     if (ehSemente(grupo)) return detalheSemente(op);
     if (ehGrupoTsi(grupo)) return detalheTsi(op);
@@ -872,13 +872,13 @@ window.Telas.planoOperacoes = (function () {
              <option value="">—</option>
              ${DADOS.fenologia.map((f) => `<option ${f === op.fenologia ? 'selected' : ''}>${f}</option>`).join('')}
            </select>`;
-    // Nome, DAP e fenologia. Renomear e excluir ficam na lista de operações.
+    // Nome e DAP (11/11/2026: sem a Fenologia; o nome vem do ERP). Renomear e excluir ficavam na lista de operações.
     return `
       <div class="op-cabecalho__linha">
         <div class="op-cabecalho__titulo">${navegacaoOperacoes(op)}${nomeOperacao(op)}</div>
         <div class="op-cabecalho__campos">
           <div class="campo campo--inline"><label class="campo__rotulo" for="op-dap">DAP</label>${dap}</div>
-          ${semFenologia ? '' : `<div class="campo campo--inline"><label class="campo__rotulo" for="op-fenologia">Fenologia</label>${fenologia}</div>`}
+          ${semFenologia || ESTRUTURA_DO_ERP ? '' : `<div class="campo campo--inline"><label class="campo__rotulo" for="op-fenologia">Fenologia</label>${fenologia}</div>`}
         </div>
       </div>`;
   }
@@ -1104,7 +1104,18 @@ window.Telas.planoOperacoes = (function () {
   }
 
   // Campo de busca com o texto digitado que não foi encontrado no cadastro (mantém o texto e mostra o erro)
-  const MSG_NAO_ENCONTRADO = 'Não encontrado no cadastro. Escolha na lista ou use "+ Pré-cadastrar".';
+  // Grupos de operação e operações vêm do ERP Compass (11/11/2026): o nome do grupo e da operação não se cria, não se
+  // renomeia nem se exclui aqui (sem Novo grupo, Nova operação, Renomear, Inserir, Excluir e arrastar guias). No plano, a
+  // pessoa preenche o DAP e planeja talhões e recomendação. O campo Fenologia saiu do cabeçalho da operação.
+  // O código continua aqui; para voltar, ESTRUTURA_DO_ERP = false.
+  const ESTRUTURA_DO_ERP = true;
+  const editaEstrutura = () => !somenteLeitura && !ESTRUTURA_DO_ERP;
+
+  // Pré-cadastro fora desta entrega (11/11/2026; rascunhos/pre-cadastro/README.md): sem a opção "+ Pré-cadastrar" nas
+  // buscas de variedade, princípio ativo e produto. O código continua aqui; para voltar, PRE_CADASTRO = true.
+  const PRE_CADASTRO = false;
+  const MSG_NAO_ENCONTRADO = PRE_CADASTRO ? 'Não encontrado no cadastro. Escolha na lista ou use "+ Pré-cadastrar".'
+    : 'Não encontrado no cadastro. Escolha na lista.';
   function celulaCombo(l, tipo, valor, placeholder, comErro) {
     const digitado = ui.naoEncontrado[`${l.id}:${tipo}`];
     if (digitado === undefined) return combo(l, tipo, valor, placeholder, comErro);
@@ -1615,7 +1626,7 @@ window.Telas.planoOperacoes = (function () {
 
   // "BRS 6981IPRO · ciclo 103 dias" (lista de variedades)
   function rotuloVariedade(v) {
-    return `${v.nome} · ${v.ciclo ? `ciclo ${v.ciclo} dias` : 'ciclo não informado'}`;
+    return `${v.nome} · ${cicloV(v) ? `ciclo ${cicloV(v)} dias` : 'ciclo não informado'}`;
   }
 
   // ----- Busca de variedade (célula da tabela, painel do talhão e modal Definir plantio) -----
@@ -1623,7 +1634,7 @@ window.Telas.planoOperacoes = (function () {
   // Sair do campo sem escolher volta ao valor anterior (não fica variedade digitada sem cadastro).
   // onde: 'tb' (célula), 'pt' (painel) ou 'pl' (modal). A lista abre por cima da tela (não fica cortada na tabela).
   function rotuloCurtoVariedade(v) {
-    return v ? `${v.nome} (${v.ciclo ? `${v.ciclo} d` : 'ciclo não informado'})` : '';
+    return v ? `${v.nome} (${cicloV(v) ? `${cicloV(v)} d` : 'ciclo não informado'})` : '';
   }
 
   // Nome sem o que vem entre parênteses no fim ("BMX Foco IPRO (104 d)" → "BMX Foco IPRO"), para achar o colado
@@ -1642,7 +1653,7 @@ window.Telas.planoOperacoes = (function () {
     const v = variedadeDoCadastro(nome);
     const texto = v ? v.nome : '';
     // Ciclo embaixo do campo (painel); na tabela e na composição do modal, não (desalinha a linha)
-    const ciclo = v && onde === 'pt' && v.ciclo ? `<p class="campo__ajuda">Ciclo de ${v.ciclo} dias</p>` : '';
+    const ciclo = v && onde === 'pt' && cicloV(v) ? `<p class="campo__ajuda">Ciclo de ${cicloV(v)} dias</p>` : '';
     return `${ciclo ? '<div>' : ''}
       <div class="combo combo--variedade">
         <input class="${classe}" ${id ? `id="${id}"` : ''} type="text" data-variedade="${onde}" ${talhao ? `data-talhao="${esc(talhao)}"` : ''} ${vi !== null ? `data-var="${vi}"` : ''}
@@ -1657,9 +1668,9 @@ window.Telas.planoOperacoes = (function () {
     const lista = variedadesDaCultura().filter((v) => !busca || Util.normalizar(v.nome).includes(busca))
       .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
     const opcoes = lista.map((v) => ({ valor: v.nome,
-      rotulo: `${esc(v.nome)}<span class="combo__sub">${v.ciclo ? `ciclo ${v.ciclo} dias` : 'ciclo não informado'}</span>`, pre: v.preCadastro }));
+      rotulo: `${esc(v.nome)}<span class="combo__sub">${cicloV(v) ? `ciclo ${cicloV(v)} dias` : 'ciclo não informado'}</span>`, pre: v.preCadastro }));
     const exata = lista.some((v) => Util.normalizar(v.nome) === busca);
-    if (texto.trim() && !exata) opcoes.push({ preCadastrar: true, valor: texto.trim(), rotulo: `${Icones.mais} Pré-cadastrar "${esc(texto.trim())}"` });
+    if (PRE_CADASTRO && texto.trim() && !exata) opcoes.push({ preCadastrar: true, valor: texto.trim(), rotulo: `${Icones.mais} Pré-cadastrar "${esc(texto.trim())}"` });
     return { opcoes, nenhuma: !lista.length };
   }
 
@@ -1738,7 +1749,7 @@ window.Telas.planoOperacoes = (function () {
     const v = acharVariedade(texto);
     if (v) { aplicarVariedade(input, v.nome, { semFoco }); return; }
     fecharBuscaVariedade(input);
-    Aviso.mostrar('Variedade não encontrada: escolha na lista ou pré-cadastre.');
+    Aviso.mostrar(PRE_CADASTRO ? 'Variedade não encontrada: escolha na lista ou pré-cadastre.' : 'Variedade não encontrada: escolha na lista.');
   }
 
   // Setas escolhem a opção ativa; Enter confirma; Esc desiste
@@ -1860,12 +1871,12 @@ window.Telas.planoOperacoes = (function () {
   // Previsão de colheita = data de plantio + ciclo da variedade (sem ciclo ou sem data: null)
   function previsaoColheita(p) {
     const v = p && p.variedade ? variedadeDoCadastro(p.variedade) : null;
-    return p && p.data && v && v.ciclo ? somarDias(p.data, v.ciclo) : null;
+    return p && p.data && v && cicloV(v) ? somarDias(p.data, cicloV(v)) : null;
   }
 
   function semCiclo(p) {
     const v = p && p.variedade ? variedadeDoCadastro(p.variedade) : null;
-    return !!(v && !v.ciclo);
+    return !!(v && !cicloV(v));
   }
 
   // ----- Histórico do talhão: [safra, variedade, sc/ha, chuva mm] -----
@@ -1894,7 +1905,7 @@ window.Telas.planoOperacoes = (function () {
     { id: 'aplicacao', rotulo: 'Área de aplicação', sub: '(ha)', numero: true, valor: (op, r) => r.area },
     { id: 'produtividade', rotulo: 'Produtividade histórica', sub: '(sc/ha)', dica: 'Média das últimas 3 safras', centro: true, valor: (op, r) => mediaHistorica(historicoTalhao(r.t.nome)) },
     { id: 'variedade', rotulo: 'Variedade', valor: (op, r) => r.l.variedade || null },
-    { id: 'ciclo', rotulo: 'Ciclo', sub: '(dias)', numero: true, valor: (op, r) => { const v = r.l.variedade ? variedadeDoCadastro(r.l.variedade) : null; return v && v.ciclo ? v.ciclo : null; } },
+    { id: 'ciclo', rotulo: 'Ciclo', sub: '(dias)', numero: true, valor: (op, r) => { const v = r.l.variedade ? variedadeDoCadastro(r.l.variedade) : null; return v && cicloV(v) ? cicloV(v) : null; } },
     { id: 'plantio', rotulo: 'Data de plantio', valor: (op, r) => r.l.data || null },
     { id: 'colheita', rotulo: 'Previsão de colheita', valor: (op, r) => previsaoColheita(r.l) },
     { id: 'populacao', rotulo: 'População', sub: '(mil plantas/ha)', numero: true, valor: (op, r) => r.l.populacao || null },
@@ -2373,14 +2384,14 @@ window.Telas.planoOperacoes = (function () {
     const s = r.sementes;
     const alertaData = foraDaJanela(v, l.data)
       ? `<span class="aviso-janela" title="Fora da janela recomendada (${esc(janelaTexto(v))})">${Icones.alerta}<span class="so-leitor">Fora da janela recomendada</span></span>` : '';
-    const alertaPop = foraDaFaixa(v, pop)
-      ? `<span class="aviso-janela" title="Fora da população recomendada (${faixaPopulacao(v)} mil plantas/ha)">${Icones.alerta}<span class="so-leitor">Fora da população recomendada</span></span>` : '';
+    // Sem a sugestão de população recomendada (11/11/2026): sem o alerta "Fora da população recomendada"
+    const alertaPop = '';
     const variedade = editar
       ? `<span class="celula-linha">${campoVariedade('tb', { talhao: t.nome, vi: i, nome: v ? v.nome : '', classe: 'celula celula--lista', rotulo: `Variedade do ${t.nome}` })}${v && v.preCadastro ? '<span class="etiqueta-pre">Pré-cadastro</span>' : ''}</span>`
       : v ? `${esc(v.nome)}${v.preCadastro ? ' <span class="etiqueta-pre">Pré-cadastro</span>' : ''}`
         : '<span class="tabela__nao-recebe">Não planejado</span>';
     // Ciclo (dias): do cadastro da variedade; sem ciclo, "Não informado" (informa-se no painel do talhão)
-    const ciclo = !v ? vazio : v.ciclo ? v.ciclo : '<span class="texto-alerta" title="Informe o ciclo no painel do talhão">Não informado</span>';
+    const ciclo = !v ? vazio : cicloV(v) ? cicloV(v) : '<span class="texto-alerta" title="Informe o ciclo no painel do talhão">Não informado</span>';
     const campo = (nomeCampo, valor, classe, rotulo, extra = '', exemplo = '—') => `<input class="celula ${classe}" data-campo="${nomeCampo}" data-talhao="${nome}" data-var="${i}" type="text"
              autocomplete="off" placeholder="${exemplo}" value="${esc(valor)}" aria-label="${rotulo} do ${nome}" ${extra}>`;
     const plantio = editar
@@ -2585,7 +2596,6 @@ window.Telas.planoOperacoes = (function () {
     const textoData = ed.datas[0];
     const germ = l.germinacao;
     const fora = foraDaJanela(v, l.data);
-    const exemploPop = exemploPopulacao(v);
     // Área (ha) da variedade no talhão (09/11/2026; antes em %): com uma variedade, o talhão inteiro ou a parte informada
     const areaLinha = Planos.areaLinhaPlantio(ed.linhas.length ? ed.linhas : [l], 0, t.area) ?? t.area;
     const leitura = (valor) => `<p class="pt-form__valor">${valor}</p>`;
@@ -2602,7 +2612,7 @@ window.Telas.planoOperacoes = (function () {
           <div class="pt-form">
             <div class="campo pt-form__campo">
               <label class="campo__rotulo" for="pt-variedade-0">Variedade</label>
-              ${somenteLeitura ? leitura(v ? `${esc(v.nome)}${v.ciclo ? ` <small>· ${v.ciclo} dias</small>` : ''}` : '—')
+              ${somenteLeitura ? leitura(v ? `${esc(v.nome)}${cicloV(v) ? ` <small>· ${cicloV(v)} dias</small>` : ''}` : '—')
                 : campoVariedade('pt', { id: 'pt-variedade-0', talhao, vi: 0, nome: l.variedade, rotulo: 'Variedade' })}
             </div>
             <div class="campo pt-form__campo">
@@ -2626,7 +2636,7 @@ window.Telas.planoOperacoes = (function () {
               <label class="campo__rotulo" for="pt-populacao-0" title="População de plantas (mil plantas/ha)">Pop. mil/ha</label>
               ${somenteLeitura ? leitura(l.populacao ? numeroTexto(l.populacao) : '—') : `
                 <input class="campo__controle" id="pt-populacao-0" data-campo="pt-populacao" data-var="0" type="text" inputmode="numeric" maxlength="3"
-                       autocomplete="off" placeholder="Ex.: ${exemploPop}" value="${l.populacao ? numeroTexto(l.populacao) : ''}">`}
+                       autocomplete="off" value="${l.populacao ? numeroTexto(l.populacao) : ''}">`}
             </div>
             <div class="campo pt-form__campo">
               <label class="campo__rotulo" for="pt-germinacao-0">Germinação (%)</label>
@@ -2635,7 +2645,7 @@ window.Telas.planoOperacoes = (function () {
                        inputmode="decimal" autocomplete="off" placeholder="Ex.: ${Planos.GERMINACAO_PADRAO}" value="${germ ? numeroTexto(germ) : ''}">`}
             </div>
           </div>
-          ${!somenteLeitura && v && !v.ciclo ? `
+          ${!somenteLeitura && v && !cicloV(v) ? `
             <div class="pt-var__extra pt-form__ciclo">
               <label class="campo__rotulo" for="pt-ciclo-0">Ciclo de ${esc(v.nome)} (dias)</label>
               <input class="campo__controle pt-var__ciclo" id="pt-ciclo-0" data-campo="pt-ciclo" data-var="0" type="text" inputmode="numeric" placeholder="Ex.: 115" autocomplete="off">
@@ -2667,7 +2677,7 @@ window.Telas.planoOperacoes = (function () {
     const area = Planos.areaLinhaPlantio(ed.linhas, vi, t ? t.area : 0);
     const erro = ed.erros[vi];
     const textoData = ed.datas[vi];
-    const ciclo = v ? `<small>${v.ciclo ? `Ciclo de ${v.ciclo} dias` : 'Ciclo não informado'}</small>` : '';
+    const ciclo = v ? `<small>${cicloV(v) ? `Ciclo de ${cicloV(v)} dias` : 'Ciclo não informado'}</small>` : '';
     // Área em ha (09/11/2026; antes em % do talhão)
     const pct = area !== null && area !== undefined ? Math.round(area * 100) / 100 : null;
     const prev = previsaoColheita(l);
@@ -2708,12 +2718,12 @@ window.Telas.planoOperacoes = (function () {
           ${fora ? `<span class="aviso-janela" title="Fora da janela recomendada (${esc(janelaTexto(v))})">${Icones.alerta}</span>` : ''}
         </span>
         ${colheita}
-        <span role="cell">${numero('pt-populacao', l.populacao ? numeroTexto(l.populacao) : '', `Ex.: ${exemploPopulacao(v)}`, 'População de plantas (mil/ha)')}</span>
+        <span role="cell">${numero('pt-populacao', l.populacao ? numeroTexto(l.populacao) : '', '', 'População de plantas (mil/ha)')}</span>
         <span role="cell">${numero('pt-germinacao', l.germinacao ? numeroTexto(l.germinacao) : '', `Ex.: ${Planos.GERMINACAO_PADRAO}`, 'Germinação (%)')}</span>
         <button class="botao-icone botao-icone--p" type="button" data-acao="pt-remover-variedade" data-var="${vi}"
                 title="Tirar ${esc(l.variedade || 'esta linha')}" aria-label="Tirar ${esc(l.variedade || 'a linha')} ${vi + 1}">${Icones.lixeira}</button>
       </div>
-      ${v && !v.ciclo ? `
+      ${v && !cicloV(v) ? `
         <div class="pt-var__extra">
           <label class="campo__rotulo" for="pt-ciclo-${vi}">Ciclo de ${esc(v.nome)} (dias)</label>
           <input class="campo__controle pt-var__ciclo" id="pt-ciclo-${vi}" data-campo="pt-ciclo" data-var="${vi}" type="text" inputmode="numeric" placeholder="Ex.: 115" autocomplete="off">
@@ -3187,9 +3197,10 @@ window.Telas.planoOperacoes = (function () {
     const v = l ? variedadeDoCadastro(l.variedade) : null;
     const n = Util.numero(valor);
     if (!v || !n || n <= 0) return;
-    v.ciclo = Math.round(n);
+    // O ciclo informado é o da região desta fazenda: o cadastro guarda o ciclo base (sem o ajuste da região)
+    v.ciclo = Math.round(n) - Util.ajusteCicloFazenda(plano.fazenda);
     alterou(); marcarSalvoPainel(); desenharMantendoFoco(`#pt-data-${vi}`);
-    Aviso.mostrar(`Ciclo de ${esc(v.nome)}: ${v.ciclo} dias`);
+    Aviso.mostrar(`Ciclo de ${esc(v.nome)}: ${cicloV(v)} dias`);
   }
 
   // ----- Área das variedades do talhão: sempre fecha o total (100% ou a área do talhão) -----
@@ -3365,7 +3376,7 @@ window.Telas.planoOperacoes = (function () {
         <div class="composicao__linha" data-var="${vi}">
           <div class="campo composicao__variedade">
             ${campoVariedade('pl', { id: `pl-variedade-${vi}`, vi, nome: l.variedade, classe: `campo__controle ${classeErro(`variedade${vi}`)}`, rotulo: `Variedade ${vi + 1}` })}
-            ${v && v.ciclo ? `<small class="composicao__ciclo">Ciclo de ${v.ciclo} dias</small>` : ''}
+            ${v && cicloV(v) ? `<small class="composicao__ciclo">Ciclo de ${cicloV(v)} dias</small>` : ''}
           </div>
           <div class="campo composicao__pct">
             <input class="campo__controle ${classeErro(`pct${vi}`)}" data-campo="pl-pct" data-var="${vi}" type="text" inputmode="decimal"
@@ -3377,7 +3388,7 @@ window.Telas.planoOperacoes = (function () {
           </div>
           <div class="campo composicao__pop">
             <input class="campo__controle ${classeErro(`populacao${vi}`)}" data-campo="pl-populacao" data-var="${vi}" type="text" inputmode="numeric" maxlength="3"
-                   autocomplete="off" placeholder="Ex.: ${exemploPopulacao(v)}" value="${esc(l.populacao || '')}" aria-label="População da variedade ${vi + 1}">
+                   autocomplete="off" value="${esc(l.populacao || '')}" aria-label="População da variedade ${vi + 1}">
           </div>
           <div class="campo composicao__germ">
             <input class="campo__controle ${classeErro(`germinacao${vi}`)}" data-campo="pl-germinacao" data-var="${vi}" type="text" inputmode="decimal"
@@ -3663,14 +3674,10 @@ window.Telas.planoOperacoes = (function () {
   const milhoes = (sementes) => `${umaCasa(sementes / 1e6)} mi`;
   const bags = (sementes) => umaCasa(sementes / embalagem().sementes);
 
-  // Exemplo de população no campo vazio ("Ex.: 63"): o meio da faixa recomendada da variedade
-  const exemploPopulacao = (v) => (v && v.populacao ? Math.round((v.populacao[0] + v.populacao[1]) / 2) : 280);
-  function faixaPopulacao(v) {
-    return v && v.populacao ? `${v.populacao[0]} – ${v.populacao[1]}` : null;
-  }
-  function foraDaFaixa(v, pop) {
-    return !!(v && v.populacao && pop && (pop < v.populacao[0] || pop > v.populacao[1]));
-  }
+  // Ciclo da variedade na região da fazenda do plano (11/11/2026)
+  const cicloV = (v) => Util.cicloVariedade(v, plano && plano.fazenda);
+  // População recomendada da variedade: saiu de todo o produto em 11/11/2026 (sem o "Ex.: 63" no campo vazio e sem o
+  // alerta "Fora da população recomendada")
 
   // Só números e uma vírgula decimal; o ponto digitado vira vírgula
   // População (mil plantas/ha): só números inteiros, até 3 dígitos (09/11/2026)
@@ -3734,10 +3741,10 @@ window.Telas.planoOperacoes = (function () {
                         value="${esc(g.nome)}" aria-label="Nome do grupo" data-foco-inicial></span>`;
             }
             return `<button class="guia ${ativo ? 'guia--ativa' : ''}" type="button" role="tab" aria-selected="${!!ativo}"
-                      data-acao="abrir-grupo" data-grupo="${g.id}" ${somenteLeitura ? '' : 'draggable="true"'}
-                      title="${somenteLeitura ? esc(g.nome) : `${esc(g.nome)} · duplo clique para renomear, botão direito para mais opções, arraste para reordenar`}">${esc(g.nome)}</button>`;
+                      data-acao="abrir-grupo" data-grupo="${g.id}" ${!editaEstrutura() ? '' : 'draggable="true"'}
+                      title="${!editaEstrutura() ? esc(g.nome) : `${esc(g.nome)} · duplo clique para renomear, botão direito para mais opções, arraste para reordenar`}">${esc(g.nome)}</button>`;
           }).join('')}
-          ${somenteLeitura ? '' : `<button class="guia guia--mais" type="button" data-acao="novo-grupo" title="Novo grupo"
+          ${!editaEstrutura() ? '' : `<button class="guia guia--mais" type="button" data-acao="novo-grupo" title="Novo grupo"
                                      aria-label="Novo grupo de operações">${Icones.mais}</button>`}
         </div>
       </footer>`;
@@ -3774,7 +3781,7 @@ window.Telas.planoOperacoes = (function () {
     }
     opcoes = opcoes.slice(0, 8);
     // "+ Pré-cadastrar" sempre como última opção quando há texto digitado (princípio ativo e produto comercial)
-    if (texto.trim()) opcoes.push({ preCadastrar: true, valor: texto.trim(), rotulo: `${Icones.mais} Pré-cadastrar "${esc(texto.trim())}"` });
+    if (PRE_CADASTRO && texto.trim()) opcoes.push({ preCadastrar: true, valor: texto.trim(), rotulo: `${Icones.mais} Pré-cadastrar "${esc(texto.trim())}"` });
     return opcoes;
   }
 
@@ -3788,7 +3795,8 @@ window.Telas.planoOperacoes = (function () {
       <div class="combo__opcao ${o.preCadastrar ? 'combo__opcao--pre' : ''}" role="option" data-indice="${i}"
            data-valor="${esc(o.valor)}" ${o.preCadastrar ? 'data-pre-cadastrar' : ''}>
         ${o.rotulo} ${o.pre ? '<span class="etiqueta-pre">Pré-cadastro</span>' : ''}
-      </div>`).join('') : '<div class="combo__nada">Digite para buscar</div>';
+      </div>`).join('') : `<div class="combo__nada">${input.value.trim() && input.value !== (tipo === 'pa' ? linha.principioAtivo : linha.produto)
+        ? 'Nenhum item encontrado no cadastro' : 'Digite para buscar'}</div>`;
     lista.hidden = false;
     input.setAttribute('aria-expanded', 'true');
   }
@@ -3898,7 +3906,7 @@ window.Telas.planoOperacoes = (function () {
         const agora = Date.now();
         const duplo = ultimoCliqueOp.id === id && agora - ultimoCliqueOp.quando < 450;
         ultimoCliqueOp = { id, quando: agora };
-        if (duplo && !somenteLeitura && !listaRecolhida()) { renomearNaLista(id); break; }
+        if (duplo && editaEstrutura() && !listaRecolhida()) { renomearNaLista(id); break; }
         if (op && op.id === id) break;
         sairDaReceita(() => {
           ui.opPorGrupo[grupo.id] = id; ui.renomeandoOp = null;
@@ -4095,7 +4103,7 @@ window.Telas.planoOperacoes = (function () {
         const agora = Date.now();
         const duplo = ultimoCliqueGuia.id === id && agora - ultimoCliqueGuia.quando < 450;
         ultimoCliqueGuia = { id, quando: agora };
-        if (duplo && !somenteLeitura) { ui.renomeandoGrupo = id; desenharTudo(); break; }
+        if (duplo && editaEstrutura()) { ui.renomeandoGrupo = id; desenharTudo(); break; }
         if (ui.grupoId === id) break;
         sairDaReceita(() => {
           // Cada guia abre em Todos os talhões ("Não planejados" muda de sentido entre os grupos)
@@ -4105,7 +4113,7 @@ window.Telas.planoOperacoes = (function () {
         break;
       }
 
-      case 'novo-grupo': sairDaReceita(novoGrupo); break;
+      case 'novo-grupo': if (editaEstrutura()) sairDaReceita(novoGrupo); break;
     }
   }
 
@@ -4328,11 +4336,11 @@ window.Telas.planoOperacoes = (function () {
     if (el.dataset.variedade) { teclaBuscaVariedade(e); return; }
     if (el.dataset.campo && el.dataset.campo.startsWith('tb-') && el.dataset.talhao && teclaCelulaPlantio(e)) return;
     // Cabeçalho da operação: F2 no nome abre o campo
-    if (el.dataset.renomearOp && e.key === 'F2' && !somenteLeitura) {
+    if (el.dataset.renomearOp && e.key === 'F2' && editaEstrutura()) {
       e.preventDefault(); ui.renomeandoOp = el.dataset.renomearOp; desenharTudo(); return;
     }
     // Lista de operações: F2 no nome abre o campo; no campo, Enter confirma e Esc desfaz
-    if (el.dataset.acao === 'abrir-op' && e.key === 'F2' && !somenteLeitura && !listaRecolhida()) {
+    if (el.dataset.acao === 'abrir-op' && e.key === 'F2' && editaEstrutura() && !listaRecolhida()) {
       e.preventDefault(); renomearNaLista(el.dataset.op); return;
     }
     if (el.dataset.campo === 'lista-nome') {
@@ -4511,12 +4519,13 @@ window.Telas.planoOperacoes = (function () {
           <p class="modal__subtitulo">Escolha as operações que vão receber as recomendações agronômicas.</p>
           <fieldset class="copiar-para">
             <legend class="so-leitor">Operações de destino</legend>
-            <label class="copiar-para__item copiar-para__item--nova">
+            ${!editaEstrutura() ? '' : `<label class="copiar-para__item copiar-para__item--nova">
               <input type="checkbox" name="destino" value="nova">
               <span class="copiar-para__nome">${Icones.mais} Nova operação</span>
               <span class="copiar-para__dap">DAP ${origem.dap ?? '—'}</span>
               <span class="copiar-para__resumo">Você dá o nome depois de colar</span>
-            </label>
+            </label>`}
+            ${outras.length ? '' : '<p class="copiar-para__vazio">Não há outras operações neste grupo.</p>'}
             ${outras.map((o) => `
               <label class="copiar-para__item">
                 <input type="checkbox" name="destino" value="${o.id}">
@@ -4992,7 +5001,9 @@ window.Telas.planoOperacoes = (function () {
 
   // Menu da operação na lista (⋯ e botão direito), nesta ordem, com ícones; Excluir separado, em vermelho
   function itensMenuOperacao(grupo, op) {
-    return [
+    // Estrutura do ERP: só "Copiar para outras operações" (a recomendação, para operações que já existem)
+    const soCopiar = (itens) => (editaEstrutura() ? itens : itens.filter((i) => i.id === 'copiar').map((i) => ({ ...i, separar: false })));
+    return soCopiar([
       { id: 'renomear', rotulo: 'Renomear', icone: Icones.lapis, acao: () => sairDaReceita(() => {
         ui.opPorGrupo[grupo.id] = op.id;
         limparSelecao(); renomearNaLista(op.id);
@@ -5000,7 +5011,7 @@ window.Telas.planoOperacoes = (function () {
       { id: 'copiar', rotulo: 'Copiar para outras operações', icone: Icones.copiar, acao: () => sairDaReceita(() => copiarParaOperacao(grupo, op)) },
       { id: 'inserir', rotulo: 'Inserir operação', icone: Icones.inserir, acao: () => sairDaReceita(() => criarOperacao(grupo)) },
       { id: 'excluir', rotulo: 'Excluir', icone: Icones.lixeira, perigo: true, separar: true, acao: () => sairDaReceita(() => excluirOperacao(grupo, op)) }
-    ];
+    ]);
   }
 
   function aoMenuContexto(e) {
@@ -5034,7 +5045,7 @@ window.Telas.planoOperacoes = (function () {
 
     if (guia) {
       const grupo = plano.grupos.find((g) => g.id === guia.dataset.grupo);
-      if (!grupo) return;
+      if (!grupo || !editaEstrutura()) return;
       abrirMenuContexto(ancora, x, y, `Grupo ${grupo.nome}`, [
         { id: 'inserir', rotulo: 'Inserir', acao: () => sairDaReceita(novoGrupo) },
         { id: 'excluir', rotulo: 'Excluir', acao: () => sairDaReceita(() => excluirGrupo(grupo)) },
@@ -5125,7 +5136,7 @@ window.Telas.planoOperacoes = (function () {
   let arrastando = null;
   function aoArrastar(e) {
     const guia = e.target.closest('[data-grupo]');
-    if (!guia) return;
+    if (!guia || !editaEstrutura()) return;
     arrastando = guia.dataset.grupo;
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/plain', arrastando);

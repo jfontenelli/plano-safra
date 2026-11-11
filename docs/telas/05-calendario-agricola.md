@@ -18,7 +18,7 @@ Ver **todas as operações do plano juntas**, de todos os grupos (Plantio, Defen
 
 ## 3. Barra de cima
 
-- **Três visões em guias**, à esquerda, numa linha própria com uma linha embaixo: **Tabela** · **Ciclo Produtivo** · **Produtos** (ícone e nome; a ativa em verde-claro com traço verde embaixo). **Abre na Tabela.** Os filtros Grupo de operação, Operação e Talhão valem para a Tabela e o Ciclo Produtivo; Produtos tem os seus filtros (Insumos e Produto).
+- **Três visões em guias**, à esquerda, numa linha própria com uma linha embaixo: **Tabela** · **Produtos** (11/11/2026: o Ciclo Produtivo saiu, guardado em rascunhos/ciclo-produtivo/) (ícone e nome; a ativa em verde-claro com traço verde embaixo). **Abre na Tabela.** Os filtros Grupo de operação, Operação e Talhão valem para a Tabela e o Ciclo Produtivo; Produtos tem os seus filtros (Insumos e Produto).
 - Embaixo, os filtros **Grupo de operação**, **Operação** e **Talhão** e, logo depois do último, **Limpar filtros** (04/11/2026: vassoura e nome, contorno cinza, sem negrito), que volta os três a Todos.
 - **Uma superfície só**: o Resumo tem fundo branco e as partes se integram à tela (sem caixas soltas sobre fundo cinza).
 - Sem "Visão consolidada" e sem "Agenda de atividades" (estão na imagem, mas foram retirados).
@@ -27,7 +27,9 @@ Ver **todas as operações do plano juntas**, de todos os grupos (Plantio, Defen
 
 - **Retiradas** das três visões (a linha "Plantio estimado · Colheita estimada" saiu).
 
-## 5. Ciclo Produtivo (antes Infográfico)
+## 5. Ciclo Produtivo (antes Infográfico) — fora desde 11/11/2026
+
+**Em rascunho** (rascunhos/ciclo-produtivo/README.md; marca no git `ciclo-produtivo-11-11-2026`). O texto abaixo fica como registro; com a fenologia fora do produto, as fases depois do plantio passaram a ser pelo DAP.
 
 - **Uma coluna por fase da cultura**, da esquerda para a direita, com rolagem horizontal e uma seta entre as colunas:
   - **DAP negativo** → uma coluna **Pré-plantio**, com a faixa de DAP (ex.: "−90 a −5 DAP").
@@ -44,7 +46,7 @@ Ver **todas as operações do plano juntas**, de todos os grupos (Plantio, Defen
 ## 6. Programação (antes Tabela)
 
 - **Na ordem da safra** (pré-plantio, plantio, manejo da cultura e colheita), **sem faixa com o nome da fase** (como na Revisão; confundia).
-- Colunas: **DAP · Fenologia · Data prevista · Operação · Área (ha) · Produto · Dose** (a coluna Consumo saiu em 09/11/2026) e **uma coluna por talhão** (nome, variedade e área no cabeçalho; com o filtro, só os talhões marcados).
+- Colunas (11/11/2026: sem a Fenologia): **DAP · Data prevista · Operação · Área (ha) · Produto · Dose** (a coluna Consumo saiu em 09/11/2026) e **uma coluna por talhão** (nome, variedade e área no cabeçalho; com o filtro, só os talhões marcados).
 - **Filtros Grupo de operação, Operação e Talhão** (abaixo das guias): cada um é uma caixa com a busca **Pesquisar** no topo, "Todos os grupos" / "Todas as operações" / "Todos os talhões" e uma marcação por opção (no talhão, com a área); dá para marcar vários. O botão mostra "Todos…", o nome (um só), "N grupos" / "N operações" / "N talhões" ou "Nenhum…". Os grupos são os do plano com operação, na ordem do plano, e a Colheita no fim. **Operação** (29/10/2026): as operações já planejadas dos grupos marcados, na ordem do DAP (a Colheita no fim, depois do plantio); trocar o Grupo de operação volta a Operação para Todas. Valem para as duas visões.
 - **Calendário sempre ampliado**: ocupa a área logo abaixo das abas do plano, sem botão Expandir/Recolher (testado e retirado). Acima dele, só as guias e os filtros. No plano aprovado, a faixa "somente leitura" não aparece no Calendário (o selo **Aprovado** fica no cabeçalho). Com uma caixa de filtro aberta, a tecla **Esc** fecha a caixa.
 - **Uma linha por produto**, com a **Dose** (a unidade, ex.: L/ha; antes "Unid.") e a **dose de cada talhão**; DAP, Fenologia, Data prevista, Operação e Área ocupam a altura de todos os produtos da operação. Na célula da Operação, o nome em negrito e o **grupo como etiqueta** embaixo. No Plantio, as linhas são **Data de plantio** e **População** (mil pl/ha); na Colheita, **Previsão de colheita**. Operação sem talhão planejado: uma linha, com **"Sem recomendação"** (no Plantio, "Sem variedade") na coluna Produto (na Dose, se o Produto estiver oculto).
@@ -52,13 +54,13 @@ Ver **todas as operações do plano juntas**, de todos os grupos (Plantio, Defen
 - **Linhas de grade** entre todas as colunas; sem abrir e fechar.
 - **Colunas congeladas** ao rolar para a direita: DAP, Fenologia, Data prevista, Operação, Área, Produto e Dose ficam paradas à esquerda (com uma sombra na borda depois da Dose); só os talhões rolam. O cabeçalho também fica parado ao rolar para baixo. No menu do botão direito do cabeçalho (qualquer coluna), **Descongelar colunas** faz tudo rolar junto (mesma ordem e larguras; o cabeçalho continua parado ao rolar para baixo); o item vira **Congelar colunas** para voltar. Abre sempre congelada.
 - **Nomes das colunas de DAP até Dose** centralizados na horizontal e na vertical, na célula do cabeçalho.
-- **Larguras fixas** das colunas congeladas: DAP 64 · Fenologia 96 · Data prevista 120 · Operação 170 · Área 84 · Produto 150 · Dose 96. **O texto quebra a linha quando não cabe**, em todas elas (ex.: o DAP da colheita, "104 a 116"; 29/10/2026), sem cortar.
+- **Larguras fixas** das colunas congeladas: DAP 64 · Data prevista 120 · Operação 170 · Área 84 · Produto 150 · Dose 96. **O texto quebra a linha quando não cabe**, em todas elas (ex.: o DAP da colheita, "104 a 116"; 29/10/2026), sem cortar.
 - **Ocultar e exibir colunas** (como no Excel), em **todas as colunas**, de DAP até Dose e cada talhão: o **botão direito** em qualquer lugar do cabeçalho da coluna (sem seta; o clique esquerdo não faz nada) abre o menu **Ocultar coluna** (e **Exibir todas as colunas**, quando há alguma oculta). A coluna oculta vira uma **faixa estreita com traço duplo**; clicar na faixa exibe a coluna de novo. As demais colunas congeladas se ajustam à esquerda. Com o menu aberto, **Esc** ou um clique fora fecha o menu. Ocultar um talhão só estreita a coluna (ele continua no filtro Talhão, que tira a coluna da tabela).
 - **Data prevista:** data de plantio + DAP da operação, nos talhões que recebem a operação (sem talhão planejado, nos talhões do filtro com plantio). Datas diferentes entre talhões viram **intervalo**, com o **mês em número** (29/10/2026): "05/10/2026"; "01–20/10/2026"; "22/09–10/10/2026"; "28/12/2026–05/01/2027". Colheita: a previsão de colheita dos talhões. Sem plantio ou sem DAP: "—".
 - **Área (ha):** só o número (sem "ha" na célula), a soma da área dos talhões que recebem a operação (com o filtro, só os talhões marcados); no Plantio, os talhões com variedade; na Colheita, os com previsão. Sem talhão planejado: "—".
 - **Dose do talhão diferente da padrão da receita**: sem destaque de cor por enquanto (o amarelo foi testado e retirado); ao passar o mouse, a dose padrão. **Talhão que não recebe** o produto: "—" em cinza.
 - A **previsão de conclusão** não aparece nem se edita aqui (vale o padrão do modelo; DECISOES 4.3).
-- Fenologia da linha: a escolhida na operação; "—" no pré-plantio (DAP negativo), no plantio (DAP 0), na colheita e sem fenologia. Colheita: DAP em faixa ("104 a 118").
+- (A coluna Fenologia saiu em 11/11/2026.) Colheita: DAP em faixa ("104 a 118").
 
 ## 6.2 Produtos
 

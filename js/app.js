@@ -16,10 +16,11 @@
     'plano':          { titulo: 'Planejamento', menu: 'planos',
                         desenhar: () => Telas.planoOperacoes.desenhar(),
                         aoMostrar: (conteudo, id, etapa) => Telas.planoOperacoes.aoMostrar(conteudo, buscarPlano(id), etapa) },
-    // Orçamento de Insumos do menu (antes Suprimentos): vários planos somados, guias Safra e Safrinha
-    'orcamento':      { titulo: 'Orçamento de Insumos', menu: 'orcamento',
-                        desenhar: () => temPlanos() ? Telas.orcamento.desenhar() : Telas.semPlanos('orcamento'),
-                        aoMostrar: (conteudo) => { if (temPlanos()) Telas.orcamento.aoMostrar(conteudo); } },
+    // Cronograma de Safras (11/11/2026: antes guia da página Planos), com filtros próprios
+    'cronograma-safras': { titulo: 'Cronograma de Safras', menu: 'cronograma',
+                        desenhar: () => temPlanos() ? Telas.cronogramaSafras.desenhar() : Telas.semPlanos('cronograma'),
+                        aoMostrar: (conteudo) => { if (temPlanos()) Telas.cronogramaSafras.aoMostrar(conteudo); } },
+    // Orçamento de Insumos: fora do menu desde 11/11/2026 (rascunhos/orcamento/README.md, marca git orcamento-11-11-2026)
     // Gestão da Lavoura (vários planos somados), dois itens no menu (11/11/2026): Operações (guias Acompanhamento,
     // Calendário, Desvios de data e Central OS; o nome do grupo leva a ele) e Estoque (guias Desvios de dose e Risco de
     // falta de produto). Calendário e Central OS são guias de Operações (antes itens do menu): no menu, fica destacado Operações
@@ -35,8 +36,10 @@
     'planejado-executado': { titulo: 'Operações', menu: 'planejado-executado',
                         desenhar: (guia) => temPlanos() ? Telas.monitoramentoAplicacoes.desenhar(guia) : Telas.semPlanos('planejado-executado'),
                         aoMostrar: (conteudo, guia) => { if (temPlanos()) Telas.monitoramentoAplicacoes.aoMostrar(conteudo, guia); } },
+    // Cadastros (11/11/2026): #/cadastros/<guia> (fazendas, safras, culturas, operacoes)
     'cadastros':      { titulo: 'Cadastros', menu: 'cadastros',
-                        desenhar: () => Telas.emConstrucao('Cadastros') }
+                        desenhar: (guia) => Telas.cadastros.desenhar(guia),
+                        aoMostrar: (conteudo) => Telas.cadastros.aoMostrar(conteudo) }
   };
   const ROTA_INICIAL = 'plano-safra';
 
