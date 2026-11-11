@@ -51,7 +51,7 @@ Acompanhar o planejamento das fazendas no ano agrícola, filtrar e abrir ou cria
 
 ## Navegação
 - "+ Criar Plano Safra" (cabeçalho do cartão) → abre a Tela 02 (Criar Plano de Safra, na tela inteira) por cima desta tela; ao criar, o plano novo abre no Planejamento (09/11/2026).
-- Botão "+ Criar Plano Safra" do aviso sem plano → o mesmo modal, já com os filtros: na lista Safra, só as safras do Ano Agrícola do filtro (mais "+ Criar nova safra"), já escolhida quando a safra do filtro Safra é do Ano Agrícola; Empresa e Fazenda do filtro (só a Fazenda escolhida: a empresa dela), a fazenda com todos os talhões. Ano Agrícola em "Todas": a lista de safras completa.
+- Botão "+ Criar Plano Safra" do aviso sem plano → o mesmo modal, já com os filtros: na lista Safra, só as safras do Ano Agrícola do filtro, já escolhida quando a safra do filtro Safra é do Ano Agrícola; Empresa e Fazenda do filtro (só a Fazenda escolhida: a empresa dela), a fazenda com todos os talhões. Ano Agrícola em "Todas": a lista de safras completa.
 - Clique na linha ou "Abrir" no menu → abre o plano no Planejamento (aba Planejamento, Telas 04.1 a 04.3), na versão em construção ou na última publicada. Plano não iniciado: antes, o modal "Como deseja iniciar o plano?" (Tela 02).
 - Linha do Histórico de versões → abre aquela versão do plano.
 

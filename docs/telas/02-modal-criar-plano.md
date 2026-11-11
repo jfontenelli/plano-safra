@@ -12,7 +12,7 @@ Criar um plano: informações gerais, a fazenda com os talhões e a **área plan
 - **Ocupa a tela inteira** (o modal todo; o conteúdo usa a largura toda e o modal rola quando a tabela não cabe). No topo, o indicador de etapas **1 Definir o plano ── 2 Como iniciar** (as duas próximas, ligadas por uma linha curta; a etapa atual em verde) e o X para fechar.
 - **Etapa 1 · Definir o plano**: título "Criar Plano de Safra"; subtítulo "Defina as informações gerais e selecione as áreas que farão parte do plano."
   - **Informações gerais**, numa linha, todas obrigatórias: **Safra · Atividade · Cultura · Fazenda** (com o nível Empresa, ver DECISOES 3: Safra · Empresa · Atividade · Cultura · Fazenda).
-    - Na lista de Safra, a última opção é "+ Criar nova safra".
+    - Na lista de Safra, só as safras cadastradas (vêm do ERP Compass; o "+ Criar nova safra" saiu em 11/11/2026).
     - Aberto pelo link do aviso sem plano da lista (Tela 03): a lista de Safra traz só as safras do Ano Agrícola do filtro, e Safra e Fazenda já vêm com o que os filtros dizem.
     - Atividade: Agricultura (já escolhida), Pecuária (Em breve), Silvicultura (Em breve).
     - Cultura: Soja e Milho (nenhuma vem escolhida).
@@ -27,7 +27,7 @@ Criar um plano: informações gerais, a fazenda com os talhões e a **área plan
 - **Área planejada** (clique no valor ou no lápis): campo com o número; **Enter** ou sair do campo grava; **Esc** desfaz. Vale de **0,1 ha até a área cadastrada**; acima: "Máximo 95 ha (área cadastrada)."; vazio ou zero: "Informe a área, a partir de 0,1 ha." Área diferente da cadastrada fica em verde. Para tirar o talhão do plano, desmarca-se a caixa (área "—").
 - A área planejada **vale em tudo dentro do plano**: área de cultivo, quantidades de semente e de produtos, Orçamento, Calendário, OS e planilha exportada. O cadastro da fazenda não muda.
 - Talhões não são obrigatórios: sem nenhum, a área fica "Pendente" e o plano pode ser criado.
-- "Criar nova safra": abre uma **janela pequena por cima do formulário**, "**Nova safra**" (subtítulo "A safra nova entra na lista e fica selecionada."), com o campo **Safra*** ("Nome da safra (ex.: 26/27)", já com o cursor) e os botões **Cancelar** e **Confirmar** (desabilitado com o campo vazio). A safra tem só o nome.
+- (Fora desde 11/11/2026.) "Criar nova safra": abre uma **janela pequena por cima do formulário**, "**Nova safra**" (subtítulo "A safra nova entra na lista e fica selecionada."), com o campo **Safra*** ("Nome da safra (ex.: 26/27)", já com o cursor) e os botões **Cancelar** e **Confirmar** (desabilitado com o campo vazio). A safra tem só o nome.
   - **Confirmar** ou **Enter**: a janela fecha, a safra nova entra na lista já selecionada e o cursor vai para o campo seguinte. Nome que já existe: só seleciona a safra existente.
   - **Cancelar** ou **Esc**: fecha sem criar; a Safra volta ao que estava.
   - **Clicar fora** não fecha: o cursor volta ao campo e aparece, em âmbar, "Confirme ou cancele a nova safra."

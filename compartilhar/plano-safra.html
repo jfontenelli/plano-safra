@@ -3232,7 +3232,21 @@ html[data-tema="escuro"] .ma-lista, html[data-tema="escuro"] .os-cal { --mt-adia
 .ma-legenda li { display: inline-flex; }
 .ma-legenda__item { display: inline-flex; align-items: center; gap: 8px; padding: 4px 6px; border: 0; border-radius: 6px; background: transparent;
   font: inherit; color: inherit; cursor: pointer; }
-.ma-legenda__item:hover { background: var(--superficie-2); color: var(--texto); }
+.ma-legenda__item:not(.ma-leg-cor):not(.os-leg-cor):hover { background: var(--superficie-2); color: var(--texto); }
+/* Legenda de Desvios de data (11/11/2026): cada status com o fundo da célula dele na tabela; bolinhas e ícone menores */
+.ma-legenda__item.ma-leg-cor { padding: 4px 10px; color: var(--texto); }
+.ma-legenda__item.ma-leg-cor:hover { box-shadow: inset 0 0 0 1px var(--borda-forte); }
+.ma-leg-cor .ma-legenda__cor, .ma-leg-cor .ma-legenda__cor.mt-ponto--futura { width: 13px; height: 13px; }
+.ma-leg-cor .ma-legenda__icone, .ma-leg-cor .ma-legenda__icone .icone { width: 15px; height: 15px; }
+.ma-leg-cor .ma-legenda__icone { background: transparent; }
+/* Ícone da legenda na cor do texto da etiqueta de cada status (as mesmas de .ma-etiqueta) */
+.ma-leg-cor.ma-st--pendente .ma-legenda__icone  { color: var(--erro); }
+.ma-leg-cor.ma-st--adiantada .ma-legenda__icone { color: #5E35B1; }
+.ma-leg-cor.ma-st--prazo .ma-legenda__icone     { color: var(--verde-700); }
+.ma-leg-cor.ma-st--atrasada .ma-legenda__icone  { color: #b9560f; }
+.ma-leg-cor.ma-st--futura .ma-legenda__icone    { color: var(--texto-suave); }
+html[data-tema="escuro"] .ma-leg-cor.ma-st--adiantada .ma-legenda__icone { color: #C3A8F5; }
+html[data-tema="escuro"] .ma-leg-cor.ma-st--atrasada .ma-legenda__icone  { color: #F0995A; }
 .ma-legenda__item[aria-pressed="true"] { color: var(--texto); font-weight: 600; }
 .ma-legenda__item--apagado { opacity: .45; }
 .ma-legenda__item:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 1px; }
@@ -3807,6 +3821,10 @@ html[data-tema="escuro"] .cal-tal__barra[class*="cal-st--"] { --f: color-mix(in 
 .cal-tal__icone .icone { width: 15px; height: 15px; stroke-width: 2.2; }
 /* Legenda: os mesmos ícones das etiquetas (Atrasada a exclamação, Executada o check, Planejada o calendário) */
 .cal-leg__icone { display: inline-flex; color: var(--c); }
+/* Legenda do Calendário (11/11/2026): cada status com o fundo das operações no calendário (o mesmo --f dos cartões) */
+.ma-legenda__item.os-leg-cor { padding: 4px 10px; background: var(--f); color: var(--texto); }
+.ma-legenda__item.os-leg-cor:hover { background: var(--f); box-shadow: inset 0 0 0 1px var(--c); }
+html[data-tema="escuro"] .ma-legenda__item.os-leg-cor { --f: color-mix(in srgb, var(--c) 24%, #15232D); }
 .cal-leg__icone .icone { width: 18px; height: 18px; stroke-width: 2.2; }
 .cal-tal__textos { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
 .cal-tal__atraso { font-size: 12px; font-weight: 400; color: var(--c); white-space: nowrap; }
@@ -4524,6 +4542,116 @@ html[data-tema="escuro"] .ao-cartao--restante { --ao-c: #9AA8B1; }
 .ao-quadros--empilhado .ao-quadro--expandido { order: -1; }
 .ao-quadros--empilhado .ao-quadro--expandido .ao-mapa { height: max(420px, calc(100vh - 380px)); }
 
+
+/* ===== Cadastros (10/11/2026; trazido em 11/11/2026): Fazendas e talhões, Safras, Culturas e variedades, Operações ===== */
+.cad { padding: 24px 40px 48px; }
+.cad-cabecalho__linha { align-self: stretch; display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.cad-salvo { display: inline-flex; align-items: center; gap: 6px; margin-bottom: 10px; font-size: 13px; color: var(--texto-suave); }
+.cad-salvo .icone { width: 15px; height: 15px; color: var(--verde-600); }
+.cad .etapa .selo, .cad-cabecalho__linha .etapa .selo { margin-left: 8px; background: var(--aviso-fundo); color: var(--aviso-texto); }
+.cad-duas { display: grid; grid-template-columns: 290px minmax(0, 1fr); gap: 20px; align-items: start; }
+.cad-coluna { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+.cad-topo { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 14px 20px; }
+.cad-topo__titulo { font-size: 17px; font-weight: 700; }
+.cad-topo__titulo small { margin-left: 8px; font-size: 13px; font-weight: 500; color: var(--texto-suave); }
+.cad-topo__acoes { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.cad-nota { margin: 0; padding: 0 20px 14px; font-size: 13px; color: var(--texto-suave); }
+.cad-nota--solta { padding: 0; margin-bottom: 14px; }
+.cad .cartao { overflow: hidden; }
+
+/* Lista lateral (fazendas, culturas) */
+.cad-lista { margin: 0; padding: 6px; list-style: none; }
+.cad-lista__grupo { padding: 12px 12px 4px; font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--texto-fraco); }
+.cad-lista__vazio { padding: 2px 12px 8px; font-size: 13px; color: var(--texto-fraco); }
+.cad-item { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; padding: 9px 12px; border: 0; border-radius: 8px; background: none; font: inherit; text-align: left; color: var(--texto); cursor: pointer; }
+.cad-item:hover { background: var(--superficie-2); }
+.cad-item:focus-visible { outline: 2px solid var(--verde-600); outline-offset: -2px; }
+.cad-item--ativo, .cad-item--ativo:hover { background: var(--verde-100); color: var(--verde-800); font-weight: 600; box-shadow: inset 3px 0 0 var(--verde-700); }
+.cad-item__sub { display: block; font-size: 12px; font-weight: 400; color: var(--texto-suave); }
+.cad-item__alerta { display: inline-flex; color: #b45f06; }
+.cad-item__alerta .icone { width: 16px; height: 16px; }
+.cad-lista__rodape { display: flex; flex-direction: column; gap: 8px; padding: 12px; border-top: 1px solid var(--borda); }
+.cad-chave { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-bottom: 1px solid var(--borda); font-size: 14px; cursor: pointer; }
+.cad-chave input { width: 16px; height: 16px; accent-color: var(--verde-700); }
+html[data-tema="escuro"] .cad-item--ativo, html[data-tema="escuro"] .cad-item--ativo:hover { background: #176B50; color: #fff; }
+html[data-tema="escuro"] .cad-item--ativo .cad-item__sub { color: #d5e6de; }
+
+/* Fazenda: dados + mapa */
+.cad-fazenda { display: grid; grid-template-columns: minmax(230px, 300px) minmax(0, 1fr); gap: 20px; padding: 4px 20px 20px; }
+.cad-fazenda .campo { margin-bottom: 12px; }
+.cad-fazenda .campo__controle { height: 38px; }
+.cad-mapa { height: 340px; border: 1px solid var(--borda); border-radius: 10px; background: var(--superficie-3); z-index: 0; }
+.cad-mapa--p { height: 230px; }
+.cad-dica { display: flex; align-items: flex-start; gap: 6px; margin: 6px 0 0; font-size: 13px; color: var(--texto-suave); }
+.cad-dica .icone { width: 15px; height: 15px; margin-top: 2px; }
+.cad-sede { display: grid; place-items: center; width: 30px !important; height: 30px !important; border: 2px solid #fff; border-radius: 50%; background: var(--verde-700); color: #fff; box-shadow: 0 1px 4px rgba(0, 0, 0, .5); cursor: grab; }
+.cad-sede .icone { width: 16px; height: 16px; }
+
+/* Tabelas dos cadastros: campos na própria linha */
+.cad .tabela td { padding-top: 8px; padding-bottom: 8px; vertical-align: middle; }
+.cad-campo { width: 100%; height: 34px; padding: 0 10px; border: 1px solid transparent; border-radius: 6px; background: transparent; font: inherit; font-size: 14px; color: var(--texto); }
+.cad-campo:hover { border-color: var(--borda-forte); background: var(--superficie); }
+.cad-campo:focus { outline: none; border-color: var(--verde-600); background: var(--superficie); box-shadow: 0 0 0 3px rgba(24, 122, 79, .15); }
+.cad-campo--num { width: 96px; text-align: right; font-variant-numeric: tabular-nums; }
+.cad-campo--cod { width: 84px; font-weight: 600; }
+.cad-campo--nome { min-width: 200px; font-weight: 600; }
+.cad-campo::placeholder { color: var(--texto-fraco); font-weight: 400; }
+select.cad-campo { cursor: pointer; }
+.cad-falta { color: #b45f06; font-weight: 600; }
+.cad-ok { display: inline-flex; align-items: center; gap: 5px; color: var(--verde-700); font-weight: 600; }
+.cad-ok .icone { width: 15px; height: 15px; }
+.cad-link { padding: 0; border: 0; background: none; font: inherit; font-weight: 600; color: var(--verde-700); cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+.cad-status { display: inline-block; padding: 1px 9px; border-radius: 999px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+.cad-status--pre { background: var(--aviso-fundo); color: var(--aviso-texto); }
+.cad-status--ok { background: var(--verde-100); color: var(--verde-700); }
+.cad-linha--alvo > * { background: var(--verde-100) !important; }
+.cad-vazio { padding: 36px 24px; text-align: center; color: var(--texto-suave); }
+.cad-vazio h3 { margin-bottom: 6px; font-size: 17px; color: var(--texto); }
+.cad-vazio p { margin: 0 auto 16px; max-width: 520px; }
+.cad-vazio__acoes { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+
+/* Barra de filtros (chips + busca) */
+.cad-barra { display: flex; align-items: center; gap: 10px 14px; flex-wrap: wrap; padding: 14px 20px; border-bottom: 1px solid var(--borda); }
+.cad-barra .campo__controle { height: 36px; width: auto; min-width: 190px; font-size: 14px; }
+.cad-barra__busca { flex: 1 1 220px; max-width: 340px; }
+.cad-barra__fim { margin-left: auto; display: flex; gap: 8px; }
+.cad-subguias { display: flex; gap: 8px; padding: 0 20px 14px; }
+
+/* Operações: um cartão por grupo */
+.cad-grupo { margin-bottom: 16px; }
+.cad-grupo__topo { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 10px 12px 10px 14px; background: var(--superficie-2); border-bottom: 1px solid var(--borda); }
+.cad-grupo__topo .cad-campo--nome { flex: 0 1 260px; font-size: 16px; }
+.cad-grupo__tipo { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--texto-suave); }
+.cad-grupo__tipo select { width: auto; }
+.cad-grupo__fim { margin-left: auto; display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--texto-suave); }
+.cad-grupo .tabela th { padding-top: 9px; padding-bottom: 9px; background: none; font-size: 13px; color: var(--texto-suave); }
+.cad-grupo__mais { padding: 8px 14px 12px; }
+
+/* Importação de talhões */
+.cad-soltar { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 28px 20px; border: 2px dashed var(--borda-forte); border-radius: 12px; background: var(--superficie-2); text-align: center; color: var(--texto-suave); cursor: pointer; }
+.cad-soltar:hover, .cad-soltar--sobre { border-color: var(--verde-600); background: var(--verde-100); }
+.cad-soltar strong { font-size: 16px; color: var(--texto); }
+.cad-soltar .icone { width: 30px; height: 30px; color: var(--verde-600); }
+.cad-soltar input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.cad-imp { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); gap: 16px; margin-top: 14px; }
+.cad-imp .cad-campo--nome { min-width: 110px; }
+.cad-imp__tabela .tabela td:last-child { white-space: normal; }
+.cad-imp__tabela { max-height: 300px; overflow: auto; border: 1px solid var(--borda); border-radius: 8px; }
+.cad-imp__tabela .tabela th { position: sticky; top: 0; z-index: 1; padding: 9px 10px; font-size: 13px; }
+.cad-imp__tabela .tabela td { padding: 5px 10px; }
+.cad-imp__resumo { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-top: 14px; }
+.cad-imp__resumo .campo { margin: 0; min-width: 220px; }
+.cad-erro { margin: 10px 0 0; color: var(--erro); font-size: 14px; }
+.cad-erro:empty { display: none; }
+.cad-aviso { display: flex; gap: 8px; margin: 0 0 14px; padding: 10px 12px; border: 1px solid var(--aviso-borda); border-radius: 8px; background: var(--aviso-fundo); color: var(--aviso-texto); font-size: 14px; }
+.cad-aviso .icone { width: 18px; height: 18px; margin-top: 1px; }
+.modal--cad-largo { max-width: 940px; }
+
+@media (max-width: 1100px) {
+  .cad { padding: 20px; }
+  .cad-duas, .cad-fazenda, .cad-imp { grid-template-columns: 1fr; }
+}
+.cad-grupo__nome { font-size: 15px; } /* 11/11/2026: nome do grupo só para consulta (vem do ERP Compass) */
 
 </style>
 </head>
@@ -6184,7 +6312,7 @@ window.ArquivoPlano = (function () {
 
     // Uma linha por variedade (o talhão pode ter várias, cada uma com a sua área de aplicação)
     const abaVariedade = [['fazenda', 'talhao', 'area_talhao', 'area_aplicacao', 'cultura', 'grupo_operacao', 'operacao', 'variedade',
-      'data_plantio', 'pop_plantas_planejada', 'pop_plantas_recomendada', 'perc_germinacao', 'quantidade_total_sementes', 'embalagem', 'qtd_embalagens']];
+      'data_plantio', 'pop_plantas_planejada', 'perc_germinacao', 'quantidade_total_sementes', 'embalagem', 'qtd_embalagens']];
     // Embalagem da cultura, como na tabela do Plantio (soja: bag de 5 milhões de sementes; milho: saco de 20 kg, 60 mil)
     const emb = DADOS.embalagemSemente[plano.cultura] || DADOS.embalagemSemente.Soja;
     if (sementes) {
@@ -6197,7 +6325,7 @@ window.ArquivoPlano = (function () {
             const v = p.variedade ? DADOS.variedades.find((x) => x.nome === p.variedade) : null;
             const sem = p.populacao && g && areaVar ? p.populacao * 1000 * areaVar / (g / 100) : null;
             abaVariedade.push([plano.fazenda, t.nome, t.area, areaVar ?? '', plano.cultura, sementes.nome, op.nome, p.variedade || '',
-              p.data || '', p.populacao || '', v && v.populacao ? `${v.populacao[0]}-${v.populacao[1]}` : '',
+              p.data || '', p.populacao || '',
               g || '', sem ? Math.round(sem) : '', sem ? emb.descricao : '', sem ? Math.round(sem / emb.sementes * 10) / 10 : '']);
           });
         });
@@ -6785,6 +6913,258 @@ window.TabelaAreas = (function () {
 })();
 
 </script>
+  <!-- Cadastros (11/11/2026): geometria dos talhões e leitura de SHP/KML/KMZ/GeoJSON -->
+  <script>
+/*
+ * Geometria dos talhões (10/11/2026): uma fonte só para o mapa do plano e para o menu Cadastros.
+ * DADOS.geometriaTalhoes[fazenda][talhão] = [[lat, lng], ...] (um anel). As fazendas de exemplo começam com o
+ * desenho fictício (DADOS.geometriaFazendas, gerado pela área); a importação de SHP/KML/KMZ grava aqui.
+ */
+window.Geo = (function () {
+  const M_POR_GRAU = 111320;
+
+  function gerar(fazenda) {
+    const g = (DADOS.geometriaFazendas || {})[fazenda];
+    const talhoes = DADOS.talhoes[fazenda] || [];
+    const saida = {};
+    if (!g) return saida;
+    const [lat0, lng0] = g.origem;
+    const mPorGrauLng = M_POR_GRAU * Math.cos((lat0 * Math.PI) / 180);
+    const giro = (g.giro * Math.PI) / 180;
+    const D = g.profundidade; const carreador = 25;
+    const latLng = (x, y) => {
+      const xr = x * Math.cos(giro) - y * Math.sin(giro);
+      const yr = x * Math.sin(giro) + y * Math.cos(giro);
+      return [lat0 + yr / M_POR_GRAU, lng0 + xr / mPorGrauLng];
+    };
+    g.linhas.forEach((linha, i) => {
+      let x = 0;
+      const y = -i * (D + carreador);
+      const desvio = (g.inclinacao || 0) * D;
+      linha.forEach((nome) => {
+        const t = talhoes.find((tt) => tt.nome === nome);
+        if (!t) return;
+        const largura = (t.area * 10000) / D;
+        saida[nome] = [[x, y], [x + largura, y], [x + largura + desvio, y - D], [x + desvio, y - D]].map(([a, b]) => latLng(a, b));
+        x += largura + carreador;
+      });
+    });
+    return saida;
+  }
+
+  function daFazenda(fazenda) {
+    DADOS.geometriaTalhoes = DADOS.geometriaTalhoes || {};
+    if (!DADOS.geometriaTalhoes[fazenda]) DADOS.geometriaTalhoes[fazenda] = gerar(fazenda);
+    return DADOS.geometriaTalhoes[fazenda];
+  }
+
+  // Área do anel em hectares (plano local em metros; suficiente para talhões)
+  function areaHa(coords) {
+    if (!coords || coords.length < 3) return 0;
+    const lat0 = coords.reduce((s, c) => s + c[0], 0) / coords.length;
+    const r = (lat0 * Math.PI) / 180;
+    const ky = 111132.92 - 559.82 * Math.cos(2 * r) + 1.175 * Math.cos(4 * r);
+    const kx = 111412.84 * Math.cos(r) - 93.5 * Math.cos(3 * r) + 0.118 * Math.cos(5 * r);
+    let soma = 0;
+    for (let i = 0; i < coords.length; i++) {
+      const [y1, x1] = coords[i]; const [y2, x2] = coords[(i + 1) % coords.length];
+      soma += (x1 * kx) * (y2 * ky) - (x2 * kx) * (y1 * ky);
+    }
+    return Math.abs(soma) / 2 / 10000;
+  }
+
+  function centro(coords) {
+    const n = coords.length || 1;
+    return [coords.reduce((s, c) => s + c[0], 0) / n, coords.reduce((s, c) => s + c[1], 0) / n];
+  }
+
+  // Como o mapa do plano espera: [{ talhao, area (do cadastro), coords, centro }], só dos talhões com geometria
+  function poligonos(fazenda) {
+    const g = daFazenda(fazenda);
+    return (DADOS.talhoes[fazenda] || []).filter((t) => g[t.nome])
+      .map((t) => ({ talhao: t.nome, area: t.area, coords: g[t.nome], centro: centro(g[t.nome]) }));
+  }
+
+  return { daFazenda, poligonos, areaHa, centro };
+})();
+
+</script>
+  <script>
+
+/*
+ * Leitura de arquivos de talhões no navegador: shapefile (.zip ou .shp + .dbf + .prj), KML, KMZ e GeoJSON.
+ * Devolve [{ atributos: { coluna: valor }, coords: [[lat, lng], ...] }] (o maior anel externo de cada feição).
+ */
+window.ArquivoGeo = (function () {
+  const texto = (u8) => {
+    try { return new TextDecoder('utf-8', { fatal: true }).decode(u8); } catch (e) { return new TextDecoder('latin1').decode(u8); }
+  };
+
+  async function lerZip(buf) {
+    const u8 = new Uint8Array(buf); const dv = new DataView(buf);
+    let i = u8.length - 22;
+    while (i >= 0 && dv.getUint32(i, true) !== 0x06054b50) i--;
+    if (i < 0) throw new Error('Não foi possível abrir o arquivo compactado.');
+    const n = dv.getUint16(i + 10, true); let p = dv.getUint32(i + 16, true);
+    const arquivos = {};
+    for (let k = 0; k < n; k++) {
+      const metodo = dv.getUint16(p + 10, true); const tam = dv.getUint32(p + 20, true);
+      const nNome = dv.getUint16(p + 28, true); const nExtra = dv.getUint16(p + 30, true); const nCom = dv.getUint16(p + 32, true);
+      const local = dv.getUint32(p + 42, true);
+      const nome = new TextDecoder().decode(u8.subarray(p + 46, p + 46 + nNome));
+      const ini = local + 30 + dv.getUint16(local + 26, true) + dv.getUint16(local + 28, true);
+      const dados = u8.slice(ini, ini + tam);
+      if (!nome.endsWith('/')) {
+        arquivos[nome] = metodo === 0 ? dados
+          : new Uint8Array(await new Response(new Blob([dados]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).arrayBuffer());
+      }
+      p += 46 + nNome + nExtra + nCom;
+    }
+    return arquivos;
+  }
+
+  // Shapefile: polígonos (tipos 5, 15 e 25). Cada feição = lista de anéis [[x, y], ...]
+  function lerShp(u8) {
+    const dv = new DataView(u8.buffer, u8.byteOffset, u8.byteLength);
+    const formas = []; let p = 100;
+    while (p + 12 <= u8.length) {
+      const tam = dv.getInt32(p + 4, false) * 2; const ini = p + 8; const tipo = dv.getInt32(ini, true);
+      if ([5, 15, 25].includes(tipo)) {
+        const nPartes = dv.getInt32(ini + 36, true); const nPts = dv.getInt32(ini + 40, true);
+        const partes = []; for (let k = 0; k < nPartes; k++) partes.push(dv.getInt32(ini + 44 + 4 * k, true));
+        const base = ini + 44 + 4 * nPartes;
+        formas.push(partes.map((a, k) => {
+          const fim = k + 1 < nPartes ? partes[k + 1] : nPts; const anel = [];
+          for (let j = a; j < fim; j++) anel.push([dv.getFloat64(base + 16 * j, true), dv.getFloat64(base + 16 * j + 8, true)]);
+          return anel;
+        }));
+      } else formas.push(null);
+      p = ini + tam;
+    }
+    return formas;
+  }
+
+  function lerDbf(u8) {
+    const dv = new DataView(u8.buffer, u8.byteOffset, u8.byteLength);
+    const n = dv.getUint32(4, true); const cab = dv.getUint16(8, true); const reg = dv.getUint16(10, true);
+    const campos = [];
+    for (let p = 32; p + 32 <= cab && u8[p] !== 0x0d; p += 32) {
+      let fim = p; while (fim < p + 11 && u8[fim] !== 0) fim++;
+      campos.push({ nome: texto(u8.subarray(p, fim)), tam: u8[p + 16] });
+    }
+    const linhas = [];
+    for (let i = 0; i < n; i++) {
+      let o = cab + i * reg + 1; const linha = {};
+      campos.forEach((c) => { linha[c.nome] = texto(u8.subarray(o, o + c.tam)).trim(); o += c.tam; });
+      linhas.push(linha);
+    }
+    return linhas;
+  }
+
+  // UTM → geográfica (WGS 84 / SIRGAS 2000)
+  function utmParaLatLng(x, y, zona, sul) {
+    const a = 6378137; const f = 1 / 298.257223563; const k0 = 0.9996;
+    const e2 = f * (2 - f); const e1 = (1 - Math.sqrt(1 - e2)) / (1 + Math.sqrt(1 - e2)); const ep2 = e2 / (1 - e2);
+    const M = (sul ? y - 10000000 : y) / k0;
+    const mu = M / (a * (1 - e2 / 4 - 3 * e2 * e2 / 64 - 5 * e2 * e2 * e2 / 256));
+    const f1 = mu + (3 * e1 / 2 - 27 * e1 ** 3 / 32) * Math.sin(2 * mu) + (21 * e1 * e1 / 16 - 55 * e1 ** 4 / 32) * Math.sin(4 * mu)
+      + (151 * e1 ** 3 / 96) * Math.sin(6 * mu) + (1097 * e1 ** 4 / 512) * Math.sin(8 * mu);
+    const N1 = a / Math.sqrt(1 - e2 * Math.sin(f1) ** 2); const T1 = Math.tan(f1) ** 2; const C1 = ep2 * Math.cos(f1) ** 2;
+    const R1 = a * (1 - e2) / (1 - e2 * Math.sin(f1) ** 2) ** 1.5; const D = (x - 500000) / (N1 * k0);
+    const lat = f1 - (N1 * Math.tan(f1) / R1) * (D * D / 2 - (5 + 3 * T1 + 10 * C1 - 4 * C1 * C1 - 9 * ep2) * D ** 4 / 24
+      + (61 + 90 * T1 + 298 * C1 + 45 * T1 * T1 - 252 * ep2 - 3 * C1 * C1) * D ** 6 / 720);
+    const lng = (D - (1 + 2 * T1 + C1) * D ** 3 / 6 + (5 - 2 * C1 + 28 * T1 - 3 * C1 * C1 + 8 * ep2 + 24 * T1 * T1) * D ** 5 / 120) / Math.cos(f1);
+    return [lat * 180 / Math.PI, (zona * 6 - 183) + lng * 180 / Math.PI];
+  }
+
+  const areaAnel = (anel) => Math.abs(anel.reduce((s, c, i) => { const d = anel[(i + 1) % anel.length]; return s + c[0] * d[1] - d[0] * c[1]; }, 0)) / 2;
+  // Fica com o maior anel e tira o ponto repetido do fechamento
+  function maiorAnel(aneis) {
+    const validos = aneis.map((a) => a.filter((c) => Number.isFinite(c[0]) && Number.isFinite(c[1]))).filter((a) => a.length >= 3);
+    if (!validos.length) return null;
+    const anel = validos.reduce((m, a) => (areaAnel(a) > areaAnel(m) ? a : m));
+    const [p, u] = [anel[0], anel[anel.length - 1]];
+    return p[0] === u[0] && p[1] === u[1] ? anel.slice(0, -1) : anel;
+  }
+
+  function deShapefile(shp, dbf, prj) {
+    const formas = lerShp(shp); const linhas = dbf ? lerDbf(dbf) : [];
+    const zona = prj && /UTM[_ ]zone[_ ](\d{1,2})\s*([NS])?/i.exec(prj);
+    const sul = zona && (/S/i.test(zona[2] || '') || /false_northing"?,\s*1(0{7})/i.test(prj) || /south/i.test(prj));
+    const saida = [];
+    formas.forEach((aneis, i) => {
+      if (!aneis) return;
+      let anel = maiorAnel(aneis); if (!anel) return;
+      const projetado = anel.some(([x, y]) => Math.abs(x) > 180 || Math.abs(y) > 90);
+      if (projetado && !zona) {
+        throw new Error('O arquivo está em coordenadas projetadas e a zona UTM não foi identificada. Envie o .prj junto ou exporte em coordenadas geográficas (SIRGAS 2000 ou WGS 84).');
+      }
+      anel = projetado ? anel.map(([x, y]) => utmParaLatLng(x, y, Number(zona[1]), sul)) : anel.map(([x, y]) => [y, x]);
+      saida.push({ atributos: linhas[i] || {}, coords: anel });
+    });
+    return saida;
+  }
+
+  function deKml(xml) {
+    const doc = new DOMParser().parseFromString(xml, 'text/xml');
+    return [...doc.getElementsByTagName('Placemark')].map((pm) => {
+      const aneis = [...pm.getElementsByTagName('outerBoundaryIs')].map((o) => o.getElementsByTagName('coordinates')[0]).filter(Boolean)
+        .map((c) => c.textContent.trim().split(/\s+/).map((t) => { const [lng, lat] = t.split(',').map(Number); return [lat, lng]; }));
+      const coords = maiorAnel(aneis); if (!coords) return null;
+      const atributos = {};
+      const nome = [...pm.children].find((c) => c.localName === 'name');
+      if (nome) atributos.name = nome.textContent.trim();
+      [...pm.getElementsByTagName('SimpleData')].forEach((d) => { atributos[d.getAttribute('name')] = d.textContent.trim(); });
+      [...pm.getElementsByTagName('Data')].forEach((d) => { const v = d.getElementsByTagName('value')[0]; if (v) atributos[d.getAttribute('name')] = v.textContent.trim(); });
+      return { atributos, coords };
+    }).filter(Boolean);
+  }
+
+  function deGeoJson(json) {
+    const feicoes = json.type === 'FeatureCollection' ? json.features : json.type === 'Feature' ? [json] : [{ type: 'Feature', properties: {}, geometry: json }];
+    return feicoes.map((f) => {
+      const g = f.geometry || {};
+      const aneis = g.type === 'Polygon' ? [g.coordinates[0]] : g.type === 'MultiPolygon' ? g.coordinates.map((p) => p[0]) : [];
+      const coords = maiorAnel(aneis.map((a) => a.map(([lng, lat]) => [lat, lng])));
+      return coords ? { atributos: f.properties || {}, coords } : null;
+    }).filter(Boolean);
+  }
+
+  const ext = (nome) => (nome.split('.').pop() || '').toLowerCase();
+
+  async function ler(arquivos) {
+    const lista = [...arquivos];
+    const por = {};
+    for (const a of lista) por[ext(a.name)] = a;
+    const achar = (mapa, e) => { const k = Object.keys(mapa).find((n) => ext(n) === e && !n.startsWith('__MACOSX')); return k ? mapa[k] : null; };
+    let feicoes;
+    if (por.zip) {
+      const z = await lerZip(await por.zip.arrayBuffer());
+      const shp = achar(z, 'shp'); const kml = achar(z, 'kml');
+      if (shp) { const prj = achar(z, 'prj'); feicoes = deShapefile(shp, achar(z, 'dbf'), prj ? texto(prj) : ''); }
+      else if (kml) feicoes = deKml(texto(kml));
+      else throw new Error('O arquivo .zip não tem um shapefile (.shp) nem um .kml dentro.');
+    } else if (por.kmz) {
+      const kml = achar(await lerZip(await por.kmz.arrayBuffer()), 'kml');
+      if (!kml) throw new Error('O arquivo .kmz não tem um .kml dentro.');
+      feicoes = deKml(texto(kml));
+    } else if (por.kml) feicoes = deKml(await por.kml.text());
+    else if (por.shp) {
+      feicoes = deShapefile(new Uint8Array(await por.shp.arrayBuffer()), por.dbf ? new Uint8Array(await por.dbf.arrayBuffer()) : null,
+        por.prj ? await por.prj.text() : '');
+    } else if (por.geojson || por.json) feicoes = deGeoJson(JSON.parse(await (por.geojson || por.json).text()));
+    else throw new Error('Formato não reconhecido. Envie .zip (shapefile), .shp, .kml, .kmz ou .geojson.');
+    if (!feicoes.length) throw new Error('Nenhum polígono encontrado no arquivo.');
+    if (feicoes.some((f) => f.coords.some(([lat, lng]) => Math.abs(lat) > 90 || Math.abs(lng) > 180))) {
+      throw new Error('As coordenadas do arquivo não parecem geográficas. Exporte em SIRGAS 2000 ou WGS 84.');
+    }
+    return feicoes;
+  }
+
+  return { ler, lerZip, lerShp, lerDbf, deShapefile, deGeoJson, deKml, utmParaLatLng };
+})();
+
+</script>
   <script>
 /*
  * Páginas provisórias para telas que ainda não foram construídas.
@@ -7116,8 +7496,10 @@ window.Telas.abrirModalCriarPlano = function ({ aoCriar, inicial = {} }) {
 
   // ----- Criar nova safra (última opção da lista de safras) -----
   function preencherSafras(selecionada = '') {
+    // 11/11/2026: as safras vêm do ERP Compass (só consulta no produto): sem o "+ Criar nova safra" (o código continua)
+    const CRIA_SAFRA = false;
     selectSafra.innerHTML = opcoes('Selecione', listaSafras, selecionada) +
-      `<option value="${NOVA_SAFRA}">+ Criar nova safra</option>`;
+      (CRIA_SAFRA ? `<option value="${NOVA_SAFRA}">+ Criar nova safra</option>` : '');
     safraAnterior = selecionada;
   }
 
@@ -10229,7 +10611,7 @@ window.Telas.osCalendario = (function () {
       <div class="ma-legenda">
         <span class="ma-legenda__titulo">Operações:</span>
         <ul aria-label="Filtrar por status da operação">
-          ${STATUS.map(([id, nome]) => `<li><button class="ma-legenda__item ${est.status && est.status !== id ? 'ma-legenda__item--apagado' : ''}" type="button"
+          ${STATUS.map(([id, nome]) => `<li><button class="ma-legenda__item os-leg-cor cal-st--${id} ${est.status && est.status !== id ? 'ma-legenda__item--apagado' : ''}" type="button"
               data-acao="os-status" data-status="${id}" aria-pressed="${est.status === id}" title="${est.status === id ? 'Mostrar todos' : DICA_STATUS[id]}">
               ${MARCA[id]}${nome}</button></li>`).join('')}
         </ul>
@@ -11195,7 +11577,8 @@ window.Telas.monitoramentoAplicacoes = (function () {
     t.querySelectorAll('[data-fixa]').forEach((c) => { c.style.left = `${esquerda[c.dataset.fixa]}px`; });
   }
 
-  // Barra acima da tabela: legenda dos status da aplicação (clicável), com as bolinhas da visão Planejada × Executada
+  // Barra acima da tabela: legenda dos status da aplicação (clicável). 11/11/2026: cada status no fundo da etiqueta da tabela,
+  // com o ícone dela (o calendário; a Atrasada, a exclamação) na cor do texto da etiqueta
   const LEGENDA = ['pendente', 'adiantada', 'prazo', 'atrasada', 'futura'].map((id) => STATUS.find(([x]) => x === id));
   // Dica de cada item da legenda (ao clicar, filtra os talhões; clicado de novo, mostra todos)
   const DICA_LEGENDA = {
@@ -11211,9 +11594,9 @@ window.Telas.monitoramentoAplicacoes = (function () {
         <div class="ma-legenda">
           <span class="ma-legenda__titulo">Operação:</span>
           <ul aria-label="Status da aplicação">
-            ${LEGENDA.map(([id, nome]) => `<li><button class="ma-legenda__item ${est.status && est.status !== id ? 'ma-legenda__item--apagado' : ''}" type="button"
+            ${LEGENDA.map(([id, nome]) => `<li><button class="ma-legenda__item ma-leg-cor ma-st--${id} ${est.status && est.status !== id ? 'ma-legenda__item--apagado' : ''}" type="button"
                 data-ma-status="${id}" aria-pressed="${est.status === id}" title="${est.status === id ? 'Mostrar todos os talhões' : DICA_LEGENDA[id]}">
-                ${id === 'pendente' ? `<span class="ma-legenda__icone ma-st--pendente" aria-hidden="true">${Icones.pendente}</span>` : `<span class="ma-legenda__cor mt-ponto--${id}" aria-hidden="true"></span>`}${nome}</button></li>`).join('')}
+                <span class="ma-legenda__icone" aria-hidden="true">${id === 'pendente' ? Icones.pendente : Icones.calendario}</span>${nome}</button></li>`).join('')}
           </ul>
         </div>
         <div class="ma-modo">
@@ -12843,10 +13226,12 @@ window.Telas.acompanhamentoOperacional = (function () {
       if (!op.nome) return;
       const dap = Math.min(porNome.get(op.nome)?.dap ?? Infinity, dapDe(g, op));
       porNome.set(op.nome, { valor: op.nome, nome: op.nome, extra: Number.isFinite(dap) ? `DAP ${dap}` : g.nome, dap,
-        plantio: porNome.get(op.nome)?.plantio || g.tipo === 'Sementes' });
+        plantio: porNome.get(op.nome)?.plantio || g.tipo === 'Sementes', colheita: porNome.get(op.nome)?.colheita || g.tipo === 'Colheita' });
     })));
-    // Pelo DAP e, no mesmo DAP, em ordem alfabética (11/11/2026); ao lado, "DAP 45" (a Colheita, que vem do ciclo, no fim)
-    return [...porNome.values()].sort((a, b) => a.dap - b.dap || a.nome.localeCompare(b.nome, 'pt-BR', { numeric: true }));
+    // 11/11/2026: Plantio e Colheita primeiro (nesta ordem); depois as demais pelo DAP e, no mesmo DAP, em ordem alfabética.
+    // Ao lado de cada uma, a regra do DAP de antes: "DAP 45" (a Colheita, que vem do ciclo, com o nome do grupo)
+    const topo = (o) => (o.plantio ? 0 : o.colheita ? 1 : 2);
+    return [...porNome.values()].sort((a, b) => topo(a) - topo(b) || a.dap - b.dap || a.nome.localeCompare(b.nome, 'pt-BR', { numeric: true }));
   }
 
   // Operação padrão do Progresso da Operação (11/11/2026): a de data planejada (pelo DAP) mais perto de hoje, nos talhões
@@ -15758,7 +16143,7 @@ window.Telas.planoOperacoes = (function () {
                 </li>`;
             }).join('')}
           </ul>
-          ${somenteLeitura ? '' : `
+          ${!editaEstrutura() ? '' : `
             <button class="botao-icone ops-lista__nova-min" type="button" data-acao="nova-op" title="Nova operação"
                     aria-label="Nova operação">${Icones.mais}</button>`}
         </aside>`;
@@ -15775,7 +16160,7 @@ window.Telas.planoOperacoes = (function () {
         <ul class="ops-lista__itens">
           ${ops.map((op) => itemOperacao(op, atual && op.id === atual.id)).join('')}
         </ul>
-        ${somenteLeitura ? '' : `
+        ${!editaEstrutura() ? '' : `
           <button class="link-acao ops-lista__nova" type="button" data-acao="nova-op">${Icones.mais} Nova operação</button>`}
         ${grupo.operacoes.length === 0 && !usaNovasOperacoes(grupo) ? '<p class="ops-lista__vazia">Nenhuma operação neste grupo.</p>' : ''}
       </aside>
@@ -15792,7 +16177,7 @@ window.Telas.planoOperacoes = (function () {
                    aria-label="Nome da operação" data-foco-inicial>${esc(op.nome)}</textarea>`
       : `<button class="ops-item__nome" type="button" data-acao="abrir-op" data-op="${op.id}"
                  ${ativo ? 'aria-current="true"' : ''}
-                 title="${somenteLeitura ? esc(op.nome) : `${esc(op.nome)} · clique duas vezes para renomear`}">${esc(op.nome)}</button>`;
+                 title="${!editaEstrutura() ? esc(op.nome) : `${esc(op.nome)} · clique duas vezes para renomear`}">${esc(op.nome)}</button>`;
     return `
       <li class="ops-item ${ativo ? 'ops-item--ativo' : ''}">
         ${nome}
@@ -15821,14 +16206,14 @@ window.Telas.planoOperacoes = (function () {
       return `<input class="campo__controle op-cabecalho__nome-campo" data-campo="nome-op" value="${esc(op.nome)}"
                      aria-label="Nome da operação" data-foco-inicial>`;
     }
-    if (somenteLeitura) return `<h2 class="op-cabecalho__nome" title="${esc(op.nome)}">${esc(op.nome)}</h2>`;
+    if (!editaEstrutura()) return `<h2 class="op-cabecalho__nome" title="${esc(op.nome)}">${esc(op.nome)}</h2>`;
     return `<h2 class="op-cabecalho__nome op-cabecalho__nome--editavel" tabindex="0" data-renomear-op="${op.id}"
                 title="${esc(op.nome)} · clique duas vezes para renomear">${esc(op.nome)}</h2>`;
   }
 
   function aoDuploClique(e) {
     const nome = e.target.closest('[data-renomear-op]');
-    if (!nome || somenteLeitura) return;
+    if (!nome || !editaEstrutura()) return;
     ui.renomeandoOp = nome.dataset.renomearOp; desenharTudo();
   }
 
@@ -15850,7 +16235,7 @@ window.Telas.planoOperacoes = (function () {
       <section class="cartao grupo-vazio" aria-label="${esc(grupo.nome)}">
         ${ILUSTRACAO_VAZIO}
         <h2 class="grupo-vazio__titulo">Nenhuma operação neste grupo</h2>
-        <p class="grupo-vazio__texto">${somenteLeitura ? 'Este grupo ainda não tem operações.' : `Para começar, clique em
+        <p class="grupo-vazio__texto">${!editaEstrutura() ? `Este grupo ainda não tem operações.${ESTRUTURA_DO_ERP ? ' As operações são criadas no ERP Compass.' : ''}` : `Para começar, clique em
           <button class="grupo-vazio__link" type="button" data-acao="nova-op">${Icones.mais} Nova operação</button> e defina o nome, o DAP e ${oQue}.`}</p>
       </section>`;
   }
@@ -15861,8 +16246,8 @@ window.Telas.planoOperacoes = (function () {
     if (usaNovasOperacoes(grupo) && !op) return grupoSemOperacao(grupo);
     if (ehOperacaoCampo(grupo)) return detalheOperacaoCampo(grupo, op);
     if (!op) {
-      return `<div class="cartao vazio"><p class="vazio__texto">${somenteLeitura
-        ? 'Nenhuma operação neste grupo.' : 'Nenhuma operação neste grupo. Use "+ Nova operação" para criar.'}</p></div>`;
+      return `<div class="cartao vazio"><p class="vazio__texto">${!editaEstrutura()
+        ? `Nenhuma operação neste grupo.${ESTRUTURA_DO_ERP ? ' As operações são criadas no ERP Compass.' : ''}` : 'Nenhuma operação neste grupo. Use "+ Nova operação" para criar.'}</p></div>`;
     }
     if (ehSemente(grupo)) return detalheSemente(op);
     if (ehGrupoTsi(grupo)) return detalheTsi(op);
@@ -15912,13 +16297,13 @@ window.Telas.planoOperacoes = (function () {
              <option value="">—</option>
              ${DADOS.fenologia.map((f) => `<option ${f === op.fenologia ? 'selected' : ''}>${f}</option>`).join('')}
            </select>`;
-    // Nome, DAP e fenologia. Renomear e excluir ficam na lista de operações.
+    // Nome e DAP (11/11/2026: sem a Fenologia; o nome vem do ERP). Renomear e excluir ficavam na lista de operações.
     return `
       <div class="op-cabecalho__linha">
         <div class="op-cabecalho__titulo">${navegacaoOperacoes(op)}${nomeOperacao(op)}</div>
         <div class="op-cabecalho__campos">
           <div class="campo campo--inline"><label class="campo__rotulo" for="op-dap">DAP</label>${dap}</div>
-          ${semFenologia ? '' : `<div class="campo campo--inline"><label class="campo__rotulo" for="op-fenologia">Fenologia</label>${fenologia}</div>`}
+          ${semFenologia || ESTRUTURA_DO_ERP ? '' : `<div class="campo campo--inline"><label class="campo__rotulo" for="op-fenologia">Fenologia</label>${fenologia}</div>`}
         </div>
       </div>`;
   }
@@ -16144,6 +16529,13 @@ window.Telas.planoOperacoes = (function () {
   }
 
   // Campo de busca com o texto digitado que não foi encontrado no cadastro (mantém o texto e mostra o erro)
+  // Grupos de operação e operações vêm do ERP Compass (11/11/2026): o nome do grupo e da operação não se cria, não se
+  // renomeia nem se exclui aqui (sem Novo grupo, Nova operação, Renomear, Inserir, Excluir e arrastar guias). No plano, a
+  // pessoa preenche o DAP e planeja talhões e recomendação. O campo Fenologia saiu do cabeçalho da operação.
+  // O código continua aqui; para voltar, ESTRUTURA_DO_ERP = false.
+  const ESTRUTURA_DO_ERP = true;
+  const editaEstrutura = () => !somenteLeitura && !ESTRUTURA_DO_ERP;
+
   // Pré-cadastro fora desta entrega (11/11/2026; rascunhos/pre-cadastro/README.md): sem a opção "+ Pré-cadastrar" nas
   // buscas de variedade, princípio ativo e produto. O código continua aqui; para voltar, PRE_CADASTRO = true.
   const PRE_CADASTRO = false;
@@ -17417,8 +17809,8 @@ window.Telas.planoOperacoes = (function () {
     const s = r.sementes;
     const alertaData = foraDaJanela(v, l.data)
       ? `<span class="aviso-janela" title="Fora da janela recomendada (${esc(janelaTexto(v))})">${Icones.alerta}<span class="so-leitor">Fora da janela recomendada</span></span>` : '';
-    const alertaPop = foraDaFaixa(v, pop)
-      ? `<span class="aviso-janela" title="Fora da população recomendada (${faixaPopulacao(v)} mil plantas/ha)">${Icones.alerta}<span class="so-leitor">Fora da população recomendada</span></span>` : '';
+    // Sem a sugestão de população recomendada (11/11/2026): sem o alerta "Fora da população recomendada"
+    const alertaPop = '';
     const variedade = editar
       ? `<span class="celula-linha">${campoVariedade('tb', { talhao: t.nome, vi: i, nome: v ? v.nome : '', classe: 'celula celula--lista', rotulo: `Variedade do ${t.nome}` })}${v && v.preCadastro ? '<span class="etiqueta-pre">Pré-cadastro</span>' : ''}</span>`
       : v ? `${esc(v.nome)}${v.preCadastro ? ' <span class="etiqueta-pre">Pré-cadastro</span>' : ''}`
@@ -17629,7 +18021,6 @@ window.Telas.planoOperacoes = (function () {
     const textoData = ed.datas[0];
     const germ = l.germinacao;
     const fora = foraDaJanela(v, l.data);
-    const exemploPop = exemploPopulacao(v);
     // Área (ha) da variedade no talhão (09/11/2026; antes em %): com uma variedade, o talhão inteiro ou a parte informada
     const areaLinha = Planos.areaLinhaPlantio(ed.linhas.length ? ed.linhas : [l], 0, t.area) ?? t.area;
     const leitura = (valor) => `<p class="pt-form__valor">${valor}</p>`;
@@ -17670,7 +18061,7 @@ window.Telas.planoOperacoes = (function () {
               <label class="campo__rotulo" for="pt-populacao-0" title="População de plantas (mil plantas/ha)">Pop. mil/ha</label>
               ${somenteLeitura ? leitura(l.populacao ? numeroTexto(l.populacao) : '—') : `
                 <input class="campo__controle" id="pt-populacao-0" data-campo="pt-populacao" data-var="0" type="text" inputmode="numeric" maxlength="3"
-                       autocomplete="off" placeholder="Ex.: ${exemploPop}" value="${l.populacao ? numeroTexto(l.populacao) : ''}">`}
+                       autocomplete="off" value="${l.populacao ? numeroTexto(l.populacao) : ''}">`}
             </div>
             <div class="campo pt-form__campo">
               <label class="campo__rotulo" for="pt-germinacao-0">Germinação (%)</label>
@@ -17752,7 +18143,7 @@ window.Telas.planoOperacoes = (function () {
           ${fora ? `<span class="aviso-janela" title="Fora da janela recomendada (${esc(janelaTexto(v))})">${Icones.alerta}</span>` : ''}
         </span>
         ${colheita}
-        <span role="cell">${numero('pt-populacao', l.populacao ? numeroTexto(l.populacao) : '', `Ex.: ${exemploPopulacao(v)}`, 'População de plantas (mil/ha)')}</span>
+        <span role="cell">${numero('pt-populacao', l.populacao ? numeroTexto(l.populacao) : '', '', 'População de plantas (mil/ha)')}</span>
         <span role="cell">${numero('pt-germinacao', l.germinacao ? numeroTexto(l.germinacao) : '', `Ex.: ${Planos.GERMINACAO_PADRAO}`, 'Germinação (%)')}</span>
         <button class="botao-icone botao-icone--p" type="button" data-acao="pt-remover-variedade" data-var="${vi}"
                 title="Tirar ${esc(l.variedade || 'esta linha')}" aria-label="Tirar ${esc(l.variedade || 'a linha')} ${vi + 1}">${Icones.lixeira}</button>
@@ -18421,7 +18812,7 @@ window.Telas.planoOperacoes = (function () {
           </div>
           <div class="campo composicao__pop">
             <input class="campo__controle ${classeErro(`populacao${vi}`)}" data-campo="pl-populacao" data-var="${vi}" type="text" inputmode="numeric" maxlength="3"
-                   autocomplete="off" placeholder="Ex.: ${exemploPopulacao(v)}" value="${esc(l.populacao || '')}" aria-label="População da variedade ${vi + 1}">
+                   autocomplete="off" value="${esc(l.populacao || '')}" aria-label="População da variedade ${vi + 1}">
           </div>
           <div class="campo composicao__germ">
             <input class="campo__controle ${classeErro(`germinacao${vi}`)}" data-campo="pl-germinacao" data-var="${vi}" type="text" inputmode="decimal"
@@ -18707,14 +19098,8 @@ window.Telas.planoOperacoes = (function () {
   const milhoes = (sementes) => `${umaCasa(sementes / 1e6)} mi`;
   const bags = (sementes) => umaCasa(sementes / embalagem().sementes);
 
-  // Exemplo de população no campo vazio ("Ex.: 63"): o meio da faixa recomendada da variedade
-  const exemploPopulacao = (v) => (v && v.populacao ? Math.round((v.populacao[0] + v.populacao[1]) / 2) : 280);
-  function faixaPopulacao(v) {
-    return v && v.populacao ? `${v.populacao[0]} – ${v.populacao[1]}` : null;
-  }
-  function foraDaFaixa(v, pop) {
-    return !!(v && v.populacao && pop && (pop < v.populacao[0] || pop > v.populacao[1]));
-  }
+  // População recomendada da variedade: saiu de todo o produto em 11/11/2026 (sem o "Ex.: 63" no campo vazio e sem o
+  // alerta "Fora da população recomendada")
 
   // Só números e uma vírgula decimal; o ponto digitado vira vírgula
   // População (mil plantas/ha): só números inteiros, até 3 dígitos (09/11/2026)
@@ -18778,10 +19163,10 @@ window.Telas.planoOperacoes = (function () {
                         value="${esc(g.nome)}" aria-label="Nome do grupo" data-foco-inicial></span>`;
             }
             return `<button class="guia ${ativo ? 'guia--ativa' : ''}" type="button" role="tab" aria-selected="${!!ativo}"
-                      data-acao="abrir-grupo" data-grupo="${g.id}" ${somenteLeitura ? '' : 'draggable="true"'}
-                      title="${somenteLeitura ? esc(g.nome) : `${esc(g.nome)} · duplo clique para renomear, botão direito para mais opções, arraste para reordenar`}">${esc(g.nome)}</button>`;
+                      data-acao="abrir-grupo" data-grupo="${g.id}" ${!editaEstrutura() ? '' : 'draggable="true"'}
+                      title="${!editaEstrutura() ? esc(g.nome) : `${esc(g.nome)} · duplo clique para renomear, botão direito para mais opções, arraste para reordenar`}">${esc(g.nome)}</button>`;
           }).join('')}
-          ${somenteLeitura ? '' : `<button class="guia guia--mais" type="button" data-acao="novo-grupo" title="Novo grupo"
+          ${!editaEstrutura() ? '' : `<button class="guia guia--mais" type="button" data-acao="novo-grupo" title="Novo grupo"
                                      aria-label="Novo grupo de operações">${Icones.mais}</button>`}
         </div>
       </footer>`;
@@ -18943,7 +19328,7 @@ window.Telas.planoOperacoes = (function () {
         const agora = Date.now();
         const duplo = ultimoCliqueOp.id === id && agora - ultimoCliqueOp.quando < 450;
         ultimoCliqueOp = { id, quando: agora };
-        if (duplo && !somenteLeitura && !listaRecolhida()) { renomearNaLista(id); break; }
+        if (duplo && editaEstrutura() && !listaRecolhida()) { renomearNaLista(id); break; }
         if (op && op.id === id) break;
         sairDaReceita(() => {
           ui.opPorGrupo[grupo.id] = id; ui.renomeandoOp = null;
@@ -19140,7 +19525,7 @@ window.Telas.planoOperacoes = (function () {
         const agora = Date.now();
         const duplo = ultimoCliqueGuia.id === id && agora - ultimoCliqueGuia.quando < 450;
         ultimoCliqueGuia = { id, quando: agora };
-        if (duplo && !somenteLeitura) { ui.renomeandoGrupo = id; desenharTudo(); break; }
+        if (duplo && editaEstrutura()) { ui.renomeandoGrupo = id; desenharTudo(); break; }
         if (ui.grupoId === id) break;
         sairDaReceita(() => {
           // Cada guia abre em Todos os talhões ("Não planejados" muda de sentido entre os grupos)
@@ -19150,7 +19535,7 @@ window.Telas.planoOperacoes = (function () {
         break;
       }
 
-      case 'novo-grupo': sairDaReceita(novoGrupo); break;
+      case 'novo-grupo': if (editaEstrutura()) sairDaReceita(novoGrupo); break;
     }
   }
 
@@ -19373,11 +19758,11 @@ window.Telas.planoOperacoes = (function () {
     if (el.dataset.variedade) { teclaBuscaVariedade(e); return; }
     if (el.dataset.campo && el.dataset.campo.startsWith('tb-') && el.dataset.talhao && teclaCelulaPlantio(e)) return;
     // Cabeçalho da operação: F2 no nome abre o campo
-    if (el.dataset.renomearOp && e.key === 'F2' && !somenteLeitura) {
+    if (el.dataset.renomearOp && e.key === 'F2' && editaEstrutura()) {
       e.preventDefault(); ui.renomeandoOp = el.dataset.renomearOp; desenharTudo(); return;
     }
     // Lista de operações: F2 no nome abre o campo; no campo, Enter confirma e Esc desfaz
-    if (el.dataset.acao === 'abrir-op' && e.key === 'F2' && !somenteLeitura && !listaRecolhida()) {
+    if (el.dataset.acao === 'abrir-op' && e.key === 'F2' && editaEstrutura() && !listaRecolhida()) {
       e.preventDefault(); renomearNaLista(el.dataset.op); return;
     }
     if (el.dataset.campo === 'lista-nome') {
@@ -19556,12 +19941,13 @@ window.Telas.planoOperacoes = (function () {
           <p class="modal__subtitulo">Escolha as operações que vão receber as recomendações agronômicas.</p>
           <fieldset class="copiar-para">
             <legend class="so-leitor">Operações de destino</legend>
-            <label class="copiar-para__item copiar-para__item--nova">
+            ${!editaEstrutura() ? '' : `<label class="copiar-para__item copiar-para__item--nova">
               <input type="checkbox" name="destino" value="nova">
               <span class="copiar-para__nome">${Icones.mais} Nova operação</span>
               <span class="copiar-para__dap">DAP ${origem.dap ?? '—'}</span>
               <span class="copiar-para__resumo">Você dá o nome depois de colar</span>
-            </label>
+            </label>`}
+            ${outras.length ? '' : '<p class="copiar-para__vazio">Não há outras operações neste grupo.</p>'}
             ${outras.map((o) => `
               <label class="copiar-para__item">
                 <input type="checkbox" name="destino" value="${o.id}">
@@ -20037,7 +20423,9 @@ window.Telas.planoOperacoes = (function () {
 
   // Menu da operação na lista (⋯ e botão direito), nesta ordem, com ícones; Excluir separado, em vermelho
   function itensMenuOperacao(grupo, op) {
-    return [
+    // Estrutura do ERP: só "Copiar para outras operações" (a recomendação, para operações que já existem)
+    const soCopiar = (itens) => (editaEstrutura() ? itens : itens.filter((i) => i.id === 'copiar').map((i) => ({ ...i, separar: false })));
+    return soCopiar([
       { id: 'renomear', rotulo: 'Renomear', icone: Icones.lapis, acao: () => sairDaReceita(() => {
         ui.opPorGrupo[grupo.id] = op.id;
         limparSelecao(); renomearNaLista(op.id);
@@ -20045,7 +20433,7 @@ window.Telas.planoOperacoes = (function () {
       { id: 'copiar', rotulo: 'Copiar para outras operações', icone: Icones.copiar, acao: () => sairDaReceita(() => copiarParaOperacao(grupo, op)) },
       { id: 'inserir', rotulo: 'Inserir operação', icone: Icones.inserir, acao: () => sairDaReceita(() => criarOperacao(grupo)) },
       { id: 'excluir', rotulo: 'Excluir', icone: Icones.lixeira, perigo: true, separar: true, acao: () => sairDaReceita(() => excluirOperacao(grupo, op)) }
-    ];
+    ]);
   }
 
   function aoMenuContexto(e) {
@@ -20079,7 +20467,7 @@ window.Telas.planoOperacoes = (function () {
 
     if (guia) {
       const grupo = plano.grupos.find((g) => g.id === guia.dataset.grupo);
-      if (!grupo) return;
+      if (!grupo || !editaEstrutura()) return;
       abrirMenuContexto(ancora, x, y, `Grupo ${grupo.nome}`, [
         { id: 'inserir', rotulo: 'Inserir', acao: () => sairDaReceita(novoGrupo) },
         { id: 'excluir', rotulo: 'Excluir', acao: () => sairDaReceita(() => excluirGrupo(grupo)) },
@@ -20170,7 +20558,7 @@ window.Telas.planoOperacoes = (function () {
   let arrastando = null;
   function aoArrastar(e) {
     const guia = e.target.closest('[data-grupo]');
-    if (!guia) return;
+    if (!guia || !editaEstrutura()) return;
     arrastando = guia.dataset.grupo;
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/plain', arrastando);
@@ -20257,6 +20645,557 @@ window.Configuracoes = (function () {
 </script>
   <script>
 /*
+ * Menu Cadastros (construído em 10/11/2026 em plano-safra-versionamento/plano-safra-cadastro.html; trazido em 11/11/2026).
+ * Guias: Fazendas e talhões · Safras · Culturas e variedades · Operações. A guia Produtos ficou de fora.
+ * Regras de 11/11/2026 (o que vem do ERP Compass não se cria nem se edita aqui):
+ *  - Fazendas e talhões: o nome e a área da fazenda e dos talhões vêm do ERP Compass (só consulta). Aqui só se preenche a
+ *    geometria: o ponto da sede da fazenda e o polígono de cada talhão, e só quando ainda não estiverem preenchidos.
+ *  - Safras: só consulta (sem a coluna Planos).
+ *  - Operações (grupo de operação › operação): vêm do ERP Compass; só o DAP padrão se altera aqui (sem Fenologia, Prazo
+ *    de conclusão e lixeiras: não se cria nem se exclui operação).
+ *  - Culturas e variedades: sem a guia Fenologia; variedades só com Variedade · Ciclo (dias), sem inserir nem editar.
+ * O que a pessoa muda fica só na memória do navegador.
+ */
+window.Telas = window.Telas || {};
+
+window.Telas.cadastros = (function () {
+  const esc = (t) => Util.escapar(t ?? '');
+  const n1 = (v) => (v === null || v === undefined || v === '' ? '' : Number(v).toLocaleString('pt-BR', { maximumFractionDigits: 1 }));
+  const SATELITE = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
+  const GUIAS = [['fazendas', 'Fazendas e talhões'], ['safras', 'Safras'], ['culturas', 'Culturas e variedades'], ['operacoes', 'Operações']];
+  const ERP = 'ERP Compass';
+  // Fazenda de exemplo sem geometria (para mostrar o preenchimento do ponto e dos polígonos)
+  const SEM_GEOMETRIA = ['São José'];
+
+  const ui = { guia: 'fazendas', fazenda: null, cultura: 'Soja', culturaOp: 'Soja', salvoEm: '' };
+  let conteudo = null; let mapa = null; let camadas = {};
+
+  // ----- Dados que só o Cadastros usa (criados a partir do exemplo, na primeira vez) -----
+  function preparar() {
+    if (!DADOS.sedes) {
+      DADOS.sedes = {};
+      Object.entries(DADOS.geometriaFazendas || {}).forEach(([f, g]) => {
+        if (!SEM_GEOMETRIA.includes(f)) DADOS.sedes[f] = [Number((g.origem[0] + 0.006).toFixed(5)), Number((g.origem[1] - 0.008).toFixed(5))];
+      });
+      DADOS.geometriaTalhoes = DADOS.geometriaTalhoes || {};
+      SEM_GEOMETRIA.forEach((f) => { if (!DADOS.geometriaTalhoes[f]) DADOS.geometriaTalhoes[f] = {}; });
+    }
+    // Geometria que já veio preenchida (não se muda aqui): a sede e os polígonos que existiam ao abrir o Cadastros
+    if (!DADOS.geometriaDeOrigem) {
+      DADOS.geometriaDeOrigem = { sedes: new Set(Object.keys(DADOS.sedes)), talhoes: {} };
+      DADOS.fazendas.forEach((f) => { DADOS.geometriaDeOrigem.talhoes[f] = new Set(Object.keys(Geo.daFazenda(f))); });
+    }
+    if (!DADOS.cadastroCulturas) {
+      const unidade = (c) => { const u = (DADOS.comercializacao[c] || {}).unidade; return u ? `${u}/ha` : ''; };
+      DADOS.cadastroCulturas = ['Soja', 'Milho', 'Algodão', 'Sorgo', 'Milheto', 'Plantas de cobertura', 'Braquiária']
+        .map((nome) => ({ nome, atividade: 'Agricultura', unidade: unidade(nome) }));
+    }
+    if (!ui.fazenda || !DADOS.fazendas.includes(ui.fazenda)) ui.fazenda = DADOS.fazendas[0] || null;
+    if (!DADOS.cadastroCulturas.some((c) => c.nome === ui.cultura)) ui.cultura = (DADOS.cadastroCulturas[0] || {}).nome || '';
+  }
+
+  const sedeDeOrigem = (f) => DADOS.geometriaDeOrigem.sedes.has(f);
+  const desenhoDeOrigem = (f, talhao) => (DADOS.geometriaDeOrigem.talhoes[f] || new Set()).has(talhao);
+  const modelo = (cultura) => (cultura === 'Soja' ? DADOS.modeloOperacoes : (DADOS.modelosCultura || {})[cultura]);
+  const notaErp = (texto) => `<p class="cad-dica">${Icones.info}<span>${texto}</span></p>`;
+
+  function salvo(texto) {
+    const d = new Date();
+    ui.salvoEm = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+    const el = conteudo && conteudo.querySelector('.cad-salvo');
+    if (el) el.innerHTML = `${Icones.certo} Salvo às ${ui.salvoEm}`;
+    Aviso.anunciar(texto || 'Salvo');
+  }
+
+  // ===== Casca: cabeçalho com as guias =====
+  function desenhar(guia) {
+    preparar();
+    if (GUIAS.some(([g]) => g === guia)) ui.guia = guia;
+    const corpo = { fazendas: guiaFazendas, safras: guiaSafras, culturas: guiaCulturas, operacoes: guiaOperacoes }[ui.guia]();
+    return `
+      <header class="cabecalho cabecalho--guias">
+        <h1 class="cabecalho__titulo">Cadastros</h1>
+        <div class="cad-cabecalho__linha">
+          <nav class="etapas" aria-label="Guias dos Cadastros">
+            ${GUIAS.map(([g, rotulo]) => `<a class="etapa ${g === ui.guia ? 'etapa--ativa' : ''}" href="#/cadastros/${g}" ${g === ui.guia ? 'aria-current="page"' : ''}>${rotulo}</a>`).join('')}
+          </nav>
+          <span class="cad-salvo" role="status">${ui.salvoEm ? `${Icones.certo} Salvo às ${ui.salvoEm}` : ''}</span>
+        </div>
+      </header>
+      <div class="cad" id="cad" data-guia="${ui.guia}">${corpo}</div>`;
+  }
+
+  function aoMostrar(el) {
+    conteudo = el;
+    if (mapa) { mapa.remove(); mapa = null; }
+    const raiz = el.querySelector('#cad');
+    raiz.addEventListener('click', aoClicar);
+    raiz.addEventListener('change', aoMudar);
+    if (ui.guia === 'fazendas') desenharMapa();
+  }
+
+  // Desenha de novo a guia, mantendo a rolagem
+  function redesenhar() {
+    if (!conteudo || !conteudo.querySelector('#cad') || !location.hash.startsWith('#/cadastros')) return;
+    const topo = conteudo.scrollTop;
+    conteudo.innerHTML = desenhar(ui.guia);
+    aoMostrar(conteudo);
+    conteudo.scrollTop = topo;
+  }
+
+  // ===== Fazendas e talhões =====
+  function faltaGeometria(nome) {
+    const ts = DADOS.talhoes[nome] || []; const g = Geo.daFazenda(nome);
+    return !DADOS.sedes[nome] || ts.some((t) => !g[t.nome]);
+  }
+
+  function guiaFazendas() {
+    const f = ui.fazenda;
+    const item = (nome) => {
+      const ts = DADOS.talhoes[nome] || [];
+      return `<li><button class="cad-item ${nome === f ? 'cad-item--ativo' : ''}" type="button" data-acao="fazenda" data-nome="${esc(nome)}">
+        <span>${esc(nome)}<span class="cad-item__sub">${ts.length} ${ts.length === 1 ? 'talhão' : 'talhões'} · ${Util.area(ts.reduce((s, t) => s + t.area, 0))}</span></span>
+        ${faltaGeometria(nome) ? `<span class="cad-item__alerta" title="Falta a geometria: o ponto da sede ou o polígono de algum talhão">${Icones.alerta}</span>` : ''}
+      </button></li>`;
+    };
+    const lista = Util.comEmpresa()
+      ? DADOS.empresas.map((e) => `<li class="cad-lista__grupo">${esc(e)}</li>${
+          (DADOS.fazendasPorEmpresa[e] || []).map(item).join('') || '<li class="cad-lista__vazio">Nenhuma fazenda</li>'}`).join('')
+      : DADOS.fazendas.map(item).join('');
+    return `
+      <div class="cad-duas">
+        <aside class="cartao">
+          <label class="cad-chave" title="Para clientes organizados em várias empresas. Ligado, a Empresa aparece nos filtros, no Criar Plano e nas tabelas.">
+            <input type="checkbox" data-campo="usa-empresa" ${Util.comEmpresa() ? 'checked' : ''}> Organizar as fazendas por empresa
+          </label>
+          <ul class="cad-lista">${lista}</ul>
+          <p class="cad-nota">As fazendas e os talhões (nome e área) são criados no ${ERP}.</p>
+        </aside>
+        <div class="cad-coluna">${f ? painelFazenda(f) : `<section class="cartao cad-vazio"><h3>Nenhuma fazenda cadastrada</h3>
+          <p>As fazendas são criadas no ${ERP}.</p></section>`}</div>
+      </div>`;
+  }
+
+  function painelFazenda(f) {
+    const ts = DADOS.talhoes[f] || []; const g = Geo.daFazenda(f); const sede = DADOS.sedes[f];
+    const totalGeo = ts.reduce((s, t) => s + (g[t.nome] ? Geo.areaHa(g[t.nome]) : 0), 0);
+    const sedeFixa = sedeDeOrigem(f);
+    const coord = (v) => String(v).replace('.', ',');
+    const faltamDesenhos = ts.filter((t) => !desenhoDeOrigem(f, t.nome)).length;
+    const sedeHtml = sedeFixa
+      ? `<div class="campo"><span class="campo__rotulo">Latitude da sede</span><span class="campo__valor">${coord(sede[0])}</span></div>
+         <div class="campo"><span class="campo__rotulo">Longitude da sede</span><span class="campo__valor">${coord(sede[1])}</span></div>
+         ${notaErp('O ponto da sede já está preenchido e não muda aqui.')}`
+      : `<div class="campo"><label class="campo__rotulo" for="cad-lat">Latitude da sede</label>
+           <input class="campo__controle" id="cad-lat" data-campo="sede-lat" inputmode="decimal" placeholder="-12,55200" value="${sede ? coord(sede[0]) : ''}"></div>
+         <div class="campo"><label class="campo__rotulo" for="cad-lng">Longitude da sede</label>
+           <input class="campo__controle" id="cad-lng" data-campo="sede-lng" inputmode="decimal" placeholder="-55,87900" value="${sede ? coord(sede[1]) : ''}"></div>
+         ${notaErp(sede ? 'Arraste o marcador da sede no mapa para ajustar a posição.' : 'Digite a latitude e a longitude (graus decimais) ou clique no mapa para marcar a sede.')}`;
+    return `
+      <section class="cartao">
+        <div class="cad-topo">
+          <h2 class="cad-topo__titulo">${esc(f)}<small>${Util.comEmpresa() ? `${esc(Util.empresaDaFazenda(f))} · ` : ''}${Util.area(ts.reduce((s, t) => s + t.area, 0))}</small></h2>
+        </div>
+        <div class="cad-fazenda">
+          <div>${sedeHtml}</div>
+          <div id="cad-mapa" class="cad-mapa" aria-label="Mapa da fazenda ${esc(f)}"></div>
+        </div>
+      </section>
+      <section class="cartao">
+        <div class="cad-topo">
+          <h2 class="cad-topo__titulo">Talhões<small id="cad-total-talhoes">${ts.length} · ${n1(ts.reduce((s, t) => s + t.area, 0))} ha${totalGeo ? ` · área geométrica ${n1(totalGeo)} ha` : ''}</small></h2>
+          <div class="cad-topo__acoes">
+            ${faltamDesenhos ? `<button class="botao botao--primario botao--p" type="button" data-acao="importar">${Icones.mapa} Importar polígonos</button>` : ''}
+          </div>
+        </div>
+        ${ts.length ? `<div class="tabela-rolagem"><table class="tabela">
+          <thead><tr><th>Talhão</th><th class="tabela__numero">Área do talhão (ha)</th>
+            <th class="tabela__numero"><span class="titulo-dica" title="Calculada pelo desenho do talhão (polígono)">Área geométrica (ha)</span></th>
+            <th>Geometria</th></tr></thead>
+          <tbody>${ts.map((t) => `<tr data-talhao="${esc(t.nome)}">
+            <td><strong>${esc(t.nome)}</strong></td>
+            <td class="tabela__numero">${n1(t.area)}</td>
+            <td class="tabela__numero">${g[t.nome] ? n1(Geo.areaHa(g[t.nome])) : '—'}</td>
+            <td>${g[t.nome] ? `<span class="cad-ok">${Icones.certo} Polígono</span>`
+              : `<span class="cad-falta">Sem geometria</span> · <button class="cad-link" type="button" data-acao="importar">Importar</button>`}</td>
+          </tr>`).join('')}</tbody></table></div>
+          ${notaErp(`O nome e a área dos talhões vêm do ${ERP}. Aqui só se importa o polígono dos talhões que ainda não têm desenho.`)}`
+        : `<div class="cad-vazio"><h3>Esta fazenda ainda não tem talhões</h3><p>Os talhões (nome e área) são criados no ${ERP}.</p></div>`}
+      </section>`;
+  }
+
+  function desenharMapa() {
+    const el = conteudo.querySelector('#cad-mapa'); if (!el) return;
+    if (!window.L) { el.innerHTML = `<p class="mapa__sem">${Icones.info} Mapa indisponível: sem conexão com a internet.</p>`; return; }
+    const f = ui.fazenda; const sede = DADOS.sedes[f]; const sedeFixa = sedeDeOrigem(f);
+    mapa = L.map(el, { zoomControl: true });
+    L.tileLayer(SATELITE, { maxZoom: 18, attribution: 'Imagens © Esri, Maxar, Earthstar Geographics' }).addTo(mapa);
+    L.control.scale({ position: 'bottomright', imperial: false }).addTo(mapa);
+    camadas = {}; const pontos = [];
+    Geo.poligonos(f).forEach((pg) => {
+      camadas[pg.talhao] = L.polygon(pg.coords, { color: '#ffffff', weight: 1.5, fillColor: '#1baf7a', fillOpacity: 0.45 }).addTo(mapa)
+        .bindTooltip(`<strong>${esc(pg.talhao)}</strong> · ${n1(pg.area)} ha`, { sticky: true, direction: 'top', className: 'mapa-detalhe' })
+        .on('click', () => {
+          const linha = conteudo.querySelector(`tr[data-talhao="${CSS.escape(pg.talhao)}"]`);
+          if (!linha) return;
+          conteudo.querySelectorAll('.cad-linha--alvo').forEach((l) => l.classList.remove('cad-linha--alvo'));
+          linha.classList.add('cad-linha--alvo'); linha.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        });
+      L.marker(pg.centro, { interactive: false, keyboard: false, icon: L.divIcon({ className: 'mapa-rotulo', html: esc(pg.talhao), iconSize: null }) }).addTo(mapa);
+      pontos.push(...pg.coords);
+    });
+    if (sede) {
+      pontos.push(sede);
+      L.marker(sede, { draggable: !sedeFixa, title: sedeFixa ? `Sede da ${f}` : `Sede da ${f} (arraste para ajustar)`,
+        icon: L.divIcon({ className: 'cad-sede', html: Icones.casa, iconSize: [30, 30], iconAnchor: [15, 15] }) }).addTo(mapa)
+        .on('dragend', (e) => { const p = e.target.getLatLng(); gravarSede(p.lat, p.lng); });
+    } else {
+      mapa.on('click', (e) => { gravarSede(e.latlng.lat, e.latlng.lng); redesenhar(); });
+      el.style.cursor = 'crosshair';
+    }
+    if (pontos.length > 1) mapa.fitBounds(L.latLngBounds(pontos), { padding: [24, 24], maxZoom: 16 });
+    else if (pontos.length) mapa.setView(pontos[0], 13);
+    else {
+      const g = (DADOS.geometriaFazendas || {})[f];
+      mapa.setView(g ? g.origem : [-13.5, -55.5], g ? 13 : 6);
+    }
+  }
+
+  function gravarSede(lat, lng) {
+    if (sedeDeOrigem(ui.fazenda)) return;
+    DADOS.sedes[ui.fazenda] = [Number(lat.toFixed(5)), Number(lng.toFixed(5))];
+    const a = conteudo.querySelector('[data-campo="sede-lat"]'); const b = conteudo.querySelector('[data-campo="sede-lng"]');
+    if (a) a.value = String(DADOS.sedes[ui.fazenda][0]).replace('.', ',');
+    if (b) b.value = String(DADOS.sedes[ui.fazenda][1]).replace('.', ',');
+    salvo('Sede salva');
+  }
+
+  // ----- Modal de formulário (campos + Cancelar/Salvar). aoSalvar devolve um texto de erro ou nada -----
+  function abrirForm({ titulo, subtitulo, corpo, rotulo = 'Salvar', aoSalvar, classe = '' }) {
+    const modal = Modal.abrir(`
+      <form novalidate>
+        <div class="modal__corpo">
+          <button class="modal__fechar" type="button" aria-label="Fechar" data-fechar>${Icones.fechar}</button>
+          <h2 class="modal__titulo" id="modal-titulo">${titulo}</h2>
+          ${subtitulo ? `<p class="modal__subtitulo">${subtitulo}</p>` : ''}
+          ${corpo}
+          <p class="cad-erro" role="alert"></p>
+        </div>
+        <div class="modal__rodape">
+          <button class="botao botao--secundario" type="button" data-fechar>Cancelar</button>
+          <button class="botao botao--primario" type="submit">${rotulo}</button>
+        </div>
+      </form>`, { classe });
+    const form = modal.elemento.querySelector('form');
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const erro = aoSalvar(form, modal);
+      if (erro) { form.querySelector('.cad-erro').textContent = erro; return; }
+      modal.fechar();
+    });
+    const primeiro = form.querySelector('input:not([type="hidden"]):not([readonly]), select');
+    if (primeiro) primeiro.focus();
+    return modal;
+  }
+  const campo = (nome, rotulo, valor = '', extra = '') => `<div class="campo"><label class="campo__rotulo" for="cf-${nome}">${rotulo}</label>
+    <input class="campo__controle" id="cf-${nome}" name="${nome}" value="${esc(valor)}" autocomplete="off" ${extra}></div>`;
+  const lista = (nome, rotulo, opcoes, valor = '', vazio = null) => `<div class="campo"><label class="campo__rotulo" for="cf-${nome}">${rotulo}</label>
+    <select class="campo__controle" id="cf-${nome}" name="${nome}">${vazio !== null ? `<option value="">${vazio}</option>` : ''}
+      ${opcoes.map((o) => `<option ${o === valor ? 'selected' : ''}>${esc(o)}</option>`).join('')}</select></div>`;
+  const val = (form, nome) => (form.elements[nome] ? form.elements[nome].value.trim() : '');
+  const igual = (a, b) => Util.normalizar(a).trim() === Util.normalizar(b).trim();
+
+  // ----- Importar polígonos: arquivo → conferência (mapa + tabela) → importar -----
+  // Só recebe desenho o talhão que já existe no cadastro (vem do ERP) e ainda não tinha polígono. Talhão que não está no
+  // cadastro não é criado aqui; talhão que já tinha polígono não muda.
+  function modalImportar() {
+    const f = ui.fazenda; let feicoes = null; let coluna = ''; let mapaImp = null;
+    const modal = Modal.abrir(`
+      <div class="modal__corpo">
+        <button class="modal__fechar" type="button" aria-label="Fechar" data-fechar>${Icones.fechar}</button>
+        <h2 class="modal__titulo" id="modal-titulo">Importar polígonos · ${esc(f)}</h2>
+        <p class="modal__subtitulo">O desenho de cada talhão é lido do arquivo e ligado ao talhão do cadastro pelo nome. Você confere antes de importar.</p>
+        <div id="imp-corpo"></div>
+        <p class="cad-erro" role="alert"></p>
+      </div>
+      <div class="modal__rodape">
+        <button class="botao botao--secundario" type="button" data-fechar>Cancelar</button>
+        <button class="botao botao--primario" type="button" id="imp-confirmar" disabled>Importar</button>
+      </div>`, { classe: 'modal--cad-largo' });
+    const raiz = modal.elemento; const corpo = raiz.querySelector('#imp-corpo'); const erro = raiz.querySelector('.cad-erro');
+    const botao = raiz.querySelector('#imp-confirmar');
+
+    function passoArquivo() {
+      corpo.innerHTML = `
+        <label class="cad-soltar" id="imp-soltar">
+          ${Icones.baixar}
+          <strong>Arraste o arquivo aqui ou clique para escolher</strong>
+          <span>Shapefile compactado (.zip) ou solto (.shp + .dbf + .prj) · KML · KMZ · GeoJSON</span>
+          <input type="file" multiple accept=".zip,.shp,.dbf,.prj,.kml,.kmz,.geojson,.json">
+        </label>
+        <p class="cad-dica">${Icones.info}<span>Não tem um arquivo agora? <button class="cad-link" type="button" id="imp-exemplo">Baixar um arquivo de exemplo (.kml)</button> com os talhões desta fazenda, para testar a importação.</span></p>`;
+      const soltar = corpo.querySelector('#imp-soltar');
+      soltar.querySelector('input').addEventListener('change', (e) => receber(e.target.files));
+      ['dragenter', 'dragover'].forEach((ev) => soltar.addEventListener(ev, (e) => { e.preventDefault(); soltar.classList.add('cad-soltar--sobre'); }));
+      ['dragleave', 'drop'].forEach((ev) => soltar.addEventListener(ev, (e) => { e.preventDefault(); soltar.classList.remove('cad-soltar--sobre'); }));
+      soltar.addEventListener('drop', (e) => receber(e.dataTransfer.files));
+      corpo.querySelector('#imp-exemplo').addEventListener('click', baixarExemplo);
+    }
+
+    async function receber(arquivos) {
+      erro.textContent = '';
+      if (!arquivos || !arquivos.length) return;
+      try {
+        feicoes = await ArquivoGeo.ler(arquivos);
+      } catch (e) { erro.textContent = e.message || 'Não foi possível ler o arquivo.'; return; }
+      const colunas = [...new Set(feicoes.flatMap((x) => Object.keys(x.atributos)))];
+      coluna = ['talh', 'nome', 'name', 'gleba', 'field', 'descr'].map((p) => colunas.find((c) => c.toLowerCase().includes(p))).find(Boolean) || colunas[0] || '';
+      feicoes.forEach((x, i) => { x.area = Geo.areaHa(x.coords); x.nome = nomeDa(x, i); x.incluir = situacao(x) === 'recebe'; });
+      passoConferir(colunas);
+    }
+    const nomeDa = (x, i) => String((coluna && x.atributos[coluna]) || '').trim() || `Talhão ${i + 1}`;
+    const existente = (nome) => (DADOS.talhoes[f] || []).find((t) => igual(t.nome, nome));
+    // 'recebe' (talhão do cadastro sem polígono de origem) · 'tem' (já tinha polígono) · 'fora' (não está no cadastro)
+    const situacao = (x) => { const e = existente(x.nome); return !e ? 'fora' : desenhoDeOrigem(f, e.nome) ? 'tem' : 'recebe'; };
+
+    function passoConferir(colunas) {
+      corpo.innerHTML = `
+        <div class="cad-imp__resumo">
+          <strong>${feicoes.length} ${feicoes.length === 1 ? 'polígono encontrado' : 'polígonos encontrados'} · ${n1(feicoes.reduce((s, x) => s + x.area, 0))} ha</strong>
+          ${colunas.length > 1 ? `<div class="campo"><label class="campo__rotulo" for="imp-coluna">Coluna com o nome do talhão</label>
+            <select class="campo__controle" id="imp-coluna">${colunas.map((c) => `<option ${c === coluna ? 'selected' : ''}>${esc(c)}</option>`).join('')}</select></div>` : ''}
+        </div>
+        <div class="cad-imp">
+          <div class="cad-imp__tabela"><table class="tabela">
+            <thead><tr><th class="tabela__marcar"><span class="so-leitor">Importar</span></th><th>Talhão</th>
+              <th class="tabela__numero">Área geométrica (ha)</th><th>O que acontece</th></tr></thead>
+            <tbody id="imp-linhas"></tbody></table></div>
+          <div id="imp-mapa" class="cad-mapa cad-mapa--p"></div>
+        </div>
+        <p class="cad-dica">${Icones.info}<span>Só recebe o desenho o talhão que já está no cadastro e ainda não tem polígono. Talhão que não está no cadastro é criado no ${ERP}; corrija o nome se ele estiver escrito diferente.</span></p>`;
+      const linhas = corpo.querySelector('#imp-linhas');
+      const pintar = () => {
+        linhas.innerHTML = feicoes.map((x, i) => {
+          const s = situacao(x); const e = existente(x.nome);
+          const texto = s === 'recebe' ? `Recebe o desenho: <strong>${esc(e.nome)}</strong> (${n1(e.area)} ha)`
+            : s === 'tem' ? `<span class="cad-falta">${esc(e.nome)} já tem polígono: não muda</span>`
+            : '<span class="cad-falta">Não está no cadastro desta fazenda</span>';
+          return `<tr><td class="tabela__marcar"><input type="checkbox" data-i="${i}" ${x.incluir ? 'checked' : ''} ${s === 'recebe' ? '' : 'disabled'} aria-label="Importar ${esc(x.nome)}"></td>
+            <td><input class="cad-campo cad-campo--nome" data-i="${i}" value="${esc(x.nome)}" aria-label="Nome do talhão"></td>
+            <td class="tabela__numero">${n1(x.area)}</td>
+            <td>${texto}</td></tr>`;
+        }).join('');
+        const n = feicoes.filter((x) => x.incluir).length;
+        botao.disabled = !n; botao.textContent = n ? `Importar ${n} ${n === 1 ? 'polígono' : 'polígonos'}` : 'Importar';
+      };
+      pintar();
+      linhas.addEventListener('change', (e) => {
+        const x = feicoes[e.target.dataset.i]; if (!x) return;
+        if (e.target.type === 'checkbox') x.incluir = e.target.checked;
+        else { x.nome = e.target.value.trim() || x.nome; x.incluir = situacao(x) === 'recebe'; }
+        pintar();
+      });
+      const sel = corpo.querySelector('#imp-coluna');
+      if (sel) sel.addEventListener('change', () => { coluna = sel.value; feicoes.forEach((x, i) => { x.nome = nomeDa(x, i); x.incluir = situacao(x) === 'recebe'; }); pintar(); });
+      if (window.L) {
+        mapaImp = L.map(corpo.querySelector('#imp-mapa'), { zoomControl: true });
+        L.tileLayer(SATELITE, { maxZoom: 18, attribution: 'Imagens © Esri, Maxar, Earthstar Geographics' }).addTo(mapaImp);
+        const pontos = [];
+        feicoes.forEach((x) => { L.polygon(x.coords, { color: '#ffd400', weight: 2, fillColor: '#ffd400', fillOpacity: 0.25 }).addTo(mapaImp).bindTooltip(esc(x.nome), { sticky: true, className: 'mapa-detalhe' }); pontos.push(...x.coords); });
+        mapaImp.fitBounds(L.latLngBounds(pontos), { padding: [16, 16] });
+      } else corpo.querySelector('#imp-mapa').innerHTML = `<p class="mapa__sem">${Icones.info} Mapa indisponível: sem conexão com a internet.</p>`;
+    }
+
+    botao.addEventListener('click', () => {
+      const escolhidas = feicoes.filter((x) => x.incluir && situacao(x) === 'recebe');
+      const nomes = escolhidas.map((x) => Util.normalizar(existente(x.nome).nome));
+      if (new Set(nomes).size !== nomes.length) { erro.textContent = 'Há mais de um polígono para o mesmo talhão. Deixe marcado só um.'; return; }
+      const g = Geo.daFazenda(f);
+      escolhidas.forEach((x) => { g[existente(x.nome).nome] = x.coords; });
+      let sugeriuSede = false;
+      if (!DADOS.sedes[f]) { const c = Geo.centro(escolhidas.flatMap((x) => x.coords)); DADOS.sedes[f] = [Number(c[0].toFixed(5)), Number(c[1].toFixed(5))]; sugeriuSede = true; }
+      if (mapaImp) mapaImp.remove();
+      modal.fechar(); salvo(); redesenhar();
+      Aviso.mostrar(`${escolhidas.length} ${escolhidas.length === 1 ? 'polígono importado' : 'polígonos importados'}`
+        + (sugeriuSede ? ' · sede sugerida no centro dos talhões: arraste para ajustar' : ''));
+    });
+
+    // Arquivo de exemplo: os talhões da fazenda (nomes do cadastro), em quadras perto da sede ou da origem da fazenda
+    function baixarExemplo() {
+      const g = (DADOS.geometriaFazendas || {})[f];
+      const [lat, lng] = DADOS.sedes[f] || (g ? g.origem : [-12.6, -55.75]);
+      const kLng = 111320 * Math.cos(lat * Math.PI / 180);
+      const ts = DADOS.talhoes[f] || [];
+      const porLinha = Math.ceil(Math.sqrt(ts.length || 1));
+      const quadra = (i, j, larg, alt) => { const x0 = 400 + i * 1030; const y0 = -400 - j * 930;
+        return [[x0, y0], [x0 + larg, y0], [x0 + larg, y0 - alt], [x0, y0 - alt], [x0, y0]].map(([x, y]) => `${(lng + x / kLng).toFixed(6)},${(lat + y / 111320).toFixed(6)},0`).join(' '); };
+      const itens = ts.map((t, k) => { const alt = 900; const larg = Math.min(1000, Math.max(300, (t.area * 10000) / alt)); return [t.nome, k % porLinha, Math.floor(k / porLinha), larg, alt]; });
+      const kml = `<?xml version="1.0" encoding="UTF-8"?>\n<kml xmlns="http://www.opengis.net/kml/2.2"><Document><name>Talhões de exemplo</name>\n${
+        itens.map(([nome, i, j, a, b]) => `<Placemark><name>${esc(nome)}</name><Polygon><outerBoundaryIs><LinearRing><coordinates>${quadra(i, j, a, b)}</coordinates></LinearRing></outerBoundaryIs></Polygon></Placemark>`).join('\n')}\n</Document></kml>`;
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([kml], { type: 'application/vnd.google-earth.kml+xml' }));
+      a.download = `talhoes-${Util.normalizar(f).replace(/\s+/g, '-')}.kml`; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    }
+
+    passoArquivo();
+  }
+
+  // ===== Safras (só consulta) =====
+  function guiaSafras() {
+    const nomes = DADOS.cadastroSafras.map((s) => s.nome);
+    const safras = [...DADOS.cadastroSafras].sort((a, b) => Util.posicaoSafra(a.nome, nomes) - Util.posicaoSafra(b.nome, nomes));
+    return `
+      <section class="cartao">
+        <div class="cad-topo">
+          <h2 class="cad-topo__titulo">Safras<small>${safras.length}</small></h2>
+        </div>
+        <p class="cad-nota">As safras são cadastradas no ${ERP} e aparecem aqui só para consulta. A safra vai de 01/09 a 31/08 do ano seguinte; a safrinha (os dois anos iguais, como 27/27) entra no mesmo Ano Agrícola da safra anterior.</p>
+        <div class="tabela-rolagem"><table class="tabela">
+          <thead><tr><th>Safra</th><th>Descrição</th><th>Início</th><th>Fim</th><th class="tabela__numero">Ano Agrícola</th></tr></thead>
+          <tbody>${safras.map((s) => `<tr>
+            <td><strong>${esc(s.nome)}</strong></td><td>${esc(s.descricao || '')}</td><td>${s.inicio ? Util.data(s.inicio) : '—'}</td><td>${s.fim ? Util.data(s.fim) : '—'}</td>
+            <td class="tabela__numero">${s.anoAgricola ?? '—'}</td></tr>`).join('')}</tbody>
+        </table></div>
+      </section>`;
+  }
+
+  // ===== Culturas e variedades (atividade › cultura › variedades) =====
+  function guiaCulturas() {
+    const c = DADOS.cadastroCulturas.find((x) => x.nome === ui.cultura);
+    const listaHtml = DADOS.atividades.map((a) => {
+      const itens = DADOS.cadastroCulturas.filter((x) => x.atividade === a);
+      return `<li class="cad-lista__grupo">${esc(a)}</li>${itens.map((x) => {
+        const vs = DADOS.variedades.filter((v) => v.cultura === x.nome);
+        return `<li><button class="cad-item ${x.nome === ui.cultura ? 'cad-item--ativo' : ''}" type="button" data-acao="cultura" data-nome="${esc(x.nome)}">
+          <span>${esc(x.nome)}<span class="cad-item__sub">${vs.length} ${vs.length === 1 ? 'variedade' : 'variedades'}</span></span></button></li>`;
+      }).join('') || '<li class="cad-lista__vazio">Nenhuma cultura cadastrada</li>'}`;
+    }).join('');
+    return `
+      <div class="cad-duas">
+        <aside class="cartao">
+          <ul class="cad-lista">${listaHtml}</ul>
+          <div class="cad-lista__rodape"><button class="botao botao--secundario botao--p" type="button" data-acao="nova-cultura">${Icones.mais} Nova cultura</button></div>
+        </aside>
+        <div class="cad-coluna">${c ? painelCultura(c) : '<section class="cartao cad-vazio"><h3>Nenhuma cultura cadastrada</h3></section>'}</div>
+      </div>`;
+  }
+
+  function painelCultura(c) {
+    const vs = DADOS.variedades.filter((v) => v.cultura === c.nome);
+    return `
+      <section class="cartao">
+        <div class="cad-topo">
+          <h2 class="cad-topo__titulo">${esc(c.nome)}<small>${esc(c.atividade)}${c.unidade ? ` · produtividade em ${esc(c.unidade)}` : ''}</small></h2>
+          <div class="cad-topo__acoes">
+            <button class="botao-icone botao-icone--borda" type="button" data-acao="editar-cultura" aria-label="Editar cultura" title="Editar cultura">${Icones.lapis}</button>
+          </div>
+        </div>
+        ${tabelaVariedades(c, vs)}
+      </section>`;
+  }
+
+  // Variedades (11/11/2026): só a tabela Variedade · Ciclo (dias), para consulta (sem inserir nem editar)
+  function tabelaVariedades(c, vs) {
+    if (!vs.length) return `<div class="cad-vazio"><h3>Nenhuma variedade de ${esc(c.nome)}</h3></div>`;
+    return `<div class="tabela-rolagem"><table class="tabela">
+      <thead><tr><th>Variedade</th><th class="tabela__numero">Ciclo (dias)</th></tr></thead>
+      <tbody>${vs.map((v) => `<tr><td><strong>${esc(v.nome)}</strong></td><td class="tabela__numero">${v.ciclo ?? '—'}</td></tr>`).join('')}</tbody></table></div>`;
+  }
+
+  function modalCultura(nomeAtual) {
+    const c = nomeAtual ? DADOS.cadastroCulturas.find((x) => x.nome === nomeAtual) : null;
+    abrirForm({
+      titulo: c ? `Editar cultura ${esc(c.nome)}` : 'Nova cultura',
+      corpo: campo('nome', 'Cultura <span class="obrigatorio">*</span>', c ? c.nome : '', c ? 'readonly title="O nome não muda depois de criado: a cultura pode estar em uso em planos"' : 'placeholder="Ex.: Feijão"')
+        + lista('atividade', 'Atividade de produção', DADOS.atividades, c ? c.atividade : 'Agricultura')
+        + lista('unidade', 'Unidade de produtividade', ['sc/ha', '@/ha', 't/ha', 'kg/ha'], c ? c.unidade : '', 'Não informada'),
+      aoSalvar(form) {
+        const nome = val(form, 'nome');
+        if (!nome) return 'Informe o nome da cultura.';
+        if (!c && DADOS.cadastroCulturas.some((x) => igual(x.nome, nome))) return 'Esta cultura já está cadastrada.';
+        const dados = { atividade: val(form, 'atividade'), unidade: val(form, 'unidade') };
+        if (c) Object.assign(c, dados); else { DADOS.cadastroCulturas.push({ nome, ...dados }); ui.cultura = nome; }
+        salvo(); redesenhar();
+      }
+    });
+  }
+
+  // ===== Operações (grupo de operação › operação), por cultura: só consulta =====
+  function guiaOperacoes() {
+    const culturas = DADOS.cadastroCulturas.filter((c) => c.atividade === 'Agricultura').map((c) => c.nome);
+    if (!culturas.includes(ui.culturaOp)) ui.culturaOp = culturas[0];
+    const cultura = ui.culturaOp; const grupos = modelo(cultura);
+    const topo = `
+      <section class="cartao" style="margin-bottom:16px">
+        <div class="cad-barra" style="border-bottom:0">
+          <div class="campo campo--inline"><label class="campo__rotulo" for="cad-cultura-op">Cultura</label>
+            <select class="campo__controle" id="cad-cultura-op" data-campo="cultura-op">${culturas.map((c) => `<option ${c === cultura ? 'selected' : ''}>${esc(c)}</option>`).join('')}</select></div>
+          <span class="cad-nota cad-nota--solta" style="margin:0; flex:1 1 320px">Os grupos de operação e as operações são cadastrados no <strong>${ERP}</strong> e aparecem aqui só para consulta.
+            Aqui só se altera o <strong>DAP padrão</strong>, que vem preenchido ao criar um plano de ${esc(cultura)} pelo <strong>Usar operações cadastradas no ${ERP}</strong> (planos já criados não mudam); no plano, o DAP também se ajusta.</span>
+        </div>
+      </section>`;
+    if (!grupos || !grupos.length) {
+      return `${topo}<section class="cartao cad-vazio"><h3>Nenhum grupo de operação para ${esc(cultura)}</h3>
+        <p>Os grupos e as operações desta cultura são cadastrados no ${ERP}.</p></section>`;
+    }
+    return topo + grupos.map((g, gi) => `
+      <section class="cartao cad-grupo">
+        <div class="cad-grupo__topo">
+          <strong class="cad-grupo__nome">${esc(g.nome)}</strong>
+          <span class="cad-grupo__tipo">Tipo: ${esc(g.tipo)}</span>
+          <div class="cad-grupo__fim">${g.operacoes.length} ${g.operacoes.length === 1 ? 'operação' : 'operações'}</div>
+        </div>
+        ${g.operacoes.length ? `<div class="tabela-rolagem"><table class="tabela">
+          <thead><tr><th>Operação</th><th class="tabela__numero"><span class="titulo-dica" title="Dias após o plantio. Negativo = antes do plantio">DAP padrão</span></th></tr></thead>
+          <tbody>${g.operacoes.map((o, oi) => `<tr>
+            <td>${esc(o.nome)}</td>
+            <td class="tabela__numero"><input class="cad-campo cad-campo--num" data-campo="op-dap" data-g="${gi}" data-o="${oi}" inputmode="numeric" value="${o.dap ?? ''}"
+              placeholder="${g.tipo === 'Colheita' ? 'pelo ciclo' : '—'}" aria-label="DAP padrão de ${esc(o.nome)}"></td>
+          </tr>`).join('')}</tbody></table></div>` : '<p class="cad-nota">Nenhuma operação neste grupo.</p>'}
+      </section>`).join('');
+  }
+
+  // ===== Eventos =====
+  function aoClicar(e) {
+    const alvo = e.target.closest('[data-acao]'); if (!alvo || alvo.disabled) return;
+    const acoes = {
+      fazenda() { ui.fazenda = alvo.dataset.nome; redesenhar(); },
+      importar: () => modalImportar(),
+      cultura() { ui.cultura = alvo.dataset.nome; redesenhar(); },
+      'nova-cultura': () => modalCultura(),
+      'editar-cultura': () => modalCultura(ui.cultura)
+    };
+    if (acoes[alvo.dataset.acao]) acoes[alvo.dataset.acao]();
+  }
+
+  function aoMudar(e) {
+    const el = e.target; const c = el.dataset.campo; if (!c) return;
+    const f = ui.fazenda;
+    if (c === 'usa-empresa') { DADOS.usaEmpresa = el.checked; salvo(); redesenhar(); return; }
+    if ((c === 'sede-lat' || c === 'sede-lng') && !sedeDeOrigem(f)) {
+      const lat = Util.numero(conteudo.querySelector('[data-campo="sede-lat"]').value); const lng = Util.numero(conteudo.querySelector('[data-campo="sede-lng"]').value);
+      if (lat === null || lng === null) return;
+      if (Math.abs(lat) > 90 || Math.abs(lng) > 180) { Aviso.mostrar('Latitude entre -90 e 90; longitude entre -180 e 180 (graus decimais).'); return; }
+      DADOS.sedes[f] = [lat, lng]; salvo('Sede salva'); redesenhar(); return;
+    }
+    if (c === 'cultura-op') { ui.culturaOp = el.value; redesenhar(); return; }
+    // DAP padrão da operação: número inteiro (negativo = antes do plantio); vazio, sem DAP. Reordena o grupo pelo DAP
+    if (c === 'op-dap') {
+      const g = (modelo(ui.culturaOp) || [])[el.dataset.g]; const o = g && g.operacoes[el.dataset.o]; if (!o) return;
+      const v = el.value.trim(); const n = v === '' ? null : Number(v.replace(',', '.'));
+      if (v !== '' && !Number.isFinite(n)) { el.value = o.dap ?? ''; Aviso.mostrar('Informe o DAP em dias (número inteiro).'); return; }
+      o.dap = n === null ? undefined : Math.round(n);
+      g.operacoes.sort((a, b) => (a.dap ?? Infinity) - (b.dap ?? Infinity));
+      salvo('DAP salvo'); redesenhar();
+    }
+  }
+
+  return { desenhar, aoMostrar };
+})();
+
+</script>
+  <script>
+/*
  * Casca do protótipo: navegação entre telas, estado do menu lateral e menu do usuário.
  * A navegação usa o endereço com # (ex.: index.html#/cadastros), assim funciona
  * abrindo o arquivo direto no navegador e no Netlify, e o botão Voltar funciona.
@@ -20294,8 +21233,10 @@ window.Configuracoes = (function () {
     'planejado-executado': { titulo: 'Operações', menu: 'planejado-executado',
                         desenhar: (guia) => temPlanos() ? Telas.monitoramentoAplicacoes.desenhar(guia) : Telas.semPlanos('planejado-executado'),
                         aoMostrar: (conteudo, guia) => { if (temPlanos()) Telas.monitoramentoAplicacoes.aoMostrar(conteudo, guia); } },
+    // Cadastros (11/11/2026): #/cadastros/<guia> (fazendas, safras, culturas, operacoes)
     'cadastros':      { titulo: 'Cadastros', menu: 'cadastros',
-                        desenhar: () => Telas.emConstrucao('Cadastros') }
+                        desenhar: (guia) => Telas.cadastros.desenhar(guia),
+                        aoMostrar: (conteudo) => Telas.cadastros.aoMostrar(conteudo) }
   };
   const ROTA_INICIAL = 'plano-safra';
 

@@ -102,10 +102,12 @@ window.Telas.acompanhamentoOperacional = (function () {
       if (!op.nome) return;
       const dap = Math.min(porNome.get(op.nome)?.dap ?? Infinity, dapDe(g, op));
       porNome.set(op.nome, { valor: op.nome, nome: op.nome, extra: Number.isFinite(dap) ? `DAP ${dap}` : g.nome, dap,
-        plantio: porNome.get(op.nome)?.plantio || g.tipo === 'Sementes' });
+        plantio: porNome.get(op.nome)?.plantio || g.tipo === 'Sementes', colheita: porNome.get(op.nome)?.colheita || g.tipo === 'Colheita' });
     })));
-    // Pelo DAP e, no mesmo DAP, em ordem alfabética (11/11/2026); ao lado, "DAP 45" (a Colheita, que vem do ciclo, no fim)
-    return [...porNome.values()].sort((a, b) => a.dap - b.dap || a.nome.localeCompare(b.nome, 'pt-BR', { numeric: true }));
+    // 11/11/2026: Plantio e Colheita primeiro (nesta ordem); depois as demais pelo DAP e, no mesmo DAP, em ordem alfabética.
+    // Ao lado de cada uma, a regra do DAP de antes: "DAP 45" (a Colheita, que vem do ciclo, com o nome do grupo)
+    const topo = (o) => (o.plantio ? 0 : o.colheita ? 1 : 2);
+    return [...porNome.values()].sort((a, b) => topo(a) - topo(b) || a.dap - b.dap || a.nome.localeCompare(b.nome, 'pt-BR', { numeric: true }));
   }
 
   // Operação padrão do Progresso da Operação (11/11/2026): a de data planejada (pelo DAP) mais perto de hoje, nos talhões

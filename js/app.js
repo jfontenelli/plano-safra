@@ -36,8 +36,10 @@
     'planejado-executado': { titulo: 'Operações', menu: 'planejado-executado',
                         desenhar: (guia) => temPlanos() ? Telas.monitoramentoAplicacoes.desenhar(guia) : Telas.semPlanos('planejado-executado'),
                         aoMostrar: (conteudo, guia) => { if (temPlanos()) Telas.monitoramentoAplicacoes.aoMostrar(conteudo, guia); } },
+    // Cadastros (11/11/2026): #/cadastros/<guia> (fazendas, safras, culturas, operacoes)
     'cadastros':      { titulo: 'Cadastros', menu: 'cadastros',
-                        desenhar: () => Telas.emConstrucao('Cadastros') }
+                        desenhar: (guia) => Telas.cadastros.desenhar(guia),
+                        aoMostrar: (conteudo) => Telas.cadastros.aoMostrar(conteudo) }
   };
   const ROTA_INICIAL = 'plano-safra';
 

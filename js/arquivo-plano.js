@@ -53,7 +53,7 @@ window.ArquivoPlano = (function () {
 
     // Uma linha por variedade (o talhão pode ter várias, cada uma com a sua área de aplicação)
     const abaVariedade = [['fazenda', 'talhao', 'area_talhao', 'area_aplicacao', 'cultura', 'grupo_operacao', 'operacao', 'variedade',
-      'data_plantio', 'pop_plantas_planejada', 'pop_plantas_recomendada', 'perc_germinacao', 'quantidade_total_sementes', 'embalagem', 'qtd_embalagens']];
+      'data_plantio', 'pop_plantas_planejada', 'perc_germinacao', 'quantidade_total_sementes', 'embalagem', 'qtd_embalagens']];
     // Embalagem da cultura, como na tabela do Plantio (soja: bag de 5 milhões de sementes; milho: saco de 20 kg, 60 mil)
     const emb = DADOS.embalagemSemente[plano.cultura] || DADOS.embalagemSemente.Soja;
     if (sementes) {
@@ -66,7 +66,7 @@ window.ArquivoPlano = (function () {
             const v = p.variedade ? DADOS.variedades.find((x) => x.nome === p.variedade) : null;
             const sem = p.populacao && g && areaVar ? p.populacao * 1000 * areaVar / (g / 100) : null;
             abaVariedade.push([plano.fazenda, t.nome, t.area, areaVar ?? '', plano.cultura, sementes.nome, op.nome, p.variedade || '',
-              p.data || '', p.populacao || '', v && v.populacao ? `${v.populacao[0]}-${v.populacao[1]}` : '',
+              p.data || '', p.populacao || '',
               g || '', sem ? Math.round(sem) : '', sem ? emb.descricao : '', sem ? Math.round(sem / emb.sementes * 10) / 10 : '']);
           });
         });

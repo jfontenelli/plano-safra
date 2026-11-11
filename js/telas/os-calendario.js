@@ -247,7 +247,7 @@ window.Telas.osCalendario = (function () {
       <div class="ma-legenda">
         <span class="ma-legenda__titulo">Operações:</span>
         <ul aria-label="Filtrar por status da operação">
-          ${STATUS.map(([id, nome]) => `<li><button class="ma-legenda__item ${est.status && est.status !== id ? 'ma-legenda__item--apagado' : ''}" type="button"
+          ${STATUS.map(([id, nome]) => `<li><button class="ma-legenda__item os-leg-cor cal-st--${id} ${est.status && est.status !== id ? 'ma-legenda__item--apagado' : ''}" type="button"
               data-acao="os-status" data-status="${id}" aria-pressed="${est.status === id}" title="${est.status === id ? 'Mostrar todos' : DICA_STATUS[id]}">
               ${MARCA[id]}${nome}</button></li>`).join('')}
         </ul>
