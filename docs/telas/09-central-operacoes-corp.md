@@ -1,6 +1,6 @@
-# Tela 09 — Gestão da Lavoura › Central OS
+# Tela 09 — Gestão da Lavoura › Operações › Central OS
 
-Atualizado em 26/10/2026 (deixa de ser aba de Operações Agrícolas e vira item próprio do menu Gestão da Lavoura; Minhas tarefas saiu do protótipo). Antes, em 23/10/2026 (renomeada de Central de Operações para Central OS). Este doc mostra só o estado atual da tela. Decisão alterada é reescrita, não acumulada.
+Atualizado em 11/11/2026 (sai do menu e vira a última guia de Operações, com o cabeçalho de Operações: título "Operações", subtítulo da Central OS, guias e "Dados atualizados", no lugar da etiqueta Últimas versões). Antes, em 26/10/2026 (deixa de ser aba de Operações Agrícolas e vira item próprio do menu Gestão da Lavoura; Minhas tarefas saiu do protótipo). Antes, em 23/10/2026 (renomeada de Central de Operações para Central OS). Este doc mostra só o estado atual da tela. Decisão alterada é reescrita, não acumulada.
 Imagens: enviadas pela usuária em 21/10/2026 (cartões Visão geral, gráficos Status da OS e Nº OS por Empresa, tabela Ordens de Serviço e o filtro Status da ação). Quando imagem e documento divergirem, vale este documento.
 **Situação no protótipo:** construída (direto no HTML, sem passar pelo Claude Design).
 
@@ -8,7 +8,7 @@ Imagens: enviadas pela usuária em 21/10/2026 (cartões Visão geral, gráficos 
 Dar ao gestor a visão de todas as OS das fazendas: quantas, em que status, quanto atraso, por empresa, fazenda ou executor, e pedir justificativa das OS com atraso.
 
 ## Quando aparece
-- Menu **Gestão da Lavoura › Central OS** (`#/central-os`), o segundo item, depois do Operações Agrícolas (Tela 10, com o Calendário Agrícola na primeira guia). Sem perfis de usuário por enquanto.
+- **Gestão da Lavoura › Operações**, guia **Central OS**, a última (Acompanhamento · Calendário · Desvios de data · Central OS), em `#/central-os`; no menu, fica destacado Operações. Sem perfis de usuário por enquanto.
 - Sem nenhum plano cadastrado: "Crie seu primeiro plano para visualizar a Central OS" e o botão "+ Criar Plano de Safra".
 
 ## Conteúdo

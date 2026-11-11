@@ -277,7 +277,7 @@ window.Telas.monitoramentoAplicacoes = (function () {
   function desenhar(guia) {
     est = est || novoEstado();
     if (guia && guia !== 'calendario') irParaGuia(guia);
-    guiaAtual = est.visao;
+    ultimaGuia[paginaDe(est.visao)] = est.visao;
     const cab = `<header class="cabecalho oa-cabecalho ma-cabecalho" data-ma-cabecalho>${cabecalho()}</header>`;
     if (est.visao === 'desvios') return Telas.desviosRecomendacao.desenhar(cab);
     if (est.visao === 'falta') return Telas.faltaProdutos.desenhar(cab);
@@ -302,13 +302,24 @@ window.Telas.monitoramentoAplicacoes = (function () {
     ['acompanhamento', 'Acompanhamento', 'Visualize a última operação registrada na Ordem de Serviço de cada talhão e sua distribuição espacial.'],
     ['tabela', 'Desvios de data', 'Compare as datas planejadas e executadas das operações por talhão.'],
     ['desvios', 'Desvios de dose', 'Analise os desvios entre o recomendado e o executado nas Ordens de Serviço, por produto, operação e nível de análise.'],
-    ['falta', 'Risco de falta de produto', 'Estime a falta de produtos para as operações planejadas.']
+    ['falta', 'Risco de falta de produto', 'Estime a falta de produtos para as operações planejadas.'],
+    // Central OS (11/11/2026: saiu do menu e virou a última guia de Operações): outra página (js/telas/central-corp.js, #/central-os)
+    ['central', 'Central OS', 'Acompanhe as ordens de serviço, recomendações e execução das operações agrícolas.']
   ];
-  const GUIAS_PAGINA = ['calendario', 'acompanhamento', 'tabela', 'desvios', 'falta'];
-  // Guia aberta por último: o item Operações do menu abre nela (no começo, o Calendário)
-  let guiaAtual = 'calendario';
-  const guiaAberta = () => guiaAtual;
-  const marcarCalendario = () => { guiaAtual = 'calendario'; };
+  // Duas páginas no menu Gestão da Lavoura (11/11/2026): Operações (Acompanhamento · Calendário · Desvios de data · Central OS)
+  // e Estoque (Desvios de dose · Risco de falta de produto), com o mesmo cabeçalho; o título é o da página
+  const PAGINAS = {
+    operacoes: { titulo: 'Operações', guias: ['acompanhamento', 'calendario', 'tabela', 'central'] },
+    estoque: { titulo: 'Estoque', guias: ['desvios', 'falta'] }
+  };
+  const paginaDe = (visao) => (PAGINAS.estoque.guias.includes(visao) ? 'estoque' : 'operacoes');
+  const hrefGuia = (id) => (id === 'calendario' ? '#/calendario-agricola' : id === 'central' ? '#/central-os'
+    : paginaDe(id) === 'estoque' ? `#/estoque/${id}` : `#/planejado-executado/${id}`);
+  // Guia aberta por último em cada página: o item do menu abre nela (no começo, a primeira: Acompanhamento e Desvios de dose)
+  const ultimaGuia = { operacoes: 'acompanhamento', estoque: 'desvios' };
+  const guiaAberta = (pagina = 'operacoes') => ultimaGuia[pagina];
+  const marcarCalendario = () => { ultimaGuia.operacoes = 'calendario'; };
+  const marcarCentral = () => { ultimaGuia.operacoes = 'central'; };
   // visao: a guia (o Calendário chama com 'calendario'). Só no Calendário, a etiqueta das versões publicadas.
   // Título da página (05/11/2026; antes "Planejado × Executado"): sempre "Operações", em qualquer guia (Desvios de data ·
   // Desvios de dose · Risco de falta de produto, antes Previsão de Falta de Produtos); o subtítulo é o da guia aberta.
@@ -322,23 +333,25 @@ window.Telas.monitoramentoAplicacoes = (function () {
   }
   function cabecalho(visao = est.visao) {
     const [, , subtitulo] = GUIAS.find(([id]) => id === visao);
+    const pagina = PAGINAS[paginaDe(visao)];
     const titulo = `
         <div class="oa-cabecalho__titulo">
-          <h1 class="cabecalho__titulo">Operações</h1>
+          <h1 class="cabecalho__titulo">${pagina.titulo}</h1>
           <p class="cabecalho__subtitulo">${subtitulo}</p>
         </div>`;
     // Dados atualizados (05/11/2026): a data e a hora em que a página foi aberta (no protótipo, os dados das OS fechadas e
     // dos estoques não vêm de um sistema), à direita do título, nas quatro guias (também no Calendário, 11/11/2026)
     return `
       <div class="oa-cabecalho__abas">${titulo}${seloAtualizacao()}</div>
-      <nav class="ma-guias" aria-label="Guias de Operações">
-        ${GUIAS_PAGINA.map((id) => `<a class="botao botao--p ${id === visao ? 'botao--primario' : 'botao--secundario'} ma-guia" href="${id === 'calendario' ? '#/calendario-agricola' : `#/planejado-executado/${id}`}"
+      <nav class="ma-guias" aria-label="Guias de ${pagina.titulo}">
+        ${pagina.guias.map((id) => `<a class="botao botao--p ${id === visao ? 'botao--primario' : 'botao--secundario'} ma-guia" href="${hrefGuia(id)}"
           ${id === visao ? 'aria-current="page"' : ''}>${GUIAS.find(([x]) => x === id)[1]}</a>`).join('')}
       </nav>`;
   }
   // Guia escolhida: o Calendário Agrícola é outra página; as demais, esta (vindo do Calendário: #/planejado-executado/tabela)
   function irParaGuia(visao) {
     if (visao === 'calendario') { location.hash = '#/calendario-agricola'; return; }
+    if (visao === 'central') { location.hash = '#/central-os'; return; }
     if (!GUIAS.some(([id]) => id === visao)) visao = 'tabela'; // guia que saiu (Executadas antiga, linha, duracao): abre em Operações
     if (est.visao !== visao) {
       est.visao = visao;
@@ -870,5 +883,5 @@ window.Telas.monitoramentoAplicacoes = (function () {
     return { executada: exec, fechamento: fechamento(p, talhao, op.nome, exec, Cal().prazoDe(op, g), i), os: osDe(p, talhao, op.nome) || null };
   }
 
-  return { desenhar, aoMostrar, cabecalho, estadoInicial, execucao, somaDias, guiaAberta, marcarCalendario };
+  return { desenhar, aoMostrar, cabecalho, estadoInicial, execucao, somaDias, guiaAberta, marcarCalendario, marcarCentral, paginaDe };
 })();

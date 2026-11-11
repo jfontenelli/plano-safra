@@ -217,7 +217,7 @@ window.Telas.faltaProdutos = (function () {
                 <td>${x.risco ? dataCurta(x.risco.data) : '—'}</td>
                 <td><span class="fp-selo fp-sit--${ok ? 'suficiente' : 'falta'}">${ok ? 'Suficiente' : 'Insuficiente'}</span></td>
                 <td class="fp-acao ${ok ? 'fp-acao--nenhuma' : ''}">${ok ? 'Nenhuma'
-                  : `Comprar ${qtd(Math.max(0, x.restante - x.estoque), x.unidade)}${x.risco && x.risco.data ? ` até ${dataLonga(x.risco.data)}` : ''}`}</td>
+                  : `Repor ${qtd(Math.max(0, x.restante - x.estoque), x.unidade)}${x.risco && x.risco.data ? ` até ${dataLonga(x.risco.data)}` : ''}`}</td>
               </tr>`;
             }).join('')}</tbody>
           </table></div>
@@ -339,13 +339,19 @@ window.Telas.faltaProdutos = (function () {
     // Até hoje: depois de cada aplicação feita, o atual + o aplicado nas datas seguintes
     const ate = comAplicado.map((i) => [i, x0.estoque + ops.slice(i + 1).reduce((t, o) => t + o.aplicado, 0)]);
     // Previsto (dose recomendada): a partir do estoque atual, menos o recomendado de cada próxima aplicação
+    // 11/11/2026 (teste da usuária): o que ainda falta aplicar em datas até a última aplicação feita (operação feita só em
+    // parte dos talhões, ou atrasada) não volta no tempo: entra no primeiro ponto previsto depois dela, para a linha
+    // prevista sair do último ponto do Estoque atual e seguir sempre para a direita
     let usado = 0;
     const prev = ultimaFeita >= 0 ? [[ultimaFeita, x0.estoque]] : [];
     ops.forEach((o, i) => {
       if (!o.aFazer) return;
       usado += o.aFazer;
+      if (i <= ultimaFeita) return; // pendente de antes: soma no próximo ponto
       prev.push([i, x0.estoque - usado]); // abaixo de zero: o que falta comprar até essa aplicação
     });
+    // Sem nenhuma aplicação depois da última feita: o pendente cai no próprio ponto da última feita
+    if (prev.length === 1 && usado > 0) prev.push([ultimaFeita, x0.estoque - usado]);
     const max = Math.max(1, x0.estoque, ...ate.map(([, v]) => v));
     const min = Math.min(0, ...prev.map(([, v]) => v));
     const faixa = max - min;

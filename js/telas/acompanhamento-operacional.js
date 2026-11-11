@@ -11,9 +11,9 @@
  * Filtros (barra padronizada): Safra, Fazenda e Operação com uma escolha só (abre na safra atual, na primeira fazenda
  * dela e no Plantio); Cultura com várias; no Mais filtros, Empresa (só com o nível Empresa), Talhão e Grupo de operação.
  * Depois dos filtros, "Operação: Plantio" e:
- *   - os cartões Área executada (verde) e Área restante (cinza), com a barra e "63% de 10.000 ha planejados";
+ *   - os cartões Área executada (verde), Área em execução (azul) e Área planejada (cinza; antes Área restante; três cartões desde 11/11/2026), com a barra e "63% de 10.000 ha planejados";
  *   - Distribuição espacial: o mapa dos talhões da fazenda (o desenho do mapa do Plantio), pintados pela situação da
- *     operação: Executadas (verde, OS fechada), Em Execução (laranja, OS aberta e não fechada), Área restante (cinza, OS
+ *     operação: Executada (verde, OS fechada), Em execução (azul, OS aberta e não fechada), Planejada (cinza; antes Área restante; OS
  *     não aberta); talhão sem a operação, só o contorno. Na dica do talhão em execução, a área apontada ("45 de 85 ha
  *     apontados (53%)", simulada: o protótipo ainda não tem os apontamentos);
  *   - Evolução acumulada: a área executada acumulada (ha) por semana, até hoje.
@@ -43,8 +43,9 @@ window.Telas.acompanhamentoOperacional = (function () {
   const UNICOS = ['safra', 'fazenda', 'operacao'];
   const DEPENDE = { cultura: ['safra'], fazenda: ['safra', 'empresa', 'cultura'], talhao: ['safra', 'fazenda'],
     operacao: ['safra', 'cultura', 'fazenda', 'grupo'], operacaoV: ['safra', 'cultura', 'fazenda', 'grupo'] };
-  const COR = { executada: '#1f7a4d', execucao: '#e8772e', restante: '#c9cfcc' };
-  const NOME = { executada: 'Executada', execucao: 'Em execução', restante: 'Área restante' };
+  // Nomes e cores dos status do Calendário (11/11/2026): Executada verde, Em execução azul, Planejada cinza
+  const COR = { executada: '#1f9d55', execucao: '#1565C0', restante: '#8a948f' };
+  const NOME = { executada: 'Executada', execucao: 'Em execução', restante: 'Planejada' };
 
   let est = null;
   let caixaCorpo = null;
@@ -258,10 +259,10 @@ window.Telas.acompanhamentoOperacional = (function () {
           <h3 class="ao-cartao__titulo">${titulo}</h3>
           <p class="ao-cartao__numero">${Util.area(ha)}</p>
         </div>
-        <!-- 11/11/2026, imagem da usuária: a barra e, embaixo dela, à direita, "50% de 983 ha planejados" -->
+        <!-- 11/11/2026, imagem da usuária: a barra e, embaixo dela, à direita, "50% de 983 ha" -->
         <div class="ao-cartao__lado">
           <div class="ao-cartao__barra" role="img" aria-label="${pct(ha, total)}%"><span style="width: ${pct(ha, total)}%"></span></div>
-          <p class="ao-cartao__texto">${pct(ha, total)}% de ${Util.area(total)} planejados</p>
+          <p class="ao-cartao__texto">${pct(ha, total)}% de ${Util.area(total)}</p>
         </div>
       </section>`;
   }
@@ -325,9 +326,10 @@ window.Telas.acompanhamentoOperacional = (function () {
     const nomeOp = Array.isArray(est.operacao) && est.operacao[0];
     if (!nomeOp) return '<p class="ao-vazio cartao">Nenhuma operação planejada com esses filtros.</p>';
     const total = ls.reduce((s, l) => s + l.area, 0);
-    const executada = ls.filter((l) => l.situacao === 'executada').reduce((s, l) => s + l.area, 0);
+    const areaDe = (sit) => ls.filter((l) => l.situacao === sit).reduce((s, l) => s + l.area, 0);
+    const executada = areaDe('executada');
     const legenda = ['executada', 'execucao', 'restante'].map((s) => `
-      <li><span class="mapa-legenda__cor" style="background: ${COR[s]}"></span>${{ executada: 'Executadas', execucao: 'Em Execução', restante: 'Área restante' }[s]}</li>`).join('');
+      <li><span class="mapa-legenda__cor" style="background: ${COR[s]}"></span>${NOME[s]}</li>`).join('');
     // Nos títulos dos quadros (11/11/2026): "Distribuição espacial · 1ª Fungicida · DAP: 40"
     // O nome da operação em negrito; o "·" e o DAP em cinza, sem negrito
     const opDoQuadro = ` <span class="ao-quadro__op">· <strong>${esc(nomeOp)}</strong>${textoDap(ls).replace(/<[^>]+>/g, '')}</span>`;
@@ -336,7 +338,8 @@ window.Telas.acompanhamentoOperacional = (function () {
       ${!ls.length ? '<p class="ao-vazio cartao">Nenhum talhão com essa operação planejada nos filtros.</p>' : `
       <div class="ao-cartoes">
         ${cartao('executada', 'Área executada', executada, total)}
-        ${cartao('restante', 'Área restante', total - executada, total)}
+        ${cartao('execucao', 'Área em execução', areaDe('execucao'), total)}
+        ${cartao('restante', 'Área planejada', areaDe('restante'), total)}
       </div>
       <div class="ao-quadros ${classeQuadros()}">
         <section class="cartao ao-quadro ${classeQuadro('mapa')}">
@@ -383,7 +386,7 @@ window.Telas.acompanhamentoOperacional = (function () {
         : !l ? 'Sem a operação'
         : l.situacao === 'executada' ? `Executada · ${Util.area(l.area)} · ${Util.data(l.executada)} - ${Util.data(l.fechamento)}`
         : l.situacao === 'execucao' ? `Em execução · ${Util.area(l.apontado).replace(' ha', '')} de ${Util.area(l.area)} apontados (${pct(l.apontado, l.area)}%)`
-        : `Área restante · ${Util.area(l.area)} · planejada para ${Util.data(l.planejado)}`;
+        : `Planejada · ${Util.area(l.area)} · para ${Util.data(l.planejado)}`;
       poligono.bindTooltip(`<strong>${esc(pg.talhao)}</strong> · ${esc(detalhe)}`, { sticky: true, direction: 'top', className: 'mapa-detalhe' });
       // Visão Geral: o talhão e, embaixo, a operação atual
       const rotulo = visao && l ? `<span class="ao-rotulo" style="color: ${textoSobre(corOperacao(l.nome))}"><strong>${esc(pg.talhao)}</strong><span>${esc(resumir(l.nome))}</span></span>` : esc(pg.talhao);
@@ -512,7 +515,7 @@ window.Telas.acompanhamentoOperacional = (function () {
   // Subtítulo da página (o do cabeçalho de Operações), conforme a guia interna (11/11/2026)
   const SUBTITULO = {
     visao: 'Visualize a última operação registrada na Ordem de Serviço de cada talhão e sua distribuição espacial.',
-    progresso: 'Acompanhe a área executada, a área restante e a evolução ao longo do tempo da operação selecionada.'
+    progresso: 'Acompanhe a área executada, em execução e planejada e a evolução ao longo do tempo da operação selecionada.'
   };
   function trocarSubtitulo(conteudo) {
     const p = conteudo.querySelector('[data-ma-cabecalho] .cabecalho__subtitulo');

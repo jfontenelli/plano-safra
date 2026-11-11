@@ -106,8 +106,10 @@ window.Telas.centralCorp = (function () {
   // ----- Desenho -----
   function desenhar() {
     est = est || novoEstado();
+    // Última guia de Operações (11/11/2026; antes item do menu): o cabeçalho de Operações, com as guias
+    Telas.monitoramentoAplicacoes.marcarCentral();
     return `
-      ${Telas.gestaoLavoura.cabecalho('central')}
+      <header class="cabecalho oa-cabecalho ma-cabecalho">${Telas.monitoramentoAplicacoes.cabecalho('central')}</header>
       <div class="pagina oc cc">
         <section class="cartao oc-filtros" aria-label="Filtrar ordens de serviço" data-cc-filtros></section>
         <section class="oc-resumo" aria-labelledby="cc-visao-titulo">

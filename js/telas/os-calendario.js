@@ -196,7 +196,7 @@ window.Telas.osCalendario = (function () {
   // ref: a data de referência para os hectares previstos (cada operação conta uma vez): Planejada, o dia planejado;
   // Atrasada e Em execução, hoje; Finalizada, o fechamento da OS.
   // Ordem do ciclo da OS (11/11/2026), a mesma dos cartões na célula: não começou (Atrasada, Planejada), Em execução, Finalizada
-  const STATUS = [['atrasada', 'Atrasada'], ['planejada', 'Planejada'], ['execucao', 'Em execução'], ['finalizada', 'Finalizada']];
+  const STATUS = [['atrasada', 'Atrasada'], ['planejada', 'Planejada'], ['execucao', 'Em execução'], ['finalizada', 'Executada']]; // Executada: antes Finalizada (11/11/2026, o mesmo nome do Acompanhamento)
   const DICA_STATUS = {
     atrasada: 'O prazo planejado já passou e a OS não foi aberta.',
     execucao: 'A OS foi aberta e ainda não foi fechada.',
@@ -331,8 +331,8 @@ window.Telas.osCalendario = (function () {
     // "Finalizada: 10/10/2026 - 15/10/2026 (5 dias)", "Planejada: 15/10/2026"
     const nDias = (n) => `${n} ${n === 1 ? 'dia' : 'dias'}`;
     const dica = (l, { r }) => {
-      const situacao = r.status === 'finalizada' ? `Finalizada: ${Util.data(r.executada)} - ${Util.data(r.fechamento)} (${nDias(diasEntre(r.executada, r.fechamento))})`
-        : r.status === 'execucao' ? `Em Execução desde ${Util.data(r.executada)} (${nDias(r.emExecucao)})`
+      const situacao = r.status === 'finalizada' ? `Executada: ${Util.data(r.executada)} - ${Util.data(r.fechamento)} (${nDias(diasEntre(r.executada, r.fechamento))})`
+        : r.status === 'execucao' ? `Em execução desde ${Util.data(r.executada)} (${nDias(r.emExecucao)})`
         : r.status === 'atrasada' ? `Atrasada desde ${Util.data(Telas.monitoramentoAplicacoes.somaDias(r.ev.fim, 1))} (${nDias(r.atraso)})`
         : `Planejada: ${Util.data(r.ev.inicio)}`;
       return `${l.fazenda} · ${l.nome} · ${r.ev.nome}

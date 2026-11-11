@@ -3169,8 +3169,9 @@ html[data-tema="escuro"] .md-modo__botao--ativo { background: #176B50; }
 .md-grafico--larga .md-rotulo { font-size: 13px; }
 /* Planejada × Executada do Monitoramento: uma linha por talhão e uma coluna por operação (talhão e eixo parados à
    esquerda, nomes das operações parados no topo). Em cada operação, o ponto no zero e a barra do desvio */
-.ma-lista, .os-cal { --mt-adiantada: #1f6fd1; --mt-prazo: #1f9d55; --mt-atrasada: #e8772e; --mt-pendente: #d93025; --mt-futura: #9aa5ad; }
-html[data-tema="escuro"] .ma-lista, html[data-tema="escuro"] .os-cal { --mt-adiantada: #6FA8E8; --mt-prazo: #4FD28A; --mt-atrasada: #F0995A; --mt-pendente: #F28B82; --mt-futura: #7C8E9B; }
+/* Antecipada em roxo (11/11/2026; antes azul, que passou a ser o Em execução do Calendário e do Acompanhamento) */
+.ma-lista, .os-cal { --mt-adiantada: #7B4FC9; --mt-prazo: #1f9d55; --mt-atrasada: #e8772e; --mt-pendente: #d93025; --mt-futura: #9aa5ad; }
+html[data-tema="escuro"] .ma-lista, html[data-tema="escuro"] .os-cal { --mt-adiantada: #B79CF0; --mt-prazo: #4FD28A; --mt-atrasada: #F0995A; --mt-pendente: #F28B82; --mt-futura: #7C8E9B; }
 .mt-rolagem { max-height: calc(100vh - 330px); min-height: 220px; overflow: auto; border-top: 1px solid var(--borda); }
 .mt { width: max-content; min-width: 100%; }
 .mt-linha { display: flex; border-bottom: 1px solid var(--borda); }
@@ -3238,15 +3239,16 @@ html[data-tema="escuro"] .ma-lista, html[data-tema="escuro"] .os-cal { --mt-adia
 /* Executadas: Pendente com o mesmo ícone da tabela (bolinha com exclamação, em vermelho) */
 .ma-legenda__icone { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; color: var(--erro); }
 .ma-legenda__icone .icone { width: 20px; height: 20px; }
-.ma-st--adiantada { background: var(--info-fundo); }
+.ma-st--adiantada { background: #EFE8FA; }
+html[data-tema="escuro"] .ma-st--adiantada { background: #2E2442; }
 .ma-st--prazo     { background: var(--verde-100); }
 .ma-st--atrasada  { background: #fdebdc; }
 .ma-st--pendente  { background: #f6cfca; }
 .ma-st--futura    { background: var(--superficie-2); }
 /* Etiqueta do status na última célula da aplicação: fundo da legenda e texto na cor do status */
 .ma-etiqueta { display: inline-block; min-width: 42px; padding: 3px 10px; border-radius: 6px; font-weight: 600; text-align: center; font-variant-numeric: tabular-nums; }
-.ma-etiqueta.ma-st--adiantada { color: #1a5bb0; }
-html[data-tema="escuro"] .ma-etiqueta.ma-st--adiantada { color: #8FBCEF; }
+.ma-etiqueta.ma-st--adiantada { color: #5E35B1; }
+html[data-tema="escuro"] .ma-etiqueta.ma-st--adiantada { color: #C3A8F5; }
 .ma-etiqueta.ma-st--prazo     { color: var(--verde-700); }
 .ma-etiqueta.ma-st--atrasada  { color: #b9560f; }
 .ma-etiqueta.ma-st--pendente  { color: var(--erro); }
@@ -3785,14 +3787,14 @@ html[data-tema="escuro"] .cal-mestab__area { --f: color-mix(in srgb, var(--c) 24
 html[data-tema="escuro"] .cal-tal__barra { --f: color-mix(in srgb, var(--c) 24%, #15232D); }
 /* Status das operações (11/11/2026): o cartão do calendário antigo (o mesmo preenchimento, altura e largura, fundo claro
    na cor, sem contorno, nome em preto e negrito), com o ícone do status no lugar da bolinha, na cor do status:
-   Atrasada vermelho (com o selo dos dias de atraso); Em execução na cor do Defensivo (laranja; os dias só na dica);
-   Finalizada na cor do Plantio (verde); Planejada cinza. No escuro, o fundo é a cor misturada ao fundo do tema. */
+   Atrasada vermelho (com o selo dos dias de atraso); Em execução azul (11/11/2026; antes laranja, confundido com o
+   vermelho; os dias só na dica); Executada (antes Finalizada) verde; Planejada cinza. As mesmas cores no Acompanhamento. No escuro, o fundo é a cor misturada ao fundo do tema. */
 .cal-st--atrasada   { --c: #C62828; --f: #FCE8E6; }
-.cal-st--execucao   { --c: #e8772e; --f: #fdeee3; }
+.cal-st--execucao   { --c: #1565C0; --f: #E3EEFB; }
 .cal-st--finalizada { --c: #1f9d55; --f: #e3f4ea; }
 .cal-st--planejada  { --c: #8a948f; --f: #eef1f0; }
 html[data-tema="escuro"] .cal-st--atrasada   { --c: #F28B82; }
-html[data-tema="escuro"] .cal-st--execucao   { --c: #F0995A; }
+html[data-tema="escuro"] .cal-st--execucao   { --c: #6FA8E8; }
 html[data-tema="escuro"] .cal-st--finalizada { --c: #4FD28A; }
 html[data-tema="escuro"] .cal-st--planejada  { --c: #9AA8B1; }
 html[data-tema="escuro"] .cal-tal__barra[class*="cal-st--"] { --f: color-mix(in srgb, var(--c) 24%, #15232D); }
@@ -3814,7 +3816,8 @@ html[data-tema="escuro"] .cal-tal__barra[class*="cal-st--"] { --f: color-mix(in 
 /* Nome grande: quebra em até duas linhas (o resto em "…"; o nome inteiro na dica) */
 .cal-tal__nome { flex: 1; min-width: 0; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden;
   white-space: normal; overflow-wrap: anywhere; }
-.cal-tal__selo { flex-shrink: 0; margin-left: 4px; padding: 0 6px; border-radius: 999px; background: var(--superficie); color: var(--c);
+/* Dias de atraso sempre à direita do cartão (11/11/2026) */
+.cal-tal__selo { flex-shrink: 0; margin-left: auto; padding: 0 6px; border-radius: 999px; background: var(--superficie); color: var(--c);
   font-size: 11.5px; font-weight: 400; line-height: 18px; font-variant-numeric: tabular-nums; }
 html[data-tema="escuro"] .cal-tal__selo { background: rgba(0, 0, 0, .25); }
 .cal-tal__info { padding: 6px 16px; }
@@ -4446,6 +4449,8 @@ html[data-tema="escuro"] .fp-selo.fp-sit--falta { background: #4a2222; }
 /* Cartão que começa antes da área visível (11/11/2026): o ícone e o nome grudam logo depois da coluna Talhão ao rolar
    para o lado, como os eventos longos no Google Agenda (assim o nome nunca fica escondido) */
 .cal-tal__conteudo { position: sticky; left: calc(var(--info-largura, 140px) + 10px); display: flex; align-items: center; gap: 6px; min-width: 0; max-width: 100%; }
+/* Atrasada (só no dia ou na semana de hoje): o conteúdo ocupa o cartão, para os dias de atraso ficarem à direita (11/11/2026) */
+.cal-st--atrasada .cal-tal__conteudo { flex: 1; }
 
 /* ===== Operações › Acompanhamento Operacional (11/11/2026, imagem da usuária) ===== */
 .ao { display: flex; flex-direction: column; gap: 14px; }
@@ -4454,12 +4459,16 @@ html[data-tema="escuro"] .fp-selo.fp-sit--falta { background: #4a2222; }
 .ao-operacao strong { font-weight: 700; }
 .ao-operacao__dap { color: var(--texto-suave); }
 .ao-vazio { margin: 0; padding: 18px 20px; color: var(--texto-suave); }
-.ao-cartoes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.ao-cartoes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
 .ao-cartao { position: relative; overflow: hidden; display: flex; align-items: center; gap: 24px; padding: 16px 24px 16px 30px; }
 .ao-cartao::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 6px; background: var(--ao-c); }
-.ao-cartao--executada { --ao-c: #1f7a4d; }
-.ao-cartao--restante { --ao-c: #b9c0bc; }
-html[data-tema="escuro"] .ao-cartao--restante { --ao-c: #7C8E9B; }
+/* As cores dos status do Calendário (11/11/2026): Executada verde, Em execução azul, Planejada cinza */
+.ao-cartao--executada { --ao-c: #1f9d55; }
+.ao-cartao--execucao { --ao-c: #1565C0; }
+html[data-tema="escuro"] .ao-cartao--execucao { --ao-c: #6FA8E8; }
+.ao-cartao--restante { --ao-c: #8a948f; }
+html[data-tema="escuro"] .ao-cartao--executada { --ao-c: #4FD28A; }
+html[data-tema="escuro"] .ao-cartao--restante { --ao-c: #9AA8B1; }
 .ao-cartao__textos { flex: 0 0 auto; }
 .ao-cartao__titulo { margin: 0 0 2px; font-size: 15px; font-weight: 700; color: var(--texto); }
 .ao-cartao__numero { margin: 0 0 4px; font-size: 30px; font-weight: 700; line-height: 1.1; color: var(--texto); font-variant-numeric: tabular-nums; }
@@ -4556,7 +4565,7 @@ html[data-tema="escuro"] .ao-cartao--restante { --ao-c: #7C8E9B; }
             </a>
           </div>
         </div>
-        <!-- Gestão da Lavoura: Operações (com a guia Calendário, a primeira; 11/11/2026) e Central OS (o nome leva a Operações) -->
+        <!-- Gestão da Lavoura (11/11/2026): Operações (guias Acompanhamento, Calendário, Desvios de data e Central OS) e Estoque; o nome leva a Operações -->
         <div class="menu__grupo">
           <a class="menu__item menu__pai" href="#/planejado-executado" title="Gestão da Lavoura">
             <svg class="menu__icone" viewBox="0 0 24 24" aria-hidden="true">
@@ -4579,12 +4588,13 @@ html[data-tema="escuro"] .ao-cartao--restante { --ao-c: #7C8E9B; }
               </svg>
               <span class="menu__texto">Operações</span>
             </a>
-            <a class="menu__item menu__sub" href="#/central-os" data-rota="central-os" title="Central OS">
+            <!-- Estoque (11/11/2026): guias Desvios de dose e Risco de falta de produto. A Central OS virou a última guia de Operações -->
+            <a class="menu__item menu__sub" href="#/estoque" data-rota="estoque" title="Estoque">
               <svg class="menu__icone" viewBox="0 0 24 24" aria-hidden="true">
-                <!-- Documento -->
-                <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h6"/>
+                <!-- Armazém com as caixas -->
+                <path d="M3 21V9l9-5 9 5v12"/><path d="M7 21v-8h10v8"/><path d="M7 17h10"/>
               </svg>
-              <span class="menu__texto">Central OS</span>
+              <span class="menu__texto">Estoque</span>
             </a>
           </div>
         </div>
@@ -6832,6 +6842,7 @@ window.Telas.semPlanos = function (item) {
     calendario:   { titulo: 'Calendário', alvo: 'o Calendário', texto: TEXTO_PLANO, icone: Icones.calendario },
     'central-os': { titulo: 'Central OS', alvo: 'a Central OS', texto: TEXTO_PLANO, icone: Icones.documento },
     'planejado-executado': { titulo: 'Operações', alvo: 'as Operações', texto: TEXTO_PLANO, icone: Icones.prancheta },
+    estoque:      { titulo: 'Estoque', alvo: 'o Estoque', texto: TEXTO_PLANO, icone: Icones.caixaOk },
     orcamento:    { titulo: 'Orçamento de Insumos', alvo: 'o Orçamento de Insumos',
                     icone: '<svg viewBox="0 0 24 24"><path d="M21 8 12 3 3 8v8l9 5 9-5Z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg>',
                     texto: `O plano organiza a necessidade de insumos por safra, ${Util.comEmpresa() ? 'empresa, ' : ''}fazenda e cultura. Depois de criado, ele abre aqui automaticamente.` }
@@ -9531,8 +9542,10 @@ window.Telas.centralCorp = (function () {
   // ----- Desenho -----
   function desenhar() {
     est = est || novoEstado();
+    // Última guia de Operações (11/11/2026; antes item do menu): o cabeçalho de Operações, com as guias
+    Telas.monitoramentoAplicacoes.marcarCentral();
     return `
-      ${Telas.gestaoLavoura.cabecalho('central')}
+      <header class="cabecalho oa-cabecalho ma-cabecalho">${Telas.monitoramentoAplicacoes.cabecalho('central')}</header>
       <div class="pagina oc cc">
         <section class="cartao oc-filtros" aria-label="Filtrar ordens de serviço" data-cc-filtros></section>
         <section class="oc-resumo" aria-labelledby="cc-visao-titulo">
@@ -10101,7 +10114,7 @@ window.Telas.osCalendario = (function () {
   // ref: a data de referência para os hectares previstos (cada operação conta uma vez): Planejada, o dia planejado;
   // Atrasada e Em execução, hoje; Finalizada, o fechamento da OS.
   // Ordem do ciclo da OS (11/11/2026), a mesma dos cartões na célula: não começou (Atrasada, Planejada), Em execução, Finalizada
-  const STATUS = [['atrasada', 'Atrasada'], ['planejada', 'Planejada'], ['execucao', 'Em execução'], ['finalizada', 'Finalizada']];
+  const STATUS = [['atrasada', 'Atrasada'], ['planejada', 'Planejada'], ['execucao', 'Em execução'], ['finalizada', 'Executada']]; // Executada: antes Finalizada (11/11/2026, o mesmo nome do Acompanhamento)
   const DICA_STATUS = {
     atrasada: 'O prazo planejado já passou e a OS não foi aberta.',
     execucao: 'A OS foi aberta e ainda não foi fechada.',
@@ -10236,8 +10249,8 @@ window.Telas.osCalendario = (function () {
     // "Finalizada: 10/10/2026 - 15/10/2026 (5 dias)", "Planejada: 15/10/2026"
     const nDias = (n) => `${n} ${n === 1 ? 'dia' : 'dias'}`;
     const dica = (l, { r }) => {
-      const situacao = r.status === 'finalizada' ? `Finalizada: ${Util.data(r.executada)} - ${Util.data(r.fechamento)} (${nDias(diasEntre(r.executada, r.fechamento))})`
-        : r.status === 'execucao' ? `Em Execução desde ${Util.data(r.executada)} (${nDias(r.emExecucao)})`
+      const situacao = r.status === 'finalizada' ? `Executada: ${Util.data(r.executada)} - ${Util.data(r.fechamento)} (${nDias(diasEntre(r.executada, r.fechamento))})`
+        : r.status === 'execucao' ? `Em execução desde ${Util.data(r.executada)} (${nDias(r.emExecucao)})`
         : r.status === 'atrasada' ? `Atrasada desde ${Util.data(Telas.monitoramentoAplicacoes.somaDias(r.ev.fim, 1))} (${nDias(r.atraso)})`
         : `Planejada: ${Util.data(r.ev.inicio)}`;
       return `${l.fazenda} · ${l.nome} · ${r.ev.nome}
@@ -10732,7 +10745,7 @@ window.Telas.monitoramentoAplicacoes = (function () {
   function desenhar(guia) {
     est = est || novoEstado();
     if (guia && guia !== 'calendario') irParaGuia(guia);
-    guiaAtual = est.visao;
+    ultimaGuia[paginaDe(est.visao)] = est.visao;
     const cab = `<header class="cabecalho oa-cabecalho ma-cabecalho" data-ma-cabecalho>${cabecalho()}</header>`;
     if (est.visao === 'desvios') return Telas.desviosRecomendacao.desenhar(cab);
     if (est.visao === 'falta') return Telas.faltaProdutos.desenhar(cab);
@@ -10757,13 +10770,24 @@ window.Telas.monitoramentoAplicacoes = (function () {
     ['acompanhamento', 'Acompanhamento', 'Visualize a última operação registrada na Ordem de Serviço de cada talhão e sua distribuição espacial.'],
     ['tabela', 'Desvios de data', 'Compare as datas planejadas e executadas das operações por talhão.'],
     ['desvios', 'Desvios de dose', 'Analise os desvios entre o recomendado e o executado nas Ordens de Serviço, por produto, operação e nível de análise.'],
-    ['falta', 'Risco de falta de produto', 'Estime a falta de produtos para as operações planejadas.']
+    ['falta', 'Risco de falta de produto', 'Estime a falta de produtos para as operações planejadas.'],
+    // Central OS (11/11/2026: saiu do menu e virou a última guia de Operações): outra página (js/telas/central-corp.js, #/central-os)
+    ['central', 'Central OS', 'Acompanhe as ordens de serviço, recomendações e execução das operações agrícolas.']
   ];
-  const GUIAS_PAGINA = ['calendario', 'acompanhamento', 'tabela', 'desvios', 'falta'];
-  // Guia aberta por último: o item Operações do menu abre nela (no começo, o Calendário)
-  let guiaAtual = 'calendario';
-  const guiaAberta = () => guiaAtual;
-  const marcarCalendario = () => { guiaAtual = 'calendario'; };
+  // Duas páginas no menu Gestão da Lavoura (11/11/2026): Operações (Acompanhamento · Calendário · Desvios de data · Central OS)
+  // e Estoque (Desvios de dose · Risco de falta de produto), com o mesmo cabeçalho; o título é o da página
+  const PAGINAS = {
+    operacoes: { titulo: 'Operações', guias: ['acompanhamento', 'calendario', 'tabela', 'central'] },
+    estoque: { titulo: 'Estoque', guias: ['desvios', 'falta'] }
+  };
+  const paginaDe = (visao) => (PAGINAS.estoque.guias.includes(visao) ? 'estoque' : 'operacoes');
+  const hrefGuia = (id) => (id === 'calendario' ? '#/calendario-agricola' : id === 'central' ? '#/central-os'
+    : paginaDe(id) === 'estoque' ? `#/estoque/${id}` : `#/planejado-executado/${id}`);
+  // Guia aberta por último em cada página: o item do menu abre nela (no começo, a primeira: Acompanhamento e Desvios de dose)
+  const ultimaGuia = { operacoes: 'acompanhamento', estoque: 'desvios' };
+  const guiaAberta = (pagina = 'operacoes') => ultimaGuia[pagina];
+  const marcarCalendario = () => { ultimaGuia.operacoes = 'calendario'; };
+  const marcarCentral = () => { ultimaGuia.operacoes = 'central'; };
   // visao: a guia (o Calendário chama com 'calendario'). Só no Calendário, a etiqueta das versões publicadas.
   // Título da página (05/11/2026; antes "Planejado × Executado"): sempre "Operações", em qualquer guia (Desvios de data ·
   // Desvios de dose · Risco de falta de produto, antes Previsão de Falta de Produtos); o subtítulo é o da guia aberta.
@@ -10777,23 +10801,25 @@ window.Telas.monitoramentoAplicacoes = (function () {
   }
   function cabecalho(visao = est.visao) {
     const [, , subtitulo] = GUIAS.find(([id]) => id === visao);
+    const pagina = PAGINAS[paginaDe(visao)];
     const titulo = `
         <div class="oa-cabecalho__titulo">
-          <h1 class="cabecalho__titulo">Operações</h1>
+          <h1 class="cabecalho__titulo">${pagina.titulo}</h1>
           <p class="cabecalho__subtitulo">${subtitulo}</p>
         </div>`;
     // Dados atualizados (05/11/2026): a data e a hora em que a página foi aberta (no protótipo, os dados das OS fechadas e
     // dos estoques não vêm de um sistema), à direita do título, nas quatro guias (também no Calendário, 11/11/2026)
     return `
       <div class="oa-cabecalho__abas">${titulo}${seloAtualizacao()}</div>
-      <nav class="ma-guias" aria-label="Guias de Operações">
-        ${GUIAS_PAGINA.map((id) => `<a class="botao botao--p ${id === visao ? 'botao--primario' : 'botao--secundario'} ma-guia" href="${id === 'calendario' ? '#/calendario-agricola' : `#/planejado-executado/${id}`}"
+      <nav class="ma-guias" aria-label="Guias de ${pagina.titulo}">
+        ${pagina.guias.map((id) => `<a class="botao botao--p ${id === visao ? 'botao--primario' : 'botao--secundario'} ma-guia" href="${hrefGuia(id)}"
           ${id === visao ? 'aria-current="page"' : ''}>${GUIAS.find(([x]) => x === id)[1]}</a>`).join('')}
       </nav>`;
   }
   // Guia escolhida: o Calendário Agrícola é outra página; as demais, esta (vindo do Calendário: #/planejado-executado/tabela)
   function irParaGuia(visao) {
     if (visao === 'calendario') { location.hash = '#/calendario-agricola'; return; }
+    if (visao === 'central') { location.hash = '#/central-os'; return; }
     if (!GUIAS.some(([id]) => id === visao)) visao = 'tabela'; // guia que saiu (Executadas antiga, linha, duracao): abre em Operações
     if (est.visao !== visao) {
       est.visao = visao;
@@ -11325,7 +11351,7 @@ window.Telas.monitoramentoAplicacoes = (function () {
     return { executada: exec, fechamento: fechamento(p, talhao, op.nome, exec, Cal().prazoDe(op, g), i), os: osDe(p, talhao, op.nome) || null };
   }
 
-  return { desenhar, aoMostrar, cabecalho, estadoInicial, execucao, somaDias, guiaAberta, marcarCalendario };
+  return { desenhar, aoMostrar, cabecalho, estadoInicial, execucao, somaDias, guiaAberta, marcarCalendario, marcarCentral, paginaDe };
 })();
 
 </script>
@@ -12138,7 +12164,7 @@ window.Telas.faltaProdutos = (function () {
                 <td>${x.risco ? dataCurta(x.risco.data) : '—'}</td>
                 <td><span class="fp-selo fp-sit--${ok ? 'suficiente' : 'falta'}">${ok ? 'Suficiente' : 'Insuficiente'}</span></td>
                 <td class="fp-acao ${ok ? 'fp-acao--nenhuma' : ''}">${ok ? 'Nenhuma'
-                  : `Comprar ${qtd(Math.max(0, x.restante - x.estoque), x.unidade)}${x.risco && x.risco.data ? ` até ${dataLonga(x.risco.data)}` : ''}`}</td>
+                  : `Repor ${qtd(Math.max(0, x.restante - x.estoque), x.unidade)}${x.risco && x.risco.data ? ` até ${dataLonga(x.risco.data)}` : ''}`}</td>
               </tr>`;
             }).join('')}</tbody>
           </table></div>
@@ -12260,13 +12286,19 @@ window.Telas.faltaProdutos = (function () {
     // Até hoje: depois de cada aplicação feita, o atual + o aplicado nas datas seguintes
     const ate = comAplicado.map((i) => [i, x0.estoque + ops.slice(i + 1).reduce((t, o) => t + o.aplicado, 0)]);
     // Previsto (dose recomendada): a partir do estoque atual, menos o recomendado de cada próxima aplicação
+    // 11/11/2026 (teste da usuária): o que ainda falta aplicar em datas até a última aplicação feita (operação feita só em
+    // parte dos talhões, ou atrasada) não volta no tempo: entra no primeiro ponto previsto depois dela, para a linha
+    // prevista sair do último ponto do Estoque atual e seguir sempre para a direita
     let usado = 0;
     const prev = ultimaFeita >= 0 ? [[ultimaFeita, x0.estoque]] : [];
     ops.forEach((o, i) => {
       if (!o.aFazer) return;
       usado += o.aFazer;
+      if (i <= ultimaFeita) return; // pendente de antes: soma no próximo ponto
       prev.push([i, x0.estoque - usado]); // abaixo de zero: o que falta comprar até essa aplicação
     });
+    // Sem nenhuma aplicação depois da última feita: o pendente cai no próprio ponto da última feita
+    if (prev.length === 1 && usado > 0) prev.push([ultimaFeita, x0.estoque - usado]);
     const max = Math.max(1, x0.estoque, ...ate.map(([, v]) => v));
     const min = Math.min(0, ...prev.map(([, v]) => v));
     const faixa = max - min;
@@ -12656,9 +12688,9 @@ window.Telas.faltaProdutos = (function () {
  * Filtros (barra padronizada): Safra, Fazenda e Operação com uma escolha só (abre na safra atual, na primeira fazenda
  * dela e no Plantio); Cultura com várias; no Mais filtros, Empresa (só com o nível Empresa), Talhão e Grupo de operação.
  * Depois dos filtros, "Operação: Plantio" e:
- *   - os cartões Área executada (verde) e Área restante (cinza), com a barra e "63% de 10.000 ha planejados";
+ *   - os cartões Área executada (verde), Área em execução (azul) e Área planejada (cinza; antes Área restante; três cartões desde 11/11/2026), com a barra e "63% de 10.000 ha planejados";
  *   - Distribuição espacial: o mapa dos talhões da fazenda (o desenho do mapa do Plantio), pintados pela situação da
- *     operação: Executadas (verde, OS fechada), Em Execução (laranja, OS aberta e não fechada), Área restante (cinza, OS
+ *     operação: Executada (verde, OS fechada), Em execução (azul, OS aberta e não fechada), Planejada (cinza; antes Área restante; OS
  *     não aberta); talhão sem a operação, só o contorno. Na dica do talhão em execução, a área apontada ("45 de 85 ha
  *     apontados (53%)", simulada: o protótipo ainda não tem os apontamentos);
  *   - Evolução acumulada: a área executada acumulada (ha) por semana, até hoje.
@@ -12688,8 +12720,9 @@ window.Telas.acompanhamentoOperacional = (function () {
   const UNICOS = ['safra', 'fazenda', 'operacao'];
   const DEPENDE = { cultura: ['safra'], fazenda: ['safra', 'empresa', 'cultura'], talhao: ['safra', 'fazenda'],
     operacao: ['safra', 'cultura', 'fazenda', 'grupo'], operacaoV: ['safra', 'cultura', 'fazenda', 'grupo'] };
-  const COR = { executada: '#1f7a4d', execucao: '#e8772e', restante: '#c9cfcc' };
-  const NOME = { executada: 'Executada', execucao: 'Em execução', restante: 'Área restante' };
+  // Nomes e cores dos status do Calendário (11/11/2026): Executada verde, Em execução azul, Planejada cinza
+  const COR = { executada: '#1f9d55', execucao: '#1565C0', restante: '#8a948f' };
+  const NOME = { executada: 'Executada', execucao: 'Em execução', restante: 'Planejada' };
 
   let est = null;
   let caixaCorpo = null;
@@ -12903,10 +12936,10 @@ window.Telas.acompanhamentoOperacional = (function () {
           <h3 class="ao-cartao__titulo">${titulo}</h3>
           <p class="ao-cartao__numero">${Util.area(ha)}</p>
         </div>
-        <!-- 11/11/2026, imagem da usuária: a barra e, embaixo dela, à direita, "50% de 983 ha planejados" -->
+        <!-- 11/11/2026, imagem da usuária: a barra e, embaixo dela, à direita, "50% de 983 ha" -->
         <div class="ao-cartao__lado">
           <div class="ao-cartao__barra" role="img" aria-label="${pct(ha, total)}%"><span style="width: ${pct(ha, total)}%"></span></div>
-          <p class="ao-cartao__texto">${pct(ha, total)}% de ${Util.area(total)} planejados</p>
+          <p class="ao-cartao__texto">${pct(ha, total)}% de ${Util.area(total)}</p>
         </div>
       </section>`;
   }
@@ -12970,9 +13003,10 @@ window.Telas.acompanhamentoOperacional = (function () {
     const nomeOp = Array.isArray(est.operacao) && est.operacao[0];
     if (!nomeOp) return '<p class="ao-vazio cartao">Nenhuma operação planejada com esses filtros.</p>';
     const total = ls.reduce((s, l) => s + l.area, 0);
-    const executada = ls.filter((l) => l.situacao === 'executada').reduce((s, l) => s + l.area, 0);
+    const areaDe = (sit) => ls.filter((l) => l.situacao === sit).reduce((s, l) => s + l.area, 0);
+    const executada = areaDe('executada');
     const legenda = ['executada', 'execucao', 'restante'].map((s) => `
-      <li><span class="mapa-legenda__cor" style="background: ${COR[s]}"></span>${{ executada: 'Executadas', execucao: 'Em Execução', restante: 'Área restante' }[s]}</li>`).join('');
+      <li><span class="mapa-legenda__cor" style="background: ${COR[s]}"></span>${NOME[s]}</li>`).join('');
     // Nos títulos dos quadros (11/11/2026): "Distribuição espacial · 1ª Fungicida · DAP: 40"
     // O nome da operação em negrito; o "·" e o DAP em cinza, sem negrito
     const opDoQuadro = ` <span class="ao-quadro__op">· <strong>${esc(nomeOp)}</strong>${textoDap(ls).replace(/<[^>]+>/g, '')}</span>`;
@@ -12981,7 +13015,8 @@ window.Telas.acompanhamentoOperacional = (function () {
       ${!ls.length ? '<p class="ao-vazio cartao">Nenhum talhão com essa operação planejada nos filtros.</p>' : `
       <div class="ao-cartoes">
         ${cartao('executada', 'Área executada', executada, total)}
-        ${cartao('restante', 'Área restante', total - executada, total)}
+        ${cartao('execucao', 'Área em execução', areaDe('execucao'), total)}
+        ${cartao('restante', 'Área planejada', areaDe('restante'), total)}
       </div>
       <div class="ao-quadros ${classeQuadros()}">
         <section class="cartao ao-quadro ${classeQuadro('mapa')}">
@@ -13028,7 +13063,7 @@ window.Telas.acompanhamentoOperacional = (function () {
         : !l ? 'Sem a operação'
         : l.situacao === 'executada' ? `Executada · ${Util.area(l.area)} · ${Util.data(l.executada)} - ${Util.data(l.fechamento)}`
         : l.situacao === 'execucao' ? `Em execução · ${Util.area(l.apontado).replace(' ha', '')} de ${Util.area(l.area)} apontados (${pct(l.apontado, l.area)}%)`
-        : `Área restante · ${Util.area(l.area)} · planejada para ${Util.data(l.planejado)}`;
+        : `Planejada · ${Util.area(l.area)} · para ${Util.data(l.planejado)}`;
       poligono.bindTooltip(`<strong>${esc(pg.talhao)}</strong> · ${esc(detalhe)}`, { sticky: true, direction: 'top', className: 'mapa-detalhe' });
       // Visão Geral: o talhão e, embaixo, a operação atual
       const rotulo = visao && l ? `<span class="ao-rotulo" style="color: ${textoSobre(corOperacao(l.nome))}"><strong>${esc(pg.talhao)}</strong><span>${esc(resumir(l.nome))}</span></span>` : esc(pg.talhao);
@@ -13157,7 +13192,7 @@ window.Telas.acompanhamentoOperacional = (function () {
   // Subtítulo da página (o do cabeçalho de Operações), conforme a guia interna (11/11/2026)
   const SUBTITULO = {
     visao: 'Visualize a última operação registrada na Ordem de Serviço de cada talhão e sua distribuição espacial.',
-    progresso: 'Acompanhe a área executada, a área restante e a evolução ao longo do tempo da operação selecionada.'
+    progresso: 'Acompanhe a área executada, em execução e planejada e a evolução ao longo do tempo da operação selecionada.'
   };
   function trocarSubtitulo(conteudo) {
     const p = conteudo.querySelector('[data-ma-cabecalho] .cabecalho__subtitulo');
@@ -20172,13 +20207,16 @@ window.Configuracoes = (function () {
     'orcamento':      { titulo: 'Orçamento de Insumos', menu: 'orcamento',
                         desenhar: () => temPlanos() ? Telas.orcamento.desenhar() : Telas.semPlanos('orcamento'),
                         aoMostrar: (conteudo) => { if (temPlanos()) Telas.orcamento.aoMostrar(conteudo); } },
-    // Gestão da Lavoura (vários planos somados), dois itens no menu (11/11/2026): Operações (com as guias Calendário,
-    // Desvios de data, Desvios de dose e Risco de falta de produto; o nome do grupo leva a ele) e Central OS.
-    // O Calendário é a primeira guia de Operações (antes item do menu): no menu, fica destacado Operações
+    // Gestão da Lavoura (vários planos somados), dois itens no menu (11/11/2026): Operações (guias Acompanhamento,
+    // Calendário, Desvios de data e Central OS; o nome do grupo leva a ele) e Estoque (guias Desvios de dose e Risco de
+    // falta de produto). Calendário e Central OS são guias de Operações (antes itens do menu): no menu, fica destacado Operações
     'calendario-agricola': { titulo: 'Calendário · Operações', menu: 'planejado-executado',
                         desenhar: () => temPlanos() ? Telas.osCalendario.desenhar() : Telas.semPlanos('calendario'),
                         aoMostrar: (conteudo) => { if (temPlanos()) Telas.osCalendario.aoMostrar(conteudo); } },
-    'central-os':     { titulo: 'Central OS', menu: 'central-os',
+    'estoque':        { titulo: 'Estoque', menu: 'estoque',
+                        desenhar: (guia) => temPlanos() ? Telas.monitoramentoAplicacoes.desenhar(guia) : Telas.semPlanos('estoque'),
+                        aoMostrar: (conteudo, guia) => { if (temPlanos()) Telas.monitoramentoAplicacoes.aoMostrar(conteudo, guia); } },
+    'central-os':     { titulo: 'Central OS · Operações', menu: 'planejado-executado',
                         desenhar: () => temPlanos() ? Telas.centralCorp.desenhar() : Telas.semPlanos('central-os'),
                         aoMostrar: (conteudo) => { if (temPlanos()) Telas.centralCorp.aoMostrar(conteudo); } },
     'planejado-executado': { titulo: 'Operações', menu: 'planejado-executado',
@@ -20216,10 +20254,22 @@ window.Configuracoes = (function () {
     const [nome, parametro, extra] = location.hash.replace(/^#\/?/, '').split('/');
     // Endereço desconhecido (inclusive o antigo #/planejamento): a lista de planos; nenhum plano abre sozinho
     if (!ROTAS[nome]) return { nome: ROTA_INICIAL };
-    // Operações sem guia no endereço (o item do menu): a guia aberta por último; no começo, o Calendário
-    if (nome === 'planejado-executado' && !parametro && Telas.monitoramentoAplicacoes.guiaAberta() === 'calendario') {
-      history.replaceState(null, '', '#/calendario-agricola');
-      return { nome: 'calendario-agricola' };
+    // Operações e Estoque (11/11/2026). Sem guia no endereço (o item do menu): a guia aberta por último; no começo, a
+    // primeira (Acompanhamento; Desvios de dose). Guia da outra página (ex.: o antigo #/planejado-executado/falta): vai
+    // para a página dela. Calendário e Central OS são páginas à parte, com o cabeçalho de Operações
+    if (nome === 'planejado-executado' || nome === 'estoque') {
+      const MA = Telas.monitoramentoAplicacoes;
+      let pagina = nome === 'estoque' ? 'estoque' : 'operacoes';
+      let guia = parametro;
+      if (guia && MA.paginaDe(guia) !== pagina) {
+        if (pagina === 'operacoes') pagina = 'estoque'; else guia = null;
+      }
+      if (!guia) guia = MA.guiaAberta(pagina);
+      const destino = guia === 'calendario' ? 'calendario-agricola' : guia === 'central' ? 'central-os'
+        : pagina === 'estoque' ? 'estoque' : 'planejado-executado';
+      const hash = ['calendario-agricola', 'central-os'].includes(destino) ? `#/${destino}` : `#/${destino}/${guia}`;
+      if (location.hash !== hash) history.replaceState(null, '', hash);
+      return { nome: destino, parametro: hash.split('/')[2] };
     }
     // Plano que não existe mais (ex.: página recarregada) volta para a lista
     if (nome === 'plano' && !buscarPlano(parametro)) return { nome: ROTA_INICIAL };

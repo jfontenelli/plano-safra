@@ -12,6 +12,7 @@ window.Telas.semPlanos = function (item) {
     calendario:   { titulo: 'Calendário', alvo: 'o Calendário', texto: TEXTO_PLANO, icone: Icones.calendario },
     'central-os': { titulo: 'Central OS', alvo: 'a Central OS', texto: TEXTO_PLANO, icone: Icones.documento },
     'planejado-executado': { titulo: 'Operações', alvo: 'as Operações', texto: TEXTO_PLANO, icone: Icones.prancheta },
+    estoque:      { titulo: 'Estoque', alvo: 'o Estoque', texto: TEXTO_PLANO, icone: Icones.caixaOk },
     orcamento:    { titulo: 'Orçamento de Insumos', alvo: 'o Orçamento de Insumos',
                     icone: '<svg viewBox="0 0 24 24"><path d="M21 8 12 3 3 8v8l9 5 9-5Z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg>',
                     texto: `O plano organiza a necessidade de insumos por safra, ${Util.comEmpresa() ? 'empresa, ' : ''}fazenda e cultura. Depois de criado, ele abre aqui automaticamente.` }

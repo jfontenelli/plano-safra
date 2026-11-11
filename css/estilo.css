@@ -3159,8 +3159,9 @@ html[data-tema="escuro"] .md-modo__botao--ativo { background: #176B50; }
 .md-grafico--larga .md-rotulo { font-size: 13px; }
 /* Planejada × Executada do Monitoramento: uma linha por talhão e uma coluna por operação (talhão e eixo parados à
    esquerda, nomes das operações parados no topo). Em cada operação, o ponto no zero e a barra do desvio */
-.ma-lista, .os-cal { --mt-adiantada: #1f6fd1; --mt-prazo: #1f9d55; --mt-atrasada: #e8772e; --mt-pendente: #d93025; --mt-futura: #9aa5ad; }
-html[data-tema="escuro"] .ma-lista, html[data-tema="escuro"] .os-cal { --mt-adiantada: #6FA8E8; --mt-prazo: #4FD28A; --mt-atrasada: #F0995A; --mt-pendente: #F28B82; --mt-futura: #7C8E9B; }
+/* Antecipada em roxo (11/11/2026; antes azul, que passou a ser o Em execução do Calendário e do Acompanhamento) */
+.ma-lista, .os-cal { --mt-adiantada: #7B4FC9; --mt-prazo: #1f9d55; --mt-atrasada: #e8772e; --mt-pendente: #d93025; --mt-futura: #9aa5ad; }
+html[data-tema="escuro"] .ma-lista, html[data-tema="escuro"] .os-cal { --mt-adiantada: #B79CF0; --mt-prazo: #4FD28A; --mt-atrasada: #F0995A; --mt-pendente: #F28B82; --mt-futura: #7C8E9B; }
 .mt-rolagem { max-height: calc(100vh - 330px); min-height: 220px; overflow: auto; border-top: 1px solid var(--borda); }
 .mt { width: max-content; min-width: 100%; }
 .mt-linha { display: flex; border-bottom: 1px solid var(--borda); }
@@ -3228,15 +3229,16 @@ html[data-tema="escuro"] .ma-lista, html[data-tema="escuro"] .os-cal { --mt-adia
 /* Executadas: Pendente com o mesmo ícone da tabela (bolinha com exclamação, em vermelho) */
 .ma-legenda__icone { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; color: var(--erro); }
 .ma-legenda__icone .icone { width: 20px; height: 20px; }
-.ma-st--adiantada { background: var(--info-fundo); }
+.ma-st--adiantada { background: #EFE8FA; }
+html[data-tema="escuro"] .ma-st--adiantada { background: #2E2442; }
 .ma-st--prazo     { background: var(--verde-100); }
 .ma-st--atrasada  { background: #fdebdc; }
 .ma-st--pendente  { background: #f6cfca; }
 .ma-st--futura    { background: var(--superficie-2); }
 /* Etiqueta do status na última célula da aplicação: fundo da legenda e texto na cor do status */
 .ma-etiqueta { display: inline-block; min-width: 42px; padding: 3px 10px; border-radius: 6px; font-weight: 600; text-align: center; font-variant-numeric: tabular-nums; }
-.ma-etiqueta.ma-st--adiantada { color: #1a5bb0; }
-html[data-tema="escuro"] .ma-etiqueta.ma-st--adiantada { color: #8FBCEF; }
+.ma-etiqueta.ma-st--adiantada { color: #5E35B1; }
+html[data-tema="escuro"] .ma-etiqueta.ma-st--adiantada { color: #C3A8F5; }
 .ma-etiqueta.ma-st--prazo     { color: var(--verde-700); }
 .ma-etiqueta.ma-st--atrasada  { color: #b9560f; }
 .ma-etiqueta.ma-st--pendente  { color: var(--erro); }
@@ -3775,14 +3777,14 @@ html[data-tema="escuro"] .cal-mestab__area { --f: color-mix(in srgb, var(--c) 24
 html[data-tema="escuro"] .cal-tal__barra { --f: color-mix(in srgb, var(--c) 24%, #15232D); }
 /* Status das operações (11/11/2026): o cartão do calendário antigo (o mesmo preenchimento, altura e largura, fundo claro
    na cor, sem contorno, nome em preto e negrito), com o ícone do status no lugar da bolinha, na cor do status:
-   Atrasada vermelho (com o selo dos dias de atraso); Em execução na cor do Defensivo (laranja; os dias só na dica);
-   Finalizada na cor do Plantio (verde); Planejada cinza. No escuro, o fundo é a cor misturada ao fundo do tema. */
+   Atrasada vermelho (com o selo dos dias de atraso); Em execução azul (11/11/2026; antes laranja, confundido com o
+   vermelho; os dias só na dica); Executada (antes Finalizada) verde; Planejada cinza. As mesmas cores no Acompanhamento. No escuro, o fundo é a cor misturada ao fundo do tema. */
 .cal-st--atrasada   { --c: #C62828; --f: #FCE8E6; }
-.cal-st--execucao   { --c: #e8772e; --f: #fdeee3; }
+.cal-st--execucao   { --c: #1565C0; --f: #E3EEFB; }
 .cal-st--finalizada { --c: #1f9d55; --f: #e3f4ea; }
 .cal-st--planejada  { --c: #8a948f; --f: #eef1f0; }
 html[data-tema="escuro"] .cal-st--atrasada   { --c: #F28B82; }
-html[data-tema="escuro"] .cal-st--execucao   { --c: #F0995A; }
+html[data-tema="escuro"] .cal-st--execucao   { --c: #6FA8E8; }
 html[data-tema="escuro"] .cal-st--finalizada { --c: #4FD28A; }
 html[data-tema="escuro"] .cal-st--planejada  { --c: #9AA8B1; }
 html[data-tema="escuro"] .cal-tal__barra[class*="cal-st--"] { --f: color-mix(in srgb, var(--c) 24%, #15232D); }
@@ -3804,7 +3806,8 @@ html[data-tema="escuro"] .cal-tal__barra[class*="cal-st--"] { --f: color-mix(in 
 /* Nome grande: quebra em até duas linhas (o resto em "…"; o nome inteiro na dica) */
 .cal-tal__nome { flex: 1; min-width: 0; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden;
   white-space: normal; overflow-wrap: anywhere; }
-.cal-tal__selo { flex-shrink: 0; margin-left: 4px; padding: 0 6px; border-radius: 999px; background: var(--superficie); color: var(--c);
+/* Dias de atraso sempre à direita do cartão (11/11/2026) */
+.cal-tal__selo { flex-shrink: 0; margin-left: auto; padding: 0 6px; border-radius: 999px; background: var(--superficie); color: var(--c);
   font-size: 11.5px; font-weight: 400; line-height: 18px; font-variant-numeric: tabular-nums; }
 html[data-tema="escuro"] .cal-tal__selo { background: rgba(0, 0, 0, .25); }
 .cal-tal__info { padding: 6px 16px; }
@@ -4436,6 +4439,8 @@ html[data-tema="escuro"] .fp-selo.fp-sit--falta { background: #4a2222; }
 /* Cartão que começa antes da área visível (11/11/2026): o ícone e o nome grudam logo depois da coluna Talhão ao rolar
    para o lado, como os eventos longos no Google Agenda (assim o nome nunca fica escondido) */
 .cal-tal__conteudo { position: sticky; left: calc(var(--info-largura, 140px) + 10px); display: flex; align-items: center; gap: 6px; min-width: 0; max-width: 100%; }
+/* Atrasada (só no dia ou na semana de hoje): o conteúdo ocupa o cartão, para os dias de atraso ficarem à direita (11/11/2026) */
+.cal-st--atrasada .cal-tal__conteudo { flex: 1; }
 
 /* ===== Operações › Acompanhamento Operacional (11/11/2026, imagem da usuária) ===== */
 .ao { display: flex; flex-direction: column; gap: 14px; }
@@ -4444,12 +4449,16 @@ html[data-tema="escuro"] .fp-selo.fp-sit--falta { background: #4a2222; }
 .ao-operacao strong { font-weight: 700; }
 .ao-operacao__dap { color: var(--texto-suave); }
 .ao-vazio { margin: 0; padding: 18px 20px; color: var(--texto-suave); }
-.ao-cartoes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.ao-cartoes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
 .ao-cartao { position: relative; overflow: hidden; display: flex; align-items: center; gap: 24px; padding: 16px 24px 16px 30px; }
 .ao-cartao::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 6px; background: var(--ao-c); }
-.ao-cartao--executada { --ao-c: #1f7a4d; }
-.ao-cartao--restante { --ao-c: #b9c0bc; }
-html[data-tema="escuro"] .ao-cartao--restante { --ao-c: #7C8E9B; }
+/* As cores dos status do Calendário (11/11/2026): Executada verde, Em execução azul, Planejada cinza */
+.ao-cartao--executada { --ao-c: #1f9d55; }
+.ao-cartao--execucao { --ao-c: #1565C0; }
+html[data-tema="escuro"] .ao-cartao--execucao { --ao-c: #6FA8E8; }
+.ao-cartao--restante { --ao-c: #8a948f; }
+html[data-tema="escuro"] .ao-cartao--executada { --ao-c: #4FD28A; }
+html[data-tema="escuro"] .ao-cartao--restante { --ao-c: #9AA8B1; }
 .ao-cartao__textos { flex: 0 0 auto; }
 .ao-cartao__titulo { margin: 0 0 2px; font-size: 15px; font-weight: 700; color: var(--texto); }
 .ao-cartao__numero { margin: 0 0 4px; font-size: 30px; font-weight: 700; line-height: 1.1; color: var(--texto); font-variant-numeric: tabular-nums; }

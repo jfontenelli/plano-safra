@@ -20,13 +20,16 @@
     'orcamento':      { titulo: 'Orçamento de Insumos', menu: 'orcamento',
                         desenhar: () => temPlanos() ? Telas.orcamento.desenhar() : Telas.semPlanos('orcamento'),
                         aoMostrar: (conteudo) => { if (temPlanos()) Telas.orcamento.aoMostrar(conteudo); } },
-    // Gestão da Lavoura (vários planos somados), dois itens no menu (11/11/2026): Operações (com as guias Calendário,
-    // Desvios de data, Desvios de dose e Risco de falta de produto; o nome do grupo leva a ele) e Central OS.
-    // O Calendário é a primeira guia de Operações (antes item do menu): no menu, fica destacado Operações
+    // Gestão da Lavoura (vários planos somados), dois itens no menu (11/11/2026): Operações (guias Acompanhamento,
+    // Calendário, Desvios de data e Central OS; o nome do grupo leva a ele) e Estoque (guias Desvios de dose e Risco de
+    // falta de produto). Calendário e Central OS são guias de Operações (antes itens do menu): no menu, fica destacado Operações
     'calendario-agricola': { titulo: 'Calendário · Operações', menu: 'planejado-executado',
                         desenhar: () => temPlanos() ? Telas.osCalendario.desenhar() : Telas.semPlanos('calendario'),
                         aoMostrar: (conteudo) => { if (temPlanos()) Telas.osCalendario.aoMostrar(conteudo); } },
-    'central-os':     { titulo: 'Central OS', menu: 'central-os',
+    'estoque':        { titulo: 'Estoque', menu: 'estoque',
+                        desenhar: (guia) => temPlanos() ? Telas.monitoramentoAplicacoes.desenhar(guia) : Telas.semPlanos('estoque'),
+                        aoMostrar: (conteudo, guia) => { if (temPlanos()) Telas.monitoramentoAplicacoes.aoMostrar(conteudo, guia); } },
+    'central-os':     { titulo: 'Central OS · Operações', menu: 'planejado-executado',
                         desenhar: () => temPlanos() ? Telas.centralCorp.desenhar() : Telas.semPlanos('central-os'),
                         aoMostrar: (conteudo) => { if (temPlanos()) Telas.centralCorp.aoMostrar(conteudo); } },
     'planejado-executado': { titulo: 'Operações', menu: 'planejado-executado',
@@ -64,10 +67,22 @@
     const [nome, parametro, extra] = location.hash.replace(/^#\/?/, '').split('/');
     // Endereço desconhecido (inclusive o antigo #/planejamento): a lista de planos; nenhum plano abre sozinho
     if (!ROTAS[nome]) return { nome: ROTA_INICIAL };
-    // Operações sem guia no endereço (o item do menu): a guia aberta por último; no começo, o Calendário
-    if (nome === 'planejado-executado' && !parametro && Telas.monitoramentoAplicacoes.guiaAberta() === 'calendario') {
-      history.replaceState(null, '', '#/calendario-agricola');
-      return { nome: 'calendario-agricola' };
+    // Operações e Estoque (11/11/2026). Sem guia no endereço (o item do menu): a guia aberta por último; no começo, a
+    // primeira (Acompanhamento; Desvios de dose). Guia da outra página (ex.: o antigo #/planejado-executado/falta): vai
+    // para a página dela. Calendário e Central OS são páginas à parte, com o cabeçalho de Operações
+    if (nome === 'planejado-executado' || nome === 'estoque') {
+      const MA = Telas.monitoramentoAplicacoes;
+      let pagina = nome === 'estoque' ? 'estoque' : 'operacoes';
+      let guia = parametro;
+      if (guia && MA.paginaDe(guia) !== pagina) {
+        if (pagina === 'operacoes') pagina = 'estoque'; else guia = null;
+      }
+      if (!guia) guia = MA.guiaAberta(pagina);
+      const destino = guia === 'calendario' ? 'calendario-agricola' : guia === 'central' ? 'central-os'
+        : pagina === 'estoque' ? 'estoque' : 'planejado-executado';
+      const hash = ['calendario-agricola', 'central-os'].includes(destino) ? `#/${destino}` : `#/${destino}/${guia}`;
+      if (location.hash !== hash) history.replaceState(null, '', hash);
+      return { nome: destino, parametro: hash.split('/')[2] };
     }
     // Plano que não existe mais (ex.: página recarregada) volta para a lista
     if (nome === 'plano' && !buscarPlano(parametro)) return { nome: ROTA_INICIAL };
