@@ -68,6 +68,8 @@ window.Telas.acompanhamentoOperacional = (function () {
   const dapDe = (g, op) => (g.tipo === 'Sementes' ? 0 : g.tipo === 'Colheita' || op.dap === null || op.dap === undefined || op.dap === '' ? Infinity : Number(op.dap));
 
   function opcoes(chave) {
+    // Visão Atual (operacaoV): a Operação como antes, só pelo DAP; o formato com Plantio e Colheita no topo é só do Progresso
+    const daVisao = chave === 'operacaoV';
     if (chave === 'operacaoV') chave = 'operacao';
     const lista = (vals) => vals.map((x) => ({ valor: x, nome: x }));
     if (chave === 'safra') return lista(Util.ordenarSafras(comPublicada().map((p) => p.safra)));
@@ -106,8 +108,11 @@ window.Telas.acompanhamentoOperacional = (function () {
     })));
     // 11/11/2026: Plantio e Colheita primeiro (nesta ordem); depois as demais pelo DAP e, no mesmo DAP, em ordem alfabética.
     // Ao lado de cada uma, a regra do DAP de antes: "DAP 45" (a Colheita, que vem do ciclo, com o nome do grupo)
-    const topo = (o) => (o.plantio ? 0 : o.colheita ? 1 : 2);
-    return [...porNome.values()].sort((a, b) => topo(a) - topo(b) || a.dap - b.dap || a.nome.localeCompare(b.nome, 'pt-BR', { numeric: true }));
+    // Entre Plantio/Colheita e as demais, um traço separador (o filtro no formato do Talhão, sem o Todos)
+    const topo = (o) => (daVisao ? 2 : o.plantio ? 0 : o.colheita ? 1 : 2);
+    const ordenadas = [...porNome.values()].sort((a, b) => topo(a) - topo(b) || a.dap - b.dap || a.nome.localeCompare(b.nome, 'pt-BR', { numeric: true }));
+    ordenadas.forEach((o, i) => { o.separar = topo(o) < 2 && !!ordenadas[i + 1] && topo(ordenadas[i + 1]) === 2; });
+    return ordenadas;
   }
 
   // Operação padrão do Progresso da Operação (11/11/2026): a de data planejada (pelo DAP) mais perto de hoje, nos talhões

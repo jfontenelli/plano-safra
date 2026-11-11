@@ -902,7 +902,7 @@ window.Telas.calendario = (function () {
             <label class="cal-filtro__opcao" data-nome="${esc(Util.normalizar(o.nome))}" ${casaBusca(estado, chave, o.nome) ? '' : 'hidden'}>
               <input type="${unico ? 'radio' : 'checkbox'}" ${unico ? `name="cal-unico-${chave}"` : ''} data-campo="cal-filtro" data-filtro="${chave}" value="${esc(o.valor)}" ${marcado(estado, chave, o.valor) ? 'checked' : ''}>
               <span>${esc(o.nome)}</span>${o.extra ? `<span class="cal-filtro__area">${esc(o.extra)}</span>` : ''}
-            </label>`).join('')}
+            </label>${o.separar ? '<hr class="cal-filtro__separador" aria-hidden="true">' : ''}`).join('')}
           <p class="cal-filtro__nada" ${opcoes.some((o) => casaBusca(estado, chave, o.nome)) ? 'hidden' : ''}>Nada encontrado</p>
         </div>
       </details>`;

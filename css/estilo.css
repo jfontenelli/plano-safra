@@ -2137,6 +2137,11 @@ th.tabela__numero .titulo-coluna { flex-direction: row-reverse; }
 .cal-filtro__busca { padding: 4px 10px 8px; }
 .cal-filtro__busca .campo__controle { width: 100%; min-width: 0; }
 .cal-filtro__opcao[hidden] { display: none; }
+/* 11/11/2026: todos os filtros de uma escolha (Safra, Fazenda, Ano agrícola, Operação do Progresso…) com a caixinha quadrada, como as de várias escolhas; o traço separa blocos de opções (Plantio/Colheita e as demais, no Progresso) */
+.cal-filtro__opcao input[type="radio"] { -webkit-appearance: none; appearance: none; flex-shrink: 0; width: 16px; height: 16px; margin: 0 2px; border: 1.5px solid var(--borda-forte); border-radius: 3px; background: var(--superficie) center / 12px no-repeat; cursor: pointer; }
+.cal-filtro__opcao input[type="radio"]:checked { border-color: #0075ff; background-color: #0075ff; background-image: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 12 12%27%3E%3Cpath d=%27M2.5 6.2l2.3 2.3 4.7-5%27 fill=%27none%27 stroke=%27white%27 stroke-width=%271.8%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27/%3E%3C/svg%3E"); }
+.cal-filtro__opcao input[type="radio"]:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 2px; }
+.cal-filtro__separador { margin: 4px 14px; border: 0; border-top: 1px solid var(--borda-forte); }
 .cal-filtro__nada { margin: 0; padding: 8px 14px; font-size: 13px; color: var(--texto-suave); }
 .cal-filtro__area { margin-left: auto; padding-left: 16px; color: var(--texto-suave); font-size: 13px; }
 .calendario__visoes .visoes__botao { height: 38px; }
@@ -4642,3 +4647,6 @@ select.cad-campo { cursor: pointer; }
   .cad-duas, .cad-fazenda, .cad-imp { grid-template-columns: 1fr; }
 }
 .cad-grupo__nome { font-size: 15px; } /* 11/11/2026: nome do grupo só para consulta (vem do ERP Compass) */
+/* Mapas (Leaflet; 11/11/2026): as camadas do mapa (z-index 400 a 1000) ficam presas dentro dele, para as listas dos
+   filtros e os menus abrirem por cima do mapa, e não atrás */
+.leaflet-container { z-index: 0; }
