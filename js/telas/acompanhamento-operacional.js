@@ -11,9 +11,9 @@
  * Filtros (barra padronizada): Safra, Fazenda e Operação com uma escolha só (abre na safra atual, na primeira fazenda
  * dela e no Plantio); Cultura com várias; no Mais filtros, Empresa (só com o nível Empresa), Talhão e Grupo de operação.
  * Depois dos filtros, "Operação: Plantio" e:
- *   - os cartões Área executada (verde), Área em execução (azul) e Área planejada (cinza; antes Área restante; três cartões desde 11/11/2026), com a barra e "63% de 10.000 ha planejados";
+ *   - os cartões Área executada (verde), Área em execução (azul) e Área restante (cinza; chamado Área planejada por um tempo, voltou a Área restante em 12/11/2026), com a barra e "63% de 10.000 ha planejados";
  *   - Distribuição espacial: o mapa dos talhões da fazenda (o desenho do mapa do Plantio), pintados pela situação da
- *     operação: Executada (verde, OS fechada), Em execução (azul, OS aberta e não fechada), Planejada (cinza; antes Área restante; OS
+ *     operação: Executada (verde, OS fechada), Em execução (azul, OS aberta e não fechada), Restante (cinza; voltou de Planejada em 12/11/2026; OS
  *     não aberta); talhão sem a operação, só o contorno. Na dica do talhão em execução, a área apontada ("45 de 85 ha
  *     apontados (53%)", simulada: o protótipo ainda não tem os apontamentos);
  *   - Evolução acumulada: a área executada acumulada (ha) por semana, até hoje.
@@ -45,7 +45,7 @@ window.Telas.acompanhamentoOperacional = (function () {
     operacao: ['safra', 'cultura', 'fazenda', 'grupo'], operacaoV: ['safra', 'cultura', 'fazenda', 'grupo'] };
   // Nomes e cores dos status do Calendário (11/11/2026): Executada verde, Em execução azul, Planejada cinza
   const COR = { executada: '#1f9d55', execucao: '#1565C0', restante: '#8a948f' };
-  const NOME = { executada: 'Executada', execucao: 'Em execução', restante: 'Planejada' };
+  const NOME = { executada: 'Executada', execucao: 'Em execução', restante: 'Restante' };
 
   let est = null;
   let caixaCorpo = null;
@@ -346,7 +346,7 @@ window.Telas.acompanhamentoOperacional = (function () {
       <div class="ao-cartoes">
         ${cartao('executada', 'Área executada', executada, total)}
         ${cartao('execucao', 'Área em execução', areaDe('execucao'), total)}
-        ${cartao('restante', 'Área planejada', areaDe('restante'), total)}
+        ${cartao('restante', 'Área restante', areaDe('restante'), total)}
       </div>
       <div class="ao-quadros ${classeQuadros()}">
         <section class="cartao ao-quadro ${classeQuadro('mapa')}">
@@ -393,7 +393,7 @@ window.Telas.acompanhamentoOperacional = (function () {
         : !l ? 'Sem a operação'
         : l.situacao === 'executada' ? `Executada · ${Util.area(l.area)} · ${Util.data(l.executada)} - ${Util.data(l.fechamento)}`
         : l.situacao === 'execucao' ? `Em execução · ${Util.area(l.apontado).replace(' ha', '')} de ${Util.area(l.area)} apontados (${pct(l.apontado, l.area)}%)`
-        : `Planejada · ${Util.area(l.area)} · para ${Util.data(l.planejado)}`;
+        : `Restante · ${Util.area(l.area)} · para ${Util.data(l.planejado)}`;
       poligono.bindTooltip(`<strong>${esc(pg.talhao)}</strong> · ${esc(detalhe)}`, { sticky: true, direction: 'top', className: 'mapa-detalhe' });
       // Visão Geral: o talhão e, embaixo, a operação atual
       const rotulo = visao && l ? `<span class="ao-rotulo" style="color: ${textoSobre(corOperacao(l.nome))}"><strong>${esc(pg.talhao)}</strong><span>${esc(resumir(l.nome))}</span></span>` : esc(pg.talhao);
