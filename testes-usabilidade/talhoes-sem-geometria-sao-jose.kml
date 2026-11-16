@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2"><Document><name>Talhões sem geometria da Fazenda São José (exemplo)</name>
+  <Placemark><name>T04</name><Polygon><outerBoundaryIs><LinearRing><coordinates>-55.8504548,-12.5485789,0 -55.8440606,-12.5478125,0 -55.8420256,-12.5566192,0 -55.8484197,-12.5573855,0 -55.8504548,-12.5485789,0</coordinates></LinearRing></outerBoundaryIs></Polygon></Placemark>
+  <Placemark><name>T07</name><Polygon><outerBoundaryIs><LinearRing><coordinates>-55.8568411,-12.5586211,0 -55.8467932,-12.5574169,0 -55.8447582,-12.5662235,0 -55.8548061,-12.5674278,0 -55.8568411,-12.5586211,0</coordinates></LinearRing></outerBoundaryIs></Polygon></Placemark>
+  <Placemark><name>T10</name><Polygon><outerBoundaryIs><LinearRing><coordinates>-55.8636842,-12.5687181,0 -55.8554631,-12.5677328,0 -55.8534281,-12.5765395,0 -55.8616491,-12.5775247,0 -55.8636842,-12.5687181,0</coordinates></LinearRing></outerBoundaryIs></Polygon></Placemark>
+  <Placemark><name>T12</name><Polygon><outerBoundaryIs><LinearRing><coordinates>-55.8490690,-12.5669664,0 -55.8394778,-12.5658169,0 -55.8374428,-12.5746236,0 -55.8470340,-12.5757731,0 -55.8490690,-12.5669664,0</coordinates></LinearRing></outerBoundaryIs></Polygon></Placemark>
+</Document></kml>

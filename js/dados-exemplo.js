@@ -43,6 +43,14 @@ window.DADOS = {
     'Empresa B': ['Boa Vista'],
     'Empresa C': ['Primavera']
   },
+  // Filial e aglomerado de cada fazenda (12/11/2026, exemplo; no ERP Compass: Empresa › Filial › Aglomerado › Fazenda ›
+  // Talhão). A empresa vem de fazendasPorEmpresa. Usados nos filtros de Cadastros › Geometria dos talhões. Ajuste à vontade.
+  filialAglomerado: {
+    'São José':    { filial: 'Filial Sorriso', aglomerado: 'Aglomerado Norte' },
+    'Santa Clara': { filial: 'Filial Sorriso', aglomerado: 'Aglomerado Leste' },
+    'Boa Vista':   { filial: 'Filial Lucas do Rio Verde', aglomerado: 'Aglomerado Centro' },
+    'Primavera':   { filial: 'Filial Primavera do Leste', aglomerado: 'Aglomerado Sul' }
+  },
   // Culturas que o Criar Plano oferece
   culturas: ['Soja', 'Milho'],
   // Culturas que aparecem nos planos (os de exemplo têm milho safrinha), para os filtros

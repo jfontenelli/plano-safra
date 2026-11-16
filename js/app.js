@@ -36,8 +36,9 @@
     'planejado-executado': { titulo: 'Operações', menu: 'planejado-executado',
                         desenhar: (guia) => temPlanos() ? Telas.monitoramentoAplicacoes.desenhar(guia) : Telas.semPlanos('planejado-executado'),
                         aoMostrar: (conteudo, guia) => { if (temPlanos()) Telas.monitoramentoAplicacoes.aoMostrar(conteudo, guia); } },
-    // Cadastros (11/11/2026): #/cadastros/<guia> (fazendas, safras, culturas, operacoes)
-    'cadastros':      { titulo: 'Cadastros', menu: 'cadastros',
+    // Cadastros (11/11/2026): #/cadastros/<guia> (talhoes, safras, culturas, operacoes)
+    // 12/11/2026: cada guia é um item do grupo Cadastros no menu (cadastros-talhoes, -safras, -culturas, -operacoes; 13/11/2026: fazendas virou talhoes)
+    'cadastros':      { titulo: () => `${Telas.cadastros.titulo()} · Cadastros`, menu: () => `cadastros-${Telas.cadastros.guia()}`,
                         desenhar: (guia) => Telas.cadastros.desenhar(guia),
                         aoMostrar: (conteudo) => Telas.cadastros.aoMostrar(conteudo) }
   };
@@ -117,10 +118,12 @@
     conteudo.innerHTML = rota.desenhar(parametro, extra);
     if (rota.aoMostrar) rota.aoMostrar(conteudo, parametro, extra);
     conteudo.scrollTop = 0;
-    document.title = `${rota.titulo} · UniSystem`;
+    const valor = (v) => (typeof v === 'function' ? v(parametro) : v);
+    document.title = `${valor(rota.titulo)} · UniSystem`;
 
+    const menuAtivo = valor(rota.menu);
     document.querySelectorAll('.menu__item[data-rota]').forEach((item) => {
-      const ativo = item.dataset.rota === rota.menu;
+      const ativo = item.dataset.rota === menuAtivo;
       item.classList.toggle('menu__item--ativo', ativo);
       if (ativo) item.setAttribute('aria-current', 'page');
       else item.removeAttribute('aria-current');

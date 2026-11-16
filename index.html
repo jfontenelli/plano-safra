@@ -7,6 +7,8 @@
   <link rel="icon" type="image/png" href="img/icone-unisystem.png">
   <!-- Leaflet (mapa da visão Mapa do grupo Semente) -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+  <!-- Leaflet-Geoman (12/11/2026): desenhar e editar o polígono do talhão em Cadastros › Talhões (Mapa de talhões) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@geoman-io/leaflet-geoman-free@2.17.0/dist/leaflet-geoman.css">
   <link rel="stylesheet" href="css/estilo.css">
 </head>
 <body>
@@ -86,14 +88,53 @@
             </a>
           </div>
         </div>
-        <a class="menu__item" href="#/cadastros" data-rota="cadastros" title="Cadastros">
-          <svg class="menu__icone" viewBox="0 0 24 24" aria-hidden="true">
-            <!-- Editar: lápis sobre um quadro aberto -->
-            <path d="M11 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5"/>
-            <path d="M18.4 2.6a2 2 0 0 1 2.9 2.9L12 14.8l-3.8 1 1-3.8Z"/>
-          </svg>
-          <span class="menu__texto">Cadastros</span>
-        </a>
+        <!-- Cadastros (12/11/2026): cada guia virou um item do grupo; o nome leva a Talhões (13/11/2026; antes Fazendas e talhões; título da página: Mapa de talhões) -->
+        <div class="menu__grupo">
+          <a class="menu__item menu__pai" href="#/cadastros/talhoes" title="Cadastros">
+            <svg class="menu__icone" viewBox="0 0 24 24" aria-hidden="true">
+              <!-- Editar: lápis sobre um quadro aberto -->
+              <path d="M11 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5"/>
+              <path d="M18.4 2.6a2 2 0 0 1 2.9 2.9L12 14.8l-3.8 1 1-3.8Z"/>
+            </svg>
+            <span class="menu__texto">Cadastros</span>
+          </a>
+          <button class="menu__grupo-alternar" type="button" data-grupo="Cadastros"
+                  aria-controls="menu-subitens-cadastros" aria-expanded="true" title="Minimizar Cadastros">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="menu__subitens" id="menu-subitens-cadastros">
+            <a class="menu__item menu__sub" href="#/cadastros/talhoes" data-rota="cadastros-talhoes" title="Talhões">
+              <svg class="menu__icone" viewBox="0 0 24 24" aria-hidden="true">
+                <!-- Talhões: polígonos lado a lado -->
+                <path d="M3 6l7-2 1 8-7 2Z"/><path d="M13 4l8 1-1 8-8-1Z"/><path d="M4 16l7-2 1 7-8-1Z"/><path d="M13 14l7 1-1 6-6-1Z"/>
+              </svg>
+              <span class="menu__texto">Talhões</span>
+            </a>
+            <a class="menu__item menu__sub" href="#/cadastros/safras" data-rota="cadastros-safras" title="Safras">
+              <svg class="menu__icone" viewBox="0 0 24 24" aria-hidden="true">
+                <!-- Calendário -->
+                <rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/>
+              </svg>
+              <span class="menu__texto">Safras</span>
+            </a>
+            <a class="menu__item menu__sub" href="#/cadastros/culturas" data-rota="cadastros-culturas" title="Culturas e variedades">
+              <svg class="menu__icone" viewBox="0 0 24 24" aria-hidden="true">
+                <!-- Espiga: grãos em volta de um eixo -->
+                <path d="M12 21V6"/><path d="M12 6c0-2 1-3 0-4-1 1 0 2 0 4Z"/>
+                <path d="M12 10c-2.5 0-4-1.2-4-3 2.5 0 4 1.2 4 3ZM12 10c2.5 0 4-1.2 4-3-2.5 0-4 1.2-4 3Z"/>
+                <path d="M12 15c-2.5 0-4-1.2-4-3 2.5 0 4 1.2 4 3ZM12 15c2.5 0 4-1.2 4-3-2.5 0-4 1.2-4 3Z"/>
+              </svg>
+              <span class="menu__texto">Culturas e variedades</span>
+            </a>
+            <a class="menu__item menu__sub" href="#/cadastros/operacoes" data-rota="cadastros-operacoes" title="Operações">
+              <svg class="menu__icone" viewBox="0 0 24 24" aria-hidden="true">
+                <!-- Lista com marcadores -->
+                <path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1.3"/><circle cx="4.5" cy="12" r="1.3"/><circle cx="4.5" cy="18" r="1.3"/>
+              </svg>
+              <span class="menu__texto">Operações</span>
+            </a>
+          </div>
+        </div>
       </nav>
 
       <button class="menu__alternar" id="menu-alternar" type="button"
@@ -130,6 +171,7 @@
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@geoman-io/leaflet-geoman-free@2.17.0/dist/leaflet-geoman.min.js"></script>
   <!-- SheetJS: exportar e importar o plano em .xlsx -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script src="js/dados-exemplo.js"></script>

@@ -4541,10 +4541,11 @@ html[data-tema="escuro"] .ao-cartao--restante { --ao-c: #9AA8B1; }
 /* ===== Cadastros (10/11/2026; trazido em 11/11/2026): Fazendas e talhões, Safras, Culturas e variedades, Operações ===== */
 .cad { padding: 24px 40px 48px; }
 .cad-cabecalho__linha { align-self: stretch; display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.cad-cabecalho .cad-salvo { margin-bottom: 0; }
 .cad-salvo { display: inline-flex; align-items: center; gap: 6px; margin-bottom: 10px; font-size: 13px; color: var(--texto-suave); }
 .cad-salvo .icone { width: 15px; height: 15px; color: var(--verde-600); }
 .cad .etapa .selo, .cad-cabecalho__linha .etapa .selo { margin-left: 8px; background: var(--aviso-fundo); color: var(--aviso-texto); }
-.cad-duas { display: grid; grid-template-columns: 290px minmax(0, 1fr); gap: 20px; align-items: start; }
+.cad-duas { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 20px; align-items: start; }
 .cad-coluna { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
 .cad-topo { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 14px 20px; }
 .cad-topo__titulo { font-size: 17px; font-weight: 700; }
@@ -4579,8 +4580,6 @@ html[data-tema="escuro"] .cad-item--ativo .cad-item__sub { color: #d5e6de; }
 .cad-mapa--p { height: 230px; }
 .cad-dica { display: flex; align-items: flex-start; gap: 6px; margin: 6px 0 0; font-size: 13px; color: var(--texto-suave); }
 .cad-dica .icone { width: 15px; height: 15px; margin-top: 2px; }
-.cad-sede { display: grid; place-items: center; width: 30px !important; height: 30px !important; border: 2px solid #fff; border-radius: 50%; background: var(--verde-700); color: #fff; box-shadow: 0 1px 4px rgba(0, 0, 0, .5); cursor: grab; }
-.cad-sede .icone { width: 16px; height: 16px; }
 
 /* Tabelas dos cadastros: campos na própria linha */
 .cad .tabela td { padding-top: 8px; padding-bottom: 8px; vertical-align: middle; }
@@ -4636,16 +4635,120 @@ select.cad-campo { cursor: pointer; }
 .cad-imp__tabela .tabela td { padding: 5px 10px; }
 .cad-imp__resumo { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-top: 14px; }
 .cad-imp__resumo .campo { margin: 0; min-width: 220px; }
+/* Correspondência com o ERP Compass (13/11/2026) */
+.cad-imp__resumo { align-items: flex-end; justify-content: flex-start; gap: 12px 20px; }
+.cad-imp__resumo .cad-imp__total { padding-bottom: 8px; }
+.cad-imp__resumo .cad-imp__contagem { padding-bottom: 9px; }
+.cad-imp__total { font-size: 16px; }
+.cad-imp__coluna { flex: 0 1 260px; }
+.cad-imp__coluna .campo__controle { height: 36px; }
+.cad-imp__contagem { margin-left: auto; font-size: 13px; color: var(--texto-suave); font-variant-numeric: tabular-nums; }
+.cad-imp__corresp td { vertical-align: middle; }
+.cad-imp__corresp .tabela__numero { font-variant-numeric: tabular-nums; }
+/* Botão que abre a lista dos talhões do Compass (no lugar da lista do navegador) */
+.cad-escolha { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; min-width: 170px; height: 36px; padding: 0 10px 0 12px;
+  border: 1px solid var(--borda-forte); border-radius: 8px; background: var(--superficie); font: inherit; font-size: 14px; color: var(--texto); text-align: left; cursor: pointer; }
+.cad-escolha:hover { border-color: var(--verde-600); }
+.cad-escolha:focus-visible, .cad-escolha[aria-expanded="true"] { outline: none; border-color: var(--verde-600); box-shadow: 0 0 0 3px rgba(24, 122, 79, .2); }
+.cad-escolha .icone { width: 16px; height: 16px; flex-shrink: 0; color: var(--texto-suave); transition: transform .15s ease; }
+.cad-escolha[aria-expanded="true"] .icone { transform: rotate(180deg); }
+.cad-escolha--vazio { color: var(--texto-suave); }
+.cad-escolha__ha { color: var(--texto-suave); }
+/* Lista: busca + grupos; altura limitada (8 linhas de 34 px) e rolagem que para no começo de uma linha */
+.cad-escolha__painel { position: fixed; z-index: 50; display: flex; flex-direction: column; border: 1px solid var(--borda); border-radius: 10px; background: var(--superficie);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .22); overflow: hidden; }
+.cad-escolha__busca { position: relative; display: flex; align-items: center; padding: 8px; border-bottom: 1px solid var(--borda); }
+.cad-escolha__busca .icone { position: absolute; left: 18px; width: 16px; height: 16px; color: var(--texto-suave); pointer-events: none; }
+.cad-escolha__busca input { width: 100%; height: 34px; padding: 0 10px 0 34px; border: 1px solid var(--borda-forte); border-radius: 6px; background: var(--superficie); color: var(--texto); font: inherit; font-size: 14px; }
+.cad-escolha__busca input:focus { outline: none; border-color: var(--verde-600); }
+.cad-escolha__lista { max-height: 272px; overflow-y: auto; padding: 0 4px; scroll-snap-type: y mandatory; }
+.cad-escolha__lista > * { scroll-snap-align: start; }
+.cad-escolha__grupo { display: flex; align-items: flex-end; justify-content: space-between; height: 34px; padding: 0 10px 6px; font-size: 12px; font-weight: 700; color: var(--texto-suave); }
+.cad-escolha__grupo--sep { border-top: 1px solid var(--borda); }
+.cad-escolha__item { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; height: 34px; padding: 0 10px; border: 0; border-radius: 6px;
+  background: none; font: inherit; font-size: 14px; color: var(--texto); text-align: left; cursor: pointer; }
+.cad-escolha__item:hover:not(:disabled), .cad-escolha__item:focus-visible { outline: none; background: var(--verde-100); }
+.cad-escolha__item--atual { font-weight: 700; color: var(--verde-700); }
+.cad-escolha__item:disabled { color: var(--texto-fraco); cursor: not-allowed; }
+.cad-escolha__limpar { color: var(--texto-suave); font-style: italic; }
+.cad-escolha__nome { font-weight: 600; }
+.cad-escolha__area { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--texto-suave); font-variant-numeric: tabular-nums; }
+.cad-escolha__icone { display: inline-grid; width: 16px; }
+.cad-escolha__icone .icone { width: 15px; height: 15px; color: var(--verde-700); }
+.cad-escolha__item:disabled .cad-escolha__icone .icone { color: var(--texto-fraco); }
+.cad-escolha__vazio { margin: 0; padding: 10px; font-size: 13px; color: var(--texto-suave); }
+/* Tabela invertida (teste de 13/11/2026): talhões do Compass à esquerda; polígonos do arquivo sem talhão numa nota embaixo */
+/* Mapa da conferência (13/11/2026): rótulos dos polígonos do arquivo (amarelo sem talhão, verde ligado) e dos que já existem */
+.cad-imp__rotulo, .cad-imp__ref { width: max-content !important; height: auto !important; translate: -50% -50%; pointer-events: none; white-space: nowrap; }
+.cad-imp__rotulo { padding: 1px 6px; border-radius: 4px; background: #ffd400; color: #1d1d1d; font: 700 12px/1.3 var(--fonte); box-shadow: 0 1px 3px rgba(0, 0, 0, .4); }
+.cad-imp__rotulo--ok { background: #ffffff; color: var(--verde-800); }
+.cad-imp__ref { color: rgba(255, 255, 255, .85); font: 600 11px/1.2 var(--fonte); text-shadow: 0 1px 2px rgba(0, 0, 0, .8); translate: -50% 60%; }
+.cad-imp__dica-mapa { color: var(--texto-suave); font-size: 11px; }
+.cad-imp__linha--nova > * { animation: cad-imp-pisca 1.4s ease; }
+@keyframes cad-imp-pisca { 0%, 40% { background: var(--verde-100); } 100% { background: transparent; } }
+@media (prefers-reduced-motion: reduce) { .cad-imp__linha--nova > * { animation: none; } }
+.cad-imp__lado { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.cad-imp__tag { display: inline-block; margin-left: 8px; padding: 1px 7px; border-radius: 999px; background: var(--aviso-fundo); color: var(--aviso-texto);
+  font-size: 11px; font-weight: 600; white-space: nowrap; vertical-align: 1px; }
+.cad-imp__tag--troca { background: var(--superficie-2); color: var(--texto-suave); }
+.cad-imp__corresp tbody td { scroll-snap-align: start; white-space: nowrap; }
+.cad-imp__lado .cad-imp__tabela { max-height: none; scroll-snap-type: y mandatory; }
+.cad-imp__sobra { display: flex; align-items: flex-start; gap: 6px; margin: 0; padding: 8px 10px; border: 1px solid var(--aviso-borda); border-radius: 8px;
+  background: var(--aviso-fundo); color: var(--aviso-texto); font-size: 13px; }
+.cad-imp__sobra[hidden] { display: none; }
+.cad-imp__sobra .icone { width: 15px; height: 15px; flex-shrink: 0; margin-top: 2px; }
+.cad-imp__nota { display: block; margin-top: 3px; font-size: 12px; font-weight: 600; color: var(--aviso-texto); }
 .cad-erro { margin: 10px 0 0; color: var(--erro); font-size: 14px; }
 .cad-erro:empty { display: none; }
 .cad-aviso { display: flex; gap: 8px; margin: 0 0 14px; padding: 10px 12px; border: 1px solid var(--aviso-borda); border-radius: 8px; background: var(--aviso-fundo); color: var(--aviso-texto); font-size: 14px; }
 .cad-aviso .icone { width: 18px; height: 18px; margin-top: 1px; }
 .modal--cad-largo { max-width: 940px; }
+/* Importar geometria do tamanho da janela (13/11/2026): tabela e mapa ocupam a altura que sobra */
+.modal--cad-imp .modal__corpo { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.modal--cad-imp #imp-corpo { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.modal--cad-imp .cad-soltar { flex: 1; justify-content: center; }
+.modal--cad-imp .cad-imp { flex: 1; min-height: 0; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); }
+.modal--cad-imp .cad-imp__lado { min-height: 0; }
+.modal--cad-imp .cad-imp__tabela { flex: 0 1 auto; }
+.modal--cad-imp .cad-mapa--p { height: auto; min-height: 320px; }
+.modal--cad-imp #imp-corpo > .cad-dica { margin-top: 12px; }
 
 @media (max-width: 1100px) {
   .cad { padding: 20px; }
   .cad-duas, .cad-fazenda, .cad-imp { grid-template-columns: 1fr; }
 }
+/* Fazendas e talhões (12/11/2026): filtros dos níveis do ERP e desenho/edição do polígono do talhão */
+.cad-filtros { margin-bottom: 20px; }
+.cad-filtros .campo { max-width: 240px; }
+.cad-filtros__limpar { margin-left: auto; }
+.cad-mapa-area { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.cad-mapa { height: 460px; }
+.cad-acoes-talhao { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.cad-sep { font-size: 13px; color: var(--texto-fraco); }
+.cad-lapis { width: 30px; height: 30px; }
+.cad-lapis .icone { width: 16px; height: 16px; }
+.cad-edicao:empty { display: none; }
+.cad-edicao--dica { display: flex; align-items: flex-start; gap: 6px; font-size: 13px; color: var(--texto-suave); }
+.cad-edicao--dica .icone { width: 15px; height: 15px; margin-top: 2px; flex-shrink: 0; }
+.cad-edicao--ativa { display: flex; align-items: center; justify-content: space-between; gap: 12px 16px; flex-wrap: wrap; padding: 12px 14px; border: 1px solid #e6c200; border-radius: 10px; background: #fffbe0; }
+.cad-edicao__info { min-width: 0; flex: 1 1 320px; }
+.cad-edicao__titulo { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 16px; margin: 0; font-size: 14px; }
+.cad-edicao__titulo > .icone { width: 16px; height: 16px; margin-right: -10px; }
+.cad-edicao__titulo > strong { font-size: 15px; }
+.cad-edicao__area { color: var(--texto-suave); }
+.cad-edicao__area strong { color: var(--texto); font-variant-numeric: tabular-nums; }
+.cad-edicao__dif { font-variant-numeric: tabular-nums; }
+.cad-edicao__dif--alta { color: #b45f06; font-weight: 600; }
+.cad-edicao__dica { margin: 4px 0 0; font-size: 13px; color: var(--texto-suave); }
+.cad-edicao .cad-erro { margin-top: 6px; }
+.cad-edicao__acoes { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.cad-edicao__acoes .icone { width: 15px; height: 15px; }
+.cad-botao-excluir { border: 1px solid #e3b3ad; background: var(--superficie); color: #c0392b; margin-right: 8px; }
+.cad-botao-excluir:hover { background: #fdecea; }
+.cad-mapa--editando .mapa-rotulo { opacity: .55; }
+html[data-tema="escuro"] .cad-edicao--ativa { border-color: #8a7400; background: #2b2810; }
+html[data-tema="escuro"] .cad-botao-excluir { border-color: #7a3a33; background: transparent; color: #f2a59c; }
+html[data-tema="escuro"] .cad-botao-excluir:hover { background: #3a1f1c; }
 .cad-grupo__nome { font-size: 15px; } /* 11/11/2026: nome do grupo só para consulta (vem do ERP Compass) */
 /* Mapas (Leaflet; 11/11/2026): as camadas do mapa (z-index 400 a 1000) ficam presas dentro dele, para as listas dos
    filtros e os menus abrirem por cima do mapa, e não atrás */
@@ -4662,3 +4765,189 @@ html[data-tema="escuro"] .cad-regiao--leste { background: #3D2817 !important; co
 html[data-tema="escuro"] .cad-regiao--sul   { background: #33223D !important; color: #D3A8E5 !important; }
 /* Cadastros (11/11/2026): fundo branco em todas as guias, como as outras páginas de consulta */
 .conteudo:has(.cad) { background: var(--superficie); }
+
+/* ===== Geometria dos talhões (13/11/2026; antes Fazendas e talhões): lista dos talhões à esquerda e mapa à direita numa
+   superfície só, com a altura que sobra na tela; o mapa fica com todo o espaço possível e a lista pode ser recolhida ===== */
+/* Cabeçalho e filtros enxutos (13/11/2026): título numa linha só e filtros numa faixa fina, sem cartão */
+.cad-cabecalho--compacto { min-height: 0; padding-top: 12px; padding-bottom: 12px; }
+.cad-cabecalho--compacto .cabecalho__titulo { font-size: 24px; }
+.cad-cabecalho--compacto .cabecalho__subtitulo { margin-top: 2px; font-size: 13px; }
+.cad[data-guia="talhoes"] { padding-top: 12px; padding-bottom: 16px; }
+.cad[data-guia="talhoes"] .cad-filtros { margin-bottom: 12px; padding: 0; border: 0; border-radius: 0; background: none; box-shadow: none; }
+.cad[data-guia="talhoes"] .cad-filtros .campo__rotulo { margin-bottom: 2px; font-size: 12px; }
+.cad[data-guia="talhoes"] .cad-filtros .campo__controle { height: 34px; }
+.cad-obrigatorio { color: var(--erro); }
+.cad-geo { display: grid; grid-template-columns: 430px minmax(0, 1fr); height: max(480px, calc(100vh - 170px)); }
+.cad-geo--recolhida { grid-template-columns: minmax(0, 1fr); }
+.cad-geo__lista { display: flex; flex-direction: column; min-width: 0; min-height: 0; border-right: 1px solid var(--borda); }
+.cad-geo__lista[hidden] { display: none; }
+.cad-geo__topo { display: flex; flex-direction: column; gap: 6px; padding: 12px 18px 10px; }
+.cad-geo__titulo-linha { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: -4px -6px -4px 0; }
+/* Resumo e etiqueta Sem geometria na mesma linha (13/11/2026) */
+.cad-geo__linha { display: flex; align-items: center; justify-content: space-between; gap: 6px 10px; flex-wrap: wrap; min-height: 28px; }
+.cad-geo__titulo { margin: 0; font-size: 17px; font-weight: 700; line-height: 1.3; text-wrap: balance; }
+.cad-geo__resumo { margin: 0; font-size: 13px; color: var(--texto-suave); font-variant-numeric: tabular-nums; }
+.cad-geo .filtros-talhoes { gap: 6px; }
+.cad-geo .filtro-talhoes { height: 28px; padding: 0 10px; font-size: 13px; white-space: nowrap; }
+.cad-geo__tabela { flex: 1; min-height: 0; overflow: auto; border-top: 1px solid var(--borda); scroll-snap-type: y mandatory; }
+.cad-talhoes tbody td { scroll-snap-align: start; }
+.cad-geo__tabela .tabela thead th { position: sticky; top: 0; z-index: 1; background: var(--superficie); }
+.cad-geo__tabela .tabela th, .cad-geo__tabela .tabela td { padding-left: 18px; padding-right: 12px; }
+.cad-geo__tabela .tabela td { font-variant-numeric: tabular-nums; }
+.cad-geo__tabela .tabela th { white-space: nowrap; }
+.cad-talhoes tbody tr { cursor: pointer; user-select: none; }
+#cad-geo-sel-n { font-weight: 600; color: var(--verde-700); }
+.cad-talhoes tbody tr:hover > * { background: var(--superficie-2); }
+.cad-talhoes tbody tr:focus-visible { outline: 2px solid var(--verde-600); outline-offset: -2px; }
+.cad-talhoes .cad-linha--alvo > :first-child { box-shadow: inset 3px 0 0 var(--verde-700); }
+.cad-sem { font-size: 12px; font-weight: 600; color: var(--aviso-texto); white-space: nowrap; }
+.cad-geo__lista > .cad-nota { padding: 10px 18px; border-top: 1px solid var(--borda); font-size: 12px; }
+.cad-geo__vazio { flex: 1; }
+.cad-geo__mapa { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+.cad-geo__acoes { display: flex; align-items: center; gap: 8px 12px; flex-wrap: wrap; padding: 10px 14px; border-bottom: 1px solid var(--borda); }
+.cad-geo__botoes { display: flex; align-items: center; gap: 6px; margin-left: auto; }
+/* Recolher e mostrar a lista: o mesmo botão « » do Planejamento (botao-icone) */
+.cad-geo__alternar { flex-shrink: 0; }
+.cad-geo__alternar[hidden] { display: none; }
+/* Ações só com ícone, em verde; o nome aparece ao passar o mouse */
+.cad-icone { display: grid; place-items: center; width: 38px; height: 38px; padding: 0; border: 1px solid var(--borda); border-radius: 8px; background: var(--superficie); color: var(--verde-700); cursor: pointer; }
+.cad-icone .icone { width: 19px; height: 19px; }
+.cad-importar { height: 38px; }
+.cad-importar .icone { width: 16px; height: 16px; }
+.cad-icone:hover:not(:disabled) { background: var(--verde-100); border-color: var(--verde-600); }
+.cad-icone--perigo:hover:not(:disabled) { background: var(--superficie); border-color: var(--erro); color: var(--erro); }
+.cad-icone:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 2px; }
+.cad-icone:disabled { color: var(--texto-fraco); opacity: .45; cursor: not-allowed; }
+.cad-geo__divisor { width: 1px; height: 24px; margin: 0 4px; background: var(--borda); }
+.cad-geo .cad-mapa-area { flex: 1; min-height: 0; gap: 0; position: relative; }
+/* Busca de lugar (13/11/2026): no alto do mapa, ao lado do + e − */
+.cad-busca { position: relative; flex: 1 1 240px; max-width: 420px; margin: 0; }
+.cad-busca__lupa { position: absolute; top: 0; left: 12px; height: 38px; display: flex; align-items: center; color: var(--texto-suave); pointer-events: none; }
+.cad-busca__lupa .icone { width: 17px; height: 17px; }
+.cad-busca__campo { width: 100%; height: 38px; padding: 0 38px; border: 1px solid var(--borda-forte); border-radius: 8px; background: var(--superficie); color: var(--texto); font: inherit; font-size: 14px; }
+.cad-busca__campo::placeholder { color: var(--texto-fraco); }
+.cad-busca__campo:focus { outline: none; border-color: var(--verde-600); box-shadow: 0 0 0 3px rgba(24, 122, 79, .2); }
+.cad-busca__limpar { position: absolute; top: 4px; right: 4px; display: grid; place-items: center; width: 30px; height: 30px; padding: 0; border: 0; border-radius: 6px; background: none; color: var(--texto-suave); cursor: pointer; }
+.cad-busca__limpar[hidden] { display: none; }
+.cad-busca__limpar:hover { background: var(--superficie-2); color: var(--texto); }
+.cad-busca__limpar .icone { width: 16px; height: 16px; }
+.cad-busca__lista { position: absolute; top: calc(100% + 6px); left: 0; right: 0; z-index: 1001; max-height: 280px; overflow: auto; border: 1px solid var(--borda); border-radius: 8px; background: var(--superficie); box-shadow: 0 4px 16px rgba(0, 0, 0, .2); }
+.cad-busca__lista[hidden] { display: none; }
+.cad-busca__lista ul { margin: 0; padding: 4px; list-style: none; }
+.cad-busca__lista button { display: block; width: 100%; padding: 8px 10px; border: 0; border-radius: 6px; background: none; font: inherit; font-size: 13px; line-height: 1.35; text-align: left; color: var(--texto); cursor: pointer; }
+.cad-busca__lista button:hover, .cad-busca__lista button:focus-visible { background: var(--verde-100); outline: none; }
+.cad-busca__msg { margin: 0; padding: 10px 12px; font-size: 13px; color: var(--texto-suave); }
+.cad-geo .cad-mapa { flex: 1; height: auto; min-height: 280px; border: 0; border-radius: 0; }
+.cad-geo .cad-edicao--ativa { margin: 0; border-width: 1px 0 0; border-radius: 0; }
+/* Botão Enquadrar, abaixo do + e − do mapa */
+.cad-enquadrar { display: grid; place-items: center; width: 34px; height: 34px; padding: 0; background: var(--superficie); color: var(--texto); cursor: pointer; }
+.cad-enquadrar:hover { background: var(--superficie-2); }
+.cad-enquadrar:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 2px; }
+.cad-enquadrar .icone { width: 18px; height: 18px; }
+/* Nome e área do talhão no mapa; de longe, somem (ficam na dica ao passar o mouse) */
+/* Só o nome do talhão; nome comprido quebra em mais linhas */
+.cad-rotulo { max-width: 96px; font-size: 12px; line-height: 1.2; text-align: center; white-space: normal; overflow-wrap: anywhere; width: max-content !important; }
+.cad-mapa--longe .cad-rotulo { display: none; }
+/* Sem o contorno do navegador no polígono clicado (13/11/2026) */
+.cad-mapa .leaflet-interactive:focus { outline: none; }
+/* Edição do polígono (13/11/2026): cantos brancos com borda verde. Ao passar o mouse, um anel verde
+   em volta (sem mudar o tamanho: o mapa posiciona o ponto pelo transform, e aumentar o ponto o tirava da linha) */
+.cad-mapa .marker-icon { border: 2px solid var(--verde-700); box-shadow: 0 1px 3px rgba(0, 0, 0, .45); cursor: move; transition: box-shadow .12s ease; }
+/* "+" que acompanha o mouse sobre o lado do polígono: o clique cria o canto ali (como no QGIS) */
+.cad-mais { display: grid; place-items: center; border: 2px solid var(--verde-700); border-radius: 50%; background: #fff; color: var(--verde-700);
+  font: 700 17px/1 var(--fonte); box-shadow: 0 0 0 4px rgba(27, 175, 122, .35), 0 1px 3px rgba(0, 0, 0, .45); cursor: copy; }
+.cad-mapa .marker-icon:hover { box-shadow: 0 0 0 5px rgba(27, 175, 122, .45), 0 1px 3px rgba(0, 0, 0, .45); }
+@media (prefers-reduced-motion: reduce) { .cad-mapa .marker-icon { transition: none; } }
+@media (max-width: 900px) {
+  .cad-geo { grid-template-columns: minmax(0, 1fr); height: auto; }
+  .cad-geo__lista { max-height: 340px; border-right: 0; border-bottom: 1px solid var(--borda); }
+  .cad-geo .cad-mapa { flex: none; height: 440px; }
+  .cad-geo__botoes { margin-left: 0; }
+}
+
+/* Importar geometria em duas abas (16/11/2026): Um talhão · Vários talhões */
+.cad-modo { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin: 0 0 16px; padding: 4px; border-radius: 999px; background: var(--superficie-2); }
+.cad-modo__opcao { padding: 8px 12px; border: 0; border-radius: 999px; background: transparent; font: inherit; font-size: 14px; font-weight: 600; color: var(--texto-suave); cursor: pointer; }
+.cad-modo__opcao:hover { color: var(--texto); }
+.cad-modo__opcao--ativa { background: var(--superficie); color: var(--texto); box-shadow: 0 1px 3px rgba(0, 0, 0, .18); }
+.cad-modo__opcao:focus-visible { outline: 2px solid var(--verde-600); outline-offset: 2px; }
+.cad-imp__explica { margin: 0 0 14px; font-size: 14px; color: var(--texto-suave); }
+.cad-imp__talhao { margin: 0 0 14px; max-width: 360px; }
+.cad-imp__um { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 16px 32px; margin-bottom: 14px; }
+.cad-imp__um .cad-imp__talhao { margin: 0; flex: 0 1 280px; }
+.cad-imp__numeros { display: flex; flex-wrap: wrap; gap: 8px 32px; margin: 0; }
+.cad-imp__numeros dt { font-size: 12px; color: var(--texto-suave); }
+.cad-imp__numeros dd { margin: 2px 0 0; font-size: 16px; font-weight: 700; color: var(--texto); font-variant-numeric: tabular-nums; }
+.cad-imp__numeros dd small { margin-left: 4px; font-size: 12px; font-weight: 400; color: var(--texto-suave); }
+.cad-imp__numeros .cad-imp__tag { margin-left: 0; }
+.cad-imp__falta { font-size: 14px; font-weight: 600; color: var(--aviso-texto); }
+.modal--cad-imp .cad-imp__mapa-um { flex: 1; min-height: 320px; }
+.cad-imp__um .cad-imp__trocar { margin-left: auto; }
+.cad-imp__resumo .cad-imp__trocar { margin-left: 8px; }
+/* Um talhão (16/11/2026): nome dos talhões cadastrados em preto sobre o cinza; legenda cinza = cadastrado, verde = importado */
+.cad-imp__rotulo--cadastrado { background: #ffffff; color: #1d1d1d; } /* mesma etiqueta do importado, com o nome em preto (16/11/2026) */
+.cad-imp__legenda { display: flex; flex-wrap: wrap; gap: 6px 20px; margin: 10px 0 0; font-size: 13px; color: var(--texto-suave); }
+.cad-imp__legenda span { display: inline-flex; align-items: center; gap: 6px; }
+.cad-imp__cor { display: inline-block; width: 14px; height: 14px; border-radius: 3px; }
+.cad-imp__cor--cadastrado { background: #9ca3a8; border: 1px solid #7d848a; }
+.cad-imp__cor--importado { background: #1baf7a; border: 1px solid #13875e; }
+/* Um talhão (16/11/2026): cabeçalho enxuto para sobrar espaço para o mapa — título menor, sem subtítulo, Talhão e áreas numa linha */
+.modal--imp-um .modal__corpo { padding-top: 16px; }
+.modal--imp-um .modal__titulo { font-size: 20px; }
+.modal--imp-um .modal__fechar { top: 10px; }
+.modal--imp-um .modal__subtitulo { display: none; }
+.modal--imp-um .cad-imp__um { align-items: center; gap: 8px 28px; margin: 10px 0 10px; }
+.modal--imp-um .cad-imp__um .cad-imp__talhao { display: flex; align-items: center; gap: 8px; flex: 0 1 300px; }
+.modal--imp-um .cad-imp__talhao .campo__rotulo { margin: 0; }
+.modal--imp-um .cad-imp__talhao .campo__controle { height: 36px; }
+.modal--imp-um .cad-imp__numeros { gap: 6px 24px; }
+.modal--imp-um .cad-imp__numeros div { display: flex; align-items: baseline; gap: 6px; }
+.modal--imp-um .cad-imp__numeros dt { font-size: 13px; }
+.modal--imp-um .cad-imp__numeros dd { margin: 0; font-size: 15px; }
+.modal--imp-um .cad-imp__legenda { margin-top: 8px; }
+/* Lote (16/11/2026): legenda embaixo do mapa (cinza cadastrado · amarelo sem talhão · verde ligado) */
+.cad-imp__lado-mapa { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+.modal--cad-imp .cad-imp__lado-mapa .cad-mapa--p { flex: 1; }
+.cad-imp__cor--sem { background: rgba(255, 212, 0, .55); border: 2px solid #ffd400; }
+/* Já associados nesta importação (16/11/2026): só informativo, escolhível; mostra a qual talhão/polígono está ligado */
+.cad-escolha__ligado { margin-right: 8px; padding: 1px 6px; border-radius: 999px; background: var(--superficie-2); color: var(--texto-suave); font-size: 11px; font-weight: 600; }
+
+/* Culturas e variedades (16/11/2026): lista como a de operações do plano (título Cultura + recolher) e setas ‹ › no nome */
+.cad-culturas__topo { padding: 16px 12px 4px 18px; }
+.cad-culturas .cad-lista { padding-top: 0; }
+.cad-duas--recolhida { grid-template-columns: minmax(0, 1fr); } /* 16/11/2026: recolhida, a lista some e o quadro ocupa tudo */
+.cad-culturas--recolhida { display: flex; justify-content: center; padding: 12px 0; }
+.cad-topo--cultura { justify-content: flex-start; gap: 6px; padding-left: 12px; }
+/* Operações (16/11/2026): grupos dentro de um quadro só, cada um com Tipo e a tabela de operações */
+.cad-grupo--ops { margin: 0; border-top: 1px solid var(--borda); }
+.cad-grupo--ops .cad-grupo__topo { padding: 10px 20px; }
+.cad-grupo--ops .cad-grupo__tipo select { height: 34px; min-width: 200px; font-size: 14px; color: var(--texto); }
+.cad-ops td:first-child, .cad-ops th:first-child { padding-left: 20px; }
+.cad-ops td:last-child, .cad-ops th:last-child { padding-right: 20px; }
+/* Plano (16/11/2026): ⓘ ao lado de "Grupo de operações", com a dica de que grupos e operações vêm do ERP */
+.grupos__rotulo--info { gap: 6px; cursor: help; }
+.grupos__rotulo--info:focus-visible { outline: 2px solid var(--verde-600); outline-offset: -2px; }
+.grupos__info { display: inline-flex; color: var(--texto-suave); }
+.grupos__info .icone { width: 16px; height: 16px; }
+.grupos__rotulo--info:hover .grupos__info { color: var(--verde-700); }
+.cad-nota--ops { color: var(--texto); }
+/* Operações (16/11/2026): cabeçalho e tabelas mais enxutos */
+.cad-ops-quadro .cad-topo--cultura { padding-top: 8px; padding-bottom: 0; }
+.cad-ops-quadro .cad-nota--ops { margin: 0; padding: 0 20px 10px; }
+.cad-ops-quadro .cad-grupo__topo { padding-top: 6px; padding-bottom: 6px; }
+.cad-ops-quadro .cad-grupo__tipo select { height: 32px; }
+.cad-ops-quadro .cad-ops th, .cad-ops-quadro .cad-ops td { padding-top: 6px; padding-bottom: 6px; }
+.cad-ops-quadro .cad-ops .cad-campo { height: 28px; padding-top: 0; padding-bottom: 0; }
+/* Largura (16/11/2026): lista CULTURA mais fina; em Operações, o quadro com largura máxima (DAP perto do nome) */
+.cad-ops-quadro { max-width: none; } /* 16/11/2026: ocupa toda a largura (a usuária preferiu) */
+.cad-mostrar-culturas { margin-right: 8px; }
+.cad-mostrar-culturas .icone { width: 16px; height: 16px; }
+.cad-ops-quadro .cad-topo--cultura { padding-top: 10px; padding-bottom: 6px; }
+/* "» Culturas" com destaque (16/11/2026): fundo verde claro, borda e texto verdes */
+.cad-mostrar-culturas { border-color: var(--verde-600); background: var(--verde-100); color: var(--verde-800); font-weight: 600; }
+.cad-mostrar-culturas:hover { background: var(--verde-600); border-color: var(--verde-600); color: #fff; }
+.cad-mostrar-culturas .icone { stroke-width: 2.4; }
+/* "» Culturas" (16/11/2026, layout da imagem da usuária): fundo branco, borda cinza, texto em negrito, sem verde */
+.cad-mostrar-culturas { border: 1px solid var(--borda-forte); border-radius: 8px; background: var(--superficie); color: var(--texto); font-weight: 700; }
+.cad-mostrar-culturas:hover { background: var(--superficie-2); border-color: var(--borda-forte); color: var(--texto); }
+.cad-mostrar-culturas .icone { color: var(--texto); }

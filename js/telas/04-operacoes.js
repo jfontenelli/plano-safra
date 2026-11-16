@@ -1110,6 +1110,7 @@ window.Telas.planoOperacoes = (function () {
   // O código continua aqui; para voltar, ESTRUTURA_DO_ERP = false.
   const ESTRUTURA_DO_ERP = true;
   const editaEstrutura = () => !somenteLeitura && !ESTRUTURA_DO_ERP;
+  const MSG_ESTRUTURA_ERP = 'Os grupos de operação e as operações são cadastrados no ERP Compass. Para edição, use o ERP.';
 
   // Pré-cadastro fora desta entrega (11/11/2026; rascunhos/pre-cadastro/README.md): sem a opção "+ Pré-cadastrar" nas
   // buscas de variedade, princípio ativo e produto. O código continua aqui; para voltar, PRE_CADASTRO = true.
@@ -3732,7 +3733,10 @@ window.Telas.planoOperacoes = (function () {
     return `
       <footer class="grupos">
         <!-- O leitor de tela ouve o nome pelo aria-label das guias (o rótulo visual não é lido duas vezes) -->
-        <span class="grupos__rotulo" aria-hidden="true">Grupo de operações</span>
+        ${ESTRUTURA_DO_ERP
+          // 16/11/2026: grupos e operações vêm do ERP; a dica fica no rótulo, com o ⓘ ao lado (não em cada guia)
+          ? `<span class="grupos__rotulo grupos__rotulo--info" title="${MSG_ESTRUTURA_ERP}" tabindex="0" aria-label="Grupo de operações. ${MSG_ESTRUTURA_ERP}">Grupo de operações<span class="grupos__info" aria-hidden="true">${Icones.info}</span></span>`
+          : '<span class="grupos__rotulo" aria-hidden="true">Grupo de operações</span>'}
         <div class="grupos__guias" role="tablist" aria-label="Grupo de operações">
           ${gruposPlanejamento().map((g) => {
             const ativo = atual && g.id === atual.id;
@@ -5015,6 +5019,8 @@ window.Telas.planoOperacoes = (function () {
   }
 
   function aoMenuContexto(e) {
+    // Botão direito na guia de grupo com grupos vindos do ERP (16/11/2026), em qualquer plano: a mensagem do ERP
+    if (ESTRUTURA_DO_ERP && e.target.closest('.guia[data-grupo]')) { e.preventDefault(); Aviso.mostrar(MSG_ESTRUTURA_ERP); return; }
     if (somenteLeitura) return;
     // Plantio: botão direito na linha (variedade) → Inserir (variedade logo abaixo) · Excluir · Limpar conteúdo
     const linhaPl = e.target.closest('.tabela-variedade tbody tr[data-talhao]');
@@ -5045,6 +5051,8 @@ window.Telas.planoOperacoes = (function () {
 
     if (guia) {
       const grupo = plano.grupos.find((g) => g.id === guia.dataset.grupo);
+      // Botão direito na guia com grupos vindos do ERP (16/11/2026): em vez de não acontecer nada, a mensagem
+      if (grupo && ESTRUTURA_DO_ERP) { Aviso.mostrar(MSG_ESTRUTURA_ERP); return; }
       if (!grupo || !editaEstrutura()) return;
       abrirMenuContexto(ancora, x, y, `Grupo ${grupo.nome}`, [
         { id: 'inserir', rotulo: 'Inserir', acao: () => sairDaReceita(novoGrupo) },

@@ -26,6 +26,8 @@ Protótipo navegável e preenchível do Plano de Safra (UniSystem), usado para v
 - Não altere `docs/DECISOES.md` nem os arquivos de `docs/telas/` sem a usuária pedir.
 
 ## Regras de trabalho
+- Ao construir ou redesenhar uma tela, use sempre a skill de design (`artifact-design`) como guia de boas práticas visuais, junto com o estilo que o protótipo já tem.
+- Ao conversar com a usuária, use linguagem acessível: frases curtas, palavras do dia a dia e nada de jargão técnico (ex.: "botão" em vez de "componente", "cor" em vez de "token"). Quando um termo técnico for inevitável, explique em poucas palavras.
 - Não invente regra de negócio. Se algo não está em `docs/`, pergunte antes de implementar.
 - Faça uma pergunta por vez.
 - Quando precisar decidir algo de UX sem definição, implemente a opção mais simples e liste como "Sugestão" no resumo final da tarefa.

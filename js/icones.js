@@ -78,6 +78,12 @@ window.Icones = (function () {
     funil: svg('<path d="M4 5h16l-6 8v5l-4 2v-7Z"/>'),
     baixar: svg('<path d="M12 4v11M7 10l5 5 5-5"/><path d="M5 19h14"/>'),
     alfinete: svg('<path d="M12 17v5"/><path d="M9 4h6l-1 6 3 3v2H7v-2l3-3Z"/>'),
+    // Geometria dos talhões (13/11/2026): importar arquivo (seta para cima), desenhar polígono e enquadrar a fazenda
+    importar: svg('<path d="M12 15V4M7 9l5-5 5 5"/><path d="M5 15v4h14v-4"/>'),
+    poligono: svg('<path d="M4 8l8-5 8 5-2 12H6Z"/><path d="M12 9v6M9 12h6"/>'),
+    // Limpar seleção (como no QGIS): quadro tracejado com um X
+    desmarcar: svg('<rect x="3" y="3" width="13" height="13" rx="1" stroke-dasharray="2.5 2.5"/><path d="M14.5 14.5l6 6M20.5 14.5l-6 6"/>'),
+    enquadrar: svg('<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/><rect x="9" y="9" width="6" height="6" rx="1"/>'),
     mais_opcoes: svg('<circle cx="5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/>')
   };
 })();
