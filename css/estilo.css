@@ -4779,6 +4779,14 @@ html[data-tema="escuro"] .cad-regiao--sul   { background: #33223D !important; co
 .cad-cabecalho--compacto { min-height: 0; padding-top: 12px; padding-bottom: 12px; }
 .cad-cabecalho--compacto .cabecalho__titulo { font-size: 24px; }
 .cad-cabecalho--compacto .cabecalho__subtitulo { margin-top: 2px; font-size: 13px; }
+/* Trilha acima do título (17/11/2026): "Cadastros › <página>" */
+.cad-trilha { margin: 0 0 2px; font-size: 13px; color: var(--texto-suave); }
+.cad-trilha strong { color: var(--texto); font-weight: 600; }
+/* Safras (17/11/2026): quadro "Safras cadastradas" com a etiqueta Consulta · ERP Compass */
+.cad-safras { overflow: hidden; }
+.cad-safras__topo { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 20px; }
+.cad-safras__titulo { margin: 0; font-size: 18px; font-weight: 700; color: var(--texto); }
+.cad-safras__etiqueta { padding: 4px 12px; border-radius: 999px; background: var(--info-fundo); color: var(--info); font-size: 12px; font-weight: 600; white-space: nowrap; }
 .cad[data-guia="talhoes"] { padding-top: 12px; padding-bottom: 16px; }
 .cad[data-guia="talhoes"] .cad-filtros { margin-bottom: 12px; padding: 0; border: 0; border-radius: 0; background: none; box-shadow: none; }
 .cad[data-guia="talhoes"] .cad-filtros .campo__rotulo { margin-bottom: 2px; font-size: 12px; }

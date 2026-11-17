@@ -21,18 +21,20 @@ window.Telas.cadastros = (function () {
   const esc = (t) => Util.escapar(t ?? '');
   const n1 = (v) => (v === null || v === undefined || v === '' ? '' : Number(v).toLocaleString('pt-BR', { maximumFractionDigits: 1 }));
   const SATELITE = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
-  // Páginas do grupo Cadastros no menu (12/11/2026; antes guias): [chave, título, subtítulo]
+  // Páginas do grupo Cadastros no menu (12/11/2026; antes guias): [chave, título, subtítulo]; ordem do menu desde 17/11/2026
   const GUIAS = [
+    ['safras', 'Safras', 'Consulte as safras cadastradas no ERP Compass.'],
     ['talhoes', 'Mapa de talhões', 'Visualize os talhões do ERP Compass e desenhe, importe ou edite seus limites no mapa.'],
-    ['safras', 'Safras', 'As safras são cadastradas no ERP Compass e disponibilizadas aqui para consulta.'],
     ['culturas', 'Culturas e variedades', 'Consulte as culturas e as variedades cadastradas no ERP Compass.'],
     ['operacoes', 'Operações', 'Consulte os grupos de operação e as operações cadastradas no ERP Compass.']
   ];
+  // Nome de cada página no menu (17/11/2026): a trilha acima do título usa o nome idêntico ao do menu
+  const NOME_MENU = { safras: 'Safras', talhoes: 'Talhões', culturas: 'Culturas e variedades', operacoes: 'Operações' };
   const ERP = 'ERP Compass';
   // Exemplo (13/11/2026): na São José, alguns talhões começam sem polígono, para mostrar o preenchimento
   const SEM_GEOMETRIA = { 'São José': ['T04', 'T07', 'T10', 'T12'] };
 
-  const ui = { guia: 'talhoes', fazenda: null, talhao: null, selecionados: new Set(), filtroGeo: 'todos', listaRecolhida: false, culturasRecolhida: false, opsRecolhida: false, busca: '', buscaPonto: null, cultura: 'Soja', culturaOp: 'Soja', salvoEm: '',
+  const ui = { guia: 'safras', fazenda: null, talhao: null, selecionados: new Set(), filtroGeo: 'todos', listaRecolhida: false, culturasRecolhida: false, opsRecolhida: false, busca: '', buscaPonto: null, cultura: 'Soja', culturaOp: 'Soja', salvoEm: '',
     filtro: { empresa: '', filial: '', aglomerado: '' } };
   let conteudo = null; let mapa = null; let camadas = {};
   // Polígono em desenho ou edição: { talhao, modo: 'desenhar' | 'editar', novo, camada }
@@ -85,11 +87,13 @@ window.Telas.cadastros = (function () {
     if (GUIAS.some(([g]) => g === guia)) ui.guia = guia;
     const corpo = { talhoes: guiaTalhoes, safras: guiaSafras, culturas: guiaCulturas, operacoes: guiaOperacoes }[ui.guia]();
     const [, titulo, subtitulo] = GUIAS.find(([g]) => g === ui.guia);
+    // Trilha acima do título (17/11/2026): "Cadastros › <página>", pequena, para saber que está em Cadastros
     // Talhões (13/11/2026): cabeçalho baixo, com o subtítulo logo abaixo do título
     const compacto = ui.guia === 'talhoes';
     return `
       <header class="cabecalho cad-cabecalho ${compacto ? 'cad-cabecalho--compacto' : ''}">
         <div>
+          <p class="cad-trilha">Cadastros › <strong>${NOME_MENU[ui.guia]}</strong></p>
           <h1 class="cabecalho__titulo">${titulo}</h1>
           <p class="cabecalho__subtitulo">${subtitulo}</p>
         </div>
@@ -1160,16 +1164,21 @@ window.Telas.cadastros = (function () {
 
   // ===== Safras (só consulta) =====
   function guiaSafras() {
-    const nomes = DADOS.cadastroSafras.map((s) => s.nome);
-    const safras = [...DADOS.cadastroSafras].sort((a, b) => Util.posicaoSafra(a.nome, nomes) - Util.posicaoSafra(b.nome, nomes));
+    // 17/11/2026: quadro "Safras cadastradas" com a etiqueta Consulta · ERP Compass; colunas Safra · Data início ·
+    // Data fim · Ano agrícola (o ano se repete em cada linha), todas com o mesmo texto; ordem de ordenarSafras
+    const porNome = Object.fromEntries(DADOS.cadastroSafras.map((s) => [s.nome, s]));
+    const data = (d) => (d ? Util.data(d) : '—');
+    const linhas = Util.ordenarSafras(Object.keys(porNome)).map((n) => { const s = porNome[n]; return `<tr>
+        <td>${esc(s.nome)}</td><td>${data(s.inicio)}</td><td>${data(s.fim)}</td><td>${esc(String(s.anoAgricola ?? '—'))}</td></tr>`; }).join('');
     return `
-      <section class="cartao">
-        <!-- 16/11/2026: sem a linha "Safras N" e sem a nota acima da tabela; ficam só os nomes das colunas -->
+      <section class="cartao cad-safras">
+        <div class="cad-safras__topo">
+          <h2 class="cad-safras__titulo">Safras cadastradas</h2>
+          <span class="cad-safras__etiqueta">Consulta · ${ERP}</span>
+        </div>
         <div class="tabela-rolagem"><table class="tabela">
-          <thead><tr><th>Safra</th><th>Descrição</th><th>Início</th><th>Fim</th><th class="tabela__numero">Ano Agrícola</th></tr></thead>
-          <tbody>${safras.map((s) => `<tr>
-            <td><strong>${esc(s.nome)}</strong></td><td>${esc(s.descricao || '')}</td><td>${s.inicio ? Util.data(s.inicio) : '—'}</td><td>${s.fim ? Util.data(s.fim) : '—'}</td>
-            <td class="tabela__numero">${s.anoAgricola ?? '—'}</td></tr>`).join('')}</tbody>
+          <thead><tr><th>Safra</th><th>Data início</th><th>Data fim</th><th>Ano agrícola</th></tr></thead>
+          <tbody>${linhas}</tbody>
         </table></div>
       </section>`;
   }
