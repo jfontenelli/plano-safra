@@ -1,0 +1,124 @@
+<!doctype html>
+<!-- Fonte editável do macrofluxo (docs/desenvolvimento/img/macrofluxo.png). Para exportar de novo:
+     node ferramentas/exportar-macrofluxo.js (ou peça ao Claude). Tamanho fixo: 1800 × 940. -->
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Macrofluxo do Novo Produto</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --fundo: #f8fafc; --painel: #ecf4fc; --painel-borda: #c9ddf1;
+    --verde: #00643e; --verde-claro: #e6f2ec; --verde-borda: #a9d3bf;
+    --azul: #1565c0; --azul-claro: #dcebfa; --azul-titulo: #0d3c73;
+    --cinza: #a7b7c5; --cinza-texto: #5f6b76; --cinza-claro: #e7ebef;
+    --texto: #1f2933; --texto-suave: #5b6670; --linha: #dfe4e9;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  body { width: 1800px; height: 940px; background: var(--fundo); font-family: 'Noto Sans', sans-serif; color: var(--texto); position: relative; overflow: hidden; }
+  .cab { position: absolute; left: 74px; top: 64px; padding-left: 30px; border-left: 7px solid var(--azul); border-radius: 2px; }
+  .cab small { display: block; font-size: 17px; font-weight: 700; letter-spacing: 3px; color: var(--azul); }
+  .cab h1 { margin-top: 2px; font-size: 50px; font-weight: 700; color: var(--verde); line-height: 1.15; }
+  .cab p { margin-top: 10px; font-size: 22px; color: var(--texto-suave); }
+
+  .cartao { position: absolute; top: 338px; height: 398px; padding: 30px 30px 0; border-radius: 18px; background: #fff; }
+  .cartao::before { content: ''; position: absolute; left: 22px; right: 22px; top: -2px; height: 6px; border-radius: 3px; background: var(--cor); }
+  .cartao h2 { font-size: 31px; font-weight: 700; line-height: 1.2; }
+  .cartao .sub { margin-top: 4px; font-size: 19px; color: var(--texto-suave); padding-bottom: 18px; border-bottom: 1px solid var(--linha); }
+  .cartao ul { list-style: none; padding: 16px 0 0 10px; }
+  .cartao li { position: relative; padding-left: 20px; font-size: 20px; line-height: 42px; white-space: nowrap; }
+  .cartao li::before { content: ''; position: absolute; left: 0; top: 17px; width: 9px; height: 9px; border-radius: 50%; background: var(--cor); }
+  .cartao .selo { position: absolute; left: 30px; bottom: 24px; width: 300px; padding: 10px 18px; border-radius: 10px; font-size: 16px; font-weight: 700; }
+  .etapa { display: flex; align-items: center; gap: 12px; margin: -8px 0 4px -12px; font-size: 17px; font-weight: 700; letter-spacing: 2.5px; color: var(--cor); }
+  .etapa b { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: var(--fundo-num); font-size: 15px; letter-spacing: 0; }
+
+  .erp { --cor: var(--verde); left: 64px; width: 340px; border: 2px solid var(--verde-borda); }
+  .erp h2 { color: var(--verde); }
+  .erp li { font-size: 20px; }
+  .erp .selo { background: var(--verde-claro); color: var(--verde); }
+
+  .painel { position: absolute; left: 453px; top: 238px; width: 1280px; height: 562px; border: 2px solid var(--painel-borda); border-radius: 28px; background: var(--painel); }
+  .painel__topo { position: absolute; left: 34px; top: 32px; display: flex; align-items: center; gap: 16px; font-size: 25px; font-weight: 700; letter-spacing: 2px; color: var(--azul-titulo); }
+  .painel__icone { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 9px; background: var(--azul); }
+  .painel__icone i { display: block; width: 16px; height: 2.6px; background: #fff; border-radius: 2px; box-shadow: 0 -6px 0 #fff, 0 6px 0 #fff; }
+  .legenda { position: absolute; right: 40px; top: 30px; display: flex; gap: 12px; }
+  .legenda span { display: flex; align-items: center; gap: 10px; height: 38px; padding: 0 22px 0 16px; border-radius: 19px; font-size: 16px; font-weight: 700; }
+  .legenda span::before { content: ''; width: 11px; height: 11px; border-radius: 50%; background: currentColor; }
+  .legenda .atual { width: 192px; background: var(--azul-claro); color: var(--azul); }
+  .legenda .depois { width: 206px; background: var(--cinza-claro); color: var(--cinza-texto); }
+  .legenda .depois::before { background: var(--cinza-texto); }
+
+  .ent { --cor: var(--azul); --fundo-num: var(--azul-claro); width: 370px; border: 2px solid var(--painel-borda); }
+  .ent .selo { background: var(--azul-claro); color: var(--azul); }
+  .cad { left: 483px; }
+  .ps { left: 903px; }
+  .gl { --cor: var(--cinza); --fundo-num: var(--cinza-claro); left: 1323px; width: 370px; border: 2px dashed var(--cinza); background: var(--fundo); }
+  .gl .etapa { color: var(--cinza-texto); }
+  .gl li::before { background: var(--cinza); }
+  .gl .selo { background: var(--cinza-claro); color: var(--cinza-texto); }
+
+  .seta { position: absolute; top: 545px; height: 3px; border-radius: 2px; background: var(--c); }
+  .seta::after { content: ''; position: absolute; right: -2px; top: -4px; border: 5.5px solid transparent; border-left: 9px solid var(--c); border-right: 0; }
+  .s1 { --c: var(--verde); left: 408px; width: 60px; }
+  .s2 { --c: var(--azul); left: 856px; width: 34px; }
+  .s3 { --c: var(--cinza); left: 1276px; width: 34px; }
+
+  .rodape { position: absolute; left: 78px; right: 78px; top: 838px; border-top: 1px solid var(--linha); }
+  .rodape div { position: absolute; top: 20px; display: flex; align-items: center; gap: 20px; font-size: 21px; color: var(--texto-suave); }
+  .rodape span { display: grid; place-items: center; height: 44px; padding: 0 24px; border-radius: 22px; font-size: 16px; font-weight: 700; letter-spacing: .5px; }
+  .r1 { left: 0; } .r1 span { background: var(--azul-claro); color: var(--azul); }
+  .r2 { left: 847px; } .r2 span { background: var(--cinza-claro); color: var(--cinza-texto); }
+</style>
+</head>
+<body>
+  <div class="cab">
+    <small>VISÃO GERAL DO PRODUTO</small>
+    <h1>Macrofluxo do Novo Produto</h1>
+    <p>O ERP Compass fornece os cadastros; o Novo Produto complementa os dados e organiza o planejamento.</p>
+  </div>
+
+  <section class="cartao erp">
+    <h2>ERP Compass</h2>
+    <p class="sub">Origem dos cadastros</p>
+    <ul><li>Empresa, filial, aglomerado</li><li>Fazenda e talhão</li><li>Cultura e variedade</li><li>Safras e operações</li></ul>
+    <p class="selo">Cadastro mantido no ERP</p>
+  </section>
+
+  <div class="painel">
+    <div class="painel__topo"><span class="painel__icone"><i></i></span>NOVO PRODUTO</div>
+    <div class="legenda"><span class="atual">Entrega atual</span><span class="depois">Etapa posterior</span></div>
+  </div>
+
+  <section class="cartao ent cad">
+    <p class="etapa"><b>1</b>ENTREGA ATUAL</p>
+    <h2>Cadastros</h2>
+    <p class="sub">Consulta e complementação</p>
+    <ul><li>Consulta aos dados do ERP</li><li>Geometria dos talhões</li><li>DAP das operações</li></ul>
+    <p class="selo">Dados complementados</p>
+  </section>
+
+  <section class="cartao ent ps">
+    <p class="etapa"><b>2</b>ENTREGA ATUAL</p>
+    <h2>Plano de Safra</h2>
+    <p class="sub">Planejamento agrícola</p>
+    <ul><li>Variedade por talhão</li><li>Operações, datas e insumos</li><li>Histórico de versões</li></ul>
+    <p class="selo">Planejamento atualizado</p>
+  </section>
+
+  <section class="cartao gl">
+    <p class="etapa"><b>3</b>ETAPA POSTERIOR</p>
+    <h2>Gestão da Lavoura</h2>
+    <p class="sub">Execução e acompanhamento</p>
+    <ul><li>Calendário e abertura de OS</li><li>Acompanhamento de estoque</li><li>Execução das operações</li></ul>
+    <p class="selo">Entrega posterior</p>
+  </section>
+
+  <i class="seta s1"></i><i class="seta s2"></i><i class="seta s3"></i>
+
+  <div class="rodape">
+    <div class="r1"><span>ENTREGA ATUAL</span>Cadastros + Plano de Safra</div>
+    <div class="r2"><span>ETAPA POSTERIOR</span>Gestão da Lavoura</div>
+  </div>
+</body>
+</html>
