@@ -4642,6 +4642,13 @@ select.cad-campo { cursor: pointer; }
 .cad-imp__total { font-size: 16px; }
 .cad-imp__coluna { flex: 0 1 260px; }
 .cad-imp__coluna .campo__controle { height: 36px; }
+/* Coluna com o nome dos talhões (17/11/2026): lista suspensa com três exemplos de valores por coluna */
+.cad-imp__coluna { flex: 0 1 340px; }
+.cad-colunas .cad-escolha__item, .cad-colunas__cab { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); gap: 12px; text-align: left; }
+.cad-colunas__cab { align-items: end; }
+.cad-colunas__nome { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cad-colunas__ex { font-size: 13px; font-weight: 400; color: var(--texto-suave); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: right; }
+.cad-colunas__cab > span:last-child { text-align: right; }
 .cad-imp__contagem { margin-left: auto; font-size: 13px; color: var(--texto-suave); font-variant-numeric: tabular-nums; }
 .cad-imp__corresp td { vertical-align: middle; }
 .cad-imp__corresp .tabela__numero { font-variant-numeric: tabular-nums; }
@@ -4883,7 +4890,7 @@ html[data-tema="escuro"] .cad-regiao--sul   { background: #33223D !important; co
 .cad-imp__falta { font-size: 14px; font-weight: 600; color: var(--aviso-texto); }
 .modal--cad-imp .cad-imp__mapa-um { flex: 1; min-height: 320px; }
 .cad-imp__um .cad-imp__trocar { margin-left: auto; }
-.cad-imp__resumo .cad-imp__trocar { margin-left: 8px; }
+.cad-imp__resumo .cad-imp__trocar { margin-left: auto; } /* 17/11/2026: sem o "N selecionados", fica sozinho à direita */
 /* Um talhão (16/11/2026): nome dos talhões cadastrados em preto sobre o cinza; legenda cinza = cadastrado, verde = importado */
 .cad-imp__rotulo--cadastrado { background: #ffffff; color: #1d1d1d; } /* mesma etiqueta do importado, com o nome em preto (16/11/2026) */
 .cad-imp__legenda { display: flex; flex-wrap: wrap; gap: 6px 20px; margin: 10px 0 0; font-size: 13px; color: var(--texto-suave); }
@@ -4951,3 +4958,17 @@ html[data-tema="escuro"] .cad-regiao--sul   { background: #33223D !important; co
 .cad-mostrar-culturas { border: 1px solid var(--borda-forte); border-radius: 8px; background: var(--superficie); color: var(--texto); font-weight: 700; }
 .cad-mostrar-culturas:hover { background: var(--superficie-2); border-color: var(--borda-forte); color: var(--texto); }
 .cad-mostrar-culturas .icone { color: var(--texto); }
+
+/* Vários talhões (17/11/2026): cabeçalho enxuto, como em Um talhão, para dar mais espaço ao mapa e à tabela: título
+   menor, sem subtítulo, e o rótulo da coluna ao lado da lista (tudo numa linha só) */
+.modal--imp-lote .modal__corpo { padding-top: 16px; }
+.modal--imp-lote .modal__titulo { font-size: 20px; }
+.modal--imp-lote .modal__fechar { top: 10px; }
+.modal--imp-lote .modal__subtitulo { display: none; }
+.modal--imp-lote .cad-imp__resumo { align-items: center; gap: 8px 24px; margin-top: 10px; }
+.modal--imp-lote .cad-imp__coluna { display: flex; align-items: center; gap: 8px; flex: 0 1 auto; min-width: 0; }
+.modal--imp-lote .cad-imp__coluna .campo__rotulo { margin: 0; white-space: nowrap; }
+.modal--imp-lote .cad-imp__coluna .cad-escolha { width: 200px; min-width: 0; }
+.modal--imp-lote .cad-imp__resumo .cad-imp__total { padding-bottom: 0; font-size: 15px; }
+.modal--imp-lote .cad-imp { margin-top: 10px; }
+.modal--imp-lote .cad-imp__legenda { margin-top: 8px; }

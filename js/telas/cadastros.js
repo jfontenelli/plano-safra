@@ -6,7 +6,7 @@
  *    consulta). Aqui só se preenche o polígono de cada talhão; a fazenda não tem geometria (a sede saiu em 13/11/2026).
  *    Filtros Empresa · Filial · Aglomerado (os níveis do ERP: Empresa › Filial › Aglomerado › Fazenda › Talhão) ·
  *    Fazenda (uma por vez) · Talhão. O polígono se desenha no mapa, se edita (arrastar, criar e remover cantos;
- *    Salvar · Cancelar · Excluir polígono), se exclui e se importa (SHP, KML, KMZ, GeoJSON), também por cima de um
+ *    Salvar · Cancelar · Excluir polígono), se exclui e se importa (SHP, KML, KMZ; sem GeoJSON desde 17/11/2026), também por cima de um
  *    que já existe. O desenho e a edição usam o Leaflet-Geoman (CDN).
  *  - Safras: só consulta (sem a coluna Planos).
  *  - Operações (grupo de operação › operação): vêm do ERP Compass; só o DAP padrão se altera aqui (sem Fenologia, Prazo
@@ -233,7 +233,7 @@ window.Telas.cadastros = (function () {
         title="${rotulo}" aria-label="${rotulo}" ${ativo ? '' : 'disabled'}>${icone}</button>`;
     return [
       // Importar fica com ícone e texto (a ação principal)
-      `<button class="botao botao--primario botao--p cad-importar" type="button" data-acao="importar" title="Importar a geometria de um arquivo SHP, KML, KMZ ou GeoJSON" ${livre && ts.length ? '' : 'disabled'}>${Icones.importar} Importar geometria</button>`,
+      `<button class="botao botao--primario botao--p cad-importar" type="button" data-acao="importar" title="Importar a geometria de um arquivo SHP, KML ou KMZ" ${livre && ts.length ? '' : 'disabled'}>${Icones.importar} Importar geometria</button>`,
       '<span class="cad-geo__divisor" aria-hidden="true"></span>',
       botao('desenhar', Icones.poligono, t && !tem ? `Desenhar o polígono do${nome}` : varios ? 'Desenhar polígono (selecione um talhão só)' : 'Desenhar polígono (selecione um talhão sem geometria)', livre && t && !tem),
       botao('editar', Icones.lapis, tem ? `Editar o polígono do${nome}` : varios ? 'Editar polígono (selecione um talhão só)' : 'Editar polígono (selecione um talhão com geometria)', livre && tem),
@@ -738,8 +738,8 @@ window.Telas.cadastros = (function () {
         <label class="cad-soltar" id="imp-soltar">
           ${Icones.importar}
           <strong>Arraste o arquivo aqui ou clique para escolher</strong>
-          <span>Shapefile compactado (.zip) ou solto (.shp + .dbf + .prj) · KML · KMZ · GeoJSON</span>
-          <input type="file" multiple accept=".zip,.shp,.dbf,.prj,.kml,.kmz,.geojson,.json">
+          <span>Formatos aceitos: Shapefile (.zip ou .shp + .shx + .dbf + .prj), KML e KMZ.</span>
+          <input type="file" multiple accept=".zip,.shp,.shx,.dbf,.prj,.kml,.kmz">
         </label>`;
       corpo.querySelectorAll('[data-modo]').forEach((b) => b.addEventListener('click', () => {
         if (modo === b.dataset.modo) return;
@@ -759,7 +759,7 @@ window.Telas.cadastros = (function () {
       erro.textContent = '';
       if (!arquivos || !arquivos.length) return;
       try {
-        feicoes = await ArquivoGeo.ler(arquivos);
+        feicoes = await ArquivoGeo.ler(arquivos, { lote: modo === 'varios' }); // lote: .shp, .shx e .dbf obrigatórios
       } catch (e) { erro.textContent = e.message || 'Não foi possível ler o arquivo.'; return; }
       const colunas = [...new Set(feicoes.flatMap((x) => Object.keys(x.atributos)))];
       coluna = ['talh', 'nome', 'name', 'gleba', 'field', 'descr'].map((p) => colunas.find((c) => c.toLowerCase().includes(p))).find(Boolean) || colunas[0] || '';
@@ -774,7 +774,11 @@ window.Telas.cadastros = (function () {
       }
       caixa.classList.add('modal--tela'); // a conferência ocupa a janela (13/11/2026)
       if (modo === 'um') passoUm();
-      else { sub.textContent = `Cada talhão do ${ERP} recebe um polígono do arquivo. Confira a correspondência antes de importar.`; passoConferir(colunas); }
+      else {
+        sub.textContent = `Cada talhão do ${ERP} recebe um polígono do arquivo. Confira a correspondência antes de importar.`;
+        caixa.classList.add('modal--imp-lote'); // 17/11/2026: cabeçalho enxuto, como em Um talhão, para o mapa ganhar espaço
+        passoConferir(colunas);
+      }
     }
 
     // Um talhão (16/11/2026): o arquivo tem um polígono só, que vai para o talhão escolhido. A conferência mostra no mapa
@@ -862,10 +866,9 @@ window.Telas.cadastros = (function () {
     function passoConferir(colunas) {
       corpo.innerHTML = `
         <div class="cad-imp__resumo">
-          ${colunas.length > 1 ? `<div class="campo cad-imp__coluna"><label class="campo__rotulo" for="imp-coluna">Coluna com o nome do talhão</label>
-            <select class="campo__controle" id="imp-coluna">${colunas.map((c) => `<option ${c === coluna ? 'selected' : ''}>${esc(c)}</option>`).join('')}</select></div>` : ''}
+          <div class="campo cad-imp__coluna"><span class="campo__rotulo" id="imp-coluna-rotulo">Coluna com nome dos talhões</span>
+            <button class="cad-escolha" type="button" id="imp-coluna" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="imp-coluna-rotulo imp-coluna"></button></div>
           <strong class="cad-imp__total">${feicoes.length} ${feicoes.length === 1 ? 'polígono encontrado' : 'polígonos encontrados'} · ${n1(feicoes.reduce((s, x) => s + x.area, 0))} ha</strong>
-          <span class="cad-imp__contagem" id="imp-contagem" aria-live="polite"></span>
           <button class="botao botao--secundario botao--p cad-imp__trocar" type="button" data-trocar>${Icones.importar} Trocar arquivo</button>
         </div>
         <div class="cad-imp">
@@ -873,18 +876,16 @@ window.Telas.cadastros = (function () {
             <div class="cad-imp__tabela"><table class="tabela cad-imp__corresp">
               <thead><tr>
                 <th class="tabela__marcar"><input type="checkbox" id="imp-todos" aria-label="Marcar todos os talhões ligados a um polígono"></th>
-                <th>Talhão no Compass</th><th class="tabela__numero">Área (ha)</th><th>Talhão no arquivo</th></tr></thead>
+                <th>Talhão no Compass</th><th class="tabela__numero">Área (ha)</th>
+                <th>Talhão no arquivo</th></tr></thead>
               <tbody id="imp-linhas"></tbody></table></div>
-            <p class="cad-imp__sobra" id="imp-sobra"></p>
           </div>
           <div class="cad-imp__lado-mapa">
             <div id="imp-mapa" class="cad-mapa cad-mapa--p"></div>
             <p class="cad-imp__legenda"><span><i class="cad-imp__cor cad-imp__cor--cadastrado"></i>Talhão cadastrado</span><span><i class="cad-imp__cor cad-imp__cor--sem"></i>Polígono sem talhão</span><span><i class="cad-imp__cor cad-imp__cor--importado"></i>Polígono ligado ao talhão</span></p>
           </div>
-        </div>
-        <p class="cad-dica">${Icones.info}<span>Os nomes iguais aos do ${ERP} já vêm ligados. Quando o nome do arquivo for diferente, escolha o polígono em "Talhão no arquivo" ou clique no polígono do mapa para escolher o talhão. Talhão que não está na lista é criado no ${ERP}.</span></p>`;
+        </div>`; // 17/11/2026: sem a dica embaixo, sem o "N selecionados" e sem o aviso dos polígonos sem talhão
       const linhas = corpo.querySelector('#imp-linhas'); const todos = corpo.querySelector('#imp-todos');
-      const contagem = corpo.querySelector('#imp-contagem'); const sobra = corpo.querySelector('#imp-sobra');
       const lado = corpo.querySelector('.cad-imp__lado'); const box = corpo.querySelector('.cad-imp__tabela');
       const doTalhao = (nome) => feicoes.find((x) => x.alvo === nome);
       const pintar = () => {
@@ -897,15 +898,10 @@ window.Telas.cadastros = (function () {
             <td class="tabela__numero">${n1(t.area)}</td>
             <td><button class="cad-escolha ${x ? '' : 'cad-escolha--vazio'}" type="button" data-k="${k}" aria-haspopup="listbox" aria-expanded="false"
                   aria-label="Polígono do arquivo para o ${esc(t.nome)}: ${x ? esc(x.nome) : 'nenhum'}">
-                  <span>${x ? `${esc(x.nome)} <span class="cad-escolha__ha">(${n1(x.area)} ha)</span>` : 'Selecionar polígono'}</span>${Icones.abaixo}</button></td></tr>`;
+                  <span>${x ? `${esc(x.nome)} <span class="cad-escolha__ha">(${n1(x.area)} ha)</span>` : 'Selecionar talhão'}</span>${Icones.abaixo}</button></td></tr>`;
         }).join('');
         const ligados = feicoes.filter((x) => x.alvo);
         const n = ligados.filter((x) => x.incluir).length;
-        const soltos = feicoes.filter((x) => !x.alvo);
-        sobra.innerHTML = soltos.length ? `${Icones.alerta}<span>${soltos.length === 1 ? 'Polígono do arquivo sem talhão' : `${soltos.length} polígonos do arquivo sem talhão`}
-          (ficam de fora): <strong>${soltos.map((x) => `${esc(x.nome)} (${n1(x.area)} ha)`).join(', ')}</strong>.</span>` : '';
-        sobra.hidden = !soltos.length;
-        contagem.textContent = `${n} ${n === 1 ? 'selecionado' : 'selecionados'}`;
         todos.disabled = !ligados.length;
         todos.checked = ligados.length > 0 && ligados.every((x) => x.incluir);
         todos.indeterminate = n > 0 && !todos.checked;
@@ -913,15 +909,14 @@ window.Telas.cadastros = (function () {
         ajustarImp(); pintarMapaImp();
       };
       pintar();
-      // Só linhas inteiras na área de rolagem (a altura que sobra no modal, descontado o aviso dos polígonos sem talhão),
+      // Só linhas inteiras na área de rolagem (a altura que sobra no modal),
       // com a rolagem parando no começo de uma linha. Refeito ao pintar e ao mudar o tamanho da janela
       function ajustarImp() {
         const tr = linhas.querySelector('tr'); const cab = box.querySelector('thead');
         if (!tr || !lado.clientHeight) return;
         const h = tr.getBoundingClientRect().height; const c = cab.getBoundingClientRect().height; const borda = box.offsetHeight - box.clientHeight;
-        const aviso = sobra.hidden ? 0 : sobra.getBoundingClientRect().height + 10;
         box.style.scrollPaddingTop = `${c}px`;
-        const n = Math.max(1, Math.floor((lado.clientHeight - aviso - c - borda) / h));
+        const n = Math.max(1, Math.floor((lado.clientHeight - c - borda) / h));
         box.style.maxHeight = `${c + n * h + borda}px`;
       }
       ajustarImp();
@@ -997,7 +992,7 @@ window.Telas.cadastros = (function () {
       // Pela tabela: na linha do talhão, escolher o polígono do arquivo
       function abrirEscolha(k, btn) {
         const t = talhoesFaz()[k]; const atual = doTalhao(t.nome);
-        abrirLista({ ancora: btn, rotulo: 'Polígonos do arquivo', placeholder: 'Buscar polígono...', nenhum: 'Nenhum polígono',
+        abrirLista({ ancora: btn, rotulo: 'Polígonos do arquivo', placeholder: 'Buscar talhão...', nenhum: 'Nenhum talhão',
           atual: atual ? String(feicoes.indexOf(atual)) : '',
           itens: () => feicoes.map((x, i) => ({ valor: String(i), nome: x.nome, area: x.area, ligadoA: x.alvo && x !== atual ? `no ${x.alvo}` : '' })),
           aoEscolher: (v) => escolher(k, v) });
@@ -1029,8 +1024,67 @@ window.Telas.cadastros = (function () {
         const b = linhas.querySelector(`.cad-escolha[data-k="${k}"]`); if (b) b.focus();
       }
       todos.addEventListener('change', () => { feicoes.forEach((x) => { if (x.alvo) x.incluir = todos.checked; }); pintar(); });
-      const sel = corpo.querySelector('#imp-coluna');
-      if (sel) sel.addEventListener('change', () => { coluna = sel.value; feicoes.forEach((x) => { x.alvo = ''; }); feicoes.forEach((x, i) => ligarPeloNome(x, i)); pintar(); });
+      // Coluna com o nome dos talhões (17/11/2026): lista suspensa nossa, sempre visível, com busca, "Nenhum", uma linha
+      // e as colunas do arquivo, cada uma com três valores de exemplo. Escolher já aplica (sem Cancelar nem Confirmar)
+      const btnColuna = corpo.querySelector('#imp-coluna');
+      const exemplos = (c) => {
+        const vs = feicoes.map((x) => String(x.atributos[c] ?? '').trim()).filter(Boolean).slice(0, 3);
+        return vs.join(vs.some((v) => v.includes(',')) ? '; ' : ', ') || '—';
+      };
+      const pintarColuna = () => {
+        btnColuna.classList.toggle('cad-escolha--vazio', !coluna);
+        btnColuna.innerHTML = `<span>${coluna ? esc(coluna) : 'Nenhum'}</span>${Icones.abaixo}`;
+      };
+      pintarColuna();
+      function abrirColunas() {
+        fecharEscolha();
+        const painel = document.createElement('div');
+        painel.className = 'cad-escolha__painel cad-colunas';
+        painel.innerHTML = `
+          <div class="cad-escolha__busca">${Icones.busca}<input type="text" placeholder="Buscar coluna..." aria-label="Buscar coluna" autocomplete="off"></div>
+          <div class="cad-escolha__lista" role="listbox" aria-label="Colunas do arquivo"></div>`;
+        raiz.appendChild(painel);
+        const r = btnColuna.getBoundingClientRect(); const largura = Math.min(480, innerWidth - 16);
+        painel.style.width = `${largura}px`;
+        painel.style.left = `${Math.max(8, Math.min(r.left, innerWidth - largura - 8))}px`;
+        painel.style.top = `${r.bottom + 4}px`;
+        const lista = painel.querySelector('.cad-escolha__lista'); const busca = painel.querySelector('input');
+        const item = (valor, nome, ex) => `<button class="cad-escolha__item ${valor === coluna ? 'cad-escolha__item--atual' : ''}" type="button" role="option"
+            data-valor="${esc(valor)}" aria-selected="${valor === coluna}"><span class="cad-colunas__nome">${esc(nome)}</span><span class="cad-colunas__ex">${esc(ex)}</span></button>`;
+        const pintarLista = () => {
+          const q = Util.normalizar(busca.value).trim();
+          const cs = colunas.filter((c) => !q || Util.normalizar(c).includes(q));
+          lista.innerHTML = (q ? '' : `${item('', 'Nenhum', '')}<div class="cad-escolha__grupo cad-escolha__grupo--sep cad-colunas__cab" role="presentation"><span>Nome da coluna</span><span>Exemplos de valores</span></div>`)
+            + (q && cs.length ? '<div class="cad-escolha__grupo cad-colunas__cab" role="presentation"><span>Nome da coluna</span><span>Exemplos de valores</span></div>' : '')
+            + cs.map((c) => item(c, c, exemplos(c))).join('')
+            + (cs.length ? '' : `<p class="cad-escolha__vazio">Nenhuma coluna com "${esc(busca.value.trim())}".</p>`);
+          lista.scrollTop = 0;
+        };
+        pintarLista();
+        const marcado = lista.querySelector('.cad-escolha__item--atual'); if (marcado) marcado.scrollIntoView({ block: 'nearest' });
+        busca.addEventListener('input', pintarLista);
+        lista.addEventListener('click', (e) => {
+          const b = e.target.closest('.cad-escolha__item'); if (!b) return;
+          coluna = b.dataset.valor;
+          feicoes.forEach((x) => { x.alvo = ''; }); feicoes.forEach((x, i) => ligarPeloNome(x, i));
+          fecharEscolha(); erro.textContent = ''; pintarColuna(); pintar(); btnColuna.focus();
+        });
+        painel.addEventListener('keydown', (e) => {
+          const its = [...lista.querySelectorAll('.cad-escolha__item')];
+          const pos = its.indexOf(document.activeElement);
+          if (e.key === 'Escape') { e.stopPropagation(); e.preventDefault(); fecharEscolha(); btnColuna.focus(); }
+          else if (e.key === 'ArrowDown') { e.preventDefault(); (its[pos + 1] || its[0])?.focus(); }
+          else if (e.key === 'ArrowUp') { e.preventDefault(); if (pos <= 0) busca.focus(); else its[pos - 1].focus(); }
+          else if (e.key === 'Enter' && document.activeElement === busca && its.length === 1) { e.preventDefault(); its[0].click(); }
+          else if (e.key === 'Tab') fecharEscolha();
+        });
+        btnColuna.setAttribute('aria-expanded', 'true');
+        const fora = (e) => { if (!painel.contains(e.target) && !btnColuna.contains(e.target)) fecharEscolha(); };
+        escolhaAberta = { painel, btn: btnColuna, fora };
+        setTimeout(() => document.addEventListener('mousedown', fora), 0);
+        busca.focus();
+      }
+      btnColuna.addEventListener('click', () => { if (escolhaAberta && escolhaAberta.btn === btnColuna) fecharEscolha(); else abrirColunas(); });
       // Mapa da conferência: em cinza, os polígonos que os talhões já têm (com o nome), para comparar; por cima, os
       // polígonos do arquivo: amarelo = sem talhão (rótulo com o nome do arquivo), verde = ligado (rótulo com o nome do talhão)
       if (window.L) {
@@ -1095,7 +1149,7 @@ window.Telas.cadastros = (function () {
       fecharEscolha();
       if (mapaImp) { mapaImp.remove(); mapaImp = null; }
       camadasImp = []; feicoes = null; erro.textContent = '';
-      caixa.classList.remove('modal--tela', 'modal--imp-um');
+      caixa.classList.remove('modal--tela', 'modal--imp-um', 'modal--imp-lote');
       sub.textContent = 'Escolha como deseja importar as geometrias.';
       botao.disabled = true; botao.textContent = 'Importar';
       passoArquivo();

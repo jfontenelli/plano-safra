@@ -1,6 +1,9 @@
 
 /*
- * Leitura de arquivos de talhões no navegador: shapefile (.zip ou .shp + .dbf + .prj), KML, KMZ e GeoJSON.
+ * Leitura de arquivos de talhões no navegador: shapefile (.zip ou .shp + .shx + .dbf + .prj), KML e KMZ (17/11/2026: sem GeoJSON; o .zip só com shapefile).
+ * Shapefile: em um talhão, só o .shp é obrigatório; em vários talhões (lote), .shp, .shx e .dbf. O .shx (índice: onde
+ * começa cada polígono no .shp) é usado quando vem; sem ele, o .shp é lido na ordem. Sem .prj, as coordenadas são lidas como
+ * geográficas (WGS 84, EPSG 4326); se forem projetadas (UTM), o .prj é necessário.
  * Devolve [{ atributos: { coluna: valor }, coords: [[lat, lng], ...] }] (o maior anel externo de cada feição).
  */
 window.ArquivoGeo = (function () {
@@ -32,10 +35,20 @@ window.ArquivoGeo = (function () {
   }
 
   // Shapefile: polígonos (tipos 5, 15 e 25). Cada feição = lista de anéis [[x, y], ...]
-  function lerShp(u8) {
+  // 17/11/2026: o .shx diz onde começa cada registro no .shp (posição em palavras de 16 bits, depois do cabeçalho de
+  // 100 bytes, 8 bytes por registro). A ordem do .shx é a mesma do .dbf: o 1º polígono é a 1ª linha da tabela
+  function posicoesShx(shx) {
+    const dv = new DataView(shx.buffer, shx.byteOffset, shx.byteLength);
+    const ps = []; for (let p = 100; p + 8 <= shx.length; p += 8) ps.push(dv.getInt32(p, false) * 2);
+    return ps;
+  }
+  function lerShp(u8, shx) {
     const dv = new DataView(u8.buffer, u8.byteOffset, u8.byteLength);
-    const formas = []; let p = 100;
-    while (p + 12 <= u8.length) {
+    const formas = [];
+    const posicoes = shx ? posicoesShx(shx) : null;
+    let p = 100; let k0 = 0;
+    while (posicoes ? k0 < posicoes.length : p + 12 <= u8.length) {
+      if (posicoes) { p = posicoes[k0++]; if (p + 12 > u8.length) { formas.push(null); continue; } }
       const tam = dv.getInt32(p + 4, false) * 2; const ini = p + 8; const tipo = dv.getInt32(ini, true);
       if ([5, 15, 25].includes(tipo)) {
         const nPartes = dv.getInt32(ini + 36, true); const nPts = dv.getInt32(ini + 40, true);
@@ -95,8 +108,8 @@ window.ArquivoGeo = (function () {
     return p[0] === u[0] && p[1] === u[1] ? anel.slice(0, -1) : anel;
   }
 
-  function deShapefile(shp, dbf, prj) {
-    const formas = lerShp(shp); const linhas = dbf ? lerDbf(dbf) : [];
+  function deShapefile(shp, dbf, prj, shx) {
+    const formas = lerShp(shp, shx); const linhas = dbf ? lerDbf(dbf) : [];
     const zona = prj && /UTM[_ ]zone[_ ](\d{1,2})\s*([NS])?/i.exec(prj);
     const sul = zona && (/S/i.test(zona[2] || '') || /false_northing"?,\s*1(0{7})/i.test(prj) || /south/i.test(prj));
     const saida = [];
@@ -105,7 +118,7 @@ window.ArquivoGeo = (function () {
       let anel = maiorAnel(aneis); if (!anel) return;
       const projetado = anel.some(([x, y]) => Math.abs(x) > 180 || Math.abs(y) > 90);
       if (projetado && !zona) {
-        throw new Error('O arquivo está em coordenadas projetadas e a zona UTM não foi identificada. Envie o .prj junto ou exporte em coordenadas geográficas (SIRGAS 2000 ou WGS 84).');
+        throw new Error('O arquivo está em coordenadas projetadas (UTM) e a zona não foi identificada. Envie o .prj junto ou exporte em coordenadas geográficas (SIRGAS 2000 ou WGS 84).');
       }
       anel = projetado ? anel.map(([x, y]) => utmParaLatLng(x, y, Number(zona[1]), sul)) : anel.map(([x, y]) => [y, x]);
       saida.push({ atributos: linhas[i] || {}, coords: anel });
@@ -140,7 +153,15 @@ window.ArquivoGeo = (function () {
 
   const ext = (nome) => (nome.split('.').pop() || '').toLowerCase();
 
-  async function ler(arquivos) {
+  // Arquivos do shapefile que faltam, com a mensagem para quem importa (17/11/2026). lote: vários talhões
+  function conferirShp(tem, lote, noZip) {
+    const faltam = (lote ? ['shx', 'dbf'] : []).filter((e) => !tem[e]).map((e) => `.${e}`);
+    if (!faltam.length) return;
+    const quais = faltam.length === 1 ? `o arquivo ${faltam[0]}` : `os arquivos ${faltam.join(' e ')}`;
+    throw new Error(`${faltam.length === 1 ? 'Falta' : 'Faltam'} ${quais}${noZip ? ' dentro do .zip' : ''}. Para importar vários talhões, envie o shapefile com .shp, .shx, .dbf e .prj.`);
+  }
+
+  async function ler(arquivos, { lote = false } = {}) {
     const lista = [...arquivos];
     const por = {};
     for (const a of lista) por[ext(a.name)] = a;
@@ -148,20 +169,21 @@ window.ArquivoGeo = (function () {
     let feicoes;
     if (por.zip) {
       const z = await lerZip(await por.zip.arrayBuffer());
-      const shp = achar(z, 'shp'); const kml = achar(z, 'kml');
-      if (shp) { const prj = achar(z, 'prj'); feicoes = deShapefile(shp, achar(z, 'dbf'), prj ? texto(prj) : ''); }
-      else if (kml) feicoes = deKml(texto(kml));
-      else throw new Error('O arquivo .zip não tem um shapefile (.shp) nem um .kml dentro.');
+      const shp = achar(z, 'shp');
+      if (!shp) throw new Error('O arquivo .zip não tem um shapefile (.shp) dentro.');
+      const shx = achar(z, 'shx');
+      conferirShp({ shx, dbf: achar(z, 'dbf') }, lote, true);
+      const prj = achar(z, 'prj'); feicoes = deShapefile(shp, achar(z, 'dbf'), prj ? texto(prj) : '', shx);
     } else if (por.kmz) {
       const kml = achar(await lerZip(await por.kmz.arrayBuffer()), 'kml');
       if (!kml) throw new Error('O arquivo .kmz não tem um .kml dentro.');
       feicoes = deKml(texto(kml));
     } else if (por.kml) feicoes = deKml(await por.kml.text());
     else if (por.shp) {
+      conferirShp(por, lote, false);
       feicoes = deShapefile(new Uint8Array(await por.shp.arrayBuffer()), por.dbf ? new Uint8Array(await por.dbf.arrayBuffer()) : null,
-        por.prj ? await por.prj.text() : '');
-    } else if (por.geojson || por.json) feicoes = deGeoJson(JSON.parse(await (por.geojson || por.json).text()));
-    else throw new Error('Formato não reconhecido. Envie .zip (shapefile), .shp, .kml, .kmz ou .geojson.');
+        por.prj ? await por.prj.text() : '', por.shx ? new Uint8Array(await por.shx.arrayBuffer()) : null);
+    } else throw new Error('Formato não reconhecido. Envie shapefile (.zip ou .shp + .shx + .dbf + .prj), .kml ou .kmz.');
     if (!feicoes.length) throw new Error('Nenhum polígono encontrado no arquivo.');
     if (feicoes.some((f) => f.coords.some(([lat, lng]) => Math.abs(lat) > 90 || Math.abs(lng) > 180))) {
       throw new Error('As coordenadas do arquivo não parecem geográficas. Exporte em SIRGAS 2000 ou WGS 84.');
