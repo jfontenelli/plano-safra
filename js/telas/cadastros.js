@@ -26,15 +26,15 @@ window.Telas.cadastros = (function () {
     ['safras', 'Safras', 'Consulte as safras cadastradas no ERP Compass.'],
     ['talhoes', 'Mapa de talhões', 'Visualize os talhões do ERP Compass e desenhe, importe ou edite seus limites no mapa.'],
     ['culturas', 'Culturas e variedades', 'Consulte as culturas e as variedades cadastradas no ERP Compass.'],
-    ['operacoes', 'Operações', 'Consulte os grupos de operação e as operações cadastradas no ERP Compass.']
+    ['operacoes', 'Tarefas', 'Consulte os grupos de tarefa e as tarefas cadastradas no ERP Compass.']
   ];
   // Nome de cada página no menu (17/11/2026): a trilha acima do título usa o nome idêntico ao do menu
-  const NOME_MENU = { safras: 'Safras', talhoes: 'Talhões', culturas: 'Culturas e variedades', operacoes: 'Operações' };
+  const NOME_MENU = { safras: 'Safras', talhoes: 'Talhões', culturas: 'Culturas', operacoes: 'Tarefas' };
   const ERP = 'ERP Compass';
   // Exemplo (13/11/2026): na São José, alguns talhões começam sem polígono, para mostrar o preenchimento
   const SEM_GEOMETRIA = { 'São José': ['T04', 'T07', 'T10', 'T12'] };
 
-  const ui = { guia: 'safras', fazenda: null, talhao: null, selecionados: new Set(), filtroGeo: 'todos', listaRecolhida: false, culturasRecolhida: false, opsRecolhida: false, busca: '', buscaPonto: null, cultura: 'Soja', culturaOp: 'Soja', salvoEm: '',
+  const ui = { guia: 'safras', fazenda: null, talhao: null, selecionados: new Set(), filtroGeo: 'todos', listaRecolhida: false, culturasRecolhida: false, opsRecolhida: false, busca: '', buscaPonto: null, semAviso: new Set(), cultura: 'Soja', culturaOp: 'Soja', salvoEm: '',
     filtro: { empresa: '', filial: '', aglomerado: '' } };
   let conteudo = null; let mapa = null; let camadas = {};
   // Polígono em desenho ou edição: { talhao, modo: 'desenhar' | 'editar', novo, camada }
@@ -72,6 +72,7 @@ window.Telas.cadastros = (function () {
   const modelo = (cultura) => (cultura === 'Soja' ? DADOS.modeloOperacoes : (DADOS.modelosCultura || {})[cultura]);
   const notaErp = (texto) => `<p class="cad-dica">${Icones.info}<span>${texto}</span></p>`;
 
+  // "Salvo às hh:mm" no cabeçalho; em Talhões não aparece (18/11/2026): basta o aviso de cada ação
   function salvo(texto) {
     const d = new Date();
     ui.salvoEm = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
@@ -97,7 +98,7 @@ window.Telas.cadastros = (function () {
           <h1 class="cabecalho__titulo">${titulo}</h1>
           <p class="cabecalho__subtitulo">${subtitulo}</p>
         </div>
-        <span class="cad-salvo" role="status">${ui.salvoEm ? `${Icones.certo} Salvo às ${ui.salvoEm}` : ''}</span>
+        ${ui.guia === 'talhoes' ? '' : `<span class="cad-salvo" role="status">${ui.salvoEm ? `${Icones.certo} Salvo às ${ui.salvoEm}` : ''}</span>`}
       </header>
       <div class="cad" id="cad" data-guia="${ui.guia}">${corpo}</div>`;
   }
@@ -139,7 +140,7 @@ window.Telas.cadastros = (function () {
         </select></div>`;
     }).join('');
     const fazendas = fazendasFiltradas(); const ts = talhoesDa();
-    const fazenda = `<div class="campo"><label class="campo__rotulo" for="cad-f-fazenda">Fazenda <span class="cad-obrigatorio" aria-hidden="true">*</span></label>
+    const fazenda = `<div class="campo"><label class="campo__rotulo" for="cad-f-fazenda">Fazenda</label>
         <select class="campo__controle" id="cad-f-fazenda" data-campo="fazenda" required>
           ${fazendas.map((f) => `<option ${f === ui.fazenda ? 'selected' : ''}>${esc(f)}</option>`).join('') || '<option value="">Nenhuma fazenda</option>'}
         </select></div>`;
@@ -147,9 +148,11 @@ window.Telas.cadastros = (function () {
         <select class="campo__controle" id="cad-f-talhao" data-campo="talhao" ${ts.length ? '' : 'disabled'}>
           ${opcoesFiltroTalhao()}
         </select></div>`;
-    const algum = NIVEIS.some(([c]) => ui.filtro[c]);
+    // Limpar filtros (17/11/2026): o botão da vassoura, como nas outras telas (sempre à mostra; o nome aparece ao
+    // passar o mouse e, com o menu recolhido, ao lado do ícone); limpa Empresa · Filial · Aglomerado e o Talhão
     return `<section class="cartao filtros cad-filtros" aria-label="Escolher a fazenda e o talhão">${campos}${fazenda}${talhao}
-      ${algum ? `<button class="botao botao--secundario botao--p cad-filtros__limpar" type="button" data-acao="limpar-niveis">Limpar filtros</button>` : ''}</section>`;
+      <button class="botao botao--secundario bf__botao cad-filtros__limpar" type="button" data-acao="limpar-niveis"
+              title="Limpar filtros" aria-label="Limpar filtros">${Icones.limpar}<span class="bf__texto">Limpar filtros</span></button></section>`;
   }
 
   // Opções do filtro Talhão: Todos · um talhão · e, com vários selecionados (Ctrl/Shift), "N talhões selecionados"
@@ -216,6 +219,8 @@ window.Telas.cadastros = (function () {
             <div class="cad-geo__botoes" id="cad-geo-acoes" role="toolbar" aria-label="Ações do talhão">${barraAcoes()}</div>
           </div>
           <div class="cad-mapa-area">
+            ${ts.length && !Geo.poligonos(f).length && !ui.semAviso.has(f) ? `<div class="cad-mapa-aviso" role="status">${Icones.info}<span class="cad-mapa-aviso__texto">Esta fazenda ainda não tem talhões com polígonos cadastrados. Importe a geometria ou desenhe os talhões no mapa.</span>
+              <button class="botao-icone cad-mapa-aviso__fechar" type="button" data-acao="fechar-aviso-mapa" title="Fechar" aria-label="Fechar o aviso">${Icones.fechar}</button></div>` : ''}
             <div id="cad-mapa" class="cad-mapa" aria-label="Mapa dos talhões da fazenda ${esc(f)}"></div>
             <div class="cad-edicao" id="cad-edicao" aria-live="polite"></div>
           </div>
@@ -256,7 +261,7 @@ window.Telas.cadastros = (function () {
   const ESTILO_APAGADO = { fillOpacity: 0.15, opacity: 0.45 };
   const ESTILO_EDICAO = { color: '#ffd400', weight: 2.5, fillColor: '#ffd400', fillOpacity: 0.25, opacity: 1 };
   const estiloDe = (nome) => (ui.selecionados.has(nome) ? ESTILO_SELECIONADO : ESTILO);
-  const dicaPoligono = (nome, coords) => `<strong>${esc(nome)}</strong> · ${n1(Geo.areaHa(coords))} ha (área geométrica)`;
+  const dicaPoligono = (nome, coords) => `<strong>${esc(nome)}</strong> · Área geométrica: ${n1(Geo.areaHa(coords))} ha`;
   // Abaixo deste zoom, os nomes dos talhões somem (aparecem ao passar o mouse), para não se sobreporem
   const ZOOM_ROTULOS = 13;
 
@@ -265,8 +270,9 @@ window.Telas.cadastros = (function () {
     if (!mapa) return;
     const cs = Object.values(camadas);
     if (cs.length) { mapa.fitBounds(L.featureGroup(cs).getBounds(), { padding: [32, 32], maxZoom: 17, animate: animar }); return; }
-    const g = (DADOS.geometriaFazendas || {})[ui.fazenda];
-    mapa.setView(g ? g.origem : [-13.5, -55.5], g ? 14 : 6, { animate: animar });
+    // Fazenda sem nenhum polígono (18/11/2026): o ERP não tem a coordenada da fazenda; o mapa mostra o Brasil inteiro
+    // e o aviso sobre o mapa orienta a buscar a localização ou importar a geometria
+    mapa.setView([-14.2, -51.9], 4, { animate: animar });
   }
 
   function desenharMapa() {
@@ -339,9 +345,16 @@ window.Telas.cadastros = (function () {
     marcaBuscaCamada = L.circleMarker([p.lat, p.lng], { radius: 8, color: '#ffffff', weight: 3, fillColor: '#e5484d', fillOpacity: 1, pmIgnore: true })
       .bindTooltip(esc(p.nome), { direction: 'top', offset: [0, -8], className: 'mapa-detalhe' }).addTo(mapa);
   }
+  // Fazenda sem polígono (18/11/2026): o X ou buscar a localização tira a faixa do aviso (não volta nesta fazenda)
+  function fecharAvisoMapa() {
+    ui.semAviso.add(ui.fazenda);
+    const aviso = conteudo.querySelector('.cad-mapa-aviso');
+    if (aviso) { aviso.remove(); if (mapa) mapa.invalidateSize({ pan: false }); }
+  }
   function irPara(r) {
     listaBusca('');
     ui.buscaPonto = { lat: r.lat, lng: r.lng, nome: r.nome };
+    fecharAvisoMapa();
     if (!mapa) return;
     marcarBusca(ui.buscaPonto);
     if (r.caixa) mapa.fitBounds(r.caixa, { maxZoom: 15 }); else mapa.setView([r.lat, r.lng], 15);
@@ -480,7 +493,13 @@ window.Telas.cadastros = (function () {
     mapa.on('pm:create', aoTerminarDesenho);
     mapa.pm.enableDraw('Polygon', { snappable: true, snapDistance: 15, allowSelfIntersection: false, finishOn: null,
       templineStyle: { color: '#ffd400' }, hintlineStyle: { color: '#ffd400', dashArray: [5, 5] }, pathOptions: { ...ESTILO_EDICAO } });
+    document.addEventListener('keydown', escNoDesenho);
     pintarBarra();
+  }
+  // Esc cancela o desenho (18/11/2026: sem a faixa embaixo do mapa durante o desenho, não há botão Cancelar)
+  function escNoDesenho(e) {
+    if (e.key !== 'Escape' || !edicao || edicao.modo !== 'desenhar') return;
+    e.preventDefault(); sairDaEdicao();
   }
   function aoComecarDesenho({ workingLayer }) {
     const ler = () => { if (edicao && edicao.modo === 'desenhar') { edicao.pontos = coordsDe(workingLayer); pintarBarra(); } };
@@ -489,10 +508,12 @@ window.Telas.cadastros = (function () {
   }
   function aoTerminarDesenho({ layer }) {
     mapa.off('pm:drawstart', aoComecarDesenho); mapa.off('pm:create', aoTerminarDesenho);
+    document.removeEventListener('keydown', escNoDesenho);
     if (!edicao) { layer.remove(); return; }
-    // Fechou o polígono: entra direto no lápis para o ajuste fino (ainda não está salvo)
-    edicao.modo = 'editar'; edicao.camada = layer; layer.setStyle(ESTILO_EDICAO);
-    ligarEdicao(layer);
+    // Fechou o polígono (clique no primeiro canto ou Salvar; 18/11/2026): grava direto, sem passar pela edição.
+    // Para ajustar depois, Editar
+    edicao.modo = 'editar'; edicao.camada = layer;
+    salvarEdicao();
   }
   function desfazerPonto() {
     const d = mapa && mapa.pm && mapa.pm.Draw && mapa.pm.Draw.Polygon;
@@ -523,7 +544,7 @@ window.Telas.cadastros = (function () {
   }
   function dicasDosPontos() {
     if (!mapa) return;
-    mapa.getContainer().querySelectorAll('.marker-icon').forEach((m) => { m.title = 'Arraste para mover o canto · botão direito para remover'; });
+    mapa.getContainer().querySelectorAll('.marker-icon').forEach((m) => { m.title = 'Arraste para mover o vértice · botão direito para remover'; });
   }
 
   let fantasma = null; let ladoRealce = null; let alvoCanto = null; let arrastandoCanto = false;
@@ -548,7 +569,7 @@ window.Telas.cadastros = (function () {
     alvoCanto = { i: melhor.i, ll };
     if (!fantasma) {
       ladoRealce = L.polyline([], { color: '#ffd400', weight: 10, opacity: 0.45, interactive: false, pmIgnore: true }).addTo(mapa);
-      fantasma = L.marker(ll, { pmIgnore: true, keyboard: false, zIndexOffset: 1000, title: 'Clique para criar um canto aqui',
+      fantasma = L.marker(ll, { pmIgnore: true, keyboard: false, zIndexOffset: 1000, title: 'Clique para criar um vértice aqui',
         icon: L.divIcon({ className: 'cad-mais', html: '+', iconSize: [22, 22], iconAnchor: [11, 11] }) }).addTo(mapa)
         .on('click', (ev) => { L.DomEvent.stopPropagation(ev); criarCanto(); });
     }
@@ -572,6 +593,7 @@ window.Telas.cadastros = (function () {
   // Sai do desenho ou da edição sem gravar: o mapa volta ao desenho gravado (o talhão continua selecionado)
   function sairDaEdicao() {
     esconderFantasma();
+    document.removeEventListener('keydown', escNoDesenho);
     if (!edicao) return;
     const e = edicao; edicao = null;
     if (mapa && mapa.pm) {
@@ -595,9 +617,9 @@ window.Telas.cadastros = (function () {
   function salvarEdicao() {
     if (!edicao || !edicao.camada) return;
     esconderFantasma();
-    if (cruza()) { pintarBarra('As linhas do polígono se cruzam. Ajuste os cantos para salvar.'); return; }
+    if (cruza()) { pintarBarra('As linhas do polígono se cruzam. Ajuste os vértices para salvar.'); return; }
     const coords = coordsDe(edicao.camada);
-    if (coords.length < 3) { pintarBarra('O polígono precisa de pelo menos 3 cantos.'); return; }
+    if (coords.length < 3) { pintarBarra('O polígono precisa de pelo menos 3 vértices.'); return; }
     const nome = edicao.talhao; const novo = edicao.novo;
     Geo.daFazenda(ui.fazenda)[nome] = coords;
     edicao.camada.pm.disable(); edicao = null;
@@ -612,22 +634,17 @@ window.Telas.cadastros = (function () {
     const f = ui.fazenda; const g = Geo.daFazenda(f);
     const nomes = (edicao ? [edicao.talhao] : [...ui.selecionados]).filter((n) => g[n]);
     if (!nomes.length) return;
-    const antes = Object.fromEntries(nomes.map((n) => [n, g[n]]));
     const um = nomes.length === 1;
-    const lista = um ? '' : nomes.length <= 6 ? `${nomes.slice(0, -1).join(', ')} e ${nomes[nomes.length - 1]}` : `${nomes.slice(0, 5).join(', ')} e mais ${nomes.length - 5}`;
     Modal.confirmar({
-      titulo: um ? `Excluir o polígono do ${esc(nomes[0])}?` : `Excluir o polígono de ${nomes.length} talhões?`,
-      texto: um ? `O desenho do talhão sai do mapa e a área geométrica fica vazia. O talhão continua no cadastro, com o nome e a área do ${ERP}.`
-        : `${esc(lista)}: os desenhos saem do mapa e a área geométrica fica vazia. Os talhões continuam no cadastro, com o nome e a área do ${ERP}.`,
-      botoes: [{ rotulo: 'Cancelar' }, { rotulo: um ? 'Excluir polígono' : `Excluir ${nomes.length} polígonos`, classe: 'perigo', acao: () => {
+      // 18/11/2026: só a quantidade, sem os nomes dos talhões e sem texto explicativo
+      titulo: `Excluir o polígono de ${nomes.length} ${um ? 'talhão' : 'talhões'}?`,
+      botoes: [{ rotulo: 'Cancelar' }, { rotulo: 'Excluir', classe: 'perigo', acao: () => {
         if (edicao && edicao.camada) edicao.camada.pm.disable();
         edicao = null;
         nomes.forEach((n) => delete g[n]);
         const rotulo = um ? `Polígono de ${nomes[0]}` : `${nomes.length} polígonos`;
+        // 18/11/2026: sem o aviso com Desfazer (a confirmação já protege a exclusão)
         salvo(`${rotulo} ${um ? 'excluído' : 'excluídos'}`); redesenhar();
-        Aviso.mostrar(`${esc(rotulo)} ${um ? 'excluído' : 'excluídos'}`, { acao: 'Desfazer', aoAgir: () => {
-          Object.assign(Geo.daFazenda(f), antes); salvo(`${rotulo} ${um ? 'restaurado' : 'restaurados'}`); redesenhar();
-        } });
       } }]
     });
   }
@@ -637,30 +654,22 @@ window.Telas.cadastros = (function () {
     const el = conteudo && conteudo.querySelector('#cad-edicao'); if (!el) return;
     if (!edicao) { el.className = 'cad-edicao'; el.innerHTML = ''; return; }
     const t = talhaoDe(edicao.talhao) || { nome: edicao.talhao, area: 0 };
-    const coords = edicao.modo === 'desenhar' ? edicao.pontos : coordsDe(edicao.camada);
-    const geo = coords.length >= 3 ? Geo.areaHa(coords) : 0;
-    const dif = t.area && geo ? ((geo - t.area) / t.area) * 100 : null;
-    const textoDif = dif === null ? '' : `<span class="cad-edicao__dif ${Math.abs(dif) > 5 ? 'cad-edicao__dif--alta' : ''}">(${dif > 0 ? '+' : dif < 0 ? '−' : ''}${n1(Math.abs(dif))}%)</span>`;
     const seCruza = edicao.modo === 'editar' && cruza();
-    const aviso = erro || (seCruza ? 'As linhas do polígono se cruzam. Ajuste os cantos para salvar.' : '');
-    const areas = `<span class="cad-edicao__area">Área cadastrada <strong>${n1(t.area)} ha</strong></span>
-      <span class="cad-edicao__area">Área geométrica <strong>${geo ? `${n1(geo)} ha` : '—'}</strong> ${textoDif}</span>`;
+    const aviso = erro || (seCruza ? 'As linhas do polígono se cruzam. Ajuste os vértices para salvar.' : '');
     el.className = 'cad-edicao cad-edicao--ativa';
-    el.innerHTML = edicao.modo === 'desenhar'
-      ? `<div class="cad-edicao__info">
-           <p class="cad-edicao__titulo">${Icones.poligono}<strong>Desenhando ${esc(t.nome)}</strong>${areas}</p>
-           <p class="cad-edicao__dica">Clique no mapa para marcar os cantos do talhão. Para fechar o polígono, clique no primeiro ponto.</p>
-         </div>
-         <div class="cad-edicao__acoes">
-           <button class="botao botao--secundario botao--p" type="button" data-acao="desfazer-ponto" ${coords.length ? '' : 'disabled'}>${Icones.desfazer} Desfazer último ponto</button>
-           <button class="botao botao--secundario botao--p" type="button" data-acao="edicao-cancelar">Cancelar</button>
-         </div>`
-      : `<div class="cad-edicao__info">
-           <p class="cad-edicao__titulo">${Icones.lapis}<strong>${edicao.novo ? 'Novo polígono' : 'Editando'} · ${esc(t.nome)}</strong>${areas}</p>
+    // Desenho (18/11/2026): a orientação fica na faixa embaixo do mapa durante todo o desenho e some quando o
+    // polígono é criado (clique no primeiro vértice, que já grava) ou cancelado (Esc)
+    if (edicao.modo === 'desenhar') {
+      el.className = 'cad-edicao cad-edicao--ativa cad-edicao--desenho';
+      el.innerHTML = `<p class="cad-edicao__titulo">${Icones.poligono}<span><strong>Desenhando ${esc(t.nome)}</strong> · Clique no mapa para marcar os vértices. Para salvar, clique no primeiro ponto. Esc cancela.</span></p>`;
+      return;
+    }
+    // Edição (18/11/2026): só "Editando T04", sem as áreas e sem Excluir polígono (excluir fica no ícone da barra)
+    el.innerHTML = `<div class="cad-edicao__info">
+           <p class="cad-edicao__titulo">${Icones.lapis}<strong>Editando ${esc(t.nome)}</strong></p>
            ${aviso ? `<p class="cad-erro" role="alert">${aviso}</p>` : ''}
          </div>
          <div class="cad-edicao__acoes">
-           ${edicao.novo ? '' : `<button class="botao botao--p cad-botao-excluir" type="button" data-acao="poligono-excluir">${Icones.lixeira} Excluir polígono</button>`}
            <button class="botao botao--secundario botao--p" type="button" data-acao="edicao-cancelar">Cancelar</button>
            <button class="botao botao--primario botao--p" type="button" data-acao="edicao-salvar" ${seCruza ? 'disabled' : ''}>Salvar</button>
          </div>`;
@@ -1274,9 +1283,9 @@ window.Telas.cadastros = (function () {
     if (!DADOS.cadastroCulturas.some((c) => c.nome === ui.culturaOp)) ui.culturaOp = (DADOS.cadastroCulturas[0] || {}).nome;
     const cultura = ui.culturaOp; const c = DADOS.cadastroCulturas.find((x) => x.nome === cultura); const grupos = modelo(cultura) || [];
     const lista = listaCulturas({ atual: cultura, acao: 'cultura-op', recolhida: ui.opsRecolhida, alternar: 'alternar-ops',
-      sub: (x) => { const n = (modelo(x.nome) || []).length; return n ? `${n} ${n === 1 ? 'grupo de operação' : 'grupos de operação'}` : 'Nenhum grupo'; } });
+      sub: (x) => { const n = (modelo(x.nome) || []).length; return n ? `${n} ${n === 1 ? 'grupo de tarefa' : 'grupos de tarefa'}` : 'Nenhum grupo'; } });
     const corpo = !grupos.length
-      ? `<div class="cad-vazio"><h3>Nenhum grupo de operação para ${esc(cultura || '')}</h3><p>Os grupos e as operações desta cultura são cadastrados no ${ERP}.</p></div>`
+      ? `<div class="cad-vazio"><h3>Nenhum grupo de tarefa para ${esc(cultura || '')}</h3><p>Os grupos e as tarefas desta cultura são cadastrados no ${ERP}.</p></div>`
       : grupos.map((g, gi) => `
         <section class="cad-grupo cad-grupo--ops" aria-label="Grupo ${esc(g.nome)}">
           <div class="cad-grupo__topo">
@@ -1284,22 +1293,22 @@ window.Telas.cadastros = (function () {
             <label class="cad-grupo__tipo">Tipo
               <select class="campo__controle" data-campo="op-tipo" data-g="${gi}" aria-label="Tipo do grupo ${esc(g.nome)}">
                 ${TIPOS_CADASTRO.map((t) => `<option ${t === tipoMostrado(g.tipo) ? 'selected' : ''}>${t}</option>`).join('')}</select></label>
-            <div class="cad-grupo__fim">${g.operacoes.length} ${g.operacoes.length === 1 ? 'operação' : 'operações'}</div>
+            <div class="cad-grupo__fim">${g.operacoes.length} ${g.operacoes.length === 1 ? 'tarefa' : 'tarefas'}</div>
           </div>
           ${g.operacoes.length ? `<table class="tabela tabela--compacta cad-ops">
-            <thead><tr><th>Operação</th><th class="tabela__numero"><span class="titulo-dica" title="Dias após o plantio. Negativo = antes do plantio">DAP padrão</span></th></tr></thead>
+            <thead><tr><th>Tarefa</th><th class="tabela__numero"><span class="titulo-dica" title="Dias após o plantio. Negativo = antes do plantio">DAP padrão</span></th></tr></thead>
             <tbody>${g.operacoes.map((o, oi) => `<tr>
               <td>${esc(o.nome)}</td>
               <td class="tabela__numero"><input class="cad-campo cad-campo--num" data-campo="op-dap" data-g="${gi}" data-o="${oi}" inputmode="numeric" value="${o.dap ?? ''}"
                 placeholder="${g.tipo === 'Colheita' ? 'pelo ciclo' : '—'}" aria-label="DAP padrão de ${esc(o.nome)}"></td>
-            </tr>`).join('')}</tbody></table>` : '<p class="cad-nota">Nenhuma operação neste grupo.</p>'}
+            </tr>`).join('')}</tbody></table>` : '<p class="cad-nota">Nenhuma tarefa neste grupo.</p>'}
         </section>`).join('');
     return `
       <div class="cad-duas ${ui.opsRecolhida ? 'cad-duas--recolhida' : ''}">
         ${lista}
         <div class="cad-coluna"><section class="cartao cad-ops-quadro">
           <div class="cad-topo cad-topo--cultura">${ui.opsRecolhida ? botaoMostrarCulturas('alternar-ops') : ''}${c ? navegacaoCulturas(c, 'cultura-op') : ''}<h2 class="cad-topo__titulo">${esc(cultura || '')}</h2></div>
-          ${grupos.length ? `<p class="cad-nota cad-nota--ops">Defina o tipo do grupo de operação e preencha o DAP de cada operação. As operações serão utilizadas no plano de safra da cultura.</p>` : ''}
+          ${grupos.length ? `<p class="cad-nota cad-nota--ops">Defina o tipo do grupo de tarefa e preencha o DAP de cada tarefa. As tarefas serão utilizadas no plano de safra da cultura.</p>` : ''}
           ${corpo}
         </section></div>
       </div>`;
@@ -1322,9 +1331,11 @@ window.Telas.cadastros = (function () {
       excluir: excluirPoligono,
       'desfazer-ponto': desfazerPonto,
       'edicao-cancelar': () => sairDaEdicao(),
+      'fechar-aviso-mapa': fecharAvisoMapa,
       'edicao-salvar': salvarEdicao,
       'poligono-excluir': excluirPoligono,
-      'limpar-niveis'() { ui.filtro = { empresa: '', filial: '', aglomerado: '' }; preparar(); redesenhar(); },
+      // Vassoura (17/11/2026): limpa Empresa · Filial · Aglomerado e o Talhão (volta a Todos, sem seleção, e enquadra a fazenda)
+      'limpar-niveis'() { sairDaEdicao(); ui.filtro = { empresa: '', filial: '', aglomerado: '' }; ui.talhao = null; ui.selecionados.clear(); preparar(); redesenhar({ enquadrar: true }); },
       cultura() {
         ui.cultura = alvo.dataset.nome; const seta = alvo.classList.contains('op-navegar') && alvo.querySelector('path')?.getAttribute('d');
         redesenhar();

@@ -32,16 +32,17 @@ window.DADOS = {
   // Atividade produtiva. Por enquanto só Agricultura (soja); as outras aparecem como "Em breve"
   atividades: ['Agricultura', 'Pecuária', 'Silvicultura'],
   atividadesEmBreve: ['Pecuária', 'Silvicultura'],
-  fazendas: ['São José', 'Boa Vista', 'Santa Clara', 'Primavera'],
+  // Esperança (18/11/2026): talhões sem nenhum polígono; Bela Vista: sem nenhum talhão (exemplos de Cadastros › Talhões)
+  fazendas: ['São José', 'Boa Vista', 'Santa Clara', 'Primavera', 'Esperança', 'Bela Vista'],
   // Região de cada fazenda (11/11/2026, exemplo): o ciclo da variedade muda com a região (Cadastros › Culturas e variedades)
-  regiaoFazenda: { 'São José': 'Norte', 'Boa Vista': 'Norte', 'Santa Clara': 'Leste', 'Primavera': 'Sul' },
+  regiaoFazenda: { 'São José': 'Norte', 'Boa Vista': 'Norte', 'Santa Clara': 'Leste', 'Primavera': 'Sul', 'Esperança': 'Norte', 'Bela Vista': 'Norte' },
   // Ciclo por região (exemplo): o ciclo da variedade (Norte) mais estes dias. Ajuste à vontade
   ajusteCicloRegiao: { Norte: 0, Leste: 4, Sul: 8 },
   // Fazendas de cada empresa (exemplo, para o Painel da Visão Geral: "Sem plano" e área total). Ajuste à vontade.
   fazendasPorEmpresa: {
     'Empresa A': ['São José', 'Santa Clara'],
     'Empresa B': ['Boa Vista'],
-    'Empresa C': ['Primavera']
+    'Empresa C': ['Primavera', 'Esperança', 'Bela Vista']
   },
   // Filial e aglomerado de cada fazenda (12/11/2026, exemplo; no ERP Compass: Empresa › Filial › Aglomerado › Fazenda ›
   // Talhão). A empresa vem de fazendasPorEmpresa. Usados nos filtros de Cadastros › Geometria dos talhões. Ajuste à vontade.
@@ -49,7 +50,9 @@ window.DADOS = {
     'São José':    { filial: 'Filial Sorriso', aglomerado: 'Aglomerado Norte' },
     'Santa Clara': { filial: 'Filial Sorriso', aglomerado: 'Aglomerado Leste' },
     'Boa Vista':   { filial: 'Filial Lucas do Rio Verde', aglomerado: 'Aglomerado Centro' },
-    'Primavera':   { filial: 'Filial Primavera do Leste', aglomerado: 'Aglomerado Sul' }
+    'Primavera':   { filial: 'Filial Primavera do Leste', aglomerado: 'Aglomerado Sul' },
+    'Esperança':   { filial: 'Filial Nova Mutum', aglomerado: 'Aglomerado Oeste' },
+    'Bela Vista':  { filial: 'Filial Nova Mutum', aglomerado: 'Aglomerado Oeste' }
   },
   // Culturas que o Criar Plano oferece
   culturas: ['Soja', 'Milho'],
@@ -90,7 +93,14 @@ window.DADOS = {
     'Primavera': [
       { nome: 'T01', area: 150 }, { nome: 'T02', area: 115 }, { nome: 'T03', area: 82 },
       { nome: 'T04', area: 128 }, { nome: 'T05', area: 69 },  { nome: 'T06', area: 104 }
-    ]
+    ],
+    // Sem desenho em geometriaFazendas: nenhum talhão com polígono
+    'Esperança': [
+      { nome: 'T01', area: 98 },  { nome: 'T02', area: 124 }, { nome: 'T03', area: 76 },
+      { nome: 'T04', area: 110 }, { nome: 'T05', area: 87 }
+    ],
+    // Nenhum talhão cadastrado
+    'Bela Vista': []
   },
 
   // Cadastro de variedades (exemplo), por cultura, para a região das fazendas (médio-norte de Mato Grosso,

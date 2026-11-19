@@ -10,6 +10,7 @@ Protótipo navegável e preenchível do Plano de Safra (UniSystem), usado para v
 - `docs/telas/_MODELO.md` — modelo para novas telas.
 - `referencias/NN-nome.png` — imagem de referência, com o mesmo número da tela (só consulta, não usar na página).
 - `img/` — imagens usadas de verdade nas páginas (logo da empresa, ilustrações).
+- `icone/` — ícones do produto em SVG, um arquivo por ícone, com o nome do lugar onde aparecem (ex.: `icone_menu_plano_safra.svg`). Gerados por `node ferramentas/gerar-icones.js`; regere quando um ícone mudar.
 - `base_conhecimento/` — documentos de apoio (levantamentos com clientes, revisões, e-book). Só consulta.
 - `plano-safra-versionamento/` — cópias datadas do arquivo único (ex.: `plano-safra-16-10-2026.html`). Só consulta.
 - `rascunhos/` — telas e funções pausadas, com README de como retomar (hoje `rascunhos/orcamento/` e `rascunhos/pre-cadastro/`). Não entram no protótipo. Rascunhos antigos (TSI, Minhas tarefas, Calendário, Desvios de dose, estudos HTML) saíram em 11/11/2026 e estão na marca do git `orcamento-11-11-2026`.
@@ -63,7 +64,7 @@ Protótipo navegável e preenchível do Plano de Safra (UniSystem), usado para v
 - Estilo próprio, clean e profissional. Menu lateral verde com o ícone reduzido da UniSystem.
 - Logo da empresa em `img/`: use os arquivos de lá, nunca redesenhe nem recrie o logo.
   - `img/icone-unisystem.png` — o ícone, no topo do menu (expandido e recolhido) e no favicon. Não há logo completo por enquanto.
-- Itens do menu (detalhe em DECISOES 4.0): Plano de Safra (Planos · Cronograma; o plano abre pela lista, com as abas Planejamento · Resumo · Validação), Gestão da Lavoura (Operações: Acompanhamento · Calendário · Desvios de data · Central OS; Estoque: Desvios de dose · Risco de falta de produto) e Cadastros. Usuário no rodapé do menu.
+- Itens do menu (detalhe em DECISOES 4.0): Plano de Safra (Planos · Cronograma; o plano abre pela lista, com as abas Planejamento · Resumo · Validação), Gestão (Operações: Acompanhamento · Calendário · Desvios de data · Central OS; Estoque: Desvios de dose · Risco de falta de produto) e Cadastros (Safras · Talhões · Culturas · Tarefas). Usuário no rodapé do menu.
 - Modo claro e escuro em todas as telas (Configurações › Aparência; cores em DECISOES 4.0).
 - Menu lateral começa expandido (ícone + nome) em todas as telas. O usuário pode recolher (só ícones) e expandir de novo com um botão de seta. O estado escolhido se mantém ao navegar entre telas.
 - Não usar o nome UniGestor.

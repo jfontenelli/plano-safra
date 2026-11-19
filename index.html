@@ -57,17 +57,17 @@
         </div>
         <!-- Gestão da Lavoura (11/11/2026): Operações (guias Acompanhamento, Calendário, Desvios de data e Central OS) e Estoque; o nome leva a Operações -->
         <div class="menu__grupo">
-          <a class="menu__item menu__pai" href="#/planejado-executado" title="Gestão da Lavoura">
+          <a class="menu__item menu__pai" href="#/planejado-executado" title="Gestão">
             <svg class="menu__icone" viewBox="0 0 24 24" aria-hidden="true">
               <!-- Lavoura: o broto (antes o ícone do Plano de Safra) -->
               <path d="M12 21v-9"/>
               <path d="M12 12c0-4 2.5-6.5 7-6.5 0 4.5-2.5 6.5-7 6.5Z"/>
               <path d="M12 14c0-3.5-2.2-5.5-6.5-5.5 0 3.8 2.2 5.5 6.5 5.5Z"/>
             </svg>
-            <span class="menu__texto">Gestão da Lavoura</span>
+            <span class="menu__texto">Gestão</span>
           </a>
-          <button class="menu__grupo-alternar" type="button" data-grupo="Gestão da Lavoura"
-                  aria-controls="menu-subitens-lavoura" aria-expanded="true" title="Minimizar Gestão da Lavoura">
+          <button class="menu__grupo-alternar" type="button" data-grupo="Gestão"
+                  aria-controls="menu-subitens-lavoura" aria-expanded="true" title="Minimizar Gestão">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
           </button>
           <div class="menu__subitens" id="menu-subitens-lavoura">
@@ -105,8 +105,8 @@
           <div class="menu__subitens" id="menu-subitens-cadastros">
             <a class="menu__item menu__sub" href="#/cadastros/safras" data-rota="cadastros-safras" title="Safras">
               <svg class="menu__icone" viewBox="0 0 24 24" aria-hidden="true">
-                <!-- Calendário -->
-                <rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/>
+                <!-- Bandeira (17/11/2026; antes, calendário) -->
+                <path d="M5 21V4"/><path d="M5 4h12l-2.5 4.5L17 13H5"/>
               </svg>
               <span class="menu__texto">Safras</span>
             </a>
@@ -117,21 +117,21 @@
               </svg>
               <span class="menu__texto">Talhões</span>
             </a>
-            <a class="menu__item menu__sub" href="#/cadastros/culturas" data-rota="cadastros-culturas" title="Culturas e variedades">
+            <a class="menu__item menu__sub" href="#/cadastros/culturas" data-rota="cadastros-culturas" title="Culturas">
               <svg class="menu__icone" viewBox="0 0 24 24" aria-hidden="true">
                 <!-- Espiga: grãos em volta de um eixo -->
                 <path d="M12 21V6"/><path d="M12 6c0-2 1-3 0-4-1 1 0 2 0 4Z"/>
                 <path d="M12 10c-2.5 0-4-1.2-4-3 2.5 0 4 1.2 4 3ZM12 10c2.5 0 4-1.2 4-3-2.5 0-4 1.2-4 3Z"/>
                 <path d="M12 15c-2.5 0-4-1.2-4-3 2.5 0 4 1.2 4 3ZM12 15c2.5 0 4-1.2 4-3-2.5 0-4 1.2-4 3Z"/>
               </svg>
-              <span class="menu__texto">Culturas e variedades</span>
+              <span class="menu__texto">Culturas</span>
             </a>
-            <a class="menu__item menu__sub" href="#/cadastros/operacoes" data-rota="cadastros-operacoes" title="Operações">
+            <a class="menu__item menu__sub" href="#/cadastros/operacoes" data-rota="cadastros-operacoes" title="Tarefas">
               <svg class="menu__icone" viewBox="0 0 24 24" aria-hidden="true">
                 <!-- Lista com marcadores -->
                 <path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1.3"/><circle cx="4.5" cy="12" r="1.3"/><circle cx="4.5" cy="18" r="1.3"/>
               </svg>
-              <span class="menu__texto">Operações</span>
+              <span class="menu__texto">Tarefas</span>
             </a>
           </div>
         </div>
